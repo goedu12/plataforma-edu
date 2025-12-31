@@ -5,8 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import {
   BookOpen,
   Bot,
-  RefreshCw,
-  BarChart3,
   Trophy,
   Medal,
   Home,
@@ -85,12 +83,10 @@ export default function MenuComponentePage() {
       : 'from-matematica-500 to-matematica-600'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar` },
-    { icon: Bot, label: nomeTutor, href: `/${componente}/tutor` },
-    { icon: RefreshCw, label: 'Revisão', href: `/${componente}/revisao` },
-    { icon: BarChart3, label: 'Notas', href: `/${componente}/notas` },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking` },
-    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas` },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Responder questões' },
+    { icon: Bot, label: nomeTutor, href: `/${componente}/tutor`, description: 'Tirar dúvidas com IA' },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Ver classificação' },
+    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Suas medalhas' },
   ]
 
   return (
@@ -167,21 +163,22 @@ export default function MenuComponentePage() {
               key={item.label}
               interactive
               onClick={() => router.push(item.href)}
-              className="text-center animate-slide-up"
+              className="text-center animate-slide-up hover:scale-105 transition-transform duration-200"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div
-                className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${
+                className={`w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-sm ${
                   componente === 'fisica' ? 'bg-fisica-100' : 'bg-matematica-100'
                 }`}
               >
                 <item.icon
-                  className={`w-6 h-6 ${
+                  className={`w-7 h-7 ${
                     componente === 'fisica' ? 'text-fisica-600' : 'text-matematica-600'
                   }`}
                 />
               </div>
-              <span className="font-medium text-gray-800">{item.label}</span>
+              <span className="font-semibold text-gray-800 block">{item.label}</span>
+              <span className="text-xs text-gray-500 mt-1 block">{item.description}</span>
             </Card>
           ))}
         </div>
