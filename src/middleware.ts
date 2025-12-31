@@ -7,7 +7,7 @@ const JWT_SECRET = new TextEncoder().encode(
 )
 
 // Rotas públicas que não precisam de autenticação
-const rotasPublicas = ['/login', '/api/auth/login']
+const rotasPublicas = ['/login', '/api/auth/login', '/api/verificar']
 
 // Rotas que precisam ser professor
 const rotasProfessor = ['/professor', '/api/professor']
