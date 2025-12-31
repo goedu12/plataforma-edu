@@ -24,6 +24,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    if (!['fisica', 'matematica'].includes(componente)) {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Componente inválido' },
+        { status: 400 }
+      )
+    }
+
     if (!['A', 'B', 'C', 'D'].includes(resposta.toUpperCase())) {
       return NextResponse.json(
         { sucesso: false, erro: 'Resposta inválida' },
@@ -76,7 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Registrar resposta
-    await supabase.from('respostas').insert({
+    const { error: erroResposta } = await supabase.from('respostas').insert({
       usuario_id: sessao.userId,
       questao_id,
       componente,
@@ -87,18 +94,18 @@ export async function POST(request: NextRequest) {
       pontos_ganhos: pontosGanhos,
     })
 
-    // Atualizar progresso do usuário
-    const camposPontos = componente === 'fisica' ? 'fis_pontos' : 'mat_pontos'
-    const camposTotal = componente === 'fisica' ? 'fis_questoes_total' : 'mat_questoes_total'
-    const camposCorretas = componente === 'fisica' ? 'fis_questoes_corretas' : 'mat_questoes_corretas'
-    const camposNivel = componente === 'fisica' ? 'fis_nivel' : 'mat_nivel'
-    const camposUltimoEstudo = componente === 'fisica' ? 'fis_ultimo_estudo' : 'mat_ultimo_estudo'
-    const camposSequencia = componente === 'fisica' ? 'fis_sequencia_dias' : 'mat_sequencia_dias'
+    if (erroResposta) {
+      console.error('Erro ao registrar resposta:', erroResposta)
+      return NextResponse.json(
+        { sucesso: false, erro: 'Erro ao registrar resposta' },
+        { status: 500 }
+      )
+    }
 
-    // Buscar dados atuais
+    // Buscar dados completos do usuário para atualização
     const { data: usuario } = await supabase
       .from('usuarios')
-      .select(`${camposPontos}, ${camposUltimoEstudo}, ${camposSequencia}`)
+      .select('*')
       .eq('id', sessao.userId)
       .single()
 
@@ -109,9 +116,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const pontosAtuais = usuario[camposPontos as keyof typeof usuario] as number
-    const ultimoEstudo = usuario[camposUltimoEstudo as keyof typeof usuario] as string | null
-    let sequencia = (usuario[camposSequencia as keyof typeof usuario] as number) || 0
+    // Determinar campos baseado no componente
+    const ehFisica = componente === 'fisica'
+    const pontosAtuais = ehFisica ? usuario.fis_pontos : usuario.mat_pontos
+    const questoesTotalAtuais = ehFisica ? usuario.fis_questoes_total : usuario.mat_questoes_total
+    const questoesCorretasAtuais = ehFisica ? usuario.fis_questoes_corretas : usuario.mat_questoes_corretas
+    const ultimoEstudo = ehFisica ? usuario.fis_ultimo_estudo : usuario.mat_ultimo_estudo
+    let sequencia = (ehFisica ? usuario.fis_sequencia_dias : usuario.mat_sequencia_dias) || 0
 
     const hoje = new Date().toISOString().split('T')[0]
     const ontem = new Date(Date.now() - 86400000).toISOString().split('T')[0]
@@ -128,21 +139,50 @@ export async function POST(request: NextRequest) {
     }
     // Se já estudou hoje, mantém a sequência
 
+    // Calcular novos valores
     const novosPontos = pontosAtuais + pontosGanhos
+    const novasQuestoesTotal = questoesTotalAtuais + 1
+    const novasQuestoesCorretas = questoesCorretasAtuais + (correta ? 1 : 0)
     const novoNivel = obterNivelPorPontos(novosPontos).nome
 
-    // Atualizar usuário
-    await supabase
+    // Atualizar usuário com valores calculados (FIX: não usar supabase.rpc)
+    const dadosAtualizacao = ehFisica
+      ? {
+          fis_pontos: novosPontos,
+          fis_questoes_total: novasQuestoesTotal,
+          fis_questoes_corretas: novasQuestoesCorretas,
+          fis_nivel: novoNivel,
+          fis_ultimo_estudo: hoje,
+          fis_sequencia_dias: sequencia,
+        }
+      : {
+          mat_pontos: novosPontos,
+          mat_questoes_total: novasQuestoesTotal,
+          mat_questoes_corretas: novasQuestoesCorretas,
+          mat_nivel: novoNivel,
+          mat_ultimo_estudo: hoje,
+          mat_sequencia_dias: sequencia,
+        }
+
+    const { error: erroAtualizacao } = await supabase
       .from('usuarios')
-      .update({
-        [camposPontos]: novosPontos,
-        [camposTotal]: supabase.rpc('increment', { x: 1 }),
-        [camposCorretas]: correta ? supabase.rpc('increment', { x: 1 }) : supabase.rpc('increment', { x: 0 }),
-        [camposNivel]: novoNivel,
-        [camposUltimoEstudo]: hoje,
-        [camposSequencia]: sequencia,
-      })
+      .update(dadosAtualizacao)
       .eq('id', sessao.userId)
+
+    if (erroAtualizacao) {
+      console.error('Erro ao atualizar usuário:', erroAtualizacao)
+    }
+
+    // Verificar e desbloquear conquistas
+    const conquistasDesbloqueadas = await verificarEDesbloquearConquistas(
+      supabase,
+      sessao.userId,
+      componente as Componente,
+      novosPontos,
+      novasQuestoesTotal,
+      novasQuestoesCorretas,
+      sequencia
+    )
 
     return NextResponse.json({
       sucesso: true,
@@ -151,6 +191,7 @@ export async function POST(request: NextRequest) {
       explicacao: questao.explicacao,
       novo_nivel: novoNivel,
       nova_pontuacao: novosPontos,
+      conquistas_desbloqueadas: conquistasDesbloqueadas,
     })
   } catch (error) {
     console.error('Erro ao responder questão:', error)
@@ -159,4 +200,85 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+// Função para verificar e desbloquear conquistas
+async function verificarEDesbloquearConquistas(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  usuarioId: string,
+  componente: Componente,
+  pontos: number,
+  questoesTotal: number,
+  questoesCorretas: number,
+  sequenciaDias: number
+): Promise<Array<{ nome: string; icone: string }>> {
+  const conquistasDesbloqueadas: Array<{ nome: string; icone: string }> = []
+
+  try {
+    // Calcular taxa de acerto
+    const taxaAcerto = questoesTotal > 0 ? (questoesCorretas / questoesTotal) * 100 : 0
+
+    // Buscar todas as conquistas que o usuário ainda não desbloqueou
+    const { data: conquistasDisponiveis } = await supabase
+      .from('conquistas')
+      .select('*')
+      .or(`componente.is.null,componente.eq.${componente}`)
+
+    if (!conquistasDisponiveis) return conquistasDesbloqueadas
+
+    // Buscar conquistas já desbloqueadas
+    const { data: conquistasUsuario } = await supabase
+      .from('conquistas_usuarios')
+      .select('conquista_id')
+      .eq('usuario_id', usuarioId)
+      .eq('componente', componente)
+
+    const conquistasJaDesbloqueadas = new Set(
+      conquistasUsuario?.map(c => c.conquista_id) || []
+    )
+
+    // Verificar cada conquista
+    for (const conquista of conquistasDisponiveis) {
+      // Pular se já desbloqueou
+      if (conquistasJaDesbloqueadas.has(conquista.id)) continue
+
+      let elegivel = false
+
+      switch (conquista.requisito_tipo) {
+        case 'pontos':
+          elegivel = pontos >= conquista.requisito_valor
+          break
+        case 'questoes':
+          elegivel = questoesTotal >= conquista.requisito_valor
+          break
+        case 'sequencia':
+          elegivel = sequenciaDias >= conquista.requisito_valor
+          break
+        case 'acertos':
+          // Precisa de mínimo de 20 questões para conquistas de taxa de acerto
+          elegivel = questoesTotal >= 20 && taxaAcerto >= conquista.requisito_valor
+          break
+      }
+
+      if (elegivel) {
+        // Desbloquear conquista
+        const { error } = await supabase.from('conquistas_usuarios').insert({
+          usuario_id: usuarioId,
+          conquista_id: conquista.id,
+          componente,
+        })
+
+        if (!error) {
+          conquistasDesbloqueadas.push({
+            nome: conquista.nome,
+            icone: conquista.icone,
+          })
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao verificar conquistas:', error)
+  }
+
+  return conquistasDesbloqueadas
 }
