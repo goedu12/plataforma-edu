@@ -31,10 +31,11 @@ export default function TutorChat({
 
   // Mensagem inicial do tutor
   useEffect(() => {
+    const disciplina = componente === 'fisica' ? 'Física' : 'Matemática'
     const mensagemInicial: MensagemChat = {
       id: '1',
       role: 'assistant',
-      content: `Olá! Sou o ${nomeTutor}, seu tutor de ${componente === 'fisica' ? 'Física' : 'Matemática'}! 👋\n\nComo posso te ajudar hoje? Pode me perguntar sobre qualquer dúvida que você tenha!`,
+      content: `Olá! Sou o ${nomeTutor}, seu tutor de ${disciplina}! 👋\n\nEstou aqui para te ajudar a aprender ${disciplina} de forma divertida e eficiente. Você pode:\n\n• Tirar dúvidas sobre qualquer assunto\n• Pedir explicações passo a passo\n• Resolver exercícios juntos\n• Aprender conceitos novos\n\nComo posso te ajudar hoje?`,
       timestamp: new Date().toISOString(),
     }
     setMensagens([mensagemInicial])
@@ -89,7 +90,7 @@ export default function TutorChat({
       }
     } catch (error) {
       console.error('Erro no chat:', error)
-      setErro('Erro de conexão. Tente novamente.')
+      setErro('Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -190,9 +191,12 @@ export default function TutorChat({
 
       {/* Aviso de limite */}
       {usoHoje >= limiteDiario && (
-        <div className="px-4 py-2 bg-yellow-50 border-t border-yellow-200">
-          <p className="text-sm text-yellow-800 text-center">
-            ⚠️ Você atingiu o limite de {limiteDiario} interações hoje. Volte amanhã!
+        <div className="px-4 py-3 bg-yellow-50 border-t border-yellow-200">
+          <p className="text-sm text-yellow-800 text-center font-medium">
+            Limite diário atingido
+          </p>
+          <p className="text-xs text-yellow-700 text-center mt-1">
+            Você usou suas {limiteDiario} interações de hoje. O limite é renovado à meia-noite. Enquanto isso, pratique respondendo questões!
           </p>
         </div>
       )}
