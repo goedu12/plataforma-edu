@@ -3,6 +3,13 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
 
+// Mapeamento de dificuldade para ordenação correta
+const ORDEM_DIFICULDADE: Record<string, number> = {
+  'facil': 1,
+  'medio': 2,
+  'dificil': 3,
+}
+
 export async function GET(request: NextRequest) {
   try {
     const sessao = await obterSessao()
@@ -39,37 +46,49 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar próxima questão não respondida
-    const { data: questao } = await supabase
+    // Buscar IDs das questões já respondidas pelo usuário
+    const { data: respostasUsuario } = await supabase
+      .from('respostas')
+      .select('questao_id')
+      .eq('usuario_id', sessao.userId)
+      .eq('componente', componente)
+
+    const questoesRespondidas = respostasUsuario?.map(r => r.questao_id) || []
+
+    // Buscar todas as questões ativas do ano e componente
+    let query = supabase
       .from('questoes')
       .select('*')
       .eq('componente', componente)
       .eq('ano', usuario.ano)
       .eq('status', 'ativa')
-      .not('id', 'in', `(
-        SELECT questao_id FROM respostas
-        WHERE usuario_id = '${sessao.userId}'
-      )`)
-      .order('dificuldade', { ascending: true })
-      .limit(1)
-      .single()
 
-    if (!questao) {
+    // Filtrar questões já respondidas (se houver alguma)
+    if (questoesRespondidas.length > 0) {
+      query = query.not('id', 'in', `(${questoesRespondidas.join(',')})`)
+    }
+
+    const { data: questoesDisponiveis, error } = await query
+
+    if (error) {
+      console.error('Erro ao buscar questões:', error)
+      return NextResponse.json(
+        { sucesso: false, erro: 'Erro ao buscar questões' },
+        { status: 500 }
+      )
+    }
+
+    // Se não há questões disponíveis
+    if (!questoesDisponiveis || questoesDisponiveis.length === 0) {
       // Verificar se completou todas as questões
-      const { count } = await supabase
+      const { count: totalQuestoes } = await supabase
         .from('questoes')
         .select('*', { count: 'exact', head: true })
         .eq('componente', componente)
         .eq('ano', usuario.ano)
         .eq('status', 'ativa')
 
-      const { count: respondidas } = await supabase
-        .from('respostas')
-        .select('*', { count: 'exact', head: true })
-        .eq('usuario_id', sessao.userId)
-        .eq('componente', componente)
-
-      if (count && respondidas && respondidas >= count) {
+      if (totalQuestoes && questoesRespondidas.length >= totalQuestoes) {
         return NextResponse.json({
           sucesso: true,
           status: 'COMPLETOU',
@@ -84,8 +103,17 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Ordenar questões por dificuldade (facil -> medio -> dificil) e selecionar a primeira
+    const questoesOrdenadas = questoesDisponiveis.sort((a, b) => {
+      const ordemA = ORDEM_DIFICULDADE[a.dificuldade] || 2
+      const ordemB = ORDEM_DIFICULDADE[b.dificuldade] || 2
+      return ordemA - ordemB
+    })
+
+    const questaoSelecionada = questoesOrdenadas[0]
+
     // Remover resposta correta da questão enviada ao cliente
-    const { resposta_correta, ...questaoSemResposta } = questao
+    const { resposta_correta, ...questaoSemResposta } = questaoSelecionada
 
     return NextResponse.json({
       sucesso: true,

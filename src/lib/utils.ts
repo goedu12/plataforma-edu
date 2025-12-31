@@ -5,8 +5,7 @@ import { twMerge } from 'tailwind-merge'
 // UTILITÁRIO PARA CLASSES CSS
 // ═══════════════════════════════════════════════════════════
 export function cn(...inputs: ClassValue[]) {
-  // Fallback simples se clsx/twMerge não estiverem disponíveis
-  return inputs.filter(Boolean).join(' ')
+  return twMerge(clsx(inputs))
 }
 
 // ═══════════════════════════════════════════════════════════
