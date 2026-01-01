@@ -69,8 +69,8 @@ export default function DashboardProfessorPage() {
   const menuItems = [
     { icon: Users, label: 'Alunos', href: '/professor/alunos', disponivel: true },
     { icon: Upload, label: 'Importar', href: '/professor/importar', disponivel: true },
-    { icon: BarChart3, label: 'Relatórios', href: '#', disponivel: false },
-    { icon: Settings, label: 'Config', href: '#', disponivel: false },
+    { icon: BarChart3, label: 'Relatórios', href: '/professor/relatorios', disponivel: true },
+    { icon: Settings, label: 'Config', href: '/professor/config', disponivel: true },
   ]
 
   return (
