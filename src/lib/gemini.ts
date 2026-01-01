@@ -5,14 +5,15 @@ import type { Componente, MensagemChat } from '@/types'
 // CONFIGURAÇÃO DO CLIENTE GEMINI
 // ═══════════════════════════════════════════════════════════
 
-// Lista de modelos em ordem de preferência (mais estáveis primeiro)
+// Lista de modelos em ordem de preferência
 // Atualizado em Janeiro 2026 baseado na documentação oficial do Google
+// gemini-2.5-flash-lite: modelo mais recente com limite ILIMITADO de requisições
 const MODELOS_DISPONIVEIS = [
-  'gemini-2.0-flash',           // Modelo estável GA (Generally Available)
-  'gemini-2.0-flash-exp',       // Versão experimental
+  'gemini-2.5-flash-lite',      // Modelo 2.5 econômico - ILIMITADO
+  'gemini-2.0-flash-lite',      // Fallback econômico
+  'gemini-2.0-flash',           // Modelo estável GA
   'gemini-1.5-flash-latest',    // Fallback estável
-  'gemini-1.5-flash',           // Fallback alternativo
-  'gemini-1.5-pro-latest',      // Último recurso (mais caro)
+  'gemini-1.5-pro-latest',      // Último recurso
 ] as const
 
 // Cache do modelo que funcionou para reutilização
