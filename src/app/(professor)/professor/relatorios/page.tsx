@@ -55,7 +55,7 @@ export default function RelatoriosProfessorPage() {
         const data = await response.json()
 
         if (data.sucesso) {
-          setEstudantes(data.estudantes)
+          setEstudantes(data.alunos || [])
           setTurmas(data.turmas || [])
         } else if (response.status === 403) {
           router.push('/login')
