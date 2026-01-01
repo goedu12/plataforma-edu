@@ -94,6 +94,15 @@ FORMATO DE RESPOSTA:
   },
 }
 
+// Lista de modelos para tentar (em ordem de preferência)
+const MODELOS_GEMINI = [
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-exp',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-latest',
+  'gemini-pro',
+]
+
 // ═══════════════════════════════════════════════════════════
 // FUNÇÃO DE CHAT COM TUTOR
 // ═══════════════════════════════════════════════════════════
@@ -101,6 +110,41 @@ export interface ChatResponse {
   sucesso: boolean
   resposta?: string
   erro?: string
+}
+
+async function tentarModelo(
+  genAI: GoogleGenerativeAI,
+  modeloNome: string,
+  prompt: string
+): Promise<{ sucesso: boolean; texto?: string; erro?: string }> {
+  try {
+    console.log(`Tentando modelo: ${modeloNome}`)
+
+    const model = genAI.getGenerativeModel({
+      model: modeloNome,
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 1024,
+      }
+    })
+
+    const result = await model.generateContent(prompt)
+    const response = result.response
+    const texto = response.text()
+
+    if (texto) {
+      console.log(`Sucesso com modelo: ${modeloNome}`)
+      return { sucesso: true, texto: texto.trim() }
+    }
+
+    return { sucesso: false, erro: 'Resposta vazia' }
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error(`Erro com modelo ${modeloNome}:`, errorMessage)
+    return { sucesso: false, erro: errorMessage }
+  }
 }
 
 export async function chatComTutor(
@@ -116,6 +160,9 @@ export async function chatComTutor(
 
     // Verificar se a API key está configurada
     const apiKey = process.env.GEMINI_API_KEY
+    console.log('GEMINI_API_KEY presente:', !!apiKey)
+    console.log('GEMINI_API_KEY começa com:', apiKey?.substring(0, 10) + '...')
+
     if (!apiKey || apiKey === 'placeholder_gemini_key' || apiKey.startsWith('placeholder')) {
       console.error('GEMINI_API_KEY não configurada ou é placeholder')
       return {
@@ -124,22 +171,12 @@ export async function chatComTutor(
       }
     }
 
-    // Inicializar cliente com a API key (dentro da função para garantir que env var está disponível)
+    // Inicializar cliente
     const genAI = new GoogleGenerativeAI(apiKey)
-
-    // Criar modelo - usando Gemini 2.0 Flash (modelo estável)
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-      }
-    })
 
     // Construir histórico para o contexto
     const historicoTexto = historico
+      .slice(-6) // Limitar histórico para economizar tokens
       .map(msg => `${msg.role === 'user' ? 'Estudante' : tutor.nome}: ${msg.content}`)
       .join('\n\n')
 
@@ -150,48 +187,57 @@ ${historicoTexto ? `HISTÓRICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudan
 
 ${tutor.nome}:`
 
-    console.log('Chamando Gemini API com modelo gemini-2.0-flash...')
+    console.log('Iniciando tentativas com modelos Gemini...')
 
-    // Gerar resposta
-    const result = await model.generateContent(prompt)
-    const response = result.response
-    const texto = response.text()
+    // Tentar cada modelo até um funcionar
+    for (const modeloNome of MODELOS_GEMINI) {
+      const resultado = await tentarModelo(genAI, modeloNome, prompt)
 
-    if (!texto) {
-      console.error('Gemini retornou resposta vazia')
-      return { sucesso: false, erro: 'Resposta vazia do tutor' }
+      if (resultado.sucesso && resultado.texto) {
+        return { sucesso: true, resposta: resultado.texto }
+      }
+
+      // Se o erro for de autenticação/quota, não tentar outros modelos
+      if (resultado.erro && (
+        resultado.erro.includes('API key') ||
+        resultado.erro.includes('quota') ||
+        resultado.erro.includes('PERMISSION_DENIED') ||
+        resultado.erro.includes('API_KEY_INVALID')
+      )) {
+        console.error('Erro de autenticação/quota, não tentando outros modelos')
+        return {
+          sucesso: false,
+          erro: 'Chave da API inválida ou limite atingido. Entre em contato com o administrador.',
+        }
+      }
     }
 
-    console.log('Resposta recebida do Gemini com sucesso')
-    return { sucesso: true, resposta: texto.trim() }
+    // Nenhum modelo funcionou
+    console.error('Nenhum modelo Gemini funcionou')
+    return {
+      sucesso: false,
+      erro: 'Serviço de IA temporariamente indisponível. Tente novamente em alguns minutos.',
+    }
   } catch (error: unknown) {
-    console.error('Erro no chat com tutor:', error)
+    console.error('Erro geral no chat com tutor:', error)
 
-    // Tratamento de erros específicos
     const errorMessage = error instanceof Error ? error.message : String(error)
 
-    if (errorMessage.includes('API key')) {
+    if (errorMessage.includes('API key') || errorMessage.includes('API_KEY_INVALID')) {
       return {
         sucesso: false,
         erro: 'Chave da API inválida. Entre em contato com o administrador.',
       }
     }
 
-    if (errorMessage.includes('quota') || errorMessage.includes('limit')) {
+    if (errorMessage.includes('quota') || errorMessage.includes('limit') || errorMessage.includes('RESOURCE_EXHAUSTED')) {
       return {
         sucesso: false,
         erro: 'Limite de uso da IA atingido. Tente novamente mais tarde.',
       }
     }
 
-    if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-      return {
-        sucesso: false,
-        erro: 'Modelo de IA não disponível. Tente novamente mais tarde.',
-      }
-    }
-
-    if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+    if (errorMessage.includes('network') || errorMessage.includes('fetch') || errorMessage.includes('ENOTFOUND')) {
       return {
         sucesso: false,
         erro: 'Erro de conexão. Verifique sua internet e tente novamente.',
