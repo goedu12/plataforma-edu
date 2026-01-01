@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, BookOpen, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, BookOpen, CheckCircle2, AlertCircle, WifiOff, RefreshCw } from 'lucide-react'
 import QuestaoCard from '@/components/QuestaoCard'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import type { Componente, Questao } from '@/types'
 
-type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU'
+type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO'
 
 export default function EstudarPage() {
   const router = useRouter()
@@ -19,11 +19,13 @@ export default function EstudarPage() {
   const [questao, setQuestao] = useState<Questao | null>(null)
   const [status, setStatus] = useState<StatusQuestao | null>(null)
   const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
   const [tempoDecorrido, setTempoDecorrido] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const buscarQuestao = async () => {
     setLoading(true)
+    setErro(null)
     try {
       const response = await fetch(`/api/questoes?componente=${componente}`)
       const data = await response.json()
@@ -37,9 +39,14 @@ export default function EstudarPage() {
         } else {
           setQuestao(null)
         }
+      } else {
+        setStatus('ERRO')
+        setErro(data.erro || 'Erro ao carregar questão')
       }
     } catch (error) {
       console.error('Erro ao buscar questão:', error)
+      setStatus('ERRO')
+      setErro('Não foi possível conectar ao servidor. Verifique sua conexão com a internet.')
     } finally {
       setLoading(false)
     }
@@ -83,6 +90,8 @@ export default function EstudarPage() {
     router.push(`/${componente}/menu`)
   }
 
+  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
+
   if (loading) {
     return <Loading fullScreen componente={componente} />
   }
@@ -98,8 +107,10 @@ export default function EstudarPage() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="font-semibold text-gray-800">Estudar</h1>
-          <div className="w-10" /> {/* Placeholder para centralizar */}
+          <h1 className="font-semibold text-gray-800">
+            📚 Estudar {nomeComponente}
+          </h1>
+          <div className="w-10" />
         </div>
       </header>
 
@@ -118,28 +129,66 @@ export default function EstudarPage() {
           <Card className="text-center py-8 animate-slide-up">
             <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Parabéns! 🎉
+              Parabéns! Você é incrível! 🎉
             </h2>
-            <p className="text-gray-600 mb-6">
-              Você completou todas as questões disponíveis!
+            <p className="text-gray-600 mb-2">
+              Você completou <strong>todas as questões</strong> de {nomeComponente} disponíveis para sua turma!
             </p>
-            <Button componente={componente} onClick={handleVoltar}>
-              Voltar ao Menu
-            </Button>
+            <p className="text-sm text-gray-500 mb-6">
+              Continue praticando no tutor IA ou aguarde novas questões serem adicionadas pelo professor.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="secondary" onClick={() => router.push(`/${componente}/tutor`)}>
+                🤖 Praticar com Tutor IA
+              </Button>
+              <Button componente={componente} onClick={handleVoltar}>
+                🏠 Voltar ao Menu
+              </Button>
+            </div>
+          </Card>
+        ) : status === 'ERRO' ? (
+          <Card className="text-center py-8 animate-slide-up">
+            <WifiOff className="w-16 h-16 text-red-400 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Ops! Algo deu errado 😕
+            </h2>
+            <p className="text-gray-600 mb-2">
+              {erro}
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Tente novamente ou volte mais tarde.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="secondary" onClick={buscarQuestao}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Tentar Novamente
+              </Button>
+              <Button componente={componente} onClick={handleVoltar}>
+                🏠 Voltar ao Menu
+              </Button>
+            </div>
           </Card>
         ) : (
           <Card className="text-center py-8 animate-slide-up">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Nenhuma questão disponível
+              Nenhuma questão disponível 📭
             </h2>
-            <p className="text-gray-600 mb-6">
-              Não há questões disponíveis no momento.
-              Volte mais tarde ou fale com seu professor.
+            <p className="text-gray-600 mb-2">
+              Ainda não há questões de {nomeComponente} cadastradas para o seu ano escolar.
             </p>
-            <Button componente={componente} onClick={handleVoltar}>
-              Voltar ao Menu
-            </Button>
+            <p className="text-sm text-gray-500 mb-6">
+              Seu professor precisa adicionar questões para você poder estudar.
+              Enquanto isso, você pode tirar dúvidas com o tutor IA!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button variant="secondary" onClick={() => router.push(`/${componente}/tutor`)}>
+                🤖 Conversar com Tutor IA
+              </Button>
+              <Button componente={componente} onClick={handleVoltar}>
+                🏠 Voltar ao Menu
+              </Button>
+            </div>
           </Card>
         )}
       </main>

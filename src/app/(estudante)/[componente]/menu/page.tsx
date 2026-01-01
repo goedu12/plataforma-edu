@@ -83,10 +83,10 @@ export default function MenuComponentePage() {
       : 'from-matematica-500 to-matematica-600'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Responder questões' },
-    { icon: Bot, label: nomeTutor, href: `/${componente}/tutor`, description: 'Tirar dúvidas com IA' },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Ver classificação' },
-    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Suas medalhas' },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Responda questões e ganhe pontos' },
+    { icon: Bot, label: nomeTutor, href: `/${componente}/tutor`, description: 'Tire dúvidas com inteligência artificial' },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Veja sua posição na turma' },
+    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Desbloqueie medalhas especiais' },
   ]
 
   return (

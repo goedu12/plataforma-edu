@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, XCircle, Lightbulb, Clock } from 'lucide-react'
+import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy } from 'lucide-react'
 import Button from './ui/Button'
 import Card from './ui/Card'
 import Badge from './ui/Badge'
@@ -18,11 +18,17 @@ interface QuestaoCardProps {
 
 type Alternativa = 'A' | 'B' | 'C' | 'D'
 
+interface ConquistaDesbloqueada {
+  nome: string
+  icone: string
+}
+
 interface FeedbackData {
   correta: boolean
   respostaCorreta: Alternativa
   explicacao: string
   pontosGanhos: number
+  conquistasDesbloqueadas: ConquistaDesbloqueada[]
 }
 
 export default function QuestaoCard({
@@ -38,6 +44,7 @@ export default function QuestaoCard({
   const [usouDica, setUsouDica] = useState(false)
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
 
   const alternativas: { letra: Alternativa; texto: string }[] = [
     { letra: 'A', texto: questao.alternativa_a },
@@ -61,6 +68,7 @@ export default function QuestaoCard({
     if (!selecionada) return
 
     setLoading(true)
+    setErro(null)
 
     try {
       const response = await fetch('/api/questoes/responder', {
@@ -80,14 +88,18 @@ export default function QuestaoCard({
       if (data.sucesso) {
         setFeedback({
           correta: data.correta,
-          respostaCorreta: questao.resposta_correta as Alternativa,
-          explicacao: data.explicacao,
+          respostaCorreta: data.correta ? selecionada : (questao.resposta_correta as Alternativa) || selecionada,
+          explicacao: data.explicacao || 'Continue estudando para melhorar seu desempenho!',
           pontosGanhos: data.pontos_ganhos,
+          conquistasDesbloqueadas: data.conquistas_desbloqueadas || [],
         })
         onResponder(selecionada, usouDica)
+      } else {
+        setErro(data.erro || 'Não foi possível registrar sua resposta. Tente novamente.')
       }
     } catch (error) {
       console.error('Erro ao responder:', error)
+      setErro('Erro de conexão. Verifique sua internet e tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -116,6 +128,12 @@ export default function QuestaoCard({
     return `${base} border-gray-200 hover:border-gray-300`
   }
 
+  const dificuldadeLabel = {
+    facil: 'Fácil',
+    medio: 'Médio',
+    dificil: 'Difícil',
+  } as const
+
   const dificuldadeColor = {
     facil: 'success',
     medio: 'warning',
@@ -126,9 +144,11 @@ export default function QuestaoCard({
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge variant={componente}>{questao.tema}</Badge>
-          <Badge variant={dificuldadeColor[questao.dificuldade]}>{questao.dificuldade}</Badge>
+          <Badge variant={dificuldadeColor[questao.dificuldade]}>
+            {dificuldadeLabel[questao.dificuldade]}
+          </Badge>
         </div>
         <div className="flex items-center gap-2 text-gray-500">
           <Clock className="w-4 h-4" />
@@ -138,7 +158,7 @@ export default function QuestaoCard({
 
       {/* Enunciado */}
       <Card>
-        <p className="text-gray-800 leading-relaxed">{questao.enunciado}</p>
+        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{questao.enunciado}</p>
       </Card>
 
       {/* Alternativas */}
@@ -146,13 +166,13 @@ export default function QuestaoCard({
         {alternativas.map(({ letra, texto }) => (
           <button
             key={letra}
-            onClick={() => !feedback && setSelecionada(letra)}
-            disabled={!!feedback}
+            onClick={() => !feedback && !loading && setSelecionada(letra)}
+            disabled={!!feedback || loading}
             className={getAlternativaStyle(letra)}
           >
             <span
               className={`
-                flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm
+                flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm flex-shrink-0
                 ${
                   feedback
                     ? letra === feedback.respostaCorreta
@@ -181,6 +201,24 @@ export default function QuestaoCard({
         ))}
       </div>
 
+      {/* Erro */}
+      {erro && (
+        <Card className="bg-red-50 border border-red-200">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-red-700">{erro}</p>
+              <button
+                onClick={handleConfirmar}
+                className="text-sm text-red-600 underline mt-1 hover:text-red-800"
+              >
+                Tentar novamente
+              </button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       {/* Dica */}
       {!feedback && questao.dica && (
         <div className="text-center">
@@ -188,7 +226,10 @@ export default function QuestaoCard({
             <Card className="bg-yellow-50 border border-yellow-200">
               <div className="flex items-start gap-3">
                 <Lightbulb className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-yellow-800">{questao.dica}</p>
+                <div className="text-left">
+                  <p className="text-xs text-yellow-600 font-medium mb-1">💡 Dica:</p>
+                  <p className="text-sm text-yellow-800">{questao.dica}</p>
+                </div>
               </div>
             </Card>
           ) : (
@@ -197,10 +238,32 @@ export default function QuestaoCard({
               className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-2 mx-auto"
             >
               <Lightbulb className="w-4 h-4" />
-              Pedir Dica (−5 pts)
+              Precisa de ajuda? Pedir Dica (−5 pts)
             </button>
           )}
         </div>
+      )}
+
+      {/* Conquistas Desbloqueadas */}
+      {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
+        <Card className="bg-yellow-50 border-2 border-yellow-400 animate-bounce-once">
+          <div className="text-center">
+            <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+            <h4 className="font-bold text-yellow-800 mb-2">
+              🎉 Nova Conquista Desbloqueada!
+            </h4>
+            <div className="flex flex-wrap justify-center gap-2">
+              {feedback.conquistasDesbloqueadas.map((conquista, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full text-yellow-800 font-medium"
+                >
+                  {conquista.icone} {conquista.nome}
+                </span>
+              ))}
+            </div>
+          </div>
+        </Card>
       )}
 
       {/* Feedback */}
@@ -214,25 +277,31 @@ export default function QuestaoCard({
             ) : (
               <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
             )}
-            <div>
+            <div className="flex-1">
               <h4
                 className={`font-semibold ${feedback.correta ? 'text-green-800' : 'text-red-800'}`}
               >
-                {feedback.correta ? 'Correto! 🎉' : 'Ops! 😕'}
-                {feedback.correta && (
-                  <span className="ml-2 text-sm font-normal">+{feedback.pontosGanhos} pontos</span>
+                {feedback.correta ? 'Muito bem! Resposta correta! 🎉' : 'Não foi dessa vez... 😕'}
+                {feedback.correta && feedback.pontosGanhos > 0 && (
+                  <span className="ml-2 text-sm font-normal bg-green-200 px-2 py-0.5 rounded-full">
+                    +{feedback.pontosGanhos} pontos
+                  </span>
                 )}
               </h4>
               {!feedback.correta && (
                 <p className="text-sm text-red-700 mt-1">
-                  A resposta correta era <strong>{feedback.respostaCorreta}</strong>
+                  A resposta correta era a alternativa <strong>{feedback.respostaCorreta}</strong>.
+                  Não desanime, continue praticando!
                 </p>
               )}
-              <div className="mt-3 pt-3 border-t border-current/10">
-                <p className={`text-sm ${feedback.correta ? 'text-green-700' : 'text-red-700'}`}>
-                  📖 {feedback.explicacao}
-                </p>
-              </div>
+              {feedback.explicacao && (
+                <div className="mt-3 pt-3 border-t border-current/10">
+                  <p className="text-xs font-medium mb-1 opacity-70">📖 Explicação:</p>
+                  <p className={`text-sm ${feedback.correta ? 'text-green-700' : 'text-red-700'}`}>
+                    {feedback.explicacao}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </Card>
@@ -243,7 +312,7 @@ export default function QuestaoCard({
         {feedback ? (
           <>
             <Button variant="secondary" onClick={onVoltar} className="flex-1">
-              🏠 Voltar ao Menu
+              🏠 Menu
             </Button>
             <Button componente={componente} onClick={onProxima} className="flex-1">
               Próxima Questão →
@@ -253,11 +322,11 @@ export default function QuestaoCard({
           <Button
             componente={componente}
             onClick={handleConfirmar}
-            disabled={!selecionada}
+            disabled={!selecionada || loading}
             loading={loading}
             className="w-full"
           >
-            Confirmar Resposta
+            {selecionada ? 'Confirmar Resposta' : 'Selecione uma alternativa'}
           </Button>
         )}
       </div>
