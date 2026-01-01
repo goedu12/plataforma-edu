@@ -230,6 +230,126 @@ export const PONTUACAO = {
 } as const
 
 // ═══════════════════════════════════════════════════════════
+// MODO DESAFIO
+// ═══════════════════════════════════════════════════════════
+export const DESAFIO = {
+  QUESTOES: 5,
+  TEMPO_SEGUNDOS: 300, // 5 minutos
+  PONTOS_POR_ACERTO: 15,
+  BONUS_PERFEITO: 25, // 5/5 corretas
+  BONUS_TEMPO: 10, // se completar antes de 3 min
+} as const
+
+// ═══════════════════════════════════════════════════════════
+// SISTEMA DE NOTAS BIMESTRAIS
+// ═══════════════════════════════════════════════════════════
+export const NOTAS = {
+  META_QUESTOES_BIMESTRE: 100, // Meta para nota máxima de participação
+  META_DIAS_BIMESTRE: 25, // Meta para nota máxima de frequência
+  PESO_DESEMPENHO: 0.5, // 50%
+  PESO_PARTICIPACAO: 0.3, // 30%
+  PESO_FREQUENCIA: 0.2, // 20%
+  NOTA_MINIMA_DESEMPENHO: 4.0, // Abaixo disso, nota máxima = 5.9
+  NOTA_MINIMA_PARTICIPACAO: 3.0, // Abaixo disso, nota máxima = 5.9
+  NOTA_MAXIMA_BLOQUEIO: 5.9,
+} as const
+
+// ═══════════════════════════════════════════════════════════
+// BIMESTRES
+// ═══════════════════════════════════════════════════════════
+export const BIMESTRES = {
+  1: { inicio: { mes: 2, dia: 1 }, fim: { mes: 4, dia: 30 } },  // Fev-Abr
+  2: { inicio: { mes: 5, dia: 1 }, fim: { mes: 7, dia: 31 } },  // Mai-Jul
+  3: { inicio: { mes: 8, dia: 1 }, fim: { mes: 10, dia: 31 } }, // Ago-Out
+  4: { inicio: { mes: 11, dia: 1 }, fim: { mes: 12, dia: 31 } }, // Nov-Dez
+} as const
+
+// Tipo para modo de resposta
+export type ModoResposta = 'estudo' | 'revisao' | 'desafio'
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Desafio
+// ═══════════════════════════════════════════════════════════
+export interface Desafio {
+  id: string
+  usuario_id: string
+  componente: Componente
+  questoes_total: number
+  acertos: number
+  tempo_total_segundos: number
+  pontos_ganhos: number
+  bonus_perfeito: boolean
+  questoes_ids: string[]
+  respostas_dadas: string[]
+  status: 'em_andamento' | 'completo' | 'timeout' | 'abandonado'
+  iniciado_em: string
+  finalizado_em?: string
+  data_desafio: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: DiaAtivo
+// ═══════════════════════════════════════════════════════════
+export interface DiaAtivo {
+  id: string
+  usuario_id: string
+  componente: Componente
+  data: string
+  questoes: number
+  acertos: number
+  pontos: number
+  tempo_total_segundos: number
+  usou_tutor: boolean
+  fez_desafio: boolean
+  fez_revisao: boolean
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: NotaBimestral
+// ═══════════════════════════════════════════════════════════
+export interface NotaBimestral {
+  id: string
+  usuario_id: string
+  componente: Componente
+  ano: number
+  bimestre: 1 | 2 | 3 | 4
+  questoes_total: number
+  questoes_corretas: number
+  dias_ativos: number
+  nota_desempenho: number
+  nota_participacao: number
+  nota_frequencia: number
+  nota_calculada: number
+  nota_final: number
+  bloqueio?: 'desempenho_baixo' | 'participacao_baixa'
+  status: 'em_andamento' | 'fechado'
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: QuestaoRevisao
+// ═══════════════════════════════════════════════════════════
+export interface QuestaoRevisao {
+  questao_id: string
+  componente: Componente
+  tema: string
+  dificuldade: Dificuldade
+  errou_em: string
+  questao?: Questao
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: TemaDificil (para relatório professor)
+// ═══════════════════════════════════════════════════════════
+export interface TemaDificil {
+  componente: Componente
+  tema: string
+  ano: number
+  total_respostas: number
+  acertos: number
+  taxa_acerto: number
+}
+
+// ═══════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════
 export function obterNivelPorPontos(pontos: number): typeof NIVEIS_JOGADOR[number] {

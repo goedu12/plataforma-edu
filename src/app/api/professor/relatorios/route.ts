@@ -1,0 +1,289 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { obterSessao } from '@/lib/auth'
+import { getSupabaseAdmin } from '@/lib/supabase'
+import type { Componente } from '@/types'
+import { NOTAS, BIMESTRES } from '@/types'
+
+// Calcular bimestre atual
+function calcularBimestreAtual(): { bimestre: 1 | 2 | 3 | 4; ano: number } {
+  const agora = new Date()
+  const mes = agora.getMonth() + 1
+  const ano = agora.getFullYear()
+
+  let bimestre: 1 | 2 | 3 | 4 = 1
+  if (mes >= 2 && mes <= 4) bimestre = 1
+  else if (mes >= 5 && mes <= 7) bimestre = 2
+  else if (mes >= 8 && mes <= 10) bimestre = 3
+  else bimestre = 4
+
+  return { bimestre, ano }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const sessao = await obterSessao()
+    if (!sessao || sessao.tipo !== 'professor') {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Acesso não autorizado' },
+        { status: 403 }
+      )
+    }
+
+    const searchParams = request.nextUrl.searchParams
+    const tipo = searchParams.get('tipo') // 'temas_dificeis' | 'notas_turma'
+    const componente = searchParams.get('componente') as Componente | null
+    const turma = searchParams.get('turma')
+
+    const supabase = getSupabaseAdmin()
+
+    // Relatório: Temas Difíceis
+    if (tipo === 'temas_dificeis') {
+      const { data: temasDificeis, error } = await supabase
+        .from('questoes')
+        .select(`
+          componente,
+          tema,
+          ano,
+          respostas!inner (
+            correta
+          )
+        `)
+        .eq('status', 'ativa')
+
+      if (error) {
+        console.error('Erro ao buscar temas:', error)
+        return NextResponse.json(
+          { sucesso: false, erro: 'Erro ao buscar dados' },
+          { status: 500 }
+        )
+      }
+
+      // Agrupar por tema e calcular taxa de acerto
+      const temasAgrupados: Record<string, {
+        componente: string
+        tema: string
+        ano: number
+        total_respostas: number
+        acertos: number
+      }> = {}
+
+      temasDificeis?.forEach((q: {
+        componente: string
+        tema: string
+        ano: number
+        respostas: Array<{ correta: boolean }>
+      }) => {
+        const key = `${q.componente}-${q.tema}-${q.ano}`
+        if (!temasAgrupados[key]) {
+          temasAgrupados[key] = {
+            componente: q.componente,
+            tema: q.tema,
+            ano: q.ano,
+            total_respostas: 0,
+            acertos: 0,
+          }
+        }
+        q.respostas.forEach((r: { correta: boolean }) => {
+          temasAgrupados[key].total_respostas++
+          if (r.correta) temasAgrupados[key].acertos++
+        })
+      })
+
+      // Calcular taxa e ordenar por taxa de acerto (menor primeiro)
+      const temasComTaxa = Object.values(temasAgrupados)
+        .filter(t => t.total_respostas >= 5) // Mínimo de 5 respostas
+        .map(t => ({
+          ...t,
+          taxa_acerto: Math.round((t.acertos / t.total_respostas) * 100),
+        }))
+        .sort((a, b) => a.taxa_acerto - b.taxa_acerto)
+        .slice(0, 15) // Top 15 temas mais difíceis
+
+      // Filtrar por componente se especificado
+      const temasFiltrados = componente
+        ? temasComTaxa.filter(t => t.componente === componente)
+        : temasComTaxa
+
+      return NextResponse.json({
+        sucesso: true,
+        tipo: 'temas_dificeis',
+        temas: temasFiltrados,
+      })
+    }
+
+    // Relatório: Notas da Turma
+    if (tipo === 'notas_turma') {
+      const { bimestre, ano } = calcularBimestreAtual()
+      const bimestreConfig = BIMESTRES[bimestre]
+      const dataInicio = `${ano}-${String(bimestreConfig.inicio.mes).padStart(2, '0')}-${String(bimestreConfig.inicio.dia).padStart(2, '0')}`
+      const dataFim = `${ano}-${String(bimestreConfig.fim.mes).padStart(2, '0')}-${String(bimestreConfig.fim.dia).padStart(2, '0')}`
+
+      // Buscar estudantes da turma (ou todas se não especificada)
+      let queryEstudantes = supabase
+        .from('usuarios')
+        .select('id, nome, turma, componentes')
+        .eq('tipo', 'estudante')
+        .eq('ativo', true)
+
+      if (turma) {
+        queryEstudantes = queryEstudantes.eq('turma', turma)
+      }
+
+      const { data: estudantes } = await queryEstudantes
+
+      if (!estudantes || estudantes.length === 0) {
+        return NextResponse.json({
+          sucesso: true,
+          tipo: 'notas_turma',
+          turma: turma || 'todas',
+          bimestre,
+          ano,
+          notas: [],
+        })
+      }
+
+      // Para cada estudante, calcular notas
+      const notasEstudantes = await Promise.all(estudantes.map(async (est) => {
+        const notas: Record<string, {
+          questoes_total: number
+          questoes_corretas: number
+          dias_ativos: number
+          nota_desempenho: number
+          nota_participacao: number
+          nota_frequencia: number
+          nota_final: number
+          bloqueio: string | null
+        }> = {}
+
+        for (const comp of est.componentes as Componente[]) {
+          // Buscar respostas
+          const { data: respostas } = await supabase
+            .from('respostas')
+            .select('correta')
+            .eq('usuario_id', est.id)
+            .eq('componente', comp)
+            .eq('modo', 'estudo')
+            .gte('criado_em', dataInicio)
+            .lte('criado_em', dataFim + 'T23:59:59')
+
+          // Buscar dias ativos
+          const { data: diasAtivos } = await supabase
+            .from('dias_ativos')
+            .select('id')
+            .eq('usuario_id', est.id)
+            .eq('componente', comp)
+            .gte('data', dataInicio)
+            .lte('data', dataFim)
+
+          const questoesTotal = respostas?.length || 0
+          const questoesCorretas = respostas?.filter(r => r.correta).length || 0
+          const diasAtivosCount = diasAtivos?.length || 0
+
+          // Calcular notas
+          const taxaAcerto = questoesTotal > 0 ? questoesCorretas / questoesTotal : 0
+          const nota_desempenho = Math.min(10, Math.round(taxaAcerto * 100) / 10)
+          const participacao = Math.min(1, questoesTotal / NOTAS.META_QUESTOES_BIMESTRE)
+          const nota_participacao = Math.round(participacao * 100) / 10
+          const frequencia = Math.min(1, diasAtivosCount / NOTAS.META_DIAS_BIMESTRE)
+          const nota_frequencia = Math.round(frequencia * 100) / 10
+
+          let nota_calculada =
+            nota_desempenho * NOTAS.PESO_DESEMPENHO +
+            nota_participacao * NOTAS.PESO_PARTICIPACAO +
+            nota_frequencia * NOTAS.PESO_FREQUENCIA
+
+          nota_calculada = Math.round(nota_calculada * 10) / 10
+
+          let bloqueio: string | null = null
+          let nota_final = nota_calculada
+
+          if (nota_desempenho < NOTAS.NOTA_MINIMA_DESEMPENHO) {
+            bloqueio = 'desempenho_baixo'
+            nota_final = Math.min(nota_final, NOTAS.NOTA_MAXIMA_BLOQUEIO)
+          } else if (nota_participacao < NOTAS.NOTA_MINIMA_PARTICIPACAO) {
+            bloqueio = 'participacao_baixa'
+            nota_final = Math.min(nota_final, NOTAS.NOTA_MAXIMA_BLOQUEIO)
+          }
+
+          notas[comp] = {
+            questoes_total: questoesTotal,
+            questoes_corretas: questoesCorretas,
+            dias_ativos: diasAtivosCount,
+            nota_desempenho,
+            nota_participacao,
+            nota_frequencia,
+            nota_final,
+            bloqueio,
+          }
+        }
+
+        return {
+          id: est.id,
+          nome: est.nome,
+          turma: est.turma,
+          componentes: est.componentes,
+          notas,
+        }
+      }))
+
+      // Ordenar por nome
+      notasEstudantes.sort((a, b) => a.nome.localeCompare(b.nome))
+
+      // Calcular médias da turma
+      const mediasTurma: Record<string, { media: number; count: number }> = {}
+
+      notasEstudantes.forEach(est => {
+        Object.entries(est.notas).forEach(([comp, nota]) => {
+          if (!mediasTurma[comp]) {
+            mediasTurma[comp] = { media: 0, count: 0 }
+          }
+          mediasTurma[comp].media += nota.nota_final
+          mediasTurma[comp].count++
+        })
+      })
+
+      const medias = Object.entries(mediasTurma).map(([comp, data]) => ({
+        componente: comp,
+        media: data.count > 0 ? Math.round((data.media / data.count) * 10) / 10 : 0,
+        total_estudantes: data.count,
+      }))
+
+      return NextResponse.json({
+        sucesso: true,
+        tipo: 'notas_turma',
+        turma: turma || 'todas',
+        bimestre,
+        ano,
+        data_inicio: dataInicio,
+        data_fim: dataFim,
+        notas: notasEstudantes,
+        medias_turma: medias,
+        meta_questoes: NOTAS.META_QUESTOES_BIMESTRE,
+        meta_dias: NOTAS.META_DIAS_BIMESTRE,
+      })
+    }
+
+    // Se nenhum tipo especificado, retornar lista de relatórios disponíveis
+    return NextResponse.json({
+      sucesso: true,
+      relatorios_disponiveis: [
+        {
+          tipo: 'temas_dificeis',
+          descricao: 'Temas com menor taxa de acerto',
+          parametros: ['componente (opcional)'],
+        },
+        {
+          tipo: 'notas_turma',
+          descricao: 'Notas bimestrais dos estudantes',
+          parametros: ['turma (opcional)', 'componente (opcional)'],
+        },
+      ],
+    })
+  } catch (error) {
+    console.error('Erro ao gerar relatório:', error)
+    return NextResponse.json(
+      { sucesso: false, erro: 'Erro interno do servidor' },
+      { status: 500 }
+    )
+  }
+}

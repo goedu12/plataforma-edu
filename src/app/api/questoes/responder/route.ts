@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { questao_id, componente, resposta, tempo_segundos, usou_dica } = await request.json()
+    const { questao_id, componente, resposta, tempo_segundos, usou_dica, modo = 'estudo' } = await request.json()
 
     // Validações
     if (!questao_id || !componente || !resposta) {
@@ -92,6 +92,7 @@ export async function POST(request: NextRequest) {
       tempo_segundos: tempo_segundos || 0,
       usou_dica: usou_dica || false,
       pontos_ganhos: pontosGanhos,
+      modo: modo || 'estudo',
     })
 
     if (erroResposta) {
@@ -171,6 +172,42 @@ export async function POST(request: NextRequest) {
 
     if (erroAtualizacao) {
       console.error('Erro ao atualizar usuário:', erroAtualizacao)
+    }
+
+    // Atualizar ou criar registro de dia ativo (apenas para modo estudo)
+    if (modo === 'estudo') {
+      const { data: diaAtivo } = await supabase
+        .from('dias_ativos')
+        .select('id, questoes, acertos, pontos, tempo_total_segundos')
+        .eq('usuario_id', sessao.userId)
+        .eq('componente', componente)
+        .eq('data', hoje)
+        .single()
+
+      if (diaAtivo) {
+        // Atualizar dia existente
+        await supabase
+          .from('dias_ativos')
+          .update({
+            questoes: diaAtivo.questoes + 1,
+            acertos: diaAtivo.acertos + (correta ? 1 : 0),
+            pontos: diaAtivo.pontos + pontosGanhos,
+            tempo_total_segundos: diaAtivo.tempo_total_segundos + (tempo_segundos || 0),
+            atualizado_em: new Date().toISOString(),
+          })
+          .eq('id', diaAtivo.id)
+      } else {
+        // Criar novo dia ativo
+        await supabase.from('dias_ativos').insert({
+          usuario_id: sessao.userId,
+          componente,
+          data: hoje,
+          questoes: 1,
+          acertos: correta ? 1 : 0,
+          pontos: pontosGanhos,
+          tempo_total_segundos: tempo_segundos || 0,
+        })
+      }
     }
 
     // Verificar e desbloquear conquistas

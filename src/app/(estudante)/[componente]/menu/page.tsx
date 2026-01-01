@@ -14,6 +14,9 @@ import {
   ArrowLeftRight,
   Target,
   ChevronRight,
+  RotateCcw,
+  Zap,
+  GraduationCap,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Loading from '@/components/ui/Loading'
@@ -100,6 +103,20 @@ export default function MenuComponentePage() {
       highlight: true
     },
     {
+      icon: Zap,
+      label: 'Modo Desafio',
+      href: `/${componente}/desafio`,
+      description: '5 questões em 5 minutos',
+      highlight: false
+    },
+    {
+      icon: RotateCcw,
+      label: 'Revisar Erros',
+      href: `/${componente}/revisao`,
+      description: 'Refazer questões erradas',
+      highlight: false
+    },
+    {
       icon: Bot,
       label: `Tutor ${nomeTutor}`,
       href: `/${componente}/tutor`,
@@ -118,6 +135,13 @@ export default function MenuComponentePage() {
       label: 'Conquistas',
       href: `/${componente}/conquistas`,
       description: 'Medalhas e troféus',
+      highlight: false
+    },
+    {
+      icon: GraduationCap,
+      label: 'Notas',
+      href: `/${componente}/notas`,
+      description: 'Nota do bimestre',
       highlight: false
     },
   ]
