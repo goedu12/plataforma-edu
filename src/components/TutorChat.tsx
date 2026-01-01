@@ -218,7 +218,7 @@ export default function TutorChat({
             className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-current focus:border-transparent outline-none disabled:bg-gray-100"
           />
           <Button
-            componente={componente}
+            variant={componente === 'fisica' ? 'fisica' : 'matematica'}
             onClick={enviarMensagem}
             disabled={!input.trim() || loading || usoHoje >= limiteDiario}
             className="px-4"

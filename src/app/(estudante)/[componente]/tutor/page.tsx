@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Bot, Sparkles, MessageCircle, Zap } from 'lucide-react'
+import { ArrowLeft, Bot, Sparkles, MessageCircle } from 'lucide-react'
 import TutorChat from '@/components/TutorChat'
 import Loading from '@/components/ui/Loading'
 import type { Componente, Usuario } from '@/types'
@@ -51,34 +51,31 @@ export default function TutorPage() {
   }
 
   const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
-  const iconeTutor = componente === 'fisica' ? '🍎' : '📐'
   const usoHoje = componente === 'fisica' ? usuario.fis_uso_ia_hoje : usuario.mat_uso_ia_hoje
   const usosRestantes = PONTUACAO.LIMITE_IA_DIARIO - usoHoje
 
-  const bgGradient = componente === 'fisica'
-    ? 'from-fisica-500 to-fisica-600'
-    : 'from-matematica-500 to-matematica-600'
+  const isFisica = componente === 'fisica'
+  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
 
   return (
-    <div className="h-screen flex flex-col bg-koyeb-bg">
+    <div className="h-screen flex flex-col bg-calm-bg">
       {/* Header */}
-      <header className={`bg-gradient-to-br ${bgGradient} text-white px-4 py-4`}>
+      <header className={`${bgColor} text-white px-4 py-4`}>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors"
+              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <Bot className="w-5 h-5" />
-              <h1 className="font-bold uppercase tracking-tight">Tutor {nomeTutor}</h1>
-              <span className="text-xl">{iconeTutor}</span>
+              <h1 className="font-semibold">Tutor {nomeTutor}</h1>
             </div>
             <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
               <MessageCircle className="w-4 h-4" />
-              <span className="text-sm font-bold">{usoHoje}/{PONTUACAO.LIMITE_IA_DIARIO}</span>
+              <span className="text-sm font-medium">{usoHoje}/{PONTUACAO.LIMITE_IA_DIARIO}</span>
             </div>
           </div>
 
@@ -89,10 +86,7 @@ export default function TutorPage() {
               <span>IA Generativa</span>
             </div>
             <span className="text-white/40">•</span>
-            <div className="flex items-center gap-1">
-              <Zap className="w-4 h-4" />
-              <span>{usosRestantes} msgs restantes hoje</span>
-            </div>
+            <span>{usosRestantes} msgs restantes hoje</span>
           </div>
         </div>
       </header>

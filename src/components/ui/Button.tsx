@@ -4,9 +4,8 @@ import { forwardRef, ButtonHTMLAttributes, ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'orange' | 'neon-fisica' | 'neon-matematica'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'fisica' | 'matematica'
   size?: 'sm' | 'md' | 'lg'
-  componente?: 'fisica' | 'matematica'
   loading?: boolean
   leftIcon?: ReactNode
   rightIcon?: ReactNode
@@ -18,7 +17,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       variant = 'primary',
       size = 'md',
-      componente = 'fisica',
       loading = false,
       leftIcon,
       rightIcon,
@@ -29,35 +27,25 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    // Estilos base - Dark Theme Premium
+    // Estilos base - Calm Design
     const baseStyles =
-      'inline-flex items-center justify-center gap-2 font-semibold rounded-full transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 uppercase tracking-wider'
+      'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed'
 
-    // Variantes de cor - Dark Theme com Neon Glow
+    // Variantes - Calm Design
     const variantStyles = {
-      primary:
-        componente === 'fisica'
-          ? 'bg-gradient-to-r from-fisica-400 to-fisica-500 text-dark-bg font-bold shadow-dark hover:shadow-glow-fisica'
-          : 'bg-gradient-to-r from-matematica-300 to-matematica-500 text-white font-bold shadow-dark hover:shadow-glow-matematica',
-      secondary:
-        'bg-transparent text-white border-2 border-white/20 hover:bg-white/10 hover:border-white/40',
-      ghost:
-        'bg-transparent text-light-secondary hover:bg-dark-elevated hover:text-white',
-      danger:
-        'bg-gradient-to-r from-error to-red-600 text-white shadow-dark hover:shadow-glow-error',
-      orange:
-        'bg-gradient-to-r from-accent-orange to-accent-coral text-white shadow-dark hover:shadow-glow-orange',
-      'neon-fisica':
-        'bg-transparent border-2 border-fisica-400 text-fisica-400 hover:bg-fisica-400/10 hover:shadow-glow-fisica',
-      'neon-matematica':
-        'bg-transparent border-2 border-matematica-300 text-matematica-300 hover:bg-matematica-300/10 hover:shadow-glow-matematica',
+      primary: 'bg-accent-orange text-white hover:bg-accent-coral shadow-soft',
+      secondary: 'bg-calm-surface text-text-primary border border-calm-border hover:bg-calm-elevated',
+      ghost: 'bg-transparent text-text-secondary hover:bg-calm-elevated hover:text-text-primary',
+      danger: 'bg-error text-white hover:bg-red-600',
+      fisica: 'bg-fisica-500 text-white hover:bg-fisica-600',
+      matematica: 'bg-matematica-500 text-white hover:bg-matematica-600',
     }
 
     // Tamanhos
     const sizeStyles = {
-      sm: 'px-4 py-2 text-xs',
-      md: 'px-6 py-3 text-sm',
-      lg: 'px-8 py-4 text-base',
+      sm: 'px-3 py-1.5 text-sm',
+      md: 'px-5 py-2.5 text-sm',
+      lg: 'px-6 py-3 text-base',
     }
 
     return (

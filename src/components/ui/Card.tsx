@@ -6,7 +6,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   interactive?: boolean
   padding?: 'sm' | 'md' | 'lg'
-  variant?: 'default' | 'elevated' | 'terminal' | 'glass' | 'glow-fisica' | 'glow-matematica'
+  variant?: 'default' | 'elevated' | 'fisica' | 'matematica'
   className?: string
 }
 
@@ -18,19 +18,17 @@ export default function Card({
   className = '',
   ...props
 }: CardProps) {
-  // Estilos base - Dark Theme Premium
+  // Estilos base - Calm Design
   const variantStyles = {
-    default: 'bg-dark-surface rounded-2xl shadow-dark border border-dark-border',
-    elevated: 'bg-dark-elevated rounded-2xl shadow-dark-lg border border-dark-border',
-    terminal: 'bg-dark-bg rounded-2xl shadow-dark-lg border border-dark-border',
-    glass: 'bg-dark-surface/60 backdrop-blur-xl rounded-2xl border border-white/5 shadow-dark',
-    'glow-fisica': 'bg-dark-surface rounded-2xl border border-fisica-400/30 shadow-glow-fisica',
-    'glow-matematica': 'bg-dark-surface rounded-2xl border border-matematica-300/30 shadow-glow-matematica',
+    default: 'bg-calm-surface rounded-2xl shadow-card border border-calm-border',
+    elevated: 'bg-calm-surface rounded-2xl shadow-elevated',
+    fisica: 'bg-calm-surface rounded-2xl shadow-card border-l-4 border-l-fisica-500 border border-calm-border',
+    matematica: 'bg-calm-surface rounded-2xl shadow-card border-l-4 border-l-matematica-500 border border-calm-border',
   }
 
   const interactiveStyles = interactive
-    ? 'hover:shadow-dark-hover hover:-translate-y-1 hover:border-dark-muted transition-all duration-300 cursor-pointer'
-    : 'transition-all duration-300'
+    ? 'hover:shadow-elevated hover:-translate-y-0.5 cursor-pointer transition-all duration-200'
+    : 'transition-all duration-200'
 
   const paddingStyles = {
     sm: 'p-4',
@@ -59,7 +57,7 @@ export function CardHeader({
   return <div className={`mb-4 ${className}`}>{children}</div>
 }
 
-// Subcomponente para título do card - Dark Theme
+// Subcomponente para título do card - Calm Design
 export function CardTitle({
   children,
   className = '',
@@ -67,7 +65,7 @@ export function CardTitle({
   children: ReactNode
   className?: string
 }) {
-  return <h3 className={`text-lg font-bold text-white uppercase tracking-tight ${className}`}>{children}</h3>
+  return <h3 className={`text-lg font-semibold text-text-primary ${className}`}>{children}</h3>
 }
 
 // Subcomponente para descrição do card
@@ -78,7 +76,7 @@ export function CardDescription({
   children: ReactNode
   className?: string
 }) {
-  return <p className={`text-sm text-light-secondary mt-1 ${className}`}>{children}</p>
+  return <p className={`text-sm text-text-secondary mt-1 ${className}`}>{children}</p>
 }
 
 // Subcomponente para conteúdo do card
@@ -100,10 +98,10 @@ export function CardFooter({
   children: ReactNode
   className?: string
 }) {
-  return <div className={`mt-4 pt-4 border-t border-dark-border ${className}`}>{children}</div>
+  return <div className={`mt-4 pt-4 border-t border-calm-border ${className}`}>{children}</div>
 }
 
-// Terminal Window Card - Dark Theme
+// Terminal Window Card - para instruções
 export function TerminalCard({
   children,
   title,
@@ -114,21 +112,21 @@ export function TerminalCard({
   className?: string
 }) {
   return (
-    <div className={`bg-dark-bg rounded-2xl overflow-hidden shadow-dark-lg border border-dark-border ${className}`}>
-      <div className="flex items-center gap-2 px-4 py-3 bg-dark-surface border-b border-dark-border">
-        <span className="w-3 h-3 rounded-full bg-error" />
-        <span className="w-3 h-3 rounded-full bg-warning" />
-        <span className="w-3 h-3 rounded-full bg-success" />
-        {title && <span className="ml-2 text-sm text-light-muted font-mono">{title}</span>}
+    <div className={`bg-gray-900 rounded-xl overflow-hidden ${className}`}>
+      <div className="flex items-center gap-2 px-4 py-2.5 bg-gray-800">
+        <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+        <span className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+        <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
+        {title && <span className="ml-2 text-sm text-gray-400 font-mono">{title}</span>}
       </div>
-      <div className="p-4 font-mono text-sm text-light-secondary">
+      <div className="p-4 font-mono text-sm text-gray-300">
         {children}
       </div>
     </div>
   )
 }
 
-// Stat Card - Dark Theme
+// Stat Card - Calm Design
 export function StatCard({
   value,
   label,
@@ -143,21 +141,28 @@ export function StatCard({
   className?: string
 }) {
   const colorStyles = {
-    default: 'text-white',
-    fisica: 'text-fisica-400',
-    matematica: 'text-matematica-300',
+    default: 'text-text-primary',
+    fisica: 'text-fisica-500',
+    matematica: 'text-matematica-500',
     orange: 'text-accent-orange',
   }
 
+  const bgStyles = {
+    default: 'bg-calm-elevated',
+    fisica: 'bg-fisica-50',
+    matematica: 'bg-matematica-50',
+    orange: 'bg-orange-50',
+  }
+
   return (
-    <div className={`bg-dark-surface rounded-2xl p-5 border border-dark-border ${className}`}>
+    <div className={`bg-calm-surface rounded-2xl p-5 border border-calm-border ${className}`}>
       {icon && (
-        <div className={`w-10 h-10 rounded-xl mb-3 flex items-center justify-center bg-dark-elevated ${colorStyles[color]}`}>
+        <div className={`w-10 h-10 rounded-xl mb-3 flex items-center justify-center ${bgStyles[color]} ${colorStyles[color]}`}>
           {icon}
         </div>
       )}
-      <p className={`text-3xl font-black tabular-nums ${colorStyles[color]}`}>{value}</p>
-      <p className="text-xs font-bold text-light-muted uppercase tracking-widest mt-1">{label}</p>
+      <p className={`text-3xl font-bold tabular-nums ${colorStyles[color]}`}>{value}</p>
+      <p className="text-sm text-text-muted mt-1">{label}</p>
     </div>
   )
 }

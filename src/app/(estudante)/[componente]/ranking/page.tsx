@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Trophy, RefreshCw, WifiOff, Medal, Crown, Star, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star, TrendingUp } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -69,9 +69,8 @@ export default function RankingPage() {
   }, [router, componente])
 
   const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const bgGradient = componente === 'fisica'
-    ? 'from-fisica-500 to-fisica-600'
-    : 'from-matematica-500 to-matematica-600'
+  const isFisica = componente === 'fisica'
+  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
 
   if (loading || !usuario) {
     return <Loading fullScreen componente={componente} />
@@ -81,35 +80,29 @@ export default function RankingPage() {
   const posicaoUsuario = ranking.findIndex(r => r.usuario_id === usuario.id) + 1
 
   return (
-    <div className="min-h-screen bg-koyeb-bg pb-8">
+    <div className="min-h-screen bg-calm-bg pb-8">
       {/* Header */}
-      <header className={`bg-gradient-to-br ${bgGradient} text-white px-4 pt-4 pb-16 relative overflow-hidden`}>
-        {/* Background decorations */}
-        <div className="absolute inset-0 opacity-20">
-          <Trophy className="absolute top-8 right-8 w-24 h-24 floating" />
-          <Medal className="absolute bottom-4 left-8 w-16 h-16 floating-delayed" />
-        </div>
-
-        <div className="max-w-2xl mx-auto relative z-10">
+      <header className={`${bgColor} text-white px-4 pt-4 pb-16`}>
+        <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors"
+              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <h1 className="font-bold uppercase tracking-tight flex items-center gap-2">
+              <h1 className="font-semibold flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
                 Ranking da Turma
               </h1>
-              <p className="text-xs text-white/70">
+              <p className="text-sm text-white/80">
                 {nomeComponente} • Turma {usuario.turma}
               </p>
             </div>
             <button
               onClick={buscarDados}
-              className="p-2 rounded-full hover:bg-white/20 transition-colors"
+              className="p-2 rounded-xl hover:bg-white/20 transition-colors"
               title="Atualizar ranking"
             >
               <RefreshCw className="w-5 h-5" />
@@ -119,7 +112,7 @@ export default function RankingPage() {
           {/* User Position Card */}
           {posicaoUsuario > 0 && (
             <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center">
-              <p className="text-sm text-white/70 mb-1">Sua Posição</p>
+              <p className="text-sm text-white/80 mb-1">Sua Posição</p>
               <div className="flex items-center justify-center gap-3">
                 {posicaoUsuario <= 3 ? (
                   <Crown className={`w-8 h-8 ${
@@ -129,26 +122,26 @@ export default function RankingPage() {
                 ) : (
                   <Star className="w-8 h-8 text-white/50" />
                 )}
-                <span className="text-4xl font-black">{posicaoUsuario}º</span>
+                <span className="text-4xl font-bold">{posicaoUsuario}º</span>
               </div>
-              <p className="text-sm text-white/70 mt-1">de {ranking.length} estudantes</p>
+              <p className="text-sm text-white/80 mt-1">de {ranking.length} estudantes</p>
             </div>
           )}
         </div>
       </header>
 
       {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto px-4 -mt-8 relative z-10">
+      <main className="max-w-2xl mx-auto px-4 -mt-8">
         {erro ? (
           <Card className="text-center py-10">
-            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-10 h-10 text-red-500" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
+              <WifiOff className="w-8 h-8 text-error" />
             </div>
-            <h2 className="text-xl font-black text-koyeb-dark mb-2 uppercase tracking-tight">
+            <h2 className="text-xl font-bold text-text-primary mb-2">
               Erro ao carregar ranking
             </h2>
-            <p className="text-gray-600 mb-6">{erro}</p>
-            <Button variant="orange" onClick={buscarDados}>
+            <p className="text-text-secondary mb-6">{erro}</p>
+            <Button variant="primary" onClick={buscarDados}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Tentar Novamente
             </Button>
@@ -156,12 +149,12 @@ export default function RankingPage() {
         ) : (
           <>
             {/* Dica */}
-            <Card variant="glass" className="mb-4 animate-slide-up">
+            <Card className="mb-4 animate-slide-up bg-orange-50 border-orange-200">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${bgGradient}`}>
-                  <TrendingUp className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent-orange/20">
+                  <TrendingUp className="w-5 h-5 text-accent-orange" />
                 </div>
-                <p className="text-sm text-gray-600 flex-1">
+                <p className="text-sm text-text-secondary flex-1">
                   Responda questões corretamente para subir no ranking!
                 </p>
               </div>

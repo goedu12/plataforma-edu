@@ -314,13 +314,13 @@ export default function QuestaoCard({
             <Button variant="secondary" onClick={onVoltar} className="flex-1">
               🏠 Menu
             </Button>
-            <Button componente={componente} onClick={onProxima} className="flex-1">
+            <Button variant={componente === 'fisica' ? 'fisica' : 'matematica'} onClick={onProxima} className="flex-1">
               Próxima Questão →
             </Button>
           </>
         ) : (
           <Button
-            componente={componente}
+            variant={componente === 'fisica' ? 'fisica' : 'matematica'}
             onClick={handleConfirmar}
             disabled={!selecionada || loading}
             loading={loading}
