@@ -115,8 +115,13 @@ export async function GET(request: NextRequest) {
     const dataInicio = `${ano}-${String(bimestreConfig.inicio.mes).padStart(2, '0')}-${String(bimestreConfig.inicio.dia).padStart(2, '0')}`
     const dataFim = `${ano}-${String(bimestreConfig.fim.mes).padStart(2, '0')}-${String(bimestreConfig.fim.dia).padStart(2, '0')}`
 
-    // Buscar respostas do usuário no bimestre (apenas modo estudo)
-    const { data: respostas, error: erroRespostas } = await supabase
+    // Buscar respostas do usuário no bimestre
+    // Primeiro tenta com modo 'estudo', se falhar tenta sem filtro de modo
+    let respostas: { correta: boolean }[] | null = null
+    let erroRespostas = null
+
+    // Tentar buscar com filtro de modo (novo schema)
+    const { data: respostasComModo, error: erro1 } = await supabase
       .from('respostas')
       .select('correta')
       .eq('usuario_id', sessao.userId)
@@ -124,6 +129,25 @@ export async function GET(request: NextRequest) {
       .eq('modo', 'estudo')
       .gte('criado_em', dataInicio)
       .lte('criado_em', dataFim + 'T23:59:59')
+
+    if (!erro1) {
+      respostas = respostasComModo
+    } else {
+      // Fallback: buscar sem filtro de modo (schema antigo)
+      const { data: respostasSemModo, error: erro2 } = await supabase
+        .from('respostas')
+        .select('correta')
+        .eq('usuario_id', sessao.userId)
+        .eq('componente', componente)
+        .gte('criado_em', dataInicio)
+        .lte('criado_em', dataFim + 'T23:59:59')
+
+      if (erro2) {
+        erroRespostas = erro2
+      } else {
+        respostas = respostasSemModo
+      }
+    }
 
     if (erroRespostas) {
       console.error('Erro ao buscar respostas:', erroRespostas)
@@ -133,6 +157,9 @@ export async function GET(request: NextRequest) {
     const questoesCorretas = respostas?.filter(r => r.correta).length || 0
 
     // Buscar dias ativos no bimestre
+    // Tenta buscar da tabela dias_ativos, com fallback para estimativa
+    let diasAtivos = 0
+
     const { data: diasAtivosData, error: erroDias } = await supabase
       .from('dias_ativos')
       .select('id')
@@ -141,11 +168,25 @@ export async function GET(request: NextRequest) {
       .gte('data', dataInicio)
       .lte('data', dataFim)
 
-    if (erroDias) {
-      console.error('Erro ao buscar dias ativos:', erroDias)
-    }
+    if (!erroDias && diasAtivosData) {
+      diasAtivos = diasAtivosData.length
+    } else {
+      // Fallback: estimar dias ativos baseado em datas distintas de respostas
+      const { data: datasDistintas } = await supabase
+        .from('respostas')
+        .select('criado_em')
+        .eq('usuario_id', sessao.userId)
+        .eq('componente', componente)
+        .gte('criado_em', dataInicio)
+        .lte('criado_em', dataFim + 'T23:59:59')
 
-    const diasAtivos = diasAtivosData?.length || 0
+      if (datasDistintas) {
+        const datasUnicas = new Set(
+          datasDistintas.map(r => r.criado_em.split('T')[0])
+        )
+        diasAtivos = datasUnicas.size
+      }
+    }
 
     // Calcular notas
     const notas = calcularNotas(questoesTotal, questoesCorretas, diasAtivos)

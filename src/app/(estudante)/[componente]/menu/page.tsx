@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Loading from '@/components/ui/Loading'
+import ProfilePhoto from '@/components/ProfilePhoto'
 import type { Usuario, Componente } from '@/types'
 import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 
@@ -177,10 +178,22 @@ export default function MenuComponentePage() {
             </div>
           </div>
 
-          {/* User Welcome */}
-          <div className="mb-4">
-            <p className="text-2xl font-bold">Olá, {primeiroNome}!</p>
-            <p className="text-white/80 text-sm">{nivel.emoji} {nivel.nome}</p>
+          {/* User Welcome with Photo */}
+          <div className="mb-4 flex items-center gap-4">
+            <ProfilePhoto
+              fotoUrl={usuario.foto_url}
+              nome={usuario.nome}
+              size="lg"
+              editable
+              componente={componente}
+              onPhotoChange={(newUrl) => {
+                setUsuario({ ...usuario, foto_url: newUrl })
+              }}
+            />
+            <div>
+              <p className="text-2xl font-bold">Olá, {primeiroNome}!</p>
+              <p className="text-white/80 text-sm">{nivel.emoji} {nivel.nome}</p>
+            </div>
           </div>
 
           {/* Quick Stats */}

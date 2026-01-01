@@ -67,6 +67,7 @@ export type Database = {
           senha_alterada: boolean
           ultimo_acesso: string | null
           criado_em: string
+          foto_url: string | null
         }
         Insert: Omit<Database['public']['Tables']['usuarios']['Row'], 'id' | 'criado_em'>
         Update: Partial<Database['public']['Tables']['usuarios']['Insert']>
