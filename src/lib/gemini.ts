@@ -95,12 +95,13 @@ FORMATO DE RESPOSTA:
 }
 
 // Lista de modelos para tentar (em ordem de preferência)
+// Nota: Gemini 1.0 e 1.5 foram descontinuados em 2025
 const MODELOS_GEMINI = [
+  'gemini-2.0-flash-001',
   'gemini-2.0-flash',
   'gemini-2.0-flash-exp',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-latest',
-  'gemini-pro',
+  'gemini-2.0-flash-lite',
+  'gemini-exp-1206',
 ]
 
 // ═══════════════════════════════════════════════════════════
@@ -188,21 +189,31 @@ ${historicoTexto ? `HISTÓRICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudan
 ${tutor.nome}:`
 
     console.log('Iniciando tentativas com modelos Gemini...')
+    console.log('Modelos disponíveis para tentar:', MODELOS_GEMINI)
 
     // Tentar cada modelo até um funcionar
-    for (const modeloNome of MODELOS_GEMINI) {
+    let ultimoErro = ''
+    for (let i = 0; i < MODELOS_GEMINI.length; i++) {
+      const modeloNome = MODELOS_GEMINI[i]
+      console.log(`[${i + 1}/${MODELOS_GEMINI.length}] Tentando modelo: ${modeloNome}`)
+
       const resultado = await tentarModelo(genAI, modeloNome, prompt)
 
       if (resultado.sucesso && resultado.texto) {
+        console.log(`✅ Sucesso com modelo: ${modeloNome}`)
         return { sucesso: true, resposta: resultado.texto }
       }
+
+      ultimoErro = resultado.erro || 'Erro desconhecido'
+      console.log(`❌ Falhou ${modeloNome}: ${ultimoErro}`)
 
       // Se o erro for de autenticação/quota, não tentar outros modelos
       if (resultado.erro && (
         resultado.erro.includes('API key') ||
         resultado.erro.includes('quota') ||
         resultado.erro.includes('PERMISSION_DENIED') ||
-        resultado.erro.includes('API_KEY_INVALID')
+        resultado.erro.includes('API_KEY_INVALID') ||
+        resultado.erro.includes('invalid')
       )) {
         console.error('Erro de autenticação/quota, não tentando outros modelos')
         return {
