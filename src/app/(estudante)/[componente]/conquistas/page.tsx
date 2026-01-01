@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Trophy, Target } from 'lucide-react'
+import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Trophy, Target, Sparkles, Star } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import ProgressBar from '@/components/ui/ProgressBar'
@@ -56,6 +56,9 @@ export default function ConquistasPage() {
   }, [componente, router])
 
   const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
+  const bgGradient = componente === 'fisica'
+    ? 'from-fisica-500 to-fisica-600'
+    : 'from-matematica-500 to-matematica-600'
 
   if (loading) {
     return <Loading fullScreen componente={componente} />
@@ -83,54 +86,87 @@ export default function ConquistasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-koyeb-bg pb-8">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <button
-            onClick={() => router.push(`/${componente}/menu`)}
-            className="p-2 -ml-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="text-center">
-            <h1 className="font-semibold text-gray-800 flex items-center gap-2">
-              <Medal className="w-5 h-5" />
-              Conquistas
-            </h1>
-            <p className="text-xs text-gray-500">
-              {nomeComponente} • {stats.desbloqueadas}/{stats.total}
+      <header className={`bg-gradient-to-br ${bgGradient} text-white px-4 pt-4 pb-16 relative overflow-hidden`}>
+        {/* Background decorations */}
+        <div className="absolute inset-0 opacity-20">
+          <Medal className="absolute top-8 right-8 w-20 h-20 floating" />
+          <Star className="absolute bottom-8 left-12 w-12 h-12 floating-delayed" />
+          <Sparkles className="absolute top-16 left-1/4 w-8 h-8 floating" />
+        </div>
+
+        <div className="max-w-2xl mx-auto relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <button
+              onClick={() => router.push(`/${componente}/menu`)}
+              className="p-2 -ml-2 rounded-full hover:bg-white/20 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="text-center">
+              <h1 className="font-bold uppercase tracking-tight flex items-center gap-2">
+                <Medal className="w-5 h-5" />
+                Conquistas
+              </h1>
+              <p className="text-xs text-white/70">
+                {nomeComponente} • {stats.desbloqueadas}/{stats.total}
+              </p>
+            </div>
+            <button
+              onClick={buscarConquistas}
+              className="p-2 rounded-full hover:bg-white/20 transition-colors"
+              title="Atualizar conquistas"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Progress Card */}
+          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-6 h-6" />
+                <span className="font-bold">Progresso</span>
+              </div>
+              <span className="text-2xl font-black">{porcentagem}%</span>
+            </div>
+            <div className="h-3 bg-white/30 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white rounded-full transition-all duration-1000"
+                style={{ width: `${porcentagem}%` }}
+              />
+            </div>
+            <p className="text-xs text-white/70 text-center mt-2">
+              {stats.desbloqueadas} de {stats.total} conquistas desbloqueadas
             </p>
           </div>
-          <button
-            onClick={buscarConquistas}
-            className="p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
-            title="Atualizar conquistas"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
         </div>
       </header>
 
       {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto p-4">
+      <main className="max-w-2xl mx-auto px-4 -mt-8 relative z-10">
         {erro ? (
-          <Card className="text-center py-8">
-            <WifiOff className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Erro ao carregar conquistas 😕
+          <Card className="text-center py-10">
+            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
+              <WifiOff className="w-10 h-10 text-red-500" />
+            </div>
+            <h2 className="text-xl font-black text-koyeb-dark mb-2 uppercase tracking-tight">
+              Erro ao carregar conquistas
             </h2>
             <p className="text-gray-600 mb-6">{erro}</p>
-            <Button componente={componente} onClick={buscarConquistas}>
+            <Button variant="orange" onClick={buscarConquistas}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Tentar Novamente
             </Button>
           </Card>
         ) : conquistas.length === 0 ? (
-          <Card className="text-center py-8">
-            <Medal className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Nenhuma conquista cadastrada 📭
+          <Card className="text-center py-10">
+            <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center bg-gray-100">
+              <Medal className="w-10 h-10 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-black text-koyeb-dark mb-2 uppercase tracking-tight">
+              Nenhuma conquista cadastrada
             </h2>
             <p className="text-gray-600 mb-2">
               Ainda não há conquistas disponíveis para {nomeComponente}.
@@ -141,58 +177,30 @@ export default function ConquistasPage() {
           </Card>
         ) : (
           <>
-            {/* Progresso Geral */}
-            <Card className="mb-6">
-              <div className="flex items-center gap-4 mb-3">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  componente === 'fisica' ? 'bg-fisica-100' : 'bg-matematica-100'
-                }`}>
-                  <Trophy className={`w-6 h-6 ${
-                    componente === 'fisica' ? 'text-fisica-600' : 'text-matematica-600'
-                  }`} />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-800">Seu Progresso em {nomeComponente}</h3>
-                  <p className="text-sm text-gray-500">
-                    {stats.desbloqueadas} de {stats.total} conquistas desbloqueadas
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-2xl font-bold ${
-                    componente === 'fisica' ? 'text-fisica-600' : 'text-matematica-600'
-                  }`}>
-                    {porcentagem}%
-                  </span>
-                </div>
-              </div>
-              <ProgressBar value={stats.desbloqueadas} max={stats.total} componente={componente} />
-            </Card>
-
             {/* Conquistas Desbloqueadas */}
             {conquistasDesbloqueadas.length > 0 && (
               <div className="mb-6">
-                <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 mb-3">
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                <h2 className="flex items-center gap-2 text-sm font-bold text-koyeb-dark mb-3 uppercase tracking-tight">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
                   Desbloqueadas ({conquistasDesbloqueadas.length})
                 </h2>
-                <div className="grid gap-3">
+                <div className="space-y-3">
                   {conquistasDesbloqueadas.map((conquista, index) => (
                     <Card
                       key={conquista.id}
                       className="flex items-center gap-4 animate-slide-up border-l-4 border-green-500"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl ${
-                        componente === 'fisica' ? 'bg-fisica-100' : 'bg-matematica-100'
-                      }`}>
+                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br ${bgGradient} shadow-koyeb`}>
                         {conquista.icone}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-800">{conquista.nome}</h3>
+                        <h3 className="font-bold text-koyeb-dark">{conquista.nome}</h3>
                         <p className="text-sm text-gray-500">{conquista.descricao}</p>
                         {conquista.desbloqueada_em && (
-                          <p className="text-xs text-green-600 mt-1">
-                            ✓ Desbloqueada em {new Date(conquista.desbloqueada_em).toLocaleDateString('pt-BR')}
+                          <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" />
+                            Desbloqueada em {new Date(conquista.desbloqueada_em).toLocaleDateString('pt-BR')}
                           </p>
                         )}
                       </div>
@@ -205,25 +213,26 @@ export default function ConquistasPage() {
             {/* Conquistas Bloqueadas */}
             {conquistasBloqueadas.length > 0 && (
               <div>
-                <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 mb-3">
-                  <Target className="w-5 h-5 text-gray-400" />
+                <h2 className="flex items-center gap-2 text-sm font-bold text-koyeb-dark mb-3 uppercase tracking-tight">
+                  <Target className="w-4 h-4 text-gray-400" />
                   A Desbloquear ({conquistasBloqueadas.length})
                 </h2>
-                <div className="grid gap-3">
+                <div className="space-y-3">
                   {conquistasBloqueadas.map((conquista, index) => (
                     <Card
                       key={conquista.id}
                       className="flex items-center gap-4 animate-slide-up opacity-75"
-                      style={{ animationDelay: `${index * 50}ms` }}
+                      style={{ animationDelay: `${(conquistasDesbloqueadas.length + index) * 50}ms` }}
                     >
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gray-100">
-                        <Lock className="w-5 h-5 text-gray-400" />
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-gray-100 border-2 border-dashed border-gray-300">
+                        <Lock className="w-6 h-6 text-gray-400" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-700">{conquista.nome}</h3>
+                        <h3 className="font-bold text-gray-700">{conquista.nome}</h3>
                         <p className="text-sm text-gray-500">{conquista.descricao}</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          🎯 Meta: {formatarRequisito(conquista)}
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                          <Target className="w-3 h-3" />
+                          Meta: {formatarRequisito(conquista)}
                         </p>
                       </div>
                     </Card>
@@ -233,11 +242,15 @@ export default function ConquistasPage() {
             )}
 
             {/* Dica */}
-            <Card className="mt-6 bg-gradient-to-r from-gray-50 to-gray-100">
-              <p className="text-sm text-gray-600 text-center">
-                💡 <strong>Dica:</strong> Responda questões corretamente, estude todos os dias
-                e acumule pontos para desbloquear novas conquistas!
-              </p>
+            <Card variant="glass" className="mt-6 animate-fade-in">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${bgGradient}`}>
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-sm text-gray-600 flex-1">
+                  <strong>Dica:</strong> Responda questões corretamente, estude todos os dias e acumule pontos para desbloquear novas conquistas!
+                </p>
+              </div>
             </Card>
           </>
         )}

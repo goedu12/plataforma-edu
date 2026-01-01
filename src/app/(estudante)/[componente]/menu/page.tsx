@@ -12,13 +12,15 @@ import {
   Star,
   Flame,
   ArrowLeftRight,
+  Target,
+  Zap,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
-import ProgressBar from '@/components/ui/ProgressBar'
-import Badge from '@/components/ui/Badge'
 import Loading from '@/components/ui/Loading'
 import type { Usuario, Componente } from '@/types'
-import { obterNivelPorPontos, calcularTaxaAcerto } from '@/types'
+import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 
 export default function MenuComponentePage() {
   const router = useRouter()
@@ -74,36 +76,86 @@ export default function MenuComponentePage() {
   const nivel = obterNivelPorPontos(pontos)
   const taxaAcerto = calcularTaxaAcerto(questoesCorretas, questoesTotal)
 
+  // Calcular progresso para próximo nível
+  const nivelAtualIndex = NIVEIS_JOGADOR.findIndex(n => n.nome === nivel.nome)
+  const proximoNivel = NIVEIS_JOGADOR[nivelAtualIndex + 1]
+  const pontosParaProximo = proximoNivel ? proximoNivel.pontos_min - pontos : 0
+  const progressoNivel = proximoNivel
+    ? ((pontos - nivel.pontos_min) / (proximoNivel.pontos_min - nivel.pontos_min)) * 100
+    : 100
+
   const primeiroNome = usuario.nome.split(' ')[0]
   const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
+  const iconeTutor = componente === 'fisica' ? '🍎' : '📐'
 
-  const bgGradient =
-    componente === 'fisica'
-      ? 'from-fisica-500 to-fisica-600'
-      : 'from-matematica-500 to-matematica-600'
+  const corPrimaria = componente === 'fisica' ? 'fisica' : 'matematica'
+  const bgGradient = componente === 'fisica'
+    ? 'from-fisica-500 to-fisica-600'
+    : 'from-matematica-500 to-matematica-600'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Responda questões e ganhe pontos' },
-    { icon: Bot, label: nomeTutor, href: `/${componente}/tutor`, description: 'Tire dúvidas com inteligência artificial' },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Veja sua posição na turma' },
-    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Desbloqueie medalhas especiais' },
+    {
+      icon: BookOpen,
+      label: 'Estudar',
+      href: `/${componente}/estudar`,
+      description: 'Questões e pontos',
+      badge: 'Principal'
+    },
+    {
+      icon: Bot,
+      label: `Tutor ${nomeTutor}`,
+      href: `/${componente}/tutor`,
+      description: 'Tire dúvidas com IA',
+      badge: iconeTutor
+    },
+    {
+      icon: Trophy,
+      label: 'Ranking',
+      href: `/${componente}/ranking`,
+      description: 'Sua posição na turma',
+      badge: null
+    },
+    {
+      icon: Medal,
+      label: 'Conquistas',
+      href: `/${componente}/conquistas`,
+      description: 'Medalhas e troféus',
+      badge: null
+    },
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-koyeb-bg pb-24">
       {/* Header */}
-      <header className={`bg-gradient-to-r ${bgGradient} text-white px-4 py-6`}>
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+      <header className={`bg-gradient-to-br ${bgGradient} text-white px-4 pt-6 pb-20 relative overflow-hidden`}>
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 right-10 floating">
+            {componente === 'fisica' ? '⚛️' : '🔢'}
+          </div>
+          <div className="absolute bottom-10 left-10 floating-delayed text-4xl">
+            {componente === 'fisica' ? '🔬' : '📊'}
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto relative z-10">
+          {/* Top Bar */}
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <span className="text-2xl">{componente === 'fisica' ? '🔬' : '🔢'}</span>
-              <h1 className="text-xl font-bold capitalize">{componente}</h1>
+              <span className="text-3xl">{componente === 'fisica' ? '⚛️' : '🔢'}</span>
+              <div>
+                <h1 className="text-xl font-black uppercase tracking-tight">{componente}</h1>
+                <div className="flex items-center gap-1 text-white/70 text-xs">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                  <span>Online</span>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
-                  className="p-2 rounded-lg hover:bg-white/20"
+                  className="p-2.5 rounded-full hover:bg-white/20 transition-colors"
                   title="Trocar componente"
                 >
                   <ArrowLeftRight className="w-5 h-5" />
@@ -111,7 +163,7 @@ export default function MenuComponentePage() {
               )}
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-lg hover:bg-white/20"
+                className="p-2.5 rounded-full hover:bg-white/20 transition-colors"
                 title="Sair"
               >
                 <LogOut className="w-5 h-5" />
@@ -119,41 +171,64 @@ export default function MenuComponentePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <p className="text-white/80 text-sm">👋 Olá, {primeiroNome}!</p>
-              <p className="text-white/60 text-xs">Turma {usuario.turma}</p>
-            </div>
+          {/* User Welcome */}
+          <div className="mb-6">
+            <p className="text-white/80 text-sm mb-1">👋 Olá, <span className="font-semibold">{primeiroNome}</span>!</p>
+            <p className="text-white/60 text-xs">Turma {usuario.turma} • {nivel.emoji} {nivel.nome}</p>
           </div>
 
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <span>{nivel.emoji}</span>
-              <span>{nivel.nome}</span>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+              <Star className="w-5 h-5 mx-auto mb-1" />
+              <p className="text-2xl font-black">{pontos}</p>
+              <p className="text-xs text-white/70 uppercase">Pontos</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4" />
-              <span>{pontos} pts</span>
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+              <Flame className="w-5 h-5 mx-auto mb-1 text-orange-300" />
+              <p className="text-2xl font-black">{sequenciaDias}</p>
+              <p className="text-xs text-white/70 uppercase">Dias</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Flame className="w-4 h-4" />
-              <span>{sequenciaDias} dias</span>
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+              <Target className="w-5 h-5 mx-auto mb-1 text-green-300" />
+              <p className="text-2xl font-black">{taxaAcerto}%</p>
+              <p className="text-xs text-white/70 uppercase">Acerto</p>
             </div>
           </div>
         </div>
       </header>
 
       {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto p-4 -mt-4">
+      <main className="max-w-2xl mx-auto px-4 -mt-12 relative z-10">
         {/* Card de Progresso */}
         <Card className="mb-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Progresso semanal</span>
-            <span className="text-xs text-gray-500">
-              {questoesTotal} questões • {taxaAcerto}% acerto
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className={`w-5 h-5 text-${corPrimaria}-500`} />
+              <span className="font-bold text-koyeb-dark uppercase text-sm">Progresso Semanal</span>
+            </div>
+            <span className="text-xs font-medium text-gray-500">
+              {questoesTotal}/50 questões
             </span>
           </div>
-          <ProgressBar value={Math.min(questoesTotal, 50)} max={50} componente={componente} />
+
+          {/* Progress Bar */}
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden mb-3">
+            <div
+              className={`h-full bg-gradient-to-r ${bgGradient} rounded-full transition-all duration-1000 ease-out`}
+              style={{ width: `${Math.min((questoesTotal / 50) * 100, 100)}%` }}
+            />
+          </div>
+
+          {/* Level Progress */}
+          {proximoNivel && (
+            <div className="flex items-center justify-between text-xs text-gray-500">
+              <span>{nivel.emoji} {nivel.nome}</span>
+              <span className={`text-${corPrimaria}-600 font-semibold`}>
+                +{pontosParaProximo} pts para {proximoNivel.emoji} {proximoNivel.nome}
+              </span>
+            </div>
+          )}
         </Card>
 
         {/* Grid de Menu */}
@@ -163,53 +238,63 @@ export default function MenuComponentePage() {
               key={item.label}
               interactive
               onClick={() => router.push(item.href)}
-              className="text-center animate-slide-up hover:scale-105 transition-transform duration-200"
-              style={{ animationDelay: `${index * 50}ms` }}
+              className="animate-slide-up group relative overflow-hidden"
+              style={{ animationDelay: `${index * 80}ms` }}
             >
-              <div
-                className={`w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-sm ${
-                  componente === 'fisica' ? 'bg-fisica-100' : 'bg-matematica-100'
-                }`}
-              >
-                <item.icon
-                  className={`w-7 h-7 ${
-                    componente === 'fisica' ? 'text-fisica-600' : 'text-matematica-600'
-                  }`}
-                />
+              {item.badge && (
+                <span className={`absolute top-2 right-2 px-2 py-0.5 bg-${corPrimaria}-100 text-${corPrimaria}-700 text-xs font-bold rounded-full`}>
+                  {item.badge}
+                </span>
+              )}
+
+              <div className={`w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br ${bgGradient} shadow-koyeb group-hover:scale-110 transition-transform duration-300`}>
+                <item.icon className="w-7 h-7 text-white" />
               </div>
-              <span className="font-semibold text-gray-800 block">{item.label}</span>
-              <span className="text-xs text-gray-500 mt-1 block">{item.description}</span>
+
+              <h3 className="font-bold text-koyeb-dark text-center mb-1">{item.label}</h3>
+              <p className="text-xs text-gray-500 text-center">{item.description}</p>
+
+              <div className={`absolute bottom-0 left-0 right-0 h-1 bg-${corPrimaria}-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300`} />
             </Card>
           ))}
         </div>
+
+        {/* Dica do Dia */}
+        <Card variant="glass" className="mt-6 animate-fade-in" style={{ animationDelay: '400ms' }}>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-koyeb-orange/10 flex items-center justify-center flex-shrink-0">
+              <Zap className="w-5 h-5 text-koyeb-orange" />
+            </div>
+            <div>
+              <p className="font-bold text-koyeb-dark text-sm mb-1">Dica do Dia</p>
+              <p className="text-xs text-gray-600">
+                Responda questões rapidamente (menos de 30s) para ganhar bônus de velocidade! ⚡
+              </p>
+            </div>
+          </div>
+        </Card>
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t safe-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom">
         <div className="max-w-2xl mx-auto flex items-center justify-around py-2">
           {[
-            { icon: Home, label: 'Início', active: true },
-            { icon: BookOpen, label: 'Estudar' },
-            { icon: Trophy, label: 'Ranking' },
-            { icon: Bot, label: 'Tutor' },
+            { icon: Home, label: 'Início', href: `/${componente}/menu`, active: true },
+            { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, active: false },
+            { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, active: false },
+            { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, active: false },
           ].map(item => (
             <button
               key={item.label}
-              onClick={() => {
-                if (item.label === 'Estudar') router.push(`/${componente}/estudar`)
-                if (item.label === 'Ranking') router.push(`/${componente}/ranking`)
-                if (item.label === 'Tutor') router.push(`/${componente}/tutor`)
-              }}
-              className={`flex flex-col items-center gap-1 px-4 py-2 ${
+              onClick={() => router.push(item.href)}
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 ${
                 item.active
-                  ? componente === 'fisica'
-                    ? 'text-fisica-600'
-                    : 'text-matematica-600'
-                  : 'text-gray-400'
+                  ? `text-${corPrimaria}-600 bg-${corPrimaria}-50`
+                  : 'text-gray-400 hover:text-gray-600'
               }`}
             >
               <item.icon className="w-5 h-5" />
-              <span className="text-xs">{item.label}</span>
+              <span className="text-xs font-medium">{item.label}</span>
             </button>
           ))}
         </div>
