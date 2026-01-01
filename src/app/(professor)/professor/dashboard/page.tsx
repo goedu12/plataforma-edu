@@ -67,10 +67,10 @@ export default function DashboardProfessorPage() {
   }
 
   const menuItems = [
-    { icon: Users, label: 'Alunos', href: '/professor/alunos' },
-    { icon: Upload, label: 'Importar', href: '/professor/importar' },
-    { icon: BarChart3, label: 'Relatórios', href: '/professor/relatorios' },
-    { icon: Settings, label: 'Configurações', href: '/professor/config' },
+    { icon: Users, label: 'Alunos', href: '/professor/alunos', disponivel: true },
+    { icon: Upload, label: 'Importar', href: '/professor/importar', disponivel: true },
+    { icon: BarChart3, label: 'Relatórios', href: '#', disponivel: false },
+    { icon: Settings, label: 'Config', href: '#', disponivel: false },
   ]
 
   return (
@@ -231,15 +231,18 @@ export default function DashboardProfessorPage() {
           {menuItems.map((item, index) => (
             <Card
               key={item.label}
-              interactive
-              onClick={() => router.push(item.href)}
-              className="text-center animate-slide-up"
+              interactive={item.disponivel}
+              onClick={() => item.disponivel && router.push(item.href)}
+              className={`text-center animate-slide-up ${!item.disponivel ? 'opacity-50 cursor-not-allowed' : ''}`}
               style={{ animationDelay: `${400 + index * 50}ms` }}
             >
-              <div className="w-12 h-12 rounded-xl bg-gray-100 mx-auto mb-3 flex items-center justify-center">
-                <item.icon className="w-6 h-6 text-gray-600" />
+              <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${item.disponivel ? 'bg-gray-100' : 'bg-gray-50'}`}>
+                <item.icon className={`w-6 h-6 ${item.disponivel ? 'text-gray-600' : 'text-gray-400'}`} />
               </div>
-              <span className="font-medium text-gray-800">{item.label}</span>
+              <span className={`font-medium ${item.disponivel ? 'text-gray-800' : 'text-gray-400'}`}>{item.label}</span>
+              {!item.disponivel && (
+                <span className="text-xs text-gray-400 block mt-1">Em breve</span>
+              )}
             </Card>
           ))}
         </div>
