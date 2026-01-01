@@ -1,20 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════
-   VARIÁVEIS CSS CUSTOMIZADAS
+   VARIÁVEIS CSS - CALM DESIGN
+   Princípios: Fluência Cognitiva, Tecnologia Calma, Minimalismo
    ═══════════════════════════════════════════════════════════ */
 :root {
-  /* Cores semânticas */
-  --success: #22c55e;
-  --error: #ef4444;
-  --warning: #f59e0b;
-  --info: #3b82f6;
+  /* Superfícies Calmas */
+  --calm-bg: #FAFAFA;
+  --calm-surface: #FFFFFF;
+  --calm-elevated: #F5F5F5;
+  --calm-border: #E5E7EB;
+  --calm-divider: #F0F0F0;
 
-  /* Background */
-  --background: #f9fafb;
-  --foreground: #111827;
+  /* Texto - Hierarquia Clara */
+  --text-primary: #1F2937;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --text-disabled: #D1D5DB;
+
+  /* Física - Teal Sóbrio */
+  --fisica-500: #0891B2;
+  --fisica-100: #CCFBF1;
+  --fisica-50: #F0FDFA;
+
+  /* Matemática - Violet Elegante */
+  --matematica-500: #7C3AED;
+  --matematica-100: #EDE9FE;
+  --matematica-50: #F5F3FF;
+
+  /* Accent - Apenas para CTAs */
+  --accent-orange: #F97316;
+  --accent-coral: #FB923C;
+
+  /* Estados Funcionais */
+  --success: #10B981;
+  --error: #EF4444;
+  --warning: #F59E0B;
+  --info: #3B82F6;
+
+  /* Background global */
+  --background: var(--calm-bg);
+  --foreground: var(--text-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -26,13 +56,19 @@
   margin: 0;
 }
 
-html,
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--background);
   color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 /* Prevenir zoom em inputs no iOS */
@@ -43,191 +79,309 @@ textarea {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SCROLLBAR CUSTOMIZADA
+   SCROLLBAR SUTIL
    ═══════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: var(--calm-border);
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--text-muted);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   COMPONENTES UTILITÁRIOS
+   SELEÇÃO DE TEXTO
+   ═══════════════════════════════════════════════════════════ */
+::selection {
+  background: var(--accent-orange);
+  color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENTES - CALM DESIGN
    ═══════════════════════════════════════════════════════════ */
 @layer components {
-  /* Container padrão */
+  /* Container */
   .container-app {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  /* Card base */
+  /* ─────────────────────────────────────────────────────────
+     CARDS - Simples e Limpos
+     ───────────────────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl shadow-md p-4 sm:p-6;
+    @apply bg-calm-surface rounded-2xl p-6 border border-calm-border shadow-card;
+  }
+
+  .card-elevated {
+    @apply bg-calm-surface rounded-2xl p-6 shadow-elevated;
   }
 
   .card-interactive {
-    @apply card hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer;
+    @apply card hover:shadow-elevated hover:-translate-y-0.5 cursor-pointer transition-all duration-200;
   }
 
-  /* Botões */
+  .card-fisica {
+    @apply card border-l-4 border-l-fisica-500;
+  }
+
+  .card-matematica {
+    @apply card border-l-4 border-l-matematica-500;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     BOTÕES - Funcionais e Claros
+     ───────────────────────────────────────────────────────── */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  .btn-primary-fisica {
+  .btn-primary {
+    @apply btn bg-accent-orange text-white hover:bg-accent-coral shadow-soft;
+  }
+
+  .btn-fisica {
     @apply btn bg-fisica-500 text-white hover:bg-fisica-600;
   }
 
-  .btn-primary-matematica {
+  .btn-matematica {
     @apply btn bg-matematica-500 text-white hover:bg-matematica-600;
   }
 
   .btn-secondary {
-    @apply btn bg-gray-100 text-gray-700 hover:bg-gray-200;
+    @apply btn bg-calm-surface text-text-primary border border-calm-border hover:bg-calm-elevated;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-gray-600 hover:bg-gray-100;
+    @apply btn bg-transparent text-text-secondary hover:bg-calm-elevated hover:text-text-primary;
   }
 
-  /* Inputs */
+  .btn-icon {
+    @apply p-2.5 rounded-xl hover:bg-calm-elevated transition-colors duration-200 text-text-secondary hover:text-text-primary;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     INPUTS - Limpos e Acessíveis
+     ───────────────────────────────────────────────────────── */
   .input {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-xl text-base
-           focus:ring-2 focus:border-transparent outline-none transition-all duration-200;
+    @apply w-full px-4 py-3 bg-calm-surface border border-calm-border rounded-xl text-base text-text-primary placeholder:text-text-muted
+           focus:ring-0 focus:border-accent-orange focus:shadow-focus outline-none transition-all duration-200;
   }
 
   .input-fisica {
-    @apply input focus:ring-fisica-500;
+    @apply input focus:border-fisica-500 focus:shadow-focus-fisica;
   }
 
   .input-matematica {
-    @apply input focus:ring-matematica-500;
+    @apply input focus:border-matematica-500 focus:shadow-focus-matematica;
   }
 
   .input-error {
-    @apply input border-red-500 focus:ring-red-500;
+    @apply input border-error focus:border-error;
   }
 
   /* Labels */
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-medium text-text-secondary mb-1.5;
   }
 
   /* Helper text */
   .helper-text {
-    @apply text-xs text-gray-500 mt-1;
+    @apply text-sm text-text-muted mt-1.5;
   }
 
   .error-text {
-    @apply text-xs text-red-500 mt-1;
+    @apply text-sm text-error mt-1.5;
   }
 
-  /* Badge */
+  /* ─────────────────────────────────────────────────────────
+     BADGES - Discretos
+     ───────────────────────────────────────────────────────── */
   .badge {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
   }
 
   .badge-fisica {
-    @apply badge bg-fisica-100 text-fisica-700;
+    @apply badge bg-fisica-50 text-fisica-500;
   }
 
   .badge-matematica {
-    @apply badge bg-matematica-100 text-matematica-700;
+    @apply badge bg-matematica-50 text-matematica-500;
   }
 
   .badge-success {
-    @apply badge bg-green-100 text-green-700;
+    @apply badge bg-green-50 text-success;
   }
 
   .badge-error {
-    @apply badge bg-red-100 text-red-700;
+    @apply badge bg-red-50 text-error;
   }
 
   .badge-warning {
-    @apply badge bg-yellow-100 text-yellow-700;
+    @apply badge bg-amber-50 text-warning;
   }
 
-  /* Alternativas de questão */
+  .badge-default {
+    @apply badge bg-calm-elevated text-text-secondary;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     TIPOGRAFIA
+     ───────────────────────────────────────────────────────── */
+  .heading-display {
+    @apply text-3xl md:text-4xl font-bold text-text-primary tracking-tight;
+  }
+
+  .heading-section {
+    @apply text-xl md:text-2xl font-semibold text-text-primary;
+  }
+
+  .heading-card {
+    @apply text-lg font-semibold text-text-primary;
+  }
+
+  .text-body {
+    @apply text-base text-text-secondary leading-relaxed;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     ALTERNATIVAS DE QUESTÃO
+     ───────────────────────────────────────────────────────── */
   .alternativa {
-    @apply flex items-center gap-3 p-4 border-2 border-gray-200 rounded-xl
-           cursor-pointer transition-all duration-200 hover:border-gray-300;
+    @apply flex items-center gap-4 p-4 bg-calm-surface border border-calm-border rounded-xl
+           cursor-pointer transition-all duration-200 hover:border-text-muted hover:bg-calm-elevated;
   }
 
   .alternativa-selected {
-    @apply border-gray-500 bg-gray-50;
+    @apply border-accent-orange bg-orange-50;
   }
 
   .alternativa-correct {
-    @apply border-green-500 bg-green-50;
+    @apply border-success bg-green-50;
   }
 
   .alternativa-wrong {
-    @apply border-red-500 bg-red-50;
+    @apply border-error bg-red-50;
   }
 
-  /* Chat bubble */
+  /* ─────────────────────────────────────────────────────────
+     CHAT BUBBLES
+     ───────────────────────────────────────────────────────── */
   .chat-bubble {
-    @apply max-w-[85%] p-3 rounded-2xl;
+    @apply max-w-[85%] p-4 rounded-2xl;
   }
 
   .chat-bubble-user {
-    @apply chat-bubble bg-gray-200 text-gray-800 rounded-br-sm ml-auto;
+    @apply chat-bubble bg-calm-elevated text-text-primary rounded-br-md ml-auto;
   }
 
   .chat-bubble-assistant-fisica {
-    @apply chat-bubble bg-fisica-500 text-white rounded-bl-sm;
+    @apply chat-bubble bg-fisica-50 text-text-primary rounded-bl-md border border-fisica-100;
   }
 
   .chat-bubble-assistant-matematica {
-    @apply chat-bubble bg-matematica-500 text-white rounded-bl-sm;
+    @apply chat-bubble bg-matematica-50 text-text-primary rounded-bl-md border border-matematica-100;
   }
 
-  /* Loading spinner */
+  /* ─────────────────────────────────────────────────────────
+     COMPONENTES UTILITÁRIOS
+     ───────────────────────────────────────────────────────── */
   .spinner {
     @apply animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full;
   }
 
-  /* Skeleton loading */
   .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
+    @apply animate-pulse bg-calm-elevated rounded;
+  }
+
+  /* Stats */
+  .stat-card {
+    @apply bg-calm-surface rounded-2xl p-5 border border-calm-border;
+  }
+
+  .stat-value {
+    @apply text-3xl font-bold text-text-primary tabular-nums;
+  }
+
+  .stat-label {
+    @apply text-sm text-text-muted mt-1;
+  }
+
+  /* Progress Bar */
+  .progress-bar {
+    @apply h-2 bg-calm-elevated rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  .progress-fill-fisica {
+    @apply progress-fill bg-fisica-500;
+  }
+
+  .progress-fill-matematica {
+    @apply progress-fill bg-matematica-500;
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary font-medium transition-colors duration-200 hover:bg-calm-elevated hover:text-text-primary;
+  }
+
+  .nav-item-active {
+    @apply bg-calm-elevated text-text-primary;
+  }
+
+  /* Terminal Card - para instruções */
+  .card-terminal {
+    @apply bg-gray-900 rounded-xl overflow-hidden;
+  }
+
+  .card-terminal-header {
+    @apply flex items-center gap-2 px-4 py-2.5 bg-gray-800;
+  }
+
+  .card-terminal-dot {
+    @apply w-2.5 h-2.5 rounded-full;
+  }
+
+  .card-terminal-body {
+    @apply p-4 font-mono text-sm text-gray-300;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ANIMAÇÕES CUSTOMIZADAS
+   UTILITÁRIOS
    ═══════════════════════════════════════════════════════════ */
 @layer utilities {
-  /* Typing indicator dots */
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+
+  /* Typing indicator */
   .typing-dot {
     @apply w-2 h-2 bg-current rounded-full;
     animation: typingDot 1.4s infinite ease-in-out both;
   }
 
-  .typing-dot:nth-child(1) {
-    animation-delay: -0.32s;
-  }
-
-  .typing-dot:nth-child(2) {
-    animation-delay: -0.16s;
-  }
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
 
   @keyframes typingDot {
-    0%,
-    80%,
-    100% {
+    0%, 80%, 100% {
       transform: scale(0.6);
       opacity: 0.5;
     }
@@ -237,48 +391,37 @@ textarea {
     }
   }
 
-  /* Confetti animation for celebrations */
-  .confetti {
-    animation: confettiFall 3s ease-out forwards;
+  /* Shimmer for loading */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--calm-elevated) 0%,
+      var(--calm-surface) 50%,
+      var(--calm-elevated) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  @keyframes confettiFall {
-    0% {
-      transform: translateY(-100vh) rotate(0deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(100vh) rotate(720deg);
-      opacity: 0;
-    }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
-  /* Pulse glow */
-  .pulse-glow {
-    animation: pulseGlow 2s infinite;
-  }
-
-  @keyframes pulseGlow {
-    0%,
-    100% {
-      box-shadow: 0 0 5px currentColor;
-    }
-    50% {
-      box-shadow: 0 0 20px currentColor;
-    }
+  /* Counter */
+  .counter {
+    @apply tabular-nums;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════
    ACESSIBILIDADE
    ═══════════════════════════════════════════════════════════ */
-/* Focus visible para navegação por teclado */
 :focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--accent-orange);
   outline-offset: 2px;
 }
 
-/* Reduz movimento para usuários que preferem */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -290,9 +433,8 @@ textarea {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RESPONSIVIDADE
+   SAFE AREAS (Mobile)
    ═══════════════════════════════════════════════════════════ */
-/* Safe area para dispositivos com notch */
 @supports (padding: max(0px)) {
   .safe-bottom {
     padding-bottom: max(1rem, env(safe-area-inset-bottom));

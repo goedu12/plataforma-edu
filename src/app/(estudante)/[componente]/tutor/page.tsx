@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Bot, Sparkles, MessageCircle } from 'lucide-react'
 import TutorChat from '@/components/TutorChat'
 import Loading from '@/components/ui/Loading'
 import type { Componente, Usuario } from '@/types'
@@ -52,21 +52,41 @@ export default function TutorPage() {
 
   const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
   const usoHoje = componente === 'fisica' ? usuario.fis_uso_ia_hoje : usuario.mat_uso_ia_hoje
+  const usosRestantes = PONTUACAO.LIMITE_IA_DIARIO - usoHoje
+
+  const isFisica = componente === 'fisica'
+  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-calm-bg">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <button
-            onClick={() => router.push(`/${componente}/menu`)}
-            className="p-2 -ml-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <h1 className="font-semibold text-gray-800">🤖 {nomeTutor}</h1>
-          <div className="text-sm text-gray-500">
-            {usoHoje}/{PONTUACAO.LIMITE_IA_DIARIO}
+      <header className={`${bgColor} text-white px-4 py-4`}>
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={() => router.push(`/${componente}/menu`)}
+              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Bot className="w-5 h-5" />
+              <h1 className="font-semibold">Tutor {nomeTutor}</h1>
+            </div>
+            <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
+              <MessageCircle className="w-4 h-4" />
+              <span className="text-sm font-medium">{usoHoje}/{PONTUACAO.LIMITE_IA_DIARIO}</span>
+            </div>
+          </div>
+
+          {/* Info Bar */}
+          <div className="flex items-center justify-center gap-4 text-sm text-white/80">
+            <div className="flex items-center gap-1">
+              <Sparkles className="w-4 h-4" />
+              <span>IA Generativa</span>
+            </div>
+            <span className="text-white/40">•</span>
+            <span>{usosRestantes} msgs restantes hoje</span>
           </div>
         </div>
       </header>

@@ -12,13 +12,16 @@ import {
   Star,
   Flame,
   ArrowLeftRight,
+  Target,
+  ChevronRight,
+  RotateCcw,
+  Zap,
+  GraduationCap,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
-import ProgressBar from '@/components/ui/ProgressBar'
-import Badge from '@/components/ui/Badge'
 import Loading from '@/components/ui/Loading'
 import type { Usuario, Componente } from '@/types'
-import { obterNivelPorPontos, calcularTaxaAcerto } from '@/types'
+import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 
 export default function MenuComponentePage() {
   const router = useRouter()
@@ -74,36 +77,91 @@ export default function MenuComponentePage() {
   const nivel = obterNivelPorPontos(pontos)
   const taxaAcerto = calcularTaxaAcerto(questoesCorretas, questoesTotal)
 
+  // Calcular progresso para próximo nível
+  const nivelAtualIndex = NIVEIS_JOGADOR.findIndex(n => n.nome === nivel.nome)
+  const proximoNivel = NIVEIS_JOGADOR[nivelAtualIndex + 1]
+  const pontosParaProximo = proximoNivel ? proximoNivel.pontos_min - pontos : 0
+  const progressoNivel = proximoNivel
+    ? ((pontos - nivel.pontos_min) / (proximoNivel.pontos_min - nivel.pontos_min)) * 100
+    : 100
+
   const primeiroNome = usuario.nome.split(' ')[0]
   const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
 
-  const bgGradient =
-    componente === 'fisica'
-      ? 'from-fisica-500 to-fisica-600'
-      : 'from-matematica-500 to-matematica-600'
+  const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'fisica-500' : 'matematica-500'
+  const bgGradient = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  const textColor = isFisica ? 'text-fisica-500' : 'text-matematica-500'
+  const bgLight = isFisica ? 'bg-fisica-50' : 'bg-matematica-50'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Responda questões e ganhe pontos' },
-    { icon: Bot, label: nomeTutor, href: `/${componente}/tutor`, description: 'Tire dúvidas com inteligência artificial' },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Veja sua posição na turma' },
-    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Desbloqueie medalhas especiais' },
+    {
+      icon: BookOpen,
+      label: 'Estudar',
+      href: `/${componente}/estudar`,
+      description: 'Questões e pontos',
+      highlight: true
+    },
+    {
+      icon: Zap,
+      label: 'Modo Desafio',
+      href: `/${componente}/desafio`,
+      description: '5 questões em 5 minutos',
+      highlight: false
+    },
+    {
+      icon: RotateCcw,
+      label: 'Revisar Erros',
+      href: `/${componente}/revisao`,
+      description: 'Refazer questões erradas',
+      highlight: false
+    },
+    {
+      icon: Bot,
+      label: `Tutor ${nomeTutor}`,
+      href: `/${componente}/tutor`,
+      description: 'Tire dúvidas com IA',
+      highlight: false
+    },
+    {
+      icon: Trophy,
+      label: 'Ranking',
+      href: `/${componente}/ranking`,
+      description: 'Sua posição na turma',
+      highlight: false
+    },
+    {
+      icon: Medal,
+      label: 'Conquistas',
+      href: `/${componente}/conquistas`,
+      description: 'Medalhas e troféus',
+      highlight: false
+    },
+    {
+      icon: GraduationCap,
+      label: 'Notas',
+      href: `/${componente}/notas`,
+      description: 'Nota do bimestre',
+      highlight: false
+    },
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-calm-bg pb-24">
       {/* Header */}
-      <header className={`bg-gradient-to-r ${bgGradient} text-white px-4 py-6`}>
+      <header className={`${bgGradient} text-white px-4 pt-6 pb-16`}>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{componente === 'fisica' ? '🔬' : '🔢'}</span>
+          {/* Top Bar */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
               <h1 className="text-xl font-bold capitalize">{componente}</h1>
+              <p className="text-white/80 text-sm">Turma {usuario.turma}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
-                  className="p-2 rounded-lg hover:bg-white/20"
+                  className="p-2.5 rounded-xl hover:bg-white/20 transition-colors"
                   title="Trocar componente"
                 >
                   <ArrowLeftRight className="w-5 h-5" />
@@ -111,7 +169,7 @@ export default function MenuComponentePage() {
               )}
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-lg hover:bg-white/20"
+                className="p-2.5 rounded-xl hover:bg-white/20 transition-colors"
                 title="Sair"
               >
                 <LogOut className="w-5 h-5" />
@@ -119,41 +177,61 @@ export default function MenuComponentePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <p className="text-white/80 text-sm">👋 Olá, {primeiroNome}!</p>
-              <p className="text-white/60 text-xs">Turma {usuario.turma}</p>
-            </div>
+          {/* User Welcome */}
+          <div className="mb-4">
+            <p className="text-2xl font-bold">Olá, {primeiroNome}!</p>
+            <p className="text-white/80 text-sm">{nivel.emoji} {nivel.nome}</p>
           </div>
 
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <span>{nivel.emoji}</span>
-              <span>{nivel.nome}</span>
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+              <Star className="w-5 h-5 mx-auto mb-1" />
+              <p className="text-xl font-bold">{pontos}</p>
+              <p className="text-xs text-white/80">Pontos</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Star className="w-4 h-4" />
-              <span>{pontos} pts</span>
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+              <Flame className="w-5 h-5 mx-auto mb-1" />
+              <p className="text-xl font-bold">{sequenciaDias}</p>
+              <p className="text-xs text-white/80">Dias</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Flame className="w-4 h-4" />
-              <span>{sequenciaDias} dias</span>
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 text-center">
+              <Target className="w-5 h-5 mx-auto mb-1" />
+              <p className="text-xl font-bold">{taxaAcerto}%</p>
+              <p className="text-xs text-white/80">Acerto</p>
             </div>
           </div>
         </div>
       </header>
 
       {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto p-4 -mt-4">
+      <main className="max-w-2xl mx-auto px-4 -mt-8">
         {/* Card de Progresso */}
         <Card className="mb-6 animate-slide-up">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Progresso semanal</span>
-            <span className="text-xs text-gray-500">
-              {questoesTotal} questões • {taxaAcerto}% acerto
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-semibold text-text-primary">Progresso</span>
+            <span className="text-sm text-text-muted">
+              {questoesTotal}/50 questões
             </span>
           </div>
-          <ProgressBar value={Math.min(questoesTotal, 50)} max={50} componente={componente} />
+
+          {/* Progress Bar */}
+          <div className="h-2 bg-calm-elevated rounded-full overflow-hidden mb-3">
+            <div
+              className={`h-full ${bgGradient} rounded-full transition-all duration-1000 ease-out`}
+              style={{ width: `${Math.min((questoesTotal / 50) * 100, 100)}%` }}
+            />
+          </div>
+
+          {/* Level Progress */}
+          {proximoNivel && (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-text-muted">{nivel.emoji} {nivel.nome}</span>
+              <span className={textColor}>
+                +{pontosParaProximo} pts para {proximoNivel.nome}
+              </span>
+            </div>
+          )}
         </Card>
 
         {/* Grid de Menu */}
@@ -163,53 +241,55 @@ export default function MenuComponentePage() {
               key={item.label}
               interactive
               onClick={() => router.push(item.href)}
-              className="text-center animate-slide-up hover:scale-105 transition-transform duration-200"
+              className="animate-slide-up group"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div
-                className={`w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center shadow-sm ${
-                  componente === 'fisica' ? 'bg-fisica-100' : 'bg-matematica-100'
-                }`}
-              >
-                <item.icon
-                  className={`w-7 h-7 ${
-                    componente === 'fisica' ? 'text-fisica-600' : 'text-matematica-600'
-                  }`}
-                />
+              <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${bgGradient}`}>
+                <item.icon className="w-6 h-6 text-white" />
               </div>
-              <span className="font-semibold text-gray-800 block">{item.label}</span>
-              <span className="text-xs text-gray-500 mt-1 block">{item.description}</span>
+
+              <h3 className="font-semibold text-text-primary text-center mb-1">{item.label}</h3>
+              <p className="text-xs text-text-muted text-center">{item.description}</p>
             </Card>
           ))}
         </div>
+
+        {/* Dica do Dia */}
+        <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200" style={{ animationDelay: '300ms' }}>
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent-orange/20 flex items-center justify-center flex-shrink-0">
+              <Flame className="w-5 h-5 text-accent-orange" />
+            </div>
+            <div>
+              <p className="font-semibold text-text-primary text-sm mb-1">Dica</p>
+              <p className="text-sm text-text-secondary">
+                Responda questões rapidamente para ganhar bônus de velocidade!
+              </p>
+            </div>
+          </div>
+        </Card>
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t safe-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bg-calm-surface border-t border-calm-border safe-bottom">
         <div className="max-w-2xl mx-auto flex items-center justify-around py-2">
           {[
-            { icon: Home, label: 'Início', active: true },
-            { icon: BookOpen, label: 'Estudar' },
-            { icon: Trophy, label: 'Ranking' },
-            { icon: Bot, label: 'Tutor' },
+            { icon: Home, label: 'Início', href: `/${componente}/menu`, active: true },
+            { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, active: false },
+            { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, active: false },
+            { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, active: false },
           ].map(item => (
             <button
               key={item.label}
-              onClick={() => {
-                if (item.label === 'Estudar') router.push(`/${componente}/estudar`)
-                if (item.label === 'Ranking') router.push(`/${componente}/ranking`)
-                if (item.label === 'Tutor') router.push(`/${componente}/tutor`)
-              }}
-              className={`flex flex-col items-center gap-1 px-4 py-2 ${
+              onClick={() => router.push(item.href)}
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors ${
                 item.active
-                  ? componente === 'fisica'
-                    ? 'text-fisica-600'
-                    : 'text-matematica-600'
-                  : 'text-gray-400'
+                  ? `${textColor} ${bgLight}`
+                  : 'text-text-muted hover:text-text-primary'
               }`}
             >
               <item.icon className="w-5 h-5" />
-              <span className="text-xs">{item.label}</span>
+              <span className="text-xs font-medium">{item.label}</span>
             </button>
           ))}
         </div>

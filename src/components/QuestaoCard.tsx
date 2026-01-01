@@ -5,7 +5,7 @@ import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy } from 'lu
 import Button from './ui/Button'
 import Card from './ui/Card'
 import Badge from './ui/Badge'
-import type { Questao, Componente } from '@/types'
+import type { Questao, Componente, ModoResposta } from '@/types'
 
 interface QuestaoCardProps {
   questao: Questao
@@ -14,6 +14,7 @@ interface QuestaoCardProps {
   onResponder: (resposta: 'A' | 'B' | 'C' | 'D', usouDica: boolean) => void
   onProxima: () => void
   onVoltar: () => void
+  modo?: ModoResposta
 }
 
 type Alternativa = 'A' | 'B' | 'C' | 'D'
@@ -38,6 +39,7 @@ export default function QuestaoCard({
   onResponder,
   onProxima,
   onVoltar,
+  modo = 'estudo',
 }: QuestaoCardProps) {
   const [selecionada, setSelecionada] = useState<Alternativa | null>(null)
   const [mostrarDica, setMostrarDica] = useState(false)
@@ -80,6 +82,7 @@ export default function QuestaoCard({
           resposta: selecionada,
           tempo_segundos: tempoDecorrido,
           usou_dica: usouDica,
+          modo,
         }),
       })
 
@@ -314,13 +317,13 @@ export default function QuestaoCard({
             <Button variant="secondary" onClick={onVoltar} className="flex-1">
               🏠 Menu
             </Button>
-            <Button componente={componente} onClick={onProxima} className="flex-1">
+            <Button variant={componente === 'fisica' ? 'fisica' : 'matematica'} onClick={onProxima} className="flex-1">
               Próxima Questão →
             </Button>
           </>
         ) : (
           <Button
-            componente={componente}
+            variant={componente === 'fisica' ? 'fisica' : 'matematica'}
             onClick={handleConfirmar}
             disabled={!selecionada || loading}
             loading={loading}

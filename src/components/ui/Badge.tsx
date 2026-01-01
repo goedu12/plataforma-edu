@@ -16,17 +16,17 @@ export default function Badge({
   className = '',
 }: BadgeProps) {
   const variantStyles = {
-    default: 'bg-gray-100 text-gray-700',
-    success: 'bg-green-100 text-green-700',
-    error: 'bg-red-100 text-red-700',
-    warning: 'bg-yellow-100 text-yellow-700',
-    fisica: 'bg-fisica-100 text-fisica-700',
-    matematica: 'bg-matematica-100 text-matematica-700',
+    default: 'bg-calm-elevated text-text-secondary',
+    success: 'bg-green-50 text-success',
+    error: 'bg-red-50 text-error',
+    warning: 'bg-amber-50 text-warning',
+    fisica: 'bg-fisica-50 text-fisica-500',
+    matematica: 'bg-matematica-50 text-matematica-500',
   }
 
   const sizeStyles = {
     sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-1 text-sm',
+    md: 'px-2.5 py-0.5 text-xs',
   }
 
   return (

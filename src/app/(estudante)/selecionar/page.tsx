@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Atom, Calculator, ChevronRight, LogOut, Flame, Star, Lightbulb } from 'lucide-react'
+import { Atom, Calculator, ChevronRight, LogOut, Flame, Star, TrendingUp } from 'lucide-react'
 import Card from '@/components/ui/Card'
+import Badge from '@/components/ui/Badge'
 import Loading from '@/components/ui/Loading'
 import type { Usuario } from '@/types'
+import { obterNivelPorPontos } from '@/types'
 
 export default function SelecionarComponentePage() {
   const router = useRouter()
@@ -21,7 +23,6 @@ export default function SelecionarComponentePage() {
         if (data.sucesso && data.usuario) {
           setUsuario(data.usuario)
 
-          // Se só tem 1 componente, redirecionar direto
           if (data.usuario.componentes.length === 1) {
             router.push(`/${data.usuario.componentes[0]}/menu`)
           }
@@ -44,27 +45,30 @@ export default function SelecionarComponentePage() {
   }
 
   if (loading || !usuario) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loading fullScreen />
-      </div>
-    )
+    return <Loading fullScreen />
   }
 
   const primeiroNome = usuario.nome.split(' ')[0]
+  const nivelFisica = obterNivelPorPontos(usuario.fis_pontos)
+  const nivelMatematica = obterNivelPorPontos(usuario.mat_pontos)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-calm-bg">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3">
+      <header className="bg-calm-surface border-b border-calm-border px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="font-semibold text-gray-800">📚 Plataforma EDU</h1>
-            <p className="text-xs text-gray-500">Turma {usuario.turma}</p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-accent-orange flex items-center justify-center">
+              <span className="text-white font-bold text-lg">E</span>
+            </div>
+            <div>
+              <h1 className="font-bold text-text-primary">Plataforma EDU</h1>
+              <span className="text-sm text-text-muted">Turma {usuario.turma}</span>
+            </div>
           </div>
           <button
             onClick={handleLogout}
-            className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+            className="p-2 text-text-muted hover:text-text-primary rounded-xl hover:bg-calm-elevated transition-colors"
             title="Sair"
           >
             <LogOut className="w-5 h-5" />
@@ -73,40 +77,63 @@ export default function SelecionarComponentePage() {
       </header>
 
       {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto p-4">
+      <main className="max-w-2xl mx-auto p-4 pt-8">
+        {/* Welcome Section */}
         <div className="text-center mb-8 animate-fade-in">
-          <h2 className="text-2xl font-bold text-gray-800">
-            👋 Olá, {primeiroNome}!
+          <h2 className="text-3xl font-bold text-text-primary mb-2">
+            Olá, {primeiroNome}!
           </h2>
-          <p className="text-gray-500 mt-1">O que vamos estudar hoje?</p>
+          <p className="text-text-secondary">O que vamos estudar hoje?</p>
         </div>
 
+        {/* Cards de Componentes */}
         <div className="space-y-4">
           {/* Card de Física */}
           {usuario.componentes.includes('fisica') && (
             <Card
               interactive
               onClick={() => router.push('/fisica/menu')}
-              className="animate-slide-up"
+              variant="fisica"
+              className="animate-slide-up group"
             >
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-fisica-100 flex items-center justify-center">
-                  <Atom className="w-8 h-8 text-fisica-600" />
+                <div className="w-14 h-14 rounded-2xl bg-fisica-500 flex items-center justify-center">
+                  <Atom className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg text-gray-800">Física</h3>
-                  <p className="text-sm text-gray-500">Tutor: Newton</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-lg text-text-primary">Física</h3>
+                    <Badge variant="fisica">{nivelFisica.nome}</Badge>
+                  </div>
+                  <p className="text-sm text-text-secondary">Tutor: Newton</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 rounded-full bg-calm-elevated flex items-center justify-center group-hover:bg-fisica-500 group-hover:text-white transition-colors text-text-muted">
+                  <ChevronRight className="w-5 h-5" />
+                </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1 text-fisica-600">
-                  <Star className="w-4 h-4" />
-                  <span>{usuario.fis_pontos} pts</span>
+
+              {/* Stats */}
+              <div className="mt-4 pt-4 border-t border-calm-border grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 text-fisica-500 mb-1">
+                    <Star className="w-4 h-4" />
+                  </div>
+                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.fis_pontos}</p>
+                  <p className="text-xs text-text-muted">Pontos</p>
                 </div>
-                <div className="flex items-center gap-1 text-orange-500">
-                  <Flame className="w-4 h-4" />
-                  <span>{usuario.fis_sequencia_dias} dias</span>
+                <div className="text-center border-x border-calm-border">
+                  <div className="flex items-center justify-center gap-1 text-accent-orange mb-1">
+                    <Flame className="w-4 h-4" />
+                  </div>
+                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.fis_sequencia_dias}</p>
+                  <p className="text-xs text-text-muted">Dias</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 text-success mb-1">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.fis_questoes_total}</p>
+                  <p className="text-xs text-text-muted">Questões</p>
                 </div>
               </div>
             </Card>
@@ -117,27 +144,48 @@ export default function SelecionarComponentePage() {
             <Card
               interactive
               onClick={() => router.push('/matematica/menu')}
-              className="animate-slide-up"
+              variant="matematica"
+              className="animate-slide-up group"
               style={{ animationDelay: '100ms' }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-matematica-100 flex items-center justify-center">
-                  <Calculator className="w-8 h-8 text-matematica-600" />
+                <div className="w-14 h-14 rounded-2xl bg-matematica-500 flex items-center justify-center">
+                  <Calculator className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg text-gray-800">Matemática</h3>
-                  <p className="text-sm text-gray-500">Tutor: Pitágoras</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-lg text-text-primary">Matemática</h3>
+                    <Badge variant="matematica">{nivelMatematica.nome}</Badge>
+                  </div>
+                  <p className="text-sm text-text-secondary">Tutor: Pitágoras</p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 rounded-full bg-calm-elevated flex items-center justify-center group-hover:bg-matematica-500 group-hover:text-white transition-colors text-text-muted">
+                  <ChevronRight className="w-5 h-5" />
+                </div>
               </div>
-              <div className="mt-4 pt-4 border-t border-gray-100 flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1 text-matematica-600">
-                  <Star className="w-4 h-4" />
-                  <span>{usuario.mat_pontos} pts</span>
+
+              {/* Stats */}
+              <div className="mt-4 pt-4 border-t border-calm-border grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 text-matematica-500 mb-1">
+                    <Star className="w-4 h-4" />
+                  </div>
+                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.mat_pontos}</p>
+                  <p className="text-xs text-text-muted">Pontos</p>
                 </div>
-                <div className="flex items-center gap-1 text-orange-500">
-                  <Flame className="w-4 h-4" />
-                  <span>{usuario.mat_sequencia_dias} dias</span>
+                <div className="text-center border-x border-calm-border">
+                  <div className="flex items-center justify-center gap-1 text-accent-orange mb-1">
+                    <Flame className="w-4 h-4" />
+                  </div>
+                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.mat_sequencia_dias}</p>
+                  <p className="text-xs text-text-muted">Dias</p>
+                </div>
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 text-success mb-1">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.mat_questoes_total}</p>
+                  <p className="text-xs text-text-muted">Questões</p>
                 </div>
               </div>
             </Card>
@@ -145,11 +193,17 @@ export default function SelecionarComponentePage() {
         </div>
 
         {/* Dica */}
-        <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <div className="inline-flex items-center gap-2 text-sm text-gray-500">
-            <Lightbulb className="w-4 h-4" />
-            <span>Estude todos os dias para manter sua sequência!</span>
-          </div>
+        <div className="mt-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <Card padding="sm" className="bg-orange-50 border-orange-200">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent-orange/20 flex items-center justify-center flex-shrink-0">
+                <Flame className="w-5 h-5 text-accent-orange" />
+              </div>
+              <p className="text-sm text-text-secondary">
+                Estude todos os dias para manter sua <strong className="text-accent-orange">sequência</strong> ativa!
+              </p>
+            </div>
+          </Card>
         </div>
       </main>
     </div>
