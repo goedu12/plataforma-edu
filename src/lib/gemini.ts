@@ -118,8 +118,12 @@ export async function chatComTutor(
     }
 
     // Verificar se a API key está configurada
-    if (!process.env.GEMINI_API_KEY) {
-      return { sucesso: false, erro: 'API do Gemini não configurada' }
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey || apiKey === 'placeholder_gemini_key' || apiKey.startsWith('placeholder')) {
+      return {
+        sucesso: false,
+        erro: 'O tutor IA ainda não está disponível. Entre em contato com seu professor.'
+      }
     }
 
     // Criar modelo
