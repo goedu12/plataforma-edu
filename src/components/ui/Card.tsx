@@ -6,7 +6,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode
   interactive?: boolean
   padding?: 'sm' | 'md' | 'lg'
-  variant?: 'default' | 'terminal' | 'glass'
+  variant?: 'default' | 'elevated' | 'terminal' | 'glass' | 'glow-fisica' | 'glow-matematica'
   className?: string
 }
 
@@ -18,15 +18,18 @@ export default function Card({
   className = '',
   ...props
 }: CardProps) {
-  // Estilos base - Koyeb Style
+  // Estilos base - Dark Theme Premium
   const variantStyles = {
-    default: 'bg-white rounded-2xl shadow-koyeb border border-gray-100',
-    terminal: 'bg-koyeb-dark rounded-2xl shadow-koyeb-lg',
-    glass: 'bg-white/80 backdrop-blur-md rounded-2xl border border-white/20 shadow-koyeb',
+    default: 'bg-dark-surface rounded-2xl shadow-dark border border-dark-border',
+    elevated: 'bg-dark-elevated rounded-2xl shadow-dark-lg border border-dark-border',
+    terminal: 'bg-dark-bg rounded-2xl shadow-dark-lg border border-dark-border',
+    glass: 'bg-dark-surface/60 backdrop-blur-xl rounded-2xl border border-white/5 shadow-dark',
+    'glow-fisica': 'bg-dark-surface rounded-2xl border border-fisica-400/30 shadow-glow-fisica',
+    'glow-matematica': 'bg-dark-surface rounded-2xl border border-matematica-300/30 shadow-glow-matematica',
   }
 
   const interactiveStyles = interactive
-    ? 'hover:shadow-koyeb-hover hover:-translate-y-1 transition-all duration-300 cursor-pointer'
+    ? 'hover:shadow-dark-hover hover:-translate-y-1 hover:border-dark-muted transition-all duration-300 cursor-pointer'
     : 'transition-all duration-300'
 
   const paddingStyles = {
@@ -56,7 +59,7 @@ export function CardHeader({
   return <div className={`mb-4 ${className}`}>{children}</div>
 }
 
-// Subcomponente para título do card - Koyeb Style
+// Subcomponente para título do card - Dark Theme
 export function CardTitle({
   children,
   className = '',
@@ -64,7 +67,7 @@ export function CardTitle({
   children: ReactNode
   className?: string
 }) {
-  return <h3 className={`text-lg font-bold text-koyeb-dark uppercase tracking-tight ${className}`}>{children}</h3>
+  return <h3 className={`text-lg font-bold text-white uppercase tracking-tight ${className}`}>{children}</h3>
 }
 
 // Subcomponente para descrição do card
@@ -75,7 +78,7 @@ export function CardDescription({
   children: ReactNode
   className?: string
 }) {
-  return <p className={`text-sm text-gray-500 mt-1 ${className}`}>{children}</p>
+  return <p className={`text-sm text-light-secondary mt-1 ${className}`}>{children}</p>
 }
 
 // Subcomponente para conteúdo do card
@@ -97,10 +100,10 @@ export function CardFooter({
   children: ReactNode
   className?: string
 }) {
-  return <div className={`mt-4 pt-4 border-t border-gray-100 ${className}`}>{children}</div>
+  return <div className={`mt-4 pt-4 border-t border-dark-border ${className}`}>{children}</div>
 }
 
-// Terminal Window Card - Koyeb Style
+// Terminal Window Card - Dark Theme
 export function TerminalCard({
   children,
   title,
@@ -111,16 +114,50 @@ export function TerminalCard({
   className?: string
 }) {
   return (
-    <div className={`bg-koyeb-dark rounded-2xl overflow-hidden shadow-koyeb-lg ${className}`}>
-      <div className="flex items-center gap-2 px-4 py-3 bg-gray-800/50">
-        <span className="w-3 h-3 rounded-full bg-red-500" />
-        <span className="w-3 h-3 rounded-full bg-yellow-500" />
-        <span className="w-3 h-3 rounded-full bg-green-500" />
-        {title && <span className="ml-2 text-sm text-gray-400">{title}</span>}
+    <div className={`bg-dark-bg rounded-2xl overflow-hidden shadow-dark-lg border border-dark-border ${className}`}>
+      <div className="flex items-center gap-2 px-4 py-3 bg-dark-surface border-b border-dark-border">
+        <span className="w-3 h-3 rounded-full bg-error" />
+        <span className="w-3 h-3 rounded-full bg-warning" />
+        <span className="w-3 h-3 rounded-full bg-success" />
+        {title && <span className="ml-2 text-sm text-light-muted font-mono">{title}</span>}
       </div>
-      <div className="p-4 font-mono text-sm text-gray-300">
+      <div className="p-4 font-mono text-sm text-light-secondary">
         {children}
       </div>
+    </div>
+  )
+}
+
+// Stat Card - Dark Theme
+export function StatCard({
+  value,
+  label,
+  icon,
+  color = 'default',
+  className = '',
+}: {
+  value: string | number
+  label: string
+  icon?: ReactNode
+  color?: 'default' | 'fisica' | 'matematica' | 'orange'
+  className?: string
+}) {
+  const colorStyles = {
+    default: 'text-white',
+    fisica: 'text-fisica-400',
+    matematica: 'text-matematica-300',
+    orange: 'text-accent-orange',
+  }
+
+  return (
+    <div className={`bg-dark-surface rounded-2xl p-5 border border-dark-border ${className}`}>
+      {icon && (
+        <div className={`w-10 h-10 rounded-xl mb-3 flex items-center justify-center bg-dark-elevated ${colorStyles[color]}`}>
+          {icon}
+        </div>
+      )}
+      <p className={`text-3xl font-black tabular-nums ${colorStyles[color]}`}>{value}</p>
+      <p className="text-xs font-bold text-light-muted uppercase tracking-widest mt-1">{label}</p>
     </div>
   )
 }

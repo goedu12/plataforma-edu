@@ -1,33 +1,49 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════
-   VARIÁVEIS CSS - KOYEB STYLE
+   VARIÁVEIS CSS - DARK THEME PREMIUM
    ═══════════════════════════════════════════════════════════ */
 :root {
-  /* Koyeb Colors */
-  --koyeb-bg: #F5F5F0;
-  --koyeb-cream: #FAF9F6;
-  --koyeb-dark: #1A1A1A;
-  --koyeb-orange: #E85D04;
-  --koyeb-coral: #FF6B35;
+  /* Dark Theme Surfaces */
+  --dark-bg: #0A0A0F;
+  --dark-surface: #12121A;
+  --dark-elevated: #1A1A24;
+  --dark-border: #2A2A3A;
+  --dark-muted: #3A3A4A;
 
-  /* Semantic Colors */
-  --success: #22c55e;
-  --error: #ef4444;
-  --warning: #f59e0b;
-  --info: #06b6d4;
+  /* Light Text */
+  --light-primary: #FFFFFF;
+  --light-secondary: #A0A0B0;
+  --light-muted: #606070;
+
+  /* Accent Colors */
+  --accent-orange: #FF6B2C;
+  --accent-coral: #FF8A5B;
+
+  /* Física - Ciano Neon */
+  --fisica-primary: #00E5FF;
+  --fisica-glow: rgba(0, 229, 255, 0.4);
+
+  /* Matemática - Magenta Neon */
+  --matematica-primary: #E040FB;
+  --matematica-glow: rgba(224, 64, 251, 0.4);
+
+  /* Status Colors */
+  --success: #00E676;
+  --error: #FF5252;
+  --warning: #FFD740;
 
   /* Background & Foreground */
-  --background: var(--koyeb-bg);
-  --foreground: var(--koyeb-dark);
+  --background: var(--dark-bg);
+  --foreground: var(--light-primary);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RESET E BASE - KOYEB STYLE
+   RESET E BASE - DARK THEME
    ═══════════════════════════════════════════════════════════ */
 * {
   box-sizing: border-box;
@@ -57,7 +73,7 @@ textarea {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SCROLLBAR KOYEB STYLE
+   SCROLLBAR DARK THEME
    ═══════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
   width: 8px;
@@ -65,20 +81,28 @@ textarea {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--dark-surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--dark-muted);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--light-muted);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   COMPONENTES KOYEB STYLE
+   SELEÇÃO DE TEXTO
+   ═══════════════════════════════════════════════════════════ */
+::selection {
+  background: var(--accent-orange);
+  color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   COMPONENTES - DARK THEME PREMIUM
    ═══════════════════════════════════════════════════════════ */
 @layer components {
   /* Container padrão */
@@ -86,238 +110,285 @@ textarea {
     @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  /* Navigation Pill - Koyeb Style */
-  .nav-pill {
-    @apply inline-flex items-center gap-6 px-6 py-3 bg-white/80 backdrop-blur-sm rounded-full shadow-koyeb border border-gray-200/50;
-  }
-
-  .nav-pill-item {
-    @apply text-sm font-medium text-gray-600 hover:text-koyeb-dark transition-colors duration-200 uppercase tracking-wide;
-  }
-
-  .nav-pill-item-active {
-    @apply text-koyeb-dark font-semibold;
-  }
-
-  /* Card Koyeb Style */
+  /* ─────────────────────────────────────────────────────────
+     CARDS - Sistema de Superfícies
+     ───────────────────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-2xl shadow-koyeb p-6 border border-gray-100 transition-all duration-300;
+    @apply bg-dark-surface rounded-2xl p-6 border border-dark-border shadow-dark transition-all duration-300;
+  }
+
+  .card-elevated {
+    @apply bg-dark-elevated rounded-2xl p-6 border border-dark-border shadow-dark-lg transition-all duration-300;
   }
 
   .card-interactive {
-    @apply card hover:shadow-koyeb-hover hover:-translate-y-1 cursor-pointer;
+    @apply card hover:shadow-dark-hover hover:-translate-y-1 hover:border-dark-muted cursor-pointer;
   }
 
+  .card-glass {
+    @apply bg-dark-surface/60 backdrop-blur-xl rounded-2xl p-6 border border-white/5 shadow-dark;
+  }
+
+  .card-glow-fisica {
+    @apply card border-fisica-400/30 shadow-glow-fisica hover:border-fisica-400/50;
+  }
+
+  .card-glow-matematica {
+    @apply card border-matematica-300/30 shadow-glow-matematica hover:border-matematica-300/50;
+  }
+
+  /* Terminal Card */
   .card-terminal {
-    @apply bg-koyeb-dark rounded-2xl p-4 overflow-hidden;
+    @apply bg-dark-bg rounded-2xl overflow-hidden border border-dark-border;
   }
 
   .card-terminal-header {
-    @apply flex items-center gap-2 mb-4;
+    @apply flex items-center gap-2 px-4 py-3 bg-dark-surface border-b border-dark-border;
   }
 
   .card-terminal-dot {
     @apply w-3 h-3 rounded-full;
   }
 
-  /* Botões Koyeb Style */
+  .card-terminal-body {
+    @apply p-4 font-mono text-sm text-light-secondary;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     BOTÕES - Neon Glow Style
+     ───────────────────────────────────────────────────────── */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm uppercase tracking-wide transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-semibold text-sm uppercase tracking-wider transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply btn bg-koyeb-dark text-white hover:bg-black shadow-koyeb hover:shadow-koyeb-lg;
+    @apply btn bg-white text-dark-bg hover:bg-light-secondary shadow-dark hover:shadow-dark-lg;
   }
 
   .btn-primary-orange {
-    @apply btn bg-koyeb-orange text-white hover:bg-koyeb-coral shadow-koyeb hover:shadow-koyeb-lg;
+    @apply btn bg-gradient-orange text-white hover:shadow-glow-orange;
   }
 
   .btn-primary-fisica {
-    @apply btn bg-fisica-500 text-white hover:bg-fisica-600 shadow-koyeb hover:shadow-koyeb-lg;
+    @apply btn bg-gradient-fisica text-dark-bg font-bold hover:shadow-glow-fisica;
   }
 
   .btn-primary-matematica {
-    @apply btn bg-matematica-500 text-white hover:bg-matematica-600 shadow-koyeb hover:shadow-koyeb-lg;
+    @apply btn bg-gradient-matematica text-white font-bold hover:shadow-glow-matematica;
   }
 
   .btn-secondary {
-    @apply btn bg-white text-koyeb-dark border-2 border-koyeb-dark hover:bg-koyeb-dark hover:text-white;
+    @apply btn bg-transparent text-white border-2 border-white/20 hover:bg-white/10 hover:border-white/40;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-gray-600 hover:bg-gray-100;
+    @apply btn bg-transparent text-light-secondary hover:bg-dark-elevated hover:text-white;
   }
 
   .btn-icon {
-    @apply p-3 rounded-full hover:bg-gray-100 transition-colors duration-200;
+    @apply p-3 rounded-full hover:bg-dark-elevated transition-all duration-200 text-light-secondary hover:text-white;
   }
 
-  /* Inputs Koyeb Style */
+  /* ─────────────────────────────────────────────────────────
+     INPUTS - Dark Theme
+     ───────────────────────────────────────────────────────── */
   .input {
-    @apply w-full px-5 py-4 bg-white border-2 border-gray-200 rounded-xl text-base font-medium
-           focus:ring-0 focus:border-koyeb-dark outline-none transition-all duration-300;
+    @apply w-full px-5 py-4 bg-dark-elevated border-2 border-dark-border rounded-xl text-base font-medium text-white placeholder:text-light-muted
+           focus:ring-0 focus:border-accent-orange outline-none transition-all duration-300;
   }
 
   .input-fisica {
-    @apply input focus:border-fisica-500;
+    @apply input focus:border-fisica-400 focus:shadow-glow-fisica;
   }
 
   .input-matematica {
-    @apply input focus:border-matematica-500;
+    @apply input focus:border-matematica-300 focus:shadow-glow-matematica;
   }
 
   .input-error {
-    @apply input border-red-500 focus:border-red-500;
+    @apply input border-error focus:border-error focus:shadow-glow-error;
   }
 
   /* Labels */
   .label {
-    @apply block text-sm font-semibold text-koyeb-dark mb-2 uppercase tracking-wide;
+    @apply block text-xs font-bold text-light-secondary mb-2 uppercase tracking-widest;
   }
 
   /* Helper text */
   .helper-text {
-    @apply text-xs text-gray-500 mt-2;
+    @apply text-xs text-light-muted mt-2;
   }
 
   .error-text {
-    @apply text-xs text-red-500 mt-2 font-medium;
+    @apply text-xs text-error mt-2 font-medium;
   }
 
-  /* Badge Koyeb Style */
+  /* ─────────────────────────────────────────────────────────
+     BADGES - Neon Style
+     ───────────────────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider;
   }
 
   .badge-fisica {
-    @apply badge bg-fisica-100 text-fisica-700;
+    @apply badge bg-fisica-400/20 text-fisica-400 border border-fisica-400/30;
   }
 
   .badge-matematica {
-    @apply badge bg-matematica-100 text-matematica-700;
+    @apply badge bg-matematica-300/20 text-matematica-300 border border-matematica-300/30;
   }
 
   .badge-success {
-    @apply badge bg-green-100 text-green-700;
+    @apply badge bg-success/20 text-success border border-success/30;
   }
 
   .badge-error {
-    @apply badge bg-red-100 text-red-700;
+    @apply badge bg-error/20 text-error border border-error/30;
   }
 
   .badge-warning {
-    @apply badge bg-yellow-100 text-yellow-700;
+    @apply badge bg-warning/20 text-warning border border-warning/30;
   }
 
-  .badge-dark {
-    @apply badge bg-koyeb-dark text-white;
+  .badge-default {
+    @apply badge bg-dark-elevated text-light-secondary border border-dark-border;
   }
 
-  /* Heading Koyeb Style - Bold Condensed */
+  .badge-glow-fisica {
+    @apply badge-fisica shadow-glow-fisica;
+  }
+
+  .badge-glow-matematica {
+    @apply badge-matematica shadow-glow-matematica;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     TIPOGRAFIA - Hierarquia
+     ───────────────────────────────────────────────────────── */
   .heading-display {
-    @apply text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-none;
+    @apply text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight leading-none text-white;
   }
 
   .heading-section {
-    @apply text-2xl md:text-3xl font-bold uppercase tracking-tight;
+    @apply text-2xl md:text-3xl font-bold uppercase tracking-tight text-white;
   }
 
-  /* Alternativas de questão */
+  .heading-card {
+    @apply text-lg font-bold uppercase tracking-tight text-white;
+  }
+
+  .text-gradient-fisica {
+    @apply bg-clip-text text-transparent bg-gradient-fisica;
+  }
+
+  .text-gradient-matematica {
+    @apply bg-clip-text text-transparent bg-gradient-matematica;
+  }
+
+  .text-gradient-orange {
+    @apply bg-clip-text text-transparent bg-gradient-orange;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     ALTERNATIVAS DE QUESTÃO
+     ───────────────────────────────────────────────────────── */
   .alternativa {
-    @apply flex items-center gap-4 p-5 bg-white border-2 border-gray-200 rounded-xl
-           cursor-pointer transition-all duration-300 hover:border-gray-400 hover:shadow-koyeb;
+    @apply flex items-center gap-4 p-5 bg-dark-elevated border-2 border-dark-border rounded-xl
+           cursor-pointer transition-all duration-300 hover:border-light-muted hover:bg-dark-surface;
   }
 
   .alternativa-selected {
-    @apply border-koyeb-dark bg-gray-50 shadow-koyeb;
+    @apply border-accent-orange bg-accent-orange/10;
   }
 
   .alternativa-correct {
-    @apply border-green-500 bg-green-50;
+    @apply border-success bg-success/10 shadow-glow-success;
   }
 
   .alternativa-wrong {
-    @apply border-red-500 bg-red-50;
+    @apply border-error bg-error/10 shadow-glow-error;
   }
 
-  /* Chat bubble */
+  /* ─────────────────────────────────────────────────────────
+     CHAT BUBBLES
+     ───────────────────────────────────────────────────────── */
   .chat-bubble {
     @apply max-w-[85%] p-4 rounded-2xl;
   }
 
   .chat-bubble-user {
-    @apply chat-bubble bg-gray-100 text-koyeb-dark rounded-br-md ml-auto;
+    @apply chat-bubble bg-dark-elevated text-white rounded-br-md ml-auto border border-dark-border;
   }
 
   .chat-bubble-assistant-fisica {
-    @apply chat-bubble bg-fisica-500 text-white rounded-bl-md;
+    @apply chat-bubble bg-gradient-fisica text-dark-bg rounded-bl-md font-medium;
   }
 
   .chat-bubble-assistant-matematica {
-    @apply chat-bubble bg-matematica-500 text-white rounded-bl-md;
+    @apply chat-bubble bg-gradient-matematica text-white rounded-bl-md font-medium;
   }
 
-  /* Loading spinner */
+  /* ─────────────────────────────────────────────────────────
+     COMPONENTES UTILITÁRIOS
+     ───────────────────────────────────────────────────────── */
   .spinner {
     @apply animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full;
   }
 
-  /* Skeleton loading */
   .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
+    @apply animate-pulse bg-dark-elevated rounded;
   }
 
-  /* Stats Card */
+  /* Stats */
   .stat-card {
-    @apply bg-white rounded-2xl p-6 border border-gray-100 shadow-koyeb;
+    @apply bg-dark-surface rounded-2xl p-6 border border-dark-border shadow-dark;
   }
 
   .stat-value {
-    @apply text-4xl font-black text-koyeb-dark;
+    @apply text-4xl font-black text-white tabular-nums;
   }
 
   .stat-label {
-    @apply text-sm font-medium text-gray-500 uppercase tracking-wide mt-1;
+    @apply text-xs font-bold text-light-muted uppercase tracking-widest mt-1;
   }
 
   /* Progress Bar */
   .progress-bar {
-    @apply h-3 bg-gray-200 rounded-full overflow-hidden;
+    @apply h-3 bg-dark-elevated rounded-full overflow-hidden;
   }
 
   .progress-fill {
     @apply h-full rounded-full transition-all duration-500 ease-out;
   }
 
-  /* Terminal Window Style */
-  .terminal-window {
-    @apply bg-koyeb-dark rounded-2xl overflow-hidden shadow-koyeb-lg;
+  .progress-fill-fisica {
+    @apply progress-fill bg-gradient-fisica shadow-glow-fisica;
   }
 
-  .terminal-header {
-    @apply flex items-center gap-2 px-4 py-3 bg-gray-800/50;
+  .progress-fill-matematica {
+    @apply progress-fill bg-gradient-matematica shadow-glow-matematica;
   }
 
-  .terminal-dot-red {
-    @apply w-3 h-3 rounded-full bg-red-500;
+  /* Navigation Pills */
+  .nav-pill {
+    @apply inline-flex items-center gap-1 p-1 bg-dark-surface rounded-full border border-dark-border;
   }
 
-  .terminal-dot-yellow {
-    @apply w-3 h-3 rounded-full bg-yellow-500;
+  .nav-pill-item {
+    @apply px-4 py-2 rounded-full text-sm font-medium text-light-secondary transition-all duration-200;
   }
 
-  .terminal-dot-green {
-    @apply w-3 h-3 rounded-full bg-green-500;
+  .nav-pill-item-active {
+    @apply bg-accent-orange text-white;
   }
 
-  .terminal-body {
-    @apply p-4 font-mono text-sm text-gray-300;
+  .nav-pill-item:hover:not(.nav-pill-item-active) {
+    @apply bg-dark-elevated text-white;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ANIMAÇÕES CUSTOMIZADAS
+   UTILITÁRIOS CUSTOMIZADOS
    ═══════════════════════════════════════════════════════════ */
 @layer utilities {
   /* Stagger animation delays */
@@ -327,7 +398,47 @@ textarea {
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
 
-  /* Typing indicator dots */
+  /* Glow effects */
+  .glow-fisica {
+    box-shadow: 0 0 20px var(--fisica-glow), 0 0 40px var(--fisica-glow);
+  }
+
+  .glow-matematica {
+    box-shadow: 0 0 20px var(--matematica-glow), 0 0 40px var(--matematica-glow);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 20px rgba(255, 107, 44, 0.4), 0 0 40px rgba(255, 107, 44, 0.2);
+  }
+
+  /* Text glow */
+  .text-glow-fisica {
+    text-shadow: 0 0 20px var(--fisica-glow), 0 0 40px var(--fisica-glow);
+  }
+
+  .text-glow-matematica {
+    text-shadow: 0 0 20px var(--matematica-glow), 0 0 40px var(--matematica-glow);
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-dark-surface/60 backdrop-blur-xl border border-white/5;
+  }
+
+  .glass-strong {
+    @apply bg-dark-bg/80 backdrop-blur-2xl border border-white/10;
+  }
+
+  /* Hover effects */
+  .hover-glow-fisica:hover {
+    @apply shadow-glow-fisica border-fisica-400/50;
+  }
+
+  .hover-glow-matematica:hover {
+    @apply shadow-glow-matematica border-matematica-300/50;
+  }
+
+  /* Typing indicator */
   .typing-dot {
     @apply w-2 h-2 bg-current rounded-full;
     animation: typingDot 1.4s infinite ease-in-out both;
@@ -347,77 +458,41 @@ textarea {
     }
   }
 
-  /* Confetti animation for celebrations */
-  .confetti {
-    animation: confettiFall 3s ease-out forwards;
+  /* Shimmer effect for loading */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--dark-elevated) 0%,
+      var(--dark-muted) 50%,
+      var(--dark-elevated) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  @keyframes confettiFall {
-    0% {
-      transform: translateY(-100vh) rotate(0deg);
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(100vh) rotate(720deg);
-      opacity: 0;
-    }
-  }
-
-  /* Pulse glow effect */
-  .pulse-glow {
-    animation: pulseGlow 2s infinite;
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% {
-      box-shadow: 0 0 5px currentColor;
-    }
-    50% {
-      box-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
-    }
-  }
-
-  /* Hover lift effect */
-  .hover-lift {
-    @apply transition-all duration-300;
-  }
-
-  .hover-lift:hover {
-    @apply -translate-y-2 shadow-koyeb-hover;
-  }
-
-  /* Text gradient */
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r;
-  }
-
-  /* Glass effect */
-  .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/20;
-  }
-
-  /* Grid pattern background */
-  .bg-grid {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23000' stroke-width='0.5' stroke-opacity='0.05'%3E%3Cpath d='M0 0h60v60H0z'/%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  /* Animated underline */
-  .animated-underline {
-    @apply relative;
-  }
-
-  .animated-underline::after {
-    content: '';
-    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-current transition-all duration-300;
-  }
-
-  .animated-underline:hover::after {
-    @apply w-full;
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
   }
 
   /* Number counter animation */
   .counter {
-    @apply tabular-nums;
+    @apply tabular-nums font-mono;
+  }
+
+  /* Neon border */
+  .neon-border-fisica {
+    @apply border-2 border-fisica-400/50;
+    box-shadow:
+      inset 0 0 10px var(--fisica-glow),
+      0 0 10px var(--fisica-glow);
+  }
+
+  .neon-border-matematica {
+    @apply border-2 border-matematica-300/50;
+    box-shadow:
+      inset 0 0 10px var(--matematica-glow),
+      0 0 10px var(--matematica-glow);
   }
 }
 
@@ -425,7 +500,7 @@ textarea {
    ACESSIBILIDADE
    ═══════════════════════════════════════════════════════════ */
 :focus-visible {
-  outline: 2px solid var(--koyeb-dark);
+  outline: 2px solid var(--accent-orange);
   outline-offset: 2px;
 }
 
@@ -440,7 +515,7 @@ textarea {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   RESPONSIVIDADE
+   RESPONSIVIDADE SAFE AREAS
    ═══════════════════════════════════════════════════════════ */
 @supports (padding: max(0px)) {
   .safe-bottom {
@@ -453,27 +528,38 @@ textarea {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   CUSTOM ANIMATIONS FOR SPECIFIC ELEMENTS
+   ANIMAÇÕES GLOBAIS
    ═══════════════════════════════════════════════════════════ */
 
-/* Floating elements */
+/* Floating animation */
 .floating {
-  animation: floating 3s ease-in-out infinite;
+  animation: floating 6s ease-in-out infinite;
 }
 
 @keyframes floating {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-15px) rotate(2deg); }
+  66% { transform: translateY(-8px) rotate(-1deg); }
 }
 
 .floating-delayed {
-  animation: floating 3s ease-in-out infinite;
-  animation-delay: 1.5s;
+  animation: floating 6s ease-in-out infinite;
+  animation-delay: 3s;
 }
 
-/* Rotate slowly */
+/* Pulse glow */
+.pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+/* Rotate slow */
 .rotate-slow {
-  animation: rotateSlow 20s linear infinite;
+  animation: rotateSlow 30s linear infinite;
 }
 
 @keyframes rotateSlow {
@@ -481,17 +567,17 @@ textarea {
   to { transform: rotate(360deg); }
 }
 
-/* Scale pulse */
-.scale-pulse {
-  animation: scalePulse 2s ease-in-out infinite;
+/* Twinkle */
+.twinkle {
+  animation: twinkle 4s ease-in-out infinite;
 }
 
-@keyframes scalePulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Gradient animation background */
+/* Gradient animation */
 .animated-gradient {
   background-size: 200% 200%;
   animation: gradientMove 8s ease infinite;
@@ -503,28 +589,29 @@ textarea {
   100% { background-position: 0% 50%; }
 }
 
-/* Shimmer effect */
-.shimmer {
-  position: relative;
-  overflow: hidden;
+/* Pop animation */
+.pop {
+  animation: pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-.shimmer::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  animation: shimmer 2s infinite;
+@keyframes pop {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
 }
 
-@keyframes shimmer {
-  100% { left: 100%; }
+/* Confetti */
+.confetti {
+  animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }

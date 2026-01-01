@@ -2,10 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Lock, ArrowRight, Info, GraduationCap, Atom, Calculator } from 'lucide-react'
+import { User, Lock, ArrowRight, Info, GraduationCap, Atom, Calculator, Sparkles, Zap } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
 import Card, { TerminalCard } from '@/components/ui/Card'
+import { AnimatedGrid } from '@/components/ui/AnimatedBackground'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -41,28 +41,37 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-koyeb-bg bg-grid relative overflow-hidden">
+    <div className="min-h-screen bg-dark-bg relative overflow-hidden">
+      {/* Animated Background */}
+      <AnimatedGrid />
+
       {/* Floating Elements */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-20 left-10 floating">
-          <div className="w-16 h-16 rounded-2xl bg-fisica-500/10 flex items-center justify-center">
-            <Atom className="w-8 h-8 text-fisica-500" />
+          <div className="w-16 h-16 rounded-2xl bg-fisica-400/20 border border-fisica-400/30 flex items-center justify-center backdrop-blur-sm">
+            <Atom className="w-8 h-8 text-fisica-400" />
           </div>
         </div>
         <div className="absolute top-40 right-20 floating-delayed">
-          <div className="w-14 h-14 rounded-2xl bg-matematica-500/10 flex items-center justify-center">
-            <Calculator className="w-7 h-7 text-matematica-500" />
+          <div className="w-14 h-14 rounded-2xl bg-matematica-300/20 border border-matematica-300/30 flex items-center justify-center backdrop-blur-sm">
+            <Calculator className="w-7 h-7 text-matematica-300" />
           </div>
         </div>
         <div className="absolute bottom-32 left-20 floating">
-          <div className="w-12 h-12 rounded-full bg-koyeb-orange/10 flex items-center justify-center">
-            <span className="text-2xl">+</span>
+          <div className="w-12 h-12 rounded-full bg-accent-orange/20 border border-accent-orange/30 flex items-center justify-center backdrop-blur-sm">
+            <Zap className="w-6 h-6 text-accent-orange" />
           </div>
         </div>
         <div className="absolute bottom-40 right-32 floating-delayed">
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-xl font-bold text-gray-400">=</span>
+          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center backdrop-blur-sm">
+            <Sparkles className="w-5 h-5 text-white/50" />
           </div>
+        </div>
+        <div className="absolute top-1/2 left-1/4 twinkle">
+          <div className="w-2 h-2 rounded-full bg-fisica-400" />
+        </div>
+        <div className="absolute top-1/3 right-1/3 twinkle" style={{ animationDelay: '1s' }}>
+          <div className="w-2 h-2 rounded-full bg-matematica-300" />
         </div>
       </div>
 
@@ -70,17 +79,17 @@ export default function LoginPage() {
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center p-4">
         {/* Header */}
         <div className="text-center mb-10 animate-slide-down">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-koyeb mb-6">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-sm font-medium text-gray-600">Plataforma Online</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-dark-surface/80 backdrop-blur-sm rounded-full border border-dark-border mb-6">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <span className="text-sm font-medium text-light-secondary">Plataforma Online</span>
           </div>
 
-          <h1 className="heading-display text-koyeb-dark mb-4">
+          <h1 className="text-5xl md:text-6xl font-black uppercase tracking-tight leading-none text-white mb-4">
             Plataforma<br />
-            <span className="text-gradient bg-gradient-to-r from-fisica-500 to-matematica-500">EDU</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-fisica-400 via-accent-orange to-matematica-300">EDU</span>
           </h1>
 
-          <p className="text-lg text-gray-600 font-medium">
+          <p className="text-lg text-light-secondary font-medium">
             Colégio Cora Coralina
           </p>
         </div>
@@ -91,7 +100,7 @@ export default function LoginPage() {
             <div>
               <label className="label">Seu Login</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-light-muted" />
                 <input
                   type="text"
                   placeholder="seunome@turma"
@@ -107,7 +116,7 @@ export default function LoginPage() {
             <div>
               <label className="label">Senha</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-light-muted" />
                 <input
                   type="password"
                   placeholder="••••••••"
@@ -121,7 +130,7 @@ export default function LoginPage() {
             </div>
 
             {erro && (
-              <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm flex items-start gap-3 animate-shake">
+              <div className="p-4 bg-error/10 border border-error/30 rounded-xl text-error text-sm flex items-start gap-3 animate-shake">
                 <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <span className="font-medium">{erro}</span>
               </div>
@@ -143,10 +152,10 @@ export default function LoginPage() {
           <div className="mt-6">
             <TerminalCard title="primeiro-acesso.sh">
               <div className="space-y-1">
-                <p><span className="text-green-400">$</span> <span className="text-gray-400"># Primeiro acesso?</span></p>
-                <p><span className="text-yellow-400">login:</span> seunomecompleto@turma</p>
-                <p><span className="text-yellow-400">senha:</span> @estudante</p>
-                <p className="text-gray-500 mt-2"># Exemplo: mariasilva@1a</p>
+                <p><span className="text-success">$</span> <span className="text-light-muted"># Primeiro acesso?</span></p>
+                <p><span className="text-warning">login:</span> seunomecompleto@turma</p>
+                <p><span className="text-warning">senha:</span> @estudante</p>
+                <p className="text-light-muted mt-2"># Exemplo: mariasilva@1a</p>
               </div>
             </TerminalCard>
           </div>
@@ -159,7 +168,7 @@ export default function LoginPage() {
                 setEmail('professor@admin')
                 setSenha('')
               }}
-              className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-koyeb-dark transition-colors animated-underline"
+              className="inline-flex items-center gap-2 text-sm font-medium text-light-muted hover:text-white transition-colors"
             >
               <GraduationCap className="w-4 h-4" />
               Acesso Professor
@@ -169,17 +178,17 @@ export default function LoginPage() {
 
         {/* Footer */}
         <div className="mt-8 text-center animate-fade-in">
-          <p className="text-sm text-gray-400 font-medium">
-            Plataforma EDU v1.0
+          <p className="text-sm text-light-muted font-medium">
+            Plataforma EDU v2.0
           </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Desenvolvido com Next.js + Supabase + Gemini AI
+          <p className="text-xs text-light-muted/60 mt-1">
+            Next.js + Supabase + Gemini AI
           </p>
         </div>
       </div>
 
-      {/* Bottom decoration */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-fisica-500 via-koyeb-orange to-matematica-500" />
+      {/* Bottom decoration - Gradient bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-fisica-400 via-accent-orange to-matematica-300" />
     </div>
   )
 }
