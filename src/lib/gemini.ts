@@ -126,8 +126,8 @@ export async function chatComTutor(
       }
     }
 
-    // Criar modelo
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    // Criar modelo - usando Gemini 2.0 Flash
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
     // Construir histórico para o contexto
     const historicoTexto = historico
