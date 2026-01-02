@@ -356,8 +356,8 @@ export default function DesafioPage() {
 
         <main className="max-w-2xl mx-auto px-4 pt-6">
           <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-8 h-8 text-error" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
+              <WifiOff className="w-8 h-8 text-red-400" />
             </div>
             <h2 className="text-2xl font-bold text-text-primary mb-3">
               {status === 'SEM_QUESTOES' ? 'Questões Insuficientes' : 'Erro'}
@@ -537,14 +537,14 @@ export default function DesafioPage() {
         )}
 
         {/* Dica */}
-        <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200" style={{ animationDelay: '300ms' }}>
+        <Card className="mt-6 animate-fade-in bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent-orange/20">
-              <Zap className="w-5 h-5 text-accent-orange" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
+              <Zap className="w-5 h-5 text-orange-400" />
             </div>
             <div>
-              <p className="font-semibold text-text-primary text-sm mb-1">Modo Desafio</p>
-              <p className="text-sm text-text-secondary">
+              <p className="font-semibold text-orange-300 text-sm mb-1">💡 Modo Desafio</p>
+              <p className="text-sm text-orange-100/90 leading-relaxed">
                 {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos.
                 Acerte todas para bônus de {DESAFIO.BONUS_PERFEITO} pontos!
               </p>

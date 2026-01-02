@@ -90,7 +90,7 @@ export default function NotasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen bg-dark-bg pb-8">
       {/* Header */}
       <header className={`${bgColor} text-white px-4 pt-4 pb-16`}>
         <div className="max-w-2xl mx-auto">
@@ -134,8 +134,8 @@ export default function NotasPage() {
       <main className="max-w-2xl mx-auto px-4 -mt-8">
         {erro ? (
           <Card className="text-center py-10">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-8 h-8 text-error" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
+              <WifiOff className="w-8 h-8 text-red-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary mb-2">Erro</h2>
             <p className="text-text-secondary mb-6">{erro}</p>
@@ -148,14 +148,14 @@ export default function NotasPage() {
           <div className="space-y-4">
             {/* Alerta de bloqueio */}
             {notaAtual.bloqueio && (
-              <Card className="bg-yellow-50 border-yellow-200 animate-slide-up">
+              <Card className="bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm animate-slide-up">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-100">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
+                    <AlertTriangle className="w-5 h-5 text-amber-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-yellow-800">Nota Limitada</p>
-                    <p className="text-sm text-yellow-700">
+                    <p className="font-semibold text-amber-300">⚠️ Nota Limitada</p>
+                    <p className="text-sm text-amber-100/90">
                       {notaAtual.bloqueio === 'desempenho_baixo'
                         ? 'Sua taxa de acerto está abaixo de 40%. Nota máxima: 5.9'
                         : 'Sua participação está abaixo de 30 questões. Nota máxima: 5.9'}
@@ -250,14 +250,14 @@ export default function NotasPage() {
             </Card>
 
             {/* Dicas */}
-            <Card className="animate-slide-up bg-orange-50 border-orange-200" style={{ animationDelay: '200ms' }}>
+            <Card className="animate-slide-up bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '200ms' }}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent-orange/20">
-                  <Target className="w-5 h-5 text-accent-orange" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-500/20 border border-orange-500/30">
+                  <Target className="w-5 h-5 text-orange-400" />
                 </div>
                 <div>
-                  <p className="font-semibold text-text-primary text-sm mb-1">Como melhorar sua nota?</p>
-                  <ul className="text-sm text-text-secondary space-y-1">
+                  <p className="font-semibold text-orange-300 text-sm mb-2">💡 Como melhorar sua nota?</p>
+                  <ul className="text-sm text-orange-100/90 space-y-1">
                     <li>• Responda questões com atenção para aumentar o desempenho</li>
                     <li>• Complete pelo menos {notaAtual.meta_questoes} questões no bimestre</li>
                     <li>• Estude em pelo menos {notaAtual.meta_dias} dias diferentes</li>

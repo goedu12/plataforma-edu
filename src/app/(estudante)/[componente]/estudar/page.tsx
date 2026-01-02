@@ -162,8 +162,8 @@ export default function EstudarPage() {
           </Card>
         ) : status === 'ERRO' ? (
           <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-8 h-8 text-error" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
+              <WifiOff className="w-8 h-8 text-red-400" />
             </div>
             <h2 className="text-2xl font-bold text-text-primary mb-3">
               Ops! Erro
@@ -211,14 +211,14 @@ export default function EstudarPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-700 border border-orange-500" style={{ animationDelay: '300ms' }}>
+          <Card className="mt-6 animate-fade-in bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-600">
-                <Zap className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
+                <Zap className="w-5 h-5 text-orange-400" />
               </div>
               <div>
-                <p className="font-semibold text-white text-sm mb-1">Dica</p>
-                <p className="text-sm text-orange-100">
+                <p className="font-semibold text-orange-300 text-sm mb-1">💡 Dica</p>
+                <p className="text-sm text-orange-100/90 leading-relaxed">
                   Responda em menos de 30 segundos para ganhar bônus de velocidade!
                 </p>
               </div>
