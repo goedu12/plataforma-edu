@@ -19,9 +19,12 @@ export default function HomePage() {
           // Redirecionar baseado no tipo
           if (data.usuario.tipo === 'professor') {
             router.push('/professor/dashboard')
-          } else if (data.usuario.componentes.length === 1) {
+          } else if (Array.isArray(data.usuario.componentes) && data.usuario.componentes.length === 1) {
             router.push(`/${data.usuario.componentes[0]}/menu`)
+          } else if (Array.isArray(data.usuario.componentes) && data.usuario.componentes.length > 1) {
+            router.push('/selecionar')
           } else {
+            // Sem componentes ou componentes inválido - vai para seleção
             router.push('/selecionar')
           }
         } else {

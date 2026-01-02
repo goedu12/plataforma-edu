@@ -1,38 +1,91 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
+// ═══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO DO SUPABASE
+// ═══════════════════════════════════════════════════════════
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
-// Cliente para uso no navegador (client-side)
-// Usa lazy initialization para evitar erro durante o build
+// ═══════════════════════════════════════════════════════════
+// VALIDAÇÃO DE URL
+// ═══════════════════════════════════════════════════════════
+function validarSupabaseUrl(url: string): boolean {
+  if (!url) return false
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+  } catch {
+    return false
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// CLIENTE PARA USO NO NAVEGADOR (client-side)
+// ═══════════════════════════════════════════════════════════
 let _supabase: SupabaseClient | null = null
 
 export function getSupabase(): SupabaseClient {
   if (!_supabase) {
-    if (!supabaseUrl || !supabaseAnonKey) {
-      throw new Error('Variáveis de ambiente do Supabase não configuradas')
+    if (!validarSupabaseUrl(supabaseUrl)) {
+      throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida')
+    }
+    if (!supabaseAnonKey) {
+      throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY não configurada')
     }
     _supabase = createClient(supabaseUrl, supabaseAnonKey)
   }
   return _supabase
 }
 
-// Mantém compatibilidade com código existente que usa 'supabase' diretamente
-// Apenas para uso em contextos onde sabemos que as variáveis estão disponíveis
-export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null as unknown as SupabaseClient
+// ═══════════════════════════════════════════════════════════
+// COMPATIBILIDADE - Exportação direta com validação
+// ═══════════════════════════════════════════════════════════
+// NOTA: Prefira usar getSupabase() para melhor tratamento de erros
+let _supabaseCompat: SupabaseClient | null = null
 
-// Cliente com service role para operações administrativas (server-side)
-export function getSupabaseAdmin() {
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY
-  if (!serviceKey) {
-    throw new Error('SUPABASE_SERVICE_KEY não configurada')
+try {
+  if (validarSupabaseUrl(supabaseUrl) && supabaseAnonKey) {
+    _supabaseCompat = createClient(supabaseUrl, supabaseAnonKey)
   }
-  return createClient(supabaseUrl, serviceKey)
+} catch (error) {
+  console.error('Erro ao criar cliente Supabase:', error)
 }
 
-// Tipos para as tabelas do Supabase
+// Exporta null se não configurado - código que usa deve verificar
+export const supabase: SupabaseClient | null = _supabaseCompat
+
+// ═══════════════════════════════════════════════════════════
+// CLIENTE ADMIN (server-side) - COM VALIDAÇÃO COMPLETA
+// ═══════════════════════════════════════════════════════════
+let _supabaseAdmin: SupabaseClient | null = null
+
+export function getSupabaseAdmin(): SupabaseClient {
+  if (_supabaseAdmin) return _supabaseAdmin
+
+  // Validar URL
+  if (!validarSupabaseUrl(supabaseUrl)) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida. Verifique as variáveis de ambiente.')
+  }
+
+  // Validar Service Key
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY
+  if (!serviceKey) {
+    throw new Error('SUPABASE_SERVICE_KEY não configurada. Verifique as variáveis de ambiente.')
+  }
+
+  _supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  })
+
+  return _supabaseAdmin
+}
+
+// ═══════════════════════════════════════════════════════════
+// TIPOS PARA AS TABELAS DO SUPABASE
+// ═══════════════════════════════════════════════════════════
 export type Database = {
   public: {
     Tables: {

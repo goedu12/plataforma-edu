@@ -27,6 +27,38 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validar e limitar tamanho da mensagem
+    const mensagemValidada = typeof mensagem === 'string'
+      ? mensagem.trim().slice(0, 2000) // Limite de 2000 caracteres
+      : ''
+
+    if (!mensagemValidada) {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Mensagem inválida' },
+        { status: 400 }
+      )
+    }
+
+    // Limitar histórico para evitar crescimento indefinido
+    // Máximo de 10 mensagens (5 trocas) para controlar custo e tempo
+    const MAX_HISTORICO = 10
+    const historicoValidado: MensagemChat[] = Array.isArray(historico)
+      ? historico
+          .slice(-MAX_HISTORICO) // Pegar apenas as últimas mensagens
+          .filter((msg): msg is MensagemChat =>
+            typeof msg === 'object' &&
+            msg !== null &&
+            typeof msg.role === 'string' &&
+            typeof msg.content === 'string' &&
+            ['user', 'assistant'].includes(msg.role) &&
+            msg.content.length <= 5000 // Limitar tamanho de cada mensagem
+          )
+          .map(msg => ({
+            ...msg,
+            content: msg.content.slice(0, 5000) // Truncar se necessário
+          }))
+      : []
+
     const supabase = getSupabaseAdmin()
 
     // Buscar dados do usuário incluindo turma para determinar ano escolar
@@ -65,8 +97,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Chamar o tutor IA
-    const resultado = await chatComTutor(componente as Componente, mensagem, historico || [])
+    // Chamar o tutor IA com valores validados
+    const resultado = await chatComTutor(componente as Componente, mensagemValidada, historicoValidado)
 
     if (!resultado.sucesso || !resultado.resposta) {
       return NextResponse.json({
@@ -113,7 +145,7 @@ export async function POST(request: NextRequest) {
         usuario_id: sessao.userId,
         componente,
         role: 'user',
-        content: mensagem,
+        content: mensagemValidada,
       },
       {
         usuario_id: sessao.userId,

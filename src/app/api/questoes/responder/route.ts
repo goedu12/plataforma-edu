@@ -38,6 +38,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validar tempo_segundos
+    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 3600
+      ? Math.floor(tempo_segundos)
+      : 0
+
+    // Validar modo
+    const modosValidos = ['estudo', 'desafio', 'revisao']
+    const modoValidado = modosValidos.includes(modo) ? modo : 'estudo'
+
     const supabase = getSupabaseAdmin()
 
     // Buscar questão para verificar resposta
@@ -76,23 +85,23 @@ export async function POST(request: NextRequest) {
     if (correta) {
       pontosGanhos = usou_dica ? PONTUACAO.RESPOSTA_COM_DICA : PONTUACAO.RESPOSTA_CORRETA
 
-      // Bônus de velocidade
-      if (tempo_segundos < 30) {
+      // Bônus de velocidade (usando tempo validado)
+      if (tempoValidado > 0 && tempoValidado < 30) {
         pontosGanhos += PONTUACAO.BONUS_VELOCIDADE
       }
     }
 
-    // Registrar resposta
+    // Registrar resposta (usando valores validados)
     const { error: erroResposta } = await supabase.from('respostas').insert({
       usuario_id: sessao.userId,
       questao_id,
       componente,
       resposta_dada: resposta.toUpperCase(),
       correta,
-      tempo_segundos: tempo_segundos || 0,
+      tempo_segundos: tempoValidado,
       usou_dica: usou_dica || false,
       pontos_ganhos: pontosGanhos,
-      modo: modo || 'estudo',
+      modo: modoValidado,
     })
 
     if (erroResposta) {
@@ -172,10 +181,15 @@ export async function POST(request: NextRequest) {
 
     if (erroAtualizacao) {
       console.error('Erro ao atualizar usuário:', erroAtualizacao)
+      // CORREÇÃO: Retornar erro ao invés de continuar com dados inconsistentes
+      return NextResponse.json(
+        { sucesso: false, erro: 'Erro ao atualizar pontuação. Tente novamente.' },
+        { status: 500 }
+      )
     }
 
     // Atualizar ou criar registro de dia ativo (apenas para modo estudo)
-    if (modo === 'estudo') {
+    if (modoValidado === 'estudo') {
       const { data: diaAtivo } = await supabase
         .from('dias_ativos')
         .select('id, questoes, acertos, pontos, tempo_total_segundos')
@@ -192,7 +206,7 @@ export async function POST(request: NextRequest) {
             questoes: diaAtivo.questoes + 1,
             acertos: diaAtivo.acertos + (correta ? 1 : 0),
             pontos: diaAtivo.pontos + pontosGanhos,
-            tempo_total_segundos: diaAtivo.tempo_total_segundos + (tempo_segundos || 0),
+            tempo_total_segundos: diaAtivo.tempo_total_segundos + tempoValidado,
             atualizado_em: new Date().toISOString(),
           })
           .eq('id', diaAtivo.id)
@@ -205,7 +219,7 @@ export async function POST(request: NextRequest) {
           questoes: 1,
           acertos: correta ? 1 : 0,
           pontos: pontosGanhos,
-          tempo_total_segundos: tempo_segundos || 0,
+          tempo_total_segundos: tempoValidado,
         })
       }
     }

@@ -4,9 +4,35 @@ import bcrypt from 'bcryptjs'
 import { getSupabaseAdmin } from './supabase'
 import type { Usuario, Componente, NivelEnsino } from '@/types'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'chave-secreta-desenvolvimento-32ch'
-)
+// ═══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO JWT SEGURA
+// ═══════════════════════════════════════════════════════════
+const JWT_SECRET_RAW = process.env.JWT_SECRET
+
+// Gerar segredo para desenvolvimento (consistente durante a sessão)
+const DEV_SECRET = 'dev-only-secret-for-local-development-only'
+
+// Em produção, usa JWT_SECRET obrigatoriamente
+// Em desenvolvimento/build, usa segredo de desenvolvimento
+function getJwtSecret(): Uint8Array {
+  if (JWT_SECRET_RAW) {
+    return new TextEncoder().encode(JWT_SECRET_RAW)
+  }
+
+  // Durante build ou em desenvolvimento, permite sem JWT_SECRET
+  if (process.env.NODE_ENV !== 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+    return new TextEncoder().encode(DEV_SECRET)
+  }
+
+  // Em produção runtime, JWT_SECRET é obrigatório
+  throw new Error('JWT_SECRET é obrigatório em produção. Configure a variável de ambiente.')
+}
+
+const JWT_SECRET = getJwtSecret()
+
+// Configurações de segurança do JWT
+const JWT_ISSUER = 'plataforma-edu'
+const JWT_AUDIENCE = 'plataforma-edu-users'
 
 const COOKIE_NAME = 'auth_token'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 dias
@@ -33,19 +59,25 @@ export async function verificarSenha(senha: string, hash: string): Promise<boole
 }
 
 // ═══════════════════════════════════════════════════════════
-// FUNÇÕES DE TOKEN JWT
+// FUNÇÕES DE TOKEN JWT - COM ISSUER E AUDIENCE
 // ═══════════════════════════════════════════════════════════
 export async function criarToken(payload: TokenPayload): Promise<string> {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
+    .setIssuer(JWT_ISSUER)
+    .setAudience(JWT_AUDIENCE)
+    .setSubject(payload.userId)
     .setExpirationTime('7d')
     .sign(JWT_SECRET)
 }
 
 export async function verificarToken(token: string): Promise<TokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const { payload } = await jwtVerify(token, JWT_SECRET, {
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    })
     return payload as TokenPayload
   } catch {
     return null

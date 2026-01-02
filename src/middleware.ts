@@ -2,9 +2,39 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'chave-secreta-desenvolvimento-32ch'
-)
+// ═══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO JWT SEGURA
+// ═══════════════════════════════════════════════════════════
+const JWT_SECRET_RAW = process.env.JWT_SECRET
+
+// Gerar segredo para desenvolvimento (consistente - deve coincidir com auth.ts)
+const DEV_SECRET = 'dev-only-secret-for-local-development-only'
+
+// Em produção, usa JWT_SECRET obrigatoriamente
+// Em desenvolvimento/build, usa segredo de desenvolvimento
+function getJwtSecret(): Uint8Array {
+  if (JWT_SECRET_RAW) {
+    return new TextEncoder().encode(JWT_SECRET_RAW)
+  }
+
+  // Durante build ou em desenvolvimento, permite sem JWT_SECRET
+  if (process.env.NODE_ENV !== 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+    return new TextEncoder().encode(DEV_SECRET)
+  }
+
+  // Em produção runtime, JWT_SECRET é obrigatório
+  throw new Error('JWT_SECRET é obrigatório em produção. Configure a variável de ambiente.')
+}
+
+const JWT_SECRET = getJwtSecret()
+
+// Configurações de segurança do JWT (devem coincidir com auth.ts)
+const JWT_ISSUER = 'plataforma-edu'
+const JWT_AUDIENCE = 'plataforma-edu-users'
+
+// ═══════════════════════════════════════════════════════════
+// CONFIGURAÇÃO DE ROTAS
+// ═══════════════════════════════════════════════════════════
 
 // Rotas públicas que não precisam de autenticação
 const rotasPublicas = ['/login', '/api/auth', '/api/verificar', '/api/ping', '/api/teste']
@@ -12,24 +42,37 @@ const rotasPublicas = ['/login', '/api/auth', '/api/verificar', '/api/ping', '/a
 // Rotas que precisam ser professor
 const rotasProfessor = ['/professor', '/api/professor']
 
+// Extensões de arquivo estático (mais seguro que verificar por ".")
+const extensoesEstaticas = [
+  '.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
+  '.woff', '.woff2', '.ttf', '.eot', '.map', '.json', '.xml', '.txt'
+]
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Ignorar arquivos estáticos
+  // ═══════════════════════════════════════════════════════════
+  // IGNORAR ARQUIVOS ESTÁTICOS - Verificação segura por extensão
+  // ═══════════════════════════════════════════════════════════
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
-    pathname.includes('.')
+    pathname.startsWith('/favicon') ||
+    extensoesEstaticas.some(ext => pathname.endsWith(ext))
   ) {
     return NextResponse.next()
   }
 
-  // Rotas públicas
+  // ═══════════════════════════════════════════════════════════
+  // ROTAS PÚBLICAS
+  // ═══════════════════════════════════════════════════════════
   if (rotasPublicas.some(rota => pathname.startsWith(rota))) {
     return NextResponse.next()
   }
 
-  // Verificar token
+  // ═══════════════════════════════════════════════════════════
+  // VERIFICAR TOKEN
+  // ═══════════════════════════════════════════════════════════
   const token = request.cookies.get('auth_token')?.value
 
   if (!token) {
@@ -44,9 +87,15 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET)
+    // Verificar token COM issuer e audience
+    const { payload } = await jwtVerify(token, JWT_SECRET, {
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
+    })
 
-    // Verificar acesso a rotas de professor
+    // ═══════════════════════════════════════════════════════════
+    // VERIFICAR ACESSO A ROTAS DE PROFESSOR
+    // ═══════════════════════════════════════════════════════════
     if (rotasProfessor.some(rota => pathname.startsWith(rota))) {
       if (payload.tipo !== 'professor') {
         if (pathname.startsWith('/api')) {
@@ -59,7 +108,9 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    // Verificar acesso a componentes
+    // ═══════════════════════════════════════════════════════════
+    // VERIFICAR ACESSO A COMPONENTES
+    // ═══════════════════════════════════════════════════════════
     const componenteMatch = pathname.match(/^\/(fisica|matematica)/)
     if (componenteMatch) {
       const componente = componenteMatch[1]
@@ -78,7 +129,7 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.next()
   } catch {
-    // Token inválido
+    // Token inválido - limpar cookie e redirecionar
     const response = NextResponse.redirect(new URL('/login', request.url))
     response.cookies.delete('auth_token')
     return response
