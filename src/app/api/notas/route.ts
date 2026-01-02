@@ -137,6 +137,52 @@ function calcularNotaRecuperacao(
   return Math.round(Math.min((questoesContam / Math.max(questoesPendentes, 1)) * 6, 6) * 100) / 100
 }
 
+// Função para gerar lista de datas entre duas datas
+function gerarListaDatas(inicio: string, fim: string): string[] {
+  const datas: string[] = []
+  const dataAtual = new Date(inicio)
+  const dataFim = new Date(fim)
+
+  while (dataAtual <= dataFim) {
+    datas.push(dataAtual.toISOString().split('T')[0])
+    dataAtual.setDate(dataAtual.getDate() + 1)
+  }
+
+  return datas
+}
+
+// Função para agrupar respostas por semana
+function agruparPorSemana(respostas: { criado_em: string }[], dataInicio: string): { semana: number; questoes: number; inicio: string; fim: string }[] {
+  const semanas: Map<number, { questoes: number; inicio: string; fim: string }> = new Map()
+  const dataBase = new Date(dataInicio)
+
+  respostas.forEach(r => {
+    const dataResposta = new Date(r.criado_em.split('T')[0])
+    const diffDays = Math.floor((dataResposta.getTime() - dataBase.getTime()) / (1000 * 60 * 60 * 24))
+    const semana = Math.floor(diffDays / 7) + 1
+
+    if (!semanas.has(semana)) {
+      const inicioSemana = new Date(dataBase)
+      inicioSemana.setDate(inicioSemana.getDate() + (semana - 1) * 7)
+      const fimSemana = new Date(inicioSemana)
+      fimSemana.setDate(fimSemana.getDate() + 6)
+
+      semanas.set(semana, {
+        questoes: 0,
+        inicio: inicioSemana.toISOString().split('T')[0],
+        fim: fimSemana.toISOString().split('T')[0],
+      })
+    }
+
+    const semanaData = semanas.get(semana)!
+    semanaData.questoes++
+  })
+
+  return Array.from(semanas.entries())
+    .map(([semana, data]) => ({ semana, ...data }))
+    .sort((a, b) => a.semana - b.semana)
+}
+
 export async function GET(request: NextRequest) {
   try {
     const sessao = await obterSessao()
@@ -191,6 +237,7 @@ export async function GET(request: NextRequest) {
       .eq('modo', 'estudo')
       .gte('criado_em', config.regular.inicio)
       .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .order('criado_em', { ascending: true })
 
     const questoesRespondidas = respostasRegular?.length || 0
 
@@ -206,6 +253,53 @@ export async function GET(request: NextRequest) {
       config.regular.meta,
       diasAtivos
     )
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // GERAR DADOS PARA TIMELINE E GRÁFICOS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Contagem de questões por dia
+    const questoesPorDia: { [data: string]: number } = {}
+    respostasRegular?.forEach(r => {
+      const data = r.criado_em.split('T')[0]
+      questoesPorDia[data] = (questoesPorDia[data] || 0) + 1
+    })
+
+    // Gerar evolução diária (questões acumuladas e nota)
+    const hoje = new Date().toISOString().split('T')[0]
+    const dataFimGrafico = hoje < config.regular.fim ? hoje : config.regular.fim
+    const todasAsDatas = gerarListaDatas(config.regular.inicio, dataFimGrafico)
+
+    let questoesAcumuladas = 0
+    let diasAtivosAcumulados = 0
+    const evolucaoDiaria = todasAsDatas.map(data => {
+      const questoesDia = questoesPorDia[data] || 0
+      questoesAcumuladas += questoesDia
+      if (questoesDia > 0) diasAtivosAcumulados++
+
+      const notaDia = calcularNotaRegular(questoesAcumuladas, config.regular.meta, diasAtivosAcumulados)
+
+      return {
+        data,
+        dataFormatada: new Date(data + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        questoes_dia: questoesDia,
+        questoes_acumuladas: questoesAcumuladas,
+        dias_ativos: diasAtivosAcumulados,
+        nota: Math.round(notaDia.nota_final * 100) / 100,
+      }
+    })
+
+    // Agrupar por semana para timeline
+    const progressoSemanal = agruparPorSemana(respostasRegular || [], config.regular.inicio)
+      .map(s => ({
+        ...s,
+        limite: 15,
+        percentual: Math.round((s.questoes / 15) * 100),
+      }))
+
+    // Calcular semana atual
+    const diffDaysHoje = Math.floor((new Date(hoje).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
+    const semanaAtual = Math.max(1, Math.floor(diffDaysHoje / 7) + 1)
 
     // ═══════════════════════════════════════════════════════════════════════
     // VERIFICAR RECUPERAÇÃO
@@ -283,55 +377,84 @@ export async function GET(request: NextRequest) {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // SALVAR/ATUALIZAR NOTA NO BANCO
+    // SALVAR/ATUALIZAR NOTA NO BANCO (opcional - não bloqueia se falhar)
     // ═══════════════════════════════════════════════════════════════════════
 
-    const { data: notaExistente } = await supabase
-      .from('notas_2025')
-      .select('id')
-      .eq('usuario_id', sessao.userId)
-      .eq('componente', componente)
-      .eq('ano_letivo', ano)
-      .eq('bimestre', bimestre)
-      .single()
+    try {
+      const { data: notaExistente } = await supabase
+        .from('notas_2025')
+        .select('id')
+        .eq('usuario_id', sessao.userId)
+        .eq('componente', componente)
+        .eq('ano_letivo', ano)
+        .eq('bimestre', bimestre)
+        .single()
 
-    const dadosNota = {
-      usuario_id: sessao.userId,
-      componente,
-      ano_letivo: ano,
-      bimestre,
-      questoes_respondidas: questoesRespondidas,
-      meta_questoes: config.regular.meta,
-      dias_ativos: diasAtivos,
-      nota_base: notaRegular.nota_base,
-      bonus_frequencia: notaRegular.bonus_frequencia,
-      nota_regular: notaRegular.nota_final,
-      em_recuperacao: emRecuperacao,
-      questoes_pendentes: questoesPendentes,
-      questoes_recuperacao: questoesRecuperacao,
-      nota_recuperacao: notaRecuperacao,
-      nota_final: notaFinal,
-      status,
-      atualizado_em: new Date().toISOString(),
-    }
+      const dadosNota = {
+        usuario_id: sessao.userId,
+        componente,
+        ano_letivo: ano,
+        bimestre,
+        questoes_respondidas: questoesRespondidas,
+        meta_questoes: config.regular.meta,
+        dias_ativos: diasAtivos,
+        nota_base: notaRegular.nota_base,
+        bonus_frequencia: notaRegular.bonus_frequencia,
+        nota_regular: notaRegular.nota_final,
+        em_recuperacao: emRecuperacao,
+        questoes_pendentes: questoesPendentes,
+        questoes_recuperacao: questoesRecuperacao,
+        nota_recuperacao: notaRecuperacao,
+        nota_final: notaFinal,
+        status,
+        atualizado_em: new Date().toISOString(),
+      }
 
-    if (notaExistente) {
-      await supabase.from('notas_2025').update(dadosNota).eq('id', notaExistente.id)
-    } else {
-      await supabase.from('notas_2025').insert(dadosNota)
+      if (notaExistente) {
+        await supabase.from('notas_2025').update(dadosNota).eq('id', notaExistente.id)
+      } else {
+        await supabase.from('notas_2025').insert(dadosNota)
+      }
+    } catch (e) {
+      // Tabela pode não existir ainda - continua sem salvar
+      console.warn('Não foi possível salvar nota no banco:', e)
     }
 
     // ═══════════════════════════════════════════════════════════════════════
     // BUSCAR HISTÓRICO
     // ═══════════════════════════════════════════════════════════════════════
 
-    const { data: historico } = await supabase
-      .from('notas_2025')
-      .select('*')
-      .eq('usuario_id', sessao.userId)
-      .eq('componente', componente)
-      .order('ano_letivo', { ascending: false })
-      .order('bimestre', { ascending: false })
+    let historico: Array<Record<string, unknown>> = []
+    try {
+      const { data } = await supabase
+        .from('notas_2025')
+        .select('*')
+        .eq('usuario_id', sessao.userId)
+        .eq('componente', componente)
+        .order('ano_letivo', { ascending: false })
+        .order('bimestre', { ascending: false })
+      historico = data || []
+    } catch (e) {
+      console.warn('Não foi possível buscar histórico:', e)
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ESTATÍSTICAS ADICIONAIS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // Média de questões por dia ativo
+    const mediaQuestoesPorDia = diasAtivos > 0 ? Math.round((questoesRespondidas / diasAtivos) * 10) / 10 : 0
+
+    // Projeção de nota final (se mantiver o ritmo atual)
+    const diasDecorridos = Math.max(1, Math.floor((new Date(hoje).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24)))
+    const diasTotais = Math.floor((new Date(config.regular.fim).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
+    const taxaDiaria = questoesRespondidas / diasDecorridos
+    const projecaoQuestoes = Math.round(taxaDiaria * diasTotais)
+    const projecaoNota = calcularNotaRegular(
+      Math.min(projecaoQuestoes, config.regular.meta * 2), // Cap em 2x a meta
+      config.regular.meta,
+      Math.min(Math.round((diasAtivos / diasDecorridos) * diasTotais), diasTotais)
+    )
 
     // ═══════════════════════════════════════════════════════════════════════
     // RETORNAR RESPOSTA
@@ -371,8 +494,23 @@ export async function GET(request: NextRequest) {
         questoes_semana: questoesSemanaAtual,
         limite_semanal: limiteSemanal,
         pode_responder: podeResponder,
+        semana_atual: semanaAtual,
       },
-      historico: historico || [],
+
+      // Dados para gráficos
+      evolucao_diaria: evolucaoDiaria,
+      progresso_semanal: progressoSemanal,
+
+      // Estatísticas
+      estatisticas: {
+        media_questoes_por_dia: mediaQuestoesPorDia,
+        dias_decorridos: diasDecorridos,
+        dias_totais: diasTotais,
+        projecao_questoes: projecaoQuestoes,
+        projecao_nota: projecaoNota.nota_final,
+      },
+
+      historico,
 
       // Tabela de bônus para referência
       tabela_bonus: [
