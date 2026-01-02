@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
+import { obterStatusSemanal, getPeriodoAtual } from '@/lib/sistema-notas'
 
 // Mapeamento de dificuldade para ordenação correta
 const ORDEM_DIFICULDADE: Record<string, number> = {
@@ -22,6 +23,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const componente = searchParams.get('componente') as Componente
+    const modo = searchParams.get('modo') || 'estudo'
 
     if (!componente || !['fisica', 'matematica'].includes(componente)) {
       return NextResponse.json(
@@ -31,6 +33,45 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // VERIFICAR STATUS SEMANAL (apenas para modo estudo)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    let statusSemanal = null
+    let periodo = null
+
+    if (modo === 'estudo') {
+      statusSemanal = await obterStatusSemanal(supabase, sessao.userId, componente)
+      periodo = getPeriodoAtual()
+
+      // Se atingiu limite semanal no modo estudo
+      if (statusSemanal.limite_semanal !== null && !statusSemanal.pode_responder) {
+        return NextResponse.json({
+          sucesso: true,
+          status: 'LIMITE_SEMANAL',
+          mensagem: `Você atingiu o limite de ${statusSemanal.limite_semanal} questões esta semana. Volte na segunda-feira!`,
+          limite: {
+            questoes_semana: statusSemanal.questoes_semana,
+            limite_semanal: statusSemanal.limite_semanal,
+            pode_responder: false,
+          },
+        })
+      }
+
+      // Verificar se está fora do período letivo
+      if (!periodo) {
+        return NextResponse.json({
+          sucesso: true,
+          status: 'FORA_PERIODO',
+          mensagem: 'Fora do período letivo. Use o modo Desafio para praticar!',
+        })
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // BUSCAR QUESTÕES
+    // ═══════════════════════════════════════════════════════════════════════
 
     // Buscar dados do usuário para saber o ano
     const { data: usuario } = await supabase
@@ -46,25 +87,23 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar IDs das questões já respondidas pelo usuário (apenas os IDs únicos)
+    // Buscar IDs das questões já respondidas pelo usuário
     const { data: respostasUsuario } = await supabase
       .from('respostas')
       .select('questao_id')
       .eq('usuario_id', sessao.userId)
       .eq('componente', componente)
 
-    // Usar Set para IDs únicos (mais eficiente)
     const questoesRespondidasSet = new Set(respostasUsuario?.map(r => r.questao_id) || [])
 
     // Buscar questões ativas do ano e componente
-    // Limitamos a busca inicial para performance, já que vamos filtrar depois
     const { data: todasQuestoes, error } = await supabase
       .from('questoes')
       .select('*')
       .eq('componente', componente)
       .eq('ano', usuario.ano)
       .eq('status', 'ativa')
-      .limit(500) // Limitar para performance
+      .limit(500)
 
     if (error) {
       console.error('Erro ao buscar questões:', error)
@@ -74,12 +113,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Filtrar questões não respondidas em memória (mais eficiente para grandes conjuntos)
+    // Filtrar questões não respondidas
     const questoesDisponiveis = todasQuestoes?.filter(q => !questoesRespondidasSet.has(q.id)) || []
 
     // Se não há questões disponíveis
     if (!questoesDisponiveis || questoesDisponiveis.length === 0) {
-      // Verificar se completou todas as questões
       const { count: totalQuestoes } = await supabase
         .from('questoes')
         .select('*', { count: 'exact', head: true })
@@ -92,6 +130,7 @@ export async function GET(request: NextRequest) {
           sucesso: true,
           status: 'COMPLETOU',
           mensagem: 'Você completou todas as questões disponíveis!',
+          limite: statusSemanal,
         })
       }
 
@@ -99,10 +138,11 @@ export async function GET(request: NextRequest) {
         sucesso: true,
         status: 'SEM_QUESTOES',
         mensagem: 'Nenhuma questão disponível no momento.',
+        limite: statusSemanal,
       })
     }
 
-    // Ordenar questões por dificuldade (facil -> medio -> dificil) e selecionar a primeira
+    // Ordenar questões por dificuldade e selecionar a primeira
     const questoesOrdenadas = questoesDisponiveis.sort((a, b) => {
       const ordemA = ORDEM_DIFICULDADE[a.dificuldade] || 2
       const ordemB = ORDEM_DIFICULDADE[b.dificuldade] || 2
@@ -118,6 +158,19 @@ export async function GET(request: NextRequest) {
       sucesso: true,
       status: 'OK',
       questao: questaoSemResposta,
+      // Informações do limite semanal (apenas modo estudo)
+      limite: statusSemanal ? {
+        questoes_semana: statusSemanal.questoes_semana,
+        limite_semanal: statusSemanal.limite_semanal,
+        restantes: statusSemanal.restantes,
+        pode_responder: statusSemanal.pode_responder,
+      } : null,
+      // Informações do período (apenas modo estudo)
+      periodo: periodo ? {
+        bimestre: periodo.bimestre,
+        tipo: periodo.tipo,
+        dias_restantes: periodo.diasRestantes,
+      } : null,
     })
   } catch (error) {
     console.error('Erro ao buscar questão:', error)

@@ -3,6 +3,17 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
 import { PONTUACAO, obterNivelPorPontos } from '@/types'
+import {
+  verificacaoCompletaParaResponder,
+  atualizarNotaTempoReal,
+  type ModoEstudo,
+  type NotaAtualizada,
+} from '@/lib/sistema-notas'
+
+// ═══════════════════════════════════════════════════════════════════════════
+// API DE RESPONDER QUESTÕES
+// Com sistema de verificação hierárquica de 5 níveis
+// ═══════════════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,19 +25,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { questao_id, componente, resposta, tempo_segundos, usou_dica, modo = 'estudo' } = await request.json()
+    const body = await request.json()
+    const { questao_id, componente, resposta, tempo_segundos, usou_dica, modo = 'estudo' } = body
 
-    // Validações
+    // Validação básica
     if (!questao_id || !componente || !resposta) {
       return NextResponse.json(
         { sucesso: false, erro: 'Dados incompletos' },
-        { status: 400 }
-      )
-    }
-
-    if (!['fisica', 'matematica'].includes(componente)) {
-      return NextResponse.json(
-        { sucesso: false, erro: 'Componente inválido' },
         { status: 400 }
       )
     }
@@ -38,17 +43,42 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar tempo_segundos
+    const supabase = getSupabaseAdmin()
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // VERIFICAÇÃO HIERÁRQUICA DE 5 NÍVEIS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    const verificacao = await verificacaoCompletaParaResponder(
+      supabase,
+      sessao.userId,
+      componente,
+      modo
+    )
+
+    // Se não passou na verificação (limite atingido, fora do período, etc.)
+    if (!verificacao.sucesso) {
+      return NextResponse.json({
+        sucesso: false,
+        erro: verificacao.motivo,
+        codigo: verificacao.niveis.find(n => !n.passou)?.codigo,
+        dados_nota: verificacao.dados_nota,
+        niveis_verificacao: verificacao.niveis.map(n => ({
+          nivel: n.nivel,
+          passou: n.passou,
+        })),
+      }, { status: 400 })
+    }
+
+    // Validar tempo e modo
     const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 3600
       ? Math.floor(tempo_segundos)
       : 0
 
-    // Validar modo (validar ANTES de verificar resposta existente)
-    const modosValidos = ['estudo', 'desafio', 'revisao']
-    const modoValidado = modosValidos.includes(modo) ? modo : 'estudo'
+    const modosValidos: ModoEstudo[] = ['estudo', 'desafio', 'revisao']
+    const modoValidado = modosValidos.includes(modo as ModoEstudo) ? modo as ModoEstudo : 'estudo'
     const ehModoRevisao = modoValidado === 'revisao'
-
-    const supabase = getSupabaseAdmin()
+    const ehModoDesafio = modoValidado === 'desafio'
 
     // Buscar questão para verificar resposta
     const { data: questao } = await supabase
@@ -86,7 +116,7 @@ export async function POST(request: NextRequest) {
     if (correta && !ehModoRevisao) {
       pontosGanhos = usou_dica ? PONTUACAO.RESPOSTA_COM_DICA : PONTUACAO.RESPOSTA_CORRETA
 
-      // Bônus de velocidade (usando tempo validado)
+      // Bônus de velocidade
       if (tempoValidado > 0 && tempoValidado < 30) {
         pontosGanhos += PONTUACAO.BONUS_VELOCIDADE
       }
@@ -115,7 +145,7 @@ export async function POST(request: NextRequest) {
         )
       }
     } else {
-      // Inserir nova resposta (modo estudo ou desafio)
+      // Inserir nova resposta
       const { error: erroResposta } = await supabase.from('respostas').insert({
         usuario_id: sessao.userId,
         questao_id,
@@ -137,17 +167,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Variáveis para resposta (valores padrão para modo revisão)
+    // Variáveis para resposta
     let novosPontos = 0
     let novoNivel = ''
     let novasQuestoesTotal = 0
     let novasQuestoesCorretas = 0
     let sequencia = 0
     const conquistasDesbloqueadas: Array<{ nome: string; icone: string }> = []
+    let notaAtualizada: NotaAtualizada | null = null
 
     // Só atualizar estatísticas se NÃO for modo revisão
     if (!ehModoRevisao) {
-      // Buscar dados completos do usuário para atualização
+      // Buscar dados completos do usuário
       const { data: usuario } = await supabase
         .from('usuarios')
         .select('*')
@@ -177,12 +208,10 @@ export async function POST(request: NextRequest) {
         sequencia = 1
       } else if (ultimoEstudo === ontem) {
         sequencia += 1
-        // Bônus de sequência de 7 dias
         if (sequencia === 7) {
           pontosGanhos += PONTUACAO.BONUS_SEQUENCIA_7_DIAS
         }
       }
-      // Se já estudou hoje, mantém a sequência
 
       // Calcular novos valores
       novosPontos = pontosAtuais + pontosGanhos
@@ -190,7 +219,7 @@ export async function POST(request: NextRequest) {
       novasQuestoesCorretas = questoesCorretasAtuais + (correta ? 1 : 0)
       novoNivel = obterNivelPorPontos(novosPontos).nome
 
-      // Atualizar usuário com valores calculados
+      // Atualizar usuário
       const dadosAtualizacao = ehFisica
         ? {
             fis_pontos: novosPontos,
@@ -222,7 +251,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Atualizar ou criar registro de dia ativo (apenas para modo estudo)
+      // Atualizar dia ativo (apenas modo estudo)
       if (modoValidado === 'estudo') {
         const { data: diaAtivo } = await supabase
           .from('dias_ativos')
@@ -233,7 +262,6 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (diaAtivo) {
-          // Atualizar dia existente
           await supabase
             .from('dias_ativos')
             .update({
@@ -245,7 +273,6 @@ export async function POST(request: NextRequest) {
             })
             .eq('id', diaAtivo.id)
         } else {
-          // Criar novo dia ativo
           await supabase.from('dias_ativos').insert({
             usuario_id: sessao.userId,
             componente,
@@ -256,9 +283,21 @@ export async function POST(request: NextRequest) {
             tempo_total_segundos: tempoValidado,
           })
         }
+
+        // ═══════════════════════════════════════════════════════════════════
+        // ATUALIZAÇÃO DE NOTA EM TEMPO REAL (Níveis 4 e 5)
+        // Apenas para modo estudo - a nota é recalculada após cada resposta
+        // ═══════════════════════════════════════════════════════════════════
+
+        notaAtualizada = await atualizarNotaTempoReal(
+          supabase,
+          sessao.userId,
+          componente as Componente,
+          modoValidado
+        )
       }
 
-      // Verificar e desbloquear conquistas
+      // Verificar conquistas
       const novasConquistas = await verificarEDesbloquearConquistas(
         supabase,
         sessao.userId,
@@ -271,6 +310,10 @@ export async function POST(request: NextRequest) {
       conquistasDesbloqueadas.push(...novasConquistas)
     }
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // RESPOSTA COM DADOS COMPLETOS DE NOTA EM TEMPO REAL
+    // ═══════════════════════════════════════════════════════════════════════
+
     return NextResponse.json({
       sucesso: true,
       correta,
@@ -279,7 +322,22 @@ export async function POST(request: NextRequest) {
       novo_nivel: ehModoRevisao ? undefined : novoNivel,
       nova_pontuacao: ehModoRevisao ? undefined : novosPontos,
       conquistas_desbloqueadas: conquistasDesbloqueadas,
-      modo_revisao: ehModoRevisao,
+      modo: modoValidado,
+
+      // Dados da nota em tempo real (apenas para modo estudo)
+      nota_tempo_real: notaAtualizada ? {
+        nota_anterior: notaAtualizada.nota_anterior,
+        nota_atual: notaAtualizada.nota_nova,
+        mudou: notaAtualizada.nota_nova !== notaAtualizada.nota_anterior,
+        questoes_respondidas: notaAtualizada.questoes_respondidas,
+        meta_questoes: notaAtualizada.meta_questoes,
+        percentual: notaAtualizada.percentual,
+        dias_ativos: notaAtualizada.dias_ativos,
+        bonus_frequencia: notaAtualizada.bonus_frequencia,
+        questoes_semana: notaAtualizada.questoes_semana,
+        limite_semanal: notaAtualizada.limite_semanal,
+        pode_continuar: notaAtualizada.pode_responder,
+      } : null,
     })
   } catch (error) {
     console.error('Erro ao responder questão:', error)
@@ -303,10 +361,8 @@ async function verificarEDesbloquearConquistas(
   const conquistasDesbloqueadas: Array<{ nome: string; icone: string }> = []
 
   try {
-    // Calcular taxa de acerto
     const taxaAcerto = questoesTotal > 0 ? (questoesCorretas / questoesTotal) * 100 : 0
 
-    // Buscar todas as conquistas que o usuário ainda não desbloqueou
     const { data: conquistasDisponiveis } = await supabase
       .from('conquistas')
       .select('*')
@@ -314,7 +370,6 @@ async function verificarEDesbloquearConquistas(
 
     if (!conquistasDisponiveis) return conquistasDesbloqueadas
 
-    // Buscar conquistas já desbloqueadas
     const { data: conquistasUsuario } = await supabase
       .from('conquistas_usuarios')
       .select('conquista_id')
@@ -325,9 +380,7 @@ async function verificarEDesbloquearConquistas(
       conquistasUsuario?.map(c => c.conquista_id) || []
     )
 
-    // Verificar cada conquista
     for (const conquista of conquistasDisponiveis) {
-      // Pular se já desbloqueou
       if (conquistasJaDesbloqueadas.has(conquista.id)) continue
 
       let elegivel = false
@@ -343,13 +396,11 @@ async function verificarEDesbloquearConquistas(
           elegivel = sequenciaDias >= conquista.requisito_valor
           break
         case 'acertos':
-          // Precisa de mínimo de 20 questões para conquistas de taxa de acerto
           elegivel = questoesTotal >= 20 && taxaAcerto >= conquista.requisito_valor
           break
       }
 
       if (elegivel) {
-        // Desbloquear conquista
         const { error } = await supabase.from('conquistas_usuarios').insert({
           usuario_id: usuarioId,
           conquista_id: conquista.id,

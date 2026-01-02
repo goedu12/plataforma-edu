@@ -1,11 +1,32 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy } from 'lucide-react'
+import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy, TrendingUp, Target } from 'lucide-react'
 import Button from './ui/Button'
 import Card from './ui/Card'
 import Badge from './ui/Badge'
 import type { Questao, Componente, ModoResposta } from '@/types'
+
+interface LimiteInfo {
+  questoes_semana: number
+  limite_semanal: number | null
+  restantes: number | null
+  pode_responder: boolean
+}
+
+interface NotaTempoReal {
+  nota_anterior: number
+  nota_atual: number
+  mudou: boolean
+  questoes_respondidas: number
+  meta_questoes: number
+  percentual: number
+  dias_ativos: number
+  bonus_frequencia: number
+  questoes_semana: number
+  limite_semanal: number | null
+  pode_continuar: boolean
+}
 
 interface QuestaoCardProps {
   questao: Questao
@@ -15,6 +36,8 @@ interface QuestaoCardProps {
   onProxima: () => void
   onVoltar: () => void
   modo?: ModoResposta
+  limiteAtual?: LimiteInfo | null
+  onNotaAtualizada?: (limite: LimiteInfo) => void
 }
 
 type Alternativa = 'A' | 'B' | 'C' | 'D'
@@ -30,6 +53,7 @@ interface FeedbackData {
   explicacao: string
   pontosGanhos: number
   conquistasDesbloqueadas: ConquistaDesbloqueada[]
+  notaTempoReal: NotaTempoReal | null
 }
 
 export default function QuestaoCard({
@@ -40,6 +64,8 @@ export default function QuestaoCard({
   onProxima,
   onVoltar,
   modo = 'estudo',
+  limiteAtual,
+  onNotaAtualizada,
 }: QuestaoCardProps) {
   const [selecionada, setSelecionada] = useState<Alternativa | null>(null)
   const [mostrarDica, setMostrarDica] = useState(false)
@@ -95,7 +121,21 @@ export default function QuestaoCard({
           explicacao: data.explicacao || 'Continue estudando para melhorar seu desempenho!',
           pontosGanhos: data.pontos_ganhos,
           conquistasDesbloqueadas: data.conquistas_desbloqueadas || [],
+          notaTempoReal: data.nota_tempo_real || null,
         })
+
+        // Atualizar limite no componente pai
+        if (data.nota_tempo_real && onNotaAtualizada) {
+          onNotaAtualizada({
+            questoes_semana: data.nota_tempo_real.questoes_semana,
+            limite_semanal: data.nota_tempo_real.limite_semanal,
+            restantes: data.nota_tempo_real.limite_semanal
+              ? data.nota_tempo_real.limite_semanal - data.nota_tempo_real.questoes_semana
+              : null,
+            pode_responder: data.nota_tempo_real.pode_continuar,
+          })
+        }
+
         onResponder(selecionada, usouDica)
       } else {
         setErro(data.erro || 'Não foi possível registrar sua resposta. Tente novamente.')
@@ -142,6 +182,13 @@ export default function QuestaoCard({
     medio: 'warning',
     dificil: 'error',
   } as const
+
+  const getNotaColor = (nota: number) => {
+    if (nota >= 7) return 'text-emerald-400'
+    if (nota >= 6) return 'text-green-400'
+    if (nota >= 5) return 'text-yellow-400'
+    return 'text-red-400'
+  }
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -212,7 +259,7 @@ export default function QuestaoCard({
               <AlertCircle className="w-5 h-5 text-red-400" />
             </div>
             <div>
-              <p className="font-semibold text-red-300 text-sm mb-1">❌ Erro</p>
+              <p className="font-semibold text-red-300 text-sm mb-1">Erro</p>
               <p className="text-sm text-red-100/90">{erro}</p>
               <button
                 onClick={handleConfirmar}
@@ -247,7 +294,7 @@ export default function QuestaoCard({
               className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-2 mx-auto transition-colors"
             >
               <Lightbulb className="w-4 h-4" />
-              Precisa de ajuda? Pedir Dica (−5 pts)
+              Precisa de ajuda? Pedir Dica (-5 pts)
             </button>
           )}
         </div>
@@ -261,7 +308,7 @@ export default function QuestaoCard({
               <Trophy className="w-7 h-7 text-amber-400" />
             </div>
             <h4 className="font-bold text-amber-300 mb-3 text-lg">
-              🎉 Nova Conquista Desbloqueada!
+              Nova Conquista Desbloqueada!
             </h4>
             <div className="flex flex-wrap justify-center gap-2">
               {feedback.conquistasDesbloqueadas.map((conquista, index) => (
@@ -272,6 +319,78 @@ export default function QuestaoCard({
                   {conquista.icone} {conquista.nome}
                 </span>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Nota em Tempo Real - Exibido após responder */}
+      {feedback && feedback.notaTempoReal && modo === 'estudo' && (
+        <div className="rounded-2xl overflow-hidden border border-blue-500/30 animate-slide-up">
+          <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-blue-500/20">
+            <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+            <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+            <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+            <span className="ml-2 text-xs text-gray-400 font-mono">nota_atualizada.sh</span>
+          </div>
+          <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
+            <p className="text-blue-400 mb-3"># Sua Nota em Tempo Real</p>
+
+            {/* Nota Principal */}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-gray-300">$ Nota atual:</span>
+              <div className="flex items-center gap-2">
+                {feedback.notaTempoReal.mudou && (
+                  <span className="text-gray-500 line-through text-sm">
+                    {feedback.notaTempoReal.nota_anterior.toFixed(1)}
+                  </span>
+                )}
+                <span className={`text-2xl font-bold ${getNotaColor(feedback.notaTempoReal.nota_atual)}`}>
+                  {feedback.notaTempoReal.nota_atual.toFixed(2)}
+                </span>
+                {feedback.notaTempoReal.mudou && (
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Barra de Progresso */}
+            <div className="mb-3">
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-400">Progresso</span>
+                <span className="text-gray-300">
+                  {feedback.notaTempoReal.questoes_respondidas}/{feedback.notaTempoReal.meta_questoes}
+                </span>
+              </div>
+              <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${
+                    componente === 'fisica' ? 'bg-cyan-500' : 'bg-purple-500'
+                  }`}
+                  style={{ width: `${Math.min(feedback.notaTempoReal.percentual, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Detalhes */}
+            <div className="space-y-1 text-xs">
+              <p className="text-gray-400">
+                $ Dias ativos: <span className="text-emerald-300">{feedback.notaTempoReal.dias_ativos}</span>
+              </p>
+              <p className="text-gray-400">
+                $ Bônus frequência: <span className="text-emerald-300">+{feedback.notaTempoReal.bonus_frequencia.toFixed(1)}</span>
+              </p>
+              {feedback.notaTempoReal.limite_semanal && (
+                <p className="text-gray-400">
+                  $ Semana: <span className={
+                    feedback.notaTempoReal.questoes_semana >= feedback.notaTempoReal.limite_semanal
+                      ? 'text-red-400'
+                      : 'text-emerald-300'
+                  }>
+                    {feedback.notaTempoReal.questoes_semana}/{feedback.notaTempoReal.limite_semanal}
+                  </span>
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -302,7 +421,7 @@ export default function QuestaoCard({
               <h4
                 className={`font-semibold ${feedback.correta ? 'text-emerald-300' : 'text-red-300'}`}
               >
-                {feedback.correta ? '✅ Muito bem! Resposta correta!' : '❌ Não foi dessa vez...'}
+                {feedback.correta ? 'Muito bem! Resposta correta!' : 'Não foi dessa vez...'}
                 {feedback.correta && feedback.pontosGanhos > 0 && (
                   <span className="ml-2 text-sm font-normal bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full text-emerald-200">
                     +{feedback.pontosGanhos} pontos
@@ -317,7 +436,7 @@ export default function QuestaoCard({
               )}
               {feedback.explicacao && (
                 <div className="mt-3 pt-3 border-t border-white/10">
-                  <p className="text-xs font-medium mb-1 text-white/60">📖 Explicação:</p>
+                  <p className="text-xs font-medium mb-1 text-white/60">Explicação:</p>
                   <p className={`text-sm leading-relaxed ${feedback.correta ? 'text-emerald-100/90' : 'text-red-100/90'}`}>
                     {feedback.explicacao}
                   </p>
@@ -328,16 +447,35 @@ export default function QuestaoCard({
         </div>
       )}
 
+      {/* Aviso de limite atingido */}
+      {feedback && feedback.notaTempoReal && !feedback.notaTempoReal.pode_continuar && (
+        <div className="rounded-2xl p-4 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <Target className="w-5 h-5 text-amber-400" />
+            <div>
+              <p className="text-amber-300 font-medium text-sm">Limite semanal atingido!</p>
+              <p className="text-amber-100/80 text-xs">Volte na segunda-feira ou use o modo Desafio.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Botões de ação */}
       <div className="flex gap-3">
         {feedback ? (
           <>
             <Button variant="secondary" onClick={onVoltar} className="flex-1">
-              🏠 Menu
+              Menu
             </Button>
-            <Button variant={componente === 'fisica' ? 'fisica' : 'matematica'} onClick={onProxima} className="flex-1">
-              Próxima Questão →
-            </Button>
+            {feedback.notaTempoReal?.pode_continuar !== false ? (
+              <Button variant={componente === 'fisica' ? 'fisica' : 'matematica'} onClick={onProxima} className="flex-1">
+                Próxima Questão
+              </Button>
+            ) : (
+              <Button variant="secondary" onClick={() => {}} disabled className="flex-1">
+                Limite Atingido
+              </Button>
+            )}
           </>
         ) : (
           <Button

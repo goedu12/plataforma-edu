@@ -148,17 +148,19 @@ export default function RankingPage() {
           </Card>
         ) : (
           <>
-            {/* Dica */}
-            <Card className="mb-4 animate-slide-up bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-500/20 border border-orange-500/30">
-                  <TrendingUp className="w-5 h-5 text-orange-400" />
-                </div>
-                <p className="text-sm text-orange-100/90 flex-1">
-                  💡 Responda questões corretamente para subir no ranking!
-                </p>
+            {/* Dica - Estilo Terminal */}
+            <div className="mb-4 animate-slide-up rounded-2xl overflow-hidden border border-emerald-500/30">
+              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-emerald-500/20">
+                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                <span className="ml-2 text-xs text-gray-400 font-mono">ranking.sh</span>
               </div>
-            </Card>
+              <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
+                <p className="text-emerald-400 mb-1"># Dica</p>
+                <p className="text-gray-300">$ Responda questões corretamente para subir no ranking!</p>
+              </div>
+            </div>
 
             <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
               <RankingTable
