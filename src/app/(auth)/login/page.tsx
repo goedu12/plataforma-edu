@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { User, Lock, ArrowRight, Info, GraduationCap, Terminal } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import Card, { TerminalCard } from '@/components/ui/Card'
+import Card from '@/components/ui/Card'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -40,8 +40,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg bg-grid-pattern bg-grid">
-      {/* Content */}
+    <div className="min-h-screen bg-dark-bg">
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
@@ -50,19 +49,19 @@ export default function LoginPage() {
               <Terminal className="w-6 h-6 text-accent-green" />
             </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-text-primary tracking-tight mb-2">
+          <h1 className="text-title text-text-primary mb-2">
             Plataforma EDU
           </h1>
-          <p className="text-lg text-text-secondary">
+          <p className="text-body text-text-secondary">
             Colégio Cora Coralina
           </p>
         </div>
 
-        {/* Login Card - Koyeb Dark Style */}
+        {/* Login Card */}
         <Card className="w-full max-w-md animate-slide-up" padding="lg">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider">
+              <label className="text-label text-text-secondary block mb-2">
                 Seu Login
               </label>
               <div className="relative">
@@ -75,7 +74,7 @@ export default function LoginPage() {
                   className="
                     w-full pl-12 pr-4 py-3
                     bg-dark-surface border border-border rounded-xl
-                    text-text-primary text-base placeholder:text-text-tertiary
+                    text-body text-text-primary placeholder:text-text-tertiary
                     transition-all duration-200 outline-none
                     hover:border-border-hover
                     focus:ring-2 focus:ring-accent-green/50 focus:border-accent-green focus:bg-dark-elevated
@@ -88,7 +87,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider">
+              <label className="text-label text-text-secondary block mb-2">
                 Senha
               </label>
               <div className="relative">
@@ -101,7 +100,7 @@ export default function LoginPage() {
                   className="
                     w-full pl-12 pr-4 py-3
                     bg-dark-surface border border-border rounded-xl
-                    text-text-primary text-base placeholder:text-text-tertiary
+                    text-body text-text-primary placeholder:text-text-tertiary
                     transition-all duration-200 outline-none
                     hover:border-border-hover
                     focus:ring-2 focus:ring-accent-green/50 focus:border-accent-green focus:bg-dark-elevated
@@ -114,8 +113,8 @@ export default function LoginPage() {
             </div>
 
             {erro && (
-              <div className="p-4 bg-error/10 border border-error/30 rounded-xl text-error text-sm flex items-start gap-3 animate-shake">
-                <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="p-3 bg-error/10 border border-error/30 rounded-xl text-error text-body-sm flex items-start gap-3 animate-shake">
+                <Info className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 <span>{erro}</span>
               </div>
             )}
@@ -132,25 +131,22 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          {/* Terminal Hint - Koyeb Style */}
+          {/* Terminal Hint */}
           <div className="mt-6">
-            <TerminalCard title="primeiro-acesso.sh">
-              <div className="space-y-1">
-                <p>
-                  <span className="text-accent-green">$</span>
-                  <span className="text-text-comment"> # Primeiro acesso?</span>
-                </p>
-                <p>
-                  <span className="text-warning">login:</span>
-                  <span className="text-text-secondary"> seunomecompleto@turma</span>
-                </p>
-                <p>
-                  <span className="text-warning">senha:</span>
-                  <span className="text-text-secondary"> @estudante</span>
-                </p>
-                <p className="text-text-comment mt-2"># Exemplo: mariasilva@1a</p>
+            <div className="terminal-box">
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">primeiro-acesso.sh</span>
               </div>
-            </TerminalCard>
+              <div className="terminal-body space-y-1">
+                <p className="comment"># Primeiro acesso?</p>
+                <p><span className="warning">login:</span> <span className="cmd">seunomecompleto@turma</span></p>
+                <p><span className="warning">senha:</span> <span className="cmd">@estudante</span></p>
+                <p className="muted mt-2"># Exemplo: mariasilva@1a</p>
+              </div>
+            </div>
           </div>
 
           {/* Professor Link */}
@@ -161,17 +157,17 @@ export default function LoginPage() {
                 setEmail('professor@admin')
                 setSenha('')
               }}
-              className="inline-flex items-center gap-2 text-sm font-medium text-text-tertiary hover:text-text-secondary transition-colors"
+              className="inline-flex items-center gap-2 text-caption text-text-tertiary hover:text-text-secondary transition-colors"
             >
               <GraduationCap className="w-4 h-4" />
-              <span className="uppercase tracking-wider">Acesso Professor</span>
+              <span className="text-label">Acesso Professor</span>
             </button>
           </div>
         </Card>
 
         {/* Footer */}
         <div className="mt-8 text-center animate-fade-in">
-          <p className="text-sm text-text-tertiary uppercase tracking-wider">
+          <p className="text-caption text-text-tertiary">
             Plataforma EDU v2.0
           </p>
         </div>

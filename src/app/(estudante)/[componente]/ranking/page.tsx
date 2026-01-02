@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star, TrendingUp } from 'lucide-react'
+import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -24,7 +24,6 @@ export default function RankingPage() {
     setErro(null)
 
     try {
-      // Buscar usuário
       const resUsuario = await fetch('/api/usuario')
       const dataUsuario = await resUsuario.json()
 
@@ -40,7 +39,6 @@ export default function RankingPage() {
 
       setUsuario(dataUsuario.usuario)
 
-      // Buscar ranking
       const resRanking = await fetch(
         `/api/ranking?componente=${componente}&turma=${dataUsuario.usuario.turma}`
       )
@@ -53,7 +51,7 @@ export default function RankingPage() {
       }
     } catch (error) {
       console.error('Erro ao buscar dados:', error)
-      setErro('Não foi possível conectar ao servidor. Verifique sua conexão.')
+      setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
     }
@@ -76,7 +74,6 @@ export default function RankingPage() {
     return <Loading fullScreen componente={componente} />
   }
 
-  // Encontrar posição do usuário no ranking
   const posicaoUsuario = ranking.findIndex(r => r.usuario_id === usuario.id) + 1
 
   return (
@@ -92,27 +89,26 @@ export default function RankingPage() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <h1 className="font-semibold flex items-center gap-2">
+              <h1 className="text-heading flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
                 Ranking da Turma
               </h1>
-              <p className="text-sm text-white/80">
+              <p className="text-caption text-white/80">
                 {nomeComponente} • Turma {usuario.turma}
               </p>
             </div>
             <button
               onClick={buscarDados}
               className="p-2 rounded-xl hover:bg-white/20 transition-colors"
-              title="Atualizar ranking"
             >
               <RefreshCw className="w-5 h-5" />
             </button>
           </div>
 
-          {/* User Position Card */}
+          {/* User Position */}
           {posicaoUsuario > 0 && (
             <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center">
-              <p className="text-sm text-white/80 mb-1">Sua Posição</p>
+              <p className="text-caption text-white/80 mb-1">Sua Posição</p>
               <div className="flex items-center justify-center gap-3">
                 {posicaoUsuario <= 3 ? (
                   <Crown className={`w-8 h-8 ${
@@ -122,25 +118,25 @@ export default function RankingPage() {
                 ) : (
                   <Star className="w-8 h-8 text-white/50" />
                 )}
-                <span className="text-4xl font-bold">{posicaoUsuario}º</span>
+                <span className="text-stat">{posicaoUsuario}º</span>
               </div>
-              <p className="text-sm text-white/80 mt-1">de {ranking.length} estudantes</p>
+              <p className="text-caption text-white/80 mt-1">de {ranking.length} estudantes</p>
             </div>
           )}
         </div>
       </header>
 
-      {/* Conteúdo */}
+      {/* Content */}
       <main className="max-w-2xl mx-auto px-4 -mt-8">
         {erro ? (
           <Card className="text-center py-10">
             <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
               <WifiOff className="w-8 h-8 text-red-400" />
             </div>
-            <h2 className="text-xl font-bold text-text-primary mb-2">
+            <h2 className="text-subtitle text-text-primary mb-2">
               Erro ao carregar ranking
             </h2>
-            <p className="text-text-secondary mb-6">{erro}</p>
+            <p className="text-body text-text-secondary mb-6">{erro}</p>
             <Button variant="primary" onClick={buscarDados}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Tentar Novamente
@@ -148,17 +144,17 @@ export default function RankingPage() {
           </Card>
         ) : (
           <>
-            {/* Dica - Estilo Terminal */}
-            <div className="mb-4 animate-slide-up rounded-2xl overflow-hidden border border-emerald-500/30">
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-emerald-500/20">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="ml-2 text-xs text-gray-400 font-mono">ranking.sh</span>
+            {/* Terminal Tip */}
+            <div className="mb-4 animate-slide-up terminal-box">
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">ranking.sh</span>
               </div>
-              <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
-                <p className="text-emerald-400 mb-1"># Dica</p>
-                <p className="text-gray-300">$ Responda questões corretamente para subir no ranking!</p>
+              <div className="terminal-body">
+                <p className="comment"># Dica</p>
+                <p className="cmd">$ Responda questões corretamente para subir no ranking!</p>
               </div>
             </div>
 

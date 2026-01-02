@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Trophy, Target, Sparkles } from 'lucide-react'
+import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Trophy, Target } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
@@ -39,7 +39,7 @@ export default function ConquistasPage() {
       }
     } catch (error) {
       console.error('Erro ao buscar conquistas:', error)
-      setErro('Não foi possível conectar ao servidor. Verifique sua conexão.')
+      setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
     }
@@ -63,23 +63,16 @@ export default function ConquistasPage() {
   }
 
   const porcentagem = stats.total > 0 ? Math.round((stats.desbloqueadas / stats.total) * 100) : 0
-
-  // Agrupar conquistas por tipo
   const conquistasDesbloqueadas = conquistas.filter(c => c.desbloqueada)
   const conquistasBloqueadas = conquistas.filter(c => !c.desbloqueada)
 
   const formatarRequisito = (conquista: ConquistaComStatus) => {
     switch (conquista.requisito_tipo) {
-      case 'pontos':
-        return `${conquista.requisito_valor} pontos`
-      case 'questoes':
-        return `${conquista.requisito_valor} questões respondidas`
-      case 'sequencia':
-        return `${conquista.requisito_valor} dias consecutivos`
-      case 'acertos':
-        return `${conquista.requisito_valor}% de acerto`
-      default:
-        return ''
+      case 'pontos': return `${conquista.requisito_valor} pontos`
+      case 'questoes': return `${conquista.requisito_valor} questões respondidas`
+      case 'sequencia': return `${conquista.requisito_valor} dias consecutivos`
+      case 'acertos': return `${conquista.requisito_valor}% de acerto`
+      default: return ''
     }
   }
 
@@ -96,31 +89,30 @@ export default function ConquistasPage() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <h1 className="font-semibold flex items-center gap-2">
+              <h1 className="text-heading flex items-center gap-2">
                 <Medal className="w-5 h-5" />
                 Conquistas
               </h1>
-              <p className="text-sm text-white/80">
+              <p className="text-caption text-white/80">
                 {nomeComponente} • {stats.desbloqueadas}/{stats.total}
               </p>
             </div>
             <button
               onClick={buscarConquistas}
               className="p-2 rounded-xl hover:bg-white/20 transition-colors"
-              title="Atualizar conquistas"
             >
               <RefreshCw className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Progress Card */}
+          {/* Progress */}
           <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
-                <span className="font-semibold">Progresso</span>
+                <span className="text-heading">Progresso</span>
               </div>
-              <span className="text-2xl font-bold">{porcentagem}%</span>
+              <span className="text-stat-sm">{porcentagem}%</span>
             </div>
             <div className="h-2 bg-white/30 rounded-full overflow-hidden">
               <div
@@ -128,24 +120,24 @@ export default function ConquistasPage() {
                 style={{ width: `${porcentagem}%` }}
               />
             </div>
-            <p className="text-sm text-white/80 text-center mt-2">
+            <p className="text-caption text-white/80 text-center mt-2">
               {stats.desbloqueadas} de {stats.total} conquistas desbloqueadas
             </p>
           </div>
         </div>
       </header>
 
-      {/* Conteúdo */}
+      {/* Content */}
       <main className="max-w-2xl mx-auto px-4 -mt-8">
         {erro ? (
           <Card className="text-center py-10">
             <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
               <WifiOff className="w-8 h-8 text-red-400" />
             </div>
-            <h2 className="text-xl font-bold text-text-primary mb-2">
+            <h2 className="text-subtitle text-text-primary mb-2">
               Erro ao carregar conquistas
             </h2>
-            <p className="text-text-secondary mb-6">{erro}</p>
+            <p className="text-body text-text-secondary mb-6">{erro}</p>
             <Button variant="primary" onClick={buscarConquistas}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Tentar Novamente
@@ -156,22 +148,22 @@ export default function ConquistasPage() {
             <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-calm-elevated">
               <Medal className="w-8 h-8 text-text-muted" />
             </div>
-            <h2 className="text-xl font-bold text-text-primary mb-2">
+            <h2 className="text-subtitle text-text-primary mb-2">
               Nenhuma conquista cadastrada
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="text-body text-text-secondary mb-2">
               Ainda não há conquistas disponíveis para {nomeComponente}.
             </p>
-            <p className="text-sm text-text-muted">
+            <p className="text-caption text-text-muted">
               Continue estudando! Em breve novas conquistas serão adicionadas.
             </p>
           </Card>
         ) : (
           <>
-            {/* Conquistas Desbloqueadas */}
+            {/* Unlocked */}
             {conquistasDesbloqueadas.length > 0 && (
               <div className="mb-6">
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-text-primary mb-3">
+                <h2 className="flex items-center gap-2 text-label text-text-primary mb-3">
                   <CheckCircle2 className="w-4 h-4 text-success" />
                   Desbloqueadas ({conquistasDesbloqueadas.length})
                 </h2>
@@ -186,10 +178,10 @@ export default function ConquistasPage() {
                         {conquista.icone}
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-text-primary">{conquista.nome}</h3>
-                        <p className="text-sm text-text-secondary">{conquista.descricao}</p>
+                        <h3 className="text-heading text-text-primary">{conquista.nome}</h3>
+                        <p className="text-body-sm text-text-secondary">{conquista.descricao}</p>
                         {conquista.desbloqueada_em && (
-                          <p className="text-xs text-success mt-1 flex items-center gap-1">
+                          <p className="text-caption text-success mt-1 flex items-center gap-1">
                             <CheckCircle2 className="w-3 h-3" />
                             Desbloqueada em {new Date(conquista.desbloqueada_em).toLocaleDateString('pt-BR')}
                           </p>
@@ -201,10 +193,10 @@ export default function ConquistasPage() {
               </div>
             )}
 
-            {/* Conquistas Bloqueadas */}
+            {/* Locked */}
             {conquistasBloqueadas.length > 0 && (
               <div>
-                <h2 className="flex items-center gap-2 text-sm font-semibold text-text-primary mb-3">
+                <h2 className="flex items-center gap-2 text-label text-text-primary mb-3">
                   <Target className="w-4 h-4 text-text-muted" />
                   A Desbloquear ({conquistasBloqueadas.length})
                 </h2>
@@ -219,9 +211,9 @@ export default function ConquistasPage() {
                         <Lock className="w-5 h-5 text-text-muted" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-text-secondary">{conquista.nome}</h3>
-                        <p className="text-sm text-text-muted">{conquista.descricao}</p>
-                        <p className="text-xs text-text-muted mt-1 flex items-center gap-1">
+                        <h3 className="text-heading text-text-secondary">{conquista.nome}</h3>
+                        <p className="text-body-sm text-text-muted">{conquista.descricao}</p>
+                        <p className="text-caption text-text-muted mt-1 flex items-center gap-1">
                           <Target className="w-3 h-3" />
                           Meta: {formatarRequisito(conquista)}
                         </p>
@@ -232,17 +224,17 @@ export default function ConquistasPage() {
               </div>
             )}
 
-            {/* Dica - Estilo Terminal */}
-            <div className="mt-6 animate-fade-in rounded-2xl overflow-hidden border border-emerald-500/30">
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-emerald-500/20">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="ml-2 text-xs text-gray-400 font-mono">conquistas.sh</span>
+            {/* Terminal Tip */}
+            <div className="mt-6 animate-fade-in terminal-box">
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">conquistas.sh</span>
               </div>
-              <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
-                <p className="text-emerald-400 mb-1"># Dica</p>
-                <p className="text-gray-300">$ Responda questões corretamente, estude todos os dias e acumule pontos para desbloquear conquistas!</p>
+              <div className="terminal-body">
+                <p className="comment"># Dica</p>
+                <p className="cmd">$ Responda questões, estude todos os dias e acumule pontos!</p>
               </div>
             </div>
           </>
