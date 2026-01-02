@@ -1,50 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════
-   VARIÁVEIS CSS - CALM DESIGN
-   Princípios: Fluência Cognitiva, Tecnologia Calma, Minimalismo
+   KOYEB-INSPIRED DARK THEME - Plataforma Educacional
+   Design System: Dark Premium, Tech Aesthetic, Terminal-inspired
    ═══════════════════════════════════════════════════════════ */
 :root {
-  /* Superfícies Calmas */
-  --calm-bg: #FAFAFA;
-  --calm-surface: #FFFFFF;
-  --calm-elevated: #F5F5F5;
-  --calm-border: #E5E7EB;
-  --calm-divider: #F0F0F0;
+  /* Backgrounds - Dark Premium */
+  --dark-bg: #0a0a0a;
+  --dark-surface: #141414;
+  --dark-elevated: #1a1a1a;
+  --dark-terminal: #1e1e1e;
+  --dark-header: #2d2d2d;
 
-  /* Texto - Hierarquia Clara */
-  --text-primary: #1F2937;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
-  --text-disabled: #D1D5DB;
+  /* Bordas */
+  --border: #222222;
+  --border-hover: #333333;
+  --border-subtle: rgba(255,255,255,0.08);
 
-  /* Física - Teal Sóbrio */
-  --fisica-500: #0891B2;
-  --fisica-100: #CCFBF1;
-  --fisica-50: #F0FDFA;
+  /* Texto */
+  --text-primary: #ffffff;
+  --text-secondary: #888888;
+  --text-tertiary: #666666;
+  --text-disabled: #444444;
+  --text-comment: #6b7280;
 
-  /* Matemática - Violet Elegante */
-  --matematica-500: #7C3AED;
-  --matematica-100: #EDE9FE;
-  --matematica-50: #F5F3FF;
+  /* Física - Cyan Tech */
+  --fisica-500: #06b6d4;
+  --fisica-400: #22d3ee;
+  --fisica-glow: rgba(6, 182, 212, 0.15);
 
-  /* Accent - Apenas para CTAs */
-  --accent-orange: #F97316;
-  --accent-coral: #FB923C;
+  /* Matemática - Purple Tech */
+  --matematica-500: #a855f7;
+  --matematica-400: #c084fc;
+  --matematica-glow: rgba(168, 85, 247, 0.15);
 
-  /* Estados Funcionais */
-  --success: #10B981;
-  --error: #EF4444;
-  --warning: #F59E0B;
-  --info: #3B82F6;
+  /* Accent - Verde Koyeb */
+  --accent-green: #10b981;
+  --accent-green-light: #34d399;
+  --accent-green-glow: rgba(16, 185, 129, 0.15);
 
-  /* Background global */
-  --background: var(--calm-bg);
-  --foreground: var(--text-primary);
+  /* Estados */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  /* Terminal dots */
+  --terminal-red: #ff5f56;
+  --terminal-yellow: #ffbd2e;
+  --terminal-green: #27ca3f;
+
+  /* Grid */
+  --grid-color: rgba(255,255,255,0.03);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -64,11 +75,19 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+}
+
+/* Grid pattern background */
+.bg-grid {
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 50px 50px;
 }
 
 /* Prevenir zoom em inputs no iOS */
@@ -79,7 +98,7 @@ textarea {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SCROLLBAR SUTIL
+   SCROLLBAR DARK
    ═══════════════════════════════════════════════════════════ */
 ::-webkit-scrollbar {
   width: 6px;
@@ -87,28 +106,28 @@ textarea {
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--dark-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--calm-border);
+  background: var(--border);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: var(--border-hover);
 }
 
 /* ═══════════════════════════════════════════════════════════
    SELEÇÃO DE TEXTO
    ═══════════════════════════════════════════════════════════ */
 ::selection {
-  background: var(--accent-orange);
+  background: var(--accent-green);
   color: white;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   COMPONENTES - CALM DESIGN
+   COMPONENTES - KOYEB DARK THEME
    ═══════════════════════════════════════════════════════════ */
 @layer components {
   /* Container */
@@ -117,209 +136,387 @@ textarea {
   }
 
   /* ─────────────────────────────────────────────────────────
-     CARDS - Simples e Limpos
+     CARDS - Dark Premium
      ───────────────────────────────────────────────────────── */
   .card {
-    @apply bg-calm-surface rounded-2xl p-6 border border-calm-border shadow-card;
+    @apply bg-dark-surface rounded-xl p-6 border border-border;
   }
 
   .card-elevated {
-    @apply bg-calm-surface rounded-2xl p-6 shadow-elevated;
+    @apply bg-dark-elevated rounded-xl p-6 border border-border shadow-card;
   }
 
   .card-interactive {
-    @apply card hover:shadow-elevated hover:-translate-y-0.5 cursor-pointer transition-all duration-200;
+    @apply card hover:border-border-hover hover:shadow-glow-green cursor-pointer transition-all duration-200;
   }
 
   .card-fisica {
-    @apply card border-l-4 border-l-fisica-500;
+    @apply card border-l-2 border-l-fisica-500;
   }
 
   .card-matematica {
-    @apply card border-l-4 border-l-matematica-500;
+    @apply card border-l-2 border-l-matematica-500;
+  }
+
+  /* Terminal Window Card */
+  .card-terminal {
+    @apply rounded-xl overflow-hidden;
+    background: var(--dark-terminal);
+  }
+
+  .card-terminal-header {
+    @apply flex items-center gap-2 px-4 py-3;
+    background: var(--dark-header);
+  }
+
+  .card-terminal-dot {
+    @apply w-3 h-3 rounded-full;
+  }
+
+  .card-terminal-dot-red { background: var(--terminal-red); }
+  .card-terminal-dot-yellow { background: var(--terminal-yellow); }
+  .card-terminal-dot-green { background: var(--terminal-green); }
+
+  .card-terminal-body {
+    @apply p-5 font-mono text-code;
   }
 
   /* ─────────────────────────────────────────────────────────
-     BOTÕES - Funcionais e Claros
+     BOTÕES - Koyeb Style
      ───────────────────────────────────────────────────────── */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm
+           transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-primary {
-    @apply btn bg-accent-orange text-white hover:bg-accent-coral shadow-soft;
+    @apply btn text-white;
+    background: var(--accent-green);
+  }
+  .btn-primary:hover {
+    background: var(--accent-green-light);
+    box-shadow: 0 0 30px var(--accent-green-glow);
   }
 
   .btn-fisica {
-    @apply btn bg-fisica-500 text-white hover:bg-fisica-600;
+    @apply btn text-white;
+    background: var(--fisica-500);
+  }
+  .btn-fisica:hover {
+    background: var(--fisica-400);
+    box-shadow: 0 0 30px var(--fisica-glow);
   }
 
   .btn-matematica {
-    @apply btn bg-matematica-500 text-white hover:bg-matematica-600;
+    @apply btn text-white;
+    background: var(--matematica-500);
+  }
+  .btn-matematica:hover {
+    background: var(--matematica-400);
+    box-shadow: 0 0 30px var(--matematica-glow);
   }
 
   .btn-secondary {
-    @apply btn bg-calm-surface text-text-primary border border-calm-border hover:bg-calm-elevated;
+    @apply btn bg-transparent border;
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: var(--border-hover);
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-text-secondary hover:bg-calm-elevated hover:text-text-primary;
+    @apply btn bg-transparent;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
   }
 
   .btn-icon {
-    @apply p-2.5 rounded-xl hover:bg-calm-elevated transition-colors duration-200 text-text-secondary hover:text-text-primary;
+    @apply p-2.5 rounded-lg transition-all duration-200;
+    color: var(--text-secondary);
+  }
+  .btn-icon:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
   }
 
   /* ─────────────────────────────────────────────────────────
-     INPUTS - Limpos e Acessíveis
+     PILLS/TABS - Koyeb Navigation Style
+     ───────────────────────────────────────────────────────── */
+  .pill {
+    @apply px-4 py-2 rounded-lg text-sm font-medium uppercase tracking-wider transition-all duration-200;
+    color: var(--text-secondary);
+  }
+  .pill:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .pill-active {
+    @apply pill;
+    color: var(--accent-green);
+    background: var(--accent-green-glow);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+  }
+
+  .pill-fisica-active {
+    @apply pill;
+    color: var(--fisica-500);
+    background: var(--fisica-glow);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+  }
+
+  .pill-matematica-active {
+    @apply pill;
+    color: var(--matematica-500);
+    background: var(--matematica-glow);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     INPUTS - Dark Theme
      ───────────────────────────────────────────────────────── */
   .input {
-    @apply w-full px-4 py-3 bg-calm-surface border border-calm-border rounded-xl text-base text-text-primary placeholder:text-text-muted
-           focus:ring-0 focus:border-accent-orange focus:shadow-focus outline-none transition-all duration-200;
+    @apply w-full px-4 py-3 rounded-lg text-base outline-none transition-all duration-200;
+    background: var(--dark-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+  }
+  .input::placeholder {
+    color: var(--text-tertiary);
+  }
+  .input:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 3px var(--accent-green-glow);
   }
 
-  .input-fisica {
-    @apply input focus:border-fisica-500 focus:shadow-focus-fisica;
+  .input-fisica:focus {
+    border-color: var(--fisica-500);
+    box-shadow: 0 0 0 3px var(--fisica-glow);
   }
 
-  .input-matematica {
-    @apply input focus:border-matematica-500 focus:shadow-focus-matematica;
+  .input-matematica:focus {
+    border-color: var(--matematica-500);
+    box-shadow: 0 0 0 3px var(--matematica-glow);
   }
 
   .input-error {
-    @apply input border-error focus:border-error;
+    border-color: var(--error) !important;
   }
 
   /* Labels */
   .label {
-    @apply block text-sm font-medium text-text-secondary mb-1.5;
+    @apply block text-sm font-medium mb-1.5 uppercase tracking-wider;
+    color: var(--text-secondary);
   }
 
   /* Helper text */
   .helper-text {
-    @apply text-sm text-text-muted mt-1.5;
+    @apply text-sm mt-1.5;
+    color: var(--text-tertiary);
   }
 
   .error-text {
-    @apply text-sm text-error mt-1.5;
+    @apply text-sm mt-1.5;
+    color: var(--error);
   }
 
   /* ─────────────────────────────────────────────────────────
-     BADGES - Discretos
+     BADGES
      ───────────────────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-medium uppercase tracking-wider;
   }
 
   .badge-fisica {
-    @apply badge bg-fisica-50 text-fisica-500;
+    @apply badge;
+    background: var(--fisica-glow);
+    color: var(--fisica-500);
   }
 
   .badge-matematica {
-    @apply badge bg-matematica-50 text-matematica-500;
+    @apply badge;
+    background: var(--matematica-glow);
+    color: var(--matematica-500);
   }
 
   .badge-success {
-    @apply badge bg-green-50 text-success;
+    @apply badge;
+    background: var(--accent-green-glow);
+    color: var(--accent-green);
   }
 
   .badge-error {
-    @apply badge bg-red-50 text-error;
+    @apply badge;
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
   }
 
   .badge-warning {
-    @apply badge bg-amber-50 text-warning;
+    @apply badge;
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
   }
 
   .badge-default {
-    @apply badge bg-calm-elevated text-text-secondary;
+    @apply badge;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-secondary);
   }
 
   /* ─────────────────────────────────────────────────────────
-     TIPOGRAFIA
+     TIPOGRAFIA - Koyeb Style
      ───────────────────────────────────────────────────────── */
+  .heading-hero {
+    @apply text-4xl md:text-5xl font-bold uppercase tracking-wider;
+    color: var(--text-primary);
+  }
+
   .heading-display {
-    @apply text-3xl md:text-4xl font-bold text-text-primary tracking-tight;
+    @apply text-2xl md:text-3xl font-bold uppercase tracking-wide;
+    color: var(--text-primary);
   }
 
   .heading-section {
-    @apply text-xl md:text-2xl font-semibold text-text-primary;
+    @apply text-lg md:text-xl font-semibold uppercase tracking-wide;
+    color: var(--text-primary);
   }
 
   .heading-card {
-    @apply text-lg font-semibold text-text-primary;
+    @apply text-base font-semibold uppercase tracking-wide;
+    color: var(--text-primary);
   }
 
   .text-body {
-    @apply text-base text-text-secondary leading-relaxed;
+    @apply text-sm leading-relaxed;
+    color: var(--text-secondary);
+  }
+
+  .text-comment {
+    @apply font-mono text-sm;
+    color: var(--text-comment);
   }
 
   /* ─────────────────────────────────────────────────────────
-     ALTERNATIVAS DE QUESTÃO
+     FEATURE CARDS - Koyeb Style com seta
+     ───────────────────────────────────────────────────────── */
+  .feature-card {
+    @apply p-5 rounded-xl transition-all duration-200 cursor-pointer;
+    background: var(--dark-surface);
+    border: 1px solid var(--border);
+  }
+  .feature-card:hover {
+    background: var(--dark-elevated);
+    border-color: var(--border-hover);
+  }
+
+  .feature-card-fisica:hover {
+    box-shadow: 0 0 30px var(--fisica-glow);
+    border-color: rgba(6, 182, 212, 0.3);
+  }
+
+  .feature-card-matematica:hover {
+    box-shadow: 0 0 30px var(--matematica-glow);
+    border-color: rgba(168, 85, 247, 0.3);
+  }
+
+  .feature-arrow {
+    @apply mr-3 text-lg;
+    color: var(--accent-green);
+  }
+
+  .feature-arrow-fisica {
+    color: var(--fisica-500);
+  }
+
+  .feature-arrow-matematica {
+    color: var(--matematica-500);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     ALTERNATIVAS DE QUESTÃO - Dark Theme
      ───────────────────────────────────────────────────────── */
   .alternativa {
-    @apply flex items-center gap-4 p-4 bg-calm-surface border border-calm-border rounded-xl
-           cursor-pointer transition-all duration-200 hover:border-text-muted hover:bg-calm-elevated;
+    @apply flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200;
+    background: var(--dark-surface);
+    border: 1px solid var(--border);
+  }
+  .alternativa:hover {
+    background: var(--dark-elevated);
+    border-color: var(--border-hover);
   }
 
   .alternativa-selected {
-    @apply border-accent-orange bg-orange-50;
+    border-color: var(--accent-green) !important;
+    background: var(--accent-green-glow) !important;
   }
 
   .alternativa-correct {
-    @apply border-success bg-green-50;
+    border-color: var(--success) !important;
+    background: rgba(16, 185, 129, 0.1) !important;
   }
 
   .alternativa-wrong {
-    @apply border-error bg-red-50;
+    border-color: var(--error) !important;
+    background: rgba(239, 68, 68, 0.1) !important;
   }
 
   /* ─────────────────────────────────────────────────────────
-     CHAT BUBBLES
+     CHAT BUBBLES - Dark Theme
      ───────────────────────────────────────────────────────── */
   .chat-bubble {
     @apply max-w-[85%] p-4 rounded-2xl;
   }
 
   .chat-bubble-user {
-    @apply chat-bubble bg-calm-elevated text-text-primary rounded-br-md ml-auto;
+    @apply chat-bubble rounded-br-sm ml-auto;
+    background: var(--dark-elevated);
+    color: var(--text-primary);
   }
 
   .chat-bubble-assistant-fisica {
-    @apply chat-bubble bg-fisica-50 text-text-primary rounded-bl-md border border-fisica-100;
+    @apply chat-bubble rounded-bl-sm;
+    background: var(--fisica-glow);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    color: var(--text-primary);
   }
 
   .chat-bubble-assistant-matematica {
-    @apply chat-bubble bg-matematica-50 text-text-primary rounded-bl-md border border-matematica-100;
+    @apply chat-bubble rounded-bl-sm;
+    background: var(--matematica-glow);
+    border: 1px solid rgba(168, 85, 247, 0.2);
+    color: var(--text-primary);
   }
 
   /* ─────────────────────────────────────────────────────────
-     COMPONENTES UTILITÁRIOS
+     STATS CARDS
      ───────────────────────────────────────────────────────── */
-  .spinner {
-    @apply animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full;
-  }
-
-  .skeleton {
-    @apply animate-pulse bg-calm-elevated rounded;
-  }
-
-  /* Stats */
   .stat-card {
-    @apply bg-calm-surface rounded-2xl p-5 border border-calm-border;
+    @apply rounded-xl p-5;
+    background: var(--dark-surface);
+    border: 1px solid var(--border);
   }
 
   .stat-value {
-    @apply text-3xl font-bold text-text-primary tabular-nums;
+    @apply text-3xl font-bold tabular-nums;
+    color: var(--text-primary);
   }
 
   .stat-label {
-    @apply text-sm text-text-muted mt-1;
+    @apply text-xs mt-1 uppercase tracking-wider;
+    color: var(--text-tertiary);
   }
 
-  /* Progress Bar */
+  /* ─────────────────────────────────────────────────────────
+     PROGRESS BAR - Dark Theme
+     ───────────────────────────────────────────────────────── */
   .progress-bar {
-    @apply h-2 bg-calm-elevated rounded-full overflow-hidden;
+    @apply h-2 rounded-full overflow-hidden;
+    background: var(--dark-elevated);
   }
 
   .progress-fill {
@@ -327,37 +524,73 @@ textarea {
   }
 
   .progress-fill-fisica {
-    @apply progress-fill bg-fisica-500;
+    @apply progress-fill;
+    background: var(--fisica-500);
   }
 
   .progress-fill-matematica {
-    @apply progress-fill bg-matematica-500;
+    @apply progress-fill;
+    background: var(--matematica-500);
   }
 
-  /* Navigation */
+  .progress-fill-green {
+    @apply progress-fill;
+    background: var(--accent-green);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     NAVIGATION
+     ───────────────────────────────────────────────────────── */
   .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-text-secondary font-medium transition-colors duration-200 hover:bg-calm-elevated hover:text-text-primary;
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200;
+    color: var(--text-secondary);
+  }
+  .nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
   }
 
   .nav-item-active {
-    @apply bg-calm-elevated text-text-primary;
+    background: var(--accent-green-glow);
+    color: var(--accent-green);
   }
 
-  /* Terminal Card - para instruções */
-  .card-terminal {
-    @apply bg-gray-900 rounded-xl overflow-hidden;
+  /* ─────────────────────────────────────────────────────────
+     HEADER GRADIENT - Dark Premium
+     ───────────────────────────────────────────────────────── */
+  .header-fisica {
+    background: linear-gradient(135deg, #0e7490 0%, #06b6d4 50%, #22d3ee 100%);
   }
 
-  .card-terminal-header {
-    @apply flex items-center gap-2 px-4 py-2.5 bg-gray-800;
+  .header-matematica {
+    background: linear-gradient(135deg, #6b21a8 0%, #a855f7 50%, #c084fc 100%);
   }
 
-  .card-terminal-dot {
-    @apply w-2.5 h-2.5 rounded-full;
+  /* ─────────────────────────────────────────────────────────
+     GLOW EFFECTS
+     ───────────────────────────────────────────────────────── */
+  .glow-green {
+    box-shadow: 0 0 30px var(--accent-green-glow);
   }
 
-  .card-terminal-body {
-    @apply p-4 font-mono text-sm text-gray-300;
+  .glow-cyan {
+    box-shadow: 0 0 30px var(--fisica-glow);
+  }
+
+  .glow-purple {
+    box-shadow: 0 0 30px var(--matematica-glow);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     SPINNER
+     ───────────────────────────────────────────────────────── */
+  .spinner {
+    @apply animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full;
+  }
+
+  .skeleton {
+    @apply animate-pulse rounded;
+    background: var(--dark-elevated);
   }
 }
 
@@ -373,7 +606,8 @@ textarea {
 
   /* Typing indicator */
   .typing-dot {
-    @apply w-2 h-2 bg-current rounded-full;
+    @apply w-2 h-2 rounded-full;
+    background: currentColor;
     animation: typingDot 1.4s infinite ease-in-out both;
   }
 
@@ -395,9 +629,9 @@ textarea {
   .shimmer {
     background: linear-gradient(
       90deg,
-      var(--calm-elevated) 0%,
-      var(--calm-surface) 50%,
-      var(--calm-elevated) 100%
+      var(--dark-elevated) 0%,
+      var(--dark-surface) 50%,
+      var(--dark-elevated) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -412,13 +646,35 @@ textarea {
   .counter {
     @apply tabular-nums;
   }
+
+  /* Text gradient */
+  .text-gradient-green {
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-purple {
+    background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════
    ACESSIBILIDADE
    ═══════════════════════════════════════════════════════════ */
 :focus-visible {
-  outline: 2px solid var(--accent-orange);
+  outline: 2px solid var(--accent-green);
   outline-offset: 2px;
 }
 
