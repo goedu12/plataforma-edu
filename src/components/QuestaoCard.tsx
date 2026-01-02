@@ -206,39 +206,44 @@ export default function QuestaoCard({
 
       {/* Erro */}
       {erro && (
-        <Card className="bg-red-50 border border-red-200">
+        <div className="rounded-2xl p-5 bg-red-900/80 border border-red-500/40 backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-500/20 border border-red-500/30">
+              <AlertCircle className="w-5 h-5 text-red-400" />
+            </div>
             <div>
-              <p className="text-sm text-red-700">{erro}</p>
+              <p className="font-semibold text-red-300 text-sm mb-1">❌ Erro</p>
+              <p className="text-sm text-red-100/90">{erro}</p>
               <button
                 onClick={handleConfirmar}
-                className="text-sm text-red-600 underline mt-1 hover:text-red-800"
+                className="text-sm text-red-300 underline mt-2 hover:text-red-200 transition-colors"
               >
                 Tentar novamente
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Dica */}
       {!feedback && questao.dica && (
         <div className="text-center">
           {mostrarDica ? (
-            <Card className="bg-orange-700 border border-orange-500">
+            <div className="rounded-2xl p-5 bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm">
               <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-orange-200 flex-shrink-0 mt-0.5" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
+                  <Lightbulb className="w-5 h-5 text-orange-400" />
+                </div>
                 <div className="text-left">
-                  <p className="text-xs text-orange-200 font-medium mb-1">💡 Dica:</p>
-                  <p className="text-sm text-white">{questao.dica}</p>
+                  <p className="font-semibold text-orange-300 text-sm mb-1">💡 Dica</p>
+                  <p className="text-sm text-orange-100/90 leading-relaxed">{questao.dica}</p>
                 </div>
               </div>
-            </Card>
+            </div>
           ) : (
             <button
               onClick={handlePedirDica}
-              className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-2 mx-auto"
+              className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-2 mx-auto transition-colors"
             >
               <Lightbulb className="w-4 h-4" />
               Precisa de ajuda? Pedir Dica (−5 pts)
@@ -249,65 +254,77 @@ export default function QuestaoCard({
 
       {/* Conquistas Desbloqueadas */}
       {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
-        <Card className="bg-yellow-50 border-2 border-yellow-400 animate-bounce-once">
+        <div className="rounded-2xl p-5 bg-amber-900/80 border-2 border-amber-500/50 backdrop-blur-sm animate-bounce-once">
           <div className="text-center">
-            <Trophy className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-            <h4 className="font-bold text-yellow-800 mb-2">
+            <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
+              <Trophy className="w-7 h-7 text-amber-400" />
+            </div>
+            <h4 className="font-bold text-amber-300 mb-3 text-lg">
               🎉 Nova Conquista Desbloqueada!
             </h4>
             <div className="flex flex-wrap justify-center gap-2">
               {feedback.conquistasDesbloqueadas.map((conquista, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-1 bg-yellow-100 px-3 py-1 rounded-full text-yellow-800 font-medium"
+                  className="inline-flex items-center gap-1 bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 rounded-full text-amber-200 font-medium text-sm"
                 >
                   {conquista.icone} {conquista.nome}
                 </span>
               ))}
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Feedback */}
       {feedback && (
-        <Card
-          className={`animate-slide-up ${feedback.correta ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'} border`}
+        <div
+          className={`rounded-2xl p-5 animate-slide-up backdrop-blur-sm ${
+            feedback.correta
+              ? 'bg-emerald-900/80 border border-emerald-500/40'
+              : 'bg-red-900/80 border border-red-500/40'
+          }`}
         >
           <div className="flex items-start gap-3">
-            {feedback.correta ? (
-              <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />
-            ) : (
-              <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
-            )}
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+              feedback.correta
+                ? 'bg-emerald-500/20 border-emerald-500/30'
+                : 'bg-red-500/20 border-red-500/30'
+            }`}>
+              {feedback.correta ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              ) : (
+                <XCircle className="w-5 h-5 text-red-400" />
+              )}
+            </div>
             <div className="flex-1">
               <h4
-                className={`font-semibold ${feedback.correta ? 'text-green-800' : 'text-red-800'}`}
+                className={`font-semibold ${feedback.correta ? 'text-emerald-300' : 'text-red-300'}`}
               >
-                {feedback.correta ? 'Muito bem! Resposta correta! 🎉' : 'Não foi dessa vez... 😕'}
+                {feedback.correta ? '✅ Muito bem! Resposta correta!' : '❌ Não foi dessa vez...'}
                 {feedback.correta && feedback.pontosGanhos > 0 && (
-                  <span className="ml-2 text-sm font-normal bg-green-200 px-2 py-0.5 rounded-full">
+                  <span className="ml-2 text-sm font-normal bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full text-emerald-200">
                     +{feedback.pontosGanhos} pontos
                   </span>
                 )}
               </h4>
               {!feedback.correta && (
-                <p className="text-sm text-red-700 mt-1">
-                  A resposta correta era a alternativa <strong>{feedback.respostaCorreta}</strong>.
+                <p className="text-sm text-red-100/90 mt-2">
+                  A resposta correta era a alternativa <strong className="text-red-300">{feedback.respostaCorreta}</strong>.
                   Não desanime, continue praticando!
                 </p>
               )}
               {feedback.explicacao && (
-                <div className="mt-3 pt-3 border-t border-current/10">
-                  <p className="text-xs font-medium mb-1 opacity-70">📖 Explicação:</p>
-                  <p className={`text-sm ${feedback.correta ? 'text-green-700' : 'text-red-700'}`}>
+                <div className="mt-3 pt-3 border-t border-white/10">
+                  <p className="text-xs font-medium mb-1 text-white/60">📖 Explicação:</p>
+                  <p className={`text-sm leading-relaxed ${feedback.correta ? 'text-emerald-100/90' : 'text-red-100/90'}`}>
                     {feedback.explicacao}
                   </p>
                 </div>
               )}
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Botões de ação */}

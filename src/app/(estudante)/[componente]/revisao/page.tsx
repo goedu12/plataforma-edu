@@ -110,7 +110,7 @@ export default function RevisaoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen bg-dark-bg pb-8">
       {/* Header */}
       <header className={`${bgColor} text-white px-4 py-4 sticky top-0 z-10`}>
         <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -139,23 +139,23 @@ export default function RevisaoPage() {
         {status === 'OK' && questao ? (
           <div className="animate-slide-up">
             {/* Info de Revisão */}
-            <Card className="mb-4 bg-amber-50 border-amber-200">
+            <div className="mb-4 rounded-2xl p-5 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-100">
-                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
+                  <AlertCircle className="w-5 h-5 text-amber-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-800">
+                  <p className="text-sm font-semibold text-amber-300">
                     Modo Revisão • {totalRevisao} {totalRevisao === 1 ? 'questão pendente' : 'questões pendentes'}
                   </p>
                   {errouEm && (
-                    <p className="text-xs text-amber-600">
+                    <p className="text-xs text-amber-100/70">
                       Você errou esta questão em {formatarDataErro(errouEm)}
                     </p>
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
 
             <QuestaoCard
               questao={questao}
@@ -192,8 +192,8 @@ export default function RevisaoPage() {
           </Card>
         ) : status === 'ERRO' ? (
           <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-8 h-8 text-error" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
+              <WifiOff className="w-8 h-8 text-red-400" />
             </div>
             <h2 className="text-2xl font-bold text-text-primary mb-3">
               Ops! Erro
@@ -218,19 +218,19 @@ export default function RevisaoPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200" style={{ animationDelay: '300ms' }}>
+          <div className="mt-6 animate-fade-in rounded-2xl p-5 bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent-orange/20">
-                <RotateCcw className="w-5 h-5 text-accent-orange" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
+                <RotateCcw className="w-5 h-5 text-orange-400" />
               </div>
               <div>
-                <p className="font-semibold text-text-primary text-sm mb-1">Modo Revisão</p>
-                <p className="text-sm text-text-secondary">
+                <p className="font-semibold text-orange-300 text-sm mb-1">💡 Modo Revisão</p>
+                <p className="text-sm text-orange-100/90 leading-relaxed">
                   Revisar questões erradas é essencial para fixar o aprendizado!
                 </p>
               </div>
             </div>
-          </Card>
+          </div>
         )}
       </main>
     </div>

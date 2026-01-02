@@ -16,12 +16,12 @@ export default function Badge({
   className = '',
 }: BadgeProps) {
   const variantStyles = {
-    default: 'bg-calm-elevated text-text-secondary',
-    success: 'bg-green-50 text-success',
-    error: 'bg-red-50 text-error',
-    warning: 'bg-amber-50 text-warning',
-    fisica: 'bg-fisica-50 text-fisica-500',
-    matematica: 'bg-matematica-50 text-matematica-500',
+    default: 'bg-dark-elevated/80 text-text-secondary border border-border',
+    success: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    error: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    warning: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+    fisica: 'bg-fisica-500/20 text-fisica-400 border border-fisica-500/30',
+    matematica: 'bg-matematica-500/20 text-matematica-400 border border-matematica-500/30',
   }
 
   const sizeStyles = {

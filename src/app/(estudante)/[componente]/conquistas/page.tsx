@@ -84,7 +84,7 @@ export default function ConquistasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen bg-dark-bg pb-8">
       {/* Header */}
       <header className={`${bgColor} text-white px-4 pt-4 pb-16`}>
         <div className="max-w-2xl mx-auto">
@@ -139,8 +139,8 @@ export default function ConquistasPage() {
       <main className="max-w-2xl mx-auto px-4 -mt-8">
         {erro ? (
           <Card className="text-center py-10">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-8 h-8 text-error" />
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
+              <WifiOff className="w-8 h-8 text-red-400" />
             </div>
             <h2 className="text-xl font-bold text-text-primary mb-2">
               Erro ao carregar conquistas
@@ -233,13 +233,13 @@ export default function ConquistasPage() {
             )}
 
             {/* Dica */}
-            <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200">
+            <Card className="mt-6 animate-fade-in bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent-orange/20">
-                  <Sparkles className="w-5 h-5 text-accent-orange" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-500/20 border border-orange-500/30">
+                  <Sparkles className="w-5 h-5 text-orange-400" />
                 </div>
-                <p className="text-sm text-text-secondary flex-1">
-                  Responda questões corretamente, estude todos os dias e acumule pontos para desbloquear conquistas!
+                <p className="text-sm text-orange-100/90 flex-1">
+                  💡 Responda questões corretamente, estude todos os dias e acumule pontos para desbloquear conquistas!
                 </p>
               </div>
             </Card>
