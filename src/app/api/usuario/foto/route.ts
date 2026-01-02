@@ -4,11 +4,12 @@ import { obterSessao } from '@/lib/auth'
 
 // ═══════════════════════════════════════════════════════════
 // API: Upload de Foto de Perfil
+// Armazena como base64 no banco (simples e funciona sem storage)
 // POST /api/usuario/foto - Upload nova foto
 // DELETE /api/usuario/foto - Remove foto atual
 // ═══════════════════════════════════════════════════════════
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB
+const MAX_FILE_SIZE = 500 * 1024 // 500KB para base64
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
 export async function POST(request: NextRequest) {
@@ -39,56 +40,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validar tamanho
+    // Validar tamanho (menor para base64)
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { sucesso: false, erro: 'Arquivo muito grande. Máximo 2MB.' },
+        { sucesso: false, erro: 'Arquivo muito grande. Máximo 500KB.' },
         { status: 400 }
       )
     }
 
     const supabase = getSupabaseAdmin()
 
-    // Converter para buffer
+    // Converter para base64
     const buffer = Buffer.from(await file.arrayBuffer())
+    const base64 = buffer.toString('base64')
+    const fotoUrl = `data:${file.type};base64,${base64}`
 
-    // Gerar nome único
-    const extension = file.type.split('/')[1]
-    const fileName = `${sessao.userId}/avatar.${extension}`
-
-    // Fazer upload para o bucket avatars
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(fileName, buffer, {
-        contentType: file.type,
-        upsert: true // Sobrescreve se já existir
-      })
-
-    if (uploadError) {
-      console.error('Erro upload:', uploadError)
-
-      // Se o bucket não existe, retornar erro amigável
-      if (uploadError.message.includes('not found')) {
-        return NextResponse.json(
-          { sucesso: false, erro: 'Storage não configurado. Contate o administrador.' },
-          { status: 500 }
-        )
-      }
-
-      return NextResponse.json(
-        { sucesso: false, erro: 'Erro ao fazer upload da foto' },
-        { status: 500 }
-      )
-    }
-
-    // Obter URL pública
-    const { data: urlData } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(fileName)
-
-    const fotoUrl = urlData.publicUrl
-
-    // Atualizar usuário com a URL da foto
+    // Atualizar usuário com a foto em base64
     const { error: updateError } = await supabase
       .from('usuarios')
       .update({ foto_url: fotoUrl })
@@ -128,18 +95,6 @@ export async function DELETE() {
     }
 
     const supabase = getSupabaseAdmin()
-
-    // Remover arquivos do storage
-    const { data: files } = await supabase.storage
-      .from('avatars')
-      .list(sessao.userId)
-
-    if (files && files.length > 0) {
-      const filesToDelete = files.map(f => `${sessao.userId}/${f.name}`)
-      await supabase.storage
-        .from('avatars')
-        .remove(filesToDelete)
-    }
 
     // Limpar URL no usuário
     const { error: updateError } = await supabase

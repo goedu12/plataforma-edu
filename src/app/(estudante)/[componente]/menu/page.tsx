@@ -17,6 +17,7 @@ import {
   RotateCcw,
   Zap,
   GraduationCap,
+  User,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Loading from '@/components/ui/Loading'
@@ -159,6 +160,13 @@ export default function MenuComponentePage() {
               <p className="text-white/80 text-sm">Turma {usuario.turma}</p>
             </div>
             <div className="flex items-center gap-1">
+              <button
+                onClick={() => router.push(`/${componente}/perfil`)}
+                className="p-2.5 rounded-xl hover:bg-white/20 transition-colors"
+                title="Meu Perfil"
+              >
+                <User className="w-5 h-5" />
+              </button>
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
@@ -178,23 +186,24 @@ export default function MenuComponentePage() {
             </div>
           </div>
 
-          {/* User Welcome with Photo */}
-          <div className="mb-4 flex items-center gap-4">
+          {/* User Welcome with Photo - clickable to go to profile */}
+          <button
+            onClick={() => router.push(`/${componente}/perfil`)}
+            className="mb-4 flex items-center gap-4 w-full text-left hover:opacity-90 transition-opacity"
+          >
             <ProfilePhoto
               fotoUrl={usuario.foto_url}
               nome={usuario.nome}
               size="lg"
-              editable
+              editable={false}
               componente={componente}
-              onPhotoChange={(newUrl) => {
-                setUsuario({ ...usuario, foto_url: newUrl })
-              }}
             />
             <div>
               <p className="text-2xl font-bold">Olá, {primeiroNome}!</p>
               <p className="text-white/80 text-sm">{nivel.emoji} {nivel.nome}</p>
+              <p className="text-white/60 text-xs mt-1">Toque para ver perfil</p>
             </div>
-          </div>
+          </button>
 
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-3">

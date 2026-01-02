@@ -51,8 +51,8 @@ export default function ProfilePhoto({
       return
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      setError('Máximo 2MB')
+    if (file.size > 500 * 1024) {
+      setError('Máximo 500KB')
       return
     }
 
