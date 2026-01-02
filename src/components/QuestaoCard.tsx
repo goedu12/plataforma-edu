@@ -110,25 +110,25 @@ export default function QuestaoCard({
 
   const getAlternativaStyle = (letra: Alternativa) => {
     const base =
-      'flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200'
+      'flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 bg-dark-surface'
 
     if (feedback) {
       if (letra === feedback.respostaCorreta) {
-        return `${base} border-green-500 bg-green-50`
+        return `${base} border-green-500 bg-green-900/30`
       }
       if (letra === selecionada && !feedback.correta) {
-        return `${base} border-red-500 bg-red-50`
+        return `${base} border-red-500 bg-red-900/30`
       }
-      return `${base} border-gray-200 opacity-50`
+      return `${base} border-border opacity-50`
     }
 
     if (selecionada === letra) {
       return componente === 'fisica'
-        ? `${base} border-fisica-500 bg-fisica-50`
-        : `${base} border-matematica-500 bg-matematica-50`
+        ? `${base} border-fisica-500 bg-fisica-500/20`
+        : `${base} border-matematica-500 bg-matematica-500/20`
     }
 
-    return `${base} border-gray-200 hover:border-gray-300`
+    return `${base} border-border hover:border-border-hover`
   }
 
   const dificuldadeLabel = {
@@ -160,8 +160,8 @@ export default function QuestaoCard({
       </div>
 
       {/* Enunciado */}
-      <Card>
-        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{questao.enunciado}</p>
+      <Card className="bg-dark-surface border-border">
+        <p className="text-white leading-relaxed whitespace-pre-wrap">{questao.enunciado}</p>
       </Card>
 
       {/* Alternativas */}
@@ -199,7 +199,7 @@ export default function QuestaoCard({
                 letra
               )}
             </span>
-            <span className="flex-1 text-left">{texto}</span>
+            <span className="flex-1 text-left text-white">{texto}</span>
           </button>
         ))}
       </div>
@@ -226,19 +226,19 @@ export default function QuestaoCard({
       {!feedback && questao.dica && (
         <div className="text-center">
           {mostrarDica ? (
-            <Card className="bg-yellow-50 border border-yellow-200">
+            <Card className="bg-orange-700 border border-orange-500">
               <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                <Lightbulb className="w-5 h-5 text-orange-200 flex-shrink-0 mt-0.5" />
                 <div className="text-left">
-                  <p className="text-xs text-yellow-600 font-medium mb-1">💡 Dica:</p>
-                  <p className="text-sm text-yellow-800">{questao.dica}</p>
+                  <p className="text-xs text-orange-200 font-medium mb-1">💡 Dica:</p>
+                  <p className="text-sm text-white">{questao.dica}</p>
                 </div>
               </div>
             </Card>
           ) : (
             <button
               onClick={handlePedirDica}
-              className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-2 mx-auto"
+              className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-2 mx-auto"
             >
               <Lightbulb className="w-4 h-4" />
               Precisa de ajuda? Pedir Dica (−5 pts)
