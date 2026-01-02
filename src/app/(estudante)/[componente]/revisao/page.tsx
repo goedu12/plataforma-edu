@@ -139,17 +139,17 @@ export default function RevisaoPage() {
         {status === 'OK' && questao ? (
           <div className="animate-slide-up">
             {/* Info de Revisão */}
-            <Card className="mb-4 bg-amber-50 border-amber-200">
+            <Card className="mb-4 bg-orange-50 border border-orange-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-100">
-                  <AlertCircle className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100">
+                  <AlertCircle className="w-5 h-5 text-orange-500" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-amber-800">
+                  <p className="text-sm font-semibold text-orange-700">
                     Modo Revisão • {totalRevisao} {totalRevisao === 1 ? 'questão pendente' : 'questões pendentes'}
                   </p>
                   {errouEm && (
-                    <p className="text-xs text-amber-600">
+                    <p className="text-xs text-orange-900">
                       Você errou esta questão em {formatarDataErro(errouEm)}
                     </p>
                   )}

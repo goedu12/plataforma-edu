@@ -148,14 +148,14 @@ export default function NotasPage() {
           <div className="space-y-4">
             {/* Alerta de bloqueio */}
             {notaAtual.bloqueio && (
-              <Card className="bg-yellow-50 border-yellow-200 animate-slide-up">
+              <Card className="bg-orange-50 border border-orange-200 animate-slide-up">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-yellow-100">
-                    <AlertTriangle className="w-5 h-5 text-yellow-600" />
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100">
+                    <AlertTriangle className="w-5 h-5 text-orange-500" />
                   </div>
                   <div>
-                    <p className="font-semibold text-yellow-800">Nota Limitada</p>
-                    <p className="text-sm text-yellow-700">
+                    <p className="font-semibold text-orange-700">Nota Limitada</p>
+                    <p className="text-sm text-orange-900">
                       {notaAtual.bloqueio === 'desempenho_baixo'
                         ? 'Sua taxa de acerto está abaixo de 40%. Nota máxima: 5.9'
                         : 'Sua participação está abaixo de 30 questões. Nota máxima: 5.9'}
