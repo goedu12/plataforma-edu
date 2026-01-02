@@ -226,12 +226,14 @@ export default function QuestaoCard({
       {!feedback && questao.dica && (
         <div className="text-center">
           {mostrarDica ? (
-            <Card className="bg-orange-700 border border-orange-500">
+            <Card className="bg-orange-50 border border-orange-200">
               <div className="flex items-start gap-3">
-                <Lightbulb className="w-5 h-5 text-orange-200 flex-shrink-0 mt-0.5" />
-                <div className="text-left">
-                  <p className="text-xs text-orange-200 font-medium mb-1">💡 Dica:</p>
-                  <p className="text-sm text-white">{questao.dica}</p>
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="w-5 h-5 text-orange-500" />
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-sm font-semibold text-orange-700 mb-1">Dica</p>
+                  <p className="text-sm text-orange-900">{questao.dica}</p>
                 </div>
               </div>
             </Card>

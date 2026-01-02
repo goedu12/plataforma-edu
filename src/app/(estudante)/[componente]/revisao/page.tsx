@@ -218,14 +218,14 @@ export default function RevisaoPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200" style={{ animationDelay: '300ms' }}>
+          <Card className="mt-6 animate-fade-in bg-orange-50 border border-orange-200" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent-orange/20">
-                <RotateCcw className="w-5 h-5 text-accent-orange" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-orange-100">
+                <RotateCcw className="w-5 h-5 text-orange-500" />
               </div>
               <div>
-                <p className="font-semibold text-text-primary text-sm mb-1">Modo Revisão</p>
-                <p className="text-sm text-text-secondary">
+                <p className="font-semibold text-orange-700 text-sm mb-1">Modo Revisão</p>
+                <p className="text-sm text-orange-900">
                   Revisar questões erradas é essencial para fixar o aprendizado!
                 </p>
               </div>

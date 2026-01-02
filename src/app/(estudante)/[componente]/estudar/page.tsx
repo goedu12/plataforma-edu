@@ -211,14 +211,14 @@ export default function EstudarPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-700 border border-orange-500" style={{ animationDelay: '300ms' }}>
+          <Card className="mt-6 animate-fade-in bg-orange-50 border border-orange-200" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-600">
-                <Zap className="w-5 h-5 text-white" />
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-orange-100">
+                <Zap className="w-5 h-5 text-orange-500" />
               </div>
               <div>
-                <p className="font-semibold text-white text-sm mb-1">Dica</p>
-                <p className="text-sm text-orange-100">
+                <p className="font-semibold text-orange-700 text-sm mb-1">Dica</p>
+                <p className="text-sm text-orange-900">
                   Responda em menos de 30 segundos para ganhar bônus de velocidade!
                 </p>
               </div>
