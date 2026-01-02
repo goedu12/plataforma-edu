@@ -213,7 +213,7 @@ export default function DesafioPage() {
     const isPerfeito = resultado.acertos === resultado.total
 
     return (
-      <div className="min-h-screen bg-calm-bg pb-8">
+      <div className="min-h-screen bg-dark-bg pb-8">
         <header className={`${bgColor} text-white px-4 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-center gap-2">
             <Trophy className="w-5 h-5" />
@@ -222,7 +222,7 @@ export default function DesafioPage() {
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-6">
-          <Card className="text-center py-8 animate-slide-up">
+          <Card className="text-center py-8 animate-slide-up bg-dark-surface border-border">
             <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${
               isPerfeito ? 'bg-yellow-100' : porcentagem >= 60 ? 'bg-green-100' : 'bg-orange-100'
             }`}>
@@ -235,7 +235,7 @@ export default function DesafioPage() {
               )}
             </div>
 
-            <h2 className="text-3xl font-bold text-text-primary mb-2">
+            <h2 className="text-3xl font-bold text-white mb-2">
               {resultado.acertos}/{resultado.total}
             </h2>
             <p className="text-text-secondary mb-4">
@@ -248,7 +248,7 @@ export default function DesafioPage() {
             </div>
 
             {resultado.bonus_perfeito && (
-              <p className="text-sm text-yellow-600 mt-2">
+              <p className="text-sm text-yellow-500 mt-2">
                 Incluindo bônus de acerto perfeito!
               </p>
             )}
@@ -256,12 +256,12 @@ export default function DesafioPage() {
 
           {/* Detalhes das respostas */}
           <div className="mt-6 space-y-3">
-            <h3 className="font-semibold text-text-primary">Suas Respostas:</h3>
+            <h3 className="font-semibold text-white">Suas Respostas:</h3>
             {resultado.resultados.map((r, index) => (
               <Card
                 key={r.questao_id}
                 className={`flex items-start gap-3 ${
-                  r.correta ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                  r.correta ? 'bg-green-900/30 border-green-500' : 'bg-red-900/30 border-red-500'
                 } border`}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -274,7 +274,7 @@ export default function DesafioPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="text-sm font-medium text-white">
                     Questão {index + 1}
                   </p>
                   <p className="text-xs text-text-secondary">
@@ -302,7 +302,7 @@ export default function DesafioPage() {
   // Tela de Já Fez Hoje
   if (status === 'JA_FEZ') {
     return (
-      <div className="min-h-screen bg-calm-bg pb-8">
+      <div className="min-h-screen bg-dark-bg pb-8">
         <header className={`${bgColor} text-white px-4 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <button onClick={handleVoltar} className="p-2 -ml-2 rounded-xl hover:bg-white/20">
@@ -317,11 +317,11 @@ export default function DesafioPage() {
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-6">
-          <Card className="text-center py-10 animate-slide-up">
+          <Card className="text-center py-10 animate-slide-up bg-dark-surface border-border">
             <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${bgColor}`}>
               <CheckCircle2 className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2 className="text-2xl font-bold text-white mb-3">
               Desafio Concluído!
             </h2>
             <p className="text-text-secondary mb-6">
@@ -340,7 +340,7 @@ export default function DesafioPage() {
   // Tela de Erro
   if (status === 'ERRO' || status === 'SEM_QUESTOES') {
     return (
-      <div className="min-h-screen bg-calm-bg pb-8">
+      <div className="min-h-screen bg-dark-bg pb-8">
         <header className={`${bgColor} text-white px-4 py-4`}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <button onClick={handleVoltar} className="p-2 -ml-2 rounded-xl hover:bg-white/20">
@@ -355,11 +355,11 @@ export default function DesafioPage() {
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-6">
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-100">
-              <WifiOff className="w-8 h-8 text-error" />
+          <Card className="text-center py-10 animate-slide-up bg-dark-surface border-border">
+            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-900/30">
+              <WifiOff className="w-8 h-8 text-red-500" />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2 className="text-2xl font-bold text-white mb-3">
               {status === 'SEM_QUESTOES' ? 'Questões Insuficientes' : 'Erro'}
             </h2>
             <p className="text-text-secondary mb-6">{erro}</p>
@@ -404,7 +404,7 @@ export default function DesafioPage() {
   ] : []
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen bg-dark-bg pb-8">
       {/* Header */}
       <header className={`${bgColor} text-white px-4 py-4 sticky top-0 z-10`}>
         <div className="max-w-2xl mx-auto">
@@ -460,8 +460,8 @@ export default function DesafioPage() {
             </div>
 
             {/* Enunciado */}
-            <Card className="mb-4">
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+            <Card className="mb-4 bg-dark-surface border-border">
+              <p className="text-white leading-relaxed whitespace-pre-wrap">
                 {questaoAtualData.enunciado}
               </p>
             </Card>
@@ -473,12 +473,12 @@ export default function DesafioPage() {
                   key={letra}
                   onClick={() => handleSelecionarResposta(letra)}
                   className={`
-                    flex items-center gap-3 p-4 border-2 rounded-xl w-full text-left transition-all
+                    flex items-center gap-3 p-4 border-2 rounded-xl w-full text-left transition-all bg-dark-surface
                     ${respostaAtual === letra
                       ? isFisica
-                        ? 'border-fisica-500 bg-fisica-50'
-                        : 'border-matematica-500 bg-matematica-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-fisica-500 bg-fisica-500/20'
+                        : 'border-matematica-500 bg-matematica-500/20'
+                      : 'border-border hover:border-border-hover'
                     }
                   `}
                 >
@@ -488,12 +488,12 @@ export default function DesafioPage() {
                       ? isFisica
                         ? 'bg-fisica-500 text-white'
                         : 'bg-matematica-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
+                      : 'bg-gray-600 text-gray-300'
                     }
                   `}>
                     {letra}
                   </span>
-                  <span className="flex-1">{texto}</span>
+                  <span className="flex-1 text-white">{texto}</span>
                 </button>
               ))}
             </div>
@@ -537,14 +537,14 @@ export default function DesafioPage() {
         )}
 
         {/* Dica */}
-        <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200" style={{ animationDelay: '300ms' }}>
+        <Card className="mt-6 animate-fade-in bg-orange-50 border border-orange-200" style={{ animationDelay: '300ms' }}>
           <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent-orange/20">
-              <Zap className="w-5 h-5 text-accent-orange" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-orange-100">
+              <Zap className="w-5 h-5 text-orange-500" />
             </div>
             <div>
-              <p className="font-semibold text-text-primary text-sm mb-1">Modo Desafio</p>
-              <p className="text-sm text-text-secondary">
+              <p className="font-semibold text-orange-700 text-sm mb-1">Modo Desafio</p>
+              <p className="text-sm text-orange-900">
                 {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos.
                 Acerte todas para bônus de {DESAFIO.BONUS_PERFEITO} pontos!
               </p>

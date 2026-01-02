@@ -94,7 +94,8 @@ export async function POST(request: NextRequest) {
 
     // Registrar ou atualizar resposta
     if (ehModoRevisao && respostaExistente) {
-      // No modo revisão, atualizar a resposta existente
+      // No modo revisão, atualizar apenas os campos básicos da resposta existente
+      // (não usa colunas 'modo' e 'atualizado_em' para compatibilidade com schema atual)
       const { error: erroAtualizacao } = await supabase
         .from('respostas')
         .update({
@@ -102,8 +103,6 @@ export async function POST(request: NextRequest) {
           correta,
           tempo_segundos: tempoValidado,
           usou_dica: usou_dica || false,
-          modo: modoValidado,
-          atualizado_em: new Date().toISOString(),
         })
         .eq('id', respostaExistente.id)
 
@@ -116,6 +115,7 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Inserir nova resposta (modo estudo ou desafio)
+      // (não usa coluna 'modo' para compatibilidade com schema atual)
       const { error: erroResposta } = await supabase.from('respostas').insert({
         usuario_id: sessao.userId,
         questao_id,
@@ -125,7 +125,6 @@ export async function POST(request: NextRequest) {
         tempo_segundos: tempoValidado,
         usou_dica: usou_dica || false,
         pontos_ganhos: pontosGanhos,
-        modo: modoValidado,
       })
 
       if (erroResposta) {
