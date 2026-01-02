@@ -75,9 +75,11 @@ html {
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
   background-color: var(--bg-dark);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
   overflow-x: hidden;
 }
 
@@ -631,6 +633,71 @@ input, select, textarea {
   }
   .typing-dot:nth-child(1) { animation-delay: -0.32s; }
   .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+  /* ─────────────────────────────────────────────────────────
+     TERMINAL BOX 2026 - Estilo unificado
+     ───────────────────────────────────────────────────────── */
+  .terminal-box {
+    @apply rounded-xl overflow-hidden;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  .terminal-box.terminal-amber {
+    border-color: rgba(245, 158, 11, 0.2);
+  }
+  .terminal-box.terminal-blue {
+    border-color: rgba(59, 130, 246, 0.2);
+  }
+  .terminal-box.terminal-red {
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .terminal-header {
+    @apply flex items-center gap-1.5 px-3 py-2;
+    background: #0f0f0f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .terminal-header .dot {
+    @apply w-2.5 h-2.5 rounded-full;
+  }
+  .terminal-header .dot-red { background: #ff5f56; }
+  .terminal-header .dot-yellow { background: #ffbd2e; }
+  .terminal-header .dot-green { background: #27c93f; }
+  .terminal-header .title {
+    @apply ml-2 text-xs text-gray-500;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .terminal-body {
+    @apply p-3;
+    background: #0a0a0a;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+  .terminal-body .comment {
+    color: #10b981;
+  }
+  .terminal-body .comment-amber {
+    color: #f59e0b;
+  }
+  .terminal-body .comment-blue {
+    color: #3b82f6;
+  }
+  .terminal-body .cmd {
+    color: #9ca3af;
+  }
+  .terminal-body .value {
+    color: #ffffff;
+  }
+  .terminal-body .success {
+    color: #34d399;
+  }
+  .terminal-body .warning {
+    color: #fbbf24;
+  }
+  .terminal-body .muted {
+    color: #4b5563;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

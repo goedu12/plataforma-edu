@@ -399,28 +399,28 @@ export default function NotasPage() {
             )}
 
             {/* Terminal: Bônus + Projeção */}
-            <div className="rounded-xl overflow-hidden border border-emerald-500/20">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0f0f0f] border-b border-emerald-500/10">
-                <span className="w-2 h-2 rounded-full bg-[#ff5f56]" />
-                <span className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
-                <span className="w-2 h-2 rounded-full bg-[#27c93f]" />
-                <span className="ml-1 text-[10px] text-gray-500 font-mono">status.sh</span>
+            <div className="terminal-box">
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">status.sh</span>
               </div>
-              <div className="p-3 bg-[#0a0a0a] font-mono text-[11px] space-y-1">
-                <p className="text-emerald-400"># Bônus por frequência</p>
+              <div className="terminal-body space-y-1">
+                <p className="comment"># Bônus por frequência</p>
                 {tabelaBonus.map((item, i) => {
                   const [min] = item.dias.replace('+', '').split('-').map(s => parseInt(s))
                   const isAtual = item.dias.includes('+') ? notaAtual.dias_ativos >= min : notaAtual.dias_ativos >= min && notaAtual.dias_ativos <= parseInt(item.dias.split('-')[1] || String(min))
                   return (
-                    <p key={i} className={isAtual ? 'text-emerald-300' : 'text-gray-600'}>
+                    <p key={i} className={isAtual ? 'success' : 'muted'}>
                       $ {item.dias.padEnd(5)} dias → +{item.bonus.toFixed(1)} {isAtual && '←'}
                     </p>
                   )
                 })}
                 {estatisticas && estatisticas.projecao_nota > 0 && !notaAtual.em_recuperacao && (
                   <>
-                    <p className="text-blue-400 mt-2"># Projeção</p>
-                    <p className="text-gray-400">$ Nota estimada: <span className={estatisticas.projecao_nota >= 6 ? 'text-emerald-400' : 'text-amber-400'}>{estatisticas.projecao_nota.toFixed(1)}</span></p>
+                    <p className="comment-blue mt-2"># Projeção</p>
+                    <p className="cmd">$ Nota estimada: <span className={estatisticas.projecao_nota >= 6 ? 'success' : 'warning'}>{estatisticas.projecao_nota.toFixed(1)}</span></p>
                   </>
                 )}
               </div>
@@ -428,17 +428,17 @@ export default function NotasPage() {
 
             {/* Recuperação ou Dicas */}
             {notaAtual.em_recuperacao ? (
-              <div className="rounded-xl overflow-hidden border border-amber-500/20">
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0f0f0f] border-b border-amber-500/10">
-                  <span className="w-2 h-2 rounded-full bg-[#ff5f56]" />
-                  <span className="w-2 h-2 rounded-full bg-[#ffbd2e]" />
-                  <span className="w-2 h-2 rounded-full bg-[#27c93f]" />
-                  <span className="ml-1 text-[10px] text-gray-500 font-mono">recuperacao.sh</span>
+              <div className="terminal-box terminal-amber">
+                <div className="terminal-header">
+                  <span className="dot dot-red" />
+                  <span className="dot dot-yellow" />
+                  <span className="dot dot-green" />
+                  <span className="title">recuperacao.sh</span>
                 </div>
-                <div className="p-3 bg-[#0a0a0a] font-mono text-[11px]">
-                  <p className="text-amber-400"># Período de Recuperação</p>
-                  <p className="text-gray-400">$ Pendentes: {notaAtual.questoes_pendentes} | Feitas: {notaAtual.questoes_recuperacao}</p>
-                  <p className="text-emerald-300">$ SEM LIMITE - Faça todas!</p>
+                <div className="terminal-body">
+                  <p className="comment-amber"># Período de Recuperação</p>
+                  <p className="cmd">$ Pendentes: {notaAtual.questoes_pendentes} | Feitas: {notaAtual.questoes_recuperacao}</p>
+                  <p className="success">$ SEM LIMITE - Faça todas!</p>
                 </div>
               </div>
             ) : notaAtual.nota_final < 10 && (
