@@ -43,6 +43,12 @@ interface NotaBimestre {
   data_inicio: string
   data_fim: string
   dias_restantes: number
+  // Nova fórmula
+  acertos_questoes: number
+  acertos_revisao: number
+  nota_questoes: number
+  nota_revisao: number
+  // Legado
   questoes_respondidas: number
   meta_questoes: number
   percentual_questoes: number
@@ -88,10 +94,6 @@ interface Estatisticas {
   projecao_nota: number
 }
 
-interface TabelaBonus {
-  dias: string
-  bonus: number
-}
 
 export default function NotasPage() {
   const router = useRouter()
@@ -102,7 +104,6 @@ export default function NotasPage() {
   const [evolucaoDiaria, setEvolucaoDiaria] = useState<EvolucaoDiaria[]>([])
   const [progressoSemanal, setProgressoSemanal] = useState<ProgressoSemanal[]>([])
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null)
-  const [tabelaBonus, setTabelaBonus] = useState<TabelaBonus[]>([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -135,7 +136,6 @@ export default function NotasPage() {
         setEvolucaoDiaria(data.evolucao_diaria || [])
         setProgressoSemanal(data.progresso_semanal || [])
         setEstatisticas(data.estatisticas || null)
-        setTabelaBonus(data.tabela_bonus || [])
         ultimaAtualizacaoRef.current = Date.now()
       } else if (!silencioso) {
         setErro(data.erro || 'Erro ao carregar notas')
@@ -291,7 +291,7 @@ export default function NotasPage() {
                 <p className="text-[10px] text-text-muted mt-1">{notaAtual.percentual_questoes}% concluído</p>
               </div>
 
-              {/* Composição */}
+              {/* Composição - Nova Fórmula */}
               <div className="bg-dark-surface rounded-xl p-3 border border-border">
                 <div className="flex items-center gap-1.5 mb-2">
                   <Zap className="w-3.5 h-3.5 text-text-muted" />
@@ -299,29 +299,33 @@ export default function NotasPage() {
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-text-muted">Base</span>
-                    <span className={getNotaColor(notaAtual.nota_base)}>{notaAtual.nota_base.toFixed(2)}</span>
+                    <span className="text-text-muted flex items-center gap-1">
+                      <Target className="w-3 h-3 text-cyan-400" /> Questões
+                    </span>
+                    <span className={getNotaColor(notaAtual.nota_questoes || 0)}>
+                      {(notaAtual.nota_questoes || 0).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-text-muted flex items-center gap-1">
-                      <Flame className="w-3 h-3 text-orange-400" /> Bônus
+                      <Flame className="w-3 h-3 text-orange-400" /> Revisão
                     </span>
-                    <span className="text-emerald-400">+{notaAtual.bonus_frequencia.toFixed(1)}</span>
+                    <span className="text-emerald-400">+{(notaAtual.nota_revisao || 0).toFixed(2)}</span>
                   </div>
                   <div className="border-t border-border pt-1 flex justify-between text-xs font-medium">
                     <span className="text-text-primary">Total</span>
-                    <span className={getNotaColor(notaAtual.nota_final)}>{notaAtual.nota_final.toFixed(1)}</span>
+                    <span className={getNotaColor(notaAtual.nota_final)}>{notaAtual.nota_final.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Grid: Stats compactas */}
+            {/* Grid: Stats compactas - Nova Fórmula */}
             <div className="grid grid-cols-4 gap-2">
               {[
-                { label: 'Dias', value: notaAtual.dias_ativos, color: 'text-emerald-400' },
-                { label: 'Média/dia', value: estatisticas?.media_questoes_por_dia || 0, color: 'text-blue-400' },
-                { label: 'Semana', value: `${notaAtual.questoes_semana}/15`, color: notaAtual.questoes_semana >= 15 ? 'text-red-400' : 'text-cyan-400' },
+                { label: 'Acertos', value: notaAtual.acertos_questoes || 0, color: 'text-cyan-400' },
+                { label: 'Revisão', value: notaAtual.acertos_revisao || 0, color: 'text-orange-400' },
+                { label: 'Semana', value: `${notaAtual.questoes_semana}/15`, color: notaAtual.questoes_semana >= 15 ? 'text-red-400' : 'text-emerald-400' },
                 { label: 'Restam', value: `${notaAtual.dias_restantes}d`, color: 'text-amber-400' },
               ].map((stat, i) => (
                 <div key={i} className="bg-dark-surface rounded-lg p-2 text-center border border-border">
@@ -398,30 +402,24 @@ export default function NotasPage() {
               </div>
             )}
 
-            {/* Terminal: Bônus + Projeção */}
+            {/* Terminal: Nova Fórmula */}
             <div className="terminal-box">
               <div className="terminal-header">
                 <span className="dot dot-red" />
                 <span className="dot dot-yellow" />
                 <span className="dot dot-green" />
-                <span className="title">status.sh</span>
+                <span className="title">formula.sh</span>
               </div>
               <div className="terminal-body space-y-1">
-                <p className="comment"># Bônus por frequência</p>
-                {tabelaBonus.map((item, i) => {
-                  const [min] = item.dias.replace('+', '').split('-').map(s => parseInt(s))
-                  const isAtual = item.dias.includes('+') ? notaAtual.dias_ativos >= min : notaAtual.dias_ativos >= min && notaAtual.dias_ativos <= parseInt(item.dias.split('-')[1] || String(min))
-                  return (
-                    <p key={i} className={isAtual ? 'success' : 'muted'}>
-                      $ {item.dias.padEnd(5)} dias → +{item.bonus.toFixed(1)} {isAtual && '←'}
-                    </p>
-                  )
-                })}
-                {estatisticas && estatisticas.projecao_nota > 0 && !notaAtual.em_recuperacao && (
-                  <>
-                    <p className="comment-blue mt-2"># Projeção</p>
-                    <p className="cmd">$ Nota estimada: <span className={estatisticas.projecao_nota >= 6 ? 'success' : 'warning'}>{estatisticas.projecao_nota.toFixed(1)}</span></p>
-                  </>
+                <p className="comment"># Nova Fórmula de Notas</p>
+                <p className="cmd">$ NOTA = (Acertos÷12) + (Revisão×0.05)</p>
+                <p className="muted mt-2"># Seus números</p>
+                <p className="success">$ Acertos Questões: {notaAtual.acertos_questoes || 0} → +{(notaAtual.nota_questoes || 0).toFixed(2)}</p>
+                <p className="success">$ Acertos Revisão: {notaAtual.acertos_revisao || 0} → +{(notaAtual.nota_revisao || 0).toFixed(2)}</p>
+                <p className="warning mt-2"># Dica</p>
+                <p className="cmd">$ Revisão não tem limite! Cada acerto = +0.05</p>
+                {notaAtual.nota_final < 10 && (
+                  <p className="muted">$ Para nota 10: mais {Math.ceil((10 - notaAtual.nota_final) / 0.05)} acertos em revisão</p>
                 )}
               </div>
             </div>
@@ -443,14 +441,11 @@ export default function NotasPage() {
               </div>
             ) : notaAtual.nota_final < 10 && (
               <div className="bg-dark-surface rounded-xl p-3 border border-border">
-                <p className="text-[11px] text-text-muted mb-2">💡 Dicas</p>
+                <p className="text-[11px] text-text-muted mb-2">💡 Como aumentar sua nota</p>
                 <div className="space-y-1 text-xs text-text-secondary">
-                  {notaAtual.questoes_respondidas < notaAtual.meta_questoes && (
-                    <p>• Faltam {notaAtual.meta_questoes - notaAtual.questoes_respondidas} questões para a meta</p>
-                  )}
-                  {notaAtual.bonus_frequencia < 2.0 && (
-                    <p>• Estude mais dias para +bônus (atual: +{notaAtual.bonus_frequencia.toFixed(1)})</p>
-                  )}
+                  <p>• <span className="text-cyan-400">Questões:</span> Responda mais questões no modo Estudar (15/semana)</p>
+                  <p>• <span className="text-orange-400">Revisão:</span> Refaça questões erradas (sem limite!)</p>
+                  <p>• <span className="text-amber-400">Desafio:</span> Faça quantos desafios quiser para pontos</p>
                 </div>
               </div>
             )}

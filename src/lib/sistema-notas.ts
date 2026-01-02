@@ -1,42 +1,37 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * SISTEMA DE NOTAS 2025 - VERIFICAÇÃO HIERÁRQUICA DE 5 NÍVEIS
+ * SISTEMA DE NOTAS 2025 - NOVA FÓRMULA
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * Inspirado nas melhores práticas de LLMs como Claude e ChatGPT:
- * - Validação em camadas (defense in depth)
- * - Separação de responsabilidades
- * - Rastreabilidade e logging
- * - Tolerância a falhas
- * - Atualização em tempo real
+ * FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
+ *
+ * COMPONENTES:
+ * ───────────────────────────────────────────────────────────────────────────
+ * QUESTÕES (modo estudo):
+ *   - Limite: 15 questões por semana
+ *   - Valor: cada 12 acertos = +1.0 ponto
+ *   - Fórmula: acertos_questoes ÷ 12
+ *
+ * REVISÃO (modo revisão):
+ *   - Limite: SEM LIMITE
+ *   - Valor: cada acerto = +0.05 pontos
+ *   - Fórmula: acertos_revisao × 0.05
+ *
+ * DESAFIO (modo desafio):
+ *   - Limite: SEM LIMITE (pode fazer quantos quiser)
+ *   - Não conta para nota bimestral, apenas pontos
+ *
+ * NOTA FINAL:
+ *   - Máximo: 10.0
+ *   - nota_final = min(nota_questoes + nota_revisao, 10.0)
  *
  * NÍVEIS DE VERIFICAÇÃO:
  * ═══════════════════════════════════════════════════════════════════════════
- * NÍVEL 1: VALIDAÇÃO DE ENTRADA (Input Validation)
- *   - Valida dados de entrada (componente, modo, resposta)
- *   - Sanitiza inputs
- *   - Verifica tipos e formatos
- *
- * NÍVEL 2: AUTENTICAÇÃO E SESSÃO (Authentication)
- *   - Verifica sessão ativa
- *   - Valida usuário existe
- *   - Carrega dados do usuário
- *
- * NÍVEL 3: REGRAS DE NEGÓCIO E LIMITES (Business Rules)
- *   - Verifica período atual (regular, recuperação, férias)
- *   - Aplica limite semanal (15 questões para modo estudo)
- *   - Modo desafio é ilimitado
- *   - Modo revisão não conta
- *
- * NÍVEL 4: PROCESSAMENTO E CÁLCULO (Processing)
- *   - Registra resposta
- *   - Calcula nota em tempo real
- *   - Atualiza estatísticas
- *
- * NÍVEL 5: PERSISTÊNCIA E NOTIFICAÇÃO (Persistence)
- *   - Salva nota atualizada
- *   - Notifica conquistas
- *   - Retorna feedback completo
+ * NÍVEL 1: Validação de Entrada
+ * NÍVEL 2: Autenticação e Sessão
+ * NÍVEL 3: Regras de Negócio (limites semanais para estudo)
+ * NÍVEL 4: Processamento e Cálculo
+ * NÍVEL 5: Persistência e Notificação
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
@@ -68,13 +63,20 @@ export interface ResultadoVerificacao {
 export interface NotaAtualizada {
   nota_anterior: number
   nota_nova: number
+  // Nova fórmula
+  acertos_questoes: number
+  acertos_revisao: number
+  nota_questoes: number  // acertos_questoes / 12
+  nota_revisao: number   // acertos_revisao * 0.05
+  // Controle semanal
+  questoes_semana: number
+  limite_semanal: number | null
+  pode_responder: boolean
+  // Legado (mantido para compatibilidade)
   questoes_respondidas: number
   meta_questoes: number
   dias_ativos: number
   bonus_frequencia: number
-  questoes_semana: number
-  limite_semanal: number | null
-  pode_responder: boolean
   percentual: number
 }
 
@@ -134,7 +136,35 @@ export function getSegundaFeiraSemana(data: Date = new Date()): string {
 }
 
 /**
- * Calcula bônus de frequência baseado nos dias ativos
+ * NOVA FÓRMULA 2025
+ * Calcula nota baseada em acertos de questões e revisão
+ *
+ * NOTA = (ACERTOS_QUESTOES / 12) + (ACERTOS_REVISAO * 0.05)
+ * Máximo: 10.0
+ */
+export function calcularNotaNova(
+  acertosQuestoes: number,
+  acertosRevisao: number
+): { notaQuestoes: number; notaRevisao: number; notaFinal: number } {
+  // Cada 12 acertos em questões = 1.0 ponto
+  const notaQuestoes = acertosQuestoes / 12
+
+  // Cada acerto em revisão = 0.05 pontos
+  const notaRevisao = acertosRevisao * 0.05
+
+  // Nota final = min(soma, 10.0)
+  const notaFinal = Math.min(notaQuestoes + notaRevisao, 10.0)
+
+  return {
+    notaQuestoes: Math.round(notaQuestoes * 100) / 100,
+    notaRevisao: Math.round(notaRevisao * 100) / 100,
+    notaFinal: Math.round(notaFinal * 100) / 100,
+  }
+}
+
+/**
+ * @deprecated Use calcularNotaNova em vez desta função
+ * Calcula bônus de frequência baseado nos dias ativos (legado)
  */
 export function calcularBonusFrequencia(diasAtivos: number): number {
   if (diasAtivos < 5) return 0.0
@@ -412,7 +442,7 @@ function getProximaSegunda(): string {
 
 /**
  * NÍVEL 4: Processamento e Cálculo de Nota
- * Calcula a nota em tempo real após cada resposta
+ * NOVA FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
  */
 export async function nivel4ProcessamentoCalculo(
   supabase: SupabaseClient,
@@ -431,28 +461,37 @@ export async function nivel4ProcessamentoCalculo(
   const config = periodo.config
 
   try {
-    // Buscar total de respostas no período regular
-    const { data: respostasRegular } = await supabase
+    // Buscar ACERTOS de questões (modo estudo)
+    const { data: respostasEstudo } = await supabase
       .from('respostas')
-      .select('id, criado_em')
+      .select('id, criado_em, correta')
       .eq('usuario_id', userId)
       .eq('componente', componente)
       .eq('modo', 'estudo')
       .gte('criado_em', config.regular.inicio)
       .lte('criado_em', config.regular.fim + 'T23:59:59')
 
-    const questoesRespondidas = respostasRegular?.length || 0
+    // Buscar ACERTOS de revisão (modo revisao)
+    const { data: respostasRevisao } = await supabase
+      .from('respostas')
+      .select('id')
+      .eq('usuario_id', userId)
+      .eq('componente', componente)
+      .eq('modo', 'revisao')
+      .eq('correta', true)
+      .gte('criado_em', config.regular.inicio)
+      .lte('criado_em', config.regular.fim + 'T23:59:59')
+
+    const questoesRespondidas = respostasEstudo?.length || 0
+    const acertosQuestoes = respostasEstudo?.filter(r => r.correta === true).length || 0
+    const acertosRevisao = respostasRevisao?.length || 0
 
     // Contar dias ativos
-    const diasAtivosSet = new Set(respostasRegular?.map(r => r.criado_em.split('T')[0]) || [])
+    const diasAtivosSet = new Set(respostasEstudo?.map(r => r.criado_em.split('T')[0]) || [])
     const diasAtivos = diasAtivosSet.size
 
-    // Calcular nota
-    const { notaBase, bonus, notaFinal } = calcularNotaRegular(
-      questoesRespondidas,
-      config.regular.meta,
-      diasAtivos
-    )
+    // NOVA FÓRMULA
+    const { notaQuestoes, notaRevisao, notaFinal } = calcularNotaNova(acertosQuestoes, acertosRevisao)
 
     // Buscar questões da semana atual
     const segundaFeira = getSegundaFeiraSemana()
@@ -469,18 +508,25 @@ export async function nivel4ProcessamentoCalculo(
       .lte('criado_em', domingoFim.toISOString().split('T')[0] + 'T23:59:59')
 
     const questoesSemana = questoesSemanaData?.length || 0
-    const limiteSemanl = periodo.tipo === 'recuperacao' ? null : LIMITE_SEMANAL_ESTUDO
+    const limiteSemanal = periodo.tipo === 'recuperacao' ? null : LIMITE_SEMANAL_ESTUDO
 
     const notaAtualizada: NotaAtualizada = {
       nota_anterior: 0, // Será preenchido depois
       nota_nova: notaFinal,
+      // Nova fórmula
+      acertos_questoes: acertosQuestoes,
+      acertos_revisao: acertosRevisao,
+      nota_questoes: notaQuestoes,
+      nota_revisao: notaRevisao,
+      // Controle semanal
+      questoes_semana: questoesSemana,
+      limite_semanal: limiteSemanal,
+      pode_responder: limiteSemanal === null || questoesSemana < limiteSemanal,
+      // Legado
       questoes_respondidas: questoesRespondidas,
       meta_questoes: config.regular.meta,
       dias_ativos: diasAtivos,
-      bonus_frequencia: bonus,
-      questoes_semana: questoesSemana,
-      limite_semanal: limiteSemanl,
-      pode_responder: limiteSemanl === null || questoesSemana < limiteSemanl,
+      bonus_frequencia: notaRevisao, // Mapear revisão como bônus
       percentual: Math.round((questoesRespondidas / config.regular.meta) * 100),
     }
 
@@ -489,8 +535,8 @@ export async function nivel4ProcessamentoCalculo(
       passou: true,
       dados: {
         nota_atualizada: notaAtualizada,
-        nota_base: notaBase,
-        bonus_frequencia: bonus,
+        nota_questoes: notaQuestoes,
+        nota_revisao: notaRevisao,
         nota_final: notaFinal,
       },
     }
@@ -626,13 +672,20 @@ export async function verificacaoCompletaParaResponder(
       dados_nota: {
         nota_anterior: 0,
         nota_nova: 0,
+        // Nova fórmula
+        acertos_questoes: 0,
+        acertos_revisao: 0,
+        nota_questoes: 0,
+        nota_revisao: 0,
+        // Controle semanal
+        questoes_semana: nivel3.dados?.questoes_semana as number || 0,
+        limite_semanal: nivel3.dados?.limite_semanal as number || null,
+        pode_responder: false,
+        // Legado
         questoes_respondidas: 0,
         meta_questoes: 0,
         dias_ativos: 0,
         bonus_frequencia: 0,
-        questoes_semana: nivel3.dados?.questoes_semana as number || 0,
-        limite_semanal: nivel3.dados?.limite_semanal as number || null,
-        pode_responder: false,
         percentual: 0,
       },
     }
@@ -646,13 +699,20 @@ export async function verificacaoCompletaParaResponder(
     dados_nota: {
       nota_anterior: 0,
       nota_nova: 0,
+      // Nova fórmula
+      acertos_questoes: 0,
+      acertos_revisao: 0,
+      nota_questoes: 0,
+      nota_revisao: 0,
+      // Controle semanal
+      questoes_semana: nivel3.dados?.questoes_semana as number || 0,
+      limite_semanal: nivel3.dados?.limite_semanal as number | null,
+      pode_responder: true,
+      // Legado
       questoes_respondidas: 0,
       meta_questoes: 0,
       dias_ativos: 0,
       bonus_frequencia: 0,
-      questoes_semana: nivel3.dados?.questoes_semana as number || 0,
-      limite_semanal: nivel3.dados?.limite_semanal as number | null,
-      pode_responder: true,
       percentual: 0,
     },
   }
