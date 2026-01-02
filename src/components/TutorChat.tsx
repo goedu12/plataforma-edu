@@ -210,17 +210,21 @@ export default function TutorChat({
   return (
     <div className="flex flex-col h-full bg-dark-bg">
       {/* ═══════════════════════════════════════════════════════════
-          HEADER - Dark Theme
+          HEADER - Glassmorphism 2026
           ═══════════════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between p-4 border-b border-border bg-dark-surface">
+      <div className="flex items-center justify-between p-4 border-b border-border-glass bg-dark-surface/80 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accentGlow}`}>
+          <div className={`
+            w-12 h-12 rounded-2xl flex items-center justify-center
+            ${isFisica ? 'bg-gradient-to-br from-fisica-500/20 to-fisica-600/10 shadow-glow-green' : 'bg-gradient-to-br from-matematica-500/20 to-matematica-600/10 shadow-glow-lilas'}
+            border border-border-glass
+          `}>
             <Bot className={`w-6 h-6 ${accentText}`} />
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary">{nomeTutor}</h2>
-            <p className="text-xs text-text-tertiary flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
+            <h2 className="font-semibold text-text-primary text-lg">{nomeTutor}</h2>
+            <p className="text-xs text-text-tertiary flex items-center gap-1.5">
+              <Sparkles className={`w-3 h-3 ${accentText} animate-pulse-soft`} />
               IA Generativa • {usoHoje}/{limiteDiario} msgs hoje
             </p>
           </div>
@@ -228,14 +232,14 @@ export default function TutorChat({
         <div className="flex items-center gap-2">
           <button
             onClick={limparChat}
-            className="p-2 text-text-tertiary hover:text-text-primary rounded-lg hover:bg-dark-elevated transition-colors"
+            className="p-2.5 text-text-tertiary hover:text-text-primary rounded-xl hover:bg-dark-elevated/80 transition-all duration-200 hover:shadow-soft-sm"
             title="Limpar conversa"
           >
             <Trash2 className="w-5 h-5" />
           </button>
           <button
             onClick={onClose}
-            className="p-2 text-text-tertiary hover:text-error rounded-lg hover:bg-error/10 transition-colors"
+            className="p-2.5 text-text-tertiary hover:text-error rounded-xl hover:bg-error/10 transition-all duration-200"
             title="Sair do chat"
           >
             <X className="w-5 h-5" />
@@ -244,19 +248,21 @@ export default function TutorChat({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          ÁREA DE MENSAGENS
+          ÁREA DE MENSAGENS - Premium 2026
           ═══════════════════════════════════════════════════════════ */}
-      <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
         {mensagens.map(msg => (
           <div
             key={msg.id}
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
           >
             <div
-              className={`max-w-[85%] p-4 rounded-2xl ${
+              className={`max-w-[85%] p-4 rounded-2xl backdrop-blur-sm transition-all duration-300 ${
                 msg.role === 'user'
-                  ? 'bg-dark-elevated text-text-primary rounded-br-sm border border-border'
-                  : `${accentGlow} border ${accentBorder} text-text-primary rounded-bl-sm`
+                  ? 'bg-dark-elevated/90 text-text-primary rounded-br-sm border border-border shadow-soft-sm hover:shadow-soft-md'
+                  : isFisica
+                    ? 'bg-gradient-to-br from-fisica-500/10 to-fisica-600/5 border border-fisica-500/20 text-text-primary rounded-bl-sm shadow-soft-sm hover:shadow-glow-green'
+                    : 'bg-gradient-to-br from-matematica-500/10 to-matematica-600/5 border border-matematica-500/20 text-text-primary rounded-bl-sm shadow-soft-sm hover:shadow-glow-lilas'
               }`}
             >
               {msg.role === 'assistant' && (
@@ -271,33 +277,39 @@ export default function TutorChat({
         ))}
 
         {/* ═══════════════════════════════════════════════════════════
-            SUGESTÕES INICIAIS - Estilo Perplexity
+            SUGESTÕES INICIAIS - Glassmorphism Premium
             ═══════════════════════════════════════════════════════════ */}
         {mostrarSugestoesIniciais && mensagens.length <= 1 && !loading && (
-          <div className="space-y-3 animate-fade-in">
+          <div className="space-y-4 animate-fade-in">
             <p className="text-xs text-text-tertiary uppercase tracking-wider flex items-center gap-2">
-              <Lightbulb className="w-3 h-3" />
+              <Lightbulb className={`w-3.5 h-3.5 ${accentText}`} />
               Sugestões para você, {primeiroNome}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {sugestoesIniciais.map((sugestao, index) => (
                 <button
                   key={index}
                   onClick={() => enviarMensagem(sugestao.prompt)}
                   className={`
-                    flex items-start gap-3 p-3 rounded-xl
-                    bg-dark-surface border border-border
-                    hover:bg-dark-elevated hover:border-border-hover
-                    transition-all duration-200 text-left group
+                    flex items-start gap-3 p-4 rounded-2xl
+                    bg-dark-surface/80 backdrop-blur-sm border border-border
+                    hover:bg-dark-elevated/90 hover:border-border-hover
+                    transition-all duration-300 text-left group
+                    hover:shadow-soft-md hover:scale-[1.02]
+                    ${isFisica ? 'hover:border-fisica-500/30 hover:shadow-glow-green' : 'hover:border-matematica-500/30 hover:shadow-glow-lilas'}
                   `}
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${accentGlow}`}>
-                    <sugestao.icon className={`w-4 h-4 ${accentText}`} />
+                  <div className={`
+                    w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
+                    ${isFisica ? 'bg-gradient-to-br from-fisica-500/20 to-fisica-600/10' : 'bg-gradient-to-br from-matematica-500/20 to-matematica-600/10'}
+                    border border-border-glass group-hover:scale-110 transition-transform duration-300
+                  `}>
+                    <sugestao.icon className={`w-5 h-5 ${accentText}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-text-primary block">{sugestao.texto}</span>
+                    <span className="text-sm text-text-primary font-medium block">{sugestao.texto}</span>
                   </div>
-                  <ArrowRight className={`w-4 h-4 ${accentText} opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 mt-1`} />
+                  <ArrowRight className={`w-4 h-4 ${accentText} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1`} />
                 </button>
               ))}
             </div>
@@ -305,12 +317,12 @@ export default function TutorChat({
         )}
 
         {/* ═══════════════════════════════════════════════════════════
-            SUGESTÕES DE CONTINUIDADE - Após resposta do tutor
+            SUGESTÕES DE CONTINUIDADE - Chips Premium
             ═══════════════════════════════════════════════════════════ */}
         {mostrarSugestoesContinuidade && !loading && mensagens.length > 2 && (
-          <div className="space-y-2 animate-fade-in">
+          <div className="space-y-3 animate-fade-in">
             <p className="text-xs text-text-tertiary uppercase tracking-wider flex items-center gap-2">
-              <RefreshCw className="w-3 h-3" />
+              <RefreshCw className={`w-3.5 h-3.5 ${accentText}`} />
               Continue a conversa
             </p>
             <div className="flex flex-wrap gap-2">
@@ -319,11 +331,12 @@ export default function TutorChat({
                   key={index}
                   onClick={() => enviarMensagem(sugestao.prompt)}
                   className={`
-                    px-3 py-2 rounded-lg text-xs font-medium
-                    bg-dark-surface border border-border
-                    hover:bg-dark-elevated hover:border-border-hover
+                    px-4 py-2.5 rounded-xl text-xs font-medium
+                    bg-dark-surface/80 backdrop-blur-sm border border-border
+                    hover:bg-dark-elevated/90 hover:border-border-hover
                     text-text-secondary hover:text-text-primary
-                    transition-all duration-200
+                    transition-all duration-300 hover:scale-105
+                    ${isFisica ? 'hover:border-fisica-500/30 hover:shadow-glow-green' : 'hover:border-matematica-500/30 hover:shadow-glow-lilas'}
                   `}
                 >
                   {sugestao.texto}
@@ -333,12 +346,18 @@ export default function TutorChat({
           </div>
         )}
 
-        {/* Loading indicator */}
+        {/* Loading indicator - Premium */}
         {loading && (
           <div className="flex justify-start animate-slide-up">
-            <div className={`p-4 rounded-2xl rounded-bl-sm ${accentGlow} border ${accentBorder}`}>
+            <div className={`
+              p-4 rounded-2xl rounded-bl-sm backdrop-blur-sm
+              ${isFisica
+                ? 'bg-gradient-to-br from-fisica-500/10 to-fisica-600/5 border border-fisica-500/20 shadow-glow-green'
+                : 'bg-gradient-to-br from-matematica-500/10 to-matematica-600/5 border border-matematica-500/20 shadow-glow-lilas'
+              }
+            `}>
               <div className={`flex items-center gap-2 mb-2 ${accentText}`}>
-                <Bot className="w-4 h-4" />
+                <Bot className="w-4 h-4 animate-pulse-soft" />
                 <span className="text-xs font-medium uppercase tracking-wider">{nomeTutor}</span>
               </div>
               <TypingIndicator />
@@ -346,12 +365,12 @@ export default function TutorChat({
           </div>
         )}
 
-        {/* Erro */}
+        {/* Erro - Premium */}
         {erro && (
-          <div className="p-4 bg-error/10 border border-error/30 rounded-xl animate-shake">
+          <div className="p-4 bg-error/10 border border-error/30 rounded-2xl animate-shake backdrop-blur-sm shadow-soft-sm">
             <div className="flex items-center gap-3 text-error">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p className="text-sm">{erro}</p>
+              <p className="text-sm font-medium">{erro}</p>
             </div>
           </div>
         )}
@@ -384,42 +403,55 @@ export default function TutorChat({
       )}
 
       {/* ═══════════════════════════════════════════════════════════
-          INPUT - Dark Theme com texto visível
+          INPUT - Glassmorphism Premium 2026
           ═══════════════════════════════════════════════════════════ */}
       {usoHoje < limiteDiario && (
-        <div className="p-4 border-t border-border bg-dark-surface">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
-              placeholder={`Digite sua dúvida, ${primeiroNome}...`}
-              disabled={loading}
-              className={`
-                flex-1 px-4 py-3
-                bg-dark-elevated border border-border rounded-xl
-                text-text-primary text-base placeholder:text-text-tertiary
-                transition-all duration-200 outline-none
-                hover:border-border-hover
-                focus:ring-2 ${focusRing}
-                disabled:opacity-50 disabled:cursor-not-allowed
-              `}
-            />
-            <Button
-              variant={componente === 'fisica' ? 'fisica' : 'matematica'}
+        <div className="p-4 border-t border-border-glass bg-dark-surface/80 backdrop-blur-xl">
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
+                placeholder={`Digite sua dúvida, ${primeiroNome}...`}
+                disabled={loading}
+                className={`
+                  w-full px-5 py-4
+                  bg-dark-elevated/80 backdrop-blur-sm border border-border rounded-2xl
+                  text-text-primary text-base placeholder:text-text-tertiary
+                  transition-all duration-300 outline-none
+                  hover:border-border-hover hover:shadow-soft-sm
+                  focus:ring-2 focus:shadow-soft-md
+                  ${isFisica
+                    ? 'focus:ring-fisica-500/30 focus:border-fisica-500/50'
+                    : 'focus:ring-matematica-500/30 focus:border-matematica-500/50'
+                  }
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                `}
+              />
+            </div>
+            <button
               onClick={() => enviarMensagem()}
               disabled={!input.trim() || loading}
-              className="px-4"
+              className={`
+                px-5 py-4 rounded-2xl font-medium
+                transition-all duration-300
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                ${isFisica
+                  ? 'bg-gradient-to-r from-fisica-500 to-fisica-600 hover:from-fisica-400 hover:to-fisica-500 text-white shadow-soft-sm hover:shadow-glow-green hover:scale-105'
+                  : 'bg-gradient-to-r from-matematica-500 to-matematica-600 hover:from-matematica-400 hover:to-matematica-500 text-white shadow-soft-sm hover:shadow-glow-lilas hover:scale-105'
+                }
+              `}
             >
               <Send className="w-5 h-5" />
-            </Button>
+            </button>
           </div>
 
           {/* Botão de voltar discreto */}
           <button
             onClick={onClose}
-            className="w-full mt-3 py-2 text-sm text-text-tertiary hover:text-text-secondary hover:bg-dark-elevated rounded-lg transition-colors"
+            className="w-full mt-3 py-2.5 text-sm text-text-tertiary hover:text-text-secondary hover:bg-dark-elevated/50 rounded-xl transition-all duration-200"
           >
             ← Voltar ao Menu
           </button>

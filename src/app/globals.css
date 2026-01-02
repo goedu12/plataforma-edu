@@ -1,702 +1,772 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ═══════════════════════════════════════════════════════════
-   KOYEB-INSPIRED DARK THEME - Plataforma Educacional
-   Design System: Dark Premium, Tech Aesthetic, Terminal-inspired
-   ═══════════════════════════════════════════════════════════ */
-:root {
-  /* Backgrounds - Dark Premium */
-  --dark-bg: #0a0a0a;
-  --dark-surface: #141414;
-  --dark-elevated: #1a1a1a;
-  --dark-terminal: #1e1e1e;
-  --dark-header: #2d2d2d;
+/* ═══════════════════════════════════════════════════════════════════════════
+   PLATAFORMA EDU - DESIGN SYSTEM 2026
+   ═══════════════════════════════════════════════════════════════════════════
 
-  /* Bordas */
-  --border: #222222;
-  --border-hover: #333333;
-  --border-subtle: rgba(255,255,255,0.08);
+   Tendências aplicadas:
+   ✓ Glassmorphism com blur e transparência
+   ✓ Soft UI / Neumorphism com sombras suaves
+   ✓ Micro-animations e transições fluidas
+   ✓ Depth & Layering para hierarquia visual
+   ✓ Glow effects para estados ativos
+
+   Paleta: Verde, Branco, Laranja, Preto, Lilás
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS VARIABLES
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Cores principais */
+  --color-primary: #10b981;
+  --color-primary-light: #34d399;
+  --color-secondary: #f97316;
+  --color-secondary-light: #fb923c;
+  --color-lilas: #a855f7;
+  --color-lilas-light: #c084fc;
+
+  /* Backgrounds */
+  --bg-dark: #0a0a0a;
+  --bg-surface: #121212;
+  --bg-elevated: #1a1a1a;
+  --bg-glass: rgba(18, 18, 18, 0.8);
 
   /* Texto */
   --text-primary: #ffffff;
-  --text-secondary: #888888;
-  --text-tertiary: #666666;
-  --text-disabled: #444444;
-  --text-comment: #6b7280;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #808080;
+  --text-muted: #606060;
 
-  /* Física - Cyan Tech */
-  --fisica-500: #06b6d4;
-  --fisica-400: #22d3ee;
-  --fisica-glow: rgba(6, 182, 212, 0.15);
+  /* Bordas */
+  --border-default: #2a2a2a;
+  --border-hover: #3a3a3a;
+  --border-glass: rgba(255, 255, 255, 0.1);
 
-  /* Matemática - Purple Tech */
-  --matematica-500: #a855f7;
-  --matematica-400: #c084fc;
-  --matematica-glow: rgba(168, 85, 247, 0.15);
-
-  /* Accent - Verde Koyeb */
-  --accent-green: #10b981;
-  --accent-green-light: #34d399;
-  --accent-green-glow: rgba(16, 185, 129, 0.15);
+  /* Glows */
+  --glow-green: rgba(16, 185, 129, 0.4);
+  --glow-orange: rgba(249, 115, 22, 0.4);
+  --glow-lilas: rgba(168, 85, 247, 0.4);
 
   /* Estados */
   --success: #10b981;
   --error: #ef4444;
-  --warning: #f59e0b;
-  --info: #3b82f6;
-
-  /* Terminal dots */
-  --terminal-red: #ff5f56;
-  --terminal-yellow: #ffbd2e;
-  --terminal-green: #27ca3f;
-
-  /* Grid */
-  --grid-color: rgba(255,255,255,0.03);
+  --warning: #f97316;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESET E BASE
-   ═══════════════════════════════════════════════════════════ */
-* {
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE RESET
+   ───────────────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--dark-bg);
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-dark);
   color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
-/* Grid pattern background */
-.bg-grid {
-  background-image:
-    linear-gradient(var(--grid-color) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-  background-size: 50px 50px;
+/* Background com gradiente sutil */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(168, 85, 247, 0.05), transparent);
+  pointer-events: none;
+  z-index: -1;
 }
 
-/* Prevenir zoom em inputs no iOS */
-input,
-select,
-textarea {
+/* Prevenir zoom em inputs iOS */
+input, select, textarea {
   font-size: 16px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SCROLLBAR DARK
-   ═══════════════════════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────────────────────
+   SCROLLBAR 2026 - Gradiente premium
+   ───────────────────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--dark-bg);
+  background: var(--bg-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-lilas));
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-hover);
+  background: linear-gradient(180deg, var(--color-primary-light), var(--color-lilas-light));
 }
 
-/* ═══════════════════════════════════════════════════════════
+/* ─────────────────────────────────────────────────────────────────────────────
    SELEÇÃO DE TEXTO
-   ═══════════════════════════════════════════════════════════ */
+   ───────────────────────────────────────────────────────────────────────────── */
 ::selection {
-  background: var(--accent-green);
+  background: rgba(16, 185, 129, 0.3);
   color: white;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   COMPONENTES - KOYEB DARK THEME
-   ═══════════════════════════════════════════════════════════ */
+/* ─────────────────────────────────────────────────────────────────────────────
+   FOCUS VISIBLE - Acessibilidade
+   ───────────────────────────────────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENTS 2026
+   ═══════════════════════════════════════════════════════════════════════════ */
 @layer components {
-  /* Container */
-  .container-app {
-    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+
+  /* ─────────────────────────────────────────────────────────
+     GLASS CARD - Glassmorphism 2026
+     ───────────────────────────────────────────────────────── */
+  .glass-card {
+    position: relative;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-glass);
+    border-radius: 20px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   }
 
   /* ─────────────────────────────────────────────────────────
-     CARDS - Dark Premium
+     SOFT CARD - Neumorphism / Soft UI
      ───────────────────────────────────────────────────────── */
-  .card {
-    @apply bg-dark-surface rounded-xl p-6 border border-border;
+  .soft-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 20px;
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .card-elevated {
-    @apply bg-dark-elevated rounded-xl p-6 border border-border shadow-card;
-  }
-
-  .card-interactive {
-    @apply card hover:border-border-hover hover:shadow-glow-green cursor-pointer transition-all duration-200;
-  }
-
-  .card-fisica {
-    @apply card border-l-2 border-l-fisica-500;
-  }
-
-  .card-matematica {
-    @apply card border-l-2 border-l-matematica-500;
-  }
-
-  /* Terminal Window Card */
-  .card-terminal {
-    @apply rounded-xl overflow-hidden;
-    background: var(--dark-terminal);
-  }
-
-  .card-terminal-header {
-    @apply flex items-center gap-2 px-4 py-3;
-    background: var(--dark-header);
-  }
-
-  .card-terminal-dot {
-    @apply w-3 h-3 rounded-full;
-  }
-
-  .card-terminal-dot-red { background: var(--terminal-red); }
-  .card-terminal-dot-yellow { background: var(--terminal-yellow); }
-  .card-terminal-dot-green { background: var(--terminal-green); }
-
-  .card-terminal-body {
-    @apply p-5 font-mono text-code;
+  .soft-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--border-hover);
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   /* ─────────────────────────────────────────────────────────
-     BOTÕES - Koyeb Style
+     GLOW CARDS - Com efeito de brilho
      ───────────────────────────────────────────────────────── */
-  .btn {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-semibold text-sm
-           transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  .glow-card-green {
+    @apply soft-card relative;
+  }
+  .glow-card-green::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.4), transparent 60%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .glow-card-green:hover::after {
+    opacity: 1;
+  }
+  .glow-card-green:hover {
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(16, 185, 129, 0.15);
   }
 
+  .glow-card-lilas {
+    @apply soft-card relative;
+  }
+  .glow-card-lilas::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), transparent 60%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .glow-card-lilas:hover::after {
+    opacity: 1;
+  }
+  .glow-card-lilas:hover {
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(168, 85, 247, 0.15);
+  }
+
+  .glow-card-orange {
+    @apply soft-card relative;
+  }
+  .glow-card-orange::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.4), transparent 60%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  .glow-card-orange:hover::after {
+    opacity: 1;
+  }
+  .glow-card-orange:hover {
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(249, 115, 22, 0.15);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     BUTTONS 2026 - Com shimmer e glow
+     ───────────────────────────────────────────────────────── */
+  .btn-2026 {
+    @apply relative overflow-hidden px-6 py-3 font-semibold text-white rounded-xl;
+    @apply transition-all duration-300;
+    @apply active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Shimmer effect */
+  .btn-2026::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+  }
+  .btn-2026:hover::before {
+    left: 100%;
+  }
+
+  /* Primary - Verde */
   .btn-primary {
-    @apply btn text-white;
-    background: var(--accent-green);
+    @apply btn-2026;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    box-shadow:
+      0 4px 20px rgba(16, 185, 129, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
   .btn-primary:hover {
-    background: var(--accent-green-light);
-    box-shadow: 0 0 30px var(--accent-green-glow);
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 30px rgba(16, 185, 129, 0.5),
+      0 0 60px rgba(16, 185, 129, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
-  .btn-fisica {
-    @apply btn text-white;
-    background: var(--fisica-500);
-  }
-  .btn-fisica:hover {
-    background: var(--fisica-400);
-    box-shadow: 0 0 30px var(--fisica-glow);
-  }
-
-  .btn-matematica {
-    @apply btn text-white;
-    background: var(--matematica-500);
-  }
-  .btn-matematica:hover {
-    background: var(--matematica-400);
-    box-shadow: 0 0 30px var(--matematica-glow);
-  }
-
+  /* Secondary - Laranja */
   .btn-secondary {
-    @apply btn bg-transparent border;
-    color: var(--text-primary);
-    border-color: var(--border);
+    @apply btn-2026;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    box-shadow:
+      0 4px 20px rgba(249, 115, 22, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
   .btn-secondary:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 30px rgba(249, 115, 22, 0.5),
+      0 0 60px rgba(249, 115, 22, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
   }
 
+  /* Lilas - Matemática */
+  .btn-lilas {
+    @apply btn-2026;
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    box-shadow:
+      0 4px 20px rgba(168, 85, 247, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  .btn-lilas:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 30px rgba(168, 85, 247, 0.5),
+      0 0 60px rgba(168, 85, 247, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+
+  /* Ghost */
   .btn-ghost {
-    @apply btn bg-transparent;
+    @apply px-6 py-3 font-semibold rounded-xl;
+    @apply transition-all duration-300;
+    background: transparent;
+    border: 1px solid var(--border-default);
     color: var(--text-secondary);
   }
   .btn-ghost:hover {
-    background: rgba(255,255,255,0.05);
-    color: var(--text-primary);
-  }
-
-  .btn-icon {
-    @apply p-2.5 rounded-lg transition-all duration-200;
-    color: var(--text-secondary);
-  }
-  .btn-icon:hover {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-hover);
     color: var(--text-primary);
   }
 
   /* ─────────────────────────────────────────────────────────
-     PILLS/TABS - Koyeb Navigation Style
+     INPUTS 2026 - Soft UI
      ───────────────────────────────────────────────────────── */
-  .pill {
-    @apply px-4 py-2 rounded-lg text-sm font-medium uppercase tracking-wider transition-all duration-200;
-    color: var(--text-secondary);
-  }
-  .pill:hover {
+  .input-2026 {
+    @apply w-full px-4 py-3.5 rounded-xl text-base outline-none;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-default);
     color: var(--text-primary);
-    background: rgba(255,255,255,0.05);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+  .input-2026::placeholder {
+    color: var(--text-tertiary);
+  }
+  .input-2026:hover {
+    border-color: var(--border-hover);
+  }
+  .input-2026:focus {
+    border-color: var(--color-primary);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.3),
+      0 0 0 4px rgba(16, 185, 129, 0.15),
+      0 0 20px rgba(16, 185, 129, 0.1);
+  }
+  .input-2026.input-lilas:focus {
+    border-color: var(--color-lilas);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.3),
+      0 0 0 4px rgba(168, 85, 247, 0.15),
+      0 0 20px rgba(168, 85, 247, 0.1);
+  }
+  .input-2026.input-error {
+    border-color: var(--error);
+    box-shadow:
+      inset 0 2px 6px rgba(0, 0, 0, 0.3),
+      0 0 0 4px rgba(239, 68, 68, 0.15);
   }
 
-  .pill-active {
-    @apply pill;
-    color: var(--accent-green);
-    background: var(--accent-green-glow);
+  /* ─────────────────────────────────────────────────────────
+     BADGES / PILLS 2026
+     ───────────────────────────────────────────────────────── */
+  .badge-2026 {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full;
+    @apply transition-all duration-300;
+  }
+  .badge-green {
+    @apply badge-2026;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
     border: 1px solid rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
   }
-
-  .pill-fisica-active {
-    @apply pill;
-    color: var(--fisica-500);
-    background: var(--fisica-glow);
-    border: 1px solid rgba(6, 182, 212, 0.3);
+  .badge-orange {
+    @apply badge-2026;
+    background: rgba(249, 115, 22, 0.15);
+    color: #fb923c;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
   }
-
-  .pill-matematica-active {
-    @apply pill;
-    color: var(--matematica-500);
-    background: var(--matematica-glow);
+  .badge-lilas {
+    @apply badge-2026;
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
     border: 1px solid rgba(168, 85, 247, 0.3);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
+  }
+  .badge-white {
+    @apply badge-2026;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   /* ─────────────────────────────────────────────────────────
-     INPUTS - Dark Theme
+     STAT CARDS 2026
      ───────────────────────────────────────────────────────── */
-  .input {
-    @apply w-full px-4 py-3 rounded-lg text-base outline-none transition-all duration-200;
-    background: var(--dark-surface);
-    border: 1px solid var(--border);
-    color: var(--text-primary);
+  .stat-card-2026 {
+    @apply relative p-5 rounded-2xl overflow-hidden;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
   }
-  .input::placeholder {
-    color: var(--text-tertiary);
+  .stat-card-2026 .stat-value {
+    @apply text-3xl font-bold text-white tabular-nums;
   }
-  .input:focus {
-    border-color: var(--accent-green);
-    box-shadow: 0 0 0 3px var(--accent-green-glow);
+  .stat-card-2026 .stat-label {
+    @apply text-xs text-text-tertiary uppercase tracking-wider mt-1;
   }
-
-  .input-fisica:focus {
-    border-color: var(--fisica-500);
-    box-shadow: 0 0 0 3px var(--fisica-glow);
+  .stat-card-2026.stat-green {
+    border-left: 4px solid var(--color-primary);
   }
-
-  .input-matematica:focus {
-    border-color: var(--matematica-500);
-    box-shadow: 0 0 0 3px var(--matematica-glow);
+  .stat-card-2026.stat-green::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+    pointer-events: none;
   }
-
-  .input-error {
-    border-color: var(--error) !important;
+  .stat-card-2026.stat-orange {
+    border-left: 4px solid var(--color-secondary);
   }
-
-  /* Labels */
-  .label {
-    @apply block text-sm font-medium mb-1.5 uppercase tracking-wider;
-    color: var(--text-secondary);
+  .stat-card-2026.stat-orange::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), transparent);
+    pointer-events: none;
   }
-
-  /* Helper text */
-  .helper-text {
-    @apply text-sm mt-1.5;
-    color: var(--text-tertiary);
+  .stat-card-2026.stat-lilas {
+    border-left: 4px solid var(--color-lilas);
   }
-
-  .error-text {
-    @apply text-sm mt-1.5;
-    color: var(--error);
+  .stat-card-2026.stat-lilas::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), transparent);
+    pointer-events: none;
   }
 
   /* ─────────────────────────────────────────────────────────
-     BADGES
+     ICON CONTAINERS 2026
      ───────────────────────────────────────────────────────── */
-  .badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded text-xs font-medium uppercase tracking-wider;
+  .icon-box {
+    @apply flex items-center justify-center rounded-xl;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   }
-
-  .badge-fisica {
-    @apply badge;
-    background: var(--fisica-glow);
-    color: var(--fisica-500);
+  .icon-box-green {
+    @apply icon-box;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
   }
-
-  .badge-matematica {
-    @apply badge;
-    background: var(--matematica-glow);
-    color: var(--matematica-500);
+  .icon-box-orange {
+    @apply icon-box;
+    background: rgba(249, 115, 22, 0.15);
+    color: #fb923c;
   }
-
-  .badge-success {
-    @apply badge;
-    background: var(--accent-green-glow);
-    color: var(--accent-green);
-  }
-
-  .badge-error {
-    @apply badge;
-    background: rgba(239, 68, 68, 0.15);
-    color: var(--error);
-  }
-
-  .badge-warning {
-    @apply badge;
-    background: rgba(245, 158, 11, 0.15);
-    color: var(--warning);
-  }
-
-  .badge-default {
-    @apply badge;
-    background: rgba(255,255,255,0.05);
-    color: var(--text-secondary);
+  .icon-box-lilas {
+    @apply icon-box;
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
   }
 
   /* ─────────────────────────────────────────────────────────
-     TIPOGRAFIA - Koyeb Style
+     PROGRESS BARS 2026
      ───────────────────────────────────────────────────────── */
-  .heading-hero {
-    @apply text-4xl md:text-5xl font-bold uppercase tracking-wider;
-    color: var(--text-primary);
+  .progress-2026 {
+    @apply h-2.5 rounded-full overflow-hidden;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
   }
-
-  .heading-display {
-    @apply text-2xl md:text-3xl font-bold uppercase tracking-wide;
-    color: var(--text-primary);
+  .progress-2026 .progress-fill {
+    @apply h-full rounded-full;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
   }
-
-  .heading-section {
-    @apply text-lg md:text-xl font-semibold uppercase tracking-wide;
-    color: var(--text-primary);
+  .progress-2026 .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
   }
-
-  .heading-card {
-    @apply text-base font-semibold uppercase tracking-wide;
-    color: var(--text-primary);
-  }
-
-  .text-body {
-    @apply text-sm leading-relaxed;
-    color: var(--text-secondary);
-  }
-
-  .text-comment {
-    @apply font-mono text-sm;
-    color: var(--text-comment);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     FEATURE CARDS - Koyeb Style com seta
-     ───────────────────────────────────────────────────────── */
-  .feature-card {
-    @apply p-5 rounded-xl transition-all duration-200 cursor-pointer;
-    background: var(--dark-surface);
-    border: 1px solid var(--border);
-  }
-  .feature-card:hover {
-    background: var(--dark-elevated);
-    border-color: var(--border-hover);
-  }
-
-  .feature-card-fisica:hover {
-    box-shadow: 0 0 30px var(--fisica-glow);
-    border-color: rgba(6, 182, 212, 0.3);
-  }
-
-  .feature-card-matematica:hover {
-    box-shadow: 0 0 30px var(--matematica-glow);
-    border-color: rgba(168, 85, 247, 0.3);
-  }
-
-  .feature-arrow {
-    @apply mr-3 text-lg;
-    color: var(--accent-green);
-  }
-
-  .feature-arrow-fisica {
-    color: var(--fisica-500);
-  }
-
-  .feature-arrow-matematica {
-    color: var(--matematica-500);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     ALTERNATIVAS DE QUESTÃO - Dark Theme
-     ───────────────────────────────────────────────────────── */
-  .alternativa {
-    @apply flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200;
-    background: var(--dark-surface);
-    border: 1px solid var(--border);
-  }
-  .alternativa:hover {
-    background: var(--dark-elevated);
-    border-color: var(--border-hover);
-  }
-
-  .alternativa-selected {
-    border-color: var(--accent-green) !important;
-    background: var(--accent-green-glow) !important;
-  }
-
-  .alternativa-correct {
-    border-color: var(--success) !important;
-    background: rgba(16, 185, 129, 0.1) !important;
-  }
-
-  .alternativa-wrong {
-    border-color: var(--error) !important;
-    background: rgba(239, 68, 68, 0.1) !important;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     CHAT BUBBLES - Dark Theme
-     ───────────────────────────────────────────────────────── */
-  .chat-bubble {
-    @apply max-w-[85%] p-4 rounded-2xl;
-  }
-
-  .chat-bubble-user {
-    @apply chat-bubble rounded-br-sm ml-auto;
-    background: var(--dark-elevated);
-    color: var(--text-primary);
-  }
-
-  .chat-bubble-assistant-fisica {
-    @apply chat-bubble rounded-bl-sm;
-    background: var(--fisica-glow);
-    border: 1px solid rgba(6, 182, 212, 0.2);
-    color: var(--text-primary);
-  }
-
-  .chat-bubble-assistant-matematica {
-    @apply chat-bubble rounded-bl-sm;
-    background: var(--matematica-glow);
-    border: 1px solid rgba(168, 85, 247, 0.2);
-    color: var(--text-primary);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     STATS CARDS
-     ───────────────────────────────────────────────────────── */
-  .stat-card {
-    @apply rounded-xl p-5;
-    background: var(--dark-surface);
-    border: 1px solid var(--border);
-  }
-
-  .stat-value {
-    @apply text-3xl font-bold tabular-nums;
-    color: var(--text-primary);
-  }
-
-  .stat-label {
-    @apply text-xs mt-1 uppercase tracking-wider;
-    color: var(--text-tertiary);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     PROGRESS BAR - Dark Theme
-     ───────────────────────────────────────────────────────── */
-  .progress-bar {
-    @apply h-2 rounded-full overflow-hidden;
-    background: var(--dark-elevated);
-  }
-
-  .progress-fill {
-    @apply h-full rounded-full transition-all duration-500 ease-out;
-  }
-
-  .progress-fill-fisica {
-    @apply progress-fill;
-    background: var(--fisica-500);
-  }
-
-  .progress-fill-matematica {
-    @apply progress-fill;
-    background: var(--matematica-500);
-  }
-
   .progress-fill-green {
-    @apply progress-fill;
-    background: var(--accent-green);
+    background: linear-gradient(90deg, #10b981, #34d399);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+  .progress-fill-orange {
+    background: linear-gradient(90deg, #f97316, #fb923c);
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  }
+  .progress-fill-lilas {
+    background: linear-gradient(90deg, #a855f7, #c084fc);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
   }
 
   /* ─────────────────────────────────────────────────────────
-     NAVIGATION
+     MENU ITEMS 2026
      ───────────────────────────────────────────────────────── */
-  .nav-item {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-200;
-    color: var(--text-secondary);
+  .menu-item-2026 {
+    @apply relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer;
+    background: var(--bg-surface);
+    border: 1px solid transparent;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .nav-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: var(--text-primary);
+  .menu-item-2026:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border-default);
+    transform: translateX(8px);
   }
-
-  .nav-item-active {
-    background: var(--accent-green-glow);
-    color: var(--accent-green);
+  .menu-item-2026.menu-green:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.1);
+  }
+  .menu-item-2026.menu-lilas:hover {
+    border-color: rgba(168, 85, 247, 0.3);
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.1);
   }
 
   /* ─────────────────────────────────────────────────────────
-     HEADER GRADIENT - Dark Premium
+     CHAT BUBBLES 2026
      ───────────────────────────────────────────────────────── */
-  .header-fisica {
-    background: linear-gradient(135deg, #0e7490 0%, #06b6d4 50%, #22d3ee 100%);
+  .chat-bubble-2026 {
+    @apply max-w-[85%] p-4 rounded-2xl;
+    animation: slideUp 0.3s ease-out;
+  }
+  .chat-user {
+    @apply chat-bubble-2026 ml-auto rounded-br-md;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+  }
+  .chat-assistant-green {
+    @apply chat-bubble-2026 rounded-bl-md;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+  .chat-assistant-lilas {
+    @apply chat-bubble-2026 rounded-bl-md;
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px solid rgba(168, 85, 247, 0.2);
   }
 
-  .header-matematica {
+  /* ─────────────────────────────────────────────────────────
+     SKELETON LOADING 2026
+     ───────────────────────────────────────────────────────── */
+  .skeleton-2026 {
+    @apply rounded-lg;
+    background: linear-gradient(90deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+    background-size: 200% 100%;
+    animation: skeleton 1.5s ease-in-out infinite;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     HEADERS GRADIENT 2026
+     ───────────────────────────────────────────────────────── */
+  .header-green {
+    background: linear-gradient(135deg, #047857 0%, #10b981 50%, #34d399 100%);
+  }
+  .header-lilas {
     background: linear-gradient(135deg, #6b21a8 0%, #a855f7 50%, #c084fc 100%);
   }
-
-  /* ─────────────────────────────────────────────────────────
-     GLOW EFFECTS
-     ───────────────────────────────────────────────────────── */
-  .glow-green {
-    box-shadow: 0 0 30px var(--accent-green-glow);
-  }
-
-  .glow-cyan {
-    box-shadow: 0 0 30px var(--fisica-glow);
-  }
-
-  .glow-purple {
-    box-shadow: 0 0 30px var(--matematica-glow);
+  .header-orange {
+    background: linear-gradient(135deg, #c2410c 0%, #f97316 50%, #fb923c 100%);
   }
 
   /* ─────────────────────────────────────────────────────────
-     SPINNER
+     DIVIDERS
      ───────────────────────────────────────────────────────── */
-  .spinner {
-    @apply animate-spin h-5 w-5 border-2 border-current border-t-transparent rounded-full;
+  .divider-h {
+    @apply h-px w-full;
+    background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+  }
+  .divider-v {
+    @apply w-px h-full;
+    background: linear-gradient(180deg, transparent, var(--border-default), transparent);
   }
 
-  .skeleton {
-    @apply animate-pulse rounded;
-    background: var(--dark-elevated);
+  /* ─────────────────────────────────────────────────────────
+     SPINNER 2026
+     ───────────────────────────────────────────────────────── */
+  .spinner-2026 {
+    @apply w-5 h-5 rounded-full border-2 border-current;
+    border-top-color: transparent;
+    animation: spin 0.8s linear infinite;
   }
-}
 
-/* ═══════════════════════════════════════════════════════════
-   UTILITÁRIOS
-   ═══════════════════════════════════════════════════════════ */
-@layer utilities {
-  /* Stagger animation delays */
-  .stagger-1 { animation-delay: 50ms; }
-  .stagger-2 { animation-delay: 100ms; }
-  .stagger-3 { animation-delay: 150ms; }
-  .stagger-4 { animation-delay: 200ms; }
-
-  /* Typing indicator */
+  /* ─────────────────────────────────────────────────────────
+     TYPING INDICATOR
+     ───────────────────────────────────────────────────────── */
   .typing-dot {
     @apply w-2 h-2 rounded-full;
     background: currentColor;
-    animation: typingDot 1.4s infinite ease-in-out both;
+    animation: typingDot 1.4s infinite ease-in-out;
   }
-
   .typing-dot:nth-child(1) { animation-delay: -0.32s; }
   .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+}
 
-  @keyframes typingDot {
-    0%, 80%, 100% {
-      transform: scale(0.6);
-      opacity: 0.5;
-    }
-    40% {
-      transform: scale(1);
-      opacity: 1;
-    }
-  }
-
-  /* Shimmer for loading */
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      var(--dark-elevated) 0%,
-      var(--dark-surface) 50%,
-      var(--dark-elevated) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  /* Counter */
-  .counter {
-    @apply tabular-nums;
-  }
-
-  /* Text gradient */
+/* ═══════════════════════════════════════════════════════════════════════════
+   UTILITIES 2026
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer utilities {
+  /* Text Gradients */
   .text-gradient-green {
-    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    background: linear-gradient(135deg, #10b981, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-orange {
+    background: linear-gradient(135deg, #f97316, #fb923c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-lilas {
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-gradient-multi {
+    background: linear-gradient(135deg, #10b981, #a855f7, #f97316);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .text-gradient-cyan {
-    background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Glow Text */
+  .glow-text-green {
+    text-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+  }
+  .glow-text-lilas {
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+  }
+  .glow-text-orange {
+    text-shadow: 0 0 30px rgba(249, 115, 22, 0.5);
   }
 
-  .text-gradient-purple {
-    background: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Background Patterns */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bg-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Safe Areas */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Hide Scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Stagger Animations */
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+  .stagger-6 { animation-delay: 0.3s; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes skeleton {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes typingDot {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
    ACESSIBILIDADE
-   ═══════════════════════════════════════════════════════════ */
-:focus-visible {
-  outline: 2px solid var(--accent-green);
-  outline-offset: 2px;
-}
-
+   ═══════════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-  }
-}
-
-/* ═══════════════════════════════════════════════════════════
-   SAFE AREAS (Mobile)
-   ═══════════════════════════════════════════════════════════ */
-@supports (padding: max(0px)) {
-  .safe-bottom {
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  }
-
-  .safe-top {
-    padding-top: max(1rem, env(safe-area-inset-top));
   }
 }

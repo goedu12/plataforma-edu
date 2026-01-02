@@ -3,8 +3,7 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { chatComTutor } from '@/lib/gemini'
 import {
-  revisarConteudoProfissional,
-  aplicarMelhorias,
+  revisarAteNota10,
 } from '@/lib/revisao-profissional'
 import type { Componente, MensagemChat } from '@/types'
 import { PONTUACAO } from '@/types'
@@ -84,21 +83,19 @@ export async function POST(request: NextRequest) {
     const anoEscolar = parseInt(usuario.turma?.charAt(0) || '1', 10)
     const primeiroNome = nomeEstudante || usuario.nome?.split(' ')[0] || 'Estudante'
 
-    // Submeter resposta para revisão por 3 profissionais
-    const resultadoRevisao = revisarConteudoProfissional(
+    // Submeter resposta para revisão por 3 profissionais até atingir nota 10
+    const resultadoRevisao = revisarAteNota10(
       resultado.resposta,
       componente as 'fisica' | 'matematica',
-      anoEscolar
+      primeiroNome,
+      3 // máximo de iterações
     )
 
-    // Aplicar melhorias automáticas baseadas no feedback dos revisores
-    let respostaFinal = resultado.resposta
-    if (!resultadoRevisao.aprovado) {
-      respostaFinal = aplicarMelhorias(resultado.resposta, resultadoRevisao, primeiroNome)
-    }
+    // Usar conteúdo revisado ou original
+    const respostaFinal = resultadoRevisao.conteudoRevisado || resultado.resposta
 
     // Log para análise de qualidade (pode ser salvo no banco futuramente)
-    console.log(`[Revisão IA] Nota: ${resultadoRevisao.notaMedia}/100, Aprovado: ${resultadoRevisao.aprovado}`)
+    console.log(`[Revisão IA] Nota: ${resultadoRevisao.notaMedia}/100, Aprovado: ${resultadoRevisao.aprovado}, Iterações: ${resultadoRevisao.iteracoes || 1}`)
 
     // Incrementar uso
     const novoUso = usoHoje + 1
@@ -138,6 +135,7 @@ export async function POST(request: NextRequest) {
       revisao: {
         nota: resultadoRevisao.notaMedia,
         aprovado: resultadoRevisao.aprovado,
+        iteracoes: resultadoRevisao.iteracoes || 1,
       },
     })
   } catch (error) {
