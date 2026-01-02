@@ -148,7 +148,7 @@ export default function NotasPage() {
           <div className="space-y-4">
             {/* Alerta de bloqueio */}
             {notaAtual.bloqueio && (
-              <Card className="bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm animate-slide-up">
+              <div className="rounded-2xl p-5 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm animate-slide-up">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
                     <AlertTriangle className="w-5 h-5 text-amber-400" />
@@ -162,7 +162,7 @@ export default function NotasPage() {
                     </p>
                   </div>
                 </div>
-              </Card>
+              </div>
             )}
 
             {/* Detalhes das notas */}
@@ -250,7 +250,7 @@ export default function NotasPage() {
             </Card>
 
             {/* Dicas */}
-            <Card className="animate-slide-up bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '200ms' }}>
+            <div className="animate-slide-up rounded-2xl p-5 bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '200ms' }}>
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-orange-500/20 border border-orange-500/30">
                   <Target className="w-5 h-5 text-orange-400" />
@@ -264,7 +264,7 @@ export default function NotasPage() {
                   </ul>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         ) : null}
       </main>

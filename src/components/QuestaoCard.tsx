@@ -206,7 +206,7 @@ export default function QuestaoCard({
 
       {/* Erro */}
       {erro && (
-        <Card className="bg-red-900/80 border border-red-500/40 backdrop-blur-sm">
+        <div className="rounded-2xl p-5 bg-red-900/80 border border-red-500/40 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-500/20 border border-red-500/30">
               <AlertCircle className="w-5 h-5 text-red-400" />
@@ -222,14 +222,14 @@ export default function QuestaoCard({
               </button>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Dica */}
       {!feedback && questao.dica && (
         <div className="text-center">
           {mostrarDica ? (
-            <Card className="bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm">
+            <div className="rounded-2xl p-5 bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
                   <Lightbulb className="w-5 h-5 text-orange-400" />
@@ -239,7 +239,7 @@ export default function QuestaoCard({
                   <p className="text-sm text-orange-100/90 leading-relaxed">{questao.dica}</p>
                 </div>
               </div>
-            </Card>
+            </div>
           ) : (
             <button
               onClick={handlePedirDica}
@@ -254,7 +254,7 @@ export default function QuestaoCard({
 
       {/* Conquistas Desbloqueadas */}
       {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
-        <Card className="bg-amber-900/80 border-2 border-amber-500/50 backdrop-blur-sm animate-bounce-once">
+        <div className="rounded-2xl p-5 bg-amber-900/80 border-2 border-amber-500/50 backdrop-blur-sm animate-bounce-once">
           <div className="text-center">
             <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
               <Trophy className="w-7 h-7 text-amber-400" />
@@ -273,13 +273,13 @@ export default function QuestaoCard({
               ))}
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Feedback */}
       {feedback && (
-        <Card
-          className={`animate-slide-up backdrop-blur-sm ${
+        <div
+          className={`rounded-2xl p-5 animate-slide-up backdrop-blur-sm ${
             feedback.correta
               ? 'bg-emerald-900/80 border border-emerald-500/40'
               : 'bg-red-900/80 border border-red-500/40'
@@ -324,7 +324,7 @@ export default function QuestaoCard({
               )}
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Botões de ação */}

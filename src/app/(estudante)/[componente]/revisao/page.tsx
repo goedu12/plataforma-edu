@@ -139,7 +139,7 @@ export default function RevisaoPage() {
         {status === 'OK' && questao ? (
           <div className="animate-slide-up">
             {/* Info de Revisão */}
-            <Card className="mb-4 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm">
+            <div className="mb-4 rounded-2xl p-5 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
                   <AlertCircle className="w-5 h-5 text-amber-400" />
@@ -155,7 +155,7 @@ export default function RevisaoPage() {
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
 
             <QuestaoCard
               questao={questao}
@@ -218,7 +218,7 @@ export default function RevisaoPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
+          <div className="mt-6 animate-fade-in rounded-2xl p-5 bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
                 <RotateCcw className="w-5 h-5 text-orange-400" />
@@ -230,7 +230,7 @@ export default function RevisaoPage() {
                 </p>
               </div>
             </div>
-          </Card>
+          </div>
         )}
       </main>
     </div>

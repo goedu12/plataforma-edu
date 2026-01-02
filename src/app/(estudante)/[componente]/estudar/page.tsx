@@ -211,7 +211,7 @@ export default function EstudarPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
+          <div className="mt-6 animate-fade-in rounded-2xl p-5 bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
                 <Zap className="w-5 h-5 text-orange-400" />
@@ -223,7 +223,7 @@ export default function EstudarPage() {
                 </p>
               </div>
             </div>
-          </Card>
+          </div>
         )}
       </main>
     </div>
