@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
@@ -113,31 +113,58 @@ export default function NotasPage() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
 
-  const buscarNotas = async () => {
-    setLoading(true)
+  // Estado para animação de atualização em tempo real
+  const [notaAnterior, setNotaAnterior] = useState<number | null>(null)
+  const [animandoNota, setAnimandoNota] = useState(false)
+  const [atualizando, setAtualizando] = useState(false)
+  const pollingRef = useRef<NodeJS.Timeout | null>(null)
+  const ultimaAtualizacaoRef = useRef<number>(Date.now())
+
+  // Função para buscar notas (silenciosa para polling)
+  const buscarNotas = useCallback(async (silencioso = false) => {
+    if (!silencioso) {
+      setLoading(true)
+    } else {
+      setAtualizando(true)
+    }
     setErro(null)
 
     try {
-      const response = await fetch(`/api/notas?componente=${componente}`)
+      const response = await fetch(`/api/notas?componente=${componente}&_t=${Date.now()}`)
       const data = await response.json()
 
       if (data.sucesso) {
+        const novaNota = data.bimestre_atual?.nota_final || 0
+        const notaAtualValor = notaAtual?.nota_final || 0
+
+        // Detectar mudança na nota para animação
+        if (silencioso && notaAtualValor > 0 && novaNota !== notaAtualValor) {
+          setNotaAnterior(notaAtualValor)
+          setAnimandoNota(true)
+          setTimeout(() => setAnimandoNota(false), 2000)
+        }
+
         setNotaAtual(data.bimestre_atual)
         setEvolucaoDiaria(data.evolucao_diaria || [])
         setProgressoSemanal(data.progresso_semanal || [])
         setEstatisticas(data.estatisticas || null)
         setTabelaBonus(data.tabela_bonus || [])
-      } else {
+        ultimaAtualizacaoRef.current = Date.now()
+      } else if (!silencioso) {
         setErro(data.erro || 'Erro ao carregar notas')
       }
     } catch (error) {
       console.error('Erro ao buscar notas:', error)
-      setErro('Não foi possível conectar ao servidor.')
+      if (!silencioso) {
+        setErro('Não foi possível conectar ao servidor.')
+      }
     } finally {
       setLoading(false)
+      setAtualizando(false)
     }
-  }
+  }, [componente, notaAtual?.nota_final])
 
+  // Polling automático a cada 5 segundos quando a página está visível
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
@@ -145,7 +172,46 @@ export default function NotasPage() {
     }
 
     buscarNotas()
-  }, [componente])
+
+    // Iniciar polling
+    const iniciarPolling = () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+      pollingRef.current = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          buscarNotas(true)
+        }
+      }, 5000) // Atualiza a cada 5 segundos
+    }
+
+    iniciarPolling()
+
+    // Atualizar quando a página voltar a ficar visível
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Se passou mais de 3 segundos desde a última atualização
+        if (Date.now() - ultimaAtualizacaoRef.current > 3000) {
+          buscarNotas(true)
+        }
+        iniciarPolling()
+      }
+    }
+
+    // Atualizar quando a janela ganhar foco
+    const handleFocus = () => {
+      if (Date.now() - ultimaAtualizacaoRef.current > 3000) {
+        buscarNotas(true)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [componente, buscarNotas])
 
   const handleVoltar = () => {
     router.push(`/${componente}/menu`)
@@ -234,21 +300,48 @@ export default function NotasPage() {
               <p className="text-sm text-white/80">{nomeComponente}</p>
             </div>
             <button
-              onClick={buscarNotas}
-              className="p-2 rounded-xl hover:bg-white/20 transition-colors"
+              onClick={() => buscarNotas(false)}
+              className="p-2 rounded-xl hover:bg-white/20 transition-colors relative"
+              disabled={atualizando}
             >
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
+              {atualizando && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              )}
             </button>
           </div>
 
           {notaAtual && (
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center">
+            <div className={`bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center relative overflow-hidden transition-all duration-500 ${animandoNota ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-transparent' : ''}`}>
+              {/* Indicador de tempo real */}
+              <div className="absolute top-2 right-2 flex items-center gap-1">
+                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="text-[10px] text-white/60 font-mono">LIVE</span>
+              </div>
+
               <p className="text-sm text-white/80 mb-1">
                 {notaAtual.bimestre}º Bimestre {notaAtual.em_recuperacao ? '(Recuperação)' : ''}
               </p>
-              <p className={`text-5xl font-bold ${notaAtual.em_recuperacao ? 'text-amber-300' : ''}`}>
-                {notaAtual.nota_final.toFixed(1)}
-              </p>
+
+              {/* Nota com animação */}
+              <div className="relative">
+                {animandoNota && notaAnterior !== null && (
+                  <p className="absolute inset-0 text-5xl font-bold text-white/30 animate-ping">
+                    {notaAnterior.toFixed(1)}
+                  </p>
+                )}
+                <p className={`text-5xl font-bold transition-all duration-500 ${
+                  notaAtual.em_recuperacao ? 'text-amber-300' : ''
+                } ${animandoNota ? 'scale-110 text-emerald-300' : ''}`}>
+                  {notaAtual.nota_final.toFixed(1)}
+                </p>
+                {animandoNota && notaAnterior !== null && (
+                  <p className="text-xs text-emerald-300 mt-1 animate-bounce">
+                    +{(notaAtual.nota_final - notaAnterior).toFixed(2)} pontos!
+                  </p>
+                )}
+              </div>
+
               <div className="flex items-center justify-center gap-2 mt-2">
                 {getStatusIcon(notaAtual.status)}
                 <span className="text-sm text-white/90">{getStatusLabel(notaAtual.status)}</span>
@@ -267,7 +360,7 @@ export default function NotasPage() {
             </div>
             <h2 className="text-xl font-bold text-text-primary mb-2">Erro</h2>
             <p className="text-text-secondary mb-6">{erro}</p>
-            <Button variant="primary" onClick={buscarNotas}>
+            <Button variant="primary" onClick={() => buscarNotas(false)}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Tentar Novamente
             </Button>
@@ -275,7 +368,7 @@ export default function NotasPage() {
         ) : notaAtual ? (
           <>
             {/* Timeline de Progresso */}
-            <Card className="animate-slide-up">
+            <Card className={`animate-slide-up transition-all duration-300 ${animandoNota ? 'ring-2 ring-emerald-500/50' : ''}`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${bgColor}`}>
                   <Target className="w-5 h-5 text-white" />
@@ -301,7 +394,7 @@ export default function NotasPage() {
                     <Activity className="w-4 h-4" />
                     Questões respondidas
                   </span>
-                  <span className="font-bold text-xl text-text-primary">
+                  <span className={`font-bold text-xl transition-all duration-300 ${animandoNota ? 'text-emerald-400 scale-110' : 'text-text-primary'}`}>
                     {notaAtual.questoes_respondidas}
                     <span className="text-text-muted font-normal text-base"> / {notaAtual.meta_questoes}</span>
                   </span>
