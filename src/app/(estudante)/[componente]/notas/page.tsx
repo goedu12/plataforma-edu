@@ -146,21 +146,22 @@ export default function NotasPage() {
           </Card>
         ) : notaAtual ? (
           <div className="space-y-4">
-            {/* Alerta de bloqueio */}
+            {/* Alerta de bloqueio - Estilo Terminal */}
             {notaAtual.bloqueio && (
-              <div className="rounded-2xl p-5 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm animate-slide-up">
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
-                    <AlertTriangle className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-amber-300">⚠️ Nota Limitada</p>
-                    <p className="text-sm text-amber-100/90">
-                      {notaAtual.bloqueio === 'desempenho_baixo'
-                        ? 'Sua taxa de acerto está abaixo de 40%. Nota máxima: 5.9'
-                        : 'Sua participação está abaixo de 30 questões. Nota máxima: 5.9'}
-                    </p>
-                  </div>
+              <div className="animate-slide-up rounded-2xl overflow-hidden border border-amber-500/30">
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-amber-500/20">
+                  <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                  <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                  <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                  <span className="ml-2 text-xs text-gray-400 font-mono">alerta.sh</span>
+                </div>
+                <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
+                  <p className="text-amber-400 mb-1"># Nota Limitada</p>
+                  <p className="text-gray-300">
+                    $ {notaAtual.bloqueio === 'desempenho_baixo'
+                      ? 'Sua taxa de acerto está abaixo de 40%. Nota máxima: 5.9'
+                      : 'Sua participação está abaixo de 30 questões. Nota máxima: 5.9'}
+                  </p>
                 </div>
               </div>
             )}
