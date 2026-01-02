@@ -28,50 +28,46 @@ export async function GET(request: NextRequest) {
     const supabase = getSupabaseAdmin()
     const hoje = new Date().toISOString().split('T')[0]
 
-    // Verificar se já fez desafio hoje
-    const { data: desafioHoje } = await supabase
+    // Verificar se há desafio em andamento (SEM LIMITE DIÁRIO)
+    const { data: desafioEmAndamento } = await supabase
       .from('desafios')
       .select('id, status')
       .eq('usuario_id', sessao.userId)
       .eq('componente', componente)
-      .eq('data_desafio', hoje)
+      .eq('status', 'em_andamento')
+      .order('criado_em', { ascending: false })
+      .limit(1)
       .single()
 
-    if (desafioHoje) {
-      if (desafioHoje.status === 'em_andamento') {
-        // Retornar desafio em andamento
-        const { data: desafio } = await supabase
-          .from('desafios')
-          .select('*')
-          .eq('id', desafioHoje.id)
-          .single()
+    if (desafioEmAndamento) {
+      // Retornar desafio em andamento
+      const { data: desafio } = await supabase
+        .from('desafios')
+        .select('*')
+        .eq('id', desafioEmAndamento.id)
+        .single()
 
-        if (desafio) {
-          // Buscar questões do desafio
-          const { data: questoes } = await supabase
-            .from('questoes')
-            .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, dica')
-            .in('id', desafio.questoes_ids)
+      if (desafio) {
+        // Buscar questões do desafio
+        const { data: questoes } = await supabase
+          .from('questoes')
+          .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, dica')
+          .in('id', desafio.questoes_ids)
 
-          return NextResponse.json({
-            sucesso: true,
-            status: 'EM_ANDAMENTO',
-            desafio: {
-              id: desafio.id,
-              questoes: questoes,
-              respostas_dadas: desafio.respostas_dadas,
-              tempo_restante: Math.max(0, DESAFIO.TEMPO_SEGUNDOS - Math.floor((Date.now() - new Date(desafio.iniciado_em).getTime()) / 1000)),
-            },
-          })
-        }
-      } else {
         return NextResponse.json({
           sucesso: true,
-          status: 'JA_FEZ',
-          mensagem: 'Você já completou o desafio de hoje! Volte amanhã.',
+          status: 'EM_ANDAMENTO',
+          desafio: {
+            id: desafio.id,
+            questoes: questoes,
+            respostas_dadas: desafio.respostas_dadas,
+            tempo_restante: Math.max(0, DESAFIO.TEMPO_SEGUNDOS - Math.floor((Date.now() - new Date(desafio.iniciado_em).getTime()) / 1000)),
+          },
         })
       }
     }
+
+    // SEM LIMITE DIÁRIO - Pode fazer quantos desafios quiser!
 
     // Buscar dados do usuário
     const { data: usuario } = await supabase

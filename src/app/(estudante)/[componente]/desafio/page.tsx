@@ -10,7 +10,7 @@ import Badge from '@/components/ui/Badge'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
 
-type StatusDesafio = 'NOVO' | 'EM_ANDAMENTO' | 'JA_FEZ' | 'SEM_QUESTOES' | 'ERRO' | 'RESULTADO'
+type StatusDesafio = 'NOVO' | 'EM_ANDAMENTO' | 'SEM_QUESTOES' | 'ERRO' | 'RESULTADO'
 
 interface QuestaoDesafio extends Omit<Questao, 'resposta_correta' | 'explicacao' | 'status' | 'criado_em' | 'ano' | 'subtema'> {
   id: string
@@ -294,44 +294,6 @@ export default function DesafioPage() {
               Voltar ao Menu
             </Button>
           </div>
-        </main>
-      </div>
-    )
-  }
-
-  // Tela de Já Fez Hoje
-  if (status === 'JA_FEZ') {
-    return (
-      <div className="min-h-screen bg-calm-bg pb-8">
-        <header className={`${bgColor} text-white px-4 py-4`}>
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <button onClick={handleVoltar} className="p-2 -ml-2 rounded-xl hover:bg-white/20">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              <h1 className="font-semibold">Modo Desafio</h1>
-            </div>
-            <div className="w-10" />
-          </div>
-        </header>
-
-        <main className="max-w-2xl mx-auto px-4 pt-6">
-          <Card className="text-center py-10 animate-slide-up">
-            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${bgColor}`}>
-              <CheckCircle2 className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
-              Desafio Concluído!
-            </h2>
-            <p className="text-text-secondary mb-6">
-              Você já completou o desafio de {nomeComponente} de hoje.
-              Volte amanhã para um novo desafio!
-            </p>
-            <Button variant="primary" onClick={handleVoltar}>
-              Voltar ao Menu
-            </Button>
-          </Card>
         </main>
       </div>
     )

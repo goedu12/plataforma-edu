@@ -4,8 +4,16 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SISTEMA DE NOTAS 2025
-// Baseado em PARTICIPAÇÃO (questões respondidas) + BÔNUS DE FREQUÊNCIA
+// SISTEMA DE NOTAS 2025 - NOVA FÓRMULA
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
+//
+// QUESTÕES (modo estudo): 15/semana, cada 12 acertos = +1.0 ponto
+// REVISÃO (modo revisão): SEM LIMITE, cada acerto = +0.05 pontos
+// DESAFIO (modo desafio): SEM LIMITE, não conta para nota
+//
+// NOTA MÁXIMA: 10.0
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Configuração dos bimestres 2025
@@ -39,7 +47,23 @@ function getSegundaFeira(data: Date = new Date()): string {
   return d.toISOString().split('T')[0]
 }
 
-// Função para calcular bônus de frequência
+// NOVA FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
+function calcularNotaNova(
+  acertosQuestoes: number,
+  acertosRevisao: number
+): { nota_questoes: number; nota_revisao: number; nota_final: number } {
+  const nota_questoes = acertosQuestoes / 12
+  const nota_revisao = acertosRevisao * 0.05
+  const nota_final = Math.min(nota_questoes + nota_revisao, 10.0)
+
+  return {
+    nota_questoes: Math.round(nota_questoes * 100) / 100,
+    nota_revisao: Math.round(nota_revisao * 100) / 100,
+    nota_final: Math.round(nota_final * 100) / 100,
+  }
+}
+
+// @deprecated - mantido para compatibilidade
 function calcularBonusFrequencia(diasAtivos: number): number {
   if (diasAtivos < 5) return 0.0
   if (diasAtivos < 10) return 0.5
@@ -225,13 +249,13 @@ export async function GET(request: NextRequest) {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // BUSCAR DADOS DO PERÍODO REGULAR
+    // BUSCAR DADOS DO PERÍODO - NOVA FÓRMULA
     // ═══════════════════════════════════════════════════════════════════════
 
-    // Buscar respostas do período regular (modo estudo)
-    const { data: respostasRegular } = await supabase
+    // Buscar respostas do período regular (modo estudo) - ACERTOS
+    const { data: respostasEstudo } = await supabase
       .from('respostas')
-      .select('id, criado_em')
+      .select('id, criado_em, correta')
       .eq('usuario_id', sessao.userId)
       .eq('componente', componente)
       .eq('modo', 'estudo')
@@ -239,15 +263,32 @@ export async function GET(request: NextRequest) {
       .lte('criado_em', config.regular.fim + 'T23:59:59')
       .order('criado_em', { ascending: true })
 
-    const questoesRespondidas = respostasRegular?.length || 0
+    // Buscar respostas de REVISÃO - ACERTOS (SEM LIMITE)
+    const { data: respostasRevisao } = await supabase
+      .from('respostas')
+      .select('id, correta')
+      .eq('usuario_id', sessao.userId)
+      .eq('componente', componente)
+      .eq('modo', 'revisao')
+      .eq('correta', true)
+      .gte('criado_em', config.regular.inicio)
+      .lte('criado_em', config.regular.fim + 'T23:59:59')
+
+    // Contadores para nova fórmula
+    const acertosQuestoes = respostasEstudo?.filter(r => r.correta === true).length || 0
+    const acertosRevisao = respostasRevisao?.length || 0
+    const questoesRespondidas = respostasEstudo?.length || 0
 
     // Contar dias ativos (datas distintas com respostas)
     const diasAtivosSet = new Set(
-      respostasRegular?.map(r => r.criado_em.split('T')[0]) || []
+      respostasEstudo?.map(r => r.criado_em.split('T')[0]) || []
     )
     const diasAtivos = diasAtivosSet.size
 
-    // Calcular nota do período regular
+    // NOVA FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
+    const notaNova = calcularNotaNova(acertosQuestoes, acertosRevisao)
+
+    // Manter cálculo antigo para compatibilidade
     const notaRegular = calcularNotaRegular(
       questoesRespondidas,
       config.regular.meta,
@@ -260,7 +301,7 @@ export async function GET(request: NextRequest) {
 
     // Contagem de questões por dia
     const questoesPorDia: { [data: string]: number } = {}
-    respostasRegular?.forEach(r => {
+    respostasEstudo?.forEach(r => {
       const data = r.criado_em.split('T')[0]
       questoesPorDia[data] = (questoesPorDia[data] || 0) + 1
     })
@@ -290,7 +331,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Agrupar por semana para timeline
-    const progressoSemanal = agruparPorSemana(respostasRegular || [], config.regular.inicio)
+    const progressoSemanal = agruparPorSemana(respostasEstudo || [], config.regular.inicio)
       .map(s => ({
         ...s,
         limite: 15,
@@ -471,14 +512,21 @@ export async function GET(request: NextRequest) {
         data_fim: emRecuperacao ? config.recuperacao.fim : config.regular.fim,
         dias_restantes: periodoAtual?.diasRestantes || 0,
 
-        // Dados do regular
+        // NOVA FÓRMULA
+        acertos_questoes: acertosQuestoes,
+        acertos_revisao: acertosRevisao,
+        nota_questoes: notaNova.nota_questoes,
+        nota_revisao: notaNova.nota_revisao,
+        nota_final: notaNova.nota_final,  // Usar nova fórmula
+
+        // Dados do regular (legado, mantido para compatibilidade)
         questoes_respondidas: questoesRespondidas,
         meta_questoes: config.regular.meta,
         percentual_questoes: Math.round((questoesRespondidas / config.regular.meta) * 100),
         dias_ativos: diasAtivos,
-        nota_base: notaRegular.nota_base,
-        bonus_frequencia: notaRegular.bonus_frequencia,
-        nota_regular: notaRegular.nota_final,
+        nota_base: notaNova.nota_questoes,  // Mapear para nova fórmula
+        bonus_frequencia: notaNova.nota_revisao,  // Mapear revisão como "bônus"
+        nota_regular: notaNova.nota_final,
 
         // Recuperação (se aplicável)
         em_recuperacao: emRecuperacao,
@@ -486,8 +534,7 @@ export async function GET(request: NextRequest) {
         questoes_recuperacao: questoesRecuperacao,
         nota_recuperacao: notaRecuperacao,
 
-        // Nota final e status
-        nota_final: notaFinal,
+        // Status
         status,
 
         // Controle semanal
@@ -508,11 +555,31 @@ export async function GET(request: NextRequest) {
         dias_totais: diasTotais,
         projecao_questoes: projecaoQuestoes,
         projecao_nota: projecaoNota.nota_final,
+        // Nova fórmula
+        acertos_para_nota_10: Math.ceil((10 - notaNova.nota_final) / 0.05), // Quantos acertos de revisão faltam
       },
 
       historico,
 
-      // Tabela de bônus para referência
+      // Tabela explicativa da nova fórmula
+      formula_notas: {
+        titulo: 'NOTA = (Acertos Questões ÷ 12) + (Acertos Revisão × 0,05)',
+        questoes: {
+          descricao: 'Cada 12 acertos = +1.0 ponto',
+          limite: '15 questões/semana',
+          atual: acertosQuestoes,
+          contribuicao: notaNova.nota_questoes,
+        },
+        revisao: {
+          descricao: 'Cada acerto = +0.05 pontos',
+          limite: 'Sem limite!',
+          atual: acertosRevisao,
+          contribuicao: notaNova.nota_revisao,
+        },
+        nota_maxima: 10.0,
+      },
+
+      // Tabela de bônus legada (para compatibilidade)
       tabela_bonus: [
         { dias: '0-4', bonus: 0.0 },
         { dias: '5-9', bonus: 0.5 },
