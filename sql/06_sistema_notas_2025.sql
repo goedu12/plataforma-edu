@@ -570,10 +570,14 @@ ALTER TABLE config_bimestres ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notas_2025 ENABLE ROW LEVEL SECURITY;
 ALTER TABLE controle_semanal ENABLE ROW LEVEL SECURITY;
 
--- Políticas de acesso
-CREATE POLICY IF NOT EXISTS "Service role full access" ON config_bimestres FOR ALL TO service_role USING (true);
-CREATE POLICY IF NOT EXISTS "Service role full access" ON notas_2025 FOR ALL TO service_role USING (true);
-CREATE POLICY IF NOT EXISTS "Service role full access" ON controle_semanal FOR ALL TO service_role USING (true);
+-- Políticas de acesso (drop primeiro para evitar erro de duplicidade)
+DROP POLICY IF EXISTS "Service role full access" ON config_bimestres;
+DROP POLICY IF EXISTS "Service role full access" ON notas_2025;
+DROP POLICY IF EXISTS "Service role full access" ON controle_semanal;
+
+CREATE POLICY "Service role full access" ON config_bimestres FOR ALL TO service_role USING (true);
+CREATE POLICY "Service role full access" ON notas_2025 FOR ALL TO service_role USING (true);
+CREATE POLICY "Service role full access" ON controle_semanal FOR ALL TO service_role USING (true);
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- COMENTÁRIOS
