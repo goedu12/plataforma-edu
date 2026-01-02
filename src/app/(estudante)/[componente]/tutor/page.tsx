@@ -56,10 +56,11 @@ export default function TutorPage() {
 
   const isFisica = componente === 'fisica'
   const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  const textColor = isFisica ? 'text-fisica-500' : 'text-matematica-500'
 
   return (
-    <div className="h-screen flex flex-col bg-calm-bg">
-      {/* Header */}
+    <div className="h-screen flex flex-col bg-dark-bg">
+      {/* Header - Dark Theme */}
       <header className={`${bgColor} text-white px-4 py-4`}>
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-2">
@@ -91,11 +92,12 @@ export default function TutorPage() {
         </div>
       </header>
 
-      {/* Chat */}
+      {/* Chat - Passando nome do estudante para personalização */}
       <div className="flex-1 overflow-hidden max-w-2xl mx-auto w-full">
         <TutorChat
           componente={componente}
           nomeTutor={nomeTutor}
+          nomeEstudante={usuario.nome}
           usoHoje={usoHoje}
           limiteDiario={PONTUACAO.LIMITE_IA_DIARIO}
           onClose={() => router.push(`/${componente}/menu`)}

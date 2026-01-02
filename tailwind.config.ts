@@ -22,6 +22,14 @@ const config: Config = {
           header: '#2d2d2d',           // Header do terminal
         },
 
+        // ═══════════════════════════════════════════════════════════
+        // ALIASES - Compatibilidade com código legado
+        // ═══════════════════════════════════════════════════════════
+        'calm-bg': '#0a0a0a',
+        'calm-surface': '#141414',
+        'calm-elevated': '#1a1a1a',
+        'calm-border': '#222222',
+
         // Bordas
         border: {
           DEFAULT: '#222222',          // Borda padrão
@@ -31,9 +39,10 @@ const config: Config = {
 
         // Texto - Hierarquia clara em dark mode
         text: {
-          primary: '#ffffff',          // Texto principal
-          secondary: '#888888',        // Descrições (~55%)
-          tertiary: '#666666',         // Labels (~40%)
+          primary: '#ffffff',          // Texto principal - BRANCO
+          secondary: '#a0a0a0',        // Descrições (~65%)
+          tertiary: '#888888',         // Labels (~55%)
+          muted: '#666666',            // Muito sutil (~40%)
           disabled: '#444444',         // Desabilitado (~25%)
           comment: '#6b7280',          // Comentários terminal
         },
@@ -73,6 +82,7 @@ const config: Config = {
           green: '#10b981',            // Verde Koyeb principal
           'green-light': '#34d399',    // Verde hover
           'green-glow': 'rgba(16, 185, 129, 0.15)',
+          orange: '#f59e0b',           // Orange para destaques
         },
 
         // Estados

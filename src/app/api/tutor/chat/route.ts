@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { chatComTutor } from '@/lib/gemini'
+import {
+  revisarConteudoProfissional,
+  aplicarMelhorias,
+} from '@/lib/revisao-profissional'
 import type { Componente, MensagemChat } from '@/types'
 import { PONTUACAO } from '@/types'
 
@@ -15,7 +19,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { componente, mensagem, historico } = await request.json()
+    const { componente, mensagem, historico, nomeEstudante } = await request.json()
 
     if (!componente || !mensagem) {
       return NextResponse.json(
@@ -26,13 +30,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
-    // Verificar uso diário da IA
+    // Buscar dados do usuário incluindo turma para determinar ano escolar
     const campoUso = componente === 'fisica' ? 'fis_uso_ia_hoje' : 'mat_uso_ia_hoje'
     const campoData = componente === 'fisica' ? 'fis_data_uso_ia' : 'mat_data_uso_ia'
 
     const { data: usuario } = await supabase
       .from('usuarios')
-      .select(`${campoUso}, ${campoData}`)
+      .select(`${campoUso}, ${campoData}, turma, nome`)
       .eq('id', sessao.userId)
       .single()
 
@@ -65,12 +69,36 @@ export async function POST(request: NextRequest) {
     // Chamar o tutor IA
     const resultado = await chatComTutor(componente as Componente, mensagem, historico || [])
 
-    if (!resultado.sucesso) {
+    if (!resultado.sucesso || !resultado.resposta) {
       return NextResponse.json({
         sucesso: false,
-        erro: resultado.erro,
+        erro: resultado.erro || 'Erro ao gerar resposta',
       })
     }
+
+    // ═══════════════════════════════════════════════════════════
+    // SISTEMA DE REVISÃO PROFISSIONAL - 3 Revisores
+    // ═══════════════════════════════════════════════════════════
+
+    // Determinar ano escolar baseado na turma (ex: "1A" -> 1º ano)
+    const anoEscolar = parseInt(usuario.turma?.charAt(0) || '1', 10)
+    const primeiroNome = nomeEstudante || usuario.nome?.split(' ')[0] || 'Estudante'
+
+    // Submeter resposta para revisão por 3 profissionais
+    const resultadoRevisao = revisarConteudoProfissional(
+      resultado.resposta,
+      componente as 'fisica' | 'matematica',
+      anoEscolar
+    )
+
+    // Aplicar melhorias automáticas baseadas no feedback dos revisores
+    let respostaFinal = resultado.resposta
+    if (!resultadoRevisao.aprovado) {
+      respostaFinal = aplicarMelhorias(resultado.resposta, resultadoRevisao, primeiroNome)
+    }
+
+    // Log para análise de qualidade (pode ser salvo no banco futuramente)
+    console.log(`[Revisão IA] Nota: ${resultadoRevisao.notaMedia}/100, Aprovado: ${resultadoRevisao.aprovado}`)
 
     // Incrementar uso
     const novoUso = usoHoje + 1
@@ -82,7 +110,7 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', sessao.userId)
 
-    // Salvar no histórico
+    // Salvar no histórico com dados de revisão
     await supabase.from('historico_chat').insert([
       {
         usuario_id: sessao.userId,
@@ -94,15 +122,23 @@ export async function POST(request: NextRequest) {
         usuario_id: sessao.userId,
         componente,
         role: 'assistant',
-        content: resultado.resposta,
+        content: respostaFinal,
+        // Metadados de revisão (se a coluna existir)
+        // revisao_nota: resultadoRevisao.notaMedia,
+        // revisao_aprovado: resultadoRevisao.aprovado,
       },
     ])
 
     return NextResponse.json({
       sucesso: true,
-      resposta: resultado.resposta,
+      resposta: respostaFinal,
       uso_hoje: novoUso,
       limite: PONTUACAO.LIMITE_IA_DIARIO,
+      // Dados de revisão para debug/admin (opcional)
+      revisao: {
+        nota: resultadoRevisao.notaMedia,
+        aprovado: resultadoRevisao.aprovado,
+      },
     })
   } catch (error) {
     console.error('Erro no chat com tutor:', error)
