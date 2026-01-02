@@ -100,7 +100,7 @@ export default function EstudarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen bg-dark-bg pb-8">
       {/* Header */}
       <header className={`${bgColor} text-white px-4 py-4 sticky top-0 z-10`}>
         <div className="max-w-2xl mx-auto flex items-center justify-between">
@@ -211,14 +211,14 @@ export default function EstudarPage() {
 
         {/* Dicas */}
         {status === 'OK' && questao && (
-          <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200" style={{ animationDelay: '300ms' }}>
+          <Card className="mt-6 animate-fade-in bg-orange-700 border border-orange-500" style={{ animationDelay: '300ms' }}>
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent-orange/20">
-                <Zap className="w-5 h-5 text-accent-orange" />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-600">
+                <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="font-semibold text-text-primary text-sm mb-1">Dica</p>
-                <p className="text-sm text-text-secondary">
+                <p className="font-semibold text-white text-sm mb-1">Dica</p>
+                <p className="text-sm text-orange-100">
                   Responda em menos de 30 segundos para ganhar bônus de velocidade!
                 </p>
               </div>

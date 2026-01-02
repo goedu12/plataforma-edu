@@ -33,6 +33,7 @@ export interface Usuario {
   senha_alterada: boolean
   ultimo_acesso?: string
   criado_em: string
+  foto_url?: string | null
 
   // Progresso Física
   fis_pontos: number
@@ -226,7 +227,7 @@ export const PONTUACAO = {
   RESPOSTA_INCORRETA: 0,
   BONUS_VELOCIDADE: 2, // < 30 segundos
   BONUS_SEQUENCIA_7_DIAS: 50,
-  LIMITE_IA_DIARIO: 5,
+  LIMITE_IA_DIARIO: 30, // 30 requisições por dia
 } as const
 
 // ═══════════════════════════════════════════════════════════

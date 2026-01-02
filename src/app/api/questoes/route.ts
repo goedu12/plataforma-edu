@@ -46,29 +46,25 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Buscar IDs das questões já respondidas pelo usuário
+    // Buscar IDs das questões já respondidas pelo usuário (apenas os IDs únicos)
     const { data: respostasUsuario } = await supabase
       .from('respostas')
       .select('questao_id')
       .eq('usuario_id', sessao.userId)
       .eq('componente', componente)
 
-    const questoesRespondidas = respostasUsuario?.map(r => r.questao_id) || []
+    // Usar Set para IDs únicos (mais eficiente)
+    const questoesRespondidasSet = new Set(respostasUsuario?.map(r => r.questao_id) || [])
 
-    // Buscar todas as questões ativas do ano e componente
-    let query = supabase
+    // Buscar questões ativas do ano e componente
+    // Limitamos a busca inicial para performance, já que vamos filtrar depois
+    const { data: todasQuestoes, error } = await supabase
       .from('questoes')
       .select('*')
       .eq('componente', componente)
       .eq('ano', usuario.ano)
       .eq('status', 'ativa')
-
-    // Filtrar questões já respondidas (se houver alguma)
-    if (questoesRespondidas.length > 0) {
-      query = query.not('id', 'in', `(${questoesRespondidas.join(',')})`)
-    }
-
-    const { data: questoesDisponiveis, error } = await query
+      .limit(500) // Limitar para performance
 
     if (error) {
       console.error('Erro ao buscar questões:', error)
@@ -77,6 +73,9 @@ export async function GET(request: NextRequest) {
         { status: 500 }
       )
     }
+
+    // Filtrar questões não respondidas em memória (mais eficiente para grandes conjuntos)
+    const questoesDisponiveis = todasQuestoes?.filter(q => !questoesRespondidasSet.has(q.id)) || []
 
     // Se não há questões disponíveis
     if (!questoesDisponiveis || questoesDisponiveis.length === 0) {
@@ -88,7 +87,7 @@ export async function GET(request: NextRequest) {
         .eq('ano', usuario.ano)
         .eq('status', 'ativa')
 
-      if (totalQuestoes && questoesRespondidas.length >= totalQuestoes) {
+      if (totalQuestoes && questoesRespondidasSet.size >= totalQuestoes) {
         return NextResponse.json({
           sucesso: true,
           status: 'COMPLETOU',

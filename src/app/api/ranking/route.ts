@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     const camposTotal = componente === 'fisica' ? 'fis_questoes_total' : 'mat_questoes_total'
     const camposCorretas = componente === 'fisica' ? 'fis_questoes_corretas' : 'mat_questoes_corretas'
 
+    // Limitar a 100 resultados por turma para performance
     const { data: usuarios, error } = await supabase
       .from('usuarios')
       .select(`id, nome, turma, ${camposPontos}, ${camposNivel}, ${camposTotal}, ${camposCorretas}`)
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
       .eq('ativo', true)
       .contains('componentes', [componente])
       .order(camposPontos, { ascending: false })
+      .limit(100)
 
     if (error) {
       console.error('Erro ao buscar ranking:', error)
