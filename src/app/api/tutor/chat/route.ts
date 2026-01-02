@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
     const respostaFinal = resultadoRevisao.conteudoRevisado || resultado.resposta
 
     // Log para análise de qualidade (pode ser salvo no banco futuramente)
-    console.log(`[Revisão IA] Nota: ${resultadoRevisao.notaMedia}/100, Aprovado: ${resultadoRevisao.aprovado}, Iterações: ${resultadoRevisao.iteracoes || 1}`)
+    console.log(`[Revisão IA] Nota: ${resultadoRevisao.notaMedia}/10 (escala 0–10), Aprovado: ${resultadoRevisao.aprovado}, Iterações: ${resultadoRevisao.iteracoes || 1}`)
 
     // Incrementar uso
     const novoUso = usoHoje + 1
