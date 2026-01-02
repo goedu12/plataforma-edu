@@ -233,12 +233,12 @@ export default function ConquistasPage() {
             )}
 
             {/* Dica */}
-            <Card className="mt-6 animate-fade-in bg-orange-50 border-orange-200">
+            <Card className="mt-6 animate-fade-in bg-orange-50 border border-orange-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent-orange/20">
-                  <Sparkles className="w-5 h-5 text-accent-orange" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100">
+                  <Sparkles className="w-5 h-5 text-orange-500" />
                 </div>
-                <p className="text-sm text-text-secondary flex-1">
+                <p className="text-sm text-orange-900 flex-1">
                   Responda questões corretamente, estude todos os dias e acumule pontos para desbloquear conquistas!
                 </p>
               </div>

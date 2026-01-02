@@ -194,13 +194,13 @@ export default function SelecionarComponentePage() {
 
         {/* Dica */}
         <div className="mt-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <Card padding="sm" className="bg-orange-50 border-orange-200">
+          <Card padding="sm" className="bg-orange-50 border border-orange-200">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-accent-orange/20 flex items-center justify-center flex-shrink-0">
-                <Flame className="w-5 h-5 text-accent-orange" />
+              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                <Flame className="w-5 h-5 text-orange-500" />
               </div>
-              <p className="text-sm text-text-secondary">
-                Estude todos os dias para manter sua <strong className="text-accent-orange">sequência</strong> ativa!
+              <p className="text-sm text-orange-900">
+                Estude todos os dias para manter sua <strong className="text-orange-700">sequência</strong> ativa!
               </p>
             </div>
           </Card>

@@ -250,14 +250,14 @@ export default function NotasPage() {
             </Card>
 
             {/* Dicas */}
-            <Card className="animate-slide-up bg-orange-50 border-orange-200" style={{ animationDelay: '200ms' }}>
+            <Card className="animate-slide-up bg-orange-50 border border-orange-200" style={{ animationDelay: '200ms' }}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-accent-orange/20">
-                  <Target className="w-5 h-5 text-accent-orange" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100">
+                  <Target className="w-5 h-5 text-orange-500" />
                 </div>
                 <div>
-                  <p className="font-semibold text-text-primary text-sm mb-1">Como melhorar sua nota?</p>
-                  <ul className="text-sm text-text-secondary space-y-1">
+                  <p className="font-semibold text-orange-700 text-sm mb-1">Como melhorar sua nota?</p>
+                  <ul className="text-sm text-orange-900 space-y-1">
                     <li>• Responda questões com atenção para aumentar o desempenho</li>
                     <li>• Complete pelo menos {notaAtual.meta_questoes} questões no bimestre</li>
                     <li>• Estude em pelo menos {notaAtual.meta_dias} dias diferentes</li>
