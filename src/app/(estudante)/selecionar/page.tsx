@@ -3,11 +3,27 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Atom, Calculator, ChevronRight, LogOut, Flame, Star, TrendingUp } from 'lucide-react'
-import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
 import Loading from '@/components/ui/Loading'
 import type { Usuario } from '@/types'
 import { obterNivelPorPontos } from '@/types'
+
+// Cores Koyeb
+const KOYEB = {
+  bg: '#0D0D14',
+  bgCard: '#1A1A2E',
+  bgElevated: '#222238',
+  bgDark: '#12121C',
+  primary: '#00FF88',
+  accent: '#00D4FF',
+  fisica: '#00FF88',
+  matematica: '#A855F7',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#8B8B9A',
+  textMuted: '#5A5A6E',
+  border: 'rgba(255,255,255,0.05)',
+  warning: '#FFB800',
+  orange: '#FF6B35',
+}
 
 export default function SelecionarComponentePage() {
   const router = useRouter()
@@ -53,157 +69,313 @@ export default function SelecionarComponentePage() {
   const nivelMatematica = obterNivelPorPontos(usuario.mat_pontos)
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <div
+      className="min-h-screen"
+      style={{
+        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
+    >
       {/* Header */}
-      <header className="bg-dark-surface border-b border-border px-4 py-4">
+      <header
+        className="px-4 py-4"
+        style={{ borderBottom: `1px solid ${KOYEB.border}` }}
+      >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent-orange flex items-center justify-center">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: KOYEB.orange }}
+            >
               <span className="text-white font-bold text-lg">E</span>
             </div>
             <div>
-              <h1 className="font-bold text-text-primary">Plataforma EDU</h1>
-              <span className="text-sm text-text-muted">Turma {usuario.turma}</span>
+              <h1
+                className="font-bold"
+                style={{ color: KOYEB.textPrimary }}
+              >
+                Plataforma EDU
+              </h1>
+              <span
+                className="text-sm"
+                style={{ color: KOYEB.textMuted }}
+              >
+                Turma {usuario.turma}
+              </span>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="p-2 text-text-muted hover:text-text-primary rounded-xl hover:bg-calm-elevated transition-colors"
+            className="p-2 rounded-xl transition-all hover:bg-white/10"
             title="Sair"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-5 h-5" style={{ color: KOYEB.textMuted }} />
           </button>
         </div>
       </header>
 
-      {/* Conteúdo */}
+      {/* Conteudo */}
       <main className="max-w-2xl mx-auto p-4 pt-8">
         {/* Welcome Section */}
-        <div className="text-center mb-8 animate-fade-in">
-          <h2 className="text-3xl font-bold text-text-primary mb-2">
-            Olá, {primeiroNome}!
+        <div className="text-center mb-8">
+          <h2
+            className="text-3xl font-bold mb-2"
+            style={{ color: KOYEB.textPrimary }}
+          >
+            Ola, {primeiroNome}!
           </h2>
-          <p className="text-text-secondary">O que vamos estudar hoje?</p>
+          <p style={{ color: KOYEB.textSecondary }}>
+            O que vamos estudar hoje?
+          </p>
         </div>
 
         {/* Cards de Componentes */}
         <div className="space-y-4">
-          {/* Card de Física */}
+          {/* Card de Fisica */}
           {usuario.componentes.includes('fisica') && (
-            <Card
-              interactive
+            <button
               onClick={() => router.push('/fisica/menu')}
-              variant="fisica"
-              className="animate-slide-up group"
+              className="w-full text-left rounded-2xl p-5 transition-all duration-300 hover:translate-y-[-2px] group"
+              style={{
+                background: KOYEB.bgCard,
+                border: `1px solid ${KOYEB.border}`,
+                borderLeft: `3px solid ${KOYEB.fisica}`,
+              }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-fisica-500 flex items-center justify-center">
-                  <Atom className="w-7 h-7 text-white" />
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                  style={{ background: KOYEB.fisica }}
+                >
+                  <Atom className="w-7 h-7 text-black" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-lg text-text-primary">Física</h3>
-                    <Badge variant="fisica">{nivelFisica.nome}</Badge>
+                    <h3
+                      className="font-semibold text-lg"
+                      style={{ color: KOYEB.textPrimary }}
+                    >
+                      Fisica
+                    </h3>
+                    <span
+                      className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold tracking-wide"
+                      style={{
+                        background: 'rgba(0, 255, 136, 0.15)',
+                        color: KOYEB.fisica,
+                        border: `1px solid rgba(0, 255, 136, 0.3)`,
+                      }}
+                    >
+                      {nivelFisica.nome}
+                    </span>
                   </div>
-                  <p className="text-sm text-text-secondary">Tutor: Newton</p>
+                  <p className="text-sm" style={{ color: KOYEB.textSecondary }}>
+                    Tutor: Newton
+                  </p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-calm-elevated flex items-center justify-center group-hover:bg-fisica-500 group-hover:text-white transition-colors text-text-muted">
-                  <ChevronRight className="w-5 h-5" />
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                  style={{ background: KOYEB.bgElevated }}
+                >
+                  <ChevronRight className="w-5 h-5" style={{ color: KOYEB.textMuted }} />
                 </div>
               </div>
 
               {/* Stats */}
-              <div className="mt-4 pt-4 border-t border-calm-border grid grid-cols-3 gap-4">
+              <div
+                className="mt-4 pt-4 grid grid-cols-3 gap-4"
+                style={{ borderTop: `1px solid ${KOYEB.border}` }}
+              >
                 <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-fisica-500 mb-1">
-                    <Star className="w-4 h-4" />
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Star className="w-4 h-4" style={{ color: KOYEB.fisica }} />
                   </div>
-                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.fis_pontos}</p>
-                  <p className="text-xs text-text-muted">Pontos</p>
+                  <p
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: KOYEB.textPrimary }}
+                  >
+                    {usuario.fis_pontos}
+                  </p>
+                  <p
+                    className="text-xs font-mono uppercase tracking-wider"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Pontos
+                  </p>
                 </div>
-                <div className="text-center border-x border-calm-border">
-                  <div className="flex items-center justify-center gap-1 text-accent-orange mb-1">
-                    <Flame className="w-4 h-4" />
+                <div
+                  className="text-center"
+                  style={{ borderLeft: `1px solid ${KOYEB.border}`, borderRight: `1px solid ${KOYEB.border}` }}
+                >
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Flame className="w-4 h-4" style={{ color: KOYEB.orange }} />
                   </div>
-                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.fis_sequencia_dias}</p>
-                  <p className="text-xs text-text-muted">Dias</p>
+                  <p
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: KOYEB.textPrimary }}
+                  >
+                    {usuario.fis_sequencia_dias}
+                  </p>
+                  <p
+                    className="text-xs font-mono uppercase tracking-wider"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Dias
+                  </p>
                 </div>
                 <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-success mb-1">
-                    <TrendingUp className="w-4 h-4" />
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <TrendingUp className="w-4 h-4" style={{ color: KOYEB.primary }} />
                   </div>
-                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.fis_questoes_total}</p>
-                  <p className="text-xs text-text-muted">Questões</p>
+                  <p
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: KOYEB.textPrimary }}
+                  >
+                    {usuario.fis_questoes_total}
+                  </p>
+                  <p
+                    className="text-xs font-mono uppercase tracking-wider"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Questoes
+                  </p>
                 </div>
               </div>
-            </Card>
+            </button>
           )}
 
-          {/* Card de Matemática */}
+          {/* Card de Matematica */}
           {usuario.componentes.includes('matematica') && (
-            <Card
-              interactive
+            <button
               onClick={() => router.push('/matematica/menu')}
-              variant="matematica"
-              className="animate-slide-up group"
-              style={{ animationDelay: '100ms' }}
+              className="w-full text-left rounded-2xl p-5 transition-all duration-300 hover:translate-y-[-2px] group"
+              style={{
+                background: KOYEB.bgCard,
+                border: `1px solid ${KOYEB.border}`,
+                borderLeft: `3px solid ${KOYEB.matematica}`,
+              }}
             >
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-matematica-500 flex items-center justify-center">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                  style={{ background: KOYEB.matematica }}
+                >
                   <Calculator className="w-7 h-7 text-white" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-lg text-text-primary">Matemática</h3>
-                    <Badge variant="matematica">{nivelMatematica.nome}</Badge>
+                    <h3
+                      className="font-semibold text-lg"
+                      style={{ color: KOYEB.textPrimary }}
+                    >
+                      Matematica
+                    </h3>
+                    <span
+                      className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold tracking-wide"
+                      style={{
+                        background: 'rgba(168, 85, 247, 0.15)',
+                        color: KOYEB.matematica,
+                        border: `1px solid rgba(168, 85, 247, 0.3)`,
+                      }}
+                    >
+                      {nivelMatematica.nome}
+                    </span>
                   </div>
-                  <p className="text-sm text-text-secondary">Tutor: Pitágoras</p>
+                  <p className="text-sm" style={{ color: KOYEB.textSecondary }}>
+                    Tutor: Pitagoras
+                  </p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-calm-elevated flex items-center justify-center group-hover:bg-matematica-500 group-hover:text-white transition-colors text-text-muted">
-                  <ChevronRight className="w-5 h-5" />
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center transition-all group-hover:scale-110"
+                  style={{ background: KOYEB.bgElevated }}
+                >
+                  <ChevronRight className="w-5 h-5" style={{ color: KOYEB.textMuted }} />
                 </div>
               </div>
 
               {/* Stats */}
-              <div className="mt-4 pt-4 border-t border-calm-border grid grid-cols-3 gap-4">
+              <div
+                className="mt-4 pt-4 grid grid-cols-3 gap-4"
+                style={{ borderTop: `1px solid ${KOYEB.border}` }}
+              >
                 <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-matematica-500 mb-1">
-                    <Star className="w-4 h-4" />
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Star className="w-4 h-4" style={{ color: KOYEB.matematica }} />
                   </div>
-                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.mat_pontos}</p>
-                  <p className="text-xs text-text-muted">Pontos</p>
+                  <p
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: KOYEB.textPrimary }}
+                  >
+                    {usuario.mat_pontos}
+                  </p>
+                  <p
+                    className="text-xs font-mono uppercase tracking-wider"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Pontos
+                  </p>
                 </div>
-                <div className="text-center border-x border-calm-border">
-                  <div className="flex items-center justify-center gap-1 text-accent-orange mb-1">
-                    <Flame className="w-4 h-4" />
+                <div
+                  className="text-center"
+                  style={{ borderLeft: `1px solid ${KOYEB.border}`, borderRight: `1px solid ${KOYEB.border}` }}
+                >
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <Flame className="w-4 h-4" style={{ color: KOYEB.orange }} />
                   </div>
-                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.mat_sequencia_dias}</p>
-                  <p className="text-xs text-text-muted">Dias</p>
+                  <p
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: KOYEB.textPrimary }}
+                  >
+                    {usuario.mat_sequencia_dias}
+                  </p>
+                  <p
+                    className="text-xs font-mono uppercase tracking-wider"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Dias
+                  </p>
                 </div>
                 <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 text-success mb-1">
-                    <TrendingUp className="w-4 h-4" />
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <TrendingUp className="w-4 h-4" style={{ color: KOYEB.primary }} />
                   </div>
-                  <p className="text-lg font-bold text-text-primary tabular-nums">{usuario.mat_questoes_total}</p>
-                  <p className="text-xs text-text-muted">Questões</p>
+                  <p
+                    className="text-lg font-bold font-mono tabular-nums"
+                    style={{ color: KOYEB.textPrimary }}
+                  >
+                    {usuario.mat_questoes_total}
+                  </p>
+                  <p
+                    className="text-xs font-mono uppercase tracking-wider"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Questoes
+                  </p>
                 </div>
               </div>
-            </Card>
+            </button>
           )}
         </div>
 
         {/* Dica */}
-        <div className="mt-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
-          <Card padding="sm" className="bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
-                <Flame className="w-5 h-5 text-orange-400" />
-              </div>
-              <p className="text-sm text-orange-100/90">
-                💡 Estude todos os dias para manter sua <strong className="text-orange-300">sequência</strong> ativa!
-              </p>
+        <div className="mt-8">
+          <div
+            className="rounded-2xl p-4 flex items-center gap-3"
+            style={{
+              background: 'rgba(255, 107, 53, 0.15)',
+              border: `1px solid rgba(255, 107, 53, 0.3)`,
+            }}
+          >
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(255, 107, 53, 0.2)' }}
+            >
+              <Flame className="w-5 h-5" style={{ color: KOYEB.orange }} />
             </div>
-          </Card>
+            <p className="text-sm" style={{ color: 'rgba(255, 200, 180, 0.9)' }}>
+              Estude todos os dias para manter sua{' '}
+              <strong style={{ color: KOYEB.orange }}>sequencia</strong> ativa!
+            </p>
+          </div>
         </div>
       </main>
     </div>

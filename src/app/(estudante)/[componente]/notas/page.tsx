@@ -11,9 +11,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Clock,
-  Zap,
   Trophy,
-  Flame,
   ChevronRight,
 } from 'lucide-react'
 import {
@@ -33,7 +31,7 @@ import Loading from '@/components/ui/Loading'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SISTEMA DE NOTAS 2025 - UI OTIMIZADA
+// SISTEMA DE NOTAS 2025 - DESIGN KOYEB
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface NotaBimestre {
@@ -94,6 +92,23 @@ interface Estatisticas {
   projecao_nota: number
 }
 
+// Cores Koyeb
+const KOYEB = {
+  bg: '#0D0D14',
+  bgCard: '#1A1A2E',
+  bgElevated: '#222238',
+  bgDark: '#12121C',
+  primary: '#00FF88',
+  accent: '#00D4FF',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#8B8B9A',
+  textMuted: '#5A5A6E',
+  border: 'rgba(255,255,255,0.05)',
+  borderHover: 'rgba(0, 255, 136, 0.2)',
+  success: '#00FF88',
+  warning: '#FFB800',
+  danger: '#FF4757',
+}
 
 export default function NotasPage() {
   const router = useRouter()
@@ -188,212 +203,504 @@ export default function NotasPage() {
   }, [componente, buscarNotas])
 
   const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
-  const chartColor = isFisica ? '#06b6d4' : '#a855f7'
-  const chartColorLight = isFisica ? '#22d3ee' : '#c084fc'
 
-  const getNotaColor = (nota: number) => {
-    if (nota >= 7) return 'text-emerald-400'
-    if (nota >= 6) return 'text-green-400'
-    if (nota >= 5) return 'text-yellow-400'
-    return 'text-red-400'
-  }
-
-  const getStatusBadge = (status: string) => {
-    const config: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
-      aprovado: { icon: <CheckCircle2 className="w-3 h-3" />, label: 'Aprovado', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-      reprovado: { icon: <AlertTriangle className="w-3 h-3" />, label: 'Reprovado', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
-      recuperacao: { icon: <RefreshCw className="w-3 h-3" />, label: 'Recuperação', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-      em_andamento: { icon: <Clock className="w-3 h-3" />, label: 'Em Andamento', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  const getStatusConfig = (status: string, nota: number) => {
+    if (nota >= 6) {
+      return {
+        icon: <CheckCircle2 className="w-4 h-4" />,
+        label: 'Aprovado',
+        bg: 'rgba(0, 255, 136, 0.1)',
+        border: 'rgba(0, 255, 136, 0.3)',
+        color: KOYEB.success,
+      }
     }
-    const { icon, label, color } = config[status] || config.em_andamento
-    return (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border ${color}`}>
-        {icon} {label}
-      </span>
-    )
+
+    const config: Record<string, { icon: React.ReactNode; label: string; bg: string; border: string; color: string }> = {
+      aprovado: { icon: <CheckCircle2 className="w-4 h-4" />, label: 'Aprovado', bg: 'rgba(0, 255, 136, 0.1)', border: 'rgba(0, 255, 136, 0.3)', color: KOYEB.success },
+      reprovado: { icon: <AlertTriangle className="w-4 h-4" />, label: 'Em recuperação', bg: 'rgba(255, 71, 87, 0.1)', border: 'rgba(255, 71, 87, 0.3)', color: KOYEB.danger },
+      recuperacao: { icon: <RefreshCw className="w-4 h-4" />, label: 'Recuperação', bg: 'rgba(255, 184, 0, 0.1)', border: 'rgba(255, 184, 0, 0.3)', color: KOYEB.warning },
+      em_andamento: { icon: <Clock className="w-4 h-4" />, label: 'Em Andamento', bg: 'rgba(0, 212, 255, 0.1)', border: 'rgba(0, 212, 255, 0.3)', color: KOYEB.accent },
+    }
+    return config[status] || config.em_andamento
   }
 
   const dadosGrafico = evolucaoDiaria.length > 15
     ? evolucaoDiaria.filter((_, i) => i % Math.ceil(evolucaoDiaria.length / 15) === 0 || i === evolucaoDiaria.length - 1)
     : evolucaoDiaria
 
+  // Calcular metas
+  const getMetas = (nota: number) => {
+    const metas = []
+
+    // Meta 6.0 - Aprovação
+    metas.push({
+      done: nota >= 6,
+      text: 'Atingir 6.0 (aprovação)',
+      faltam: nota >= 6 ? 0 : Math.ceil((6 - nota) / 0.05),
+    })
+
+    // Meta 8.0
+    metas.push({
+      done: nota >= 8,
+      text: nota >= 8 ? 'Atingir 8.0' : `Atingir 8.0 — faltam ${Math.ceil((8 - nota) / 0.05)} acertos`,
+      faltam: nota >= 8 ? 0 : Math.ceil((8 - nota) / 0.05),
+    })
+
+    // Meta 10.0
+    metas.push({
+      done: nota >= 10,
+      text: nota >= 10 ? 'Nota máxima!' : `Atingir 10.0 — faltam ${Math.ceil((10 - nota) / 0.05)} acertos`,
+      faltam: nota >= 10 ? 0 : Math.ceil((10 - nota) / 0.05),
+    })
+
+    return metas
+  }
+
   if (loading) return <Loading fullScreen componente={componente} />
 
+  const progresso = notaAtual ? (notaAtual.nota_final / 10) * 100 : 0
+  const statusConfig = notaAtual ? getStatusConfig(notaAtual.status, notaAtual.nota_final) : null
+
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Header Compacto */}
-      <header className={`${bgColor} text-white px-3 pt-3 pb-12`}>
-        <div className="max-w-lg mx-auto">
-          {/* Nav */}
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={() => router.push(`/${componente}/menu`)} className="p-1.5 -ml-1 rounded-lg hover:bg-white/20">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-[10px] text-white/70 font-mono">LIVE</span>
-            </div>
-            <button onClick={() => buscarNotas(false)} disabled={atualizando} className="p-1.5 rounded-lg hover:bg-white/20">
-              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
-            </button>
+    <div
+      className="min-h-screen"
+      style={{
+        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
+    >
+      {/* Header */}
+      <header className="text-center pt-6 pb-4 px-6">
+        {/* Nav */}
+        <div className="flex items-center justify-between mb-6 max-w-lg mx-auto">
+          <button
+            onClick={() => router.push(`/${componente}/menu`)}
+            className="p-2 rounded-lg transition-all hover:bg-white/10"
+          >
+            <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.textSecondary }} />
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: KOYEB.primary }}
+            />
+            <span
+              className="font-mono text-xs tracking-wider uppercase"
+              style={{ color: KOYEB.textSecondary }}
+            >
+              Live
+            </span>
           </div>
 
-          {/* Nota Principal */}
-          {notaAtual && (
-            <div className={`text-center transition-all duration-300 ${animandoNota ? 'scale-105' : ''}`}>
-              <p className="text-[11px] text-white/70 mb-0.5">
-                {notaAtual.bimestre}º Bimestre • {isFisica ? 'Física' : 'Matemática'}
-              </p>
-              <div className="relative inline-block">
-                <span className={`text-5xl font-bold tabular-nums ${animandoNota ? 'text-emerald-300' : ''}`}>
-                  {notaAtual.nota_final.toFixed(1)}
-                </span>
-                {animandoNota && notaAnterior !== null && (
-                  <span className="absolute -right-12 top-1 text-xs text-emerald-300 font-bold animate-bounce">
-                    +{(notaAtual.nota_final - notaAnterior).toFixed(2)}
-                  </span>
-                )}
-              </div>
-              <div className="mt-1">{getStatusBadge(notaAtual.status)}</div>
-            </div>
-          )}
+          <button
+            onClick={() => buscarNotas(false)}
+            disabled={atualizando}
+            className="p-2 rounded-lg transition-all hover:bg-white/10"
+          >
+            <RefreshCw
+              className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`}
+              style={{ color: KOYEB.textSecondary }}
+            />
+          </button>
         </div>
+
+        {/* Badge Bimestre */}
+        {notaAtual && (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4"
+            style={{ background: KOYEB.bgElevated }}
+          >
+            <span
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ background: KOYEB.primary }}
+            />
+            <span
+              className="font-mono text-xs tracking-wider uppercase"
+              style={{ color: KOYEB.textSecondary }}
+            >
+              {notaAtual.bimestre}º Bimestre • 2025
+            </span>
+          </div>
+        )}
+
+        {/* Título */}
+        <p
+          className="font-mono text-sm font-bold tracking-widest uppercase mb-1"
+          style={{ color: KOYEB.textSecondary }}
+        >
+          Minhas Notas
+        </p>
+        <p className="font-mono text-2xl font-bold tracking-wide">
+          <span style={{ color: KOYEB.textPrimary }}>{isFisica ? 'Física' : 'Matemática'}</span>
+        </p>
       </header>
 
       {/* Conteúdo */}
-      <main className="max-w-lg mx-auto px-3 -mt-6 pb-6 space-y-3">
+      <main className="max-w-lg mx-auto px-4 pb-8 space-y-4">
         {erro ? (
-          <div className="bg-dark-surface rounded-xl p-6 text-center border border-border">
-            <WifiOff className="w-10 h-10 text-red-400 mx-auto mb-3" />
-            <p className="text-sm text-text-secondary mb-4">{erro}</p>
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: KOYEB.danger }} />
+            <p className="text-sm mb-6" style={{ color: KOYEB.textSecondary }}>{erro}</p>
             <Button variant="primary" size="sm" onClick={() => buscarNotas(false)}>
               Tentar Novamente
             </Button>
           </div>
         ) : notaAtual ? (
           <>
-            {/* Grid: Progresso + Composição */}
-            <div className="grid grid-cols-2 gap-2">
-              {/* Progresso */}
-              <div className="bg-dark-surface rounded-xl p-3 border border-border">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Target className="w-3.5 h-3.5 text-text-muted" />
-                  <span className="text-[11px] text-text-muted">Progresso</span>
+            {/* Card Nota Principal */}
+            <div
+              className={`rounded-2xl p-6 relative overflow-hidden transition-all duration-300 ${animandoNota ? 'scale-[1.02]' : ''}`}
+              style={{
+                background: KOYEB.bgCard,
+                border: `1px solid ${KOYEB.border}`,
+                borderTop: `3px solid ${KOYEB.primary}`,
+              }}
+            >
+              <p
+                className="font-mono text-xs font-bold tracking-widest uppercase mb-4"
+                style={{ color: KOYEB.textMuted }}
+              >
+                Nota Atual
+              </p>
+
+              <div className="text-center">
+                <div className="relative inline-block">
+                  <span
+                    className={`font-mono text-7xl font-bold transition-all duration-300 ${animandoNota ? 'scale-110' : ''}`}
+                    style={{
+                      color: KOYEB.textPrimary,
+                      textShadow: `0 0 40px rgba(0, 255, 136, 0.3)`,
+                    }}
+                  >
+                    {notaAtual.nota_final.toFixed(2)}
+                  </span>
+                  <span
+                    className="font-mono text-2xl"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    /10
+                  </span>
+
+                  {animandoNota && notaAnterior !== null && (
+                    <span
+                      className="absolute -right-16 top-4 font-mono text-sm font-bold animate-bounce"
+                      style={{ color: KOYEB.primary }}
+                    >
+                      +{(notaAtual.nota_final - notaAnterior).toFixed(2)}
+                    </span>
+                  )}
                 </div>
-                <p className="text-2xl font-bold text-text-primary">
-                  {notaAtual.questoes_respondidas}
-                  <span className="text-sm text-text-muted font-normal">/{notaAtual.meta_questoes}</span>
-                </p>
-                <div className="h-1.5 bg-dark-elevated rounded-full mt-2 overflow-hidden">
-                  <div className={`h-full rounded-full ${bgColor}`} style={{ width: `${Math.min(notaAtual.percentual_questoes, 100)}%` }} />
-                </div>
-                <p className="text-[10px] text-text-muted mt-1">{notaAtual.percentual_questoes}% concluído</p>
+
+                {/* Status Badge */}
+                {statusConfig && (
+                  <div className="mt-4">
+                    <span
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-xs font-bold tracking-wider uppercase"
+                      style={{
+                        background: statusConfig.bg,
+                        border: `1px solid ${statusConfig.border}`,
+                        color: statusConfig.color,
+                      }}
+                    >
+                      {statusConfig.icon} {statusConfig.label}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Composição - Nova Fórmula */}
-              <div className="bg-dark-surface rounded-xl p-3 border border-border">
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Zap className="w-3.5 h-3.5 text-text-muted" />
-                  <span className="text-[11px] text-text-muted">Composição</span>
+              {/* Progress Bar */}
+              <div className="mt-6">
+                <div className="flex justify-between mb-2">
+                  <span className="text-xs" style={{ color: KOYEB.textMuted }}>
+                    Progresso para nota 10
+                  </span>
+                  <span
+                    className="font-mono text-xs font-bold"
+                    style={{ color: KOYEB.primary }}
+                  >
+                    {progresso.toFixed(0)}%
+                  </span>
                 </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-text-muted flex items-center gap-1">
-                      <Target className="w-3 h-3 text-cyan-400" /> Questões
-                    </span>
-                    <span className={getNotaColor(notaAtual.nota_questoes || 0)}>
-                      {(notaAtual.nota_questoes || 0).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-text-muted flex items-center gap-1">
-                      <Flame className="w-3 h-3 text-orange-400" /> Revisão
-                    </span>
-                    <span className="text-emerald-400">+{(notaAtual.nota_revisao || 0).toFixed(2)}</span>
-                  </div>
-                  <div className="border-t border-border pt-1 flex justify-between text-xs font-medium">
-                    <span className="text-text-primary">Total</span>
-                    <span className={getNotaColor(notaAtual.nota_final)}>{notaAtual.nota_final.toFixed(2)}</span>
-                  </div>
+                <div
+                  className="h-2 rounded-full overflow-hidden"
+                  style={{ background: KOYEB.bgDark }}
+                >
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${progresso}%`,
+                      background: `linear-gradient(90deg, ${KOYEB.primary}, ${KOYEB.accent})`,
+                    }}
+                  />
                 </div>
               </div>
             </div>
 
-            {/* Grid: Stats compactas - Nova Fórmula */}
-            <div className="grid grid-cols-4 gap-2">
+            {/* Grid Composição */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Questões */}
+              <div
+                className="rounded-xl p-5 transition-all duration-300 hover:translate-y-[-2px] cursor-pointer"
+                style={{
+                  background: KOYEB.bgCard,
+                  border: `1px solid ${KOYEB.border}`,
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3"
+                  style={{ background: 'rgba(0, 255, 136, 0.1)' }}
+                >
+                  <Target className="w-5 h-5" style={{ color: KOYEB.primary }} />
+                </div>
+                <p
+                  className="font-mono text-[10px] font-bold tracking-widest uppercase mb-1"
+                  style={{ color: KOYEB.textMuted }}
+                >
+                  Questões
+                </p>
+                <p
+                  className="font-mono text-3xl font-bold mb-1"
+                  style={{ color: KOYEB.primary }}
+                >
+                  {(notaAtual.nota_questoes || 0).toFixed(2)}
+                </p>
+                <p className="text-xs" style={{ color: KOYEB.textSecondary }}>
+                  <strong style={{ color: KOYEB.textPrimary }}>{notaAtual.acertos_questoes || 0}</strong> acertos
+                </p>
+              </div>
+
+              {/* Revisão */}
+              <div
+                className="rounded-xl p-5 transition-all duration-300 hover:translate-y-[-2px] cursor-pointer"
+                style={{
+                  background: KOYEB.bgCard,
+                  border: `1px solid ${KOYEB.border}`,
+                }}
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-xl mb-3"
+                  style={{ background: 'rgba(0, 212, 255, 0.1)' }}
+                >
+                  <RefreshCw className="w-5 h-5" style={{ color: KOYEB.accent }} />
+                </div>
+                <p
+                  className="font-mono text-[10px] font-bold tracking-widest uppercase mb-1"
+                  style={{ color: KOYEB.textMuted }}
+                >
+                  Revisão
+                </p>
+                <p
+                  className="font-mono text-3xl font-bold mb-1"
+                  style={{ color: KOYEB.accent }}
+                >
+                  {(notaAtual.nota_revisao || 0).toFixed(2)}
+                </p>
+                <p className="text-xs" style={{ color: KOYEB.textSecondary }}>
+                  <strong style={{ color: KOYEB.textPrimary }}>{notaAtual.acertos_revisao || 0}</strong> acertos
+                </p>
+              </div>
+            </div>
+
+            {/* Detalhes */}
+            <div
+              className="rounded-2xl p-5"
+              style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+            >
+              <p
+                className="font-mono text-[10px] font-bold tracking-widest uppercase mb-4"
+                style={{ color: KOYEB.textMuted }}
+              >
+                Detalhes
+              </p>
+
               {[
-                { label: 'Acertos', value: notaAtual.acertos_questoes || 0, color: 'text-cyan-400' },
-                { label: 'Revisão', value: notaAtual.acertos_revisao || 0, color: 'text-orange-400' },
-                { label: 'Semana', value: `${notaAtual.questoes_semana}/15`, color: notaAtual.questoes_semana >= 15 ? 'text-red-400' : 'text-emerald-400' },
-                { label: 'Restam', value: `${notaAtual.dias_restantes}d`, color: 'text-amber-400' },
-              ].map((stat, i) => (
-                <div key={i} className="bg-dark-surface rounded-lg p-2 text-center border border-border">
-                  <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
-                  <p className="text-[9px] text-text-muted">{stat.label}</p>
+                { icon: <Target className="w-4 h-4" />, label: 'Questões respondidas', value: notaAtual.questoes_respondidas.toString() },
+                { icon: <CheckCircle2 className="w-4 h-4" />, label: 'Taxa de acerto', value: `${Math.round((notaAtual.acertos_questoes / Math.max(notaAtual.questoes_respondidas, 1)) * 100)}%`, color: KOYEB.primary },
+                { icon: <RefreshCw className="w-4 h-4" />, label: 'Revisões feitas', value: (notaAtual.acertos_revisao || 0).toString() },
+                { icon: <TrendingUp className="w-4 h-4" />, label: 'Esta semana', value: `${notaAtual.questoes_semana}/15`, color: notaAtual.questoes_semana >= 15 ? KOYEB.danger : KOYEB.primary },
+                { icon: <Clock className="w-4 h-4" />, label: 'Dias restantes', value: notaAtual.dias_restantes.toString(), color: KOYEB.warning },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between py-3"
+                  style={{ borderBottom: i < 4 ? `1px solid ${KOYEB.border}` : 'none' }}
+                >
+                  <span
+                    className="flex items-center gap-2 text-sm"
+                    style={{ color: KOYEB.textSecondary }}
+                  >
+                    <span style={{ color: KOYEB.textMuted }}>{item.icon}</span>
+                    {item.label}
+                  </span>
+                  <span
+                    className="font-mono text-sm font-semibold"
+                    style={{ color: item.color || KOYEB.textPrimary }}
+                  >
+                    {item.value}
+                  </span>
                 </div>
               ))}
             </div>
 
-            {/* Gráfico Evolução - Compacto */}
-            {dadosGrafico.length > 0 && (
-              <div className="bg-dark-surface rounded-xl p-3 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-text-muted" />
-                    <span className="text-[11px] text-text-muted">Evolução</span>
+            {/* Metas */}
+            <div
+              className="rounded-2xl p-5"
+              style={{
+                background: `linear-gradient(135deg, ${KOYEB.bgCard} 0%, rgba(0, 255, 136, 0.05) 100%)`,
+                border: `1px solid rgba(0, 255, 136, 0.1)`,
+              }}
+            >
+              <p
+                className="font-mono text-[10px] font-bold tracking-widest uppercase mb-4"
+                style={{ color: KOYEB.primary }}
+              >
+                Próximas Metas
+              </p>
+
+              {getMetas(notaAtual.nota_final).map((meta, i) => (
+                <div key={i} className="flex items-center gap-4 py-2">
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                    style={{
+                      background: meta.done ? KOYEB.primary : 'transparent',
+                      border: `2px solid ${meta.done ? KOYEB.primary : KOYEB.textMuted}`,
+                      color: meta.done ? KOYEB.bg : KOYEB.textMuted,
+                    }}
+                  >
+                    {meta.done && '✓'}
                   </div>
-                  <div className="flex items-center gap-2 text-[9px] text-text-muted">
+                  <span
+                    className="text-sm"
+                    style={{
+                      color: KOYEB.textSecondary,
+                      textDecoration: meta.done ? 'line-through' : 'none',
+                      opacity: meta.done ? 0.6 : 1,
+                    }}
+                  >
+                    {meta.text}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Gráfico Evolução */}
+            {dadosGrafico.length > 2 && (
+              <div
+                className="rounded-2xl p-5"
+                style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <p
+                    className="font-mono text-[10px] font-bold tracking-widest uppercase"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Evolução
+                  </p>
+                  <div className="flex items-center gap-3 text-[10px]" style={{ color: KOYEB.textMuted }}>
                     <span className="flex items-center gap-1">
-                      <span className="w-2 h-0.5 rounded" style={{ backgroundColor: chartColor }} /> Nota
+                      <span className="w-3 h-0.5 rounded" style={{ background: KOYEB.primary }} /> Nota
                     </span>
                     <span className="flex items-center gap-1">
-                      <span className="w-2 h-0.5 rounded bg-amber-500 opacity-50" /> Min 6.0
+                      <span className="w-3 h-0.5 rounded" style={{ background: KOYEB.warning, opacity: 0.5 }} /> Min 6.0
                     </span>
                   </div>
                 </div>
-                <div className="h-28">
+                <div className="h-32">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dadosGrafico} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
                       <defs>
-                        <linearGradient id="colorNota" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={chartColor} stopOpacity={0.3} />
-                          <stop offset="95%" stopColor={chartColor} stopOpacity={0} />
+                        <linearGradient id="colorNotaKoyeb" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={KOYEB.primary} stopOpacity={0.3} />
+                          <stop offset="95%" stopColor={KOYEB.primary} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="dataFormatada" tick={{ fill: '#6b7280', fontSize: 8 }} axisLine={false} tickLine={false} />
-                      <YAxis domain={[0, 10]} tick={{ fill: '#6b7280', fontSize: 8 }} axisLine={false} tickLine={false} ticks={[0, 5, 10]} />
+                      <XAxis
+                        dataKey="dataFormatada"
+                        tick={{ fill: KOYEB.textMuted, fontSize: 9, fontFamily: 'Space Mono, monospace' }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <YAxis
+                        domain={[0, 10]}
+                        tick={{ fill: KOYEB.textMuted, fontSize: 9, fontFamily: 'Space Mono, monospace' }}
+                        axisLine={false}
+                        tickLine={false}
+                        ticks={[0, 5, 10]}
+                      />
                       <Tooltip
-                        contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, fontSize: 11 }}
-                        labelStyle={{ color: '#9ca3af' }}
+                        contentStyle={{
+                          background: KOYEB.bgDark,
+                          border: `1px solid ${KOYEB.border}`,
+                          borderRadius: 8,
+                          fontSize: 11,
+                          fontFamily: 'Space Mono, monospace',
+                        }}
+                        labelStyle={{ color: KOYEB.textSecondary }}
                         formatter={(value) => [typeof value === 'number' ? value.toFixed(2) : value, 'Nota']}
                       />
-                      <ReferenceLine y={6} stroke="#f59e0b" strokeDasharray="3 3" strokeOpacity={0.4} />
-                      <Area type="monotone" dataKey="nota" stroke={chartColor} strokeWidth={1.5} fill="url(#colorNota)" />
+                      <ReferenceLine y={6} stroke={KOYEB.warning} strokeDasharray="3 3" strokeOpacity={0.4} />
+                      <Area
+                        type="monotone"
+                        dataKey="nota"
+                        stroke={KOYEB.primary}
+                        strokeWidth={2}
+                        fill="url(#colorNotaKoyeb)"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </div>
             )}
 
-            {/* Gráfico Semanal - Compacto */}
+            {/* Gráfico Semanal */}
             {progressoSemanal.length > 0 && (
-              <div className="bg-dark-surface rounded-xl p-3 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] text-text-muted">Questões/Semana</span>
-                  <span className={`text-xs font-medium ${notaAtual.pode_responder ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div
+                className="rounded-2xl p-5"
+                style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <p
+                    className="font-mono text-[10px] font-bold tracking-widest uppercase"
+                    style={{ color: KOYEB.textMuted }}
+                  >
+                    Questões/Semana
+                  </p>
+                  <span
+                    className="font-mono text-xs font-medium"
+                    style={{ color: notaAtual.pode_responder ? KOYEB.primary : KOYEB.danger }}
+                  >
                     S{notaAtual.semana_atual}: {notaAtual.questoes_semana}/15
                   </span>
                 </div>
-                <div className="h-20">
+                <div className="h-24">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={progressoSemanal} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-                      <XAxis dataKey="semana" tick={{ fill: '#6b7280', fontSize: 8 }} axisLine={false} tickLine={false} tickFormatter={(v) => `S${v}`} />
-                      <YAxis domain={[0, 15]} tick={{ fill: '#6b7280', fontSize: 8 }} axisLine={false} tickLine={false} ticks={[0, 15]} />
-                      <ReferenceLine y={15} stroke="#ef4444" strokeDasharray="2 2" strokeOpacity={0.3} />
-                      <Bar dataKey="questoes" radius={[3, 3, 0, 0]}>
+                      <XAxis
+                        dataKey="semana"
+                        tick={{ fill: KOYEB.textMuted, fontSize: 9, fontFamily: 'Space Mono, monospace' }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(v) => `S${v}`}
+                      />
+                      <YAxis
+                        domain={[0, 15]}
+                        tick={{ fill: KOYEB.textMuted, fontSize: 9, fontFamily: 'Space Mono, monospace' }}
+                        axisLine={false}
+                        tickLine={false}
+                        ticks={[0, 15]}
+                      />
+                      <ReferenceLine y={15} stroke={KOYEB.danger} strokeDasharray="2 2" strokeOpacity={0.3} />
+                      <Bar dataKey="questoes" radius={[4, 4, 0, 0]}>
                         {progressoSemanal.map((entry, index) => (
-                          <Cell key={index} fill={entry.semana === notaAtual.semana_atual ? chartColorLight : chartColor} opacity={entry.semana === notaAtual.semana_atual ? 1 : 0.6} />
+                          <Cell
+                            key={index}
+                            fill={entry.semana === notaAtual.semana_atual ? KOYEB.primary : KOYEB.accent}
+                            opacity={entry.semana === notaAtual.semana_atual ? 1 : 0.5}
+                          />
                         ))}
                       </Bar>
                     </BarChart>
@@ -402,75 +709,56 @@ export default function NotasPage() {
               </div>
             )}
 
-            {/* Terminal: Nova Fórmula */}
-            <div className="terminal-box">
-              <div className="terminal-header">
-                <span className="dot dot-red" />
-                <span className="dot dot-yellow" />
-                <span className="dot dot-green" />
-                <span className="title">formula.sh</span>
-              </div>
-              <div className="terminal-body space-y-1">
-                <p className="comment"># Nova Fórmula de Notas</p>
-                <p className="cmd">$ NOTA = (Acertos÷12) + (Revisão×0.05)</p>
-                <p className="muted mt-2"># Seus números</p>
-                <p className="success">$ Acertos Questões: {notaAtual.acertos_questoes || 0} → +{(notaAtual.nota_questoes || 0).toFixed(2)}</p>
-                <p className="success">$ Acertos Revisão: {notaAtual.acertos_revisao || 0} → +{(notaAtual.nota_revisao || 0).toFixed(2)}</p>
-                <p className="warning mt-2"># Dica</p>
-                <p className="cmd">$ Revisão não tem limite! Cada acerto = +0.05</p>
-                {notaAtual.nota_final < 10 && (
-                  <p className="muted">$ Para nota 10: mais {Math.ceil((10 - notaAtual.nota_final) / 0.05)} acertos em revisão</p>
-                )}
-              </div>
-            </div>
-
-            {/* Recuperação ou Dicas */}
-            {notaAtual.em_recuperacao ? (
-              <div className="terminal-box terminal-amber">
-                <div className="terminal-header">
-                  <span className="dot dot-red" />
-                  <span className="dot dot-yellow" />
-                  <span className="dot dot-green" />
-                  <span className="title">recuperacao.sh</span>
-                </div>
-                <div className="terminal-body">
-                  <p className="comment-amber"># Período de Recuperação</p>
-                  <p className="cmd">$ Pendentes: {notaAtual.questoes_pendentes} | Feitas: {notaAtual.questoes_recuperacao}</p>
-                  <p className="success">$ SEM LIMITE - Faça todas!</p>
-                </div>
-              </div>
-            ) : notaAtual.nota_final < 10 && (
-              <div className="bg-dark-surface rounded-xl p-3 border border-border">
-                <p className="text-[11px] text-text-muted mb-2">💡 Como aumentar sua nota</p>
-                <div className="space-y-1 text-xs text-text-secondary">
-                  <p>• <span className="text-cyan-400">Questões:</span> Responda mais questões no modo Estudar (15/semana)</p>
-                  <p>• <span className="text-orange-400">Revisão:</span> Refaça questões erradas (sem limite!)</p>
-                  <p>• <span className="text-amber-400">Desafio:</span> Faça quantos desafios quiser para pontos</p>
-                </div>
-              </div>
-            )}
-
-            {/* Nota 10 */}
+            {/* Nota 10 - Celebração */}
             {notaAtual.nota_final >= 10 && (
-              <div className="bg-gradient-to-r from-amber-500/10 to-emerald-500/10 rounded-xl p-4 text-center border border-amber-500/20">
-                <Trophy className="w-10 h-10 mx-auto mb-2 text-amber-400" />
-                <p className="text-sm font-bold text-emerald-400">Nota Máxima!</p>
+              <div
+                className="rounded-2xl p-6 text-center"
+                style={{
+                  background: `linear-gradient(135deg, rgba(255, 184, 0, 0.1) 0%, rgba(0, 255, 136, 0.1) 100%)`,
+                  border: `1px solid rgba(255, 184, 0, 0.2)`,
+                }}
+              >
+                <Trophy className="w-12 h-12 mx-auto mb-3" style={{ color: KOYEB.warning }} />
+                <p
+                  className="font-mono text-lg font-bold tracking-wide"
+                  style={{ color: KOYEB.primary }}
+                >
+                  Nota Máxima Atingida!
+                </p>
               </div>
             )}
 
-            {/* Botão Estudar */}
-            <Button
-              variant={isFisica ? 'fisica' : 'matematica'}
-              className="w-full"
-              onClick={() => router.push(`/${componente}/estudar`)}
-              disabled={!notaAtual.pode_responder}
-            >
-              {notaAtual.pode_responder ? (
-                <>Estudar <ChevronRight className="w-4 h-4 ml-1" /></>
-              ) : (
-                <>Limite Semanal Atingido</>
-              )}
-            </Button>
+            {/* Botões */}
+            <div className="grid grid-cols-2 gap-4 pt-2">
+              <button
+                onClick={() => router.push(`/${componente}/estudar`)}
+                disabled={!notaAtual.pode_responder}
+                className="flex items-center justify-center gap-2 py-4 px-6 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all duration-300 hover:translate-y-[-2px] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: notaAtual.pode_responder ? KOYEB.primary : KOYEB.textMuted,
+                  color: KOYEB.bg,
+                  boxShadow: notaAtual.pode_responder ? `0 4px 20px rgba(0, 255, 136, 0.3)` : 'none',
+                }}
+              >
+                {notaAtual.pode_responder ? (
+                  <>Estudar <ChevronRight className="w-4 h-4" /></>
+                ) : (
+                  'Limite Atingido'
+                )}
+              </button>
+
+              <button
+                onClick={() => router.push(`/${componente}/revisar`)}
+                className="flex items-center justify-center gap-2 py-4 px-6 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all duration-300 hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid rgba(255, 255, 255, 0.2)`,
+                  color: KOYEB.textPrimary,
+                }}
+              >
+                <RefreshCw className="w-4 h-4" /> Revisão
+              </button>
+            </div>
           </>
         ) : null}
       </main>

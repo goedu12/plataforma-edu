@@ -2,11 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, AlertTriangle } from 'lucide-react'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
+import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, AlertTriangle, ArrowRight } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
-import Badge from '@/components/ui/Badge'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
 
@@ -199,164 +196,208 @@ export default function DesafioPage() {
     return `${min}:${seg.toString().padStart(2, '0')}`
   }
 
-  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  const tempoPerigo = tempoRestante <= 60
 
   if (loading && !questoes.length) {
     return <Loading fullScreen componente={componente} />
   }
 
-  // Tela de Resultado
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TELA DE RESULTADO - ESTILO KOYEB
+  // ═══════════════════════════════════════════════════════════════════════════
   if (status === 'RESULTADO' && resultado) {
     const porcentagem = Math.round((resultado.acertos / resultado.total) * 100)
     const isPerfeito = resultado.acertos === resultado.total
 
     return (
-      <div className="min-h-screen bg-calm-bg pb-8">
-        <header className={`${bgColor} text-white px-4 py-4`}>
-          <div className="max-w-2xl mx-auto flex items-center justify-center gap-2">
-            <Trophy className="w-5 h-5" />
-            <h1 className="font-semibold">Resultado do Desafio</h1>
+      <div className="min-h-screen" style={{ background: '#1A1A2E' }}>
+        {/* Header Terminal */}
+        <header className="px-4 py-4 border-b" style={{ borderColor: '#3D3D4A' }}>
+          <div className="max-w-2xl mx-auto flex items-center justify-center gap-3">
+            <Trophy className="w-5 h-5" style={{ color: '#00FF88' }} />
+            <h1 className="font-mono text-sm font-bold tracking-wider uppercase" style={{ color: '#FFFFFF' }}>
+              RESULTADO DO DESAFIO
+            </h1>
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-4 pt-6">
-          <Card className="text-center py-8 animate-slide-up">
-            <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center ${
-              isPerfeito ? 'bg-yellow-100' : porcentagem >= 60 ? 'bg-green-100' : 'bg-orange-100'
-            }`}>
-              {isPerfeito ? (
-                <Trophy className="w-10 h-10 text-yellow-500" />
-              ) : porcentagem >= 60 ? (
-                <CheckCircle2 className="w-10 h-10 text-green-500" />
-              ) : (
-                <AlertTriangle className="w-10 h-10 text-orange-500" />
-              )}
+        <main className="max-w-2xl mx-auto px-4 pt-8 pb-8">
+          {/* Terminal Card - Resultado */}
+          <div className="rounded-xl overflow-hidden" style={{ background: '#2D2D3A' }}>
+            {/* Terminal Header */}
+            <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+              <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>resultado.sh</span>
             </div>
 
-            <h2 className="text-3xl font-bold text-text-primary mb-2">
-              {resultado.acertos}/{resultado.total}
-            </h2>
-            <p className="text-text-secondary mb-4">
-              {isPerfeito ? 'Perfeito! Você acertou todas!' :
-               porcentagem >= 60 ? 'Bom trabalho!' : 'Continue praticando!'}
-            </p>
+            {/* Terminal Body */}
+            <div className="p-6 font-mono text-sm">
+              <p style={{ color: '#A0A0A0' }}># Desafio finalizado</p>
+              <div className="mt-4 text-center">
+                <p className="text-6xl font-bold" style={{ color: isPerfeito ? '#00FF88' : porcentagem >= 60 ? '#00FF88' : '#FFBD2E' }}>
+                  {resultado.acertos}/{resultado.total}
+                </p>
+                <p className="mt-2 text-lg" style={{ color: '#A0A0A0' }}>
+                  {isPerfeito ? '$ PERFEITO!' : porcentagem >= 60 ? '$ Bom trabalho!' : '$ Continue praticando!'}
+                </p>
+              </div>
 
-            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-lg ${bgColor} text-white`}>
-              +{resultado.pontos_ganhos} pontos
+              <div className="mt-6 pt-4" style={{ borderTop: '1px solid #3D3D4A' }}>
+                <div className="flex items-center justify-center gap-2">
+                  <span style={{ color: '#00FF88' }}>→</span>
+                  <span className="text-xl font-bold" style={{ color: '#00FF88' }}>
+                    +{resultado.pontos_ganhos} PONTOS
+                  </span>
+                </div>
+                {resultado.bonus_perfeito && (
+                  <p className="text-center mt-2 text-xs" style={{ color: '#FFBD2E' }}>
+                    Incluindo bônus de acerto perfeito!
+                  </p>
+                )}
+              </div>
             </div>
+          </div>
 
-            {resultado.bonus_perfeito && (
-              <p className="text-sm text-yellow-600 mt-2">
-                Incluindo bônus de acerto perfeito!
-              </p>
-            )}
-          </Card>
-
-          {/* Detalhes das respostas */}
+          {/* Lista de Respostas */}
           <div className="mt-6 space-y-3">
-            <h3 className="font-semibold text-text-primary">Suas Respostas:</h3>
+            <p className="font-mono text-xs uppercase tracking-wider" style={{ color: '#A0A0A0' }}>
+              SUAS RESPOSTAS
+            </p>
             {resultado.resultados.map((r, index) => (
-              <Card
+              <div
                 key={r.questao_id}
-                className={`flex items-start gap-3 ${
-                  r.correta ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-                } border`}
+                className="rounded-lg p-4 flex items-start gap-3"
+                style={{
+                  background: '#2D2D3A',
+                  border: `1px solid ${r.correta ? '#00FF88' : '#FF5F56'}33`,
+                }}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  r.correta ? 'bg-green-500' : 'bg-red-500'
-                } text-white`}>
+                <div
+                  className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
+                  style={{ background: r.correta ? '#00FF8820' : '#FF5F5620' }}
+                >
                   {r.correta ? (
-                    <CheckCircle2 className="w-4 h-4" />
+                    <CheckCircle2 className="w-4 h-4" style={{ color: '#00FF88' }} />
                   ) : (
-                    <XCircle className="w-4 h-4" />
+                    <XCircle className="w-4 h-4" style={{ color: '#FF5F56' }} />
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-text-primary">
+                  <p className="font-mono text-sm font-medium" style={{ color: '#FFFFFF' }}>
                     Questão {index + 1}
                   </p>
-                  <p className="text-xs text-text-secondary">
-                    Sua resposta: {r.resposta_dada || 'Não respondida'} •
-                    Correta: {r.resposta_correta}
+                  <p className="font-mono text-xs mt-1" style={{ color: '#A0A0A0' }}>
+                    Sua: {r.resposta_dada || '—'} • Correta: {r.resposta_correta}
                   </p>
-                  {r.explicacao && !r.correta && (
-                    <p className="text-xs text-text-muted mt-1">{r.explicacao}</p>
-                  )}
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
 
-          <div className="mt-6 flex gap-3">
-            <Button variant="secondary" onClick={handleVoltar} className="flex-1">
-              Voltar ao Menu
-            </Button>
-          </div>
+          {/* Botão Voltar */}
+          <button
+            onClick={handleVoltar}
+            className="mt-8 w-full py-3 px-6 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
+            style={{
+              background: 'transparent',
+              border: '2px solid #00FF88',
+              color: '#00FF88',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#00FF88'
+              e.currentTarget.style.color = '#1A1A2E'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = '#00FF88'
+            }}
+          >
+            <span>▸</span> VOLTAR AO MENU
+          </button>
         </main>
       </div>
     )
   }
 
-  // Tela de Erro
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TELA DE ERRO - ESTILO KOYEB
+  // ═══════════════════════════════════════════════════════════════════════════
   if (status === 'ERRO' || status === 'SEM_QUESTOES') {
     return (
-      <div className="min-h-screen bg-calm-bg pb-8">
-        <header className={`${bgColor} text-white px-4 py-4`}>
+      <div className="min-h-screen" style={{ background: '#1A1A2E' }}>
+        <header className="px-4 py-4 border-b" style={{ borderColor: '#3D3D4A' }}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <button onClick={handleVoltar} className="p-2 -ml-2 rounded-xl hover:bg-white/20">
+            <button
+              onClick={handleVoltar}
+              className="p-2 -ml-2 rounded transition-colors"
+              style={{ color: '#A0A0A0' }}
+            >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              <h1 className="font-semibold">Modo Desafio</h1>
+              <Zap className="w-5 h-5" style={{ color: '#00FF88' }} />
+              <h1 className="font-mono text-sm font-bold tracking-wider uppercase" style={{ color: '#FFFFFF' }}>
+                MODO DESAFIO
+              </h1>
             </div>
             <div className="w-10" />
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-4 pt-6">
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
-              <WifiOff className="w-8 h-8 text-red-400" />
+        <main className="max-w-2xl mx-auto px-4 pt-8">
+          <div className="rounded-xl overflow-hidden" style={{ background: '#2D2D3A' }}>
+            <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+              <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>erro.sh</span>
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
-              {status === 'SEM_QUESTOES' ? 'Questões Insuficientes' : 'Erro'}
-            </h2>
-            <p className="text-text-secondary mb-6">{erro}</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={iniciarDesafio}>
-                <RefreshCw className="w-4 h-4 mr-2" />
-                Tentar Novamente
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
-                Voltar ao Menu
-              </Button>
+            <div className="p-8 text-center">
+              <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: '#FF5F56' }} />
+              <p className="font-mono text-lg font-bold" style={{ color: '#FFFFFF' }}>
+                {status === 'SEM_QUESTOES' ? 'QUESTÕES INSUFICIENTES' : 'ERRO'}
+              </p>
+              <p className="font-mono text-sm mt-2" style={{ color: '#A0A0A0' }}>{erro}</p>
+
+              <div className="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
+                <button
+                  onClick={iniciarDesafio}
+                  className="py-3 px-6 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+                  style={{
+                    background: 'transparent',
+                    border: '2px solid #A0A0A0',
+                    color: '#A0A0A0',
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4" /> TENTAR NOVAMENTE
+                </button>
+                <button
+                  onClick={handleVoltar}
+                  className="py-3 px-6 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+                  style={{
+                    background: 'transparent',
+                    border: '2px solid #00FF88',
+                    color: '#00FF88',
+                  }}
+                >
+                  <span>▸</span> VOLTAR
+                </button>
+              </div>
             </div>
-          </Card>
+          </div>
         </main>
       </div>
     )
   }
 
-  // Tela do Desafio em Andamento
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TELA DO DESAFIO EM ANDAMENTO - ESTILO KOYEB
+  // ═══════════════════════════════════════════════════════════════════════════
   const questaoAtualData = questoes[questaoAtual]
   const respostaAtual = respostas[questaoAtual]
   const todasRespondidas = respostas.every(r => r !== null)
-  const tempoPerigo = tempoRestante <= 60
-
-  const dificuldadeLabel = {
-    facil: 'Fácil',
-    medio: 'Médio',
-    dificil: 'Difícil',
-  } as const
-
-  const dificuldadeColor = {
-    facil: 'success',
-    medio: 'warning',
-    dificil: 'error',
-  } as const
 
   const alternativas = questaoAtualData ? [
     { letra: 'A', texto: questaoAtualData.alternativa_a },
@@ -366,40 +407,55 @@ export default function DesafioPage() {
   ] : []
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
-      {/* Header */}
-      <header className={`${bgColor} text-white px-4 py-4 sticky top-0 z-10`}>
+    <div className="min-h-screen pb-8" style={{ background: '#1A1A2E' }}>
+      {/* Header com Timer */}
+      <header className="px-4 py-4 sticky top-0 z-10" style={{ background: '#1A1A2E', borderBottom: '1px solid #3D3D4A' }}>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              <h1 className="font-semibold">Modo Desafio</h1>
+              <Zap className="w-5 h-5" style={{ color: '#00FF88' }} />
+              <h1 className="font-mono text-sm font-bold tracking-wider uppercase" style={{ color: '#FFFFFF' }}>
+                MODO DESAFIO
+              </h1>
             </div>
-            <div className={`flex items-center gap-1 px-3 py-1 rounded-full font-mono text-lg ${
-              tempoPerigo ? 'bg-red-500 animate-pulse' : 'bg-white/20'
-            }`}>
+            {/* Timer */}
+            <div
+              className={`flex items-center gap-2 px-4 py-2 rounded font-mono text-lg font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
+              style={{
+                background: tempoPerigo ? '#FF5F5620' : '#2D2D3A',
+                color: tempoPerigo ? '#FF5F56' : '#00FF88',
+                border: `1px solid ${tempoPerigo ? '#FF5F56' : '#00FF88'}33`,
+              }}
+            >
               <Clock className="w-4 h-4" />
               <span>{formatarTempo(tempoRestante)}</span>
             </div>
           </div>
 
-          {/* Indicadores de questão */}
-          <div className="flex justify-center gap-2">
+          {/* Indicadores de questão - estilo barra de progresso */}
+          <div className="flex gap-1">
             {questoes.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setQuestaoAtual(index)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
-                  index === questaoAtual
-                    ? 'bg-white text-gray-800 scale-110'
+                className="flex-1 h-2 rounded-sm transition-all"
+                style={{
+                  background: index === questaoAtual
+                    ? '#00FF88'
                     : respostas[index]
-                      ? 'bg-white/50 text-white'
-                      : 'bg-white/20 text-white/70'
-                }`}
-              >
-                {index + 1}
-              </button>
+                      ? '#00FF8866'
+                      : '#3D3D4A',
+                }}
+              />
             ))}
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className="font-mono text-xs" style={{ color: '#A0A0A0' }}>
+              QUESTÃO {questaoAtual + 1}/{questoes.length}
+            </span>
+            <span className="font-mono text-xs" style={{ color: '#00FF88' }}>
+              {respostas.filter(r => r !== null).length} RESPONDIDAS
+            </span>
           </div>
         </div>
       </header>
@@ -408,25 +464,30 @@ export default function DesafioPage() {
       <main className="max-w-2xl mx-auto px-4 pt-6">
         {questaoAtualData && (
           <div className="animate-fade-in">
-            {/* Header da questão */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Badge variant={componente}>{questaoAtualData.tema}</Badge>
-                <Badge variant={dificuldadeColor[questaoAtualData.dificuldade as keyof typeof dificuldadeColor]}>
-                  {dificuldadeLabel[questaoAtualData.dificuldade as keyof typeof dificuldadeLabel]}
-                </Badge>
+            {/* Terminal com Enunciado */}
+            <div className="rounded-xl overflow-hidden mb-6" style={{ background: '#2D2D3A' }}>
+              <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
+                <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+                <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+                <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+                <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>
+                  questao_{questaoAtual + 1}.txt
+                </span>
+                <div className="ml-auto flex items-center gap-2">
+                  <span
+                    className="font-mono text-xs px-2 py-0.5 rounded"
+                    style={{ background: '#00FF8820', color: '#00FF88' }}
+                  >
+                    {questaoAtualData.tema}
+                  </span>
+                </div>
               </div>
-              <span className="text-sm text-text-muted">
-                {questaoAtual + 1} de {questoes.length}
-              </span>
+              <div className="p-5">
+                <p className="font-mono text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#FFFFFF' }}>
+                  {questaoAtualData.enunciado}
+                </p>
+              </div>
             </div>
-
-            {/* Enunciado */}
-            <Card className="mb-4">
-              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                {questaoAtualData.enunciado}
-              </p>
-            </Card>
 
             {/* Alternativas */}
             <div className="space-y-3 mb-6">
@@ -434,85 +495,113 @@ export default function DesafioPage() {
                 <button
                   key={letra}
                   onClick={() => handleSelecionarResposta(letra)}
-                  className={`
-                    flex items-center gap-3 p-4 border-2 rounded-xl w-full text-left transition-all
-                    ${respostaAtual === letra
-                      ? isFisica
-                        ? 'border-fisica-500 bg-fisica-50'
-                        : 'border-matematica-500 bg-matematica-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                    }
-                  `}
+                  className="flex items-center gap-4 p-4 w-full text-left transition-all rounded-lg"
+                  style={{
+                    background: respostaAtual === letra ? '#00FF8815' : '#2D2D3A',
+                    border: `2px solid ${respostaAtual === letra ? '#00FF88' : '#3D3D4A'}`,
+                  }}
                 >
-                  <span className={`
-                    flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm flex-shrink-0
-                    ${respostaAtual === letra
-                      ? isFisica
-                        ? 'bg-fisica-500 text-white'
-                        : 'bg-matematica-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                    }
-                  `}>
+                  <span
+                    className="flex items-center justify-center w-10 h-10 font-mono font-bold text-lg flex-shrink-0 rounded"
+                    style={{
+                      background: respostaAtual === letra ? '#00FF88' : '#3D3D4A',
+                      color: respostaAtual === letra ? '#1A1A2E' : '#A0A0A0',
+                    }}
+                  >
                     {letra}
                   </span>
-                  <span className="flex-1">{texto}</span>
+                  <span
+                    className="font-mono text-sm flex-1"
+                    style={{ color: respostaAtual === letra ? '#FFFFFF' : '#A0A0A0' }}
+                  >
+                    {texto}
+                  </span>
+                  {respostaAtual === letra && (
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: '#00FF88' }} />
+                  )}
                 </button>
               ))}
             </div>
 
             {/* Navegação */}
             <div className="flex gap-3">
-              <Button
-                variant="secondary"
+              <button
                 onClick={handleAnterior}
                 disabled={questaoAtual === 0}
-                className="flex-1"
+                className="flex-1 py-3 px-4 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-30"
+                style={{
+                  background: 'transparent',
+                  border: '2px solid #3D3D4A',
+                  color: '#A0A0A0',
+                }}
               >
-                ← Anterior
-              </Button>
+                <ArrowLeft className="w-4 h-4" /> ANTERIOR
+              </button>
               {questaoAtual < questoes.length - 1 ? (
-                <Button
-                  variant={componente === 'fisica' ? 'fisica' : 'matematica'}
+                <button
                   onClick={handleProxima}
-                  className="flex-1"
+                  className="flex-1 py-3 px-4 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
+                  style={{
+                    background: 'transparent',
+                    border: '2px solid #00FF88',
+                    color: '#00FF88',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = '#00FF88'
+                    e.currentTarget.style.color = '#1A1A2E'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent'
+                    e.currentTarget.style.color = '#00FF88'
+                  }}
                 >
-                  Próxima →
-                </Button>
+                  PRÓXIMA <ArrowRight className="w-4 h-4" />
+                </button>
               ) : (
-                <Button
-                  variant={componente === 'fisica' ? 'fisica' : 'matematica'}
+                <button
                   onClick={() => finalizarDesafio(false)}
                   disabled={!todasRespondidas}
-                  className="flex-1"
+                  className="flex-1 py-3 px-4 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-30"
+                  style={{
+                    background: todasRespondidas ? '#00FF88' : 'transparent',
+                    border: '2px solid #00FF88',
+                    color: todasRespondidas ? '#1A1A2E' : '#00FF88',
+                  }}
                 >
-                  Finalizar
-                </Button>
+                  <span>▸</span> FINALIZAR
+                </button>
               )}
             </div>
 
             {!todasRespondidas && questaoAtual === questoes.length - 1 && (
-              <p className="text-center text-sm text-text-muted mt-3">
-                Responda todas as questões para finalizar
+              <p className="text-center font-mono text-xs mt-4" style={{ color: '#A0A0A0' }}>
+                $ Responda todas as questões para finalizar
               </p>
             )}
           </div>
         )}
 
-        {/* Dica */}
-        <Card className="mt-6 animate-fade-in bg-orange-900/80 border border-orange-500/40 backdrop-blur-sm" style={{ animationDelay: '300ms' }}>
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-orange-500/20 border border-orange-500/30">
-              <Zap className="w-5 h-5 text-orange-400" />
-            </div>
-            <div>
-              <p className="font-semibold text-orange-300 text-sm mb-1">💡 Modo Desafio</p>
-              <p className="text-sm text-orange-100/90 leading-relaxed">
-                {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos.
-                Acerte todas para bônus de {DESAFIO.BONUS_PERFEITO} pontos!
-              </p>
-            </div>
+        {/* Terminal Info */}
+        <div className="mt-8 rounded-xl overflow-hidden" style={{ background: '#2D2D3A' }}>
+          <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
+            <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+            <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+            <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>info.sh</span>
           </div>
-        </Card>
+          <div className="p-4 font-mono text-sm">
+            <p style={{ color: '#A0A0A0' }}># Modo Desafio</p>
+            <p className="mt-1" style={{ color: '#00FF88' }}>
+              → {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos
+            </p>
+            <p className="mt-1" style={{ color: '#00FF88' }}>
+              → Acerte todas = +{DESAFIO.BONUS_PERFEITO} pontos bônus!
+            </p>
+            <p className="mt-1" style={{ color: '#FFBD2E' }}>
+              → SEM LIMITE - Faça quantos desafios quiser!
+            </p>
+          </div>
+        </div>
       </main>
     </div>
   )
