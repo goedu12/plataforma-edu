@@ -4,12 +4,28 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, RotateCcw, CheckCircle2, WifiOff, RefreshCw, Clock, AlertCircle } from 'lucide-react'
 import QuestaoCard from '@/components/QuestaoCard'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import type { Componente, Questao } from '@/types'
 
 type StatusRevisao = 'OK' | 'SEM_REVISAO' | 'ERRO'
+
+// Cores Koyeb
+const KOYEB = {
+  bg: '#0D0D14',
+  bgCard: '#1A1A2E',
+  bgElevated: '#222238',
+  bgDark: '#12121C',
+  primary: '#00FF88',
+  accent: '#00D4FF',
+  fisica: '#00FF88',
+  matematica: '#A855F7',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#8B8B9A',
+  textMuted: '#5A5A6E',
+  border: 'rgba(255,255,255,0.05)',
+  danger: '#FF4757',
+  warning: '#FFB800',
+}
 
 export default function RevisaoPage() {
   const router = useRouter()
@@ -97,7 +113,7 @@ export default function RevisaoPage() {
 
   const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
   const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
 
   // Formatar data de quando errou
   const formatarDataErro = (data: string) => {
@@ -110,24 +126,49 @@ export default function RevisaoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-8">
+    <div
+      className="min-h-screen pb-8"
+      style={{
+        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
+    >
       {/* Header */}
-      <header className={`${bgColor} text-white px-4 py-4 sticky top-0 z-10`}>
+      <header
+        className="px-4 py-4 sticky top-0 z-10"
+        style={{
+          background: KOYEB.warning,
+          boxShadow: `0 4px 20px ${KOYEB.warning}40`,
+        }}
+      >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={handleVoltar}
-            className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+            className="p-2 -ml-2 rounded-xl hover:bg-black/20 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.bg }} />
           </button>
           <div className="flex items-center gap-2">
-            <RotateCcw className="w-5 h-5" />
-            <h1 className="font-semibold">Revisar Erros</h1>
+            <RotateCcw className="w-5 h-5" style={{ color: KOYEB.bg }} />
+            <h1
+              className="font-mono text-sm font-bold tracking-wider uppercase"
+              style={{ color: KOYEB.bg }}
+            >
+              Revisar Erros
+            </h1>
           </div>
           {status === 'OK' && questao && (
-            <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm font-mono">{tempoDecorrido}s</span>
+            <div
+              className="flex items-center gap-1 rounded-full px-3 py-1"
+              style={{ background: 'rgba(0,0,0,0.2)' }}
+            >
+              <Clock className="w-4 h-4" style={{ color: KOYEB.bg }} />
+              <span
+                className="text-sm font-mono tabular-nums"
+                style={{ color: KOYEB.bg }}
+              >
+                {tempoDecorrido}s
+              </span>
             </div>
           )}
           {status !== 'OK' && <div className="w-16" />}
@@ -138,20 +179,31 @@ export default function RevisaoPage() {
       <main className="max-w-2xl mx-auto px-4 pt-6">
         {status === 'OK' && questao ? (
           <div className="animate-slide-up">
-            {/* Info de Revisão - Estilo Terminal */}
-            <div className="mb-4 rounded-2xl overflow-hidden border border-amber-500/30">
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-amber-500/20">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="ml-2 text-xs text-gray-400 font-mono">revisao.sh</span>
+            {/* Info de Revisão - Terminal */}
+            <div
+              className="mb-4 rounded-xl overflow-hidden"
+              style={{ background: KOYEB.bgElevated }}
+            >
+              <div
+                className="flex items-center gap-2 px-4 py-2"
+                style={{ background: KOYEB.bgCard }}
+              >
+                <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+                <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+                <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+                <span
+                  className="ml-2 font-mono text-xs"
+                  style={{ color: KOYEB.textMuted }}
+                >
+                  revisao.sh
+                </span>
               </div>
-              <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
-                <p className="text-amber-400">
+              <div className="px-4 py-3">
+                <p className="font-mono text-xs" style={{ color: KOYEB.warning }}>
                   # Modo Revisão • {totalRevisao} {totalRevisao === 1 ? 'questão pendente' : 'questões pendentes'}
                 </p>
                 {errouEm && (
-                  <p className="text-gray-400 text-xs mt-1">
+                  <p className="font-mono text-xs mt-1" style={{ color: KOYEB.textMuted }}>
                     $ Você errou esta questão em {formatarDataErro(errouEm)}
                   </p>
                 )}
@@ -169,66 +221,134 @@ export default function RevisaoPage() {
             />
           </div>
         ) : status === 'SEM_REVISAO' ? (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${bgColor}`}>
-              <CheckCircle2 className="w-8 h-8 text-white" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: accentColor }}
+            >
+              <CheckCircle2 className="w-8 h-8" style={{ color: KOYEB.bg }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Tudo Revisado!
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               Você não tem questões de {nomeComponente} para revisar!
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               Continue estudando para aprender novos conteúdos.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={() => router.push(`/${componente}/estudar`)}>
+              <button
+                onClick={() => router.push(`/${componente}/estudar`)}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
                 Estudar Novas Questões
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         ) : status === 'ERRO' ? (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
-              <WifiOff className="w-8 h-8 text-red-400" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: `${KOYEB.danger}20`, border: `1px solid ${KOYEB.danger}40` }}
+            >
+              <WifiOff className="w-8 h-8" style={{ color: KOYEB.danger }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Ops! Erro
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               {erro}
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               Tente novamente ou volte mais tarde.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={buscarQuestao}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+              <button
+                onClick={buscarQuestao}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
+                <RefreshCw className="w-4 h-4" />
                 Tentar Novamente
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         ) : null}
 
-        {/* Dicas - Estilo Terminal */}
+        {/* Dicas - Terminal */}
         {status === 'OK' && questao && (
-          <div className="mt-6 animate-fade-in rounded-2xl overflow-hidden border border-emerald-500/30" style={{ animationDelay: '300ms' }}>
-            <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-emerald-500/20">
-              <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-              <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-              <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-              <span className="ml-2 text-xs text-gray-400 font-mono">dica.sh</span>
+          <div
+            className="mt-6 rounded-xl overflow-hidden animate-fade-in"
+            style={{ background: KOYEB.bgElevated, animationDelay: '300ms' }}
+          >
+            <div
+              className="flex items-center gap-2 px-4 py-2"
+              style={{ background: KOYEB.bgCard }}
+            >
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+              <span
+                className="ml-2 font-mono text-xs"
+                style={{ color: KOYEB.textMuted }}
+              >
+                dica.sh
+              </span>
             </div>
-            <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
-              <p className="text-emerald-400 mb-1"># Modo Revisão</p>
-              <p className="text-gray-300">$ Revisar questões erradas é essencial para fixar o aprendizado!</p>
+            <div className="px-4 py-3">
+              <p className="font-mono text-xs" style={{ color: KOYEB.textMuted }}>
+                # Modo Revisão
+              </p>
+              <p className="font-mono text-xs mt-1" style={{ color: KOYEB.textPrimary }}>
+                $ Revisar questões erradas é essencial para fixar o aprendizado!
+              </p>
+              <p className="font-mono text-xs mt-1" style={{ color: KOYEB.warning }}>
+                $ Acertos na revisão contribuem para sua nota bimestral!
+              </p>
             </div>
           </div>
         )}

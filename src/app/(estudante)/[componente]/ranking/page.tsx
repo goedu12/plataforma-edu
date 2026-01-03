@@ -2,12 +2,28 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star } from 'lucide-react'
+import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star, Users } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import type { Componente, Usuario, RankingItem } from '@/types'
+
+// Cores Koyeb
+const KOYEB = {
+  bg: '#0D0D14',
+  bgCard: '#1A1A2E',
+  bgElevated: '#222238',
+  bgDark: '#12121C',
+  primary: '#00FF88',
+  accent: '#00D4FF',
+  fisica: '#00FF88',
+  matematica: '#A855F7',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#8B8B9A',
+  textMuted: '#5A5A6E',
+  border: 'rgba(255,255,255,0.05)',
+  danger: '#FF4757',
+  gold: '#FFD700',
+}
 
 export default function RankingPage() {
   const router = useRouter()
@@ -18,9 +34,11 @@ export default function RankingPage() {
   const [ranking, setRanking] = useState<RankingItem[]>([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
+  const [atualizando, setAtualizando] = useState(false)
 
-  const buscarDados = async () => {
-    setLoading(true)
+  const buscarDados = async (silencioso = false) => {
+    if (!silencioso) setLoading(true)
+    else setAtualizando(true)
     setErro(null)
 
     try {
@@ -54,6 +72,7 @@ export default function RankingPage() {
       setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
+      setAtualizando(false)
     }
   }
 
@@ -68,7 +87,7 @@ export default function RankingPage() {
 
   const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
   const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
 
   if (loading || !usuario) {
     return <Loading fullScreen componente={componente} />
@@ -77,94 +96,174 @@ export default function RankingPage() {
   const posicaoUsuario = ranking.findIndex(r => r.usuario_id === usuario.id) + 1
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-8">
+    <div
+      className="min-h-screen pb-8"
+      style={{
+        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
+    >
       {/* Header */}
-      <header className={`${bgColor} text-white px-4 pt-4 pb-16`}>
-        <div className="max-w-2xl mx-auto">
+      <header className="px-4 pt-6 pb-4">
+        <div className="max-w-lg mx-auto">
+          {/* Nav */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+              className="p-2 rounded-lg transition-all hover:bg-white/10"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.textSecondary }} />
             </button>
-            <div className="text-center">
-              <h1 className="text-heading flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                Ranking da Turma
-              </h1>
-              <p className="text-caption text-white/80">
-                {nomeComponente} • Turma {usuario.turma}
-              </p>
+
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5" style={{ color: accentColor }} />
+              <span
+                className="font-mono text-sm font-bold tracking-wider uppercase"
+                style={{ color: KOYEB.textPrimary }}
+              >
+                Ranking
+              </span>
             </div>
+
             <button
-              onClick={buscarDados}
-              className="p-2 rounded-xl hover:bg-white/20 transition-colors"
+              onClick={() => buscarDados(true)}
+              disabled={atualizando}
+              className="p-2 rounded-lg transition-all hover:bg-white/10"
             >
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw
+                className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`}
+                style={{ color: KOYEB.textSecondary }}
+              />
             </button>
           </div>
 
-          {/* User Position */}
+          {/* Badge Turma */}
+          <div className="text-center mb-6">
+            <div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-3"
+              style={{ background: KOYEB.bgElevated }}
+            >
+              <Users className="w-4 h-4" style={{ color: KOYEB.textMuted }} />
+              <span
+                className="font-mono text-xs tracking-wider uppercase"
+                style={{ color: KOYEB.textSecondary }}
+              >
+                Turma {usuario.turma} • {nomeComponente}
+              </span>
+            </div>
+          </div>
+
+          {/* Posição do usuário */}
           {posicaoUsuario > 0 && (
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 text-center">
-              <p className="text-caption text-white/80 mb-1">Sua Posição</p>
-              <div className="flex items-center justify-center gap-3">
+            <div
+              className="rounded-2xl p-6 text-center"
+              style={{
+                background: `linear-gradient(135deg, ${KOYEB.bgCard} 0%, ${isFisica ? 'rgba(0, 255, 136, 0.1)' : 'rgba(168, 85, 247, 0.1)'} 100%)`,
+                border: `1px solid ${accentColor}30`,
+              }}
+            >
+              <p
+                className="font-mono text-xs tracking-widest uppercase mb-3"
+                style={{ color: KOYEB.textMuted }}
+              >
+                Sua Posição
+              </p>
+              <div className="flex items-center justify-center gap-4">
                 {posicaoUsuario <= 3 ? (
-                  <Crown className={`w-8 h-8 ${
-                    posicaoUsuario === 1 ? 'text-yellow-300' :
-                    posicaoUsuario === 2 ? 'text-gray-300' : 'text-amber-400'
-                  }`} />
+                  <Crown
+                    className="w-10 h-10"
+                    style={{
+                      color: posicaoUsuario === 1
+                        ? KOYEB.gold
+                        : posicaoUsuario === 2
+                        ? '#C0C0C0'
+                        : '#CD7F32',
+                    }}
+                  />
                 ) : (
-                  <Star className="w-8 h-8 text-white/50" />
+                  <Star className="w-10 h-10" style={{ color: accentColor }} />
                 )}
-                <span className="text-stat">{posicaoUsuario}º</span>
+                <span
+                  className="font-mono text-5xl font-bold tabular-nums"
+                  style={{
+                    color: KOYEB.textPrimary,
+                    textShadow: `0 0 30px ${accentColor}50`,
+                  }}
+                >
+                  {posicaoUsuario}º
+                </span>
               </div>
-              <p className="text-caption text-white/80 mt-1">de {ranking.length} estudantes</p>
+              <p
+                className="font-mono text-sm mt-3"
+                style={{ color: KOYEB.textSecondary }}
+              >
+                de {ranking.length} estudantes
+              </p>
             </div>
           )}
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 -mt-8">
+      <main className="max-w-lg mx-auto px-4">
         {erro ? (
-          <Card className="text-center py-10">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
-              <WifiOff className="w-8 h-8 text-red-400" />
-            </div>
-            <h2 className="text-subtitle text-text-primary mb-2">
-              Erro ao carregar ranking
-            </h2>
-            <p className="text-body text-text-secondary mb-6">{erro}</p>
-            <Button variant="primary" onClick={buscarDados}>
-              <RefreshCw className="w-4 h-4 mr-2" />
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: KOYEB.danger }} />
+            <p className="font-mono text-sm mb-6" style={{ color: KOYEB.textSecondary }}>
+              {erro}
+            </p>
+            <button
+              onClick={() => buscarDados()}
+              className="flex items-center gap-2 mx-auto px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+              style={{
+                background: accentColor,
+                color: KOYEB.bg,
+                boxShadow: `0 4px 20px ${accentColor}40`,
+              }}
+            >
+              <RefreshCw className="w-4 h-4" />
               Tentar Novamente
-            </Button>
-          </Card>
+            </button>
+          </div>
         ) : (
           <>
             {/* Terminal Tip */}
-            <div className="mb-4 animate-slide-up terminal-box">
-              <div className="terminal-header">
-                <span className="dot dot-red" />
-                <span className="dot dot-yellow" />
-                <span className="dot dot-green" />
-                <span className="title">ranking.sh</span>
+            <div
+              className="rounded-xl overflow-hidden mb-6"
+              style={{ background: KOYEB.bgElevated }}
+            >
+              <div
+                className="flex items-center gap-2 px-4 py-2"
+                style={{ background: KOYEB.bgCard }}
+              >
+                <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+                <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+                <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+                <span
+                  className="ml-2 font-mono text-xs"
+                  style={{ color: KOYEB.textMuted }}
+                >
+                  ranking.sh
+                </span>
               </div>
-              <div className="terminal-body">
-                <p className="comment"># Dica</p>
-                <p className="cmd">$ Responda questões corretamente para subir no ranking!</p>
+              <div className="px-4 py-3 space-y-1">
+                <p className="font-mono text-xs" style={{ color: KOYEB.textMuted }}>
+                  # Dica
+                </p>
+                <p className="font-mono text-xs" style={{ color: KOYEB.textPrimary }}>
+                  $ Responda questões corretamente para subir no ranking!
+                </p>
               </div>
             </div>
 
-            <div className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-              <RankingTable
-                ranking={ranking}
-                componente={componente}
-                usuarioAtualId={usuario.id}
-              />
-            </div>
+            <RankingTable
+              ranking={ranking}
+              componente={componente}
+              usuarioAtualId={usuario.id}
+            />
           </>
         )}
       </main>

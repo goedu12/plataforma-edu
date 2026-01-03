@@ -10,211 +10,254 @@ const config: Config = {
     extend: {
       colors: {
         // ═══════════════════════════════════════════════════════════════
-        // PLATAFORMA EDU - DESIGN SYSTEM 2026
-        // Glassmorphism + Soft UI + Micro-animations
-        // Paleta: Verde, Branco, Laranja, Preto, Lilás
+        // KOYEB DESIGN SYSTEM - PLATAFORMA EDU 2026
+        // Terminal-style dark theme with vibrant accents
         // ═══════════════════════════════════════════════════════════════
 
         // ─────────────────────────────────────────────────────────────
-        // CORES BASE - Fundos e Superfícies
+        // KOYEB BACKGROUNDS - Gradiente escuro
         // ─────────────────────────────────────────────────────────────
-        dark: {
-          bg: '#0a0a0a',              // Preto profundo - background principal
-          surface: '#121212',          // Superfície de cards
-          elevated: '#1a1a1a',         // Cards elevados
-          glass: 'rgba(18, 18, 18, 0.7)', // Glassmorphism
+        koyeb: {
+          bg: '#0D0D14',              // Background mais escuro
+          card: '#1A1A2E',            // Cards e superfícies
+          elevated: '#222238',         // Elementos elevados
+          terminal: '#2D2D3A',         // Blocos de código/terminal
+          dark: '#12121C',             // Progress bar bg
         },
 
-        // Aliases para compatibilidade
-        'calm-bg': '#0a0a0a',
-        'calm-surface': '#121212',
-        'calm-elevated': '#1a1a1a',
-        'calm-border': '#2a2a2a',
+        // Aliases para dark theme (compatibilidade)
+        dark: {
+          bg: '#0D0D14',
+          surface: '#1A1A2E',
+          elevated: '#222238',
+          glass: 'rgba(26, 26, 46, 0.8)',
+        },
 
         // ─────────────────────────────────────────────────────────────
-        // VERDE - Cor primária (Sucesso, CTAs, Destaques)
+        // KOYEB PRIMARY - Verde vibrante (#00FF88)
         // ─────────────────────────────────────────────────────────────
         primary: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',              // Verde principal
-          600: '#059669',
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
-          glow: 'rgba(16, 185, 129, 0.4)',
+          50: '#e6fff5',
+          100: '#b3ffe0',
+          200: '#80ffcc',
+          300: '#4dffb8',
+          400: '#1affa3',
+          500: '#00FF88',              // KOYEB PRIMARY
+          600: '#00CC6A',
+          700: '#00994F',
+          800: '#006635',
+          900: '#00331A',
+          DEFAULT: '#00FF88',
+          glow: 'rgba(0, 255, 136, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // LARANJA - Cor secundária (Alertas, Gamificação, Energia)
+        // KOYEB ACCENT - Cyan (#00D4FF)
         // ─────────────────────────────────────────────────────────────
-        secondary: {
-          50: '#fff7ed',
-          100: '#ffedd5',
-          200: '#fed7aa',
-          300: '#fdba74',
-          400: '#fb923c',
-          500: '#f97316',              // Laranja principal
-          600: '#ea580c',
-          700: '#c2410c',
-          800: '#9a3412',
-          900: '#7c2d12',
-          glow: 'rgba(249, 115, 22, 0.4)',
+        accent: {
+          50: '#e6faff',
+          100: '#b3f0ff',
+          200: '#80e6ff',
+          300: '#4ddcff',
+          400: '#1ad2ff',
+          500: '#00D4FF',              // KOYEB ACCENT
+          600: '#00A8CC',
+          700: '#007C99',
+          800: '#005066',
+          900: '#002433',
+          DEFAULT: '#00D4FF',
+          glow: 'rgba(0, 212, 255, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // LILÁS - Matemática (Criatividade, Imaginação)
+        // FÍSICA - Verde Koyeb (alias de primary)
         // ─────────────────────────────────────────────────────────────
-        lilas: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',              // Lilás principal
-          600: '#9333ea',
-          700: '#7c3aed',
-          800: '#6b21a8',
-          900: '#581c87',
-          glow: 'rgba(168, 85, 247, 0.4)',
-        },
-
-        // Física - Verde (já usando primary)
         fisica: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          glow: 'rgba(16, 185, 129, 0.4)',
+          50: '#e6fff5',
+          100: '#b3ffe0',
+          200: '#80ffcc',
+          300: '#4dffb8',
+          400: '#1affa3',
+          500: '#00FF88',
+          600: '#00CC6A',
+          700: '#00994F',
+          DEFAULT: '#00FF88',
+          glow: 'rgba(0, 255, 136, 0.4)',
         },
 
-        // Matemática - Lilás
+        // ─────────────────────────────────────────────────────────────
+        // MATEMÁTICA - Roxo (#A855F7)
+        // ─────────────────────────────────────────────────────────────
         matematica: {
           50: '#faf5ff',
           100: '#f3e8ff',
           200: '#e9d5ff',
           300: '#d8b4fe',
           400: '#c084fc',
-          500: '#a855f7',
+          500: '#A855F7',
           600: '#9333ea',
           700: '#7c3aed',
+          DEFAULT: '#A855F7',
+          glow: 'rgba(168, 85, 247, 0.4)',
+        },
+
+        // Alias lilas = matematica
+        lilas: {
+          50: '#faf5ff',
+          100: '#f3e8ff',
+          200: '#e9d5ff',
+          300: '#d8b4fe',
+          400: '#c084fc',
+          500: '#A855F7',
+          600: '#9333ea',
+          700: '#7c3aed',
+          DEFAULT: '#A855F7',
           glow: 'rgba(168, 85, 247, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // TEXTO - Hierarquia em Dark Mode
+        // SECUNDÁRIA - Laranja (#FF6B35)
         // ─────────────────────────────────────────────────────────────
-        text: {
-          primary: '#ffffff',          // Branco puro
-          secondary: '#b0b0b0',        // Cinza claro
-          tertiary: '#808080',         // Cinza médio
-          muted: '#606060',            // Cinza escuro
-          disabled: '#404040',
+        secondary: {
+          50: '#fff5f0',
+          100: '#ffe6db',
+          200: '#ffc9b3',
+          300: '#ffab8a',
+          400: '#ff8862',
+          500: '#FF6B35',
+          600: '#CC562A',
+          700: '#994020',
+          DEFAULT: '#FF6B35',
+          glow: 'rgba(255, 107, 53, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // BORDAS E CONTORNOS
+        // TEXTO - Hierarquia Koyeb
+        // ─────────────────────────────────────────────────────────────
+        text: {
+          primary: '#FFFFFF',
+          secondary: '#8B8B9A',
+          tertiary: '#5A5A6E',
+          muted: '#3D3D4A',
+          disabled: '#2D2D3A',
+        },
+
+        // ─────────────────────────────────────────────────────────────
+        // BORDAS - Koyeb style
         // ─────────────────────────────────────────────────────────────
         border: {
-          DEFAULT: '#2a2a2a',
-          hover: '#3a3a3a',
-          focus: '#4a4a4a',
+          DEFAULT: 'rgba(255, 255, 255, 0.05)',
+          hover: 'rgba(255, 255, 255, 0.1)',
+          focus: 'rgba(0, 255, 136, 0.3)',
           glass: 'rgba(255, 255, 255, 0.1)',
         },
 
         // ─────────────────────────────────────────────────────────────
         // ESTADOS
         // ─────────────────────────────────────────────────────────────
-        success: '#10b981',
-        error: '#ef4444',
-        warning: '#f97316',
-        info: '#3b82f6',
+        success: '#00FF88',
+        error: '#FF4757',
+        warning: '#FFB800',
+        info: '#00D4FF',
 
-        // Accent alias
-        accent: {
-          green: '#10b981',
-          orange: '#f97316',
+        // ─────────────────────────────────────────────────────────────
+        // TERMINAL DOTS (macOS style)
+        // ─────────────────────────────────────────────────────────────
+        dot: {
+          red: '#FF5F56',
+          yellow: '#FFBD2E',
+          green: '#27CA40',
         },
+
+        // Compatibilidade com código antigo
+        'calm-bg': '#0D0D14',
+        'calm-surface': '#1A1A2E',
+        'calm-elevated': '#222238',
+        'calm-border': 'rgba(255, 255, 255, 0.05)',
       },
 
       // ─────────────────────────────────────────────────────────────
-      // TIPOGRAFIA 2026 - Hierarquia clara
+      // TIPOGRAFIA KOYEB - Space Mono + Inter
       // ─────────────────────────────────────────────────────────────
       fontFamily: {
-        sans: ['Inter', 'SF Pro Display', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'SF Mono', 'monospace'],
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        mono: ['Space Mono', 'JetBrains Mono', 'SF Mono', 'monospace'],
       },
 
       fontSize: {
-        'display-xl': ['4rem', { lineHeight: '1', fontWeight: '800', letterSpacing: '-0.02em' }],
+        // Display
+        'display-xl': ['4rem', { lineHeight: '1', fontWeight: '700', letterSpacing: '-0.02em' }],
         'display': ['3rem', { lineHeight: '1.1', fontWeight: '700', letterSpacing: '-0.02em' }],
+
+        // Headings
         'heading-xl': ['2rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '-0.01em' }],
         'heading': ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
         'subheading': ['1.125rem', { lineHeight: '1.4', fontWeight: '600' }],
+
+        // Body
         'body-lg': ['1rem', { lineHeight: '1.6' }],
         'body': ['0.875rem', { lineHeight: '1.6' }],
+        'body-sm': ['0.8125rem', { lineHeight: '1.5' }],
+
+        // Labels (Koyeb style - monospace uppercase)
+        'label': ['0.6875rem', { lineHeight: '1.3', fontWeight: '700', letterSpacing: '0.15em' }],
+        'label-sm': ['0.625rem', { lineHeight: '1.3', fontWeight: '700', letterSpacing: '0.15em' }],
+
+        // Caption
         'caption': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.02em' }],
       },
 
       // ─────────────────────────────────────────────────────────────
-      // SOMBRAS 2026 - Soft UI + Glassmorphism
+      // SOMBRAS KOYEB - Glow effects
       // ─────────────────────────────────────────────────────────────
       boxShadow: {
-        // Neumorphism Soft UI
-        'soft-xs': '0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2)',
-        'soft-sm': '0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3)',
-        'soft-md': '0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 8px rgba(0, 0, 0, 0.4)',
-        'soft-lg': '0 16px 48px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.5)',
-        'soft-xl': '0 24px 64px rgba(0, 0, 0, 0.7), 0 12px 24px rgba(0, 0, 0, 0.6)',
+        // Soft shadows
+        'soft-xs': '0 2px 8px rgba(0, 0, 0, 0.4)',
+        'soft-sm': '0 4px 16px rgba(0, 0, 0, 0.5)',
+        'soft-md': '0 8px 24px rgba(0, 0, 0, 0.6)',
+        'soft-lg': '0 16px 48px rgba(0, 0, 0, 0.7)',
 
-        // Glow Effects
-        'glow-green': '0 0 20px rgba(16, 185, 129, 0.3), 0 0 40px rgba(16, 185, 129, 0.2), 0 0 60px rgba(16, 185, 129, 0.1)',
-        'glow-orange': '0 0 20px rgba(249, 115, 22, 0.3), 0 0 40px rgba(249, 115, 22, 0.2), 0 0 60px rgba(249, 115, 22, 0.1)',
-        'glow-lilas': '0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.2), 0 0 60px rgba(168, 85, 247, 0.1)',
-        'glow-white': '0 0 20px rgba(255, 255, 255, 0.1), 0 0 40px rgba(255, 255, 255, 0.05)',
+        // Glow effects - Koyeb style
+        'glow-green': '0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.15)',
+        'glow-cyan': '0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.15)',
+        'glow-lilas': '0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15)',
+        'glow-orange': '0 0 20px rgba(255, 107, 53, 0.3), 0 0 40px rgba(255, 107, 53, 0.15)',
+        'glow-white': '0 0 20px rgba(255, 255, 255, 0.1)',
 
-        // Inner shadows (Neumorphism)
-        'inner-soft': 'inset 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -1px 2px rgba(255, 255, 255, 0.05)',
+        // Text shadow for nota grande
+        'text-glow': '0 0 40px rgba(0, 255, 136, 0.3)',
 
-        // Glassmorphism
-        'glass': '0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        // Card shadows
+        'card': '0 4px 20px rgba(0, 0, 0, 0.5)',
+        'card-hover': '0 8px 30px rgba(0, 0, 0, 0.6)',
 
-        // Cards elevated
-        'card': '0 4px 20px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-        'card-hover': '0 8px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+        // Glass
+        'glass': '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+
+        // Inner
+        'inner-soft': 'inset 0 2px 4px rgba(0, 0, 0, 0.4)',
       },
 
       // ─────────────────────────────────────────────────────────────
-      // ANIMAÇÕES 2026 - Micro-interactions
+      // GRADIENTES KOYEB
+      // ─────────────────────────────────────────────────────────────
+      backgroundImage: {
+        'koyeb-gradient': 'linear-gradient(180deg, #0D0D14 0%, #1A1A2E 100%)',
+        'koyeb-card': 'linear-gradient(135deg, #1A1A2E 0%, rgba(0, 255, 136, 0.05) 100%)',
+        'progress-green': 'linear-gradient(90deg, #00FF88, #00D4FF)',
+        'progress-lilas': 'linear-gradient(90deg, #A855F7, #00D4FF)',
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // ANIMAÇÕES
       // ─────────────────────────────────────────────────────────────
       animation: {
-        // Entrada
         'fade-in': 'fadeIn 0.3s ease-out forwards',
         'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'slide-left': 'slideLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'slide-right': 'slideRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         'scale-in': 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'bounce-in': 'bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
-
-        // Contínuas
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-        'float': 'float 3s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
-
-        // Feedback
-        'shake': 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97)',
-        'success-pop': 'successPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
-
-        // Skeleton loading
         'skeleton': 'skeleton 1.5s ease-in-out infinite',
       },
 
@@ -227,53 +270,21 @@ const config: Config = {
           '0%': { opacity: '0', transform: 'translateY(20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
-        slideDown: {
-          '0%': { opacity: '0', transform: 'translateY(-20px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        slideLeft: {
-          '0%': { opacity: '0', transform: 'translateX(20px)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
-        slideRight: {
-          '0%': { opacity: '0', transform: 'translateX(-20px)' },
-          '100%': { opacity: '1', transform: 'translateX(0)' },
-        },
         scaleIn: {
-          '0%': { opacity: '0', transform: 'scale(0.9)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
-        },
-        bounceIn: {
-          '0%': { opacity: '0', transform: 'scale(0.3)' },
-          '50%': { transform: 'scale(1.05)' },
-          '70%': { transform: 'scale(0.95)' },
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.7' },
+          '50%': { opacity: '0.5' },
         },
         glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(16, 185, 129, 0.2)' },
-          '50%': { boxShadow: '0 0 40px rgba(16, 185, 129, 0.4)' },
-        },
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '0%, 100%': { boxShadow: '0 0 20px rgba(0, 255, 136, 0.2)' },
+          '50%': { boxShadow: '0 0 40px rgba(0, 255, 136, 0.4)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
-        },
-        shake: {
-          '0%, 100%': { transform: 'translateX(0)' },
-          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
-          '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
-        },
-        successPop: {
-          '0%': { transform: 'scale(0)' },
-          '50%': { transform: 'scale(1.2)' },
-          '100%': { transform: 'scale(1)' },
         },
         skeleton: {
           '0%': { backgroundPosition: '-200px 0' },
@@ -282,7 +293,7 @@ const config: Config = {
       },
 
       // ─────────────────────────────────────────────────────────────
-      // BLUR E BACKDROP (Glassmorphism)
+      // OUTROS
       // ─────────────────────────────────────────────────────────────
       backdropBlur: {
         xs: '2px',
@@ -291,35 +302,19 @@ const config: Config = {
         md: '12px',
         lg: '16px',
         xl: '24px',
-        '2xl': '40px',
-        '3xl': '64px',
       },
 
-      // ─────────────────────────────────────────────────────────────
-      // BORDER RADIUS 2026 - Mais arredondado
-      // ─────────────────────────────────────────────────────────────
       borderRadius: {
         'sm': '6px',
-        'DEFAULT': '10px',
+        'DEFAULT': '8px',
         'md': '12px',
         'lg': '16px',
         'xl': '20px',
         '2xl': '24px',
-        '3xl': '32px',
       },
 
-      // ─────────────────────────────────────────────────────────────
-      // TRANSIÇÕES
-      // ─────────────────────────────────────────────────────────────
       transitionTimingFunction: {
-        'bounce-out': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
         'smooth': 'cubic-bezier(0.16, 1, 0.3, 1)',
-      },
-
-      transitionDuration: {
-        '250': '250ms',
-        '350': '350ms',
-        '400': '400ms',
       },
     },
   },

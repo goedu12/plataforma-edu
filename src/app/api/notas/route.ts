@@ -16,7 +16,7 @@ import type { Componente } from '@/types'
 // NOTA MÁXIMA: 10.0
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Configuração dos bimestres 2025
+// Configuração dos bimestres 2025 e 2026
 const CONFIG_BIMESTRES = {
   2025: {
     1: {
@@ -34,6 +34,24 @@ const CONFIG_BIMESTRES = {
     4: {
       regular: { inicio: '2025-10-04', fim: '2025-12-04', meta: 135 },
       recuperacao: { inicio: '2025-12-05', fim: '2025-12-15' },
+    },
+  },
+  2026: {
+    1: {
+      regular: { inicio: '2026-01-01', fim: '2026-03-24', meta: 105 },
+      recuperacao: { inicio: '2026-03-25', fim: '2026-04-03' },
+    },
+    2: {
+      regular: { inicio: '2026-04-04', fim: '2026-06-16', meta: 150 },
+      recuperacao: { inicio: '2026-06-17', fim: '2026-06-26' },
+    },
+    3: {
+      regular: { inicio: '2026-08-04', fim: '2026-09-23', meta: 105 },
+      recuperacao: { inicio: '2026-09-24', fim: '2026-10-03' },
+    },
+    4: {
+      regular: { inicio: '2026-10-04', fim: '2026-12-04', meta: 135 },
+      recuperacao: { inicio: '2026-12-05', fim: '2026-12-15' },
     },
   },
 }
@@ -73,7 +91,7 @@ function calcularBonusFrequencia(diasAtivos: number): number {
 }
 
 // Função para obter período atual
-function getPeriodoAtual(ano: number = 2025): {
+function getPeriodoAtual(ano: number = new Date().getFullYear()): {
   bimestre: 1 | 2 | 3 | 4
   tipo: 'regular' | 'recuperacao' | 'ferias'
   dataInicio: string
@@ -230,7 +248,7 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
-    const ano = anoParam ? parseInt(anoParam) : 2025
+    const ano = anoParam ? parseInt(anoParam) : new Date().getFullYear()
 
     // Obter período atual
     const periodoAtual = getPeriodoAtual(ano)

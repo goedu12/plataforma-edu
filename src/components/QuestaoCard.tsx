@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy, TrendingUp, Target } from 'lucide-react'
 import Button from './ui/Button'
-import Card from './ui/Card'
 import Badge from './ui/Badge'
 import type { Questao, Componente, ModoResposta } from '@/types'
 
@@ -149,26 +148,23 @@ export default function QuestaoCard({
   }
 
   const getAlternativaStyle = (letra: Alternativa) => {
-    const base =
-      'flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 bg-dark-surface'
+    const baseClass = componente === 'matematica' ? 'question-option question-matematica' : 'question-option'
 
     if (feedback) {
       if (letra === feedback.respostaCorreta) {
-        return `${base} border-green-500 bg-green-900/30`
+        return `${baseClass} correct`
       }
       if (letra === selecionada && !feedback.correta) {
-        return `${base} border-red-500 bg-red-900/30`
+        return `${baseClass} incorrect`
       }
-      return `${base} border-border opacity-50`
+      return `${baseClass} opacity-50`
     }
 
     if (selecionada === letra) {
-      return componente === 'fisica'
-        ? `${base} border-fisica-500 bg-fisica-500/20`
-        : `${base} border-matematica-500 bg-matematica-500/20`
+      return `${baseClass} selected`
     }
 
-    return `${base} border-border hover:border-border-hover`
+    return baseClass
   }
 
   const dificuldadeLabel = {
@@ -207,9 +203,9 @@ export default function QuestaoCard({
       </div>
 
       {/* Enunciado */}
-      <Card className="bg-dark-surface border-border">
-        <p className="text-white leading-relaxed whitespace-pre-wrap">{questao.enunciado}</p>
-      </Card>
+      <div className={`question-card ${componente === 'matematica' ? 'question-matematica' : ''}`}>
+        <p className="question-text">{questao.enunciado}</p>
+      </div>
 
       {/* Alternativas */}
       <div className="space-y-3">
@@ -220,24 +216,7 @@ export default function QuestaoCard({
             disabled={!!feedback || loading}
             className={getAlternativaStyle(letra)}
           >
-            <span
-              className={`
-                flex items-center justify-center w-8 h-8 rounded-full font-semibold text-sm flex-shrink-0
-                ${
-                  feedback
-                    ? letra === feedback.respostaCorreta
-                      ? 'bg-green-500 text-white'
-                      : letra === selecionada && !feedback.correta
-                        ? 'bg-red-500 text-white'
-                        : 'bg-gray-200 text-gray-500'
-                    : selecionada === letra
-                      ? componente === 'fisica'
-                        ? 'bg-fisica-500 text-white'
-                        : 'bg-matematica-500 text-white'
-                      : 'bg-gray-200 text-gray-600'
-                }
-              `}
-            >
+            <span className="option-letter">
               {feedback && letra === feedback.respostaCorreta ? (
                 <CheckCircle2 className="w-5 h-5" />
               ) : feedback && letra === selecionada && !feedback.correta ? (
@@ -246,7 +225,7 @@ export default function QuestaoCard({
                 letra
               )}
             </span>
-            <span className="flex-1 text-left text-white">{texto}</span>
+            <span className="option-text">{texto}</span>
           </button>
         ))}
       </div>
@@ -272,20 +251,20 @@ export default function QuestaoCard({
         </div>
       )}
 
-      {/* Dica - Estilo Terminal */}
+      {/* Dica - Estilo Terminal Koyeb */}
       {!feedback && questao.dica && (
         <div className="text-center">
           {mostrarDica ? (
-            <div className="rounded-2xl overflow-hidden border border-emerald-500/30 text-left">
-              <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-emerald-500/20">
-                <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                <span className="ml-2 text-xs text-gray-400 font-mono">dica.sh</span>
+            <div className="terminal-box text-left">
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">dica.sh</span>
               </div>
-              <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
-                <p className="text-emerald-400 mb-1"># Dica</p>
-                <p className="text-gray-300">{questao.dica}</p>
+              <div className="terminal-body">
+                <p className="comment"># Dica</p>
+                <p className="text-white mt-1">{questao.dica}</p>
               </div>
             </div>
           ) : (
@@ -326,22 +305,22 @@ export default function QuestaoCard({
 
       {/* Nota em Tempo Real - Exibido após responder */}
       {feedback && feedback.notaTempoReal && modo === 'estudo' && (
-        <div className="rounded-2xl overflow-hidden border border-blue-500/30 animate-slide-up">
-          <div className="flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] border-b border-blue-500/20">
-            <span className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-            <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-            <span className="w-3 h-3 rounded-full bg-[#27c93f]" />
-            <span className="ml-2 text-xs text-gray-400 font-mono">nota_atualizada.sh</span>
+        <div className="terminal-box terminal-cyan animate-slide-up">
+          <div className="terminal-header">
+            <span className="dot dot-red" />
+            <span className="dot dot-yellow" />
+            <span className="dot dot-green" />
+            <span className="title">nota_atualizada.sh</span>
           </div>
-          <div className="p-4 bg-[#0d0d0d] font-mono text-sm">
-            <p className="text-blue-400 mb-3"># Sua Nota em Tempo Real</p>
+          <div className="terminal-body">
+            <p className="comment-cyan mb-3"># Sua Nota em Tempo Real</p>
 
             {/* Nota Principal */}
             <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-300">$ Nota atual:</span>
+              <span className="text-white">$ Nota atual:</span>
               <div className="flex items-center gap-2">
                 {feedback.notaTempoReal.mudou && (
-                  <span className="text-gray-500 line-through text-sm">
+                  <span className="muted line-through text-sm">
                     {feedback.notaTempoReal.nota_anterior.toFixed(1)}
                   </span>
                 )}
@@ -357,15 +336,15 @@ export default function QuestaoCard({
             {/* Barra de Progresso */}
             <div className="mb-3">
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-400">Progresso</span>
-                <span className="text-gray-300">
+                <span className="muted">Progresso</span>
+                <span className="text-white">
                   {feedback.notaTempoReal.questoes_respondidas}/{feedback.notaTempoReal.meta_questoes}
                 </span>
               </div>
-              <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div className="progress-2026">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    componente === 'fisica' ? 'bg-cyan-500' : 'bg-purple-500'
+                  className={`progress-fill ${
+                    componente === 'fisica' ? 'progress-fill-cyan' : 'progress-fill-lilas'
                   }`}
                   style={{ width: `${Math.min(feedback.notaTempoReal.percentual, 100)}%` }}
                 />
@@ -374,18 +353,18 @@ export default function QuestaoCard({
 
             {/* Detalhes */}
             <div className="space-y-1 text-xs">
-              <p className="text-gray-400">
-                $ Dias ativos: <span className="text-emerald-300">{feedback.notaTempoReal.dias_ativos}</span>
+              <p className="muted">
+                $ Dias ativos: <span className="success">{feedback.notaTempoReal.dias_ativos}</span>
               </p>
-              <p className="text-gray-400">
-                $ Bônus frequência: <span className="text-emerald-300">+{feedback.notaTempoReal.bonus_frequencia.toFixed(1)}</span>
+              <p className="muted">
+                $ Bônus frequência: <span className="success">+{feedback.notaTempoReal.bonus_frequencia.toFixed(1)}</span>
               </p>
               {feedback.notaTempoReal.limite_semanal && (
-                <p className="text-gray-400">
+                <p className="muted">
                   $ Semana: <span className={
                     feedback.notaTempoReal.questoes_semana >= feedback.notaTempoReal.limite_semanal
-                      ? 'text-red-400'
-                      : 'text-emerald-300'
+                      ? 'error'
+                      : 'success'
                   }>
                     {feedback.notaTempoReal.questoes_semana}/{feedback.notaTempoReal.limite_semanal}
                   </span>
