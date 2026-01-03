@@ -465,28 +465,23 @@ export default function DesafioPage() {
         {questaoAtualData && (
           <div className="animate-fade-in">
             {/* Terminal com Enunciado */}
-            <div className="rounded-xl overflow-hidden mb-6" style={{ background: '#2D2D3A' }}>
-              <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
+            <div className="question-card mb-6">
+              <div className="flex items-center gap-2 mb-4">
                 <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
                 <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
                 <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-                <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>
+                <span className="ml-2 font-mono text-xs" style={{ color: '#8B8B9A' }}>
                   questao_{questaoAtual + 1}.txt
                 </span>
                 <div className="ml-auto flex items-center gap-2">
-                  <span
-                    className="font-mono text-xs px-2 py-0.5 rounded"
-                    style={{ background: '#00FF8820', color: '#00FF88' }}
-                  >
+                  <span className="badge-green text-xs">
                     {questaoAtualData.tema}
                   </span>
                 </div>
               </div>
-              <div className="p-5">
-                <p className="font-mono text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#FFFFFF' }}>
-                  {questaoAtualData.enunciado}
-                </p>
-              </div>
+              <p className="question-text">
+                {questaoAtualData.enunciado}
+              </p>
             </div>
 
             {/* Alternativas */}
@@ -495,25 +490,12 @@ export default function DesafioPage() {
                 <button
                   key={letra}
                   onClick={() => handleSelecionarResposta(letra)}
-                  className="flex items-center gap-4 p-4 w-full text-left transition-all rounded-lg"
-                  style={{
-                    background: respostaAtual === letra ? '#00FF8815' : '#2D2D3A',
-                    border: `2px solid ${respostaAtual === letra ? '#00FF88' : '#3D3D4A'}`,
-                  }}
+                  className={`question-option ${respostaAtual === letra ? 'selected' : ''}`}
                 >
-                  <span
-                    className="flex items-center justify-center w-10 h-10 font-mono font-bold text-lg flex-shrink-0 rounded"
-                    style={{
-                      background: respostaAtual === letra ? '#00FF88' : '#3D3D4A',
-                      color: respostaAtual === letra ? '#1A1A2E' : '#A0A0A0',
-                    }}
-                  >
+                  <span className="option-letter">
                     {letra}
                   </span>
-                  <span
-                    className="font-mono text-sm flex-1"
-                    style={{ color: respostaAtual === letra ? '#FFFFFF' : '#A0A0A0' }}
-                  >
+                  <span className="option-text">
                     {texto}
                   </span>
                   {respostaAtual === letra && (

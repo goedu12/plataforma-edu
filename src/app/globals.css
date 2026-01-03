@@ -857,6 +857,109 @@ input, select, textarea {
   .terminal-body .muted {
     color: var(--text-muted);
   }
+
+  /* ─────────────────────────────────────────────────────────
+     QUESTION CARD - Koyeb Style
+     Caixas de questões com borda verde
+     ───────────────────────────────────────────────────────── */
+  .question-card {
+    @apply rounded-2xl p-5 overflow-hidden;
+    background: var(--bg-surface);
+    border: 2px solid rgba(0, 255, 136, 0.25);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.05);
+  }
+  .question-card .question-text {
+    @apply text-base leading-relaxed whitespace-pre-wrap;
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Question Card para Matemática (Lilás) */
+  .question-card.question-matematica {
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.05);
+  }
+
+  /* Alternativas de questões */
+  .question-option {
+    @apply flex items-center gap-4 p-4 rounded-xl cursor-pointer;
+    @apply transition-all duration-200;
+    background: var(--bg-surface);
+    border: 2px solid rgba(0, 255, 136, 0.15);
+  }
+  .question-option:hover:not(:disabled) {
+    border-color: rgba(0, 255, 136, 0.4);
+    background: var(--bg-elevated);
+  }
+  .question-option.selected {
+    border-color: #00FF88;
+    background: rgba(0, 255, 136, 0.1);
+  }
+  .question-option .option-letter {
+    @apply flex items-center justify-center w-10 h-10 rounded-lg;
+    @apply font-mono font-bold text-base flex-shrink-0;
+    background: var(--bg-terminal);
+    color: var(--text-secondary);
+  }
+  .question-option.selected .option-letter {
+    background: #00FF88;
+    color: #0D0D14;
+  }
+  .question-option .option-text {
+    @apply flex-1 text-left;
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Opções para Matemática */
+  .question-option.question-matematica {
+    border-color: rgba(168, 85, 247, 0.15);
+  }
+  .question-option.question-matematica:hover:not(:disabled) {
+    border-color: rgba(168, 85, 247, 0.4);
+  }
+  .question-option.question-matematica.selected {
+    border-color: #A855F7;
+    background: rgba(168, 85, 247, 0.1);
+  }
+  .question-option.question-matematica.selected .option-letter {
+    background: #A855F7;
+    color: #FFFFFF;
+  }
+
+  /* Estados correto/incorreto */
+  .question-option.correct {
+    border-color: #00FF88 !important;
+    background: rgba(0, 255, 136, 0.15) !important;
+  }
+  .question-option.correct .option-letter {
+    background: #00FF88 !important;
+    color: #0D0D14 !important;
+  }
+  .question-option.incorrect {
+    border-color: #FF4757 !important;
+    background: rgba(255, 71, 87, 0.15) !important;
+  }
+  .question-option.incorrect .option-letter {
+    background: #FF4757 !important;
+    color: #FFFFFF !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     TEXT ON GREEN BACKGROUND - Fonte preta
+     ───────────────────────────────────────────────────────── */
+  .bg-green-text-black {
+    background: #00FF88;
+    color: #0D0D14 !important;
+  }
+  .bg-green-text-black * {
+    color: #0D0D14 !important;
+  }
+
+  .bg-lilas-text-white {
+    background: #A855F7;
+    color: #FFFFFF !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
