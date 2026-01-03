@@ -91,7 +91,7 @@ function calcularBonusFrequencia(diasAtivos: number): number {
 }
 
 // Função para obter período atual
-function getPeriodoAtual(ano: number = 2025): {
+function getPeriodoAtual(ano: number = new Date().getFullYear()): {
   bimestre: 1 | 2 | 3 | 4
   tipo: 'regular' | 'recuperacao' | 'ferias'
   dataInicio: string
@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
     }
 
     const supabase = getSupabaseAdmin()
-    const ano = anoParam ? parseInt(anoParam) : 2025
+    const ano = anoParam ? parseInt(anoParam) : new Date().getFullYear()
 
     // Obter período atual
     const periodoAtual = getPeriodoAtual(ano)
