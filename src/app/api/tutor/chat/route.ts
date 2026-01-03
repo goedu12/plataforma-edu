@@ -97,8 +97,13 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Chamar o tutor IA com valores validados
-    const resultado = await chatComTutor(componente as Componente, mensagemValidada, historicoValidado)
+    // Chamar o tutor IA com valores validados e contexto
+    const resultado = await chatComTutor(
+      componente as Componente,
+      mensagemValidada,
+      historicoValidado,
+      {} // contexto do estudante - pode ser expandido futuramente para rastrear erros, frustrações, etc
+    )
 
     if (!resultado.sucesso || !resultado.resposta) {
       return NextResponse.json({
@@ -106,6 +111,9 @@ export async function POST(request: NextRequest) {
         erro: resultado.erro || 'Erro ao gerar resposta',
       })
     }
+
+    // Log do modo detectado para análise
+    console.log(`[Tutor IA] Modo: ${resultado.modo}, Tópico: ${resultado.topico}`)
 
     // ═══════════════════════════════════════════════════════════
     // SISTEMA DE REVISÃO PROFISSIONAL - 3 Revisores
@@ -163,6 +171,9 @@ export async function POST(request: NextRequest) {
       resposta: respostaFinal,
       uso_hoje: novoUso,
       limite: PONTUACAO.LIMITE_IA_DIARIO,
+      // Modo e tópico detectados pela IA
+      modo: resultado.modo,
+      topico: resultado.topico,
       // Dados de revisão para debug/admin (opcional)
       revisao: {
         nota: resultadoRevisao.notaMedia,
