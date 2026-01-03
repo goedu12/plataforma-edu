@@ -2,10 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, BookOpen, CheckCircle2, WifiOff, RefreshCw, Clock, AlertTriangle, Calendar } from 'lucide-react'
+import { ArrowLeft, BookOpen, CheckCircle2, WifiOff, RefreshCw, Clock, AlertTriangle, Calendar, Zap } from 'lucide-react'
 import QuestaoCard from '@/components/QuestaoCard'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import type { Componente, Questao } from '@/types'
 
@@ -22,6 +20,24 @@ interface PeriodoInfo {
   bimestre: number
   tipo: 'regular' | 'recuperacao'
   dias_restantes: number
+}
+
+// Cores Koyeb
+const KOYEB = {
+  bg: '#0D0D14',
+  bgCard: '#1A1A2E',
+  bgElevated: '#222238',
+  bgDark: '#12121C',
+  primary: '#00FF88',
+  accent: '#00D4FF',
+  fisica: '#00FF88',
+  matematica: '#A855F7',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#8B8B9A',
+  textMuted: '#5A5A6E',
+  border: 'rgba(255,255,255,0.05)',
+  danger: '#FF4757',
+  warning: '#FFB800',
 }
 
 export default function EstudarPage() {
@@ -114,31 +130,56 @@ export default function EstudarPage() {
 
   const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
   const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
 
   if (loading) {
     return <Loading fullScreen componente={componente} />
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-8">
+    <div
+      className="min-h-screen pb-8"
+      style={{
+        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
+        fontFamily: "'Inter', -apple-system, sans-serif",
+      }}
+    >
       {/* Header */}
-      <header className={`${bgColor} text-white px-4 py-4 sticky top-0 z-10`}>
+      <header
+        className="px-4 py-4 sticky top-0 z-10"
+        style={{
+          background: accentColor,
+          boxShadow: `0 4px 20px ${accentColor}40`,
+        }}
+      >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={handleVoltar}
-            className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+            className="p-2 -ml-2 rounded-xl hover:bg-black/20 transition-colors"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.bg }} />
           </button>
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5" />
-            <h1 className="font-semibold">Estudar {nomeComponente}</h1>
+            <BookOpen className="w-5 h-5" style={{ color: KOYEB.bg }} />
+            <h1
+              className="font-mono text-sm font-bold tracking-wider uppercase"
+              style={{ color: KOYEB.bg }}
+            >
+              Estudar
+            </h1>
           </div>
           {status === 'OK' && questao && (
-            <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm font-mono">{tempoDecorrido}s</span>
+            <div
+              className="flex items-center gap-1 rounded-full px-3 py-1"
+              style={{ background: 'rgba(0,0,0,0.2)' }}
+            >
+              <Clock className="w-4 h-4" style={{ color: KOYEB.bg }} />
+              <span
+                className="text-sm font-mono tabular-nums"
+                style={{ color: KOYEB.bg }}
+              >
+                {tempoDecorrido}s
+              </span>
             </div>
           )}
           {status !== 'OK' && <div className="w-16" />}
@@ -148,19 +189,33 @@ export default function EstudarPage() {
       {/* Indicador de Limite Semanal */}
       {limite && limite.limite_semanal !== null && status === 'OK' && (
         <div className="max-w-2xl mx-auto px-4 pt-4">
-          <div className="flex items-center justify-between bg-dark-elevated rounded-xl p-3 border border-border">
+          <div
+            className="flex items-center justify-between rounded-xl p-3"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-text-muted" />
-              <span className="text-sm text-text-secondary">Esta semana</span>
+              <Calendar className="w-4 h-4" style={{ color: KOYEB.textMuted }} />
+              <span className="text-sm" style={{ color: KOYEB.textSecondary }}>
+                Esta semana
+              </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className={`text-sm font-bold ${
-                limite.restantes !== null && limite.restantes <= 3 ? 'text-amber-400' : 'text-emerald-400'
-              }`}>
+              <span
+                className="text-sm font-mono font-bold tabular-nums"
+                style={{
+                  color: limite.restantes !== null && limite.restantes <= 3 ? KOYEB.warning : KOYEB.primary,
+                }}
+              >
                 {limite.questoes_semana}/{limite.limite_semanal}
               </span>
               {limite.restantes !== null && limite.restantes <= 5 && (
-                <span className="text-xs text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-full">
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={{
+                    background: `${KOYEB.warning}20`,
+                    color: KOYEB.warning,
+                  }}
+                >
                   {limite.restantes} restantes
                 </span>
               )}
@@ -185,140 +240,288 @@ export default function EstudarPage() {
             />
           </div>
         ) : status === 'LIMITE_SEMANAL' ? (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
-              <AlertTriangle className="w-8 h-8 text-amber-400" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: `${KOYEB.warning}20`, border: `1px solid ${KOYEB.warning}40` }}
+            >
+              <AlertTriangle className="w-8 h-8" style={{ color: KOYEB.warning }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Limite Semanal Atingido
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               Você já respondeu {limite?.questoes_semana || 15} questões esta semana!
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               O limite semanal é de 15 questões no modo estudo. Volte na segunda-feira para continuar ou use o modo Desafio para praticar sem limites!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)}>
-                Modo Desafio (Ilimitado)
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              <button
+                onClick={() => router.push(`/${componente}/desafio`)}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
+                <Zap className="w-4 h-4" />
+                Modo Desafio
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         ) : status === 'FORA_PERIODO' ? (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-blue-500/20 border border-blue-500/30">
-              <Calendar className="w-8 h-8 text-blue-400" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: `${KOYEB.accent}20`, border: `1px solid ${KOYEB.accent}40` }}
+            >
+              <Calendar className="w-8 h-8" style={{ color: KOYEB.accent }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Fora do Período Letivo
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               O período letivo ainda não começou ou está em férias.
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               Você pode usar o modo Desafio para praticar sem limites!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)}>
+              <button
+                onClick={() => router.push(`/${componente}/desafio`)}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
+                <Zap className="w-4 h-4" />
                 Modo Desafio
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         ) : status === 'COMPLETOU' ? (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center ${bgColor}`}>
-              <CheckCircle2 className="w-8 h-8 text-white" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: accentColor }}
+            >
+              <CheckCircle2 className="w-8 h-8" style={{ color: KOYEB.bg }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Parabéns!
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               Você completou todas as questões de {nomeComponente} disponíveis para sua turma!
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               Continue praticando no tutor IA ou aguarde novas questões.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={() => router.push(`/${componente}/tutor`)}>
+              <button
+                onClick={() => router.push(`/${componente}/tutor`)}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
                 Praticar com Tutor IA
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         ) : status === 'ERRO' ? (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
-              <WifiOff className="w-8 h-8 text-red-400" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: `${KOYEB.danger}20`, border: `1px solid ${KOYEB.danger}40` }}
+            >
+              <WifiOff className="w-8 h-8" style={{ color: KOYEB.danger }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Ops! Erro
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               {erro}
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               Tente novamente ou volte mais tarde.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={buscarQuestao}>
-                <RefreshCw className="w-4 h-4 mr-2" />
+              <button
+                onClick={buscarQuestao}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
+                <RefreshCw className="w-4 h-4" />
                 Tentar Novamente
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         ) : (
-          <Card className="text-center py-10 animate-slide-up">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-calm-elevated">
-              <BookOpen className="w-8 h-8 text-text-muted" />
+          <div
+            className="rounded-2xl p-8 text-center animate-slide-up"
+            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: KOYEB.bgElevated }}
+            >
+              <BookOpen className="w-8 h-8" style={{ color: KOYEB.textMuted }} />
             </div>
-            <h2 className="text-2xl font-bold text-text-primary mb-3">
+            <h2
+              className="font-mono text-xl font-bold mb-3"
+              style={{ color: KOYEB.textPrimary }}
+            >
               Sem Questões
             </h2>
-            <p className="text-text-secondary mb-2">
+            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
               Ainda não há questões de {nomeComponente} cadastradas para o seu ano escolar.
             </p>
-            <p className="text-sm text-text-muted mb-8">
+            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
               Enquanto isso, você pode tirar dúvidas com o tutor IA!
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button variant="secondary" onClick={() => router.push(`/${componente}/tutor`)}>
+              <button
+                onClick={() => router.push(`/${componente}/tutor`)}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: 'transparent',
+                  border: `2px solid ${accentColor}`,
+                  color: accentColor,
+                }}
+              >
                 Conversar com Tutor IA
-              </Button>
-              <Button variant="primary" onClick={handleVoltar}>
+              </button>
+              <button
+                onClick={handleVoltar}
+                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
+                style={{
+                  background: accentColor,
+                  color: KOYEB.bg,
+                  boxShadow: `0 4px 20px ${accentColor}40`,
+                }}
+              >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
-          </Card>
+          </div>
         )}
 
         {/* Dicas - Estilo Terminal Koyeb */}
         {status === 'OK' && questao && (
-          <div className="mt-6 animate-fade-in terminal-box" style={{ animationDelay: '300ms' }}>
-            <div className="terminal-header">
-              <span className="dot dot-red" />
-              <span className="dot dot-yellow" />
-              <span className="dot dot-green" />
-              <span className="title">dica.sh</span>
+          <div
+            className="mt-6 rounded-xl overflow-hidden animate-fade-in"
+            style={{ background: KOYEB.bgElevated, animationDelay: '300ms' }}
+          >
+            <div
+              className="flex items-center gap-2 px-4 py-2"
+              style={{ background: KOYEB.bgCard }}
+            >
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
+              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
+              <span
+                className="ml-2 font-mono text-xs"
+                style={{ color: KOYEB.textMuted }}
+              >
+                dica.sh
+              </span>
             </div>
-            <div className="terminal-body">
-              <p className="comment"># Dica de Velocidade</p>
-              <p className="text-white mt-1">$ Responda em menos de 30 segundos para ganhar bônus de velocidade!</p>
+            <div className="px-4 py-3 space-y-2">
+              <p className="font-mono text-xs" style={{ color: KOYEB.textMuted }}>
+                # Dica de Velocidade
+              </p>
+              <p className="font-mono text-xs" style={{ color: KOYEB.textPrimary }}>
+                $ Responda em menos de 30 segundos para ganhar bônus de velocidade!
+              </p>
               {limite && limite.limite_semanal !== null && (
                 <>
-                  <p className="comment mt-3"># Limite Semanal</p>
-                  <p className="text-white mt-1">$ Máximo de {limite.limite_semanal} questões por semana no modo estudo</p>
-                  <p className="text-white">$ Questões desta semana: {limite.questoes_semana}/{limite.limite_semanal}</p>
+                  <p className="font-mono text-xs mt-3" style={{ color: KOYEB.textMuted }}>
+                    # Limite Semanal
+                  </p>
+                  <p className="font-mono text-xs" style={{ color: KOYEB.textPrimary }}>
+                    $ Máximo de {limite.limite_semanal} questões por semana no modo estudo
+                  </p>
+                  <p className="font-mono text-xs" style={{ color: KOYEB.primary }}>
+                    $ Questões desta semana: {limite.questoes_semana}/{limite.limite_semanal}
+                  </p>
                 </>
               )}
             </div>
