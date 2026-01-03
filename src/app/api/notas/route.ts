@@ -399,10 +399,10 @@ export async function GET(request: NextRequest) {
     const podeResponder = emRecuperacao || emPeriodoRecuperacao || questoesSemanaAtual < 15
 
     // ═══════════════════════════════════════════════════════════════════════
-    // DETERMINAR NOTA FINAL E STATUS
+    // DETERMINAR NOTA FINAL E STATUS (usando nova fórmula)
     // ═══════════════════════════════════════════════════════════════════════
 
-    let notaFinal = notaRegular.nota_final
+    let notaFinal = notaNova.nota_final // Usar nova fórmula
     let status: 'em_andamento' | 'recuperacao' | 'aprovado' | 'reprovado' = 'em_andamento'
 
     if (emRecuperacao && notaRecuperacao !== null) {
@@ -414,7 +414,7 @@ export async function GET(request: NextRequest) {
         status = notaRecuperacao >= 6.0 ? 'aprovado' : 'reprovado'
       }
     } else if (periodoRegularEncerrou && !emRecuperacao) {
-      status = notaRegular.nota_final >= 6.0 ? 'aprovado' : 'reprovado'
+      status = notaNova.nota_final >= 6.0 ? 'aprovado' : 'reprovado'
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -439,6 +439,12 @@ export async function GET(request: NextRequest) {
         questoes_respondidas: questoesRespondidas,
         meta_questoes: config.regular.meta,
         dias_ativos: diasAtivos,
+        // Nova fórmula
+        acertos_questoes: acertosQuestoes,
+        acertos_revisao: acertosRevisao,
+        nota_questoes: notaNova.nota_questoes,
+        nota_revisao: notaNova.nota_revisao,
+        // Legado (mantido para compatibilidade)
         nota_base: notaRegular.nota_base,
         bonus_frequencia: notaRegular.bonus_frequencia,
         nota_regular: notaRegular.nota_final,
@@ -446,7 +452,7 @@ export async function GET(request: NextRequest) {
         questoes_pendentes: questoesPendentes,
         questoes_recuperacao: questoesRecuperacao,
         nota_recuperacao: notaRecuperacao,
-        nota_final: notaFinal,
+        nota_final: notaNova.nota_final, // Usar nova fórmula
         status,
         atualizado_em: new Date().toISOString(),
       }
