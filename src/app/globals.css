@@ -53,12 +53,13 @@
   --bg-glass: rgba(26, 26, 46, 0.8);
 
   /* ═══════════════════════════════════════════════════════════
-     TEXTO - Hierarquia Koyeb
+     TEXTO - Hierarquia Koyeb (Briefing Atualizado)
      ═══════════════════════════════════════════════════════════ */
   --text-primary: #FFFFFF;
-  --text-secondary: #8B8B9A;
+  --text-secondary: #A0A0B0;
   --text-tertiary: #5A5A6E;
   --text-muted: #3D3D4A;
+  --text-inverse: #0D0D14;
 
   /* ═══════════════════════════════════════════════════════════
      BORDAS - Koyeb style
@@ -90,6 +91,55 @@
   --dot-red: #FF5F56;
   --dot-yellow: #FFBD2E;
   --dot-green: #27CA40;
+
+  /* ═══════════════════════════════════════════════════════════
+     ESPAÇAMENTO - Sistema Base 4px (Briefing)
+     ═══════════════════════════════════════════════════════════ */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ═══════════════════════════════════════════════════════════
+     DURAÇÃO DE ANIMAÇÕES (Briefing)
+     ═══════════════════════════════════════════════════════════ */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --duration-slower: 600ms;
+
+  /* ═══════════════════════════════════════════════════════════
+     EASING (Briefing)
+     ═══════════════════════════════════════════════════════════ */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ═══════════════════════════════════════════════════════════
+     BORDER RADIUS (Briefing)
+     ═══════════════════════════════════════════════════════════ */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ═══════════════════════════════════════════════════════════
+     SOMBRAS (Briefing)
+     ═══════════════════════════════════════════════════════════ */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.3);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────

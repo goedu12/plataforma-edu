@@ -20,6 +20,25 @@ import Button from './ui/Button'
 import { TypingIndicator } from './ui/Loading'
 import type { Componente, MensagemChat } from '@/types'
 
+// Tipos de modo da IA
+type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'MAPA_MENTAL' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
+
+// Badges visuais para cada modo da IA
+const MODO_BADGES: Record<ModoIA, { icone: string; cor: string; label: string }> = {
+  'DIRETO': { icone: '⚡', cor: 'bg-amber-500/20 text-amber-400 border-amber-500/30', label: 'Direto' },
+  'PASSO_A_PASSO': { icone: '📝', cor: 'bg-blue-500/20 text-blue-400 border-blue-500/30', label: 'Passo a Passo' },
+  'MAPA_MENTAL': { icone: '🗺️', cor: 'bg-purple-500/20 text-purple-400 border-purple-500/30', label: 'Mapa Mental' },
+  'ESTIMULAR': { icone: '💪', cor: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Motivação' },
+  'SOCRATICO': { icone: '🎓', cor: 'bg-orange-500/20 text-orange-400 border-orange-500/30', label: 'Socrático' },
+  'CONVERSACIONAL': { icone: '💬', cor: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: 'Conversa' },
+}
+
+// Interface extendida de mensagem com modo
+interface MensagemChatComModo extends MensagemChat {
+  modo?: ModoIA
+  topico?: string
+}
+
 interface TutorChatProps {
   componente: Componente
   nomeTutor: string
@@ -82,7 +101,7 @@ export default function TutorChat({
   limiteDiario,
   onClose,
 }: TutorChatProps) {
-  const [mensagens, setMensagens] = useState<MensagemChat[]>([])
+  const [mensagens, setMensagens] = useState<MensagemChatComModo[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [usoHoje, setUsoHoje] = useState(usoInicial)
@@ -157,17 +176,20 @@ export default function TutorChat({
 
       if (data.sucesso) {
         // Adicionar frase motivacional personalizada ocasionalmente
+        // (mas não para modo DIRETO que precisa ser objetivo)
         let resposta = data.resposta
-        if (Math.random() > 0.5 && mensagens.length > 1) {
+        if (data.modo !== 'DIRETO' && Math.random() > 0.5 && mensagens.length > 1) {
           const fraseAleatoria = FRASES_MOTIVACIONAIS[Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length)]
           resposta = `${fraseAleatoria(primeiroNome)}\n\n${resposta}`
         }
 
-        const respostaTutor: MensagemChat = {
+        const respostaTutor: MensagemChatComModo = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content: resposta,
           timestamp: new Date().toISOString(),
+          modo: data.modo as ModoIA,
+          topico: data.topico,
         }
         setMensagens(prev => [...prev, respostaTutor])
         setUsoHoje(data.uso_hoje)
@@ -266,9 +288,15 @@ export default function TutorChat({
               }`}
             >
               {msg.role === 'assistant' && (
-                <div className={`flex items-center gap-2 mb-2 ${accentText}`}>
-                  <Bot className="w-4 h-4" />
-                  <span className="text-xs font-medium uppercase tracking-wider">{nomeTutor}</span>
+                <div className={`flex items-center gap-2 mb-2`}>
+                  <Bot className={`w-4 h-4 ${accentText}`} />
+                  <span className={`text-xs font-medium uppercase tracking-wider ${accentText}`}>{nomeTutor}</span>
+                  {/* Badge de modo da IA */}
+                  {msg.modo && MODO_BADGES[msg.modo] && (
+                    <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-medium border ${MODO_BADGES[msg.modo].cor}`}>
+                      {MODO_BADGES[msg.modo].icone} {MODO_BADGES[msg.modo].label}
+                    </span>
+                  )}
                 </div>
               )}
               <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>

@@ -1,5 +1,13 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai'
 import type { Componente, MensagemChat } from '@/types'
+import {
+  type ModoIA,
+  type ContextoEstudante,
+  detectarModo,
+  detectarTopico,
+  obterPromptModo,
+  obterDescricaoModo
+} from './ia-modos'
 
 // ═══════════════════════════════════════════════════════════
 // CONFIGURAÇÃO DO CLIENTE GEMINI
@@ -166,6 +174,18 @@ export interface ChatResponse {
   resposta?: string
   erro?: string
   modelo_usado?: string
+  modo?: ModoIA
+  topico?: string
+}
+
+// Re-exportar tipos e funções de modos
+export {
+  type ModoIA,
+  type ContextoEstudante,
+  detectarModo,
+  detectarTopico,
+  obterPromptModo,
+  obterDescricaoModo
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -198,7 +218,8 @@ async function testarModelo(nomeModelo: string, prompt: string): Promise<{ suces
 export async function chatComTutor(
   componente: Componente,
   mensagem: string,
-  historico: MensagemChat[] = []
+  historico: MensagemChat[] = [],
+  contexto: ContextoEstudante = {}
 ): Promise<ChatResponse> {
   // Validar componente
   const tutor = TUTORES[componente]
@@ -225,14 +246,26 @@ export async function chatComTutor(
     }
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // DETECTAR MODO E TÓPICO AUTOMATICAMENTE
+  // ═══════════════════════════════════════════════════════════
+  const modoDetectado = detectarModo(mensagem, contexto)
+  const topicoDetectado = detectarTopico(mensagem)
+  const promptModo = obterPromptModo(modoDetectado)
+
+  console.log(`[Gemini] Modo detectado: ${modoDetectado}, Tópico: ${topicoDetectado}`)
+
   // Construir histórico para o contexto
   const historicoTexto = historico
     .map(msg => `${msg.role === 'user' ? 'Estudante' : tutor.nome}: ${msg.content}`)
     .join('\n\n')
 
-  // Prompt completo
+  // ═══════════════════════════════════════════════════════════
+  // PROMPT COMPLETO COM MODO ESPECÍFICO
+  // ═══════════════════════════════════════════════════════════
   const prompt = `${tutor.system}
 
+${promptModo ? `\n${promptModo}\n` : ''}
 ${historicoTexto ? `HISTÓRICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudante: ${mensagem}
 
 ${tutor.nome}:`
@@ -260,7 +293,9 @@ ${tutor.nome}:`
       return {
         sucesso: true,
         resposta: resultado.resposta,
-        modelo_usado: nomeModelo
+        modelo_usado: nomeModelo,
+        modo: modoDetectado,
+        topico: topicoDetectado
       }
     }
 

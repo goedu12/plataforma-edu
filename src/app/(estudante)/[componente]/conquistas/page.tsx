@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Trophy, Target } from 'lucide-react'
+import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Target } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
@@ -77,58 +77,49 @@ export default function ConquistasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-8">
-      {/* Header */}
-      <header className={`${bgColor} text-white px-4 pt-4 pb-16`}>
+    <div className="min-h-screen bg-dark-bg pb-6">
+      {/* Header Compacto */}
+      <header className={`${bgColor} text-white px-4 pt-3 pb-12`}>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+              className="p-1.5 -ml-1 rounded-lg hover:bg-white/20 transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
             <div className="text-center">
-              <h1 className="text-heading flex items-center gap-2">
-                <Medal className="w-5 h-5" />
+              <h1 className="text-body font-semibold flex items-center gap-1.5">
+                <Medal className="w-4 h-4" />
                 Conquistas
               </h1>
-              <p className="text-caption text-white/80">
-                {nomeComponente} • {stats.desbloqueadas}/{stats.total}
-              </p>
             </div>
             <button
               onClick={buscarConquistas}
-              className="p-2 rounded-xl hover:bg-white/20 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
             >
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Progress */}
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5" />
-                <span className="text-heading">Progresso</span>
-              </div>
-              <span className="text-stat-sm">{porcentagem}%</span>
+          {/* Progress Compacto */}
+          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-caption font-medium">{stats.desbloqueadas}/{stats.total}</span>
+              <span className="text-body font-bold">{porcentagem}%</span>
             </div>
-            <div className="h-2 bg-white/30 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-white/30 rounded-full overflow-hidden">
               <div
                 className="h-full bg-white rounded-full transition-all duration-1000"
                 style={{ width: `${porcentagem}%` }}
               />
             </div>
-            <p className="text-caption text-white/80 text-center mt-2">
-              {stats.desbloqueadas} de {stats.total} conquistas desbloqueadas
-            </p>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 -mt-8">
+      <main className="max-w-2xl mx-auto px-4 -mt-6">
         {erro ? (
           <Card className="text-center py-10">
             <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
@@ -162,31 +153,28 @@ export default function ConquistasPage() {
           <>
             {/* Unlocked */}
             {conquistasDesbloqueadas.length > 0 && (
-              <div className="mb-6">
-                <h2 className="flex items-center gap-2 text-label text-text-primary mb-3">
-                  <CheckCircle2 className="w-4 h-4 text-success" />
+              <div className="mb-4">
+                <h2 className="flex items-center gap-2 text-label text-text-primary mb-2">
+                  <CheckCircle2 className="w-3 h-3 text-success" />
                   Desbloqueadas ({conquistasDesbloqueadas.length})
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {conquistasDesbloqueadas.map((conquista, index) => (
                     <Card
                       key={conquista.id}
-                      className="flex items-center gap-4 animate-slide-up border-l-4 border-success"
+                      className="flex items-center gap-3 p-3 animate-slide-up border-l-2 border-success"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl ${bgColor}`}>
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${bgColor}`}>
                         {conquista.icone}
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-heading text-text-primary">{conquista.nome}</h3>
-                        <p className="text-body-sm text-text-secondary">{conquista.descricao}</p>
-                        {conquista.desbloqueada_em && (
-                          <p className="text-caption text-success mt-1 flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Desbloqueada em {new Date(conquista.desbloqueada_em).toLocaleDateString('pt-BR')}
-                          </p>
-                        )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-body font-semibold text-text-primary truncate">{conquista.nome}</h3>
+                        <p className="text-caption text-text-secondary truncate">{conquista.descricao}</p>
                       </div>
+                      {conquista.desbloqueada_em && (
+                        <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
+                      )}
                     </Card>
                   ))}
                 </div>
@@ -196,26 +184,24 @@ export default function ConquistasPage() {
             {/* Locked */}
             {conquistasBloqueadas.length > 0 && (
               <div>
-                <h2 className="flex items-center gap-2 text-label text-text-primary mb-3">
-                  <Target className="w-4 h-4 text-text-muted" />
+                <h2 className="flex items-center gap-2 text-label text-text-primary mb-2">
+                  <Target className="w-3 h-3 text-text-muted" />
                   A Desbloquear ({conquistasBloqueadas.length})
                 </h2>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {conquistasBloqueadas.map((conquista, index) => (
                     <Card
                       key={conquista.id}
-                      className="flex items-center gap-4 animate-slide-up opacity-75"
+                      className="flex items-center gap-3 p-3 animate-slide-up opacity-60"
                       style={{ animationDelay: `${(conquistasDesbloqueadas.length + index) * 50}ms` }}
                     >
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-calm-elevated border-2 border-dashed border-calm-border">
-                        <Lock className="w-5 h-5 text-text-muted" />
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-calm-elevated border border-dashed border-calm-border">
+                        <Lock className="w-4 h-4 text-text-muted" />
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-heading text-text-secondary">{conquista.nome}</h3>
-                        <p className="text-body-sm text-text-muted">{conquista.descricao}</p>
-                        <p className="text-caption text-text-muted mt-1 flex items-center gap-1">
-                          <Target className="w-3 h-3" />
-                          Meta: {formatarRequisito(conquista)}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-body font-medium text-text-secondary truncate">{conquista.nome}</h3>
+                        <p className="text-caption text-text-muted truncate">
+                          {formatarRequisito(conquista)}
                         </p>
                       </div>
                     </Card>
@@ -224,18 +210,11 @@ export default function ConquistasPage() {
               </div>
             )}
 
-            {/* Terminal Tip */}
-            <div className="mt-6 animate-fade-in terminal-box">
-              <div className="terminal-header">
-                <span className="dot dot-red" />
-                <span className="dot dot-yellow" />
-                <span className="dot dot-green" />
-                <span className="title">conquistas.sh</span>
-              </div>
-              <div className="terminal-body">
-                <p className="comment"># Dica</p>
-                <p className="cmd">$ Responda questões, estude todos os dias e acumule pontos!</p>
-              </div>
+            {/* Dica compacta */}
+            <div className="mt-4 p-3 rounded-lg bg-koyeb-card border border-primary/10 animate-fade-in">
+              <p className="text-caption text-text-secondary">
+                💡 Responda questões e estude diariamente para desbloquear!
+              </p>
             </div>
           </>
         )}
