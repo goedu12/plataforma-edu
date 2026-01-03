@@ -1,7 +1,6 @@
 'use client'
 
-import { Trophy, Medal, Star, Crown, TrendingUp } from 'lucide-react'
-import ProfilePhoto from './ProfilePhoto'
+import { Trophy, Star, Crown, TrendingUp } from 'lucide-react'
 import type { RankingItem, Componente } from '@/types'
 
 interface RankingTableProps {
@@ -79,22 +78,15 @@ export default function RankingTable({
                   style={{
                     border: `3px solid ${KOYEB.silver}`,
                     boxShadow: `0 0 20px rgba(192, 192, 192, 0.3)`,
+                    background: KOYEB.bgElevated,
                   }}
                 >
-                  {top3[1]?.foto_url ? (
-                    <img
-                      src={top3[1].foto_url}
-                      alt={top3[1].nome}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      className="text-2xl font-bold"
-                      style={{ color: KOYEB.silver }}
-                    >
-                      {top3[1]?.nome?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <span
+                    className="text-2xl font-bold"
+                    style={{ color: KOYEB.silver }}
+                  >
+                    {top3[1]?.nome?.charAt(0).toUpperCase()}
+                  </span>
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
@@ -136,22 +128,15 @@ export default function RankingTable({
                   style={{
                     border: `4px solid ${KOYEB.gold}`,
                     boxShadow: `0 0 30px rgba(255, 215, 0, 0.4)`,
+                    background: KOYEB.bgElevated,
                   }}
                 >
-                  {top3[0]?.foto_url ? (
-                    <img
-                      src={top3[0].foto_url}
-                      alt={top3[0].nome}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      className="text-3xl font-bold"
-                      style={{ color: KOYEB.gold }}
-                    >
-                      {top3[0]?.nome?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <span
+                    className="text-3xl font-bold"
+                    style={{ color: KOYEB.gold }}
+                  >
+                    {top3[0]?.nome?.charAt(0).toUpperCase()}
+                  </span>
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
@@ -189,22 +174,15 @@ export default function RankingTable({
                   style={{
                     border: `3px solid ${KOYEB.bronze}`,
                     boxShadow: `0 0 20px rgba(205, 127, 50, 0.3)`,
+                    background: KOYEB.bgElevated,
                   }}
                 >
-                  {top3[2]?.foto_url ? (
-                    <img
-                      src={top3[2].foto_url}
-                      alt={top3[2].nome}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span
-                      className="text-2xl font-bold"
-                      style={{ color: KOYEB.bronze }}
-                    >
-                      {top3[2]?.nome?.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <span
+                    className="text-2xl font-bold"
+                    style={{ color: KOYEB.bronze }}
+                  >
+                    {top3[2]?.nome?.charAt(0).toUpperCase()}
+                  </span>
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
