@@ -132,14 +132,15 @@ const config: Config = {
         },
 
         // ─────────────────────────────────────────────────────────────
-        // TEXTO - Hierarquia Koyeb
+        // TEXTO - Hierarquia Koyeb (Briefing Atualizado)
         // ─────────────────────────────────────────────────────────────
         text: {
           primary: '#FFFFFF',
-          secondary: '#8B8B9A',
+          secondary: '#A0A0B0',  // Atualizado conforme briefing
           tertiary: '#5A5A6E',
           muted: '#3D3D4A',
           disabled: '#2D2D3A',
+          inverse: '#0D0D14',   // Novo: texto em fundos claros
         },
 
         // ─────────────────────────────────────────────────────────────
