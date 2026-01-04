@@ -2,6 +2,14 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export async function GET() {
+  // BLOQUEADO em produção - expõe informações sensíveis
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Endpoint desabilitado em produção' },
+      { status: 403 }
+    )
+  }
+
   const resultados: {
     item: string
     status: 'OK' | 'ERRO'
@@ -206,16 +214,7 @@ export async function GET() {
       ok: totalOk,
       erros: totalErro
     },
-    resultados,
-    credenciais_teste: {
-      professor: {
-        email: 'professor@admin',
-        senha: '@professor123'
-      },
-      estudante: {
-        email: 'mariasilvasantos@1a',
-        senha: '@estudante'
-      }
-    }
+    resultados
+    // REMOVIDO: credenciais_teste - nunca expor senhas em endpoints
   })
 }

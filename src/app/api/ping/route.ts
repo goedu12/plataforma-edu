@@ -4,12 +4,22 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// Endpoint de diagnóstico simples - BUILD ID: 20260104-v2
+// Endpoint de diagnóstico - BLOQUEADO em produção
+// Use /api/health para health checks em produção
 export async function GET() {
+  // Bloquear em produção por segurança
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Endpoint desabilitado em produção. Use /api/health' },
+      { status: 403 }
+    )
+  }
+
+  // Apenas desenvolvimento/teste
   return NextResponse.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    build: '20260104-v2',
+    build: '20260104-v3',
     env: {
       SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
       SUPABASE_ANON: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING',
