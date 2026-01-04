@@ -81,11 +81,10 @@ export default function ImportarProfessorPage() {
   }
 
   const downloadModelo = (tipo: 'xlsx' | 'csv') => {
-    // Criar conteúdo do modelo
     const conteudo =
       tipo === 'csv'
         ? 'nome,turma,componente\nMaria Silva,1A,fisica\nMaria Silva,1A,matematica\nJoão Pedro,7B,matematica'
-        : '' // Para XLSX, seria necessário uma biblioteca adicional
+        : ''
 
     if (tipo === 'csv') {
       const blob = new Blob([conteudo], { type: 'text/csv' })
@@ -101,21 +100,26 @@ export default function ImportarProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-8">
+    <div className="min-h-screen bg-dark-bg pb-8">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-3 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
+      <header className="bg-dark-surface border-b border-border px-4 py-6">
+        <div className="max-w-2xl mx-auto">
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="p-2 -ml-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100"
+            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
+            <span className="text-body">Voltar ao Dashboard</span>
           </button>
-          <h1 className="font-semibold text-gray-800 flex items-center gap-2">
-            <Upload className="w-5 h-5" />
-            Importar Estudantes
-          </h1>
-          <div className="w-10" />
+          <div className="flex items-center gap-3">
+            <div className="icon-box-green w-12 h-12">
+              <Upload className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-title text-text-primary">Importar Estudantes</h1>
+              <p className="text-caption text-text-tertiary">Adicione estudantes via planilha</p>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -123,11 +127,11 @@ export default function ImportarProfessorPage() {
       <main className="max-w-2xl mx-auto p-4">
         {/* Download Modelo */}
         <Card className="mb-6">
-          <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <Download className="w-5 h-5" />
-            Baixar Modelo
-          </h3>
-          <p className="text-sm text-gray-600 mb-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Download className="w-5 h-5 text-accent-500" />
+            <h3 className="text-heading text-text-primary">Baixar Modelo</h3>
+          </div>
+          <p className="text-body text-text-secondary mb-4">
             Baixe o modelo e preencha com os dados dos estudantes.
             Cada linha representa um estudante com um componente.
             Se o estudante tiver 2 componentes, adicione 2 linhas.
@@ -135,25 +139,27 @@ export default function ImportarProfessorPage() {
           <div className="flex gap-3">
             <Button variant="secondary" onClick={() => downloadModelo('csv')}>
               <FileSpreadsheet className="w-5 h-5" />
-              CSV
+              Baixar CSV
             </Button>
           </div>
         </Card>
 
         {/* Upload */}
         <Card className="mb-6">
-          <h3 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <Upload className="w-5 h-5" />
-            Enviar Arquivo
-          </h3>
+          <div className="flex items-center gap-2 mb-4">
+            <Upload className="w-5 h-5 text-primary-500" />
+            <h3 className="text-heading text-text-primary">Enviar Arquivo</h3>
+          </div>
           <div
             onDrop={handleDrop}
             onDragOver={e => e.preventDefault()}
             onClick={() => fileInputRef.current?.click()}
             className={`
               border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
-              transition-colors duration-200
-              ${arquivo ? 'border-green-300 bg-green-50' : 'border-gray-300 hover:border-gray-400'}
+              transition-all duration-300
+              ${arquivo
+                ? 'border-primary-500/50 bg-primary-500/10'
+                : 'border-border hover:border-border-hover hover:bg-dark-elevated'}
             `}
           >
             <input
@@ -165,22 +171,22 @@ export default function ImportarProfessorPage() {
             />
             {arquivo ? (
               <>
-                <FileSpreadsheet className="w-12 h-12 text-green-500 mx-auto mb-3" />
-                <p className="font-medium text-gray-800">{arquivo.name}</p>
-                <p className="text-sm text-gray-500 mt-1">
+                <FileSpreadsheet className="w-12 h-12 text-primary-500 mx-auto mb-3" />
+                <p className="font-medium text-text-primary">{arquivo.name}</p>
+                <p className="text-caption text-text-tertiary mt-1">
                   Clique para trocar o arquivo
                 </p>
               </>
             ) : (
               <>
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="font-medium text-gray-600">
+                <Upload className="w-12 h-12 text-text-tertiary mx-auto mb-3" />
+                <p className="font-medium text-text-secondary">
                   Arraste o arquivo aqui
                 </p>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-caption text-text-tertiary mt-1">
                   ou clique para selecionar
                 </p>
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-caption text-text-muted mt-2">
                   Formatos: .xlsx, .csv
                 </p>
               </>
@@ -201,32 +207,32 @@ export default function ImportarProfessorPage() {
         {/* Resultado */}
         {resultado && (
           <Card className="animate-slide-up">
-            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <div className="flex items-center gap-2 mb-4">
               {resultado.sucesso ? (
                 <>
-                  <CheckCircle2 className="w-5 h-5 text-green-500" />
-                  Importação Concluída
+                  <CheckCircle2 className="w-5 h-5 text-success" />
+                  <h3 className="text-heading text-text-primary">Importação Concluída</h3>
                 </>
               ) : (
                 <>
-                  <AlertCircle className="w-5 h-5 text-yellow-500" />
-                  Importação com Alertas
+                  <AlertCircle className="w-5 h-5 text-warning" />
+                  <h3 className="text-heading text-text-primary">Importação com Alertas</h3>
                 </>
               )}
-            </h3>
+            </div>
 
             <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-              <div className="p-3 bg-green-50 rounded-lg">
-                <p className="text-2xl font-bold text-green-600">{resultado.novos}</p>
-                <p className="text-xs text-green-700">Novos</p>
+              <div className="p-3 bg-primary-500/10 border border-primary-500/20 rounded-xl">
+                <p className="text-2xl font-bold text-primary-500">{resultado.novos}</p>
+                <p className="text-caption text-primary-400">Novos</p>
               </div>
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-2xl font-bold text-blue-600">{resultado.atualizados}</p>
-                <p className="text-xs text-blue-700">Atualizados</p>
+              <div className="p-3 bg-accent-500/10 border border-accent-500/20 rounded-xl">
+                <p className="text-2xl font-bold text-accent-500">{resultado.atualizados}</p>
+                <p className="text-caption text-accent-400">Atualizados</p>
               </div>
-              <div className="p-3 bg-red-50 rounded-lg">
-                <p className="text-2xl font-bold text-red-600">{resultado.erros}</p>
-                <p className="text-xs text-red-700">Erros</p>
+              <div className="p-3 bg-error/10 border border-error/20 rounded-xl">
+                <p className="text-2xl font-bold text-error">{resultado.erros}</p>
+                <p className="text-caption text-error/80">Erros</p>
               </div>
             </div>
 
@@ -237,27 +243,27 @@ export default function ImportarProfessorPage() {
                     key={index}
                     className={`flex items-center gap-3 p-2 rounded-lg text-sm ${
                       item.status === 'erro'
-                        ? 'bg-red-50'
+                        ? 'bg-error/10 border border-error/20'
                         : item.status === 'novo'
-                          ? 'bg-green-50'
-                          : 'bg-blue-50'
+                          ? 'bg-primary-500/10 border border-primary-500/20'
+                          : 'bg-accent-500/10 border border-accent-500/20'
                     }`}
                   >
                     {item.status === 'erro' ? (
-                      <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                      <XCircle className="w-4 h-4 text-error flex-shrink-0" />
                     ) : (
                       <CheckCircle2
                         className={`w-4 h-4 flex-shrink-0 ${
-                          item.status === 'novo' ? 'text-green-500' : 'text-blue-500'
+                          item.status === 'novo' ? 'text-primary-500' : 'text-accent-500'
                         }`}
                       />
                     )}
-                    <span className="flex-1 truncate">{item.nome}</span>
+                    <span className="flex-1 truncate text-text-primary">{item.nome}</span>
                     <Badge variant="default" size="sm">
                       {item.turma}
                     </Badge>
                     {item.erro && (
-                      <span className="text-xs text-red-600">{item.erro}</span>
+                      <span className="text-caption text-error">{item.erro}</span>
                     )}
                   </div>
                 ))}

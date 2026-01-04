@@ -112,24 +112,24 @@ export default function ConfigProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dark-bg">
       {/* Header */}
-      <header className="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-4 py-6">
+      <header className="bg-dark-surface border-b border-border px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="flex items-center gap-2 text-gray-300 hover:text-white mb-4"
+            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
-            Voltar ao Dashboard
+            <span className="text-body">Voltar ao Dashboard</span>
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+            <div className="icon-box-cyan w-12 h-12">
               <Settings className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">Configurações</h1>
-              <p className="text-gray-300 text-sm">Gerencie suas preferências e segurança</p>
+              <h1 className="text-title text-text-primary">Configurações</h1>
+              <p className="text-caption text-text-tertiary">Gerencie suas preferências e segurança</p>
             </div>
           </div>
         </div>
@@ -140,17 +140,17 @@ export default function ConfigProfessorPage() {
         {/* Informações do Professor */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-gray-500" />
-            <h3 className="font-semibold text-gray-800">Sua Conta</h3>
+            <Shield className="w-5 h-5 text-text-tertiary" />
+            <h3 className="text-heading text-text-primary">Sua Conta</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm text-gray-500">Nome</label>
-              <p className="font-medium text-gray-800">{professor?.nome}</p>
+            <div className="p-4 bg-dark-elevated rounded-xl">
+              <label className="text-caption text-text-tertiary">Nome</label>
+              <p className="font-medium text-text-primary">{professor?.nome}</p>
             </div>
-            <div>
-              <label className="text-sm text-gray-500">Email</label>
-              <p className="font-medium text-gray-800">{professor?.email}</p>
+            <div className="p-4 bg-dark-elevated rounded-xl">
+              <label className="text-caption text-text-tertiary">Email</label>
+              <p className="font-medium text-text-primary">{professor?.email}</p>
             </div>
           </div>
         </Card>
@@ -158,36 +158,36 @@ export default function ConfigProfessorPage() {
         {/* Configurações da Plataforma */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
-            <Info className="w-5 h-5 text-blue-500" />
-            <h3 className="font-semibold text-gray-800">Configurações da Plataforma</h3>
+            <Info className="w-5 h-5 text-accent-500" />
+            <h3 className="text-heading text-text-primary">Configurações da Plataforma</h3>
           </div>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-body text-text-secondary mb-4">
             Estas configurações são definidas globalmente pelo sistema. Para alterá-las, entre em contato com o administrador.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="p-4 bg-dark-elevated rounded-xl border border-matematica-500/20">
               <div className="flex items-center gap-2 mb-2">
-                <Bot className="w-5 h-5 text-purple-500" />
-                <span className="font-medium text-gray-700">Limite Tutor IA</span>
+                <Bot className="w-5 h-5 text-matematica-500" />
+                <span className="font-medium text-text-primary">Limite Tutor IA</span>
               </div>
-              <p className="text-2xl font-bold text-purple-600">{PONTUACAO.LIMITE_IA_DIARIO}</p>
-              <p className="text-xs text-gray-500">interações por dia por aluno</p>
+              <p className="text-2xl font-bold text-matematica-500">{PONTUACAO.LIMITE_IA_DIARIO}</p>
+              <p className="text-caption text-text-tertiary">interações por dia por aluno</p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="p-4 bg-dark-elevated rounded-xl border border-primary-500/20">
               <div className="flex items-center gap-2 mb-2">
-                <Target className="w-5 h-5 text-green-500" />
-                <span className="font-medium text-gray-700">Meta Semanal</span>
+                <Target className="w-5 h-5 text-primary-500" />
+                <span className="font-medium text-text-primary">Meta Semanal</span>
               </div>
-              <p className="text-2xl font-bold text-green-600">50</p>
-              <p className="text-xs text-gray-500">questões por semana</p>
+              <p className="text-2xl font-bold text-primary-500">50</p>
+              <p className="text-caption text-text-tertiary">questões por semana</p>
             </div>
           </div>
-          <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+          <div className="mt-4 p-4 bg-accent-500/10 border border-accent-500/20 rounded-xl">
             <div className="flex gap-2">
-              <Info className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-700">
-                <p className="font-medium">Sistema de Pontuação:</p>
-                <ul className="mt-1 space-y-1 text-blue-600">
+              <Info className="w-4 h-4 text-accent-500 mt-0.5 flex-shrink-0" />
+              <div className="text-sm">
+                <p className="font-medium text-accent-400">Sistema de Pontuação:</p>
+                <ul className="mt-1 space-y-1 text-accent-300">
                   <li>• Resposta correta: +{PONTUACAO.RESPOSTA_CORRETA} pontos</li>
                   <li>• Com dica: +{PONTUACAO.RESPOSTA_COM_DICA} pontos</li>
                   <li>• Bônus velocidade (&lt;30s): +{PONTUACAO.BONUS_VELOCIDADE} pontos</li>
@@ -201,16 +201,16 @@ export default function ConfigProfessorPage() {
         {/* Alterar Senha */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
-            <Key className="w-5 h-5 text-yellow-500" />
-            <h3 className="font-semibold text-gray-800">Alterar Senha</h3>
+            <Key className="w-5 h-5 text-warning" />
+            <h3 className="text-heading text-text-primary">Alterar Senha</h3>
           </div>
 
           {mensagem && (
             <div
               className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
                 mensagem.tipo === 'sucesso'
-                  ? 'bg-green-50 text-green-700'
-                  : 'bg-red-50 text-red-700'
+                  ? 'bg-success/10 border border-success/20 text-success'
+                  : 'bg-error/10 border border-error/20 text-error'
               }`}
             >
               {mensagem.tipo === 'sucesso' ? (
@@ -224,7 +224,7 @@ export default function ConfigProfessorPage() {
 
           <form onSubmit={alterarSenha} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-caption text-text-secondary mb-2">
                 Senha Atual
               </label>
               <div className="relative">
@@ -232,13 +232,13 @@ export default function ConfigProfessorPage() {
                   type={mostrarSenhaAtual ? 'text' : 'password'}
                   value={senhaAtual}
                   onChange={e => setSenhaAtual(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent pr-12"
+                  className="w-full px-4 py-3 bg-dark-elevated border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-text-primary placeholder-text-muted pr-12 transition-all"
                   placeholder="Digite sua senha atual"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
                 >
                   {mostrarSenhaAtual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -246,7 +246,7 @@ export default function ConfigProfessorPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-caption text-text-secondary mb-2">
                 Nova Senha
               </label>
               <div className="relative">
@@ -254,13 +254,13 @@ export default function ConfigProfessorPage() {
                   type={mostrarNovaSenha ? 'text' : 'password'}
                   value={novaSenha}
                   onChange={e => setNovaSenha(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent pr-12"
+                  className="w-full px-4 py-3 bg-dark-elevated border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-text-primary placeholder-text-muted pr-12 transition-all"
                   placeholder="Digite a nova senha (mínimo 6 caracteres)"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
                 >
                   {mostrarNovaSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -268,14 +268,14 @@ export default function ConfigProfessorPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-caption text-text-secondary mb-2">
                 Confirmar Nova Senha
               </label>
               <input
                 type="password"
                 value={confirmarSenha}
                 onChange={e => setConfirmarSenha(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                className="w-full px-4 py-3 bg-dark-elevated border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-text-primary placeholder-text-muted transition-all"
                 placeholder="Confirme a nova senha"
               />
             </div>
@@ -283,7 +283,7 @@ export default function ConfigProfessorPage() {
             <Button
               type="submit"
               disabled={salvando}
-              className="w-full bg-gray-800 hover:bg-gray-900 text-white"
+              className="w-full"
             >
               {salvando ? 'Salvando...' : 'Alterar Senha'}
             </Button>
@@ -291,12 +291,12 @@ export default function ConfigProfessorPage() {
         </Card>
 
         {/* Informações de Segurança */}
-        <Card className="bg-yellow-50 border border-yellow-200">
+        <Card className="border border-warning/30">
           <div className="flex gap-3">
-            <Shield className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <Shield className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-800 mb-1">Dicas de Segurança</h3>
-              <ul className="text-sm text-yellow-700 space-y-1">
+              <h3 className="font-semibold text-warning mb-2">Dicas de Segurança</h3>
+              <ul className="text-body text-text-secondary space-y-1">
                 <li>• Use uma senha forte com letras, números e símbolos</li>
                 <li>• Não compartilhe sua senha com outras pessoas</li>
                 <li>• Altere sua senha periodicamente</li>
