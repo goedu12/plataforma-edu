@@ -4,20 +4,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Atom, Calculator, Loader2 } from 'lucide-react'
 
-// Cores Koyeb
-const KOYEB = {
-  bg: '#0D0D14',
-  bgCard: '#1A1A2E',
-  bgElevated: '#222238',
-  primary: '#00FF88',
-  accent: '#00D4FF',
-  fisica: '#00FF88',
-  matematica: '#A855F7',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#8B8B9A',
-  textMuted: '#5A5A6E',
-}
-
 export default function HomePage() {
   const router = useRouter()
   const [carregando, setCarregando] = useState(true)
@@ -61,7 +47,7 @@ export default function HomePage() {
     <div
       className="min-h-screen flex items-center justify-center"
       style={{
-        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
+        background: 'linear-gradient(180deg, var(--bg-base) 0%, var(--bg-surface) 100%)',
       }}
     >
       <div className="text-center animate-fade-in px-6">
@@ -70,18 +56,18 @@ export default function HomePage() {
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg animate-pulse"
             style={{
-              background: `linear-gradient(135deg, ${KOYEB.fisica} 0%, rgba(0, 255, 136, 0.7) 100%)`,
-              boxShadow: `0 0 40px rgba(0, 255, 136, 0.3)`,
+              background: 'linear-gradient(135deg, var(--color-fisica) 0%, var(--color-fisica-light) 100%)',
+              boxShadow: '0 0 40px var(--color-fisica-glow)',
             }}
           >
-            <Atom className="w-12 h-12" style={{ color: KOYEB.bg }} />
+            <Atom className="w-12 h-12 text-black" />
           </div>
 
           <div
             className="w-3 h-3 rounded-full animate-bounce"
             style={{
-              background: KOYEB.accent,
-              boxShadow: `0 0 20px ${KOYEB.accent}`,
+              background: 'var(--color-accent)',
+              boxShadow: '0 0 20px var(--color-accent)',
               animationDelay: '0.2s',
             }}
           />
@@ -89,8 +75,8 @@ export default function HomePage() {
           <div
             className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg animate-pulse"
             style={{
-              background: `linear-gradient(135deg, ${KOYEB.matematica} 0%, rgba(168, 85, 247, 0.7) 100%)`,
-              boxShadow: `0 0 40px rgba(168, 85, 247, 0.3)`,
+              background: 'linear-gradient(135deg, var(--color-matematica) 0%, var(--color-matematica-light) 100%)',
+              boxShadow: '0 0 40px var(--color-matematica-glow)',
               animationDelay: '0.3s',
             }}
           >
@@ -100,14 +86,14 @@ export default function HomePage() {
 
         {/* Título */}
         <h1
-          className="font-mono text-3xl font-bold tracking-wide mb-2"
-          style={{ color: KOYEB.textPrimary }}
+          className="font-display text-3xl font-bold tracking-wide mb-2"
+          style={{ color: 'var(--text-primary)' }}
         >
-          Plataforma <span style={{ color: KOYEB.primary }}>EDU</span>
+          Plataforma <span style={{ color: 'var(--color-fisica)' }}>EDU</span>
         </h1>
         <p
-          className="font-mono text-sm tracking-widest uppercase mb-8"
-          style={{ color: KOYEB.textMuted }}
+          className="text-sm tracking-widest mb-8"
+          style={{ color: 'var(--text-muted)' }}
         >
           Colégio Cora Coralina
         </p>
@@ -116,28 +102,14 @@ export default function HomePage() {
         <div className="flex items-center justify-center gap-3">
           <Loader2
             className="w-5 h-5 animate-spin"
-            style={{ color: KOYEB.primary }}
+            style={{ color: 'var(--color-fisica)' }}
           />
           <span
-            className="font-mono text-sm"
-            style={{ color: KOYEB.textSecondary }}
+            className="text-sm"
+            style={{ color: 'var(--text-secondary)' }}
           >
             Carregando...
           </span>
-        </div>
-
-        {/* Terminal style footer */}
-        <div className="mt-12 terminal-box max-w-xs mx-auto">
-          <div className="terminal-header">
-            <span className="dot dot-red" />
-            <span className="dot dot-yellow" />
-            <span className="dot dot-green" />
-            <span className="title">init.sh</span>
-          </div>
-          <div className="terminal-body">
-            <p className="comment">$ Inicializando sistema...</p>
-            <p className="success">✓ Conectado</p>
-          </div>
         </div>
       </div>
     </div>
