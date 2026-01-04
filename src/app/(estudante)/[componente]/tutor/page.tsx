@@ -59,7 +59,7 @@ export default function TutorPage() {
   const usosRestantes = PONTUACAO.LIMITE_IA_DIARIO - usoHoje
 
   return (
-    <div className="h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
+    <div className="h-screen flex flex-col pb-nav" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
       <header className="px-4 py-4" style={{ background: corPrimaria }}>
         <div className="max-w-2xl mx-auto">

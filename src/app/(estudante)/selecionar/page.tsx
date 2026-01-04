@@ -108,7 +108,7 @@ export default function SelecionarComponentePage() {
             className="font-display text-3xl font-bold mb-2"
             style={{ color: 'var(--text-primary)' }}
           >
-            Ola, {primeiroNome}!
+            Olá, {primeiroNome}!
           </h2>
           <p style={{ color: 'var(--text-secondary)' }}>
             O que vamos estudar hoje?
@@ -146,7 +146,7 @@ export default function SelecionarComponentePage() {
                       className="font-display font-semibold text-lg"
                       style={{ color: 'var(--text-primary)' }}
                     >
-                      Fisica
+                      Física
                     </h3>
                     <Badge variant="fisica" size="sm">
                       {nivelFisica.nome}
@@ -223,14 +223,14 @@ export default function SelecionarComponentePage() {
                     className="text-xs"
                     style={{ color: 'var(--text-muted)' }}
                   >
-                    Questoes
+                    Questões
                   </p>
                 </div>
               </div>
             </button>
           )}
 
-          {/* Card de Matematica */}
+          {/* Card de Matemática */}
           {usuario.componentes.includes('matematica') && (
             <button
               onClick={() => router.push('/matematica/menu')}
@@ -259,14 +259,14 @@ export default function SelecionarComponentePage() {
                       className="font-display font-semibold text-lg"
                       style={{ color: 'var(--text-primary)' }}
                     >
-                      Matematica
+                      Matemática
                     </h3>
                     <Badge variant="matematica" size="sm">
                       {nivelMatematica.nome}
                     </Badge>
                   </div>
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    Tutor: Pitagoras
+                    Tutor: Pitágoras
                   </p>
                 </div>
                 <div
@@ -336,7 +336,7 @@ export default function SelecionarComponentePage() {
                     className="text-xs"
                     style={{ color: 'var(--text-muted)' }}
                   >
-                    Questoes
+                    Questões
                   </p>
                 </div>
               </div>
@@ -361,7 +361,7 @@ export default function SelecionarComponentePage() {
             </div>
             <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
               Estude todos os dias para manter sua{' '}
-              <strong style={{ color: 'var(--color-streak)' }}>sequencia</strong> ativa!
+              <strong style={{ color: 'var(--color-streak)' }}>sequência</strong> ativa!
             </p>
           </div>
         </div>

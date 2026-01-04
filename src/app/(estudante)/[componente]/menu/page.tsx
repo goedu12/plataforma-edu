@@ -83,18 +83,18 @@ export default function MenuComponentePage() {
   const pontosParaProximo = proximoNivel ? proximoNivel.pontos_min - pontos : 0
 
   const primeiroNome = usuario.nome.split(' ')[0]
-  const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitagoras'
+  const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
 
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const accentGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questoes e pontos' },
-    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 questoes em 5 min' },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões e pontos' },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 questões em 5 min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Refazer erros' },
-    { icon: Bot, label: `Tutor`, href: `/${componente}/tutor`, description: `Duvidas com ${nomeTutor}` },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Sua posicao' },
+    { icon: Bot, label: `Tutor`, href: `/${componente}/tutor`, description: `Dúvidas com ${nomeTutor}` },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Sua posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Medalhas' },
     { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Nota bimestre' },
   ]
@@ -117,7 +117,7 @@ export default function MenuComponentePage() {
                 className="text-sm font-semibold"
                 style={{ color: accentColor }}
               >
-                {componente === 'fisica' ? 'Fisica' : 'Matematica'}
+                {componente === 'fisica' ? 'Física' : 'Matemática'}
               </h1>
               <p
                 className="text-xs"
@@ -181,7 +181,7 @@ export default function MenuComponentePage() {
                 className="font-display text-2xl font-bold"
                 style={{ color: 'var(--text-primary)' }}
               >
-                Ola, {primeiroNome}!
+                Olá, {primeiroNome}!
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant={isFisica ? 'fisica' : 'matematica'} size="sm">
@@ -287,7 +287,7 @@ export default function MenuComponentePage() {
               className="text-sm font-mono tabular-nums"
               style={{ color: 'var(--text-secondary)' }}
             >
-              {questoesTotal}/50 questoes
+              {questoesTotal}/50 questões
             </span>
           </div>
 
