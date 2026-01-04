@@ -290,21 +290,22 @@ export default function ConfigProfessorPage() {
           </form>
         </Card>
 
-        {/* Informações de Segurança */}
-        <Card className="border border-warning/30">
-          <div className="flex gap-3">
-            <Shield className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-semibold text-warning mb-2">Dicas de Segurança</h3>
-              <ul className="text-body text-text-secondary space-y-1">
-                <li>• Use uma senha forte com letras, números e símbolos</li>
-                <li>• Não compartilhe sua senha com outras pessoas</li>
-                <li>• Altere sua senha periodicamente</li>
-                <li>• Faça logout ao usar computadores compartilhados</li>
-              </ul>
-            </div>
+        {/* Informações de Segurança - Terminal Style */}
+        <div className="terminal-box terminal-amber">
+          <div className="terminal-header">
+            <span className="dot dot-red" />
+            <span className="dot dot-yellow" />
+            <span className="dot dot-green" />
+            <span className="title">seguranca.sh</span>
           </div>
-        </Card>
+          <div className="terminal-body space-y-2">
+            <p className="comment"># Dicas de Segurança</p>
+            <p className="text-white">$ Use uma senha forte com letras, numeros e simbolos</p>
+            <p className="text-white">$ Nao compartilhe sua senha com outras pessoas</p>
+            <p className="text-white">$ Altere sua senha periodicamente</p>
+            <p className="text-white">$ Faca logout ao usar computadores compartilhados</p>
+          </div>
+        </div>
       </main>
     </div>
   )

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
   Upload,
-  Download,
   FileSpreadsheet,
   CheckCircle2,
   XCircle,
@@ -125,24 +124,27 @@ export default function ImportarProfessorPage() {
 
       {/* Conteúdo */}
       <main className="max-w-2xl mx-auto p-4">
-        {/* Download Modelo */}
-        <Card className="mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Download className="w-5 h-5 text-accent-500" />
-            <h3 className="text-heading text-text-primary">Baixar Modelo</h3>
+        {/* Download Modelo - Terminal Style */}
+        <div className="terminal-box terminal-cyan mb-6">
+          <div className="terminal-header">
+            <span className="dot dot-red" />
+            <span className="dot dot-yellow" />
+            <span className="dot dot-green" />
+            <span className="title">modelo_importacao.sh</span>
           </div>
-          <p className="text-body text-text-secondary mb-4">
-            Baixe o modelo e preencha com os dados dos estudantes.
-            Cada linha representa um estudante com um componente.
-            Se o estudante tiver 2 componentes, adicione 2 linhas.
-          </p>
-          <div className="flex gap-3">
-            <Button variant="secondary" onClick={() => downloadModelo('csv')}>
-              <FileSpreadsheet className="w-5 h-5" />
-              Baixar CSV
-            </Button>
+          <div className="terminal-body space-y-2">
+            <p className="comment"># Instrucoes para importar estudantes</p>
+            <p className="text-white">$ Baixe o modelo e preencha com os dados dos estudantes</p>
+            <p className="text-white">$ Cada linha representa um estudante com um componente</p>
+            <p className="text-white">$ Se o estudante tiver 2 componentes, adicione 2 linhas</p>
+            <div className="mt-4">
+              <Button variant="secondary" onClick={() => downloadModelo('csv')}>
+                <FileSpreadsheet className="w-5 h-5" />
+                Baixar CSV
+              </Button>
+            </div>
           </div>
-        </Card>
+        </div>
 
         {/* Upload */}
         <Card className="mb-6">

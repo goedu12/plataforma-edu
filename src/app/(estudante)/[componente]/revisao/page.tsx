@@ -180,32 +180,17 @@ export default function RevisaoPage() {
         {status === 'OK' && questao ? (
           <div className="animate-slide-up">
             {/* Info de Revisão - Terminal */}
-            <div
-              className="mb-4 rounded-xl overflow-hidden"
-              style={{ background: KOYEB.bgElevated }}
-            >
-              <div
-                className="flex items-center gap-2 px-4 py-2"
-                style={{ background: KOYEB.bgCard }}
-              >
-                <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-                <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-                <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-                <span
-                  className="ml-2 font-mono text-xs"
-                  style={{ color: KOYEB.textMuted }}
-                >
-                  revisao.sh
-                </span>
+            <div className="terminal-box terminal-amber mb-4">
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">revisao.sh</span>
               </div>
-              <div className="px-4 py-3">
-                <p className="font-mono text-xs" style={{ color: KOYEB.warning }}>
-                  # Modo Revisão • {totalRevisao} {totalRevisao === 1 ? 'questão pendente' : 'questões pendentes'}
-                </p>
+              <div className="terminal-body">
+                <p className="warning"># Modo Revisao - {totalRevisao} {totalRevisao === 1 ? 'questao pendente' : 'questoes pendentes'}</p>
                 {errouEm && (
-                  <p className="font-mono text-xs mt-1" style={{ color: KOYEB.textMuted }}>
-                    $ Você errou esta questão em {formatarDataErro(errouEm)}
-                  </p>
+                  <p className="muted">$ Voce errou esta questao em {formatarDataErro(errouEm)}</p>
                 )}
               </div>
             </div>
@@ -321,34 +306,17 @@ export default function RevisaoPage() {
 
         {/* Dicas - Terminal */}
         {status === 'OK' && questao && (
-          <div
-            className="mt-6 rounded-xl overflow-hidden animate-fade-in"
-            style={{ background: KOYEB.bgElevated, animationDelay: '300ms' }}
-          >
-            <div
-              className="flex items-center gap-2 px-4 py-2"
-              style={{ background: KOYEB.bgCard }}
-            >
-              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-              <span
-                className="ml-2 font-mono text-xs"
-                style={{ color: KOYEB.textMuted }}
-              >
-                dica.sh
-              </span>
+          <div className={`mt-6 terminal-box ${isFisica ? '' : 'terminal-lilas'} animate-fade-in`} style={{ animationDelay: '300ms' }}>
+            <div className="terminal-header">
+              <span className="dot dot-red" />
+              <span className="dot dot-yellow" />
+              <span className="dot dot-green" />
+              <span className="title">dica.sh</span>
             </div>
-            <div className="px-4 py-3">
-              <p className="font-mono text-xs" style={{ color: KOYEB.textMuted }}>
-                # Modo Revisão
-              </p>
-              <p className="font-mono text-xs mt-1" style={{ color: KOYEB.textPrimary }}>
-                $ Revisar questões erradas é essencial para fixar o aprendizado!
-              </p>
-              <p className="font-mono text-xs mt-1" style={{ color: KOYEB.warning }}>
-                $ Acertos na revisão contribuem para sua nota bimestral!
-              </p>
+            <div className="terminal-body space-y-1">
+              <p className="comment"># Modo Revisao</p>
+              <p className="text-white">$ Revisar questoes erradas e essencial para fixar o aprendizado!</p>
+              <p className="warning">$ Acertos na revisao contribuem para sua nota bimestral!</p>
             </div>
           </div>
         )}

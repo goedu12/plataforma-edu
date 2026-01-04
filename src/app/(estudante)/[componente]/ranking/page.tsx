@@ -231,31 +231,16 @@ export default function RankingPage() {
         ) : (
           <>
             {/* Terminal Tip */}
-            <div
-              className="rounded-xl overflow-hidden mb-6"
-              style={{ background: KOYEB.bgElevated }}
-            >
-              <div
-                className="flex items-center gap-2 px-4 py-2"
-                style={{ background: KOYEB.bgCard }}
-              >
-                <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-                <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-                <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-                <span
-                  className="ml-2 font-mono text-xs"
-                  style={{ color: KOYEB.textMuted }}
-                >
-                  ranking.sh
-                </span>
+            <div className={`terminal-box ${isFisica ? '' : 'terminal-lilas'} mb-6`}>
+              <div className="terminal-header">
+                <span className="dot dot-red" />
+                <span className="dot dot-yellow" />
+                <span className="dot dot-green" />
+                <span className="title">ranking.sh</span>
               </div>
-              <div className="px-4 py-3 space-y-1">
-                <p className="font-mono text-xs" style={{ color: KOYEB.textMuted }}>
-                  # Dica
-                </p>
-                <p className="font-mono text-xs" style={{ color: KOYEB.textPrimary }}>
-                  $ Responda questões corretamente para subir no ranking!
-                </p>
+              <div className="terminal-body">
+                <p className="comment"># Dica</p>
+                <p className="text-white">$ Responda questoes corretamente para subir no ranking!</p>
               </div>
             </div>
 

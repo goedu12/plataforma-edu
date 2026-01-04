@@ -223,38 +223,30 @@ export default function DesafioPage() {
 
         <main className="max-w-2xl mx-auto px-4 pt-8 pb-8">
           {/* Terminal Card - Resultado */}
-          <div className="rounded-xl overflow-hidden" style={{ background: '#2D2D3A' }}>
-            {/* Terminal Header */}
-            <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
-              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-              <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>resultado.sh</span>
+          <div className="terminal-box">
+            <div className="terminal-header">
+              <span className="dot dot-red" />
+              <span className="dot dot-yellow" />
+              <span className="dot dot-green" />
+              <span className="title">resultado.sh</span>
             </div>
-
-            {/* Terminal Body */}
-            <div className="p-6 font-mono text-sm">
-              <p style={{ color: '#A0A0A0' }}># Desafio finalizado</p>
-              <div className="mt-4 text-center">
-                <p className="text-6xl font-bold" style={{ color: isPerfeito ? '#00FF88' : porcentagem >= 60 ? '#00FF88' : '#FFBD2E' }}>
+            <div className="terminal-body text-center">
+              <p className="comment text-left"># Desafio finalizado</p>
+              <div className="mt-4">
+                <p className={`text-6xl font-bold ${isPerfeito || porcentagem >= 60 ? 'success' : 'warning'}`}>
                   {resultado.acertos}/{resultado.total}
                 </p>
-                <p className="mt-2 text-lg" style={{ color: '#A0A0A0' }}>
+                <p className="mt-2 text-lg muted">
                   {isPerfeito ? '$ PERFEITO!' : porcentagem >= 60 ? '$ Bom trabalho!' : '$ Continue praticando!'}
                 </p>
               </div>
-
-              <div className="mt-6 pt-4" style={{ borderTop: '1px solid #3D3D4A' }}>
+              <div className="mt-6 pt-4 border-t border-white/10">
                 <div className="flex items-center justify-center gap-2">
-                  <span style={{ color: '#00FF88' }}>→</span>
-                  <span className="text-xl font-bold" style={{ color: '#00FF88' }}>
-                    +{resultado.pontos_ganhos} PONTOS
-                  </span>
+                  <span className="success">→</span>
+                  <span className="text-xl font-bold success">+{resultado.pontos_ganhos} PONTOS</span>
                 </div>
                 {resultado.bonus_perfeito && (
-                  <p className="text-center mt-2 text-xs" style={{ color: '#FFBD2E' }}>
-                    Incluindo bônus de acerto perfeito!
-                  </p>
+                  <p className="mt-2 text-xs warning">Incluindo bonus de acerto perfeito!</p>
                 )}
               </div>
             </div>
@@ -347,20 +339,19 @@ export default function DesafioPage() {
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-8">
-          <div className="rounded-xl overflow-hidden" style={{ background: '#2D2D3A' }}>
-            <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
-              <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-              <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-              <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>erro.sh</span>
+          <div className="terminal-box terminal-red">
+            <div className="terminal-header">
+              <span className="dot dot-red" />
+              <span className="dot dot-yellow" />
+              <span className="dot dot-green" />
+              <span className="title">erro.sh</span>
             </div>
-            <div className="p-8 text-center">
-              <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: '#FF5F56' }} />
-              <p className="font-mono text-lg font-bold" style={{ color: '#FFFFFF' }}>
-                {status === 'SEM_QUESTOES' ? 'QUESTÕES INSUFICIENTES' : 'ERRO'}
+            <div className="terminal-body text-center py-4">
+              <WifiOff className="w-12 h-12 mx-auto mb-4 text-error" />
+              <p className="font-mono text-lg font-bold text-white">
+                {status === 'SEM_QUESTOES' ? 'QUESTOES INSUFICIENTES' : 'ERRO'}
               </p>
-              <p className="font-mono text-sm mt-2" style={{ color: '#A0A0A0' }}>{erro}</p>
-
+              <p className="font-mono text-sm mt-2 muted">{erro}</p>
               <div className="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
                 <button
                   onClick={iniciarDesafio}
@@ -574,24 +565,18 @@ export default function DesafioPage() {
         )}
 
         {/* Terminal Info */}
-        <div className="mt-8 rounded-xl overflow-hidden" style={{ background: '#2D2D3A' }}>
-          <div className="flex items-center gap-2 px-4 py-3" style={{ background: '#1A1A2E' }}>
-            <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-            <span className="ml-2 font-mono text-xs" style={{ color: '#A0A0A0' }}>info.sh</span>
+        <div className="mt-8 terminal-box">
+          <div className="terminal-header">
+            <span className="dot dot-red" />
+            <span className="dot dot-yellow" />
+            <span className="dot dot-green" />
+            <span className="title">info.sh</span>
           </div>
-          <div className="p-4 font-mono text-sm">
-            <p style={{ color: '#A0A0A0' }}># Modo Desafio</p>
-            <p className="mt-1" style={{ color: '#00FF88' }}>
-              → {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos
-            </p>
-            <p className="mt-1" style={{ color: '#00FF88' }}>
-              → Acerte todas = +{DESAFIO.BONUS_PERFEITO} pontos bônus!
-            </p>
-            <p className="mt-1" style={{ color: '#FFBD2E' }}>
-              → SEM LIMITE - Faça quantos desafios quiser!
-            </p>
+          <div className="terminal-body space-y-1">
+            <p className="comment"># Modo Desafio</p>
+            <p className="success">→ {DESAFIO.QUESTOES} questoes em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos</p>
+            <p className="success">→ Acerte todas = +{DESAFIO.BONUS_PERFEITO} pontos bonus!</p>
+            <p className="warning">→ SEM LIMITE - Faca quantos desafios quiser!</p>
           </div>
         </div>
       </main>
