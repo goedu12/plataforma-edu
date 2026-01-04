@@ -127,31 +127,16 @@ export default function HomePage() {
         </div>
 
         {/* Terminal style footer */}
-        <div
-          className="mt-12 rounded-xl overflow-hidden max-w-xs mx-auto"
-          style={{ background: KOYEB.bgElevated }}
-        >
-          <div
-            className="flex items-center gap-2 px-4 py-2"
-            style={{ background: KOYEB.bgCard }}
-          >
-            <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-            <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-            <span
-              className="ml-2 font-mono text-xs"
-              style={{ color: KOYEB.textMuted }}
-            >
-              init.sh
-            </span>
+        <div className="mt-12 terminal-box max-w-xs mx-auto">
+          <div className="terminal-header">
+            <span className="dot dot-red" />
+            <span className="dot dot-yellow" />
+            <span className="dot dot-green" />
+            <span className="title">init.sh</span>
           </div>
-          <div className="px-4 py-3">
-            <p className="font-mono text-xs" style={{ color: KOYEB.textMuted }}>
-              $ Inicializando sistema...
-            </p>
-            <p className="font-mono text-xs mt-1" style={{ color: KOYEB.primary }}>
-              ✓ Conectado
-            </p>
+          <div className="terminal-body">
+            <p className="comment">$ Inicializando sistema...</p>
+            <p className="success">✓ Conectado</p>
           </div>
         </div>
       </div>
