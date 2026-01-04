@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 
-// Endpoint de diagnóstico simples - BUILD ID: 20260104-v1
+// Força rota dinâmica (sem cache)
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+// Endpoint de diagnóstico simples - BUILD ID: 20260104-v2
 export async function GET() {
   return NextResponse.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    build: '20260104-v1',
+    build: '20260104-v2',
     env: {
       SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
       SUPABASE_ANON: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING',
