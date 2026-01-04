@@ -1,10 +1,21 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // ═══════════════════════════════════════════════════════════
-// CONFIGURAÇÃO DO SUPABASE
+// CONFIGURAÇÃO DO SUPABASE - LEITURA EM RUNTIME
 // ═══════════════════════════════════════════════════════════
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+
+// Funções para obter variáveis em runtime (não em build time)
+function getSupabaseUrl(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+}
+
+function getSupabaseAnonKey(): string {
+  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+}
+
+function getSupabaseServiceKey(): string {
+  return process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+}
 
 // ═══════════════════════════════════════════════════════════
 // VALIDAÇÃO DE URL
@@ -25,34 +36,26 @@ function validarSupabaseUrl(url: string): boolean {
 let _supabase: SupabaseClient | null = null
 
 export function getSupabase(): SupabaseClient {
-  if (!_supabase) {
-    if (!validarSupabaseUrl(supabaseUrl)) {
-      throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida')
-    }
-    if (!supabaseAnonKey) {
-      throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY não configurada')
-    }
-    _supabase = createClient(supabaseUrl, supabaseAnonKey)
+  if (_supabase) return _supabase
+
+  const url = getSupabaseUrl()
+  const anonKey = getSupabaseAnonKey()
+
+  if (!validarSupabaseUrl(url)) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida')
   }
+  if (!anonKey) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY não configurada')
+  }
+
+  _supabase = createClient(url, anonKey)
   return _supabase
 }
 
 // ═══════════════════════════════════════════════════════════
-// COMPATIBILIDADE - Exportação direta com validação
+// COMPATIBILIDADE - Exportação direta (lazy initialization)
 // ═══════════════════════════════════════════════════════════
-// NOTA: Prefira usar getSupabase() para melhor tratamento de erros
-let _supabaseCompat: SupabaseClient | null = null
-
-try {
-  if (validarSupabaseUrl(supabaseUrl) && supabaseAnonKey) {
-    _supabaseCompat = createClient(supabaseUrl, supabaseAnonKey)
-  }
-} catch (error) {
-  console.error('Erro ao criar cliente Supabase:', error)
-}
-
-// Exporta null se não configurado - código que usa deve verificar
-export const supabase: SupabaseClient | null = _supabaseCompat
+export const supabase: SupabaseClient | null = null // Deprecated: use getSupabase()
 
 // ═══════════════════════════════════════════════════════════
 // CLIENTE ADMIN (server-side) - COM VALIDAÇÃO COMPLETA
@@ -62,18 +65,20 @@ let _supabaseAdmin: SupabaseClient | null = null
 export function getSupabaseAdmin(): SupabaseClient {
   if (_supabaseAdmin) return _supabaseAdmin
 
+  const url = getSupabaseUrl()
+  const serviceKey = getSupabaseServiceKey()
+
   // Validar URL
-  if (!validarSupabaseUrl(supabaseUrl)) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida. Verifique as variáveis de ambiente.')
+  if (!validarSupabaseUrl(url)) {
+    throw new Error(`NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida. Valor atual: "${url}"`)
   }
 
-  // Validar Service Key (aceita ambos os nomes)
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  // Validar Service Key
   if (!serviceKey) {
     throw new Error('SUPABASE_SERVICE_KEY não configurada. Verifique as variáveis de ambiente.')
   }
 
-  _supabaseAdmin = createClient(supabaseUrl, serviceKey, {
+  _supabaseAdmin = createClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
