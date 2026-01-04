@@ -181,8 +181,9 @@ const config: Config = {
       // TIPOGRAFIA KOYEB - Space Mono + Inter
       // ─────────────────────────────────────────────────────────────
       fontFamily: {
+        display: ['Space Grotesk', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['Space Mono', 'JetBrains Mono', 'SF Mono', 'monospace'],
+        mono: ['JetBrains Mono', 'Space Mono', 'SF Mono', 'monospace'],
       },
 
       fontSize: {
@@ -260,6 +261,8 @@ const config: Config = {
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
         'skeleton': 'skeleton 1.5s ease-in-out infinite',
+        'shake': 'shake 0.5s ease-in-out',
+        'bounce-once': 'bounceOnce 0.6s ease-out',
       },
 
       keyframes: {
@@ -290,6 +293,16 @@ const config: Config = {
         skeleton: {
           '0%': { backgroundPosition: '-200px 0' },
           '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
+        },
+        bounceOnce: {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.1)' },
+          '100%': { transform: 'scale(1)' },
         },
       },
 
