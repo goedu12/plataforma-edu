@@ -91,7 +91,7 @@ export default function SelecionarComponentePage() {
             </div>
             <div>
               <h1
-                className="font-bold"
+                className="font-display font-bold"
                 style={{ color: KOYEB.textPrimary }}
               >
                 Plataforma EDU
@@ -119,7 +119,7 @@ export default function SelecionarComponentePage() {
         {/* Welcome Section */}
         <div className="text-center mb-8">
           <h2
-            className="text-3xl font-bold mb-2"
+            className="font-display text-3xl font-bold mb-2"
             style={{ color: KOYEB.textPrimary }}
           >
             Ola, {primeiroNome}!

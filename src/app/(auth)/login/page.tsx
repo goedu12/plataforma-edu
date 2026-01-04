@@ -49,7 +49,7 @@ export default function LoginPage() {
               <Terminal className="w-6 h-6 text-accent-green" />
             </div>
           </div>
-          <h1 className="text-title text-text-primary mb-2">
+          <h1 className="font-display text-3xl font-bold text-text-primary mb-2 tracking-tight">
             Plataforma EDU
           </h1>
           <p className="text-body text-text-secondary">

@@ -188,8 +188,7 @@ export default function MenuComponentePage() {
             />
             <div>
               <p
-                className="text-xl font-bold transition-colors"
-                style={{ color: KOYEB.textPrimary }}
+                className="font-display text-2xl font-bold transition-colors text-white"
               >
                 Ola, {primeiroNome}!
               </p>
