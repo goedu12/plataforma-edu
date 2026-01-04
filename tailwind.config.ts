@@ -11,93 +11,76 @@ const config: Config = {
       colors: {
         // ═══════════════════════════════════════════════════════════════
         // KOYEB DESIGN SYSTEM - PLATAFORMA EDU 2026
-        // Terminal-style dark theme with vibrant accents
+        // Briefing UI/UX Completo
         // ═══════════════════════════════════════════════════════════════
 
         // ─────────────────────────────────────────────────────────────
-        // KOYEB BACKGROUNDS - Gradiente escuro
+        // DARK THEME BACKGROUNDS (Briefing)
         // ─────────────────────────────────────────────────────────────
-        koyeb: {
-          bg: '#0D0D14',              // Background mais escuro
-          card: '#1A1A2E',            // Cards e superfícies
-          elevated: '#222238',         // Elementos elevados
-          terminal: '#2D2D3A',         // Blocos de código/terminal
-          dark: '#12121C',             // Progress bar bg
-        },
-
-        // Aliases para dark theme (compatibilidade)
         dark: {
-          bg: '#0D0D14',
-          surface: '#1A1A2E',
-          elevated: '#222238',
-          glass: 'rgba(26, 26, 46, 0.8)',
+          base: '#0a0a0a',           // Fundo principal
+          elevated: '#0d0d0d',        // Sidebar, áreas elevadas
+          surface: '#141414',         // Cards, containers
+          'surface-hover': '#1a1a1a', // Cards em hover
+          overlay: '#1e1e1e',         // Modals, dropdowns
+        },
+
+        // Terminal colors
+        terminal: {
+          bg: '#1e1e1e',              // Corpo do terminal
+          header: '#2d2d2d',          // Header do terminal
+          'dot-close': '#ff5f56',
+          'dot-minimize': '#ffbd2e',
+          'dot-maximize': '#27ca3f',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // KOYEB PRIMARY - Verde vibrante (#00FF88)
+        // PRIMARY - Verde Emerald (Briefing: #10b981)
         // ─────────────────────────────────────────────────────────────
         primary: {
-          50: '#e6fff5',
-          100: '#b3ffe0',
-          200: '#80ffcc',
-          300: '#4dffb8',
-          400: '#1affa3',
-          500: '#00FF88',              // KOYEB PRIMARY
-          600: '#00CC6A',
-          700: '#00994F',
-          800: '#006635',
-          900: '#00331A',
-          DEFAULT: '#00FF88',
-          glow: 'rgba(0, 255, 136, 0.4)',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',             // Hover state
+          500: '#10b981',             // PRIMARY (Briefing)
+          600: '#059669',             // Pressed state
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
+          DEFAULT: '#10b981',
+          glow: 'rgba(16, 185, 129, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // KOYEB ACCENT - Cyan (#00D4FF)
-        // ─────────────────────────────────────────────────────────────
-        accent: {
-          50: '#e6faff',
-          100: '#b3f0ff',
-          200: '#80e6ff',
-          300: '#4ddcff',
-          400: '#1ad2ff',
-          500: '#00D4FF',              // KOYEB ACCENT
-          600: '#00A8CC',
-          700: '#007C99',
-          800: '#005066',
-          900: '#002433',
-          DEFAULT: '#00D4FF',
-          glow: 'rgba(0, 212, 255, 0.4)',
-        },
-
-        // ─────────────────────────────────────────────────────────────
-        // FÍSICA - Verde Koyeb (alias de primary)
+        // FÍSICA - Alias de Primary
         // ─────────────────────────────────────────────────────────────
         fisica: {
-          50: '#e6fff5',
-          100: '#b3ffe0',
-          200: '#80ffcc',
-          300: '#4dffb8',
-          400: '#1affa3',
-          500: '#00FF88',
-          600: '#00CC6A',
-          700: '#00994F',
-          DEFAULT: '#00FF88',
-          glow: 'rgba(0, 255, 136, 0.4)',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          DEFAULT: '#10b981',
+          glow: 'rgba(16, 185, 129, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // MATEMÁTICA - Roxo (#A855F7)
+        // MATEMÁTICA - Roxo (#a855f7)
         // ─────────────────────────────────────────────────────────────
         matematica: {
           50: '#faf5ff',
           100: '#f3e8ff',
           200: '#e9d5ff',
           300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#A855F7',
-          600: '#9333ea',
+          400: '#c084fc',             // Hover state
+          500: '#a855f7',             // PRIMARY MATEMATICA
+          600: '#9333ea',             // Pressed state
           700: '#7c3aed',
-          DEFAULT: '#A855F7',
+          DEFAULT: '#a855f7',
           glow: 'rgba(168, 85, 247, 0.4)',
         },
 
@@ -108,77 +91,108 @@ const config: Config = {
           200: '#e9d5ff',
           300: '#d8b4fe',
           400: '#c084fc',
-          500: '#A855F7',
+          500: '#a855f7',
           600: '#9333ea',
           700: '#7c3aed',
-          DEFAULT: '#A855F7',
+          DEFAULT: '#a855f7',
           glow: 'rgba(168, 85, 247, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // SECUNDÁRIA - Laranja (#FF6B35)
+        // ACCENT - Cyan (#06b6d4)
+        // ─────────────────────────────────────────────────────────────
+        accent: {
+          50: '#ecfeff',
+          100: '#cffafe',
+          200: '#a5f3fc',
+          300: '#67e8f9',
+          400: '#22d3ee',
+          500: '#06b6d4',             // ACCENT (Briefing)
+          600: '#0891b2',
+          700: '#0e7490',
+          DEFAULT: '#06b6d4',
+          glow: 'rgba(6, 182, 212, 0.4)',
+        },
+
+        // ─────────────────────────────────────────────────────────────
+        // SECONDARY - Laranja (#f59e0b / warning)
         // ─────────────────────────────────────────────────────────────
         secondary: {
-          50: '#fff5f0',
-          100: '#ffe6db',
-          200: '#ffc9b3',
-          300: '#ffab8a',
-          400: '#ff8862',
-          500: '#FF6B35',
-          600: '#CC562A',
-          700: '#994020',
-          DEFAULT: '#FF6B35',
-          glow: 'rgba(255, 107, 53, 0.4)',
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          DEFAULT: '#f59e0b',
+          glow: 'rgba(245, 158, 11, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // TEXTO - Hierarquia Koyeb (Briefing Atualizado)
+        // TEXTO - Hierarquia (Briefing)
         // ─────────────────────────────────────────────────────────────
         text: {
-          primary: '#FFFFFF',
-          secondary: '#A0A0B0',  // Atualizado conforme briefing
-          tertiary: '#5A5A6E',
-          muted: '#3D3D4A',
-          disabled: '#2D2D3A',
-          inverse: '#0D0D14',   // Novo: texto em fundos claros
+          primary: '#ffffff',         // Títulos, headings
+          secondary: '#a1a1aa',       // Parágrafos, descrições (~65%)
+          tertiary: '#71717a',        // Labels, metadados (~45%)
+          muted: '#52525b',           // Placeholders, desabilitado (~32%)
         },
 
         // ─────────────────────────────────────────────────────────────
-        // BORDAS - Koyeb style
+        // BORDAS (Briefing)
         // ─────────────────────────────────────────────────────────────
         border: {
-          DEFAULT: 'rgba(255, 255, 255, 0.05)',
-          hover: 'rgba(255, 255, 255, 0.1)',
-          focus: 'rgba(0, 255, 136, 0.3)',
-          glass: 'rgba(255, 255, 255, 0.1)',
+          DEFAULT: 'rgba(255, 255, 255, 0.08)',
+          hover: 'rgba(255, 255, 255, 0.15)',
+          fisica: 'rgba(16, 185, 129, 0.3)',
+          matematica: 'rgba(168, 85, 247, 0.3)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // ESTADOS
+        // ESTADOS (Briefing)
         // ─────────────────────────────────────────────────────────────
-        success: '#00FF88',
-        error: '#FF4757',
-        warning: '#FFB800',
-        info: '#00D4FF',
+        success: {
+          500: '#10b981',
+          DEFAULT: '#10b981',
+        },
+        error: {
+          500: '#ef4444',
+          DEFAULT: '#ef4444',
+        },
+        warning: {
+          500: '#f59e0b',
+          DEFAULT: '#f59e0b',
+        },
+        info: {
+          500: '#3b82f6',
+          DEFAULT: '#3b82f6',
+        },
 
         // ─────────────────────────────────────────────────────────────
-        // TERMINAL DOTS (macOS style)
+        // Compatibilidade com código existente
         // ─────────────────────────────────────────────────────────────
+        koyeb: {
+          bg: '#0a0a0a',
+          card: '#141414',
+          elevated: '#1a1a1a',
+          terminal: '#1e1e1e',
+          dark: '#0d0d0d',
+        },
+        'calm-bg': '#0a0a0a',
+        'calm-surface': '#141414',
+        'calm-elevated': '#1a1a1a',
+        'calm-border': 'rgba(255, 255, 255, 0.08)',
         dot: {
-          red: '#FF5F56',
-          yellow: '#FFBD2E',
-          green: '#27CA40',
+          red: '#ff5f56',
+          yellow: '#ffbd2e',
+          green: '#27ca3f',
         },
-
-        // Compatibilidade com código antigo
-        'calm-bg': '#0D0D14',
-        'calm-surface': '#1A1A2E',
-        'calm-elevated': '#222238',
-        'calm-border': 'rgba(255, 255, 255, 0.05)',
       },
 
       // ─────────────────────────────────────────────────────────────
-      // TIPOGRAFIA KOYEB - Space Mono + Inter
+      // TIPOGRAFIA (Briefing)
       // ─────────────────────────────────────────────────────────────
       fontFamily: {
         display: ['Space Grotesk', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
@@ -187,104 +201,81 @@ const config: Config = {
       },
 
       fontSize: {
-        // Display
-        'display-xl': ['4rem', { lineHeight: '1', fontWeight: '700', letterSpacing: '-0.02em' }],
-        'display': ['3rem', { lineHeight: '1.1', fontWeight: '700', letterSpacing: '-0.02em' }],
+        // Hero/Display
+        'hero': ['3rem', { lineHeight: '1.1', fontWeight: '700', letterSpacing: '-0.02em' }],
+        'display': ['2rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '-0.02em' }],
 
         // Headings
-        'heading-xl': ['2rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '-0.01em' }],
-        'heading': ['1.5rem', { lineHeight: '1.3', fontWeight: '600' }],
-        'subheading': ['1.125rem', { lineHeight: '1.4', fontWeight: '600' }],
+        'title': ['1.5rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '0.01em' }],
+        'heading': ['1.125rem', { lineHeight: '1.3', fontWeight: '600', letterSpacing: '0.01em' }],
+        'subheading': ['1rem', { lineHeight: '1.4', fontWeight: '600', letterSpacing: '0.02em' }],
 
         // Body
         'body-lg': ['1rem', { lineHeight: '1.6' }],
         'body': ['0.875rem', { lineHeight: '1.6' }],
         'body-sm': ['0.8125rem', { lineHeight: '1.5' }],
 
-        // Labels (Koyeb style - monospace uppercase)
-        'label': ['0.6875rem', { lineHeight: '1.3', fontWeight: '700', letterSpacing: '0.15em' }],
-        'label-sm': ['0.625rem', { lineHeight: '1.3', fontWeight: '700', letterSpacing: '0.15em' }],
-
-        // Caption
-        'caption': ['0.75rem', { lineHeight: '1.5', letterSpacing: '0.02em' }],
+        // Caption/Label
+        'caption': ['0.75rem', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.02em' }],
+        'label': ['0.6875rem', { lineHeight: '1.3', fontWeight: '500', letterSpacing: '0.05em' }],
       },
 
       // ─────────────────────────────────────────────────────────────
-      // SOMBRAS KOYEB - Glow effects
+      // SOMBRAS (Briefing)
       // ─────────────────────────────────────────────────────────────
       boxShadow: {
-        // Soft shadows
-        'soft-xs': '0 2px 8px rgba(0, 0, 0, 0.4)',
-        'soft-sm': '0 4px 16px rgba(0, 0, 0, 0.5)',
-        'soft-md': '0 8px 24px rgba(0, 0, 0, 0.6)',
-        'soft-lg': '0 16px 48px rgba(0, 0, 0, 0.7)',
+        'sm': '0 1px 2px rgba(0, 0, 0, 0.5)',
+        'md': '0 4px 6px rgba(0, 0, 0, 0.4)',
+        'lg': '0 10px 15px rgba(0, 0, 0, 0.3)',
 
-        // Glow effects - Koyeb style
-        'glow-green': '0 0 20px rgba(0, 255, 136, 0.3), 0 0 40px rgba(0, 255, 136, 0.15)',
-        'glow-cyan': '0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(0, 212, 255, 0.15)',
-        'glow-lilas': '0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.15)',
-        'glow-orange': '0 0 20px rgba(255, 107, 53, 0.3), 0 0 40px rgba(255, 107, 53, 0.15)',
-        'glow-white': '0 0 20px rgba(255, 255, 255, 0.1)',
+        // Glow effects (Briefing)
+        'glow-green': '0 0 30px rgba(16, 185, 129, 0.15)',
+        'glow-lilas': '0 0 30px rgba(168, 85, 247, 0.15)',
+        'glow-cyan': '0 0 30px rgba(6, 182, 212, 0.15)',
+        'glow-amber': '0 0 30px rgba(245, 158, 11, 0.15)',
 
-        // Text shadow for nota grande
-        'text-glow': '0 0 40px rgba(0, 255, 136, 0.3)',
-
-        // Card shadows
+        // Card
         'card': '0 4px 20px rgba(0, 0, 0, 0.5)',
         'card-hover': '0 8px 30px rgba(0, 0, 0, 0.6)',
 
         // Glass
         'glass': '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
-
-        // Inner
-        'inner-soft': 'inset 0 2px 4px rgba(0, 0, 0, 0.4)',
       },
 
       // ─────────────────────────────────────────────────────────────
-      // GRADIENTES KOYEB
-      // ─────────────────────────────────────────────────────────────
-      backgroundImage: {
-        'koyeb-gradient': 'linear-gradient(180deg, #0D0D14 0%, #1A1A2E 100%)',
-        'koyeb-card': 'linear-gradient(135deg, #1A1A2E 0%, rgba(0, 255, 136, 0.05) 100%)',
-        'progress-green': 'linear-gradient(90deg, #00FF88, #00D4FF)',
-        'progress-lilas': 'linear-gradient(90deg, #A855F7, #00D4FF)',
-      },
-
-      // ─────────────────────────────────────────────────────────────
-      // ANIMAÇÕES
+      // ANIMAÇÕES (Briefing)
       // ─────────────────────────────────────────────────────────────
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
-        'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'scale-in': 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-        'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
-        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-        'shimmer': 'shimmer 2s linear infinite',
-        'skeleton': 'skeleton 1.5s ease-in-out infinite',
+        'slide-up': 'slideUp 0.3s ease-out forwards',
         'shake': 'shake 0.5s ease-in-out',
         'bounce-once': 'bounceOnce 0.6s ease-out',
+        'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+        'skeleton': 'skeleton 1.5s ease-in-out infinite',
       },
 
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' },
+          from: { opacity: '0' },
+          to: { opacity: '1' },
         },
         slideUp: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+          from: { opacity: '0', transform: 'translateY(10px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
         },
-        scaleIn: {
-          '0%': { opacity: '0', transform: 'scale(0.95)' },
-          '100%': { opacity: '1', transform: 'scale(1)' },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
+        },
+        bounceOnce: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
         },
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.5' },
-        },
-        glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px rgba(0, 255, 136, 0.2)' },
-          '50%': { boxShadow: '0 0 40px rgba(0, 255, 136, 0.4)' },
+          '50%': { opacity: '0.7' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
@@ -294,20 +285,10 @@ const config: Config = {
           '0%': { backgroundPosition: '-200px 0' },
           '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
         },
-        shake: {
-          '0%, 100%': { transform: 'translateX(0)' },
-          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },
-          '20%, 40%, 60%, 80%': { transform: 'translateX(4px)' },
-        },
-        bounceOnce: {
-          '0%': { transform: 'scale(1)' },
-          '50%': { transform: 'scale(1.1)' },
-          '100%': { transform: 'scale(1)' },
-        },
       },
 
       // ─────────────────────────────────────────────────────────────
-      // OUTROS
+      // OUTROS (Briefing)
       // ─────────────────────────────────────────────────────────────
       backdropBlur: {
         xs: '2px',
@@ -319,16 +300,23 @@ const config: Config = {
       },
 
       borderRadius: {
-        'sm': '6px',
+        'sm': '4px',
         'DEFAULT': '8px',
-        'md': '12px',
-        'lg': '16px',
-        'xl': '20px',
-        '2xl': '24px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '20px',
       },
 
-      transitionTimingFunction: {
-        'smooth': 'cubic-bezier(0.16, 1, 0.3, 1)',
+      spacing: {
+        '1': '4px',
+        '2': '8px',
+        '3': '12px',
+        '4': '16px',
+        '6': '24px',
+        '8': '32px',
+        '12': '48px',
+        '16': '64px',
       },
     },
   },

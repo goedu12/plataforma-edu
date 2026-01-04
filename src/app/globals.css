@@ -1,145 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PLATAFORMA EDU - DESIGN SYSTEM 2026
-   ═══════════════════════════════════════════════════════════════════════════
-
-   Tendências aplicadas:
-   ✓ Glassmorphism com blur e transparência
-   ✓ Soft UI / Neumorphism com sombras suaves
-   ✓ Micro-animations e transições fluidas
-   ✓ Depth & Layering para hierarquia visual
-   ✓ Glow effects para estados ativos
-
-   Paleta: Verde, Branco, Laranja, Preto, Lilás
+   PLATAFORMA EDU - KOYEB DESIGN SYSTEM 2026
+   Briefing UI/UX Completo
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   CSS VARIABLES - KOYEB DESIGN SYSTEM
+   CSS VARIABLES (Briefing)
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  /* ═══════════════════════════════════════════════════════════
-     KOYEB CORES PRINCIPAIS
-     ═══════════════════════════════════════════════════════════ */
+  /* Backgrounds */
+  --bg-dark-base: #0a0a0a;
+  --bg-dark-elevated: #0d0d0d;
+  --bg-dark-surface: #141414;
+  --bg-dark-surface-hover: #1a1a1a;
+  --bg-dark-overlay: #1e1e1e;
+  --bg-terminal: #1e1e1e;
+  --bg-terminal-header: #2d2d2d;
 
-  /* Primary - Verde Koyeb vibrante */
-  --color-primary: #00FF88;
-  --color-primary-light: #4dffb8;
-  --color-primary-dark: #00CC6A;
+  /* Primary - Física */
+  --color-primary: #10b981;
+  --color-primary-light: #34d399;
+  --color-primary-dark: #059669;
 
-  /* Accent - Cyan Koyeb */
-  --color-accent: #00D4FF;
-  --color-accent-light: #4ddcff;
+  /* Matemática */
+  --color-matematica: #a855f7;
+  --color-matematica-light: #c084fc;
+  --color-matematica-dark: #9333ea;
 
-  /* Secondary - Laranja */
-  --color-secondary: #FF6B35;
-  --color-secondary-light: #ff8862;
+  /* Accent */
+  --color-accent: #06b6d4;
 
-  /* Matemática - Lilás */
-  --color-lilas: #A855F7;
-  --color-lilas-light: #c084fc;
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --text-muted: #52525b;
 
-  /* ═══════════════════════════════════════════════════════════
-     KOYEB BACKGROUNDS - Dark Terminal Theme
-     ═══════════════════════════════════════════════════════════ */
-  --bg-dark: #0D0D14;
-  --bg-surface: #1A1A2E;
-  --bg-elevated: #222238;
-  --bg-terminal: #2D2D3A;
-  --bg-glass: rgba(26, 26, 46, 0.8);
+  /* Borders */
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.15);
+  --border-fisica: rgba(16, 185, 129, 0.3);
+  --border-matematica: rgba(168, 85, 247, 0.3);
 
-  /* ═══════════════════════════════════════════════════════════
-     TEXTO - Hierarquia Koyeb (Briefing Atualizado)
-     ═══════════════════════════════════════════════════════════ */
-  --text-primary: #FFFFFF;
-  --text-secondary: #A0A0B0;
-  --text-tertiary: #5A5A6E;
-  --text-muted: #3D3D4A;
-  --text-inverse: #0D0D14;
+  /* States */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
 
-  /* ═══════════════════════════════════════════════════════════
-     BORDAS - Koyeb style
-     ═══════════════════════════════════════════════════════════ */
-  --border-default: rgba(255, 255, 255, 0.05);
-  --border-hover: rgba(255, 255, 255, 0.1);
-  --border-focus: rgba(0, 255, 136, 0.3);
-  --border-glass: rgba(255, 255, 255, 0.1);
-
-  /* ═══════════════════════════════════════════════════════════
-     GLOWS - Efeitos de brilho Koyeb
-     ═══════════════════════════════════════════════════════════ */
-  --glow-green: rgba(0, 255, 136, 0.4);
-  --glow-cyan: rgba(0, 212, 255, 0.4);
-  --glow-orange: rgba(255, 107, 53, 0.4);
-  --glow-lilas: rgba(168, 85, 247, 0.4);
-
-  /* ═══════════════════════════════════════════════════════════
-     ESTADOS
-     ═══════════════════════════════════════════════════════════ */
-  --success: #00FF88;
-  --error: #FF4757;
-  --warning: #FFB800;
-  --info: #00D4FF;
-
-  /* ═══════════════════════════════════════════════════════════
-     TERMINAL DOTS (macOS style)
-     ═══════════════════════════════════════════════════════════ */
-  --dot-red: #FF5F56;
-  --dot-yellow: #FFBD2E;
-  --dot-green: #27CA40;
-
-  /* ═══════════════════════════════════════════════════════════
-     ESPAÇAMENTO - Sistema Base 4px (Briefing)
-     ═══════════════════════════════════════════════════════════ */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
-  --space-16: 64px;
-  --space-20: 80px;
-  --space-24: 96px;
-
-  /* ═══════════════════════════════════════════════════════════
-     DURAÇÃO DE ANIMAÇÕES (Briefing)
-     ═══════════════════════════════════════════════════════════ */
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --duration-slower: 600ms;
-
-  /* ═══════════════════════════════════════════════════════════
-     EASING (Briefing)
-     ═══════════════════════════════════════════════════════════ */
-  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-  /* ═══════════════════════════════════════════════════════════
-     BORDER RADIUS (Briefing)
-     ═══════════════════════════════════════════════════════════ */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
-
-  /* ═══════════════════════════════════════════════════════════
-     SOMBRAS (Briefing)
-     ═══════════════════════════════════════════════════════════ */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 20px rgba(0, 255, 136, 0.3);
+  /* Terminal Dots */
+  --dot-close: #ff5f56;
+  --dot-minimize: #ffbd2e;
+  --dot-maximize: #27ca3f;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -160,38 +77,23 @@ html {
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
-  background-color: var(--bg-dark);
+  background-color: var(--bg-dark-base);
   color: var(--text-primary);
   line-height: 1.5;
-  letter-spacing: -0.01em;
-  overflow-x: hidden;
 }
 
-/* Font family para elementos monospace - Koyeb style */
-code, pre, .font-mono, [class*="terminal"], [class*="mono"] {
-  font-family: 'Space Mono', 'JetBrains Mono', 'SF Mono', monospace;
+/* Font mono */
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', 'Space Mono', monospace;
 }
 
-/* Background com gradiente sutil - Koyeb style */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 255, 136, 0.06), transparent),
-    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(168, 85, 247, 0.04), transparent),
-    radial-gradient(ellipse 50% 30% at 0% 50%, rgba(0, 212, 255, 0.03), transparent);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* Prevenir zoom em inputs iOS */
+/* Prevent zoom on iOS inputs */
 input, select, textarea {
   font-size: 16px;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   SCROLLBAR - Koyeb Style
+   SCROLLBAR
    ───────────────────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 6px;
@@ -199,594 +101,537 @@ input, select, textarea {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark);
+  background: var(--bg-dark-base);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--color-primary), var(--color-accent));
+  background: var(--color-primary);
   border-radius: 10px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, var(--color-primary-light), var(--color-accent-light));
-}
-
-/* ─────────────────────────────────────────────────────────────────────────────
-   SELEÇÃO DE TEXTO - Koyeb Green
-   ───────────────────────────────────────────────────────────────────────────── */
+/* Selection */
 ::selection {
-  background: rgba(0, 255, 136, 0.3);
+  background: rgba(16, 185, 129, 0.3);
   color: white;
 }
 
-/* ─────────────────────────────────────────────────────────────────────────────
-   FOCUS VISIBLE - Acessibilidade
-   ───────────────────────────────────────────────────────────────────────────── */
+/* Focus */
 *:focus-visible {
   outline: 2px solid var(--color-primary);
-  outline-offset: 3px;
+  outline-offset: 2px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENTS 2026
+   TYPOGRAPHY CLASSES (Briefing)
    ═══════════════════════════════════════════════════════════════════════════ */
-@layer components {
-
-  /* ─────────────────────────────────────────────────────────
-     GLASS CARD - Glassmorphism 2026
-     ───────────────────────────────────────────────────────── */
-  .glass-card {
-    position: relative;
-    background: var(--bg-glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-glass);
-    border-radius: 20px;
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    overflow: hidden;
+@layer utilities {
+  .text-hero {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    text-transform: uppercase;
   }
 
-  .glass-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  .text-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.2;
+    text-transform: uppercase;
   }
 
-  /* ─────────────────────────────────────────────────────────
-     SOFT CARD - Neumorphism / Soft UI
-     ───────────────────────────────────────────────────────── */
-  .soft-card {
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    border-radius: 20px;
-    box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.03),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  .text-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    text-transform: uppercase;
   }
 
-  .soft-card:hover {
-    transform: translateY(-4px);
-    border-color: var(--border-hover);
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 0 1px rgba(255, 255, 255, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  .text-subheading {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    text-transform: uppercase;
   }
 
-  /* ─────────────────────────────────────────────────────────
-     GLOW CARDS - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .glow-card-green {
-    @apply soft-card relative;
-  }
-  .glow-card-green::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 22px;
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.3), transparent 60%);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .glow-card-green:hover::after {
-    opacity: 1;
-  }
-  .glow-card-green:hover {
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 60px rgba(0, 255, 136, 0.12);
-  }
-
-  .glow-card-cyan {
-    @apply soft-card relative;
-  }
-  .glow-card-cyan::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 22px;
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), transparent 60%);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .glow-card-cyan:hover::after {
-    opacity: 1;
-  }
-  .glow-card-cyan:hover {
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 60px rgba(0, 212, 255, 0.12);
-  }
-
-  .glow-card-lilas {
-    @apply soft-card relative;
-  }
-  .glow-card-lilas::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 22px;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), transparent 60%);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .glow-card-lilas:hover::after {
-    opacity: 1;
-  }
-  .glow-card-lilas:hover {
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 60px rgba(168, 85, 247, 0.12);
-  }
-
-  .glow-card-orange {
-    @apply soft-card relative;
-  }
-  .glow-card-orange::after {
-    content: '';
-    position: absolute;
-    inset: -2px;
-    border-radius: 22px;
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), transparent 60%);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-  }
-  .glow-card-orange:hover::after {
-    opacity: 1;
-  }
-  .glow-card-orange:hover {
-    box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 60px rgba(255, 107, 53, 0.12);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     BUTTONS 2026 - Com shimmer e glow
-     ───────────────────────────────────────────────────────── */
-  .btn-2026 {
-    @apply relative overflow-hidden px-6 py-3 font-semibold text-white rounded-xl;
-    @apply transition-all duration-300;
-    @apply active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
-  }
-
-  /* Shimmer effect */
-  .btn-2026::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.6s ease;
-  }
-  .btn-2026:hover::before {
-    left: 100%;
-  }
-
-  /* Primary - Verde Koyeb */
-  .btn-primary {
-    @apply btn-2026;
-    background: linear-gradient(135deg, #00FF88 0%, #00CC6A 100%);
-    box-shadow:
-      0 4px 20px rgba(0, 255, 136, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 30px rgba(0, 255, 136, 0.4),
-      0 0 60px rgba(0, 255, 136, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-
-  /* Accent - Cyan Koyeb */
-  .btn-accent {
-    @apply btn-2026;
-    background: linear-gradient(135deg, #00D4FF 0%, #00A8CC 100%);
-    box-shadow:
-      0 4px 20px rgba(0, 212, 255, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  .btn-accent:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 30px rgba(0, 212, 255, 0.4),
-      0 0 60px rgba(0, 212, 255, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-
-  /* Secondary - Laranja Koyeb */
-  .btn-secondary {
-    @apply btn-2026;
-    background: linear-gradient(135deg, #FF6B35 0%, #CC562A 100%);
-    box-shadow:
-      0 4px 20px rgba(255, 107, 53, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  .btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 30px rgba(255, 107, 53, 0.4),
-      0 0 60px rgba(255, 107, 53, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-
-  /* Lilas - Matemática */
-  .btn-lilas {
-    @apply btn-2026;
-    background: linear-gradient(135deg, #A855F7 0%, #9333ea 100%);
-    box-shadow:
-      0 4px 20px rgba(168, 85, 247, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  .btn-lilas:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 30px rgba(168, 85, 247, 0.4),
-      0 0 60px rgba(168, 85, 247, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  }
-
-  /* Ghost */
-  .btn-ghost {
-    @apply px-6 py-3 font-semibold rounded-xl;
-    @apply transition-all duration-300;
-    background: transparent;
-    border: 1px solid var(--border-default);
+  .text-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.6;
     color: var(--text-secondary);
   }
-  .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--border-hover);
-    color: var(--text-primary);
+
+  .text-body-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-secondary);
   }
 
-  /* ─────────────────────────────────────────────────────────
-     INPUTS - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .input-2026 {
-    @apply w-full px-4 py-3.5 rounded-xl text-base outline-none;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    color: var(--text-primary);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-  }
-  .input-2026::placeholder {
+  .text-caption {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
     color: var(--text-tertiary);
   }
-  .input-2026:hover {
-    border-color: var(--border-hover);
-  }
-  .input-2026:focus {
-    border-color: var(--color-primary);
-    background: var(--bg-elevated);
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.3),
-      0 0 0 3px rgba(0, 255, 136, 0.15),
-      0 0 20px rgba(0, 255, 136, 0.08);
-  }
-  .input-2026.input-lilas:focus {
-    border-color: var(--color-lilas);
-    background: var(--bg-elevated);
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.3),
-      0 0 0 3px rgba(168, 85, 247, 0.15),
-      0 0 20px rgba(168, 85, 247, 0.08);
-  }
-  .input-2026.input-cyan:focus {
-    border-color: var(--color-accent);
-    background: var(--bg-elevated);
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.3),
-      0 0 0 3px rgba(0, 212, 255, 0.15),
-      0 0 20px rgba(0, 212, 255, 0.08);
-  }
-  .input-2026.input-error {
-    border-color: var(--error);
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.3),
-      0 0 0 3px rgba(255, 71, 87, 0.15);
-  }
 
-  /* ─────────────────────────────────────────────────────────
-     BADGES / PILLS - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .badge-2026 {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full;
-    @apply transition-all duration-300;
-    font-family: 'Space Mono', monospace;
-    text-transform: uppercase;
+  .text-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 500;
     letter-spacing: 0.05em;
-  }
-  .badge-green {
-    @apply badge-2026;
-    background: rgba(0, 255, 136, 0.12);
-    color: #00FF88;
-    border: 1px solid rgba(0, 255, 136, 0.25);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.08);
-  }
-  .badge-cyan {
-    @apply badge-2026;
-    background: rgba(0, 212, 255, 0.12);
-    color: #00D4FF;
-    border: 1px solid rgba(0, 212, 255, 0.25);
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.08);
-  }
-  .badge-orange {
-    @apply badge-2026;
-    background: rgba(255, 107, 53, 0.12);
-    color: #FF6B35;
-    border: 1px solid rgba(255, 107, 53, 0.25);
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.08);
-  }
-  .badge-lilas {
-    @apply badge-2026;
-    background: rgba(168, 85, 247, 0.12);
-    color: #c084fc;
-    border: 1px solid rgba(168, 85, 247, 0.25);
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.08);
-  }
-  .badge-white {
-    @apply badge-2026;
-    background: rgba(255, 255, 255, 0.08);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     STAT CARDS - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .stat-card-2026 {
-    @apply relative p-5 rounded-2xl overflow-hidden;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  }
-  .stat-card-2026 .stat-value {
-    @apply text-3xl font-bold text-white tabular-nums;
-    font-family: 'Space Mono', monospace;
-  }
-  .stat-card-2026 .stat-label {
-    @apply text-xs uppercase tracking-wider mt-1;
+    line-height: 1.3;
+    text-transform: uppercase;
     color: var(--text-tertiary);
-    font-family: 'Space Mono', monospace;
-    letter-spacing: 0.1em;
-  }
-  .stat-card-2026.stat-green {
-    border-left: 4px solid var(--color-primary);
-  }
-  .stat-card-2026.stat-green::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.08), transparent);
-    pointer-events: none;
-  }
-  .stat-card-2026.stat-cyan {
-    border-left: 4px solid var(--color-accent);
-  }
-  .stat-card-2026.stat-cyan::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(0, 212, 255, 0.08), transparent);
-    pointer-events: none;
-  }
-  .stat-card-2026.stat-orange {
-    border-left: 4px solid var(--color-secondary);
-  }
-  .stat-card-2026.stat-orange::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.08), transparent);
-    pointer-events: none;
-  }
-  .stat-card-2026.stat-lilas {
-    border-left: 4px solid var(--color-lilas);
-  }
-  .stat-card-2026.stat-lilas::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), transparent);
-    pointer-events: none;
   }
 
+  .text-mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT CLASSES (Briefing)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
   /* ─────────────────────────────────────────────────────────
-     ICON CONTAINERS - Koyeb Style
+     BUTTONS (Briefing)
      ───────────────────────────────────────────────────────── */
-  .icon-box {
-    @apply flex items-center justify-center rounded-xl;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  .icon-box-green {
-    @apply icon-box;
-    background: rgba(0, 255, 136, 0.12);
-    color: #00FF88;
-  }
-  .icon-box-cyan {
-    @apply icon-box;
-    background: rgba(0, 212, 255, 0.12);
-    color: #00D4FF;
-  }
-  .icon-box-orange {
-    @apply icon-box;
-    background: rgba(255, 107, 53, 0.12);
-    color: #FF6B35;
-  }
-  .icon-box-lilas {
-    @apply icon-box;
-    background: rgba(168, 85, 247, 0.12);
-    color: #c084fc;
+  .btn {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply font-semibold rounded-lg;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  .btn-primary {
+    @apply btn px-6 py-3 bg-primary-500 text-white;
+    @apply hover:bg-primary-400 active:bg-primary-600;
+    @apply focus:ring-primary-500/50 focus:ring-offset-dark-base;
+  }
+
+  .btn-matematica {
+    @apply btn px-6 py-3 bg-matematica-500 text-white;
+    @apply hover:bg-matematica-400 active:bg-matematica-600;
+    @apply focus:ring-matematica-500/50 focus:ring-offset-dark-base;
+  }
+
+  .btn-secondary {
+    @apply btn px-6 py-3 bg-transparent text-white;
+    @apply border border-border-hover;
+    @apply hover:bg-white/5 active:bg-white/10;
+  }
+
+  .btn-ghost {
+    @apply btn px-4 py-2 bg-transparent text-text-tertiary;
+    @apply hover:text-white hover:bg-white/5;
+  }
+
+  .btn-danger {
+    @apply btn px-6 py-3 bg-error text-white;
+    @apply hover:bg-red-400 active:bg-red-600;
+  }
+
+  .btn-accent {
+    @apply btn px-6 py-3 bg-accent-500 text-white;
+    @apply hover:bg-accent-400 active:bg-accent-600;
+  }
+
+  /* Button sizes */
+  .btn-sm { @apply px-3 py-1.5 text-sm; }
+  .btn-md { @apply px-4 py-2 text-sm; }
+  .btn-lg { @apply px-6 py-3 text-base; }
+
+  /* Alias for backward compatibility */
+  .btn-lilas { @apply btn-matematica; }
+
   /* ─────────────────────────────────────────────────────────
-     PROGRESS BARS - Koyeb Style
+     CARDS (Briefing)
      ───────────────────────────────────────────────────────── */
-  .progress-2026 {
-    @apply h-2 rounded-full overflow-hidden;
+  .card {
+    @apply rounded-xl border transition-all duration-200;
+  }
+
+  .card-default {
+    @apply card bg-dark-surface border-border p-6;
+  }
+
+  .card-elevated {
+    @apply card bg-dark-surface-hover border-border p-6;
+  }
+
+  .card-glass {
+    @apply card bg-white/5 backdrop-blur-xl border-white/10 p-6;
+  }
+
+  .card-fisica {
+    @apply card bg-dark-surface border-border-fisica p-6;
+    @apply hover:shadow-glow-green hover:border-primary-500/50;
+  }
+
+  .card-matematica {
+    @apply card bg-dark-surface border-border-matematica p-6;
+    @apply hover:shadow-glow-lilas hover:border-matematica-500/50;
+  }
+
+  .card-interactive {
+    @apply card bg-dark-surface border-border p-6 cursor-pointer;
+    @apply hover:border-border-hover hover:-translate-y-1;
+  }
+
+  .card-warning {
+    @apply card bg-warning/10 border-warning/30 p-6;
+  }
+
+  /* Aliases for backward compatibility */
+  .soft-card { @apply card-default; }
+  .glass-card { @apply card-glass; }
+  .glow-card-green { @apply card-fisica; }
+  .glow-card-lilas { @apply card-matematica; }
+
+  /* ─────────────────────────────────────────────────────────
+     BADGES (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-md;
+    @apply text-xs font-medium uppercase tracking-wide;
+  }
+
+  .badge-default { @apply bg-white/10 text-text-secondary; }
+  .badge-fisica { @apply bg-primary-500/20 text-primary-400; }
+  .badge-matematica { @apply bg-matematica-500/20 text-matematica-400; }
+  .badge-success { @apply bg-success/20 text-success; }
+  .badge-warning { @apply bg-warning/20 text-warning; }
+  .badge-error { @apply bg-error/20 text-error; }
+
+  /* Aliases */
+  .badge-green { @apply badge-fisica; }
+  .badge-lilas { @apply badge-matematica; }
+
+  /* ─────────────────────────────────────────────────────────
+     INPUTS (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .input-label {
+    @apply text-label text-text-tertiary mb-2 block;
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-dark-surface border border-border rounded-lg;
+    @apply text-white placeholder-text-muted font-sans text-sm;
+    @apply focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30;
+    @apply transition-all duration-200;
+  }
+
+  .input-with-icon {
+    @apply pl-11;
+  }
+
+  .input-error {
+    @apply border-error focus:border-error focus:ring-error/30;
+  }
+
+  /* Aliases */
+  .input-2026 { @apply input; }
+
+  /* ─────────────────────────────────────────────────────────
+     TERMINAL-BOX (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .terminal-box {
+    @apply rounded-xl overflow-hidden border border-border;
     background: var(--bg-terminal);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
   }
-  .progress-2026 .progress-fill {
-    @apply h-full rounded-full;
-    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
+
+  .terminal-header {
+    @apply flex items-center gap-2 px-4 py-3 border-b border-border;
+    background: var(--bg-terminal-header);
   }
-  .progress-2026 .progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-    animation: shimmer 2s infinite;
+
+  .terminal-dots {
+    @apply flex gap-2;
   }
-  .progress-fill-green {
-    background: linear-gradient(90deg, #00FF88, #00D4FF);
-    box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+
+  .dot {
+    @apply w-3 h-3 rounded-full;
   }
-  .progress-fill-cyan {
-    background: linear-gradient(90deg, #00D4FF, #00A8CC);
-    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+
+  .dot-red { background: var(--dot-close); }
+  .dot-yellow { background: var(--dot-minimize); }
+  .dot-green { background: var(--dot-maximize); }
+
+  .terminal-title {
+    @apply ml-2 text-xs text-text-tertiary font-mono;
   }
-  .progress-fill-orange {
-    background: linear-gradient(90deg, #FF6B35, #ff8862);
-    box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+
+  /* Alias */
+  .title { @apply terminal-title; }
+
+  .terminal-body {
+    @apply p-4 font-mono text-sm space-y-1;
+    background: var(--bg-terminal);
   }
-  .progress-fill-lilas {
-    background: linear-gradient(90deg, #A855F7, #00D4FF);
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+
+  /* Terminal syntax */
+  .terminal-comment, .comment { @apply text-text-tertiary; }
+  .terminal-command, .cmd { @apply text-white; }
+  .terminal-string { @apply text-primary-500; }
+  .terminal-success, .success { color: var(--dot-maximize); }
+  .terminal-warning, .warning { @apply text-warning; }
+  .terminal-error, .error { @apply text-error; }
+  .terminal-muted, .muted { @apply text-text-muted; }
+  .value { @apply text-white; }
+
+  /* Terminal variants */
+  .terminal-fisica .terminal-header,
+  .terminal-box:not(.terminal-lilas):not(.terminal-amber):not(.terminal-cyan):not(.terminal-red) .terminal-header {
+    @apply bg-primary-500/10 border-primary-500/20;
+  }
+
+  .terminal-lilas .terminal-header {
+    @apply bg-matematica-500/10 border-matematica-500/20;
+  }
+
+  .terminal-amber .terminal-header {
+    @apply bg-warning/10 border-warning/20;
+  }
+
+  .terminal-cyan .terminal-header {
+    @apply bg-accent-500/10 border-accent-500/20;
+  }
+
+  .terminal-red .terminal-header {
+    @apply bg-error/10 border-error/20;
   }
 
   /* ─────────────────────────────────────────────────────────
-     MENU ITEMS - Koyeb Style
+     PROGRESS BAR (Briefing)
      ───────────────────────────────────────────────────────── */
-  .menu-item-2026 {
-    @apply relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer;
-    background: var(--bg-surface);
-    border: 1px solid transparent;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  .progress {
+    @apply w-full h-2 bg-dark-surface-hover rounded-full overflow-hidden;
   }
-  .menu-item-2026:hover {
-    background: var(--bg-elevated);
-    border-color: var(--border-default);
-    transform: translateX(8px);
+
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500;
   }
-  .menu-item-2026.menu-green:hover {
-    border-color: rgba(0, 255, 136, 0.25);
-    box-shadow: 0 0 30px rgba(0, 255, 136, 0.08);
+
+  .progress-fisica .progress-fill {
+    @apply bg-gradient-to-r from-primary-500 to-primary-400;
   }
-  .menu-item-2026.menu-cyan:hover {
-    border-color: rgba(0, 212, 255, 0.25);
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.08);
+
+  .progress-matematica .progress-fill {
+    @apply bg-gradient-to-r from-matematica-500 to-matematica-400;
   }
-  .menu-item-2026.menu-lilas:hover {
-    border-color: rgba(168, 85, 247, 0.25);
-    box-shadow: 0 0 30px rgba(168, 85, 247, 0.08);
+
+  .progress-warning .progress-fill {
+    @apply bg-gradient-to-r from-warning to-warning/80;
+  }
+
+  /* Aliases */
+  .progress-2026 { @apply progress; }
+  .progress-fill-green { @apply bg-gradient-to-r from-primary-500 to-accent-500; }
+  .progress-fill-lilas { @apply bg-gradient-to-r from-matematica-500 to-accent-500; }
+
+  /* ─────────────────────────────────────────────────────────
+     SPINNER (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .spinner {
+    @apply w-5 h-5 border-2 border-white/20 rounded-full animate-spin;
+  }
+
+  .spinner-fisica {
+    @apply spinner border-t-primary-500;
+  }
+
+  .spinner-matematica {
+    @apply spinner border-t-matematica-500;
+  }
+
+  .spinner-white {
+    @apply spinner border-t-white;
   }
 
   /* ─────────────────────────────────────────────────────────
-     CHAT BUBBLES - Koyeb Style
+     QUESTION CARD (Briefing)
      ───────────────────────────────────────────────────────── */
-  .chat-bubble-2026 {
+  .questao-card {
+    @apply card-default;
+  }
+
+  .questao-header {
+    @apply flex items-center justify-between pb-4 mb-4 border-b border-border;
+  }
+
+  .questao-enunciado {
+    @apply text-body text-white mb-6;
+  }
+
+  .alternativa {
+    @apply flex items-start gap-3 p-4 rounded-lg border border-border;
+    @apply cursor-pointer transition-all duration-200;
+    @apply hover:border-border-hover hover:bg-white/5;
+  }
+
+  .alternativa-selected {
+    @apply border-primary-500 bg-primary-500/10;
+  }
+
+  .alternativa-correct {
+    @apply border-success bg-success/10 cursor-default;
+  }
+
+  .alternativa-incorrect {
+    @apply border-error bg-error/10 cursor-default;
+  }
+
+  /* Aliases */
+  .question-card { @apply questao-card; }
+  .question-option { @apply alternativa; }
+
+  /* ─────────────────────────────────────────────────────────
+     RANKING TABLE (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .ranking-table {
+    @apply w-full;
+  }
+
+  .ranking-header {
+    @apply text-label text-text-tertiary;
+  }
+
+  .ranking-header th {
+    @apply px-4 py-3 text-left border-b border-border;
+  }
+
+  .ranking-row {
+    @apply border-b border-border transition-colors;
+    @apply hover:bg-white/5;
+  }
+
+  .ranking-row td {
+    @apply px-4 py-4;
+  }
+
+  .ranking-row-current {
+    @apply bg-primary-500/10 border-l-2 border-l-primary-500;
+  }
+
+  /* Aliases */
+  .table-koyeb { @apply ranking-table; }
+
+  /* ─────────────────────────────────────────────────────────
+     SELECT (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .select {
+    @apply w-full px-4 py-3 rounded-lg text-base outline-none appearance-none;
+    @apply bg-dark-surface border border-border text-white;
+    @apply focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30;
+    @apply transition-all duration-200;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+    padding-right: 44px;
+  }
+
+  /* Alias */
+  .select-koyeb { @apply select; }
+
+  /* ─────────────────────────────────────────────────────────
+     STAT CARD
+     ───────────────────────────────────────────────────────── */
+  .stat-card {
+    @apply card-default text-center;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold font-mono text-white;
+  }
+
+  .stat-label {
+    @apply text-caption text-text-muted mt-1;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     GRID BACKGROUND (Briefing)
+     ───────────────────────────────────────────────────────── */
+  .bg-grid-pattern {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     SAFE AREAS
+     ───────────────────────────────────────────────────────── */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     CHAT BUBBLES
+     ───────────────────────────────────────────────────────── */
+  .chat-bubble {
     @apply max-w-[85%] p-4 rounded-2xl;
     animation: slideUp 0.3s ease-out;
   }
+
   .chat-user {
-    @apply chat-bubble-2026 ml-auto rounded-br-md;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border-default);
-  }
-  .chat-assistant-green {
-    @apply chat-bubble-2026 rounded-bl-md;
-    background: rgba(0, 255, 136, 0.08);
-    border: 1px solid rgba(0, 255, 136, 0.15);
-  }
-  .chat-assistant-cyan {
-    @apply chat-bubble-2026 rounded-bl-md;
-    background: rgba(0, 212, 255, 0.08);
-    border: 1px solid rgba(0, 212, 255, 0.15);
-  }
-  .chat-assistant-lilas {
-    @apply chat-bubble-2026 rounded-bl-md;
-    background: rgba(168, 85, 247, 0.08);
-    border: 1px solid rgba(168, 85, 247, 0.15);
+    @apply chat-bubble ml-auto rounded-br-md;
+    @apply bg-dark-elevated border border-border;
   }
 
-  /* ─────────────────────────────────────────────────────────
-     SKELETON LOADING 2026
-     ───────────────────────────────────────────────────────── */
-  .skeleton-2026 {
-    @apply rounded-lg;
-    background: linear-gradient(90deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
-    background-size: 200% 100%;
-    animation: skeleton 1.5s ease-in-out infinite;
+  .chat-assistant-fisica {
+    @apply chat-bubble rounded-bl-md;
+    @apply bg-primary-500/10 border border-primary-500/20;
   }
 
+  .chat-assistant-matematica {
+    @apply chat-bubble rounded-bl-md;
+    @apply bg-matematica-500/10 border border-matematica-500/20;
+  }
+
+  /* Aliases */
+  .chat-assistant-green { @apply chat-assistant-fisica; }
+  .chat-assistant-lilas { @apply chat-assistant-matematica; }
+
   /* ─────────────────────────────────────────────────────────
-     HEADERS GRADIENT - Koyeb Style
+     SKELETON LOADING
      ───────────────────────────────────────────────────────── */
-  .header-green {
-    background: linear-gradient(135deg, #00994F 0%, #00FF88 50%, #4dffb8 100%);
+  .skeleton {
+    @apply rounded-lg animate-pulse;
+    background: linear-gradient(90deg, #141414 0%, #1a1a1a 50%, #141414 100%);
   }
-  .header-cyan {
-    background: linear-gradient(135deg, #007C99 0%, #00D4FF 50%, #4ddcff 100%);
-  }
-  .header-lilas {
-    background: linear-gradient(135deg, #6b21a8 0%, #A855F7 50%, #c084fc 100%);
-  }
-  .header-orange {
-    background: linear-gradient(135deg, #994020 0%, #FF6B35 50%, #ff8862 100%);
-  }
+
+  /* Alias */
+  .skeleton-2026 { @apply skeleton; }
 
   /* ─────────────────────────────────────────────────────────
      DIVIDERS
@@ -795,470 +640,47 @@ input, select, textarea {
     @apply h-px w-full;
     background: linear-gradient(90deg, transparent, var(--border-default), transparent);
   }
+
   .divider-v {
     @apply w-px h-full;
     background: linear-gradient(180deg, transparent, var(--border-default), transparent);
   }
-
-  /* ─────────────────────────────────────────────────────────
-     SPINNER 2026
-     ───────────────────────────────────────────────────────── */
-  .spinner-2026 {
-    @apply w-5 h-5 rounded-full border-2 border-current;
-    border-top-color: transparent;
-    animation: spin 0.8s linear infinite;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     TYPING INDICATOR
-     ───────────────────────────────────────────────────────── */
-  .typing-dot {
-    @apply w-2 h-2 rounded-full;
-    background: currentColor;
-    animation: typingDot 1.4s infinite ease-in-out;
-  }
-  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-
-  /* ─────────────────────────────────────────────────────────
-     TERMINAL BOX - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .terminal-box {
-    @apply rounded-xl overflow-hidden;
-    border: 1px solid rgba(0, 255, 136, 0.15);
-    background: var(--bg-dark);
-  }
-  .terminal-box.terminal-cyan {
-    border-color: rgba(0, 212, 255, 0.15);
-  }
-  .terminal-box.terminal-amber {
-    border-color: rgba(255, 184, 0, 0.15);
-  }
-  .terminal-box.terminal-lilas {
-    border-color: rgba(168, 85, 247, 0.15);
-  }
-  .terminal-box.terminal-red {
-    border-color: rgba(255, 71, 87, 0.15);
-  }
-
-  .terminal-header {
-    @apply flex items-center gap-2 px-4 py-3;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-default);
-  }
-  .terminal-header .dot {
-    @apply w-3 h-3 rounded-full;
-    box-shadow: 0 0 6px currentColor;
-  }
-  .terminal-header .dot-red {
-    background: var(--dot-red);
-    box-shadow: 0 0 6px rgba(255, 95, 86, 0.5);
-  }
-  .terminal-header .dot-yellow {
-    background: var(--dot-yellow);
-    box-shadow: 0 0 6px rgba(255, 189, 46, 0.5);
-  }
-  .terminal-header .dot-green {
-    background: var(--dot-green);
-    box-shadow: 0 0 6px rgba(39, 202, 64, 0.5);
-  }
-  .terminal-header .title {
-    @apply ml-2 text-xs;
-    color: var(--text-tertiary);
-    font-family: 'Space Mono', monospace;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .terminal-body {
-    @apply p-4;
-    background: var(--bg-dark);
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    line-height: 1.7;
-  }
-  .terminal-body .comment {
-    color: #00FF88;
-  }
-  .terminal-body .comment-cyan {
-    color: #00D4FF;
-  }
-  .terminal-body .comment-amber {
-    color: #FFB800;
-  }
-  .terminal-body .comment-lilas {
-    color: #A855F7;
-  }
-  .terminal-body .cmd {
-    color: var(--text-secondary);
-  }
-  .terminal-body .value {
-    color: var(--text-primary);
-  }
-  .terminal-body .success {
-    color: #00FF88;
-  }
-  .terminal-body .warning {
-    color: #FFB800;
-  }
-  .terminal-body .error {
-    color: #FF4757;
-  }
-  .terminal-body .muted {
-    color: var(--text-muted);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     QUESTION CARD - Koyeb Style
-     Caixas de questões com borda verde
-     ───────────────────────────────────────────────────────── */
-  .question-card {
-    @apply rounded-2xl p-5 overflow-hidden;
-    background: var(--bg-surface);
-    border: 2px solid rgba(0, 255, 136, 0.25);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.05);
-  }
-  .question-card .question-text {
-    @apply text-base leading-relaxed whitespace-pre-wrap;
-    color: #FFFFFF;
-    font-family: 'Inter', sans-serif;
-  }
-
-  /* Question Card para Matemática (Lilás) */
-  .question-card.question-matematica {
-    border-color: rgba(168, 85, 247, 0.25);
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.05);
-  }
-
-  /* Alternativas de questões */
-  .question-option {
-    @apply flex items-center gap-4 p-4 rounded-xl cursor-pointer;
-    @apply transition-all duration-200;
-    background: var(--bg-surface);
-    border: 2px solid rgba(0, 255, 136, 0.15);
-  }
-  .question-option:hover:not(:disabled) {
-    border-color: rgba(0, 255, 136, 0.4);
-    background: var(--bg-elevated);
-  }
-  .question-option.selected {
-    border-color: #00FF88;
-    background: rgba(0, 255, 136, 0.1);
-  }
-  .question-option .option-letter {
-    @apply flex items-center justify-center w-10 h-10 rounded-lg;
-    @apply font-mono font-bold text-base flex-shrink-0;
-    background: var(--bg-terminal);
-    color: var(--text-secondary);
-  }
-  .question-option.selected .option-letter {
-    background: #00FF88;
-    color: #0D0D14;
-  }
-  .question-option .option-text {
-    @apply flex-1 text-left;
-    color: #FFFFFF;
-    font-family: 'Inter', sans-serif;
-  }
-
-  /* Opções para Matemática */
-  .question-option.question-matematica {
-    border-color: rgba(168, 85, 247, 0.15);
-  }
-  .question-option.question-matematica:hover:not(:disabled) {
-    border-color: rgba(168, 85, 247, 0.4);
-  }
-  .question-option.question-matematica.selected {
-    border-color: #A855F7;
-    background: rgba(168, 85, 247, 0.1);
-  }
-  .question-option.question-matematica.selected .option-letter {
-    background: #A855F7;
-    color: #FFFFFF;
-  }
-
-  /* Estados correto/incorreto */
-  .question-option.correct {
-    border-color: #00FF88 !important;
-    background: rgba(0, 255, 136, 0.15) !important;
-  }
-  .question-option.correct .option-letter {
-    background: #00FF88 !important;
-    color: #0D0D14 !important;
-  }
-  .question-option.incorrect {
-    border-color: #FF4757 !important;
-    background: rgba(255, 71, 87, 0.15) !important;
-  }
-  .question-option.incorrect .option-letter {
-    background: #FF4757 !important;
-    color: #FFFFFF !important;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     TEXT ON GREEN BACKGROUND - Fonte preta
-     ───────────────────────────────────────────────────────── */
-  .bg-green-text-black {
-    background: #00FF88;
-    color: #0D0D14 !important;
-  }
-  .bg-green-text-black * {
-    color: #0D0D14 !important;
-  }
-
-  .bg-lilas-text-white {
-    background: #A855F7;
-    color: #FFFFFF !important;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     TABLE - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .table-koyeb {
-    @apply w-full text-sm;
-  }
-  .table-koyeb thead {
-    background: var(--bg-surface);
-  }
-  .table-koyeb thead tr {
-    border-bottom: 1px solid var(--border-default);
-  }
-  .table-koyeb th {
-    @apply py-3 px-3 font-medium text-left;
-    color: var(--text-secondary);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  .table-koyeb tbody tr {
-    border-bottom: 1px solid var(--border-default);
-    transition: background 0.2s ease;
-  }
-  .table-koyeb tbody tr:hover {
-    background: var(--bg-elevated);
-  }
-  .table-koyeb td {
-    @apply py-3 px-3;
-    color: var(--text-primary);
-  }
-  .table-koyeb .text-right {
-    text-align: right;
-  }
-  .table-koyeb .text-center {
-    text-align: center;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     SELECT - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .select-koyeb {
-    @apply w-full px-4 py-3 rounded-xl text-base outline-none appearance-none;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-    color: var(--text-primary);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23A0A0B0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 20px;
-    padding-right: 44px;
-  }
-  .select-koyeb:hover {
-    border-color: var(--border-hover);
-  }
-  .select-koyeb:focus {
-    border-color: var(--color-primary);
-    background-color: var(--bg-elevated);
-    box-shadow:
-      inset 0 2px 6px rgba(0, 0, 0, 0.3),
-      0 0 0 3px rgba(0, 255, 136, 0.15);
-  }
-  .select-koyeb option {
-    background: var(--bg-surface);
-    color: var(--text-primary);
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     EXPORT BUTTON - Koyeb Style
-     ───────────────────────────────────────────────────────── */
-  .export-btn {
-    @apply flex items-center justify-center gap-3 p-4 rounded-xl;
-    @apply transition-all duration-300;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-default);
-  }
-  .export-btn:hover:not(:disabled) {
-    background: var(--bg-elevated);
-    border-color: var(--border-hover);
-    transform: translateY(-2px);
-  }
-  .export-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-  .export-btn.export-fisica {
-    border-color: rgba(0, 255, 136, 0.2);
-  }
-  .export-btn.export-fisica:hover:not(:disabled) {
-    border-color: rgba(0, 255, 136, 0.4);
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
-  }
-  .export-btn.export-matematica {
-    border-color: rgba(168, 85, 247, 0.2);
-  }
-  .export-btn.export-matematica:hover:not(:disabled) {
-    border-color: rgba(168, 85, 247, 0.4);
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
-  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   UTILITIES 2026
+   UTILITY CLASSES
    ═══════════════════════════════════════════════════════════════════════════ */
 @layer utilities {
-  /* ─────────────────────────────────────────────────────────
-     TYPOGRAPHY SYSTEM - Consistente em toda app
-     ───────────────────────────────────────────────────────── */
-  .text-title {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
-  .text-subtitle {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-  }
-  .text-heading {
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.4;
-  }
-  .text-body {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.5;
-  }
-  .text-body-sm {
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.5;
-  }
-  .text-caption {
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.4;
-  }
-  .text-label {
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.3;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-  .text-mono {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    line-height: 1.6;
-  }
-  .text-stat {
-    font-size: 28px;
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-  .text-stat-sm {
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Text Gradients - Koyeb Style */
+  /* Text Gradients */
   .text-gradient-green {
-    background: linear-gradient(135deg, #00FF88, #00D4FF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-cyan {
-    background: linear-gradient(135deg, #00D4FF, #00A8CC);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-orange {
-    background: linear-gradient(135deg, #FF6B35, #ff8862);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-lilas {
-    background: linear-gradient(135deg, #A855F7, #c084fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .text-gradient-multi {
-    background: linear-gradient(135deg, #00FF88, #A855F7, #FF6B35);
+    background: linear-gradient(135deg, #10b981, #06b6d4);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Glow Text - Koyeb Style */
+  .text-gradient-lilas {
+    background: linear-gradient(135deg, #a855f7, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glow text */
   .glow-text-green {
-    text-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+    text-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
   }
-  .glow-text-cyan {
-    text-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-  }
+
   .glow-text-lilas {
     text-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
   }
-  .glow-text-orange {
-    text-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
-  }
 
-  /* Background Patterns */
-  .bg-grid {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-  .bg-dots {
-    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Safe Areas */
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0);
-  }
-  .safe-top {
-    padding-top: env(safe-area-inset-top, 0);
-  }
-
-  /* Hide Scrollbar */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* Stagger Animations */
+  /* Stagger animations */
   .stagger-1 { animation-delay: 0.05s; }
   .stagger-2 { animation-delay: 0.1s; }
   .stagger-3 { animation-delay: 0.15s; }
   .stagger-4 { animation-delay: 0.2s; }
   .stagger-5 { animation-delay: 0.25s; }
-  .stagger-6 { animation-delay: 0.3s; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1268,33 +690,12 @@ input, select, textarea {
   to { transform: rotate(360deg); }
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes skeleton {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
-}
-
-@keyframes typingDot {
-  0%, 80%, 100% {
-    transform: scale(0.6);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
 @keyframes slideUp {
-  0% {
+  from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
@@ -1302,15 +703,15 @@ input, select, textarea {
 
 @keyframes pulse-glow {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
   }
   50% {
-    box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
+    box-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ACESSIBILIDADE
+   ACCESSIBILITY
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
