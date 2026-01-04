@@ -4,14 +4,17 @@ import { NextResponse } from 'next/server'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// Endpoint de diagnóstico simples - BUILD ID: 20260104-v2
+// Endpoint de diagnóstico simples - BUILD ID: 20260104-v3
 export async function GET() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+
   return NextResponse.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    build: '20260104-v2',
+    build: '20260104-v3',
     env: {
-      SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'MISSING',
+      SUPABASE_URL: supabaseUrl ? 'SET' : 'MISSING',
+      SUPABASE_URL_VALUE: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'EMPTY',
       SUPABASE_ANON: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'SET' : 'MISSING',
       SUPABASE_SERVICE: (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY) ? 'SET' : 'MISSING',
       GEMINI: process.env.GEMINI_API_KEY ? 'SET' : 'MISSING',
