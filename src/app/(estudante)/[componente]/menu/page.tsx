@@ -16,11 +16,14 @@ import {
   Zap,
   GraduationCap,
   ChevronRight,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
 import BottomNav from '@/components/BottomNav'
 import ProfilePhoto from '@/components/ProfilePhoto'
+import ThemeToggle from '@/components/ThemeToggle'
 import type { Usuario, Componente } from '@/types'
 import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 
@@ -365,6 +368,24 @@ export default function MenuComponentePage() {
               />
             </button>
           ))}
+        </div>
+
+        {/* Theme Toggle */}
+        <div
+          className="mt-6 rounded-2xl p-5"
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-default)',
+          }}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <Sun className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+            <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Aparência
+            </span>
+            <Moon className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+          </div>
+          <ThemeToggle componente={componente} />
         </div>
       </main>
 
