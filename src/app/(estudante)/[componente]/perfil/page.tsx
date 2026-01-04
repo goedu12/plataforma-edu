@@ -17,11 +17,11 @@ import {
   Camera,
   Info
 } from 'lucide-react'
-import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Loading from '@/components/ui/Loading'
 import ProfilePhoto from '@/components/ProfilePhoto'
+import BottomNav from '@/components/BottomNav'
 import type { Usuario, Componente } from '@/types'
 
 export default function PerfilPage() {
@@ -34,19 +34,21 @@ export default function PerfilPage() {
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
 
-  // Estado para alteração de senha
   const [senhaAtual, setSenhaAtual] = useState('')
   const [novaSenha, setNovaSenha] = useState('')
   const [confirmarSenha, setConfirmarSenha] = useState('')
   const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false)
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false)
 
+  const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const nomeComponente = isFisica ? 'Física' : 'Matemática'
+
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
       return
     }
-
     buscarUsuario()
   }, [componente, router])
 
@@ -54,7 +56,6 @@ export default function PerfilPage() {
     try {
       const response = await fetch('/api/usuario')
       const data = await response.json()
-
       if (data.sucesso) {
         setUsuario(data.usuario)
       } else {
@@ -72,7 +73,6 @@ export default function PerfilPage() {
     e.preventDefault()
     setMensagem(null)
 
-    // Validações
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
       setMensagem({ tipo: 'erro', texto: 'Preencha todos os campos' })
       return
@@ -94,10 +94,7 @@ export default function PerfilPage() {
       const response = await fetch('/api/auth/alterar-senha', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          senha_atual: senhaAtual,
-          nova_senha: novaSenha
-        })
+        body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
       })
 
       const data = await response.json()
@@ -118,10 +115,6 @@ export default function PerfilPage() {
     }
   }
 
-  const handleVoltar = () => {
-    router.push(`/${componente}/menu`)
-  }
-
   const handlePhotoChange = (newUrl: string | null) => {
     if (usuario) {
       setUsuario({ ...usuario, foto_url: newUrl })
@@ -130,38 +123,38 @@ export default function PerfilPage() {
     }
   }
 
-  if (loading) {
-    return <Loading fullScreen componente={componente} />
-  }
-
-  if (!usuario) {
-    return null
-  }
-
-  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
+  if (loading) return <Loading fullScreen componente={componente} />
+  if (!usuario) return null
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className={`${bgColor} text-white px-4 pt-4 pb-20`}>
+      <header
+        className="px-4 pt-4 pb-20"
+        style={{ background: corPrimaria }}
+      >
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+              onClick={() => router.push(`/${componente}/menu`)}
+              className="p-3 -ml-2 rounded-xl hover:bg-black/20 transition-colors touch-target"
+              style={{ color: isFisica ? '#000' : '#fff' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <h1 className="font-semibold flex items-center gap-2">
+              <h1
+                className="font-display font-semibold flex items-center gap-2"
+                style={{ color: isFisica ? '#000' : '#fff' }}
+              >
                 <User className="w-5 h-5" />
                 Meu Perfil
               </h1>
-              <p className="text-sm text-white/80">{nomeComponente}</p>
+              <p className="text-sm" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.8)' }}>
+                {nomeComponente}
+              </p>
             </div>
-            <div className="w-9" /> {/* Spacer */}
+            <div className="w-12" />
           </div>
         </div>
       </header>
@@ -171,23 +164,22 @@ export default function PerfilPage() {
         {/* Mensagem de feedback */}
         {mensagem && (
           <div
-            className={`mb-4 p-4 rounded-xl flex items-center gap-3 animate-slide-up ${
-              mensagem.tipo === 'sucesso'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-            }`}
+            className="mb-4 p-4 rounded-xl flex items-center gap-3 animate-fade-in"
+            style={{
+              background: mensagem.tipo === 'sucesso' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+              color: mensagem.tipo === 'sucesso' ? 'var(--success)' : 'var(--error)',
+            }}
           >
-            {mensagem.tipo === 'sucesso' ? (
-              <Check className="w-5 h-5 flex-shrink-0" />
-            ) : (
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-            )}
+            {mensagem.tipo === 'sucesso' ? <Check className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
             <p className="text-sm">{mensagem.texto}</p>
           </div>
         )}
 
         {/* Card de Foto e Info Básica */}
-        <Card className="animate-slide-up mb-4">
+        <div
+          className="card p-6 mb-4 animate-fade-in-up"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+        >
           <div className="flex flex-col items-center text-center">
             <ProfilePhoto
               fotoUrl={usuario.foto_url}
@@ -197,47 +189,62 @@ export default function PerfilPage() {
               componente={componente}
               onPhotoChange={handlePhotoChange}
             />
-            <h2 className="text-xl font-bold text-text-primary mt-4">{usuario.nome}</h2>
-            <p className="text-text-secondary">{usuario.email}</p>
+            <h2 className="text-xl font-bold mt-4" style={{ color: 'var(--text-primary)' }}>{usuario.nome}</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>{usuario.email}</p>
 
-            <div className="mt-4 p-3 bg-calm-elevated rounded-xl w-full">
-              <div className="flex items-center justify-center gap-2 text-sm text-text-secondary">
+            <div
+              className="mt-4 p-3 rounded-xl w-full"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <div className="flex items-center justify-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
                 <Camera className="w-4 h-4" />
                 <span>Clique na foto para alterar (máx. 500KB)</span>
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Card de Informações */}
-        <Card className="animate-slide-up mb-4" style={{ animationDelay: '50ms' }}>
-          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+        <div
+          className="card p-6 mb-4 animate-fade-in-up"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', animationDelay: '50ms' }}
+        >
+          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Info className="w-5 h-5" />
             Informações da Conta
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-calm-elevated rounded-xl">
-              <Mail className="w-5 h-5 text-text-muted" />
+            <div
+              className="flex items-center gap-3 p-3 rounded-xl"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <Mail className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
               <div>
-                <p className="text-xs text-text-muted">E-mail</p>
-                <p className="text-text-primary">{usuario.email}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>E-mail</p>
+                <p style={{ color: 'var(--text-primary)' }}>{usuario.email}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 bg-calm-elevated rounded-xl">
-              <GraduationCap className="w-5 h-5 text-text-muted" />
+            <div
+              className="flex items-center gap-3 p-3 rounded-xl"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <GraduationCap className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
               <div>
-                <p className="text-xs text-text-muted">Turma</p>
-                <p className="text-text-primary">{usuario.turma}</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Turma</p>
+                <p style={{ color: 'var(--text-primary)' }}>{usuario.turma}</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-3 bg-calm-elevated rounded-xl">
-              <Calendar className="w-5 h-5 text-text-muted" />
+            <div
+              className="flex items-center gap-3 p-3 rounded-xl"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <Calendar className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
               <div>
-                <p className="text-xs text-text-muted">Membro desde</p>
-                <p className="text-text-primary">
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Membro desde</p>
+                <p style={{ color: 'var(--text-primary)' }}>
                   {new Date(usuario.criado_em).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'long',
@@ -247,18 +254,21 @@ export default function PerfilPage() {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
 
         {/* Card de Alterar Senha */}
-        <Card className="animate-slide-up" style={{ animationDelay: '100ms' }}>
-          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+        <div
+          className="card p-6 animate-fade-in-up"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', animationDelay: '100ms' }}
+        >
+          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Lock className="w-5 h-5" />
             Alterar Senha
           </h3>
 
           <form onSubmit={handleAlterarSenha} className="space-y-4">
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Senha Atual</label>
+              <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Senha Atual</label>
               <div className="relative">
                 <Input
                   type={mostrarSenhaAtual ? 'text' : 'password'}
@@ -270,7 +280,8 @@ export default function PerfilPage() {
                 <button
                   type="button"
                   onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 touch-target"
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   {mostrarSenhaAtual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -278,7 +289,7 @@ export default function PerfilPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Nova Senha</label>
+              <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Nova Senha</label>
               <div className="relative">
                 <Input
                   type={mostrarNovaSenha ? 'text' : 'password'}
@@ -290,7 +301,8 @@ export default function PerfilPage() {
                 <button
                   type="button"
                   onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 touch-target"
+                  style={{ color: 'var(--text-muted)' }}
                 >
                   {mostrarNovaSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -298,7 +310,7 @@ export default function PerfilPage() {
             </div>
 
             <div>
-              <label className="block text-sm text-text-secondary mb-1">Confirmar Nova Senha</label>
+              <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Confirmar Nova Senha</label>
               <Input
                 type={mostrarNovaSenha ? 'text' : 'password'}
                 value={confirmarSenha}
@@ -312,22 +324,15 @@ export default function PerfilPage() {
               variant={isFisica ? 'fisica' : 'matematica'}
               className="w-full"
               disabled={salvando}
+              leftIcon={salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
             >
-              {salvando ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Lock className="w-4 h-4 mr-2" />
-                  Alterar Senha
-                </>
-              )}
+              {salvando ? 'Salvando...' : 'Alterar Senha'}
             </Button>
           </form>
-        </Card>
+        </div>
       </main>
+
+      <BottomNav componente={componente} />
     </div>
   )
 }

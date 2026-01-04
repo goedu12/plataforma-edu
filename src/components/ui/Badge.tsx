@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 
 interface BadgeProps {
   children: ReactNode
-  variant?: 'default' | 'success' | 'error' | 'warning' | 'fisica' | 'matematica'
+  variant?: 'default' | 'fisica' | 'matematica' | 'streak' | 'success' | 'warning' | 'error'
   size?: 'sm' | 'md'
   className?: string
 }
@@ -15,28 +15,55 @@ export default function Badge({
   size = 'md',
   className = '',
 }: BadgeProps) {
-  const variantStyles = {
-    default: 'bg-dark-elevated/80 text-text-secondary border border-border',
-    success: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    error: 'bg-red-500/20 text-red-400 border border-red-500/30',
-    warning: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-    fisica: 'bg-fisica-500/20 text-fisica-400 border border-fisica-500/30',
-    matematica: 'bg-matematica-500/20 text-matematica-400 border border-matematica-500/30',
-  }
-
   const sizeStyles = {
     sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-xs',
+    md: 'px-3 py-1 text-xs',
+  }
+
+  const getVariantStyle = () => {
+    switch (variant) {
+      case 'fisica':
+        return {
+          background: 'rgba(34, 197, 94, 0.15)',
+          color: 'var(--color-fisica)',
+        }
+      case 'matematica':
+        return {
+          background: 'rgba(139, 92, 246, 0.15)',
+          color: 'var(--color-matematica)',
+        }
+      case 'streak':
+        return {
+          background: 'rgba(249, 115, 22, 0.15)',
+          color: 'var(--color-streak)',
+        }
+      case 'success':
+        return {
+          background: 'rgba(16, 185, 129, 0.15)',
+          color: 'var(--success)',
+        }
+      case 'warning':
+        return {
+          background: 'rgba(245, 158, 11, 0.15)',
+          color: 'var(--warning)',
+        }
+      case 'error':
+        return {
+          background: 'rgba(239, 68, 68, 0.15)',
+          color: 'var(--error)',
+        }
+      default:
+        return {
+          background: 'var(--bg-surface-hover)',
+          color: 'var(--text-secondary)',
+        }
+    }
   }
 
   return (
     <span
-      className={`
-        inline-flex items-center font-medium rounded-full
-        ${variantStyles[variant]}
-        ${sizeStyles[size]}
-        ${className}
-      `}
+      className={`inline-flex items-center font-semibold rounded-full ${sizeStyles[size]} ${className}`}
+      style={getVariantStyle()}
     >
       {children}
     </span>

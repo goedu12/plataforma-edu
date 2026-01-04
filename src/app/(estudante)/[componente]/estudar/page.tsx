@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, BookOpen, CheckCircle2, WifiOff, RefreshCw, Clock, AlertTriangle, Calendar, Zap } from 'lucide-react'
 import QuestaoCard from '@/components/QuestaoCard'
 import Loading from '@/components/ui/Loading'
+import Button from '@/components/ui/Button'
+import BottomNav from '@/components/BottomNav'
 import type { Componente, Questao } from '@/types'
 
 type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'LIMITE_SEMANAL' | 'FORA_PERIODO'
@@ -14,30 +16,6 @@ interface LimiteInfo {
   limite_semanal: number | null
   restantes: number | null
   pode_responder: boolean
-}
-
-interface PeriodoInfo {
-  bimestre: number
-  tipo: 'regular' | 'recuperacao'
-  dias_restantes: number
-}
-
-// Cores Koyeb
-const KOYEB = {
-  bg: '#0D0D14',
-  bgCard: '#1A1A2E',
-  bgElevated: '#222238',
-  bgDark: '#12121C',
-  primary: '#00FF88',
-  accent: '#00D4FF',
-  fisica: '#00FF88',
-  matematica: '#A855F7',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#8B8B9A',
-  textMuted: '#5A5A6E',
-  border: 'rgba(255,255,255,0.05)',
-  danger: '#FF4757',
-  warning: '#FFB800',
 }
 
 export default function EstudarPage() {
@@ -51,8 +29,12 @@ export default function EstudarPage() {
   const [erro, setErro] = useState<string | null>(null)
   const [tempoDecorrido, setTempoDecorrido] = useState(0)
   const [limite, setLimite] = useState<LimiteInfo | null>(null)
-  const [periodo, setPeriodo] = useState<PeriodoInfo | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const isFisica = componente === 'fisica'
+  const nomeComponente = isFisica ? 'Física' : 'Matemática'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
   const buscarQuestao = async () => {
     setLoading(true)
@@ -64,7 +46,6 @@ export default function EstudarPage() {
       if (data.sucesso) {
         setStatus(data.status)
         setLimite(data.limite || null)
-        setPeriodo(data.periodo || null)
 
         if (data.status === 'OK' && data.questao) {
           setQuestao(data.questao)
@@ -80,16 +61,14 @@ export default function EstudarPage() {
     } catch (error) {
       console.error('Erro ao buscar questão:', error)
       setStatus('ERRO')
-      setErro('Não foi possível conectar ao servidor. Verifique sua conexão com a internet.')
+      setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
     }
   }
 
   const iniciarTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-    }
+    if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
       setTempoDecorrido(prev => prev + 1)
     }, 1000)
@@ -108,81 +87,58 @@ export default function EstudarPage() {
       return
     }
     buscarQuestao()
-
     return () => pararTimer()
   }, [componente])
 
-  const handleResponder = () => {
-    pararTimer()
-  }
-
-  const handleProxima = () => {
-    buscarQuestao()
-  }
-
-  const handleVoltar = () => {
-    router.push(`/${componente}/menu`)
-  }
-
-  const handleNotaAtualizada = (novoLimite: LimiteInfo) => {
-    setLimite(novoLimite)
-  }
-
-  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
+  const handleVoltar = () => router.push(`/${componente}/menu`)
+  const handleNotaAtualizada = (novoLimite: LimiteInfo) => setLimite(novoLimite)
 
   if (loading) {
     return <Loading fullScreen componente={componente} />
   }
 
   return (
-    <div
-      className="min-h-screen pb-8"
-      style={{
-        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
-        fontFamily: "'Inter', -apple-system, sans-serif",
-      }}
-    >
+    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
       <header
         className="px-4 py-4 sticky top-0 z-10"
         style={{
-          background: accentColor,
-          boxShadow: `0 4px 20px ${accentColor}40`,
+          background: corPrimaria,
+          boxShadow: `0 4px 20px ${corGlow}`,
         }}
       >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={handleVoltar}
-            className="p-2 -ml-2 rounded-xl hover:bg-black/20 transition-colors"
+            className="p-3 -ml-2 rounded-xl hover:bg-black/20 transition-colors touch-target"
           >
-            <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.bg }} />
+            <ArrowLeft className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
           </button>
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5" style={{ color: KOYEB.bg }} />
+            <BookOpen className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
             <h1
-              className="font-mono text-sm font-bold tracking-wider uppercase"
-              style={{ color: KOYEB.bg }}
+              className="font-display font-semibold"
+              style={{ color: isFisica ? '#000' : '#fff' }}
             >
               Estudar
             </h1>
           </div>
-          {status === 'OK' && questao && (
+          {status === 'OK' && questao ? (
             <div
               className="flex items-center gap-1 rounded-full px-3 py-1"
               style={{ background: 'rgba(0,0,0,0.2)' }}
             >
-              <Clock className="w-4 h-4" style={{ color: KOYEB.bg }} />
+              <Clock className="w-4 h-4" style={{ color: isFisica ? '#000' : '#fff' }} />
               <span
                 className="text-sm font-mono tabular-nums"
-                style={{ color: KOYEB.bg }}
+                style={{ color: isFisica ? '#000' : '#fff' }}
               >
                 {tempoDecorrido}s
               </span>
             </div>
+          ) : (
+            <div className="w-12" />
           )}
-          {status !== 'OK' && <div className="w-16" />}
         </div>
       </header>
 
@@ -191,11 +147,14 @@ export default function EstudarPage() {
         <div className="max-w-2xl mx-auto px-4 pt-4">
           <div
             className="flex items-center justify-between rounded-xl p-3"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+            }}
           >
             <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" style={{ color: KOYEB.textMuted }} />
-              <span className="text-sm" style={{ color: KOYEB.textSecondary }}>
+              <Calendar className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Esta semana
               </span>
             </div>
@@ -203,7 +162,9 @@ export default function EstudarPage() {
               <span
                 className="text-sm font-mono font-bold tabular-nums"
                 style={{
-                  color: limite.restantes !== null && limite.restantes <= 3 ? KOYEB.warning : KOYEB.primary,
+                  color: limite.restantes !== null && limite.restantes <= 3
+                    ? 'var(--warning)'
+                    : corPrimaria,
                 }}
               >
                 {limite.questoes_semana}/{limite.limite_semanal}
@@ -212,8 +173,8 @@ export default function EstudarPage() {
                 <span
                   className="text-xs px-2 py-0.5 rounded-full"
                   style={{
-                    background: `${KOYEB.warning}20`,
-                    color: KOYEB.warning,
+                    background: 'rgba(245, 158, 11, 0.15)',
+                    color: 'var(--warning)',
                   }}
                 >
                   {limite.restantes} restantes
@@ -227,286 +188,137 @@ export default function EstudarPage() {
       {/* Conteúdo */}
       <main className="max-w-2xl mx-auto px-4 pt-6">
         {status === 'OK' && questao ? (
-          <div className="animate-slide-up">
+          <div className="animate-fade-in-up">
             <QuestaoCard
               questao={questao}
               componente={componente}
               tempoDecorrido={tempoDecorrido}
-              onResponder={handleResponder}
-              onProxima={handleProxima}
+              onResponder={pararTimer}
+              onProxima={buscarQuestao}
               onVoltar={handleVoltar}
               onNotaAtualizada={handleNotaAtualizada}
               limiteAtual={limite}
             />
           </div>
-        ) : status === 'LIMITE_SEMANAL' ? (
-          <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
-          >
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: `${KOYEB.warning}20`, border: `1px solid ${KOYEB.warning}40` }}
-            >
-              <AlertTriangle className="w-8 h-8" style={{ color: KOYEB.warning }} />
-            </div>
-            <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
-            >
-              Limite Semanal Atingido
-            </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
-              Você já respondeu {limite?.questoes_semana || 15} questões esta semana!
-            </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
-              O limite semanal é de 15 questões no modo estudo. Volte na segunda-feira para continuar ou use o modo Desafio para praticar sem limites!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => router.push(`/${componente}/desafio`)}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
-              >
-                <Zap className="w-4 h-4" />
-                Modo Desafio
-              </button>
-              <button
-                onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
-              >
-                Voltar ao Menu
-              </button>
-            </div>
-          </div>
-        ) : status === 'FORA_PERIODO' ? (
-          <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
-          >
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: `${KOYEB.accent}20`, border: `1px solid ${KOYEB.accent}40` }}
-            >
-              <Calendar className="w-8 h-8" style={{ color: KOYEB.accent }} />
-            </div>
-            <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
-            >
-              Fora do Período Letivo
-            </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
-              O período letivo ainda não começou ou está em férias.
-            </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
-              Você pode usar o modo Desafio para praticar sem limites!
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => router.push(`/${componente}/desafio`)}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
-              >
-                <Zap className="w-4 h-4" />
-                Modo Desafio
-              </button>
-              <button
-                onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
-              >
-                Voltar ao Menu
-              </button>
-            </div>
-          </div>
-        ) : status === 'COMPLETOU' ? (
-          <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
-          >
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: accentColor }}
-            >
-              <CheckCircle2 className="w-8 h-8" style={{ color: KOYEB.bg }} />
-            </div>
-            <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
-            >
-              Parabéns!
-            </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
-              Você completou todas as questões de {nomeComponente} disponíveis para sua turma!
-            </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
-              Continue praticando no tutor IA ou aguarde novas questões.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => router.push(`/${componente}/tutor`)}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
-              >
-                Praticar com Tutor IA
-              </button>
-              <button
-                onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
-              >
-                Voltar ao Menu
-              </button>
-            </div>
-          </div>
-        ) : status === 'ERRO' ? (
-          <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
-          >
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: `${KOYEB.danger}20`, border: `1px solid ${KOYEB.danger}40` }}
-            >
-              <WifiOff className="w-8 h-8" style={{ color: KOYEB.danger }} />
-            </div>
-            <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
-            >
-              Ops! Erro
-            </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
-              {erro}
-            </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
-              Tente novamente ou volte mais tarde.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={buscarQuestao}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
-              >
-                <RefreshCw className="w-4 h-4" />
-                Tentar Novamente
-              </button>
-              <button
-                onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
-              >
-                Voltar ao Menu
-              </button>
-            </div>
-          </div>
         ) : (
           <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+            className="card p-8 text-center animate-fade-in-up"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+            }}
           >
+            {/* Ícone */}
             <div
               className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: KOYEB.bgElevated }}
+              style={{
+                background: status === 'LIMITE_SEMANAL' ? 'rgba(245, 158, 11, 0.15)'
+                  : status === 'ERRO' ? 'rgba(239, 68, 68, 0.15)'
+                  : status === 'COMPLETOU' ? `${corGlow}`
+                  : 'var(--bg-elevated)',
+                border: status === 'LIMITE_SEMANAL' ? '1px solid rgba(245, 158, 11, 0.3)'
+                  : status === 'ERRO' ? '1px solid rgba(239, 68, 68, 0.3)'
+                  : status === 'COMPLETOU' ? `1px solid ${corPrimaria}`
+                  : '1px solid var(--border-default)',
+              }}
             >
-              <BookOpen className="w-8 h-8" style={{ color: KOYEB.textMuted }} />
+              {status === 'LIMITE_SEMANAL' && <AlertTriangle className="w-8 h-8" style={{ color: 'var(--warning)' }} />}
+              {status === 'FORA_PERIODO' && <Calendar className="w-8 h-8" style={{ color: 'var(--color-accent)' }} />}
+              {status === 'COMPLETOU' && <CheckCircle2 className="w-8 h-8" style={{ color: corPrimaria }} />}
+              {status === 'ERRO' && <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />}
+              {status === 'SEM_QUESTOES' && <BookOpen className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />}
             </div>
+
+            {/* Título */}
             <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
+              className="font-display text-xl font-bold mb-3"
+              style={{ color: 'var(--text-primary)' }}
             >
-              Sem Questões
+              {status === 'LIMITE_SEMANAL' && 'Limite Semanal Atingido'}
+              {status === 'FORA_PERIODO' && 'Fora do Período Letivo'}
+              {status === 'COMPLETOU' && 'Parabéns!'}
+              {status === 'ERRO' && 'Ops! Erro'}
+              {status === 'SEM_QUESTOES' && 'Sem Questões'}
             </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
-              Ainda não há questões de {nomeComponente} cadastradas para o seu ano escolar.
+
+            {/* Descrição */}
+            <p className="mb-2" style={{ color: 'var(--text-secondary)' }}>
+              {status === 'LIMITE_SEMANAL' && `Você já respondeu ${limite?.questoes_semana || 15} questões esta semana!`}
+              {status === 'FORA_PERIODO' && 'O período letivo ainda não começou ou está em férias.'}
+              {status === 'COMPLETOU' && `Você completou todas as questões de ${nomeComponente}!`}
+              {status === 'ERRO' && erro}
+              {status === 'SEM_QUESTOES' && `Ainda não há questões de ${nomeComponente} para seu ano.`}
             </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
-              Enquanto isso, você pode tirar dúvidas com o tutor IA!
+
+            <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
+              {status === 'LIMITE_SEMANAL' && 'Volte na segunda-feira ou use o modo Desafio!'}
+              {status === 'FORA_PERIODO' && 'Use o modo Desafio para praticar sem limites!'}
+              {status === 'COMPLETOU' && 'Continue praticando no tutor IA!'}
+              {status === 'ERRO' && 'Tente novamente ou volte mais tarde.'}
+              {status === 'SEM_QUESTOES' && 'Tire dúvidas com o tutor IA!'}
             </p>
+
+            {/* Botões */}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => router.push(`/${componente}/tutor`)}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
-              >
-                Conversar com Tutor IA
-              </button>
-              <button
+              {(status === 'LIMITE_SEMANAL' || status === 'FORA_PERIODO') && (
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push(`/${componente}/desafio`)}
+                  leftIcon={<Zap className="w-4 h-4" />}
+                >
+                  Modo Desafio
+                </Button>
+              )}
+              {(status === 'COMPLETOU' || status === 'SEM_QUESTOES') && (
+                <Button
+                  variant="secondary"
+                  onClick={() => router.push(`/${componente}/tutor`)}
+                >
+                  Tutor IA
+                </Button>
+              )}
+              {status === 'ERRO' && (
+                <Button
+                  variant="secondary"
+                  onClick={buscarQuestao}
+                  leftIcon={<RefreshCw className="w-4 h-4" />}
+                >
+                  Tentar Novamente
+                </Button>
+              )}
+              <Button
+                variant={isFisica ? 'fisica' : 'matematica'}
                 onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
               >
                 Voltar ao Menu
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Dicas - Estilo Terminal Koyeb */}
+        {/* Dica simples (sem terminal-box) */}
         {status === 'OK' && questao && (
-          <div className={`mt-6 terminal-box ${isFisica ? '' : 'terminal-lilas'} animate-fade-in`} style={{ animationDelay: '300ms' }}>
-            <div className="terminal-header">
-              <span className="dot dot-red" />
-              <span className="dot dot-yellow" />
-              <span className="dot dot-green" />
-              <span className="title">dica.sh</span>
-            </div>
-            <div className="terminal-body space-y-2">
-              <p className="comment"># Dica de Velocidade</p>
-              <p className="text-white">$ Responda em menos de 30 segundos para ganhar bonus de velocidade!</p>
+          <div
+            className="mt-6 p-4 rounded-xl animate-fade-in"
+            style={{
+              background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+              border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
+            }}
+          >
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <strong style={{ color: corPrimaria }}>Dica:</strong> Responda em menos de 30 segundos para ganhar bônus de velocidade!
               {limite && limite.limite_semanal !== null && (
-                <>
-                  <p className="comment mt-3"># Limite Semanal</p>
-                  <p className="text-white">$ Maximo de {limite.limite_semanal} questoes por semana no modo estudo</p>
-                  <p className="success">$ Questoes desta semana: {limite.questoes_semana}/{limite.limite_semanal}</p>
-                </>
+                <span className="block mt-1" style={{ color: 'var(--text-muted)' }}>
+                  Questões desta semana: {limite.questoes_semana}/{limite.limite_semanal}
+                </span>
               )}
-            </div>
+            </p>
           </div>
         )}
       </main>
+
+      {/* Bottom Navigation */}
+      <BottomNav componente={componente} />
     </div>
   )
 }

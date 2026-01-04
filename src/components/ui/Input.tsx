@@ -28,33 +28,20 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   ) => {
     const inputId = id || `input-${Math.random().toString(36).slice(2, 9)}`
 
-    // Koyeb Dark Theme - Focus ring colors
-    const ringColor =
-      componente === 'fisica'
-        ? 'focus:ring-fisica-500/50 focus:border-fisica-500'
-        : 'focus:ring-matematica-500/50 focus:border-matematica-500'
+    const focusColor = componente === 'fisica'
+      ? 'var(--color-fisica)'
+      : 'var(--color-matematica)'
 
-    // Koyeb Dark Theme - Base input styles
-    const baseInputStyles = `
-      w-full px-4 py-3
-      bg-dark-surface border border-border rounded-xl
-      text-text-primary text-base placeholder:text-text-tertiary
-      transition-all duration-200 outline-none
-      hover:border-border-hover
-      focus:ring-2 focus:bg-dark-elevated
-      disabled:bg-dark-elevated disabled:opacity-50 disabled:cursor-not-allowed
-    `
-
-    const inputStyles = error
-      ? `${baseInputStyles} border-error focus:ring-error/30 focus:border-error`
-      : `${baseInputStyles} ${ringColor}`
+    const focusGlow = componente === 'fisica'
+      ? 'var(--color-fisica-glow)'
+      : 'var(--color-matematica-glow)'
 
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider"
+            className="input-label"
           >
             {label}
           </label>
@@ -62,7 +49,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary">
+            <div
+              className="absolute left-4 top-1/2 -translate-y-1/2"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               {leftIcon}
             </div>
           )}
@@ -70,19 +60,44 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
-            className={`${inputStyles} ${leftIcon ? 'pl-12' : ''} ${rightIcon ? 'pr-12' : ''} ${className}`}
+            className={`input ${leftIcon ? 'pl-12' : ''} ${rightIcon ? 'pr-12' : ''} ${error ? 'input-error' : ''} ${className}`}
+            style={{
+              ['--focus-color' as string]: focusColor,
+              ['--focus-glow' as string]: focusGlow,
+            }}
+            onFocus={(e) => {
+              if (!error) {
+                e.currentTarget.style.borderColor = focusColor
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${focusGlow}`
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = error ? 'var(--error)' : 'var(--border-default)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
             {...props}
           />
 
           {rightIcon && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary">
+            <div
+              className="absolute right-4 top-1/2 -translate-y-1/2"
+              style={{ color: 'var(--text-tertiary)' }}
+            >
               {rightIcon}
             </div>
           )}
         </div>
 
-        {error && <p className="text-xs text-error mt-2">{error}</p>}
-        {helper && !error && <p className="text-xs text-text-tertiary mt-2">{helper}</p>}
+        {error && (
+          <p className="text-xs mt-2" style={{ color: 'var(--error)' }}>
+            {error}
+          </p>
+        )}
+        {helper && !error && (
+          <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+            {helper}
+          </p>
+        )}
       </div>
     )
   }
@@ -92,7 +107,7 @@ Input.displayName = 'Input'
 
 export default Input
 
-// Textarea Component - Koyeb Dark Theme
+// Textarea Component
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string
   error?: string
@@ -115,31 +130,20 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   ) => {
     const inputId = id || `textarea-${Math.random().toString(36).slice(2, 9)}`
 
-    const ringColor =
-      componente === 'fisica'
-        ? 'focus:ring-fisica-500/50 focus:border-fisica-500'
-        : 'focus:ring-matematica-500/50 focus:border-matematica-500'
+    const focusColor = componente === 'fisica'
+      ? 'var(--color-fisica)'
+      : 'var(--color-matematica)'
 
-    const baseStyles = `
-      w-full px-4 py-3
-      bg-dark-surface border border-border rounded-xl
-      text-text-primary text-base placeholder:text-text-tertiary
-      transition-all duration-200 outline-none resize-none
-      hover:border-border-hover
-      focus:ring-2 focus:bg-dark-elevated
-      disabled:bg-dark-elevated disabled:opacity-50 disabled:cursor-not-allowed
-    `
-
-    const textareaStyles = error
-      ? `${baseStyles} border-error focus:ring-error/30 focus:border-error`
-      : `${baseStyles} ${ringColor}`
+    const focusGlow = componente === 'fisica'
+      ? 'var(--color-fisica-glow)'
+      : 'var(--color-matematica-glow)'
 
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider"
+            className="input-label"
           >
             {label}
           </label>
@@ -148,12 +152,30 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
-          className={`${textareaStyles} ${className}`}
+          className={`input resize-none ${error ? 'input-error' : ''} ${className}`}
+          onFocus={(e) => {
+            if (!error) {
+              e.currentTarget.style.borderColor = focusColor
+              e.currentTarget.style.boxShadow = `0 0 0 3px ${focusGlow}`
+            }
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = error ? 'var(--error)' : 'var(--border-default)'
+            e.currentTarget.style.boxShadow = 'none'
+          }}
           {...props}
         />
 
-        {error && <p className="text-xs text-error mt-2">{error}</p>}
-        {helper && !error && <p className="text-xs text-text-tertiary mt-2">{helper}</p>}
+        {error && (
+          <p className="text-xs mt-2" style={{ color: 'var(--error)' }}>
+            {error}
+          </p>
+        )}
+        {helper && !error && (
+          <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+            {helper}
+          </p>
+        )}
       </div>
     )
   }
@@ -161,7 +183,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 
 Textarea.displayName = 'Textarea'
 
-// Select Component - Koyeb Dark Theme
+// Select Component
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string
   error?: string
@@ -186,31 +208,20 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ) => {
     const inputId = id || `select-${Math.random().toString(36).slice(2, 9)}`
 
-    const ringColor =
-      componente === 'fisica'
-        ? 'focus:ring-fisica-500/50 focus:border-fisica-500'
-        : 'focus:ring-matematica-500/50 focus:border-matematica-500'
+    const focusColor = componente === 'fisica'
+      ? 'var(--color-fisica)'
+      : 'var(--color-matematica)'
 
-    const baseStyles = `
-      w-full px-4 py-3
-      bg-dark-surface border border-border rounded-xl
-      text-text-primary text-base
-      transition-all duration-200 outline-none appearance-none
-      hover:border-border-hover
-      focus:ring-2 focus:bg-dark-elevated
-      disabled:bg-dark-elevated disabled:opacity-50 disabled:cursor-not-allowed
-    `
-
-    const selectStyles = error
-      ? `${baseStyles} border-error focus:ring-error/30 focus:border-error`
-      : `${baseStyles} ${ringColor}`
+    const focusGlow = componente === 'fisica'
+      ? 'var(--color-fisica-glow)'
+      : 'var(--color-matematica-glow)'
 
     return (
       <div className="w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-medium text-text-secondary mb-2 uppercase tracking-wider"
+            className="input-label"
           >
             {label}
           </label>
@@ -220,20 +231,33 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={inputId}
-            className={`${selectStyles} pr-10 ${className}`}
+            className={`select ${error ? 'input-error' : ''} ${className}`}
+            onFocus={(e) => {
+              if (!error) {
+                e.currentTarget.style.borderColor = focusColor
+                e.currentTarget.style.boxShadow = `0 0 0 3px ${focusGlow}`
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.borderColor = error ? 'var(--error)' : 'var(--border-default)'
+              e.currentTarget.style.boxShadow = 'none'
+            }}
             {...props}
           >
             {children}
           </select>
-          <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-tertiary">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
         </div>
 
-        {error && <p className="text-xs text-error mt-2">{error}</p>}
-        {helper && !error && <p className="text-xs text-text-tertiary mt-2">{helper}</p>}
+        {error && (
+          <p className="text-xs mt-2" style={{ color: 'var(--error)' }}>
+            {error}
+          </p>
+        )}
+        {helper && !error && (
+          <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
+            {helper}
+          </p>
+        )}
       </div>
     )
   }

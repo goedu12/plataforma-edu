@@ -87,7 +87,7 @@ export default function DashboardProfessorPage() {
                 <span className="text-white font-bold text-lg">P</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold">Dashboard</h1>
+                <h1 className="font-display text-lg font-bold">Dashboard</h1>
                 <p className="text-white/70 text-sm">Plataforma EDU • Professor</p>
               </div>
             </div>

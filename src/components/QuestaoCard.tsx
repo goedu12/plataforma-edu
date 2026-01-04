@@ -63,7 +63,6 @@ export default function QuestaoCard({
   onProxima,
   onVoltar,
   modo = 'estudo',
-  limiteAtual,
   onNotaAtualizada,
 }: QuestaoCardProps) {
   const [selecionada, setSelecionada] = useState<Alternativa | null>(null)
@@ -72,6 +71,9 @@ export default function QuestaoCard({
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
+
+  const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const alternativas: { letra: Alternativa; texto: string }[] = [
     { letra: 'A', texto: questao.alternativa_a },
@@ -123,7 +125,6 @@ export default function QuestaoCard({
           notaTempoReal: data.nota_tempo_real || null,
         })
 
-        // Atualizar limite no componente pai
         if (data.nota_tempo_real && onNotaAtualizada) {
           onNotaAtualizada({
             questoes_semana: data.nota_tempo_real.questoes_semana,
@@ -148,42 +149,49 @@ export default function QuestaoCard({
   }
 
   const getAlternativaStyle = (letra: Alternativa) => {
-    const baseClass = componente === 'matematica' ? 'question-option question-matematica' : 'question-option'
-
     if (feedback) {
       if (letra === feedback.respostaCorreta) {
-        return `${baseClass} correct`
+        return {
+          background: 'rgba(34, 197, 94, 0.15)',
+          border: '2px solid var(--success)',
+          color: 'var(--success)',
+        }
       }
       if (letra === selecionada && !feedback.correta) {
-        return `${baseClass} incorrect`
+        return {
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '2px solid var(--error)',
+          color: 'var(--error)',
+        }
       }
-      return `${baseClass} opacity-50`
+      return {
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border-default)',
+        opacity: 0.5,
+      }
     }
 
     if (selecionada === letra) {
-      return `${baseClass} selected`
+      return {
+        background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+        border: `2px solid ${corPrimaria}`,
+      }
     }
 
-    return baseClass
+    return {
+      background: 'var(--bg-surface)',
+      border: '1px solid var(--border-default)',
+    }
   }
 
-  const dificuldadeLabel = {
-    facil: 'Fácil',
-    medio: 'Médio',
-    dificil: 'Difícil',
-  } as const
-
-  const dificuldadeColor = {
-    facil: 'success',
-    medio: 'warning',
-    dificil: 'error',
-  } as const
+  const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
+  const dificuldadeColor = { facil: 'success', medio: 'warning', dificil: 'error' } as const
 
   const getNotaColor = (nota: number) => {
-    if (nota >= 7) return 'text-emerald-400'
-    if (nota >= 6) return 'text-green-400'
-    if (nota >= 5) return 'text-yellow-400'
-    return 'text-red-400'
+    if (nota >= 7) return 'var(--success)'
+    if (nota >= 6) return '#4ade80'
+    if (nota >= 5) return 'var(--warning)'
+    return 'var(--error)'
   }
 
   return (
@@ -196,53 +204,83 @@ export default function QuestaoCard({
             {dificuldadeLabel[questao.dificuldade]}
           </Badge>
         </div>
-        <div className="flex items-center gap-2 text-gray-500">
+        <div className="flex items-center gap-2" style={{ color: 'var(--text-muted)' }}>
           <Clock className="w-4 h-4" />
-          <span className="text-sm font-mono">{formatarTempo(tempoDecorrido)}</span>
+          <span className="text-sm font-mono tabular-nums">{formatarTempo(tempoDecorrido)}</span>
         </div>
       </div>
 
       {/* Enunciado */}
-      <div className={`question-card ${componente === 'matematica' ? 'question-matematica' : ''}`}>
-        <p className="question-text">{questao.enunciado}</p>
+      <div
+        className="card p-5 rounded-xl"
+        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+      >
+        <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+          {questao.enunciado}
+        </p>
       </div>
 
       {/* Alternativas */}
       <div className="space-y-3">
-        {alternativas.map(({ letra, texto }) => (
-          <button
-            key={letra}
-            onClick={() => !feedback && !loading && setSelecionada(letra)}
-            disabled={!!feedback || loading}
-            className={getAlternativaStyle(letra)}
-          >
-            <span className="option-letter">
-              {feedback && letra === feedback.respostaCorreta ? (
-                <CheckCircle2 className="w-5 h-5" />
-              ) : feedback && letra === selecionada && !feedback.correta ? (
-                <XCircle className="w-5 h-5" />
-              ) : (
-                letra
-              )}
-            </span>
-            <span className="option-text">{texto}</span>
-          </button>
-        ))}
+        {alternativas.map(({ letra, texto }) => {
+          const style = getAlternativaStyle(letra)
+          return (
+            <button
+              key={letra}
+              onClick={() => !feedback && !loading && setSelecionada(letra)}
+              disabled={!!feedback || loading}
+              className="w-full p-4 rounded-xl flex items-center gap-4 transition-all touch-target text-left"
+              style={style}
+            >
+              <span
+                className="w-10 h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0"
+                style={{
+                  background: feedback && letra === feedback.respostaCorreta
+                    ? 'var(--success)'
+                    : feedback && letra === selecionada && !feedback.correta
+                      ? 'var(--error)'
+                      : selecionada === letra
+                        ? corPrimaria
+                        : 'var(--bg-elevated)',
+                  color: (feedback && (letra === feedback.respostaCorreta || (letra === selecionada && !feedback.correta))) || selecionada === letra
+                    ? isFisica ? '#000' : '#fff'
+                    : 'var(--text-muted)',
+                }}
+              >
+                {feedback && letra === feedback.respostaCorreta ? (
+                  <CheckCircle2 className="w-5 h-5" />
+                ) : feedback && letra === selecionada && !feedback.correta ? (
+                  <XCircle className="w-5 h-5" />
+                ) : (
+                  letra
+                )}
+              </span>
+              <span style={{ color: 'var(--text-primary)' }}>{texto}</span>
+            </button>
+          )
+        })}
       </div>
 
       {/* Erro */}
       {erro && (
-        <div className="rounded-2xl p-5 bg-red-900/80 border border-red-500/40 backdrop-blur-sm">
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-red-500/20 border border-red-500/30">
-              <AlertCircle className="w-5 h-5 text-red-400" />
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(239, 68, 68, 0.2)' }}
+            >
+              <AlertCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />
             </div>
             <div>
-              <p className="font-semibold text-red-300 text-sm mb-1">Erro</p>
-              <p className="text-sm text-red-100/90">{erro}</p>
+              <p className="font-semibold text-sm mb-1" style={{ color: 'var(--error)' }}>Erro</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
               <button
                 onClick={handleConfirmar}
-                className="text-sm text-red-300 underline mt-2 hover:text-red-200 transition-colors"
+                className="text-sm underline mt-2"
+                style={{ color: 'var(--error)' }}
               >
                 Tentar novamente
               </button>
@@ -251,26 +289,28 @@ export default function QuestaoCard({
         </div>
       )}
 
-      {/* Dica - Estilo Terminal Koyeb */}
+      {/* Dica */}
       {!feedback && questao.dica && (
         <div className="text-center">
           {mostrarDica ? (
-            <div className="terminal-box text-left">
-              <div className="terminal-header">
-                <span className="dot dot-red" />
-                <span className="dot dot-yellow" />
-                <span className="dot dot-green" />
-                <span className="title">dica.sh</span>
+            <div
+              className="p-4 rounded-xl text-left"
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Lightbulb className="w-4 h-4" style={{ color: corPrimaria }} />
+                <span className="text-sm font-medium" style={{ color: corPrimaria }}>Dica</span>
               </div>
-              <div className="terminal-body">
-                <p className="comment"># Dica</p>
-                <p className="text-white mt-1">{questao.dica}</p>
-              </div>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{questao.dica}</p>
             </div>
           ) : (
             <button
               onClick={handlePedirDica}
-              className="text-sm text-text-secondary hover:text-text-primary flex items-center gap-2 mx-auto transition-colors"
+              className="text-sm flex items-center gap-2 mx-auto transition-colors"
+              style={{ color: 'var(--text-secondary)' }}
             >
               <Lightbulb className="w-4 h-4" />
               Precisa de ajuda? Pedir Dica (-5 pts)
@@ -281,96 +321,100 @@ export default function QuestaoCard({
 
       {/* Conquistas Desbloqueadas */}
       {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
-        <div className="rounded-2xl p-5 bg-amber-900/80 border-2 border-amber-500/50 backdrop-blur-sm animate-bounce-once">
-          <div className="text-center">
-            <div className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center bg-amber-500/20 border border-amber-500/30">
-              <Trophy className="w-7 h-7 text-amber-400" />
-            </div>
-            <h4 className="font-bold text-amber-300 mb-3 text-lg">
-              Nova Conquista Desbloqueada!
-            </h4>
-            <div className="flex flex-wrap justify-center gap-2">
-              {feedback.conquistasDesbloqueadas.map((conquista, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center gap-1 bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 rounded-full text-amber-200 font-medium text-sm"
-                >
-                  {conquista.icone} {conquista.nome}
-                </span>
-              ))}
-            </div>
+        <div
+          className="rounded-xl p-5 text-center animate-fade-in"
+          style={{ background: 'rgba(245, 158, 11, 0.15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
+        >
+          <div
+            className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center"
+            style={{ background: 'rgba(245, 158, 11, 0.2)' }}
+          >
+            <Trophy className="w-7 h-7" style={{ color: 'var(--warning)' }} />
+          </div>
+          <h4 className="font-bold mb-3 text-lg" style={{ color: 'var(--warning)' }}>
+            Nova Conquista Desbloqueada!
+          </h4>
+          <div className="flex flex-wrap justify-center gap-2">
+            {feedback.conquistasDesbloqueadas.map((conquista, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium"
+                style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}
+              >
+                {conquista.icone} {conquista.nome}
+              </span>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Nota em Tempo Real - Exibido após responder */}
+      {/* Nota em Tempo Real */}
       {feedback && feedback.notaTempoReal && modo === 'estudo' && (
-        <div className="terminal-box terminal-cyan animate-slide-up">
-          <div className="terminal-header">
-            <span className="dot dot-red" />
-            <span className="dot dot-yellow" />
-            <span className="dot dot-green" />
-            <span className="title">nota_atualizada.sh</span>
-          </div>
-          <div className="terminal-body">
-            <p className="comment-cyan mb-3"># Sua Nota em Tempo Real</p>
+        <div
+          className="rounded-xl p-5 animate-fade-in-up"
+          style={{
+            background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+            border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
+          }}
+        >
+          <p className="text-sm font-medium mb-3" style={{ color: corPrimaria }}>
+            Sua Nota em Tempo Real
+          </p>
 
-            {/* Nota Principal */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-white">$ Nota atual:</span>
-              <div className="flex items-center gap-2">
-                {feedback.notaTempoReal.mudou && (
-                  <span className="muted line-through text-sm">
-                    {feedback.notaTempoReal.nota_anterior.toFixed(1)}
-                  </span>
-                )}
-                <span className={`text-2xl font-bold ${getNotaColor(feedback.notaTempoReal.nota_atual)}`}>
-                  {feedback.notaTempoReal.nota_atual.toFixed(2)}
+          <div className="flex items-center justify-between mb-3">
+            <span style={{ color: 'var(--text-secondary)' }}>Nota atual:</span>
+            <div className="flex items-center gap-2">
+              {feedback.notaTempoReal.mudou && (
+                <span className="text-sm line-through" style={{ color: 'var(--text-muted)' }}>
+                  {feedback.notaTempoReal.nota_anterior.toFixed(1)}
                 </span>
-                {feedback.notaTempoReal.mudou && (
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                )}
-              </div>
-            </div>
-
-            {/* Barra de Progresso */}
-            <div className="mb-3">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="muted">Progresso</span>
-                <span className="text-white">
-                  {feedback.notaTempoReal.questoes_respondidas}/{feedback.notaTempoReal.meta_questoes}
-                </span>
-              </div>
-              <div className="progress-2026">
-                <div
-                  className={`progress-fill ${
-                    componente === 'fisica' ? 'progress-fill-cyan' : 'progress-fill-lilas'
-                  }`}
-                  style={{ width: `${Math.min(feedback.notaTempoReal.percentual, 100)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Detalhes */}
-            <div className="space-y-1 text-xs">
-              <p className="muted">
-                $ Dias ativos: <span className="success">{feedback.notaTempoReal.dias_ativos}</span>
-              </p>
-              <p className="muted">
-                $ Bônus frequência: <span className="success">+{feedback.notaTempoReal.bonus_frequencia.toFixed(1)}</span>
-              </p>
-              {feedback.notaTempoReal.limite_semanal && (
-                <p className="muted">
-                  $ Semana: <span className={
-                    feedback.notaTempoReal.questoes_semana >= feedback.notaTempoReal.limite_semanal
-                      ? 'error'
-                      : 'success'
-                  }>
-                    {feedback.notaTempoReal.questoes_semana}/{feedback.notaTempoReal.limite_semanal}
-                  </span>
-                </p>
+              )}
+              <span className="text-2xl font-bold" style={{ color: getNotaColor(feedback.notaTempoReal.nota_atual) }}>
+                {feedback.notaTempoReal.nota_atual.toFixed(2)}
+              </span>
+              {feedback.notaTempoReal.mudou && (
+                <TrendingUp className="w-4 h-4" style={{ color: 'var(--success)' }} />
               )}
             </div>
+          </div>
+
+          <div className="mb-3">
+            <div className="flex justify-between text-xs mb-1">
+              <span style={{ color: 'var(--text-muted)' }}>Progresso</span>
+              <span style={{ color: 'var(--text-primary)' }}>
+                {feedback.notaTempoReal.questoes_respondidas}/{feedback.notaTempoReal.meta_questoes}
+              </span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${Math.min(feedback.notaTempoReal.percentual, 100)}%`,
+                  background: corPrimaria,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1 text-xs">
+            <p style={{ color: 'var(--text-muted)' }}>
+              Dias ativos: <span style={{ color: 'var(--success)' }}>{feedback.notaTempoReal.dias_ativos}</span>
+            </p>
+            <p style={{ color: 'var(--text-muted)' }}>
+              Bônus frequência: <span style={{ color: 'var(--success)' }}>+{feedback.notaTempoReal.bonus_frequencia.toFixed(1)}</span>
+            </p>
+            {feedback.notaTempoReal.limite_semanal && (
+              <p style={{ color: 'var(--text-muted)' }}>
+                Semana:{' '}
+                <span style={{
+                  color: feedback.notaTempoReal.questoes_semana >= feedback.notaTempoReal.limite_semanal
+                    ? 'var(--error)'
+                    : 'var(--success)',
+                }}>
+                  {feedback.notaTempoReal.questoes_semana}/{feedback.notaTempoReal.limite_semanal}
+                </span>
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -378,45 +422,46 @@ export default function QuestaoCard({
       {/* Feedback */}
       {feedback && (
         <div
-          className={`rounded-2xl p-5 animate-slide-up backdrop-blur-sm ${
-            feedback.correta
-              ? 'bg-emerald-900/80 border border-emerald-500/40'
-              : 'bg-red-900/80 border border-red-500/40'
-          }`}
+          className="rounded-xl p-5 animate-fade-in-up"
+          style={{
+            background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+          }}
         >
           <div className="flex items-start gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border ${
-              feedback.correta
-                ? 'bg-emerald-500/20 border-emerald-500/30'
-                : 'bg-red-500/20 border-red-500/30'
-            }`}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+            >
               {feedback.correta ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} />
               ) : (
-                <XCircle className="w-5 h-5 text-red-400" />
+                <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />
               )}
             </div>
             <div className="flex-1">
-              <h4
-                className={`font-semibold ${feedback.correta ? 'text-emerald-300' : 'text-red-300'}`}
-              >
+              <h4 className="font-semibold" style={{ color: feedback.correta ? 'var(--success)' : 'var(--error)' }}>
                 {feedback.correta ? 'Muito bem! Resposta correta!' : 'Não foi dessa vez...'}
                 {feedback.correta && feedback.pontosGanhos > 0 && (
-                  <span className="ml-2 text-sm font-normal bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full text-emerald-200">
+                  <span
+                    className="ml-2 text-sm font-normal px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}
+                  >
                     +{feedback.pontosGanhos} pontos
                   </span>
                 )}
               </h4>
               {!feedback.correta && (
-                <p className="text-sm text-red-100/90 mt-2">
-                  A resposta correta era a alternativa <strong className="text-red-300">{feedback.respostaCorreta}</strong>.
+                <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
+                  A resposta correta era a alternativa{' '}
+                  <strong style={{ color: 'var(--error)' }}>{feedback.respostaCorreta}</strong>.
                   Não desanime, continue praticando!
                 </p>
               )}
               {feedback.explicacao && (
-                <div className="mt-3 pt-3 border-t border-white/10">
-                  <p className="text-xs font-medium mb-1 text-white/60">Explicação:</p>
-                  <p className={`text-sm leading-relaxed ${feedback.correta ? 'text-emerald-100/90' : 'text-red-100/90'}`}>
+                <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border-default)' }}>
+                  <p className="text-xs font-medium mb-1" style={{ color: 'var(--text-muted)' }}>Explicação:</p>
+                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
                     {feedback.explicacao}
                   </p>
                 </div>
@@ -428,12 +473,17 @@ export default function QuestaoCard({
 
       {/* Aviso de limite atingido */}
       {feedback && feedback.notaTempoReal && !feedback.notaTempoReal.pode_continuar && (
-        <div className="rounded-2xl p-4 bg-amber-900/80 border border-amber-500/40 backdrop-blur-sm">
+        <div
+          className="rounded-xl p-4"
+          style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+        >
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-amber-400" />
+            <Target className="w-5 h-5" style={{ color: 'var(--warning)' }} />
             <div>
-              <p className="text-amber-300 font-medium text-sm">Limite semanal atingido!</p>
-              <p className="text-amber-100/80 text-xs">Volte na segunda-feira ou use o modo Desafio.</p>
+              <p className="font-medium text-sm" style={{ color: 'var(--warning)' }}>Limite semanal atingido!</p>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                Volte na segunda-feira ou use o modo Desafio.
+              </p>
             </div>
           </div>
         </div>
@@ -447,7 +497,7 @@ export default function QuestaoCard({
               Menu
             </Button>
             {feedback.notaTempoReal?.pode_continuar !== false ? (
-              <Button variant={componente === 'fisica' ? 'fisica' : 'matematica'} onClick={onProxima} className="flex-1">
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={onProxima} className="flex-1">
                 Próxima Questão
               </Button>
             ) : (
@@ -458,7 +508,7 @@ export default function QuestaoCard({
           </>
         ) : (
           <Button
-            variant={componente === 'fisica' ? 'fisica' : 'matematica'}
+            variant={isFisica ? 'fisica' : 'matematica'}
             onClick={handleConfirmar}
             disabled={!selecionada || loading}
             loading={loading}

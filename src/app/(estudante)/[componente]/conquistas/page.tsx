@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Target } from 'lucide-react'
-import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
+import BottomNav from '@/components/BottomNav'
 import type { Componente, Conquista } from '@/types'
 
 interface ConquistaComStatus extends Conquista {
@@ -22,6 +22,10 @@ export default function ConquistasPage() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [stats, setStats] = useState({ total: 0, desbloqueadas: 0 })
+
+  const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const nomeComponente = isFisica ? 'Física' : 'Matemática'
 
   const buscarConquistas = async () => {
     setLoading(true)
@@ -50,17 +54,10 @@ export default function ConquistasPage() {
       router.push('/selecionar')
       return
     }
-
     buscarConquistas()
   }, [componente, router])
 
-  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
-
-  if (loading) {
-    return <Loading fullScreen componente={componente} />
-  }
+  if (loading) return <Loading fullScreen componente={componente} />
 
   const porcentagem = stats.total > 0 ? Math.round((stats.desbloqueadas / stats.total) * 100) : 0
   const conquistasDesbloqueadas = conquistas.filter(c => c.desbloqueada)
@@ -77,41 +74,68 @@ export default function ConquistasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-6">
-      {/* Header Compacto */}
-      <header className={`${bgColor} text-white px-4 pt-3 pb-12`}>
+    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+      {/* Header */}
+      <header
+        className="px-4 pt-3 pb-12"
+        style={{ background: corPrimaria }}
+      >
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-1.5 -ml-1 rounded-lg hover:bg-white/20 transition-colors"
+              className="p-3 -ml-1 rounded-lg transition-colors touch-target"
+              style={{ color: isFisica ? '#000' : '#fff' }}
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <h1 className="text-body font-semibold flex items-center gap-1.5">
-                <Medal className="w-4 h-4" />
+              <h1
+                className="font-display font-semibold flex items-center gap-2"
+                style={{ color: isFisica ? '#000' : '#fff' }}
+              >
+                <Medal className="w-5 h-5" />
                 Conquistas
               </h1>
             </div>
             <button
               onClick={buscarConquistas}
-              className="p-1.5 rounded-lg hover:bg-white/20 transition-colors"
+              className="p-3 rounded-lg transition-colors touch-target"
+              style={{ color: isFisica ? '#000' : '#fff' }}
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Progress Compacto */}
-          <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3">
+          {/* Progress */}
+          <div
+            className="rounded-xl p-3"
+            style={{ background: 'rgba(0,0,0,0.2)' }}
+          >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-caption font-medium">{stats.desbloqueadas}/{stats.total}</span>
-              <span className="text-body font-bold">{porcentagem}%</span>
+              <span
+                className="text-sm font-medium"
+                style={{ color: isFisica ? 'rgba(0,0,0,0.8)' : 'rgba(255,255,255,0.8)' }}
+              >
+                {stats.desbloqueadas}/{stats.total}
+              </span>
+              <span
+                className="text-lg font-bold"
+                style={{ color: isFisica ? '#000' : '#fff' }}
+              >
+                {porcentagem}%
+              </span>
             </div>
-            <div className="h-1.5 bg-white/30 rounded-full overflow-hidden">
+            <div
+              className="h-2 rounded-full overflow-hidden"
+              style={{ background: 'rgba(255,255,255,0.3)' }}
+            >
               <div
-                className="h-full bg-white rounded-full transition-all duration-1000"
-                style={{ width: `${porcentagem}%` }}
+                className="h-full rounded-full transition-all duration-1000"
+                style={{
+                  width: `${porcentagem}%`,
+                  background: isFisica ? '#000' : '#fff',
+                }}
               />
             </div>
           </div>
@@ -121,104 +145,154 @@ export default function ConquistasPage() {
       {/* Content */}
       <main className="max-w-2xl mx-auto px-4 -mt-6">
         {erro ? (
-          <Card className="text-center py-10">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/20 border border-red-500/30">
-              <WifiOff className="w-8 h-8 text-red-400" />
+          <div
+            className="card p-8 text-center"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: 'rgba(239, 68, 68, 0.15)' }}
+            >
+              <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />
             </div>
-            <h2 className="text-subtitle text-text-primary mb-2">
+            <h2 className="font-display text-lg mb-2" style={{ color: 'var(--text-primary)' }}>
               Erro ao carregar conquistas
             </h2>
-            <p className="text-body text-text-secondary mb-6">{erro}</p>
-            <Button variant="primary" onClick={buscarConquistas}>
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
+            <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarConquistas} leftIcon={<RefreshCw className="w-4 h-4" />}>
               Tentar Novamente
             </Button>
-          </Card>
+          </div>
         ) : conquistas.length === 0 ? (
-          <Card className="text-center py-10">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-calm-elevated">
-              <Medal className="w-8 h-8 text-text-muted" />
+          <div
+            className="card p-8 text-center"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <Medal className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />
             </div>
-            <h2 className="text-subtitle text-text-primary mb-2">
+            <h2 className="font-display text-lg mb-2" style={{ color: 'var(--text-primary)' }}>
               Nenhuma conquista cadastrada
             </h2>
-            <p className="text-body text-text-secondary mb-2">
+            <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
               Ainda não há conquistas disponíveis para {nomeComponente}.
             </p>
-            <p className="text-caption text-text-muted">
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
               Continue estudando! Em breve novas conquistas serão adicionadas.
             </p>
-          </Card>
+          </div>
         ) : (
           <>
-            {/* Unlocked */}
+            {/* Desbloqueadas */}
             {conquistasDesbloqueadas.length > 0 && (
               <div className="mb-4">
-                <h2 className="flex items-center gap-2 text-label text-text-primary mb-2">
-                  <CheckCircle2 className="w-3 h-3 text-success" />
+                <h2
+                  className="flex items-center gap-2 text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} />
                   Desbloqueadas ({conquistasDesbloqueadas.length})
                 </h2>
                 <div className="space-y-2">
                   {conquistasDesbloqueadas.map((conquista, index) => (
-                    <Card
+                    <div
                       key={conquista.id}
-                      className="flex items-center gap-3 p-3 animate-slide-up border-l-2 border-success"
-                      style={{ animationDelay: `${index * 50}ms` }}
+                      className="card flex items-center gap-3 p-4 animate-fade-in-up"
+                      style={{
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-default)',
+                        borderLeft: '3px solid var(--success)',
+                        animationDelay: `${index * 50}ms`,
+                      }}
                     >
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${bgColor}`}>
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                        style={{
+                          background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                          color: corPrimaria,
+                        }}
+                      >
                         {conquista.icone}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-body font-semibold text-text-primary truncate">{conquista.nome}</h3>
-                        <p className="text-caption text-text-secondary truncate">{conquista.descricao}</p>
+                        <h3 className="font-semibold truncate" style={{ color: 'var(--text-primary)' }}>
+                          {conquista.nome}
+                        </h3>
+                        <p className="text-sm truncate" style={{ color: 'var(--text-secondary)' }}>
+                          {conquista.descricao}
+                        </p>
                       </div>
-                      {conquista.desbloqueada_em && (
-                        <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
-                      )}
-                    </Card>
+                      <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Locked */}
+            {/* Bloqueadas */}
             {conquistasBloqueadas.length > 0 && (
               <div>
-                <h2 className="flex items-center gap-2 text-label text-text-primary mb-2">
-                  <Target className="w-3 h-3 text-text-muted" />
+                <h2
+                  className="flex items-center gap-2 text-sm font-medium mb-2"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <Target className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                   A Desbloquear ({conquistasBloqueadas.length})
                 </h2>
                 <div className="space-y-2">
                   {conquistasBloqueadas.map((conquista, index) => (
-                    <Card
+                    <div
                       key={conquista.id}
-                      className="flex items-center gap-3 p-3 animate-slide-up opacity-60"
-                      style={{ animationDelay: `${(conquistasDesbloqueadas.length + index) * 50}ms` }}
+                      className="card flex items-center gap-3 p-4 animate-fade-in-up opacity-60"
+                      style={{
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-default)',
+                        animationDelay: `${(conquistasDesbloqueadas.length + index) * 50}ms`,
+                      }}
                     >
-                      <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-calm-elevated border border-dashed border-calm-border">
-                        <Lock className="w-4 h-4 text-text-muted" />
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center border border-dashed"
+                        style={{
+                          background: 'var(--bg-elevated)',
+                          borderColor: 'var(--border-default)',
+                        }}
+                      >
+                        <Lock className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-body font-medium text-text-secondary truncate">{conquista.nome}</h3>
-                        <p className="text-caption text-text-muted truncate">
+                        <h3 className="font-medium truncate" style={{ color: 'var(--text-secondary)' }}>
+                          {conquista.nome}
+                        </h3>
+                        <p className="text-sm truncate" style={{ color: 'var(--text-muted)' }}>
                           {formatarRequisito(conquista)}
                         </p>
                       </div>
-                    </Card>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Dica compacta */}
-            <div className="mt-4 p-3 rounded-lg bg-koyeb-card border border-primary/10 animate-fade-in">
-              <p className="text-caption text-text-secondary">
-                💡 Responda questões e estude diariamente para desbloquear!
+            {/* Dica */}
+            <div
+              className="mt-4 p-4 rounded-xl animate-fade-in"
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
+              }}
+            >
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                Responda questões e estude diariamente para desbloquear conquistas!
               </p>
             </div>
           </>
         )}
       </main>
+
+      <BottomNav componente={componente} />
     </div>
   )
 }

@@ -5,25 +5,9 @@ import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star, Users } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
 import Loading from '@/components/ui/Loading'
+import Button from '@/components/ui/Button'
+import BottomNav from '@/components/BottomNav'
 import type { Componente, Usuario, RankingItem } from '@/types'
-
-// Cores Koyeb
-const KOYEB = {
-  bg: '#0D0D14',
-  bgCard: '#1A1A2E',
-  bgElevated: '#222238',
-  bgDark: '#12121C',
-  primary: '#00FF88',
-  accent: '#00D4FF',
-  fisica: '#00FF88',
-  matematica: '#A855F7',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#8B8B9A',
-  textMuted: '#5A5A6E',
-  border: 'rgba(255,255,255,0.05)',
-  danger: '#FF4757',
-  gold: '#FFD700',
-}
 
 export default function RankingPage() {
   const router = useRouter()
@@ -35,6 +19,10 @@ export default function RankingPage() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [atualizando, setAtualizando] = useState(false)
+
+  const isFisica = componente === 'fisica'
+  const nomeComponente = isFisica ? 'Física' : 'Matemática'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const buscarDados = async (silencioso = false) => {
     if (!silencioso) setLoading(true)
@@ -81,13 +69,8 @@ export default function RankingPage() {
       router.push('/selecionar')
       return
     }
-
     buscarDados()
   }, [router, componente])
-
-  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
 
   if (loading || !usuario) {
     return <Loading fullScreen componente={componente} />
@@ -96,13 +79,7 @@ export default function RankingPage() {
   const posicaoUsuario = ranking.findIndex(r => r.usuario_id === usuario.id) + 1
 
   return (
-    <div
-      className="min-h-screen pb-8"
-      style={{
-        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
-        fontFamily: "'Inter', -apple-system, sans-serif",
-      }}
-    >
+    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
       <header className="px-4 pt-6 pb-4">
         <div className="max-w-lg mx-auto">
@@ -110,17 +87,15 @@ export default function RankingPage() {
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 rounded-lg transition-all hover:bg-white/10"
+              className="p-3 rounded-xl transition-all touch-target"
+              style={{ color: 'var(--text-secondary)' }}
             >
-              <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.textSecondary }} />
+              <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" style={{ color: accentColor }} />
-              <span
-                className="font-mono text-sm font-bold tracking-wider uppercase"
-                style={{ color: KOYEB.textPrimary }}
-              >
+              <Trophy className="w-5 h-5" style={{ color: corPrimaria }} />
+              <span className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Ranking
               </span>
             </div>
@@ -128,26 +103,21 @@ export default function RankingPage() {
             <button
               onClick={() => buscarDados(true)}
               disabled={atualizando}
-              className="p-2 rounded-lg transition-all hover:bg-white/10"
+              className="p-3 rounded-xl transition-all touch-target"
+              style={{ color: 'var(--text-secondary)' }}
             >
-              <RefreshCw
-                className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`}
-                style={{ color: KOYEB.textSecondary }}
-              />
+              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
           {/* Badge Turma */}
           <div className="text-center mb-6">
             <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-3"
-              style={{ background: KOYEB.bgElevated }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <Users className="w-4 h-4" style={{ color: KOYEB.textMuted }} />
-              <span
-                className="font-mono text-xs tracking-wider uppercase"
-                style={{ color: KOYEB.textSecondary }}
-              >
+              <Users className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Turma {usuario.turma} • {nomeComponente}
               </span>
             </div>
@@ -158,14 +128,11 @@ export default function RankingPage() {
             <div
               className="rounded-2xl p-6 text-center"
               style={{
-                background: `linear-gradient(135deg, ${KOYEB.bgCard} 0%, ${isFisica ? 'rgba(0, 255, 136, 0.1)' : 'rgba(168, 85, 247, 0.1)'} 100%)`,
-                border: `1px solid ${accentColor}30`,
+                background: 'var(--bg-surface)',
+                border: `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
               }}
             >
-              <p
-                className="font-mono text-xs tracking-widest uppercase mb-3"
-                style={{ color: KOYEB.textMuted }}
-              >
+              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
                 Sua Posição
               </p>
               <div className="flex items-center justify-center gap-4">
@@ -173,30 +140,22 @@ export default function RankingPage() {
                   <Crown
                     className="w-10 h-10"
                     style={{
-                      color: posicaoUsuario === 1
-                        ? KOYEB.gold
-                        : posicaoUsuario === 2
-                        ? '#C0C0C0'
+                      color: posicaoUsuario === 1 ? '#FFD700'
+                        : posicaoUsuario === 2 ? '#C0C0C0'
                         : '#CD7F32',
                     }}
                   />
                 ) : (
-                  <Star className="w-10 h-10" style={{ color: accentColor }} />
+                  <Star className="w-10 h-10" style={{ color: corPrimaria }} />
                 )}
                 <span
-                  className="font-mono text-5xl font-bold tabular-nums"
-                  style={{
-                    color: KOYEB.textPrimary,
-                    textShadow: `0 0 30px ${accentColor}50`,
-                  }}
+                  className="font-display text-5xl font-bold tabular-nums"
+                  style={{ color: 'var(--text-primary)' }}
                 >
                   {posicaoUsuario}º
                 </span>
               </div>
-              <p
-                className="font-mono text-sm mt-3"
-                style={{ color: KOYEB.textSecondary }}
-              >
+              <p className="text-sm mt-3" style={{ color: 'var(--text-secondary)' }}>
                 de {ranking.length} estudantes
               </p>
             </div>
@@ -208,40 +167,42 @@ export default function RankingPage() {
       <main className="max-w-lg mx-auto px-4">
         {erro ? (
           <div
-            className="rounded-2xl p-8 text-center"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+            className="card p-8 text-center"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+            }}
           >
-            <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: KOYEB.danger }} />
-            <p className="font-mono text-sm mb-6" style={{ color: KOYEB.textSecondary }}>
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{ background: 'rgba(239, 68, 68, 0.15)' }}
+            >
+              <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />
+            </div>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
               {erro}
             </p>
-            <button
+            <Button
+              variant={isFisica ? 'fisica' : 'matematica'}
               onClick={() => buscarDados()}
-              className="flex items-center gap-2 mx-auto px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-              style={{
-                background: accentColor,
-                color: KOYEB.bg,
-                boxShadow: `0 4px 20px ${accentColor}40`,
-              }}
+              leftIcon={<RefreshCw className="w-4 h-4" />}
             >
-              <RefreshCw className="w-4 h-4" />
               Tentar Novamente
-            </button>
+            </Button>
           </div>
         ) : (
           <>
-            {/* Terminal Tip */}
-            <div className={`terminal-box ${isFisica ? '' : 'terminal-lilas'} mb-6`}>
-              <div className="terminal-header">
-                <span className="dot dot-red" />
-                <span className="dot dot-yellow" />
-                <span className="dot dot-green" />
-                <span className="title">ranking.sh</span>
-              </div>
-              <div className="terminal-body">
-                <p className="comment"># Dica</p>
-                <p className="text-white">$ Responda questoes corretamente para subir no ranking!</p>
-              </div>
+            {/* Dica */}
+            <div
+              className="p-4 rounded-xl mb-6"
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
+              }}
+            >
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                <strong style={{ color: corPrimaria }}>Dica:</strong> Responda questões corretamente para subir no ranking!
+              </p>
             </div>
 
             <RankingTable
@@ -252,6 +213,8 @@ export default function RankingPage() {
           </>
         )}
       </main>
+
+      <BottomNav componente={componente} />
     </div>
   )
 }
