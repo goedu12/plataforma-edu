@@ -59,7 +59,7 @@ INSERT INTO usuarios (
     tipo
 ) VALUES (
     'professor@admin',
-    '$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/X.VQ6RG0K.7FD4V6q', -- @professor123
+    '$2a$12$mG354kndJJwSKpaIanlXr.HMKpHA6LxeSO.i803TZnYqxdPFmZxo.', -- @professor123
     'Professor Leonardo',
     'ADMIN',
     1,
@@ -75,29 +75,29 @@ ON CONFLICT (email) DO NOTHING;
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO usuarios (email, senha_hash, nome, turma, ano, nivel, componentes, tipo) VALUES
 -- Turma 1A (Ensino Médio - Física e Matemática)
-('mariasilvasantos@1a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Maria Silva Santos', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('joaopedrolima@1a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'João Pedro Lima', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('anaclarasousa@1a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Ana Clara Sousa', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('pedrohenriquecosta@1a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Pedro Henrique Costa', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('juliaferreira@1a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Julia Ferreira', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('mariasilvasantos@1a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Maria Silva Santos', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('joaopedrolima@1a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'João Pedro Lima', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('anaclarasousa@1a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Ana Clara Sousa', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('pedrohenriquecosta@1a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Pedro Henrique Costa', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('juliaferreira@1a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Julia Ferreira', '1A', 1, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
 
 -- Turma 2A (Ensino Médio - Física e Matemática)
-('lucasoliveira@2a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Lucas Oliveira', '2A', 2, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('gabrielasantos@2a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Gabriela Santos', '2A', 2, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('mateusribeiro@2a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Mateus Ribeiro', '2A', 2, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('lucasoliveira@2a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Lucas Oliveira', '2A', 2, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('gabrielasantos@2a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Gabriela Santos', '2A', 2, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('mateusribeiro@2a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Mateus Ribeiro', '2A', 2, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
 
 -- Turma 3A (Ensino Médio - Física e Matemática)
-('rafaelalmeida@3a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Rafael Almeida', '3A', 3, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
-('isabelamartins@3a', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Isabela Martins', '3A', 3, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('rafaelalmeida@3a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Rafael Almeida', '3A', 3, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
+('isabelamartins@3a', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Isabela Martins', '3A', 3, 'EM', ARRAY['fisica', 'matematica'], 'estudante'),
 
 -- Turma 7B (Ensino Fundamental - Apenas Matemática)
-('carloseduardosilva@7b', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Carlos Eduardo Silva', '7B', 7, 'EF', ARRAY['matematica'], 'estudante'),
-('laurabezerrasouza@7b', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Laura Bezerra Souza', '7B', 7, 'EF', ARRAY['matematica'], 'estudante'),
-('thiagopereira@7b', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Thiago Pereira', '7B', 7, 'EF', ARRAY['matematica'], 'estudante'),
+('carloseduardosilva@7b', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Carlos Eduardo Silva', '7B', 7, 'EF', ARRAY['matematica'], 'estudante'),
+('laurabezerrasouza@7b', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Laura Bezerra Souza', '7B', 7, 'EF', ARRAY['matematica'], 'estudante'),
+('thiagopereira@7b', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Thiago Pereira', '7B', 7, 'EF', ARRAY['matematica'], 'estudante'),
 
 -- Turma 9C (Ensino Fundamental - Apenas Matemática)
-('fernandacosta@9c', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fernanda Costa', '9C', 9, 'EF', ARRAY['matematica'], 'estudante'),
-('brunocarvalho@9c', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bruno Carvalho', '9C', 9, 'EF', ARRAY['matematica'], 'estudante')
+('fernandacosta@9c', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Fernanda Costa', '9C', 9, 'EF', ARRAY['matematica'], 'estudante'),
+('brunocarvalho@9c', '$2a$12$9ilPQ8JKNQSGcQNJUnnvSuowjNbeV7.1iNOjROzGUUGRrH/OMU58O', 'Bruno Carvalho', '9C', 9, 'EF', ARRAY['matematica'], 'estudante')
 ON CONFLICT (email) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
