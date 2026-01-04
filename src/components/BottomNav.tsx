@@ -12,35 +12,35 @@ export default function BottomNav({ componente }: BottomNavProps) {
   const router = useRouter()
   const pathname = usePathname()
 
-  const color = componente === 'fisica'
-    ? 'var(--color-fisica)'
-    : 'var(--color-matematica)'
+  const isFisica = componente === 'fisica'
+  const activeColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const activeBg = isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)'
 
   const items = [
-    {
-      icon: Home,
-      label: 'Inicio',
-      href: `/${componente}/menu`,
-    },
-    {
-      icon: BookOpen,
-      label: 'Estudar',
-      href: `/${componente}/estudar`,
-    },
-    {
-      icon: Trophy,
-      label: 'Ranking',
-      href: `/${componente}/ranking`,
-    },
-    {
-      icon: User,
-      label: 'Perfil',
-      href: `/${componente}/perfil`,
-    },
+    { icon: Home, label: 'Início', href: `/${componente}/menu` },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar` },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking` },
+    { icon: User, label: 'Perfil', href: `/${componente}/perfil` },
   ]
 
   return (
-    <nav className="bottom-nav">
+    <nav
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '64px',
+        background: 'var(--bg-elevated)',
+        borderTop: '1px solid var(--border-default)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        paddingBottom: 'env(safe-area-inset-bottom, 0)',
+        zIndex: 50,
+        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
+      }}
+    >
       {items.map((item) => {
         const isActive = pathname === item.href ||
           (item.href.includes('/menu') && pathname === `/${componente}/menu`)
@@ -49,19 +49,25 @@ export default function BottomNav({ componente }: BottomNavProps) {
           <button
             key={item.label}
             onClick={() => router.push(item.href)}
-            className="bottom-nav-item touch-target"
             style={{
-              color: isActive ? color : 'var(--text-muted)',
-              background: isActive
-                ? componente === 'fisica'
-                  ? 'rgba(34, 197, 94, 0.1)'
-                  : 'rgba(139, 92, 246, 0.1)'
-                : 'transparent',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '4px',
+              minWidth: '64px',
+              minHeight: '48px',
+              padding: '8px 12px',
               borderRadius: '12px',
+              background: isActive ? activeBg : 'transparent',
+              color: isActive ? activeColor : 'var(--text-muted)',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
             }}
           >
-            <item.icon className="w-5 h-5" />
-            <span className="text-[10px] font-medium">{item.label}</span>
+            <item.icon style={{ width: '20px', height: '20px' }} />
+            <span style={{ fontSize: '10px', fontWeight: 500 }}>{item.label}</span>
           </button>
         )
       })}
