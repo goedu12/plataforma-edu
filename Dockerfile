@@ -42,10 +42,10 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
-# Koyeb usa PORT dinâmico (geralmente 8000)
-EXPOSE 8000
+# Porta configurada no Koyeb
+EXPOSE 3000
 
-# Koyeb define PORT automaticamente via variável de ambiente
+ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["node", "server.js"]
