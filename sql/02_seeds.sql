@@ -1,11 +1,11 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- PLATAFORMA EDUCACIONAL - DADOS INICIAIS (SEEDS)
 -- Colégio Estadual Cora Coralina
--- Versão: 1.0
+-- Versão: 2.0 - IDEMPOTENTE (pode rodar múltiplas vezes sem erro)
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- CONQUISTAS
+-- CONQUISTAS (idempotente - ON CONFLICT DO NOTHING)
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO conquistas (codigo, nome, descricao, icone, componente, requisito_tipo, requisito_valor) VALUES
 -- Conquistas de Pontos
@@ -41,10 +41,11 @@ INSERT INTO conquistas (codigo, nome, descricao, icone, componente, requisito_ti
 -- Conquistas específicas de Matemática
 ('mat_primeira', 'Matemático Iniciante', 'Responda sua primeira questão de Matemática', '🔢', 'matematica', 'questoes', 1),
 ('mat_50', 'Aprendiz de Pitágoras', 'Responda 50 questões de Matemática', '📐', 'matematica', 'questoes', 50),
-('mat_100', 'Calculista', 'Responda 100 questões de Matemática', '🧮', 'matematica', 'questoes', 100);
+('mat_100', 'Calculista', 'Responda 100 questões de Matemática', '🧮', 'matematica', 'questoes', 100)
+ON CONFLICT (codigo) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- PROFESSOR PADRÃO
+-- PROFESSOR PADRÃO (idempotente)
 -- Senha: @professor123 (hash bcrypt)
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO usuarios (
@@ -65,10 +66,11 @@ INSERT INTO usuarios (
     'EM',
     ARRAY['fisica', 'matematica'],
     'professor'
-);
+)
+ON CONFLICT (email) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- ESTUDANTES DE EXEMPLO
+-- ESTUDANTES DE EXEMPLO (idempotente)
 -- Senha padrão: @estudante (hash bcrypt)
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO usuarios (email, senha_hash, nome, turma, ano, nivel, componentes, tipo) VALUES
@@ -95,10 +97,12 @@ INSERT INTO usuarios (email, senha_hash, nome, turma, ano, nivel, componentes, t
 
 -- Turma 9C (Ensino Fundamental - Apenas Matemática)
 ('fernandacosta@9c', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Fernanda Costa', '9C', 9, 'EF', ARRAY['matematica'], 'estudante'),
-('brunocarvalho@9c', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bruno Carvalho', '9C', 9, 'EF', ARRAY['matematica'], 'estudante');
+('brunocarvalho@9c', '$2a$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Bruno Carvalho', '9C', 9, 'EF', ARRAY['matematica'], 'estudante')
+ON CONFLICT (email) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- QUESTÕES DE FÍSICA - ENSINO MÉDIO
+-- QUESTÕES DE FÍSICA - ENSINO MÉDIO (idempotente)
+-- Usa hash do enunciado como identificador único
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, resposta_correta, explicacao, dica) VALUES
 
@@ -218,10 +222,11 @@ INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, al
 'Qual é a velocidade aproximada do som no ar?',
 '30 m/s', '300 m/s', '340 m/s', '3400 m/s', 'C',
 'A velocidade do som no ar ao nível do mar é aproximadamente 340 m/s.',
-'É uma velocidade de três dígitos');
+'É uma velocidade de três dígitos')
+ON CONFLICT (enunciado) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- QUESTÕES DE MATEMÁTICA - ENSINO FUNDAMENTAL
+-- QUESTÕES DE MATEMÁTICA - ENSINO FUNDAMENTAL (idempotente)
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, resposta_correta, explicacao, dica) VALUES
 
@@ -299,10 +304,11 @@ INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, al
 'Dada a função f(x) = 2x + 3, qual é o valor de f(4)?',
 '5', '8', '11', '14', 'C',
 'f(4) = 2 × 4 + 3 = 8 + 3 = 11.',
-'Substitua x por 4');
+'Substitua x por 4')
+ON CONFLICT (enunciado) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- QUESTÕES DE MATEMÁTICA - ENSINO MÉDIO
+-- QUESTÕES DE MATEMÁTICA - ENSINO MÉDIO (idempotente)
 -- ═══════════════════════════════════════════════════════════════════════════
 INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, resposta_correta, explicacao, dica) VALUES
 
@@ -406,10 +412,12 @@ INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, al
 'Qual é a mediana do conjunto {3, 7, 2, 9, 5}?',
 '2', '5', '7', '9', 'B',
 'Ordenando: 2, 3, 5, 7, 9. A mediana (valor central) é 5.',
-'Ordene primeiro, depois encontre o valor do meio');
+'Ordene primeiro, depois encontre o valor do meio')
+ON CONFLICT (enunciado) DO NOTHING;
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ATUALIZAR PROGRESSO DOS ESTUDANTES DE EXEMPLO
+-- (Só executa se os registros existirem)
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- Maria Silva - Aluna exemplar

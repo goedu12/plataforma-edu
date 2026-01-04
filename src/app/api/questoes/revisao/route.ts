@@ -97,21 +97,35 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Buscar dados da primeira questão
-    const primeiraQuestao = questoesParaRevisao[0]
-    const { data: questaoData, error: erroQuestao } = await supabase
-      .from('questoes')
-      .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, explicacao, dica, status')
-      .eq('id', primeiraQuestao.questao_id)
-      .eq('status', 'ativa')
-      .single()
+    // Buscar questão ativa para revisão
+    // Percorrer todas as questões até encontrar uma ativa
+    let questaoEncontrada = null
+    let questaoErradaInfo = null
+    let questoesAtivasCount = 0
 
-    if (erroQuestao || !questaoData) {
-      // Tentar próxima questão se a primeira não está ativa
+    for (const questaoRevisao of questoesParaRevisao) {
+      const { data: questaoData, error: erroQuestao } = await supabase
+        .from('questoes')
+        .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, explicacao, dica, status')
+        .eq('id', questaoRevisao.questao_id)
+        .eq('status', 'ativa')
+        .single()
+
+      if (!erroQuestao && questaoData) {
+        questoesAtivasCount++
+        if (!questaoEncontrada) {
+          questaoEncontrada = questaoData
+          questaoErradaInfo = questaoRevisao
+        }
+      }
+    }
+
+    // Se nenhuma questão ativa foi encontrada
+    if (!questaoEncontrada || !questaoErradaInfo) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_REVISAO',
-        mensagem: 'Você não tem questões para revisar!',
+        mensagem: 'Você não tem questões ativas para revisar!',
         total: 0,
       })
     }
@@ -120,20 +134,20 @@ export async function GET(request: NextRequest) {
       sucesso: true,
       status: 'OK',
       questao: {
-        id: questaoData.id,
-        componente: questaoData.componente,
-        tema: questaoData.tema,
-        dificuldade: questaoData.dificuldade,
-        enunciado: questaoData.enunciado,
-        alternativa_a: questaoData.alternativa_a,
-        alternativa_b: questaoData.alternativa_b,
-        alternativa_c: questaoData.alternativa_c,
-        alternativa_d: questaoData.alternativa_d,
-        explicacao: questaoData.explicacao,
-        dica: questaoData.dica,
+        id: questaoEncontrada.id,
+        componente: questaoEncontrada.componente,
+        tema: questaoEncontrada.tema,
+        dificuldade: questaoEncontrada.dificuldade,
+        enunciado: questaoEncontrada.enunciado,
+        alternativa_a: questaoEncontrada.alternativa_a,
+        alternativa_b: questaoEncontrada.alternativa_b,
+        alternativa_c: questaoEncontrada.alternativa_c,
+        alternativa_d: questaoEncontrada.alternativa_d,
+        explicacao: questaoEncontrada.explicacao,
+        dica: questaoEncontrada.dica,
       },
-      total_revisao: questoesParaRevisao.length,
-      errou_em: primeiraQuestao.errou_em,
+      total_revisao: questoesAtivasCount,
+      errou_em: questaoErradaInfo.errou_em,
     })
   } catch (error) {
     console.error('Erro ao buscar questões para revisão:', error)

@@ -37,17 +37,17 @@ describe('Button Component', () => {
   })
 
   it('applies fisica variant styles', () => {
-    render(<Button componente="fisica">Física</Button>)
-    expect(screen.getByRole('button')).toHaveClass('bg-fisica-500')
+    render(<Button variant="fisica">Física</Button>)
+    expect(screen.getByRole('button')).toHaveClass('from-fisica-500')
   })
 
   it('applies matematica variant styles', () => {
-    render(<Button componente="matematica">Matemática</Button>)
-    expect(screen.getByRole('button')).toHaveClass('bg-matematica-500')
+    render(<Button variant="matematica">Matemática</Button>)
+    expect(screen.getByRole('button')).toHaveClass('from-matematica-500')
   })
 
   it('applies secondary variant styles', () => {
     render(<Button variant="secondary">Secondary</Button>)
-    expect(screen.getByRole('button')).toHaveClass('bg-gray-100')
+    expect(screen.getByRole('button')).toHaveClass('bg-dark-surface/80')
   })
 })
