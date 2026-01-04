@@ -1,50 +1,45 @@
 import { SignJWT, jwtVerify, JWTPayload } from 'jose'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
-import { getSupabaseAdmin } from './supabase'
+import { createSupabaseAdmin } from './supabase'
 import type { Usuario, Componente, NivelEnsino } from '@/types'
 
 // ═══════════════════════════════════════════════════════════
-// CONFIGURAÇÃO JWT SEGURA
+// CONFIGURAÇÃO JWT
 // ═══════════════════════════════════════════════════════════
-const JWT_SECRET_RAW = process.env.JWT_SECRET
-
-// Gerar segredo para desenvolvimento (consistente durante a sessão)
-const DEV_SECRET = 'dev-only-secret-for-local-development-only'
-
-// Em produção, usa JWT_SECRET obrigatoriamente
-// Em desenvolvimento/build, usa segredo de desenvolvimento
 function getJwtSecret(): Uint8Array {
-  if (JWT_SECRET_RAW) {
-    return new TextEncoder().encode(JWT_SECRET_RAW)
+  const secret = process.env.JWT_SECRET
+  if (!secret) {
+    // Fallback para desenvolvimento
+    if (process.env.NODE_ENV !== 'production') {
+      return new TextEncoder().encode('dev-secret-key-for-development-only')
+    }
+    throw new Error('JWT_SECRET não configurado')
   }
-
-  // Durante build ou em desenvolvimento, permite sem JWT_SECRET
-  if (process.env.NODE_ENV !== 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
-    return new TextEncoder().encode(DEV_SECRET)
-  }
-
-  // Em produção runtime, JWT_SECRET é obrigatório
-  throw new Error('JWT_SECRET é obrigatório em produção. Configure a variável de ambiente.')
+  return new TextEncoder().encode(secret)
 }
 
-const JWT_SECRET = getJwtSecret()
-
-// Configurações de segurança do JWT
 const JWT_ISSUER = 'plataforma-edu'
 const JWT_AUDIENCE = 'plataforma-edu-users'
-
 const COOKIE_NAME = 'auth_token'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 dias
 
 // ═══════════════════════════════════════════════════════════
-// PAYLOAD DO TOKEN
+// TIPOS
 // ═══════════════════════════════════════════════════════════
 interface TokenPayload extends JWTPayload {
   userId: string
   email: string
   tipo: 'estudante' | 'professor'
   componentes: Componente[]
+}
+
+export interface LoginResult {
+  sucesso: boolean
+  erro?: string
+  tipo?: 'estudante' | 'professor'
+  componentes?: Componente[]
+  redirecionarPara?: string
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -59,9 +54,10 @@ export async function verificarSenha(senha: string, hash: string): Promise<boole
 }
 
 // ═══════════════════════════════════════════════════════════
-// FUNÇÕES DE TOKEN JWT - COM ISSUER E AUDIENCE
+// FUNÇÕES DE TOKEN
 // ═══════════════════════════════════════════════════════════
 export async function criarToken(payload: TokenPayload): Promise<string> {
+  const secret = getJwtSecret()
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -69,12 +65,13 @@ export async function criarToken(payload: TokenPayload): Promise<string> {
     .setAudience(JWT_AUDIENCE)
     .setSubject(payload.userId)
     .setExpirationTime('7d')
-    .sign(JWT_SECRET)
+    .sign(secret)
 }
 
 export async function verificarToken(token: string): Promise<TokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET, {
+    const secret = getJwtSecret()
+    const { payload } = await jwtVerify(token, secret, {
       issuer: JWT_ISSUER,
       audience: JWT_AUDIENCE,
     })
@@ -113,9 +110,7 @@ export async function criarSessao(usuario: {
 export async function obterSessao(): Promise<TokenPayload | null> {
   const cookieStore = await cookies()
   const token = cookieStore.get(COOKIE_NAME)?.value
-
   if (!token) return null
-
   return verificarToken(token)
 }
 
@@ -125,77 +120,83 @@ export async function encerrarSessao(): Promise<void> {
 }
 
 // ═══════════════════════════════════════════════════════════
-// FUNÇÕES DE AUTENTICAÇÃO
+// LOGIN - FUNÇÃO PRINCIPAL
 // ═══════════════════════════════════════════════════════════
-export interface LoginResult {
-  sucesso: boolean
-  erro?: string
-  tipo?: 'estudante' | 'professor'
-  componentes?: Componente[]
-  redirecionarPara?: string
-}
-
 export async function login(email: string, senha: string): Promise<LoginResult> {
-  const supabase = getSupabaseAdmin()
+  try {
+    // Criar cliente Supabase novo para cada login
+    const supabase = createSupabaseAdmin()
 
-  // Buscar usuário
-  const { data: usuario, error } = await supabase
-    .from('usuarios')
-    .select('*')
-    .eq('email', email.toLowerCase())
-    .eq('ativo', true)
-    .single()
+    // Buscar usuário pelo email (case insensitive)
+    const { data: usuario, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .ilike('email', email.trim())
+      .eq('ativo', true)
+      .single()
 
-  if (error || !usuario) {
-    return { sucesso: false, erro: 'Usuário não encontrado' }
-  }
+    // Log para debug (remover em produção)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Login attempt:', { email, found: !!usuario, error: error?.message })
+    }
 
-  // Verificar senha
-  const senhaValida = await verificarSenha(senha, usuario.senha_hash)
-  if (!senhaValida) {
-    return { sucesso: false, erro: 'Senha incorreta' }
-  }
+    if (error || !usuario) {
+      return { sucesso: false, erro: 'Usuário não encontrado' }
+    }
 
-  // Validar componentes
-  const componentes = usuario.componentes as Componente[]
-  if (componentes.length === 0 && usuario.tipo === 'estudante') {
-    return { sucesso: false, erro: 'Nenhum componente atribuído. Contate seu professor.' }
-  }
+    // Verificar senha
+    const senhaValida = await verificarSenha(senha, usuario.senha_hash)
+    if (!senhaValida) {
+      return { sucesso: false, erro: 'Senha incorreta' }
+    }
 
-  // Validar Física para Ensino Fundamental
-  if (componentes.includes('fisica') && usuario.nivel === 'EF') {
-    return { sucesso: false, erro: 'Física disponível apenas para Ensino Médio' }
-  }
+    // Validar componentes
+    const componentes = (usuario.componentes || []) as Componente[]
+    if (componentes.length === 0 && usuario.tipo === 'estudante') {
+      return { sucesso: false, erro: 'Nenhum componente atribuído. Contate seu professor.' }
+    }
 
-  // Criar sessão
-  await criarSessao({
-    id: usuario.id,
-    email: usuario.email,
-    tipo: usuario.tipo,
-    componentes,
-  })
+    // Validar Física para Ensino Fundamental
+    if (componentes.includes('fisica') && usuario.nivel === 'EF') {
+      return { sucesso: false, erro: 'Física disponível apenas para Ensino Médio' }
+    }
 
-  // Atualizar último acesso
-  await supabase
-    .from('usuarios')
-    .update({ ultimo_acesso: new Date().toISOString() })
-    .eq('id', usuario.id)
+    // Criar sessão
+    await criarSessao({
+      id: usuario.id,
+      email: usuario.email,
+      tipo: usuario.tipo,
+      componentes,
+    })
 
-  // Determinar redirecionamento
-  let redirecionarPara: string
-  if (usuario.tipo === 'professor') {
-    redirecionarPara = '/professor/dashboard'
-  } else if (componentes.length === 1) {
-    redirecionarPara = `/${componentes[0]}/menu`
-  } else {
-    redirecionarPara = '/selecionar'
-  }
+    // Atualizar último acesso
+    await supabase
+      .from('usuarios')
+      .update({ ultimo_acesso: new Date().toISOString() })
+      .eq('id', usuario.id)
 
-  return {
-    sucesso: true,
-    tipo: usuario.tipo,
-    componentes,
-    redirecionarPara,
+    // Determinar redirecionamento
+    let redirecionarPara: string
+    if (usuario.tipo === 'professor') {
+      redirecionarPara = '/professor/dashboard'
+    } else if (componentes.length === 1) {
+      redirecionarPara = `/${componentes[0]}/menu`
+    } else {
+      redirecionarPara = '/selecionar'
+    }
+
+    return {
+      sucesso: true,
+      tipo: usuario.tipo,
+      componentes,
+      redirecionarPara,
+    }
+  } catch (err) {
+    console.error('Erro no login:', err)
+    return {
+      sucesso: false,
+      erro: err instanceof Error ? err.message : 'Erro interno do servidor'
+    }
   }
 }
 
@@ -204,13 +205,13 @@ export async function logout(): Promise<void> {
 }
 
 // ═══════════════════════════════════════════════════════════
-// FUNÇÕES DE USUÁRIO
+// OBTER USUÁRIO ATUAL
 // ═══════════════════════════════════════════════════════════
 export async function obterUsuarioAtual(): Promise<Usuario | null> {
   const sessao = await obterSessao()
   if (!sessao) return null
 
-  const supabase = getSupabaseAdmin()
+  const supabase = createSupabaseAdmin()
   const { data, error } = await supabase
     .from('usuarios')
     .select('*')

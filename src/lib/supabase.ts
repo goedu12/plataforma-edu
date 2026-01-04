@@ -1,92 +1,57 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 // ═══════════════════════════════════════════════════════════
-// CONFIGURAÇÃO DO SUPABASE - LEITURA EM RUNTIME
+// SUPABASE CLIENT - CRIAÇÃO SIMPLES E DIRETA
 // ═══════════════════════════════════════════════════════════
 
-// Funções para obter variáveis em runtime (não em build time)
-function getSupabaseUrl(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-}
+/**
+ * Cria um cliente Supabase Admin (server-side)
+ * Lê as variáveis de ambiente a cada chamada para garantir valores atualizados
+ */
+export function createSupabaseAdmin(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
 
-function getSupabaseAnonKey(): string {
-  return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-}
-
-function getSupabaseServiceKey(): string {
-  return process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-}
-
-// ═══════════════════════════════════════════════════════════
-// VALIDAÇÃO DE URL
-// ═══════════════════════════════════════════════════════════
-function validarSupabaseUrl(url: string): boolean {
-  if (!url) return false
-  try {
-    const parsed = new URL(url)
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
-  } catch {
-    return false
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// CLIENTE PARA USO NO NAVEGADOR (client-side)
-// ═══════════════════════════════════════════════════════════
-let _supabase: SupabaseClient | null = null
-
-export function getSupabase(): SupabaseClient {
-  if (_supabase) return _supabase
-
-  const url = getSupabaseUrl()
-  const anonKey = getSupabaseAnonKey()
-
-  if (!validarSupabaseUrl(url)) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida')
-  }
-  if (!anonKey) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY não configurada')
+  if (!url) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL não está configurada')
   }
 
-  _supabase = createClient(url, anonKey)
-  return _supabase
-}
-
-// ═══════════════════════════════════════════════════════════
-// COMPATIBILIDADE - Exportação direta (lazy initialization)
-// ═══════════════════════════════════════════════════════════
-export const supabase: SupabaseClient | null = null // Deprecated: use getSupabase()
-
-// ═══════════════════════════════════════════════════════════
-// CLIENTE ADMIN (server-side) - COM VALIDAÇÃO COMPLETA
-// ═══════════════════════════════════════════════════════════
-let _supabaseAdmin: SupabaseClient | null = null
-
-export function getSupabaseAdmin(): SupabaseClient {
-  if (_supabaseAdmin) return _supabaseAdmin
-
-  const url = getSupabaseUrl()
-  const serviceKey = getSupabaseServiceKey()
-
-  // Validar URL
-  if (!validarSupabaseUrl(url)) {
-    throw new Error(`NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida. Valor atual: "${url}"`)
-  }
-
-  // Validar Service Key
   if (!serviceKey) {
-    throw new Error('SUPABASE_SERVICE_KEY não configurada. Verifique as variáveis de ambiente.')
+    throw new Error('SUPABASE_SERVICE_KEY não está configurada')
   }
 
-  _supabaseAdmin = createClient(url, serviceKey, {
+  return createClient(url, serviceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
     }
   })
-
-  return _supabaseAdmin
 }
+
+/**
+ * Cria um cliente Supabase público (client-side)
+ */
+export function createSupabaseClient(): SupabaseClient {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_URL não está configurada')
+  }
+
+  if (!anonKey) {
+    throw new Error('NEXT_PUBLIC_SUPABASE_ANON_KEY não está configurada')
+  }
+
+  return createClient(url, anonKey)
+}
+
+// Aliases para compatibilidade
+export const getSupabaseAdmin = createSupabaseAdmin
+export const getSupabase = createSupabaseClient
+
+// Exportação deprecated (não usar)
+export const supabase: SupabaseClient | null = null
 
 // ═══════════════════════════════════════════════════════════
 // TIPOS PARA AS TABELAS DO SUPABASE
