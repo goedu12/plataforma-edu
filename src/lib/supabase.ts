@@ -67,8 +67,8 @@ export function getSupabaseAdmin(): SupabaseClient {
     throw new Error('NEXT_PUBLIC_SUPABASE_URL não configurada ou inválida. Verifique as variáveis de ambiente.')
   }
 
-  // Validar Service Key
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY
+  // Validar Service Key (aceita ambos os nomes)
+  const serviceKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
   if (!serviceKey) {
     throw new Error('SUPABASE_SERVICE_KEY não configurada. Verifique as variáveis de ambiente.')
   }
