@@ -9,46 +9,26 @@ interface RankingTableProps {
   usuarioAtualId: string
 }
 
-// Cores Koyeb
-const KOYEB = {
-  bg: '#0D0D14',
-  bgCard: '#1A1A2E',
-  bgElevated: '#222238',
-  bgDark: '#12121C',
-  primary: '#00FF88',
-  accent: '#00D4FF',
-  fisica: '#00FF88',
-  matematica: '#A855F7',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#8B8B9A',
-  textMuted: '#5A5A6E',
-  border: 'rgba(255,255,255,0.05)',
-  gold: '#FFD700',
-  silver: '#C0C0C0',
-  bronze: '#CD7F32',
-}
-
 export default function RankingTable({
   ranking,
   componente,
   usuarioAtualId,
 }: RankingTableProps) {
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const top3 = ranking.slice(0, 3)
   const restante = ranking.slice(3)
 
-  // Encontrar posição do usuário
   const posicaoUsuario = ranking.findIndex(r => r.usuario_id === usuarioAtualId) + 1
   const dadosUsuario = ranking.find(r => r.usuario_id === usuarioAtualId)
 
   const getPodiumColor = (posicao: number) => {
     switch (posicao) {
-      case 1: return KOYEB.gold
-      case 2: return KOYEB.silver
-      case 3: return KOYEB.bronze
-      default: return KOYEB.textMuted
+      case 1: return '#FFD700'
+      case 2: return '#C0C0C0'
+      case 3: return '#CD7F32'
+      default: return 'var(--text-muted)'
     }
   }
 
@@ -67,7 +47,10 @@ export default function RankingTable({
       {top3.length >= 3 && (
         <div
           className="rounded-2xl p-6 overflow-hidden"
-          style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-default)',
+          }}
         >
           <div className="flex items-end justify-center gap-3 pt-4">
             {/* 2º Lugar */}
@@ -76,92 +59,92 @@ export default function RankingTable({
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
                   style={{
-                    border: `3px solid ${KOYEB.silver}`,
+                    border: `3px solid ${getPodiumColor(2)}`,
                     boxShadow: `0 0 20px rgba(192, 192, 192, 0.3)`,
-                    background: KOYEB.bgElevated,
+                    background: 'var(--bg-elevated)',
                   }}
                 >
                   <span
                     className="text-2xl font-bold"
-                    style={{ color: KOYEB.silver }}
+                    style={{ color: getPodiumColor(2) }}
                   >
                     {top3[1]?.nome?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ background: KOYEB.silver }}
+                  style={{ background: getPodiumColor(2) }}
                 >
-                  <span className="text-xs font-bold" style={{ color: KOYEB.bg }}>2</span>
+                  <span className="text-xs font-bold" style={{ color: 'var(--bg-base)' }}>2</span>
                 </div>
               </div>
               <p
-                className="font-mono text-xs font-bold truncate max-w-full text-center"
-                style={{ color: KOYEB.textPrimary }}
+                className="text-xs font-bold truncate max-w-full text-center"
+                style={{ color: 'var(--text-primary)' }}
               >
                 {top3[1]?.nome.split(' ')[0]}
               </p>
               <p
-                className="font-mono text-xs tabular-nums"
-                style={{ color: KOYEB.silver }}
+                className="text-xs tabular-nums"
+                style={{ color: getPodiumColor(2) }}
               >
                 {top3[1]?.pontos} pts
               </p>
               <div
                 className={`w-full ${getPodiumHeight(2)} rounded-t-lg mt-3`}
                 style={{
-                  background: `linear-gradient(180deg, ${KOYEB.silver}40 0%, ${KOYEB.silver}20 100%)`,
-                  borderTop: `2px solid ${KOYEB.silver}`,
+                  background: `linear-gradient(180deg, ${getPodiumColor(2)}40 0%, ${getPodiumColor(2)}20 100%)`,
+                  borderTop: `2px solid ${getPodiumColor(2)}`,
                 }}
               />
             </div>
 
-            {/* 1º Lugar - Mais alto */}
+            {/* 1º Lugar */}
             <div className="flex flex-col items-center w-28 -mt-4">
               <Crown
                 className="w-8 h-8 mb-2 animate-bounce"
-                style={{ color: KOYEB.gold, animationDuration: '2s' }}
+                style={{ color: getPodiumColor(1), animationDuration: '2s' }}
               />
               <div className="relative mb-3">
                 <div
                   className="w-20 h-20 rounded-full flex items-center justify-center overflow-hidden"
                   style={{
-                    border: `4px solid ${KOYEB.gold}`,
+                    border: `4px solid ${getPodiumColor(1)}`,
                     boxShadow: `0 0 30px rgba(255, 215, 0, 0.4)`,
-                    background: KOYEB.bgElevated,
+                    background: 'var(--bg-elevated)',
                   }}
                 >
                   <span
                     className="text-3xl font-bold"
-                    style={{ color: KOYEB.gold }}
+                    style={{ color: getPodiumColor(1) }}
                   >
                     {top3[0]?.nome?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
-                  style={{ background: KOYEB.gold }}
+                  style={{ background: getPodiumColor(1) }}
                 >
-                  <Trophy className="w-4 h-4" style={{ color: KOYEB.bg }} />
+                  <Trophy className="w-4 h-4" style={{ color: 'var(--bg-base)' }} />
                 </div>
               </div>
               <p
-                className="font-mono text-sm font-bold truncate max-w-full text-center"
-                style={{ color: KOYEB.textPrimary }}
+                className="text-sm font-bold truncate max-w-full text-center"
+                style={{ color: 'var(--text-primary)' }}
               >
                 {top3[0]?.nome.split(' ')[0]}
               </p>
               <p
-                className="font-mono text-sm tabular-nums font-bold"
-                style={{ color: KOYEB.gold }}
+                className="text-sm tabular-nums font-bold"
+                style={{ color: getPodiumColor(1) }}
               >
                 {top3[0]?.pontos} pts
               </p>
               <div
                 className={`w-full ${getPodiumHeight(1)} rounded-t-lg mt-3`}
                 style={{
-                  background: `linear-gradient(180deg, ${KOYEB.gold}40 0%, ${KOYEB.gold}20 100%)`,
-                  borderTop: `2px solid ${KOYEB.gold}`,
+                  background: `linear-gradient(180deg, ${getPodiumColor(1)}40 0%, ${getPodiumColor(1)}20 100%)`,
+                  borderTop: `2px solid ${getPodiumColor(1)}`,
                 }}
               />
             </div>
@@ -172,42 +155,42 @@ export default function RankingTable({
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center overflow-hidden"
                   style={{
-                    border: `3px solid ${KOYEB.bronze}`,
+                    border: `3px solid ${getPodiumColor(3)}`,
                     boxShadow: `0 0 20px rgba(205, 127, 50, 0.3)`,
-                    background: KOYEB.bgElevated,
+                    background: 'var(--bg-elevated)',
                   }}
                 >
                   <span
                     className="text-2xl font-bold"
-                    style={{ color: KOYEB.bronze }}
+                    style={{ color: getPodiumColor(3) }}
                   >
                     {top3[2]?.nome?.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ background: KOYEB.bronze }}
+                  style={{ background: getPodiumColor(3) }}
                 >
-                  <span className="text-xs font-bold" style={{ color: KOYEB.bg }}>3</span>
+                  <span className="text-xs font-bold" style={{ color: 'var(--bg-base)' }}>3</span>
                 </div>
               </div>
               <p
-                className="font-mono text-xs font-bold truncate max-w-full text-center"
-                style={{ color: KOYEB.textPrimary }}
+                className="text-xs font-bold truncate max-w-full text-center"
+                style={{ color: 'var(--text-primary)' }}
               >
                 {top3[2]?.nome.split(' ')[0]}
               </p>
               <p
-                className="font-mono text-xs tabular-nums"
-                style={{ color: KOYEB.bronze }}
+                className="text-xs tabular-nums"
+                style={{ color: getPodiumColor(3) }}
               >
                 {top3[2]?.pontos} pts
               </p>
               <div
                 className={`w-full ${getPodiumHeight(3)} rounded-t-lg mt-3`}
                 style={{
-                  background: `linear-gradient(180deg, ${KOYEB.bronze}40 0%, ${KOYEB.bronze}20 100%)`,
-                  borderTop: `2px solid ${KOYEB.bronze}`,
+                  background: `linear-gradient(180deg, ${getPodiumColor(3)}40 0%, ${getPodiumColor(3)}20 100%)`,
+                  borderTop: `2px solid ${getPodiumColor(3)}`,
                 }}
               />
             </div>
@@ -220,39 +203,36 @@ export default function RankingTable({
         <div
           className="rounded-xl p-4"
           style={{
-            background: `linear-gradient(135deg, ${KOYEB.bgCard} 0%, ${isFisica ? 'rgba(0, 255, 136, 0.1)' : 'rgba(168, 85, 247, 0.1)'} 100%)`,
-            border: `2px solid ${accentColor}40`,
+            background: 'var(--bg-surface)',
+            border: `2px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
           }}
         >
           <div className="flex items-center gap-4">
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center font-mono text-sm font-bold"
-              style={{ background: `${accentColor}20`, color: accentColor }}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                color: corPrimaria,
+              }}
             >
               {posicaoUsuario}º
             </div>
             <div className="flex-1 min-w-0">
-              <p
-                className="font-mono text-sm font-bold truncate"
-                style={{ color: KOYEB.textPrimary }}
-              >
+              <p className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                 {dadosUsuario.nome}
-                <span className="ml-2 text-xs" style={{ color: accentColor }}>(você)</span>
+                <span className="ml-2 text-xs" style={{ color: corPrimaria }}>(você)</span>
               </p>
-              <p className="text-xs" style={{ color: KOYEB.textMuted }}>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 {dadosUsuario.nivel} • {dadosUsuario.taxa_acerto}% acerto
               </p>
             </div>
             <div className="text-right">
-              <p
-                className="font-mono text-lg font-bold"
-                style={{ color: accentColor }}
-              >
+              <p className="text-lg font-bold" style={{ color: corPrimaria }}>
                 {dadosUsuario.pontos}
               </p>
-              <p className="text-xs" style={{ color: KOYEB.textMuted }}>pontos</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>pontos</p>
             </div>
-            <Star className="w-5 h-5" style={{ color: accentColor }} />
+            <Star className="w-5 h-5" style={{ color: corPrimaria }} />
           </div>
         </div>
       )}
@@ -264,22 +244,20 @@ export default function RankingTable({
           return (
             <div
               key={item.usuario_id}
-              className="rounded-xl p-4 transition-all duration-300 hover:translate-y-[-1px]"
+              className="rounded-xl p-4 transition-all duration-300"
               style={{
-                background: isUsuario
-                  ? `linear-gradient(135deg, ${KOYEB.bgCard} 0%, ${isFisica ? 'rgba(0, 255, 136, 0.1)' : 'rgba(168, 85, 247, 0.1)'} 100%)`
-                  : KOYEB.bgCard,
+                background: 'var(--bg-surface)',
                 border: isUsuario
-                  ? `2px solid ${accentColor}40`
-                  : `1px solid ${KOYEB.border}`,
+                  ? `2px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`
+                  : '1px solid var(--border-default)',
               }}
             >
               <div className="flex items-center gap-4">
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center font-mono text-xs font-bold"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
                   style={{
-                    background: KOYEB.bgElevated,
-                    color: item.posicao <= 10 ? accentColor : KOYEB.textMuted,
+                    background: 'var(--bg-elevated)',
+                    color: item.posicao <= 10 ? corPrimaria : 'var(--text-muted)',
                   }}
                 >
                   {item.posicao}º
@@ -287,33 +265,30 @@ export default function RankingTable({
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p
-                      className="font-mono text-sm font-medium truncate"
-                      style={{ color: KOYEB.textPrimary }}
-                    >
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>
                       {item.nome}
                       {isUsuario && (
-                        <span className="ml-2 text-xs" style={{ color: accentColor }}>(você)</span>
+                        <span className="ml-2 text-xs" style={{ color: corPrimaria }}>(você)</span>
                       )}
                     </p>
                   </div>
-                  <p className="text-xs" style={{ color: KOYEB.textMuted }}>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {item.nivel} • {item.taxa_acerto}% acerto
                   </p>
                 </div>
 
                 <div className="text-right">
                   <p
-                    className="font-mono text-lg font-bold tabular-nums"
-                    style={{ color: isUsuario ? accentColor : KOYEB.textPrimary }}
+                    className="text-lg font-bold tabular-nums"
+                    style={{ color: isUsuario ? corPrimaria : 'var(--text-primary)' }}
                   >
                     {item.pontos}
                   </p>
-                  <p className="text-xs" style={{ color: KOYEB.textMuted }}>pts</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>pts</p>
                 </div>
 
                 {isUsuario && (
-                  <Star className="w-5 h-5 flex-shrink-0" style={{ color: accentColor }} />
+                  <Star className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
                 )}
               </div>
             </div>
@@ -324,13 +299,16 @@ export default function RankingTable({
       {ranking.length === 0 && (
         <div
           className="rounded-2xl p-8 text-center"
-          style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-default)',
+          }}
         >
-          <TrendingUp className="w-12 h-12 mx-auto mb-4" style={{ color: KOYEB.textMuted }} />
-          <p className="font-mono text-sm" style={{ color: KOYEB.textSecondary }}>
+          <TrendingUp className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
             Nenhum estudante no ranking ainda.
           </p>
-          <p className="text-xs mt-1" style={{ color: KOYEB.textMuted }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>
             Comece a estudar para aparecer aqui!
           </p>
         </div>

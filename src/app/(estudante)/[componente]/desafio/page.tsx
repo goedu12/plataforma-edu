@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, AlertTriangle, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, ArrowRight } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
+import Button from '@/components/ui/Button'
+import BottomNav from '@/components/BottomNav'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
 
@@ -30,14 +32,12 @@ export default function DesafioPage() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
 
-  // Estado do desafio
   const [desafioId, setDesafioId] = useState<string | null>(null)
   const [questoes, setQuestoes] = useState<QuestaoDesafio[]>([])
   const [questaoAtual, setQuestaoAtual] = useState(0)
   const [respostas, setRespostas] = useState<(string | null)[]>([])
   const [tempoRestante, setTempoRestante] = useState<number>(DESAFIO.TEMPO_SEGUNDOS)
 
-  // Estado do resultado
   const [resultado, setResultado] = useState<{
     acertos: number
     total: number
@@ -48,6 +48,9 @@ export default function DesafioPage() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const tempoInicioRef = useRef<number>(Date.now())
+
+  const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const finalizarDesafio = useCallback(async (timeout = false) => {
     if (timerRef.current) {
@@ -108,7 +111,6 @@ export default function DesafioPage() {
           setTempoRestante(data.desafio.tempo_restante)
           tempoInicioRef.current = Date.now() - ((DESAFIO.TEMPO_SEGUNDOS - data.desafio.tempo_restante) * 1000)
 
-          // Iniciar timer
           timerRef.current = setInterval(() => {
             setTempoRestante(prev => {
               if (prev <= 1) {
@@ -145,9 +147,7 @@ export default function DesafioPage() {
     iniciarDesafio()
 
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current)
-      }
+      if (timerRef.current) clearInterval(timerRef.current)
     }
   }, [componente])
 
@@ -158,7 +158,6 @@ export default function DesafioPage() {
     novasRespostas[questaoAtual] = letra
     setRespostas(novasRespostas)
 
-    // Salvar resposta no servidor
     try {
       await fetch('/api/desafio', {
         method: 'POST',
@@ -174,21 +173,9 @@ export default function DesafioPage() {
     }
   }
 
-  const handleProxima = () => {
-    if (questaoAtual < questoes.length - 1) {
-      setQuestaoAtual(prev => prev + 1)
-    }
-  }
-
-  const handleAnterior = () => {
-    if (questaoAtual > 0) {
-      setQuestaoAtual(prev => prev - 1)
-    }
-  }
-
-  const handleVoltar = () => {
-    router.push(`/${componente}/menu`)
-  }
+  const handleProxima = () => questaoAtual < questoes.length - 1 && setQuestaoAtual(prev => prev + 1)
+  const handleAnterior = () => questaoAtual > 0 && setQuestaoAtual(prev => prev - 1)
+  const handleVoltar = () => router.push(`/${componente}/menu`)
 
   const formatarTempo = (segundos: number) => {
     const min = Math.floor(segundos / 60)
@@ -202,85 +189,107 @@ export default function DesafioPage() {
     return <Loading fullScreen componente={componente} />
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TELA DE RESULTADO - ESTILO KOYEB
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Tela de Resultado
   if (status === 'RESULTADO' && resultado) {
     const porcentagem = Math.round((resultado.acertos / resultado.total) * 100)
     const isPerfeito = resultado.acertos === resultado.total
 
     return (
-      <div className="min-h-screen" style={{ background: '#1A1A2E' }}>
-        {/* Header Terminal */}
-        <header className="px-4 py-4 border-b" style={{ borderColor: '#3D3D4A' }}>
+      <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+        <header
+          className="px-4 py-4"
+          style={{
+            background: corPrimaria,
+            borderBottom: '1px solid var(--border-default)',
+          }}
+        >
           <div className="max-w-2xl mx-auto flex items-center justify-center gap-3">
-            <Trophy className="w-5 h-5" style={{ color: '#00FF88' }} />
-            <h1 className="font-mono text-sm font-bold tracking-wider uppercase" style={{ color: '#FFFFFF' }}>
-              RESULTADO DO DESAFIO
+            <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+            <h1
+              className="font-display font-semibold"
+              style={{ color: isFisica ? '#000' : '#fff' }}
+            >
+              Resultado do Desafio
             </h1>
           </div>
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-8 pb-8">
-          {/* Terminal Card - Resultado */}
-          <div className="terminal-box">
-            <div className="terminal-header">
-              <span className="dot dot-red" />
-              <span className="dot dot-yellow" />
-              <span className="dot dot-green" />
-              <span className="title">resultado.sh</span>
+          {/* Card de Resultado */}
+          <div
+            className="card p-8 text-center animate-fade-in-up"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background: isPerfeito || porcentagem >= 60 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                border: `2px solid ${isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)'}`,
+              }}
+            >
+              <Trophy
+                className="w-10 h-10"
+                style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
+              />
             </div>
-            <div className="terminal-body text-center">
-              <p className="comment text-left"># Desafio finalizado</p>
-              <div className="mt-4">
-                <p className={`text-6xl font-bold ${isPerfeito || porcentagem >= 60 ? 'success' : 'warning'}`}>
-                  {resultado.acertos}/{resultado.total}
+
+            <p
+              className="font-display text-5xl font-bold"
+              style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
+            >
+              {resultado.acertos}/{resultado.total}
+            </p>
+            <p className="mt-2 text-lg" style={{ color: 'var(--text-secondary)' }}>
+              {isPerfeito ? 'Perfeito!' : porcentagem >= 60 ? 'Bom trabalho!' : 'Continue praticando!'}
+            </p>
+
+            <div
+              className="mt-6 pt-4 rounded-xl p-4"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <p className="text-2xl font-bold" style={{ color: 'var(--success)' }}>
+                +{resultado.pontos_ganhos} pontos
+              </p>
+              {resultado.bonus_perfeito && (
+                <p className="text-sm mt-1" style={{ color: 'var(--warning)' }}>
+                  Incluindo bônus de acerto perfeito!
                 </p>
-                <p className="mt-2 text-lg muted">
-                  {isPerfeito ? '$ PERFEITO!' : porcentagem >= 60 ? '$ Bom trabalho!' : '$ Continue praticando!'}
-                </p>
-              </div>
-              <div className="mt-6 pt-4 border-t border-white/10">
-                <div className="flex items-center justify-center gap-2">
-                  <span className="success">→</span>
-                  <span className="text-xl font-bold success">+{resultado.pontos_ganhos} PONTOS</span>
-                </div>
-                {resultado.bonus_perfeito && (
-                  <p className="mt-2 text-xs warning">Incluindo bonus de acerto perfeito!</p>
-                )}
-              </div>
+              )}
             </div>
           </div>
 
           {/* Lista de Respostas */}
           <div className="mt-6 space-y-3">
-            <p className="font-mono text-xs uppercase tracking-wider" style={{ color: '#A0A0A0' }}>
-              SUAS RESPOSTAS
+            <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+              Suas Respostas
             </p>
             {resultado.resultados.map((r, index) => (
               <div
                 key={r.questao_id}
-                className="rounded-lg p-4 flex items-start gap-3"
+                className="rounded-xl p-4 flex items-center gap-3"
                 style={{
-                  background: '#2D2D3A',
-                  border: `1px solid ${r.correta ? '#00FF88' : '#FF5F56'}33`,
+                  background: 'var(--bg-surface)',
+                  border: `1px solid ${r.correta ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
                 }}
               >
                 <div
-                  className="w-8 h-8 rounded flex items-center justify-center flex-shrink-0"
-                  style={{ background: r.correta ? '#00FF8820' : '#FF5F5620' }}
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: r.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)' }}
                 >
                   {r.correta ? (
-                    <CheckCircle2 className="w-4 h-4" style={{ color: '#00FF88' }} />
+                    <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} />
                   ) : (
-                    <XCircle className="w-4 h-4" style={{ color: '#FF5F56' }} />
+                    <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />
                   )}
                 </div>
-                <div className="flex-1">
-                  <p className="font-mono text-sm font-medium" style={{ color: '#FFFFFF' }}>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
                     Questão {index + 1}
                   </p>
-                  <p className="font-mono text-xs mt-1" style={{ color: '#A0A0A0' }}>
+                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
                     Sua: {r.resposta_dada || '—'} • Correta: {r.resposta_correta}
                   </p>
                 </div>
@@ -289,103 +298,87 @@ export default function DesafioPage() {
           </div>
 
           {/* Botão Voltar */}
-          <button
+          <Button
+            variant={isFisica ? 'fisica' : 'matematica'}
             onClick={handleVoltar}
-            className="mt-8 w-full py-3 px-6 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
-            style={{
-              background: 'transparent',
-              border: '2px solid #00FF88',
-              color: '#00FF88',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#00FF88'
-              e.currentTarget.style.color = '#1A1A2E'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.color = '#00FF88'
-            }}
+            className="w-full mt-8"
           >
-            <span>▸</span> VOLTAR AO MENU
-          </button>
+            Voltar ao Menu
+          </Button>
         </main>
+
+        <BottomNav componente={componente} />
       </div>
     )
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TELA DE ERRO - ESTILO KOYEB
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Tela de Erro
   if (status === 'ERRO' || status === 'SEM_QUESTOES') {
     return (
-      <div className="min-h-screen" style={{ background: '#1A1A2E' }}>
-        <header className="px-4 py-4 border-b" style={{ borderColor: '#3D3D4A' }}>
+      <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+        <header
+          className="px-4 py-4"
+          style={{
+            background: 'var(--bg-surface)',
+            borderBottom: '1px solid var(--border-default)',
+          }}
+        >
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <button
               onClick={handleVoltar}
-              className="p-2 -ml-2 rounded transition-colors"
-              style={{ color: '#A0A0A0' }}
+              className="p-3 -ml-2 rounded-xl transition-colors touch-target"
+              style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" style={{ color: '#00FF88' }} />
-              <h1 className="font-mono text-sm font-bold tracking-wider uppercase" style={{ color: '#FFFFFF' }}>
-                MODO DESAFIO
+              <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
+              <h1 className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Modo Desafio
               </h1>
             </div>
-            <div className="w-10" />
+            <div className="w-12" />
           </div>
         </header>
 
         <main className="max-w-2xl mx-auto px-4 pt-8">
-          <div className="terminal-box terminal-red">
-            <div className="terminal-header">
-              <span className="dot dot-red" />
-              <span className="dot dot-yellow" />
-              <span className="dot dot-green" />
-              <span className="title">erro.sh</span>
+          <div
+            className="card p-8 text-center animate-fade-in-up"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+            }}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+              }}
+            >
+              <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />
             </div>
-            <div className="terminal-body text-center py-4">
-              <WifiOff className="w-12 h-12 mx-auto mb-4 text-error" />
-              <p className="font-mono text-lg font-bold text-white">
-                {status === 'SEM_QUESTOES' ? 'QUESTOES INSUFICIENTES' : 'ERRO'}
-              </p>
-              <p className="font-mono text-sm mt-2 muted">{erro}</p>
-              <div className="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
-                <button
-                  onClick={iniciarDesafio}
-                  className="py-3 px-6 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2"
-                  style={{
-                    background: 'transparent',
-                    border: '2px solid #A0A0A0',
-                    color: '#A0A0A0',
-                  }}
-                >
-                  <RefreshCw className="w-4 h-4" /> TENTAR NOVAMENTE
-                </button>
-                <button
-                  onClick={handleVoltar}
-                  className="py-3 px-6 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2"
-                  style={{
-                    background: 'transparent',
-                    border: '2px solid #00FF88',
-                    color: '#00FF88',
-                  }}
-                >
-                  <span>▸</span> VOLTAR
-                </button>
-              </div>
+            <h2 className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              {status === 'SEM_QUESTOES' ? 'Questões Insuficientes' : 'Erro'}
+            </h2>
+            <p className="mt-2" style={{ color: 'var(--text-muted)' }}>{erro}</p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
+              <Button variant="secondary" onClick={iniciarDesafio} leftIcon={<RefreshCw className="w-4 h-4" />}>
+                Tentar Novamente
+              </Button>
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar}>
+                Voltar
+              </Button>
             </div>
           </div>
         </main>
+
+        <BottomNav componente={componente} />
       </div>
     )
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TELA DO DESAFIO EM ANDAMENTO - ESTILO KOYEB
-  // ═══════════════════════════════════════════════════════════════════════════
+  // Tela do Desafio em Andamento
   const questaoAtualData = questoes[questaoAtual]
   const respostaAtual = respostas[questaoAtual]
   const todasRespondidas = respostas.every(r => r !== null)
@@ -398,34 +391,39 @@ export default function DesafioPage() {
   ] : []
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: '#1A1A2E' }}>
+    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
       {/* Header com Timer */}
-      <header className="px-4 py-4 sticky top-0 z-10" style={{ background: '#1A1A2E', borderBottom: '1px solid #3D3D4A' }}>
+      <header
+        className="px-4 py-4 sticky top-0 z-10"
+        style={{
+          background: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-default)',
+        }}
+      >
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            {/* Botão Voltar */}
             <button
               onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-lg transition-colors flex items-center gap-1"
-              style={{ color: '#A0A0A0' }}
-              title="Sair do desafio"
+              className="p-3 -ml-2 rounded-xl transition-colors touch-target"
+              style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" style={{ color: '#00FF88' }} />
-              <h1 className="font-mono text-sm font-bold tracking-wider uppercase" style={{ color: '#FFFFFF' }}>
-                MODO DESAFIO
+              <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
+              <h1 className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+                Modo Desafio
               </h1>
             </div>
+
             {/* Timer */}
             <div
-              className={`flex items-center gap-2 px-4 py-2 rounded font-mono text-lg font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg font-mono text-lg font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
               style={{
-                background: tempoPerigo ? '#FF5F5620' : '#2D2D3A',
-                color: tempoPerigo ? '#FF5F56' : '#00FF88',
-                border: `1px solid ${tempoPerigo ? '#FF5F56' : '#00FF88'}33`,
+                background: tempoPerigo ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-elevated)',
+                color: tempoPerigo ? 'var(--error)' : corPrimaria,
+                border: `1px solid ${tempoPerigo ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-default)'}`,
               }}
             >
               <Clock className="w-4 h-4" />
@@ -433,29 +431,29 @@ export default function DesafioPage() {
             </div>
           </div>
 
-          {/* Indicadores de questão - estilo barra de progresso */}
+          {/* Progress Indicators */}
           <div className="flex gap-1">
             {questoes.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setQuestaoAtual(index)}
-                className="flex-1 h-2 rounded-sm transition-all"
+                className="flex-1 h-2 rounded-sm transition-all touch-target"
                 style={{
                   background: index === questaoAtual
-                    ? '#00FF88'
+                    ? corPrimaria
                     : respostas[index]
-                      ? '#00FF8866'
-                      : '#3D3D4A',
+                      ? isFisica ? 'rgba(34, 197, 94, 0.4)' : 'rgba(139, 92, 246, 0.4)'
+                      : 'var(--bg-elevated)',
                 }}
               />
             ))}
           </div>
           <div className="flex justify-between mt-2">
-            <span className="font-mono text-xs" style={{ color: '#A0A0A0' }}>
-              QUESTÃO {questaoAtual + 1}/{questoes.length}
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Questão {questaoAtual + 1}/{questoes.length}
             </span>
-            <span className="font-mono text-xs" style={{ color: '#00FF88' }}>
-              {respostas.filter(r => r !== null).length} RESPONDIDAS
+            <span className="text-xs" style={{ color: corPrimaria }}>
+              {respostas.filter(r => r !== null).length} respondidas
             </span>
           </div>
         </div>
@@ -465,22 +463,26 @@ export default function DesafioPage() {
       <main className="max-w-2xl mx-auto px-4 pt-6">
         {questaoAtualData && (
           <div className="animate-fade-in">
-            {/* Terminal com Enunciado */}
-            <div className="question-card mb-6">
+            {/* Card da Questão */}
+            <div
+              className="card p-5 mb-6"
+              style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+              }}
+            >
               <div className="flex items-center gap-2 mb-4">
-                <span className="w-3 h-3 rounded-full" style={{ background: '#FF5F56' }} />
-                <span className="w-3 h-3 rounded-full" style={{ background: '#FFBD2E' }} />
-                <span className="w-3 h-3 rounded-full" style={{ background: '#27CA40' }} />
-                <span className="ml-2 font-mono text-xs" style={{ color: '#8B8B9A' }}>
-                  questao_{questaoAtual + 1}.txt
+                <span
+                  className="px-2 py-1 rounded-md text-xs font-medium"
+                  style={{
+                    background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                    color: corPrimaria,
+                  }}
+                >
+                  {questaoAtualData.tema}
                 </span>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="badge-green text-xs">
-                    {questaoAtualData.tema}
-                  </span>
-                </div>
               </div>
-              <p className="question-text">
+              <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                 {questaoAtualData.enunciado}
               </p>
             </div>
@@ -491,16 +493,28 @@ export default function DesafioPage() {
                 <button
                   key={letra}
                   onClick={() => handleSelecionarResposta(letra)}
-                  className={`question-option ${respostaAtual === letra ? 'selected' : ''}`}
+                  className="w-full p-4 rounded-xl flex items-center gap-4 transition-all touch-target"
+                  style={{
+                    background: respostaAtual === letra
+                      ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                      : 'var(--bg-surface)',
+                    border: `2px solid ${respostaAtual === letra ? corPrimaria : 'var(--border-default)'}`,
+                  }}
                 >
-                  <span className="option-letter">
+                  <span
+                    className="w-10 h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0"
+                    style={{
+                      background: respostaAtual === letra ? corPrimaria : 'var(--bg-elevated)',
+                      color: respostaAtual === letra ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+                    }}
+                  >
                     {letra}
                   </span>
-                  <span className="option-text">
+                  <span className="text-left flex-1" style={{ color: 'var(--text-primary)' }}>
                     {texto}
                   </span>
                   {respostaAtual === letra && (
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: '#00FF88' }} />
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
                   )}
                 </button>
               ))}
@@ -508,78 +522,60 @@ export default function DesafioPage() {
 
             {/* Navegação */}
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="secondary"
                 onClick={handleAnterior}
                 disabled={questaoAtual === 0}
-                className="flex-1 py-3 px-4 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-30"
-                style={{
-                  background: 'transparent',
-                  border: '2px solid #3D3D4A',
-                  color: '#A0A0A0',
-                }}
+                className="flex-1"
+                leftIcon={<ArrowLeft className="w-4 h-4" />}
               >
-                <ArrowLeft className="w-4 h-4" /> ANTERIOR
-              </button>
+                Anterior
+              </Button>
               {questaoAtual < questoes.length - 1 ? (
-                <button
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
                   onClick={handleProxima}
-                  className="flex-1 py-3 px-4 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all"
-                  style={{
-                    background: 'transparent',
-                    border: '2px solid #00FF88',
-                    color: '#00FF88',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = '#00FF88'
-                    e.currentTarget.style.color = '#1A1A2E'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent'
-                    e.currentTarget.style.color = '#00FF88'
-                  }}
+                  className="flex-1"
+                  rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
-                  PRÓXIMA <ArrowRight className="w-4 h-4" />
-                </button>
+                  Próxima
+                </Button>
               ) : (
-                <button
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
                   onClick={() => finalizarDesafio(false)}
                   disabled={!todasRespondidas}
-                  className="flex-1 py-3 px-4 font-mono text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all disabled:opacity-30"
-                  style={{
-                    background: todasRespondidas ? '#00FF88' : 'transparent',
-                    border: '2px solid #00FF88',
-                    color: todasRespondidas ? '#1A1A2E' : '#00FF88',
-                  }}
+                  className="flex-1"
                 >
-                  <span>▸</span> FINALIZAR
-                </button>
+                  Finalizar
+                </Button>
               )}
             </div>
 
             {!todasRespondidas && questaoAtual === questoes.length - 1 && (
-              <p className="text-center font-mono text-xs mt-4" style={{ color: '#A0A0A0' }}>
-                $ Responda todas as questões para finalizar
+              <p className="text-center text-sm mt-4" style={{ color: 'var(--text-muted)' }}>
+                Responda todas as questões para finalizar
               </p>
             )}
           </div>
         )}
 
-        {/* Terminal Info */}
-        <div className="mt-8 terminal-box">
-          <div className="terminal-header">
-            <span className="dot dot-red" />
-            <span className="dot dot-yellow" />
-            <span className="dot dot-green" />
-            <span className="title">info.sh</span>
-          </div>
-          <div className="terminal-body space-y-1">
-            <p className="comment"># Modo Desafio</p>
-            <p className="success">→ {DESAFIO.QUESTOES} questoes em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos</p>
-            <p className="success">→ Acerte todas = +{DESAFIO.BONUS_PERFEITO} pontos bonus!</p>
-            <p className="warning">→ SEM LIMITE - Faca quantos desafios quiser!</p>
-          </div>
+        {/* Dica */}
+        <div
+          className="mt-8 p-4 rounded-xl"
+          style={{
+            background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+            border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
+          }}
+        >
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <strong style={{ color: corPrimaria }}>Dica:</strong> {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos.
+            Acerte todas para ganhar +{DESAFIO.BONUS_PERFEITO} pontos bônus!
+          </p>
         </div>
       </main>
+
+      <BottomNav componente={componente} />
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Bot, Sparkles, MessageCircle } from 'lucide-react'
 import TutorChat from '@/components/TutorChat'
 import Loading from '@/components/ui/Loading'
+import BottomNav from '@/components/BottomNav'
 import type { Componente, Usuario } from '@/types'
 import { PONTUACAO } from '@/types'
 
@@ -15,6 +16,9 @@ export default function TutorPage() {
 
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -50,49 +54,52 @@ export default function TutorPage() {
     return <Loading fullScreen componente={componente} />
   }
 
-  const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
-  const usoHoje = componente === 'fisica' ? usuario.fis_uso_ia_hoje : usuario.mat_uso_ia_hoje
+  const nomeTutor = isFisica ? 'Newton' : 'Pitágoras'
+  const usoHoje = isFisica ? usuario.fis_uso_ia_hoje : usuario.mat_uso_ia_hoje
   const usosRestantes = PONTUACAO.LIMITE_IA_DIARIO - usoHoje
 
-  const isFisica = componente === 'fisica'
-  const bgColor = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
-  const textColor = isFisica ? 'text-fisica-500' : 'text-matematica-500'
-
   return (
-    <div className="h-screen flex flex-col bg-dark-bg">
-      {/* Header - Dark Theme */}
-      <header className={`${bgColor} text-white px-4 py-4`}>
+    <div className="h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
+      {/* Header */}
+      <header className="px-4 py-4" style={{ background: corPrimaria }}>
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+              className="p-3 -ml-2 rounded-xl hover:bg-black/20 transition-colors touch-target"
+              style={{ color: isFisica ? '#000' : '#fff' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" style={{ color: isFisica ? '#000' : '#fff' }}>
               <Bot className="w-5 h-5" />
-              <h1 className="font-semibold">Tutor {nomeTutor}</h1>
+              <h1 className="font-display font-semibold">Tutor {nomeTutor}</h1>
             </div>
-            <div className="flex items-center gap-1 bg-white/20 rounded-full px-3 py-1">
+            <div
+              className="flex items-center gap-1 rounded-full px-3 py-1"
+              style={{ background: 'rgba(0,0,0,0.2)', color: isFisica ? '#000' : '#fff' }}
+            >
               <MessageCircle className="w-4 h-4" />
               <span className="text-sm font-medium">{usoHoje}/{PONTUACAO.LIMITE_IA_DIARIO}</span>
             </div>
           </div>
 
           {/* Info Bar */}
-          <div className="flex items-center justify-center gap-4 text-sm text-white/80">
+          <div
+            className="flex items-center justify-center gap-4 text-sm"
+            style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.8)' }}
+          >
             <div className="flex items-center gap-1">
               <Sparkles className="w-4 h-4" />
               <span>IA Generativa</span>
             </div>
-            <span className="text-white/40">•</span>
+            <span style={{ opacity: 0.5 }}>•</span>
             <span>{usosRestantes} msgs restantes hoje</span>
           </div>
         </div>
       </header>
 
-      {/* Chat - Passando nome do estudante para personalização */}
+      {/* Chat */}
       <div className="flex-1 overflow-hidden max-w-2xl mx-auto w-full">
         <TutorChat
           componente={componente}
@@ -103,6 +110,8 @@ export default function TutorPage() {
           onClose={() => router.push(`/${componente}/menu`)}
         />
       </div>
+
+      <BottomNav componente={componente} />
     </div>
   )
 }
