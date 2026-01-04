@@ -16,23 +16,38 @@ export default function Loading({
   componente = 'fisica',
 }: LoadingProps) {
   const sizeStyles = {
-    sm: 'h-4 w-4',
+    sm: 'h-5 w-5',
     md: 'h-8 w-8',
     lg: 'h-12 w-12',
   }
 
-  const color = componente === 'fisica' ? 'text-fisica-500' : 'text-matematica-500'
+  const color = componente === 'fisica'
+    ? 'var(--color-fisica)'
+    : 'var(--color-matematica)'
 
   const content = (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <Loader2 className={`animate-spin ${sizeStyles[size]} ${color}`} />
-      {text && <p className="text-sm text-gray-500">{text}</p>}
+    <div className="flex flex-col items-center justify-center gap-4">
+      <Loader2
+        className={`animate-spin ${sizeStyles[size]}`}
+        style={{ color }}
+      />
+      {text && (
+        <p
+          className="text-sm font-medium"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {text}
+        </p>
+      )}
     </div>
   )
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+        style={{ background: 'var(--bg-base)' }}
+      >
         {content}
       </div>
     )
@@ -41,9 +56,13 @@ export default function Loading({
   return content
 }
 
-// Skeleton para loading de conteúdo
+// Skeleton para loading de conteudo
 export function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+  return (
+    <div
+      className={`skeleton ${className}`}
+    />
+  )
 }
 
 // Skeleton para lista
@@ -64,12 +83,23 @@ export function SkeletonList({ count = 3 }: { count?: number }) {
 }
 
 // Typing indicator para chat
-export function TypingIndicator() {
+export function TypingIndicator({ componente = 'fisica' }: { componente?: 'fisica' | 'matematica' }) {
+  const color = componente === 'fisica'
+    ? 'var(--color-fisica)'
+    : 'var(--color-matematica)'
+
   return (
-    <div className="flex items-center gap-1 p-2">
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+    <div className="flex items-center gap-1.5 p-2">
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          className="w-2 h-2 rounded-full animate-bounce"
+          style={{
+            background: color,
+            animationDelay: `${i * 150}ms`
+          }}
+        />
+      ))}
     </div>
   )
 }

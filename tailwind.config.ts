@@ -6,253 +6,269 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         // ═══════════════════════════════════════════════════════════════
-        // KOYEB DESIGN SYSTEM - PLATAFORMA EDU 2026
-        // Briefing UI/UX Completo
+        // PLATAFORMA EDU - DESIGN SYSTEM 4.0
+        // Briefing Completo - Janeiro 2026
         // ═══════════════════════════════════════════════════════════════
 
         // ─────────────────────────────────────────────────────────────
-        // DARK THEME BACKGROUNDS (Briefing)
+        // DARK THEME BACKGROUNDS
         // ─────────────────────────────────────────────────────────────
         dark: {
           base: '#0a0a0a',           // Fundo principal
-          elevated: '#0d0d0d',        // Sidebar, áreas elevadas
-          surface: '#141414',         // Cards, containers
-          'surface-hover': '#1a1a1a', // Cards em hover
-          overlay: '#1e1e1e',         // Modals, dropdowns
-        },
-
-        // Terminal colors
-        terminal: {
-          bg: '#1e1e1e',              // Corpo do terminal
-          header: '#2d2d2d',          // Header do terminal
-          'dot-close': '#ff5f56',
-          'dot-minimize': '#ffbd2e',
-          'dot-maximize': '#27ca3f',
+          elevated: '#111111',        // Sidebar, areas elevadas
+          surface: '#171717',         // Cards, containers
+          'surface-hover': '#1f1f1f', // Cards em hover
+          overlay: '#262626',         // Modals, dropdowns
         },
 
         // ─────────────────────────────────────────────────────────────
-        // PRIMARY - Verde Emerald (Briefing: #10b981)
+        // LIGHT THEME BACKGROUNDS
         // ─────────────────────────────────────────────────────────────
-        primary: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',             // Hover state
-          500: '#10b981',             // PRIMARY (Briefing)
-          600: '#059669',             // Pressed state
-          700: '#047857',
-          800: '#065f46',
-          900: '#064e3b',
-          DEFAULT: '#10b981',
-          glow: 'rgba(16, 185, 129, 0.4)',
+        light: {
+          base: '#ffffff',
+          elevated: '#f5f5f5',
+          surface: '#fafafa',
+          'surface-hover': '#f0f0f0',
+          overlay: '#e5e5e5',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // FÍSICA - Alias de Primary
+        // FISICA - Verde Vibrante (#22c55e)
         // ─────────────────────────────────────────────────────────────
         fisica: {
-          50: '#ecfdf5',
-          100: '#d1fae5',
-          200: '#a7f3d0',
-          300: '#6ee7b7',
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
-          700: '#047857',
-          DEFAULT: '#10b981',
-          glow: 'rgba(16, 185, 129, 0.4)',
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',             // PRIMARY FISICA
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+          DEFAULT: '#22c55e',
+          glow: 'rgba(34, 197, 94, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // MATEMÁTICA - Roxo (#a855f7)
+        // MATEMATICA - Roxo Vibrante (#8b5cf6)
         // ─────────────────────────────────────────────────────────────
         matematica: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',             // Hover state
-          500: '#a855f7',             // PRIMARY MATEMATICA
-          600: '#9333ea',             // Pressed state
-          700: '#7c3aed',
-          DEFAULT: '#a855f7',
-          glow: 'rgba(168, 85, 247, 0.4)',
-        },
-
-        // Alias lilas = matematica
-        lilas: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7c3aed',
-          DEFAULT: '#a855f7',
-          glow: 'rgba(168, 85, 247, 0.4)',
+          50: '#f5f3ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa',
+          500: '#8b5cf6',             // PRIMARY MATEMATICA
+          600: '#7c3aed',
+          700: '#6d28d9',
+          800: '#5b21b6',
+          900: '#4c1d95',
+          DEFAULT: '#8b5cf6',
+          glow: 'rgba(139, 92, 246, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // ACCENT - Cyan (#06b6d4)
+        // ACCENT - Sky Blue (#0ea5e9)
         // ─────────────────────────────────────────────────────────────
         accent: {
-          50: '#ecfeff',
-          100: '#cffafe',
-          200: '#a5f3fc',
-          300: '#67e8f9',
-          400: '#22d3ee',
-          500: '#06b6d4',             // ACCENT (Briefing)
-          600: '#0891b2',
-          700: '#0e7490',
-          DEFAULT: '#06b6d4',
-          glow: 'rgba(6, 182, 212, 0.4)',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',             // ACCENT
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          DEFAULT: '#0ea5e9',
+          glow: 'rgba(14, 165, 233, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // SECONDARY - Laranja (#f59e0b / warning)
+        // STREAK - Laranja (#f97316)
         // ─────────────────────────────────────────────────────────────
-        secondary: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          DEFAULT: '#f59e0b',
-          glow: 'rgba(245, 158, 11, 0.4)',
+        streak: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',             // STREAK/WARNING
+          600: '#ea580c',
+          700: '#c2410c',
+          DEFAULT: '#f97316',
+          glow: 'rgba(249, 115, 22, 0.4)',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // TEXTO - Hierarquia (Briefing)
-        // ─────────────────────────────────────────────────────────────
-        text: {
-          primary: '#ffffff',         // Títulos, headings
-          secondary: '#a1a1aa',       // Parágrafos, descrições (~65%)
-          tertiary: '#71717a',        // Labels, metadados (~45%)
-          muted: '#52525b',           // Placeholders, desabilitado (~32%)
-        },
-
-        // ─────────────────────────────────────────────────────────────
-        // BORDAS (Briefing)
-        // ─────────────────────────────────────────────────────────────
-        border: {
-          DEFAULT: 'rgba(255, 255, 255, 0.08)',
-          hover: 'rgba(255, 255, 255, 0.15)',
-          fisica: 'rgba(16, 185, 129, 0.3)',
-          matematica: 'rgba(168, 85, 247, 0.3)',
-        },
-
-        // ─────────────────────────────────────────────────────────────
-        // ESTADOS (Briefing)
+        // ESTADOS
         // ─────────────────────────────────────────────────────────────
         success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
           500: '#10b981',
+          600: '#059669',
           DEFAULT: '#10b981',
         },
         error: {
+          50: '#fef2f2',
+          100: '#fee2e2',
           500: '#ef4444',
+          600: '#dc2626',
           DEFAULT: '#ef4444',
         },
         warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
           500: '#f59e0b',
+          600: '#d97706',
           DEFAULT: '#f59e0b',
         },
         info: {
+          50: '#eff6ff',
+          100: '#dbeafe',
           500: '#3b82f6',
+          600: '#2563eb',
           DEFAULT: '#3b82f6',
         },
 
         // ─────────────────────────────────────────────────────────────
-        // Compatibilidade com código existente
+        // TEXTO - Dark Mode
         // ─────────────────────────────────────────────────────────────
-        koyeb: {
-          bg: '#0a0a0a',
-          card: '#141414',
-          elevated: '#1a1a1a',
-          terminal: '#1e1e1e',
-          dark: '#0d0d0d',
+        'text-dark': {
+          primary: '#ffffff',
+          secondary: '#a1a1aa',
+          tertiary: '#71717a',
+          muted: '#52525b',
         },
-        'calm-bg': '#0a0a0a',
-        'calm-surface': '#141414',
-        'calm-elevated': '#1a1a1a',
-        'calm-border': 'rgba(255, 255, 255, 0.08)',
-        dot: {
-          red: '#ff5f56',
-          yellow: '#ffbd2e',
-          green: '#27ca3f',
+
+        // ─────────────────────────────────────────────────────────────
+        // TEXTO - Light Mode
+        // ─────────────────────────────────────────────────────────────
+        'text-light': {
+          primary: '#171717',
+          secondary: '#525252',
+          tertiary: '#737373',
+          muted: '#a3a3a3',
+        },
+
+        // ─────────────────────────────────────────────────────────────
+        // BORDAS
+        // ─────────────────────────────────────────────────────────────
+        border: {
+          dark: 'rgba(255, 255, 255, 0.1)',
+          'dark-hover': 'rgba(255, 255, 255, 0.2)',
+          light: 'rgba(0, 0, 0, 0.1)',
+          'light-hover': 'rgba(0, 0, 0, 0.2)',
+          fisica: 'rgba(34, 197, 94, 0.3)',
+          matematica: 'rgba(139, 92, 246, 0.3)',
+        },
+
+        // ─────────────────────────────────────────────────────────────
+        // ALIASES - Compatibilidade
+        // ─────────────────────────────────────────────────────────────
+        primary: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          DEFAULT: '#22c55e',
+        },
+        lilas: {
+          50: '#f5f3ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa',
+          500: '#8b5cf6',
+          600: '#7c3aed',
+          700: '#6d28d9',
+          DEFAULT: '#8b5cf6',
         },
       },
 
       // ─────────────────────────────────────────────────────────────
-      // TIPOGRAFIA (Briefing)
+      // TIPOGRAFIA (Briefing 4.0)
+      // Nunito para display, Inter para body, JetBrains Mono para code
       // ─────────────────────────────────────────────────────────────
       fontFamily: {
-        display: ['Space Grotesk', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        display: ['Nunito', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Space Mono', 'SF Mono', 'monospace'],
+        mono: ['JetBrains Mono', 'SF Mono', 'monospace'],
       },
 
       fontSize: {
-        // Hero/Display
-        'hero': ['3rem', { lineHeight: '1.1', fontWeight: '700', letterSpacing: '-0.02em' }],
-        'display': ['2rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '-0.02em' }],
+        // Hero/Display - NO UPPERCASE (Title Case)
+        'hero': ['2.5rem', { lineHeight: '1.15', fontWeight: '800', letterSpacing: '-0.02em' }],
+        'display': ['2rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '-0.01em' }],
 
-        // Headings
-        'title': ['1.5rem', { lineHeight: '1.2', fontWeight: '700', letterSpacing: '0.01em' }],
-        'heading': ['1.125rem', { lineHeight: '1.3', fontWeight: '600', letterSpacing: '0.01em' }],
-        'subheading': ['1rem', { lineHeight: '1.4', fontWeight: '600', letterSpacing: '0.02em' }],
+        // Headings - NO UPPERCASE (Title Case)
+        'title': ['1.5rem', { lineHeight: '1.25', fontWeight: '700' }],
+        'heading': ['1.25rem', { lineHeight: '1.3', fontWeight: '600' }],
+        'subheading': ['1rem', { lineHeight: '1.4', fontWeight: '600' }],
 
         // Body
         'body-lg': ['1rem', { lineHeight: '1.6' }],
-        'body': ['0.875rem', { lineHeight: '1.6' }],
-        'body-sm': ['0.8125rem', { lineHeight: '1.5' }],
+        'body': ['0.9375rem', { lineHeight: '1.6' }],
+        'body-sm': ['0.875rem', { lineHeight: '1.5' }],
 
-        // Caption/Label
-        'caption': ['0.75rem', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.02em' }],
-        'label': ['0.6875rem', { lineHeight: '1.3', fontWeight: '500', letterSpacing: '0.05em' }],
+        // Caption/Label - labels podem ser uppercase
+        'caption': ['0.8125rem', { lineHeight: '1.4', fontWeight: '500' }],
+        'label': ['0.75rem', { lineHeight: '1.3', fontWeight: '600', letterSpacing: '0.02em' }],
+        'label-sm': ['0.6875rem', { lineHeight: '1.2', fontWeight: '600', letterSpacing: '0.04em' }],
       },
 
       // ─────────────────────────────────────────────────────────────
-      // SOMBRAS (Briefing)
+      // SOMBRAS
       // ─────────────────────────────────────────────────────────────
       boxShadow: {
-        'sm': '0 1px 2px rgba(0, 0, 0, 0.5)',
-        'md': '0 4px 6px rgba(0, 0, 0, 0.4)',
-        'lg': '0 10px 15px rgba(0, 0, 0, 0.3)',
+        'sm': '0 1px 2px rgba(0, 0, 0, 0.3)',
+        'md': '0 4px 6px rgba(0, 0, 0, 0.25)',
+        'lg': '0 10px 15px rgba(0, 0, 0, 0.2)',
+        'xl': '0 20px 25px rgba(0, 0, 0, 0.25)',
 
-        // Glow effects (Briefing)
-        'glow-green': '0 0 30px rgba(16, 185, 129, 0.15)',
-        'glow-lilas': '0 0 30px rgba(168, 85, 247, 0.15)',
-        'glow-cyan': '0 0 30px rgba(6, 182, 212, 0.15)',
-        'glow-amber': '0 0 30px rgba(245, 158, 11, 0.15)',
+        // Glow effects
+        'glow-fisica': '0 0 20px rgba(34, 197, 94, 0.25)',
+        'glow-matematica': '0 0 20px rgba(139, 92, 246, 0.25)',
+        'glow-accent': '0 0 20px rgba(14, 165, 233, 0.25)',
+        'glow-streak': '0 0 20px rgba(249, 115, 22, 0.25)',
 
-        // Card
-        'card': '0 4px 20px rgba(0, 0, 0, 0.5)',
-        'card-hover': '0 8px 30px rgba(0, 0, 0, 0.6)',
+        // Card shadows
+        'card': '0 4px 16px rgba(0, 0, 0, 0.4)',
+        'card-hover': '0 8px 24px rgba(0, 0, 0, 0.5)',
+        'card-light': '0 4px 16px rgba(0, 0, 0, 0.08)',
+        'card-light-hover': '0 8px 24px rgba(0, 0, 0, 0.12)',
 
-        // Glass
-        'glass': '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+        // Bottom nav
+        'nav': '0 -4px 20px rgba(0, 0, 0, 0.4)',
+        'nav-light': '0 -4px 20px rgba(0, 0, 0, 0.1)',
       },
 
       // ─────────────────────────────────────────────────────────────
-      // ANIMAÇÕES (Briefing)
+      // ANIMACOES
       // ─────────────────────────────────────────────────────────────
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out forwards',
+        'fade-in-up': 'fadeInUp 0.4s ease-out forwards',
         'slide-up': 'slideUp 0.3s ease-out forwards',
-        'shake': 'shake 0.5s ease-in-out',
-        'bounce-once': 'bounceOnce 0.6s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out forwards',
+        'scale-in': 'scaleIn 0.2s ease-out forwards',
+        'bounce-in': 'bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
         'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
-        'skeleton': 'skeleton 1.5s ease-in-out infinite',
+        'spin-slow': 'spin 2s linear infinite',
+        'streak-glow': 'streakGlow 2s ease-in-out infinite',
       },
 
       keyframes: {
@@ -260,18 +276,27 @@ const config: Config = {
           from: { opacity: '0' },
           to: { opacity: '1' },
         },
-        slideUp: {
-          from: { opacity: '0', transform: 'translateY(10px)' },
+        fadeInUp: {
+          from: { opacity: '0', transform: 'translateY(16px)' },
           to: { opacity: '1', transform: 'translateY(0)' },
         },
-        shake: {
-          '0%, 100%': { transform: 'translateX(0)' },
-          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
-          '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
+        slideUp: {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
         },
-        bounceOnce: {
-          '0%, 100%': { transform: 'scale(1)' },
+        slideDown: {
+          from: { opacity: '0', transform: 'translateY(-8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          from: { opacity: '0', transform: 'scale(0.95)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        bounceIn: {
+          '0%': { opacity: '0', transform: 'scale(0.3)' },
           '50%': { transform: 'scale(1.05)' },
+          '70%': { transform: 'scale(0.9)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
         pulseSoft: {
           '0%, 100%': { opacity: '1' },
@@ -281,14 +306,26 @@ const config: Config = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
-        skeleton: {
-          '0%': { backgroundPosition: '-200px 0' },
-          '100%': { backgroundPosition: 'calc(200px + 100%) 0' },
+        streakGlow: {
+          '0%, 100%': { boxShadow: '0 0 10px rgba(249, 115, 22, 0.3)' },
+          '50%': { boxShadow: '0 0 25px rgba(249, 115, 22, 0.6)' },
         },
       },
 
       // ─────────────────────────────────────────────────────────────
-      // OUTROS (Briefing)
+      // BREAKPOINTS (Briefing 4.0)
+      // ─────────────────────────────────────────────────────────────
+      screens: {
+        'xs': '375px',
+        'sm': '640px',
+        'md': '768px',      // Tablet
+        'lg': '1024px',     // Laptop
+        'xl': '1280px',     // Desktop
+        '2xl': '1536px',
+      },
+
+      // ─────────────────────────────────────────────────────────────
+      // OUTROS
       // ─────────────────────────────────────────────────────────────
       backdropBlur: {
         xs: '2px',
@@ -300,23 +337,39 @@ const config: Config = {
       },
 
       borderRadius: {
-        'sm': '4px',
+        'sm': '6px',
         'DEFAULT': '8px',
-        'md': '8px',
+        'md': '10px',
         'lg': '12px',
         'xl': '16px',
         '2xl': '20px',
+        '3xl': '24px',
       },
 
       spacing: {
-        '1': '4px',
-        '2': '8px',
-        '3': '12px',
-        '4': '16px',
-        '6': '24px',
-        '8': '32px',
-        '12': '48px',
-        '16': '64px',
+        '4.5': '18px',
+        '13': '52px',
+        '15': '60px',
+        '18': '72px',
+        '22': '88px',
+        'nav': '64px',          // Bottom nav height
+        'nav-rail': '72px',     // Navigation rail width
+        'nav-rail-expanded': '256px',
+      },
+
+      minHeight: {
+        'touch': '48px',        // Touch target minimum (48dp)
+        'nav': '64px',
+      },
+
+      minWidth: {
+        'touch': '48px',
+      },
+
+      zIndex: {
+        'nav': '50',
+        'modal': '100',
+        'toast': '150',
       },
     },
   },

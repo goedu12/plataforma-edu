@@ -1,39 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   PLATAFORMA EDU - KOYEB DESIGN SYSTEM 2026
-   Briefing UI/UX Completo
+   PLATAFORMA EDU - DESIGN SYSTEM 4.0
+   Janeiro 2026
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   CSS VARIABLES (Briefing)
+   CSS VARIABLES - DARK THEME (Default)
    ───────────────────────────────────────────────────────────────────────────── */
 :root {
   /* Backgrounds */
-  --bg-dark-base: #0a0a0a;
-  --bg-dark-elevated: #0d0d0d;
-  --bg-dark-surface: #141414;
-  --bg-dark-surface-hover: #1a1a1a;
-  --bg-dark-overlay: #1e1e1e;
-  --bg-terminal: #1e1e1e;
-  --bg-terminal-header: #2d2d2d;
+  --bg-base: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-surface: #171717;
+  --bg-surface-hover: #1f1f1f;
+  --bg-overlay: #262626;
 
-  /* Primary - Física */
-  --color-primary: #10b981;
-  --color-primary-light: #34d399;
-  --color-primary-dark: #059669;
+  /* Primary Colors */
+  --color-fisica: #22c55e;
+  --color-fisica-light: #4ade80;
+  --color-fisica-dark: #16a34a;
+  --color-fisica-glow: rgba(34, 197, 94, 0.4);
 
-  /* Matemática */
-  --color-matematica: #a855f7;
-  --color-matematica-light: #c084fc;
-  --color-matematica-dark: #9333ea;
+  --color-matematica: #8b5cf6;
+  --color-matematica-light: #a78bfa;
+  --color-matematica-dark: #7c3aed;
+  --color-matematica-glow: rgba(139, 92, 246, 0.4);
 
-  /* Accent */
-  --color-accent: #06b6d4;
+  --color-accent: #0ea5e9;
+  --color-streak: #f97316;
 
   /* Text */
   --text-primary: #ffffff;
@@ -42,10 +41,10 @@
   --text-muted: #52525b;
 
   /* Borders */
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.15);
-  --border-fisica: rgba(16, 185, 129, 0.3);
-  --border-matematica: rgba(168, 85, 247, 0.3);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --border-fisica: rgba(34, 197, 94, 0.3);
+  --border-matematica: rgba(139, 92, 246, 0.3);
 
   /* States */
   --success: #10b981;
@@ -53,10 +52,38 @@
   --warning: #f59e0b;
   --info: #3b82f6;
 
-  /* Terminal Dots */
-  --dot-close: #ff5f56;
-  --dot-minimize: #ffbd2e;
-  --dot-maximize: #27ca3f;
+  /* Shadows */
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-nav: 0 -4px 20px rgba(0, 0, 0, 0.4);
+
+  /* Color scheme */
+  color-scheme: dark;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS VARIABLES - LIGHT THEME
+   ───────────────────────────────────────────────────────────────────────────── */
+.light, [data-theme="light"] {
+  --bg-base: #ffffff;
+  --bg-elevated: #f5f5f5;
+  --bg-surface: #fafafa;
+  --bg-surface-hover: #f0f0f0;
+  --bg-overlay: #e5e5e5;
+
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --text-tertiary: #737373;
+  --text-muted: #a3a3a3;
+
+  --border-default: rgba(0, 0, 0, 0.1);
+  --border-hover: rgba(0, 0, 0, 0.2);
+  --border-fisica: rgba(34, 197, 94, 0.25);
+  --border-matematica: rgba(139, 92, 246, 0.25);
+
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-nav: 0 -4px 20px rgba(0, 0, 0, 0.1);
+
+  color-scheme: light;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -72,19 +99,27 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  background-color: var(--bg-dark-base);
+  font-size: 15px;
+  background-color: var(--bg-base);
   color: var(--text-primary);
   line-height: 1.5;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
-/* Font mono */
+/* Headings use Nunito */
+h1, h2, h3, h4, h5, h6, .font-display {
+  font-family: 'Nunito', 'Inter', -apple-system, sans-serif;
+}
+
+/* Code uses JetBrains Mono */
 code, pre, .font-mono {
-  font-family: 'JetBrains Mono', 'Space Mono', monospace;
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
 }
 
 /* Prevent zoom on iOS inputs */
@@ -92,78 +127,114 @@ input, select, textarea {
   font-size: 16px;
 }
 
+/* Links */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    SCROLLBAR
    ───────────────────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-dark-base);
+  background: var(--bg-base);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 10px;
+  background: var(--text-muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }
 
 /* Selection */
 ::selection {
-  background: rgba(16, 185, 129, 0.3);
+  background: rgba(34, 197, 94, 0.3);
   color: white;
 }
 
-/* Focus */
+.matematica ::selection,
+[data-componente="matematica"] ::selection {
+  background: rgba(139, 92, 246, 0.3);
+}
+
+/* Focus styles */
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid var(--color-fisica);
   outline-offset: 2px;
 }
 
+.matematica *:focus-visible,
+[data-componente="matematica"] *:focus-visible {
+  outline-color: var(--color-matematica);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
-   TYPOGRAPHY CLASSES (Briefing)
+   TYPOGRAPHY CLASSES
+   No uppercase for titles - only for labels
    ═══════════════════════════════════════════════════════════════════════════ */
 @layer utilities {
   .text-hero {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 3rem;
-    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
     letter-spacing: -0.02em;
-    line-height: 1.1;
-    text-transform: uppercase;
+    line-height: 1.15;
+  }
+
+  .text-display {
+    font-family: 'Nunito', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
   }
 
   .text-title {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-size: 1.5rem;
     font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1.2;
-    text-transform: uppercase;
+    line-height: 1.25;
   }
 
   .text-heading {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.125rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.25rem;
     font-weight: 600;
-    letter-spacing: 0.01em;
     line-height: 1.3;
-    text-transform: uppercase;
   }
 
   .text-subheading {
     font-family: 'Inter', sans-serif;
     font-size: 1rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
     line-height: 1.4;
-    text-transform: uppercase;
+  }
+
+  .text-body-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.6;
+    color: var(--text-secondary);
   }
 
   .text-body {
     font-family: 'Inter', sans-serif;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     font-weight: 400;
     line-height: 1.6;
     color: var(--text-secondary);
@@ -171,7 +242,7 @@ input, select, textarea {
 
   .text-body-sm {
     font-family: 'Inter', sans-serif;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.5;
     color: var(--text-secondary);
@@ -179,471 +250,639 @@ input, select, textarea {
 
   .text-caption {
     font-family: 'Inter', sans-serif;
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
-    letter-spacing: 0.02em;
     line-height: 1.4;
     color: var(--text-tertiary);
   }
 
+  /* Labels CAN be uppercase */
   .text-label {
     font-family: 'Inter', sans-serif;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     line-height: 1.3;
     text-transform: uppercase;
     color: var(--text-tertiary);
   }
 
+  .text-label-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
   .text-mono {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.875rem;
-    line-height: 1.6;
+    line-height: 1.5;
   }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   COMPONENT CLASSES (Briefing)
+   COMPONENT CLASSES
    ═══════════════════════════════════════════════════════════════════════════ */
 @layer components {
   /* ─────────────────────────────────────────────────────────
-     BUTTONS (Briefing)
+     BUTTONS
+     Touch target minimum: 48px
      ───────────────────────────────────────────────────────── */
   .btn {
     @apply inline-flex items-center justify-center gap-2;
-    @apply font-semibold rounded-lg;
+    @apply font-semibold rounded-xl;
     @apply transition-all duration-200;
-    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
     @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply active:scale-[0.98];
+    min-height: 48px;
+    min-width: 48px;
   }
 
-  .btn-primary {
-    @apply btn px-6 py-3 bg-primary-500 text-white;
-    @apply hover:bg-primary-400 active:bg-primary-600;
-    @apply focus:ring-primary-500/50 focus:ring-offset-dark-base;
+  .btn-fisica {
+    @apply btn px-6 py-3;
+    background: var(--color-fisica);
+    color: #000;
+  }
+  .btn-fisica:hover:not(:disabled) {
+    background: var(--color-fisica-light);
+  }
+  .btn-fisica:active:not(:disabled) {
+    background: var(--color-fisica-dark);
   }
 
   .btn-matematica {
-    @apply btn px-6 py-3 bg-matematica-500 text-white;
-    @apply hover:bg-matematica-400 active:bg-matematica-600;
-    @apply focus:ring-matematica-500/50 focus:ring-offset-dark-base;
+    @apply btn px-6 py-3;
+    background: var(--color-matematica);
+    color: #fff;
+  }
+  .btn-matematica:hover:not(:disabled) {
+    background: var(--color-matematica-light);
+  }
+  .btn-matematica:active:not(:disabled) {
+    background: var(--color-matematica-dark);
   }
 
   .btn-secondary {
-    @apply btn px-6 py-3 bg-transparent text-white;
-    @apply border border-border-hover;
-    @apply hover:bg-white/5 active:bg-white/10;
+    @apply btn px-6 py-3;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-hover);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--bg-surface-hover);
   }
 
   .btn-ghost {
-    @apply btn px-4 py-2 bg-transparent text-text-tertiary;
-    @apply hover:text-white hover:bg-white/5;
+    @apply btn px-4 py-2;
+    background: transparent;
+    color: var(--text-tertiary);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: var(--text-primary);
+    background: var(--bg-surface-hover);
   }
 
   .btn-danger {
     @apply btn px-6 py-3 bg-error text-white;
-    @apply hover:bg-red-400 active:bg-red-600;
+  }
+  .btn-danger:hover:not(:disabled) {
+    @apply bg-red-400;
   }
 
   .btn-accent {
-    @apply btn px-6 py-3 bg-accent-500 text-white;
-    @apply hover:bg-accent-400 active:bg-accent-600;
+    @apply btn px-6 py-3;
+    background: var(--color-accent);
+    color: #fff;
   }
 
   /* Button sizes */
-  .btn-sm { @apply px-3 py-1.5 text-sm; }
-  .btn-md { @apply px-4 py-2 text-sm; }
-  .btn-lg { @apply px-6 py-3 text-base; }
+  .btn-sm {
+    @apply px-4 py-2 text-sm rounded-lg;
+    min-height: 40px;
+  }
+  .btn-lg {
+    @apply px-8 py-4 text-base rounded-2xl;
+    min-height: 56px;
+  }
 
-  /* Alias for backward compatibility */
+  /* Aliases */
+  .btn-primary { @apply btn-fisica; }
   .btn-lilas { @apply btn-matematica; }
 
   /* ─────────────────────────────────────────────────────────
-     CARDS (Briefing)
+     CARDS
      ───────────────────────────────────────────────────────── */
   .card {
-    @apply rounded-xl border transition-all duration-200;
-  }
-
-  .card-default {
-    @apply card bg-dark-surface border-border p-6;
+    @apply rounded-2xl transition-all duration-200;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
   }
 
   .card-elevated {
-    @apply card bg-dark-surface-hover border-border p-6;
-  }
-
-  .card-glass {
-    @apply card bg-white/5 backdrop-blur-xl border-white/10 p-6;
+    @apply card;
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-card);
   }
 
   .card-fisica {
-    @apply card bg-dark-surface border-border-fisica p-6;
-    @apply hover:shadow-glow-green hover:border-primary-500/50;
+    @apply card p-5;
+    border-color: var(--border-fisica);
+  }
+  .card-fisica:hover {
+    border-color: var(--color-fisica);
+    box-shadow: 0 0 20px var(--color-fisica-glow);
   }
 
   .card-matematica {
-    @apply card bg-dark-surface border-border-matematica p-6;
-    @apply hover:shadow-glow-lilas hover:border-matematica-500/50;
+    @apply card p-5;
+    border-color: var(--border-matematica);
+  }
+  .card-matematica:hover {
+    border-color: var(--color-matematica);
+    box-shadow: 0 0 20px var(--color-matematica-glow);
   }
 
   .card-interactive {
-    @apply card bg-dark-surface border-border p-6 cursor-pointer;
-    @apply hover:border-border-hover hover:-translate-y-1;
+    @apply card p-5 cursor-pointer;
+  }
+  .card-interactive:hover {
+    border-color: var(--border-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+  }
+  .card-interactive:active {
+    transform: translateY(0);
   }
 
-  .card-warning {
-    @apply card bg-warning/10 border-warning/30 p-6;
+  .card-glass {
+    @apply card backdrop-blur-xl;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
   }
-
-  /* Aliases for backward compatibility */
-  .soft-card { @apply card-default; }
-  .glass-card { @apply card-glass; }
-  .glow-card-green { @apply card-fisica; }
-  .glow-card-lilas { @apply card-matematica; }
 
   /* ─────────────────────────────────────────────────────────
-     BADGES (Briefing)
+     BADGES
      ───────────────────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-md;
-    @apply text-xs font-medium uppercase tracking-wide;
+    @apply inline-flex items-center px-3 py-1 rounded-full;
+    @apply text-xs font-semibold;
   }
 
-  .badge-default { @apply bg-white/10 text-text-secondary; }
-  .badge-fisica { @apply bg-primary-500/20 text-primary-400; }
-  .badge-matematica { @apply bg-matematica-500/20 text-matematica-400; }
-  .badge-success { @apply bg-success/20 text-success; }
-  .badge-warning { @apply bg-warning/20 text-warning; }
-  .badge-error { @apply bg-error/20 text-error; }
+  .badge-default {
+    background: var(--bg-surface-hover);
+    color: var(--text-secondary);
+  }
 
-  /* Aliases */
-  .badge-green { @apply badge-fisica; }
-  .badge-lilas { @apply badge-matematica; }
+  .badge-fisica {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-fisica);
+  }
+
+  .badge-matematica {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--color-matematica);
+  }
+
+  .badge-streak {
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--color-streak);
+  }
+
+  .badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+  }
+
+  .badge-error {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+  }
 
   /* ─────────────────────────────────────────────────────────
-     INPUTS (Briefing)
+     INPUTS
      ───────────────────────────────────────────────────────── */
   .input-label {
-    @apply text-label text-text-tertiary mb-2 block;
+    @apply text-label mb-2 block;
   }
 
   .input {
-    @apply w-full px-4 py-3 bg-dark-surface border border-border rounded-lg;
-    @apply text-white placeholder-text-muted font-sans text-sm;
-    @apply focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30;
-    @apply transition-all duration-200;
+    @apply w-full px-4 py-3 rounded-xl text-base;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    min-height: 48px;
+    transition: all 0.2s;
+  }
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--color-fisica);
+    box-shadow: 0 0 0 3px var(--color-fisica-glow);
   }
 
-  .input-with-icon {
-    @apply pl-11;
+  .input-matematica:focus {
+    border-color: var(--color-matematica);
+    box-shadow: 0 0 0 3px var(--color-matematica-glow);
   }
 
   .input-error {
-    @apply border-error focus:border-error focus:ring-error/30;
+    border-color: var(--error);
+  }
+  .input-error:focus {
+    border-color: var(--error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
   }
 
-  /* Aliases */
-  .input-2026 { @apply input; }
+  .input-with-icon {
+    @apply pl-12;
+  }
 
   /* ─────────────────────────────────────────────────────────
-     TERMINAL-BOX (Briefing)
+     SELECT
+     ───────────────────────────────────────────────────────── */
+  .select {
+    @apply input appearance-none cursor-pointer;
+    padding-right: 44px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 20px;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     PROGRESS BAR
+     ───────────────────────────────────────────────────────── */
+  .progress {
+    @apply w-full h-2 rounded-full overflow-hidden;
+    background: var(--bg-surface-hover);
+  }
+
+  .progress-fill {
+    @apply h-full rounded-full;
+    transition: width 0.5s ease-out;
+  }
+
+  .progress-fisica .progress-fill {
+    background: linear-gradient(90deg, var(--color-fisica), var(--color-accent));
+  }
+
+  .progress-matematica .progress-fill {
+    background: linear-gradient(90deg, var(--color-matematica), var(--color-accent));
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     BOTTOM NAVIGATION
+     Height: 64px, 4 items
+     ───────────────────────────────────────────────────────── */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0;
+    @apply flex items-center justify-around;
+    height: 64px;
+    background: var(--bg-elevated);
+    border-top: 1px solid var(--border-default);
+    box-shadow: var(--shadow-nav);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    z-index: 50;
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center justify-center gap-1;
+    @apply transition-colors duration-200;
+    min-width: 64px;
+    min-height: 48px;
+    color: var(--text-muted);
+  }
+
+  .bottom-nav-item:hover {
+    color: var(--text-secondary);
+  }
+
+  .bottom-nav-item.active {
+    color: var(--color-fisica);
+  }
+
+  .bottom-nav-item.active.matematica {
+    color: var(--color-matematica);
+  }
+
+  .bottom-nav-label {
+    @apply text-label-sm;
+    text-transform: none;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     NAVIGATION RAIL (Desktop)
+     Width: 72px collapsed, 256px expanded
+     ───────────────────────────────────────────────────────── */
+  @media (min-width: 1024px) {
+    .nav-rail {
+      @apply fixed left-0 top-0 bottom-0;
+      @apply flex flex-col;
+      width: 72px;
+      background: var(--bg-elevated);
+      border-right: 1px solid var(--border-default);
+      z-index: 50;
+      transition: width 0.3s ease;
+    }
+
+    .nav-rail:hover,
+    .nav-rail.expanded {
+      width: 256px;
+    }
+
+    .nav-rail-item {
+      @apply flex items-center gap-3 px-4 py-3;
+      @apply transition-all duration-200;
+      min-height: 48px;
+      color: var(--text-secondary);
+    }
+
+    .nav-rail-item:hover {
+      background: var(--bg-surface-hover);
+      color: var(--text-primary);
+    }
+
+    .nav-rail-item.active {
+      color: var(--color-fisica);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .nav-rail-label {
+      @apply text-body-sm whitespace-nowrap overflow-hidden;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .nav-rail:hover .nav-rail-label,
+    .nav-rail.expanded .nav-rail-label {
+      opacity: 1;
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     STAT CARD
+     ───────────────────────────────────────────────────────── */
+  .stat-card {
+    @apply card p-4 text-center;
+  }
+
+  .stat-icon {
+    @apply w-6 h-6 mx-auto mb-2;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold font-mono;
+    color: var(--text-primary);
+  }
+
+  .stat-label {
+    @apply text-label-sm mt-1;
+    text-transform: none;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     QUESTION CARD
+     ───────────────────────────────────────────────────────── */
+  .questao-card {
+    @apply card p-5;
+  }
+
+  .questao-header {
+    @apply flex items-center justify-between pb-4 mb-4;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .questao-enunciado {
+    @apply text-body-lg mb-6;
+    color: var(--text-primary);
+  }
+
+  .alternativa {
+    @apply flex items-start gap-3 p-4 rounded-xl cursor-pointer;
+    @apply transition-all duration-200;
+    border: 1px solid var(--border-default);
+    min-height: 48px;
+  }
+  .alternativa:hover {
+    border-color: var(--border-hover);
+    background: var(--bg-surface-hover);
+  }
+
+  .alternativa-selected {
+    border-color: var(--color-fisica);
+    background: rgba(34, 197, 94, 0.1);
+  }
+
+  .alternativa-correct {
+    border-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    cursor: default;
+  }
+
+  .alternativa-incorrect {
+    border-color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+    cursor: default;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     CHAT BUBBLES (Tutor)
+     ───────────────────────────────────────────────────────── */
+  .chat-bubble {
+    @apply max-w-[85%] p-4 rounded-2xl;
+    animation: fadeInUp 0.3s ease-out;
+  }
+
+  .chat-user {
+    @apply chat-bubble ml-auto rounded-br-md;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+  }
+
+  .chat-assistant {
+    @apply chat-bubble rounded-bl-md;
+  }
+
+  .chat-assistant-fisica {
+    @apply chat-assistant;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid var(--border-fisica);
+  }
+
+  .chat-assistant-matematica {
+    @apply chat-assistant;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid var(--border-matematica);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     RANKING TABLE
+     ───────────────────────────────────────────────────────── */
+  .ranking-row {
+    @apply flex items-center gap-4 p-4 rounded-xl;
+    @apply transition-colors duration-200;
+    border: 1px solid transparent;
+  }
+  .ranking-row:hover {
+    background: var(--bg-surface-hover);
+  }
+
+  .ranking-row-current {
+    border-color: var(--color-fisica);
+    background: rgba(34, 197, 94, 0.05);
+  }
+
+  .ranking-position {
+    @apply w-8 h-8 flex items-center justify-center;
+    @apply font-bold text-sm rounded-full;
+  }
+
+  .ranking-position-1 {
+    background: linear-gradient(135deg, #ffd700, #ffb800);
+    color: #000;
+  }
+  .ranking-position-2 {
+    background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+    color: #000;
+  }
+  .ranking-position-3 {
+    background: linear-gradient(135deg, #cd7f32, #b8722c);
+    color: #fff;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     STREAK INDICATOR
+     ───────────────────────────────────────────────────────── */
+  .streak-badge {
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-full;
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--color-streak);
+    animation: streakGlow 2s ease-in-out infinite;
+  }
+
+  .streak-flame {
+    @apply w-5 h-5;
+    animation: pulse 1s ease-in-out infinite;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     LEVEL PROGRESS
+     ───────────────────────────────────────────────────────── */
+  .level-card {
+    @apply card p-5;
+  }
+
+  .level-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 rounded-lg;
+    @apply text-sm font-semibold;
+  }
+
+  .level-badge-fisica {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-fisica);
+  }
+
+  .level-badge-matematica {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--color-matematica);
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     TERMINAL BOX (Professor only)
      ───────────────────────────────────────────────────────── */
   .terminal-box {
-    @apply rounded-xl overflow-hidden border border-border;
-    background: var(--bg-terminal);
+    @apply rounded-xl overflow-hidden;
+    background: #1a1a1a;
+    border: 1px solid var(--border-default);
   }
 
   .terminal-header {
-    @apply flex items-center gap-2 px-4 py-3 border-b border-border;
-    background: var(--bg-terminal-header);
+    @apply flex items-center gap-2 px-4 py-3;
+    background: #262626;
+    border-bottom: 1px solid var(--border-default);
   }
 
   .terminal-dots {
     @apply flex gap-2;
   }
 
-  .dot {
+  .terminal-dot {
     @apply w-3 h-3 rounded-full;
   }
 
-  .dot-red { background: var(--dot-close); }
-  .dot-yellow { background: var(--dot-minimize); }
-  .dot-green { background: var(--dot-maximize); }
+  .terminal-dot-red { background: #ff5f56; }
+  .terminal-dot-yellow { background: #ffbd2e; }
+  .terminal-dot-green { background: #27ca3f; }
 
   .terminal-title {
-    @apply ml-2 text-xs text-text-tertiary font-mono;
+    @apply ml-2 text-xs font-mono;
+    color: var(--text-tertiary);
   }
-
-  /* Alias */
-  .title { @apply terminal-title; }
 
   .terminal-body {
     @apply p-4 font-mono text-sm space-y-1;
-    background: var(--bg-terminal);
   }
 
-  /* Terminal syntax */
-  .terminal-comment, .comment { @apply text-text-tertiary; }
-  .terminal-command, .cmd { @apply text-white; }
-  .terminal-string { @apply text-primary-500; }
-  .terminal-success, .success { color: var(--dot-maximize); }
-  .terminal-warning, .warning { @apply text-warning; }
-  .terminal-error, .error { @apply text-error; }
-  .terminal-muted, .muted { @apply text-text-muted; }
-  .value { @apply text-white; }
-
-  /* Terminal variants */
-  .terminal-fisica .terminal-header,
-  .terminal-box:not(.terminal-lilas):not(.terminal-amber):not(.terminal-cyan):not(.terminal-red) .terminal-header {
-    @apply bg-primary-500/10 border-primary-500/20;
-  }
-
-  .terminal-lilas .terminal-header {
-    @apply bg-matematica-500/10 border-matematica-500/20;
-  }
-
-  .terminal-amber .terminal-header {
-    @apply bg-warning/10 border-warning/20;
-  }
-
-  .terminal-cyan .terminal-header {
-    @apply bg-accent-500/10 border-accent-500/20;
-  }
-
-  .terminal-red .terminal-header {
-    @apply bg-error/10 border-error/20;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     PROGRESS BAR (Briefing)
-     ───────────────────────────────────────────────────────── */
-  .progress {
-    @apply w-full h-2 bg-dark-surface-hover rounded-full overflow-hidden;
-  }
-
-  .progress-fill {
-    @apply h-full rounded-full transition-all duration-500;
-  }
-
-  .progress-fisica .progress-fill {
-    @apply bg-gradient-to-r from-primary-500 to-primary-400;
-  }
-
-  .progress-matematica .progress-fill {
-    @apply bg-gradient-to-r from-matematica-500 to-matematica-400;
-  }
-
-  .progress-warning .progress-fill {
-    @apply bg-gradient-to-r from-warning to-warning/80;
-  }
-
-  /* Aliases */
-  .progress-2026 { @apply progress; }
-  .progress-fill-green { @apply bg-gradient-to-r from-primary-500 to-accent-500; }
-  .progress-fill-lilas { @apply bg-gradient-to-r from-matematica-500 to-accent-500; }
-
-  /* ─────────────────────────────────────────────────────────
-     SPINNER (Briefing)
-     ───────────────────────────────────────────────────────── */
-  .spinner {
-    @apply w-5 h-5 border-2 border-white/20 rounded-full animate-spin;
-  }
-
-  .spinner-fisica {
-    @apply spinner border-t-primary-500;
-  }
-
-  .spinner-matematica {
-    @apply spinner border-t-matematica-500;
-  }
-
-  .spinner-white {
-    @apply spinner border-t-white;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     QUESTION CARD (Briefing)
-     ───────────────────────────────────────────────────────── */
-  .questao-card {
-    @apply card-default;
-  }
-
-  .questao-header {
-    @apply flex items-center justify-between pb-4 mb-4 border-b border-border;
-  }
-
-  .questao-enunciado {
-    @apply text-body text-white mb-6;
-  }
-
-  .alternativa {
-    @apply flex items-start gap-3 p-4 rounded-lg border border-border;
-    @apply cursor-pointer transition-all duration-200;
-    @apply hover:border-border-hover hover:bg-white/5;
-  }
-
-  .alternativa-selected {
-    @apply border-primary-500 bg-primary-500/10;
-  }
-
-  .alternativa-correct {
-    @apply border-success bg-success/10 cursor-default;
-  }
-
-  .alternativa-incorrect {
-    @apply border-error bg-error/10 cursor-default;
-  }
-
-  /* Aliases */
-  .question-card { @apply questao-card; }
-  .question-option { @apply alternativa; }
-
-  /* ─────────────────────────────────────────────────────────
-     RANKING TABLE (Briefing)
-     ───────────────────────────────────────────────────────── */
-  .ranking-table {
-    @apply w-full;
-  }
-
-  .ranking-header {
-    @apply text-label text-text-tertiary;
-  }
-
-  .ranking-header th {
-    @apply px-4 py-3 text-left border-b border-border;
-  }
-
-  .ranking-row {
-    @apply border-b border-border transition-colors;
-    @apply hover:bg-white/5;
-  }
-
-  .ranking-row td {
-    @apply px-4 py-4;
-  }
-
-  .ranking-row-current {
-    @apply bg-primary-500/10 border-l-2 border-l-primary-500;
-  }
-
-  /* Aliases */
-  .table-koyeb { @apply ranking-table; }
-
-  /* ─────────────────────────────────────────────────────────
-     SELECT (Briefing)
-     ───────────────────────────────────────────────────────── */
-  .select {
-    @apply w-full px-4 py-3 rounded-lg text-base outline-none appearance-none;
-    @apply bg-dark-surface border border-border text-white;
-    @apply focus:border-primary-500 focus:ring-1 focus:ring-primary-500/30;
-    @apply transition-all duration-200;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a1a1aa'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 20px;
-    padding-right: 44px;
-  }
-
-  /* Alias */
-  .select-koyeb { @apply select; }
-
-  /* ─────────────────────────────────────────────────────────
-     STAT CARD
-     ───────────────────────────────────────────────────────── */
-  .stat-card {
-    @apply card-default text-center;
-  }
-
-  .stat-value {
-    @apply text-2xl font-bold font-mono text-white;
-  }
-
-  .stat-label {
-    @apply text-caption text-text-muted mt-1;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     GRID BACKGROUND (Briefing)
-     ───────────────────────────────────────────────────────── */
-  .bg-grid-pattern {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 50px 50px;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     SAFE AREAS
-     ───────────────────────────────────────────────────────── */
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0);
-  }
-
-  .safe-top {
-    padding-top: env(safe-area-inset-top, 0);
-  }
-
-  /* Hide scrollbar */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     CHAT BUBBLES
-     ───────────────────────────────────────────────────────── */
-  .chat-bubble {
-    @apply max-w-[85%] p-4 rounded-2xl;
-    animation: slideUp 0.3s ease-out;
-  }
-
-  .chat-user {
-    @apply chat-bubble ml-auto rounded-br-md;
-    @apply bg-dark-elevated border border-border;
-  }
-
-  .chat-assistant-fisica {
-    @apply chat-bubble rounded-bl-md;
-    @apply bg-primary-500/10 border border-primary-500/20;
-  }
-
-  .chat-assistant-matematica {
-    @apply chat-bubble rounded-bl-md;
-    @apply bg-matematica-500/10 border border-matematica-500/20;
-  }
-
-  /* Aliases */
-  .chat-assistant-green { @apply chat-assistant-fisica; }
-  .chat-assistant-lilas { @apply chat-assistant-matematica; }
+  .terminal-comment { color: var(--text-tertiary); }
+  .terminal-success { color: #27ca3f; }
+  .terminal-warning { color: #ffbd2e; }
+  .terminal-error { color: #ff5f56; }
 
   /* ─────────────────────────────────────────────────────────
      SKELETON LOADING
      ───────────────────────────────────────────────────────── */
   .skeleton {
-    @apply rounded-lg animate-pulse;
-    background: linear-gradient(90deg, #141414 0%, #1a1a1a 50%, #141414 100%);
+    @apply rounded-lg;
+    background: linear-gradient(90deg,
+      var(--bg-surface) 0%,
+      var(--bg-surface-hover) 50%,
+      var(--bg-surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
   }
 
-  /* Alias */
-  .skeleton-2026 { @apply skeleton; }
+  /* ─────────────────────────────────────────────────────────
+     SPINNER
+     ───────────────────────────────────────────────────────── */
+  .spinner {
+    @apply w-5 h-5 border-2 rounded-full animate-spin;
+    border-color: var(--bg-surface-hover);
+    border-top-color: var(--color-fisica);
+  }
+
+  .spinner-matematica {
+    border-top-color: var(--color-matematica);
+  }
+
+  .spinner-white {
+    border-color: rgba(255, 255, 255, 0.2);
+    border-top-color: white;
+  }
 
   /* ─────────────────────────────────────────────────────────
      DIVIDERS
      ───────────────────────────────────────────────────────── */
-  .divider-h {
+  .divider {
     @apply h-px w-full;
-    background: linear-gradient(90deg, transparent, var(--border-default), transparent);
+    background: var(--border-default);
   }
 
-  .divider-v {
-    @apply w-px h-full;
-    background: linear-gradient(180deg, transparent, var(--border-default), transparent);
+  .divider-gradient {
+    @apply h-px w-full;
+    background: linear-gradient(90deg, transparent, var(--border-default), transparent);
   }
 }
 
@@ -651,49 +890,62 @@ input, select, textarea {
    UTILITY CLASSES
    ═══════════════════════════════════════════════════════════════════════════ */
 @layer utilities {
-  /* Text Gradients */
-  .text-gradient-green {
-    background: linear-gradient(135deg, #10b981, #06b6d4);
+  /* Safe areas */
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .pb-nav {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0));
+  }
+
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Text gradients */
+  .text-gradient-fisica {
+    background: linear-gradient(135deg, var(--color-fisica), var(--color-accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .text-gradient-lilas {
-    background: linear-gradient(135deg, #a855f7, #c084fc);
+  .text-gradient-matematica {
+    background: linear-gradient(135deg, var(--color-matematica), var(--color-accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Glow text */
-  .glow-text-green {
-    text-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+  /* Touch target helper */
+  .touch-target {
+    min-width: 48px;
+    min-height: 48px;
   }
 
-  .glow-text-lilas {
-    text-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
-  }
-
-  /* Stagger animations */
-  .stagger-1 { animation-delay: 0.05s; }
-  .stagger-2 { animation-delay: 0.1s; }
-  .stagger-3 { animation-delay: 0.15s; }
-  .stagger-4 { animation-delay: 0.2s; }
-  .stagger-5 { animation-delay: 0.25s; }
+  /* Animation delays */
+  .delay-75 { animation-delay: 75ms; }
+  .delay-100 { animation-delay: 100ms; }
+  .delay-150 { animation-delay: 150ms; }
+  .delay-200 { animation-delay: 200ms; }
+  .delay-300 { animation-delay: 300ms; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   KEYFRAMES
+   KEYFRAME ANIMATIONS
    ═══════════════════════════════════════════════════════════════════════════ */
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes slideUp {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -701,13 +953,19 @@ input, select, textarea {
   }
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
-  }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes streakGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(249, 115, 22, 0.6); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -718,5 +976,13 @@ input, select, textarea {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --border-default: rgba(255, 255, 255, 0.3);
+    --border-hover: rgba(255, 255, 255, 0.5);
   }
 }
