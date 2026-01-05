@@ -96,7 +96,10 @@ export interface Resposta {
 
 // ═══════════════════════════════════════════════════════════
 // INTERFACE: Conquista
+// Sistema de 10 níveis com requisitos combinados
 // ═══════════════════════════════════════════════════════════
+export type DificuldadeConquista = 'facil' | 'medio' | 'dificil' | 'muito_dificil' | 'lendario'
+
 export interface Conquista {
   id: string
   codigo: string
@@ -104,8 +107,15 @@ export interface Conquista {
   descricao: string
   icone: string
   componente?: Componente
-  requisito_tipo: 'pontos' | 'questoes' | 'sequencia' | 'acertos'
+  requisito_tipo: 'pontos' | 'questoes' | 'sequencia' | 'acertos' | 'combinado'
   requisito_valor: number
+  // Requisitos combinados (para conquistas médias+)
+  req_pontos?: number
+  req_questoes_corretas?: number
+  req_sequencia_dias?: number
+  // Metadados
+  dificuldade: DificuldadeConquista
+  ordem: number
 }
 
 export interface ConquistaUsuario {
