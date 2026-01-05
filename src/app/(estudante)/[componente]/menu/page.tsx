@@ -16,6 +16,7 @@ import {
   Zap,
   GraduationCap,
   ChevronRight,
+  Map,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
@@ -95,6 +96,7 @@ export default function MenuComponentePage() {
     { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões' },
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
+    { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
     { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },

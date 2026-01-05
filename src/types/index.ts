@@ -398,3 +398,55 @@ export function extrairAnoTurma(turma: string): { ano: number; nivel: NivelEnsin
 
   throw new Error('Turma inválida')
 }
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Mapa Mental
+// Sistema de resumos visuais por série e bimestre
+// ═══════════════════════════════════════════════════════════
+
+export type SerieEM = 1 | 2 | 3
+export type Bimestre = 1 | 2 | 3 | 4
+
+export interface MapaMental {
+  id: string
+  componente: Componente
+  serie: SerieEM
+  bimestre: Bimestre
+  titulo: string
+  descricao?: string
+  tema?: string
+  imagem_url: string
+  thumbnail_url?: string
+  curtidas: number
+  downloads: number
+  visualizacoes: number
+  ativo: boolean
+  destaque: boolean
+  criado_em: string
+  atualizado_em: string
+}
+
+export interface MapaMentalComStatus extends MapaMental {
+  curtido: boolean  // Se o usuário atual curtiu
+}
+
+export interface MapaCurtida {
+  id: string
+  mapa_id: string
+  usuario_id: string
+  criado_em: string
+}
+
+// Labels para exibição
+export const SERIES_LABELS: Record<SerieEM, string> = {
+  1: '1ª Série',
+  2: '2ª Série',
+  3: '3ª Série',
+}
+
+export const BIMESTRES_LABELS: Record<Bimestre, string> = {
+  1: '1º Bimestre',
+  2: '2º Bimestre',
+  3: '3º Bimestre',
+  4: '4º Bimestre',
+}
