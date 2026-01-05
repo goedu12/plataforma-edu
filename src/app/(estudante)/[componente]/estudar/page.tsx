@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, BookOpen, CheckCircle2, WifiOff, RefreshCw, Clock, AlertTriangle, Calendar, Zap } from 'lucide-react'
+import { ArrowLeft, BookOpen, CheckCircle2, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap } from 'lucide-react'
 import QuestaoCard from '@/components/QuestaoCard'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
@@ -35,7 +35,6 @@ export default function EstudarPage() {
   const isFisica = componente === 'fisica'
   const nomeComponente = isFisica ? 'Física' : 'Matemática'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const corGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
   const buscarQuestao = async () => {
     setLoading(true)
@@ -99,98 +98,61 @@ export default function EstudarPage() {
   }
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
-      {/* Header */}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          HEADER COMPACTO
+          ═══════════════════════════════════════════════════════════════════ */}
       <header
-        className="px-4 py-4 sticky top-0 z-10"
-        style={{
-          background: corPrimaria,
-          boxShadow: `0 4px 20px ${corGlow}`,
-        }}
+        className="px-4 py-2 sticky top-0 z-10 flex-shrink-0"
+        style={{ background: corPrimaria }}
       >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={handleVoltar}
-            className="p-3 -ml-2 rounded-xl hover:bg-black/20 transition-colors touch-target"
+            className="p-2 -ml-2 rounded-lg"
+            style={{ color: isFisica ? '#000' : '#fff' }}
           >
-            <ArrowLeft className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+            <ArrowLeft className="w-5 h-5" />
           </button>
+
           <div className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
-            <h1
-              className="font-display font-semibold"
-              style={{ color: isFisica ? '#000' : '#fff' }}
-            >
+            <BookOpen className="w-4 h-4" style={{ color: isFisica ? '#000' : '#fff' }} />
+            <span className="font-semibold text-sm" style={{ color: isFisica ? '#000' : '#fff' }}>
               Estudar
-            </h1>
+            </span>
           </div>
-          {status === 'OK' && questao ? (
+
+          {/* Indicador de limite semanal compacto */}
+          {status === 'OK' && limite && limite.limite_semanal !== null && (
             <div
-              className="flex items-center gap-1 rounded-full px-3 py-1"
-              style={{ background: 'rgba(0,0,0,0.2)' }}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium"
+              style={{ background: 'rgba(0,0,0,0.2)', color: isFisica ? '#000' : '#fff' }}
             >
-              <Clock className="w-4 h-4" style={{ color: isFisica ? '#000' : '#fff' }} />
-              <span
-                className="text-sm font-mono tabular-nums"
-                style={{ color: isFisica ? '#000' : '#fff' }}
-              >
-                {tempoDecorrido}s
-              </span>
+              <Calendar className="w-3.5 h-3.5" />
+              <span className="tabular-nums">{limite.questoes_semana}/{limite.limite_semanal}</span>
+              {limite.restantes !== null && limite.restantes <= 3 && (
+                <span className="text-[10px] opacity-80">
+                  ({limite.restantes})
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="w-12" />
+          )}
+
+          {/* Espaçador quando não há limite */}
+          {!(status === 'OK' && limite && limite.limite_semanal !== null) && (
+            <div className="w-9" />
           )}
         </div>
       </header>
 
-      {/* Indicador de Limite Semanal */}
-      {limite && limite.limite_semanal !== null && status === 'OK' && (
-        <div className="max-w-2xl mx-auto px-4 pt-4">
-          <div
-            className="flex items-center justify-between rounded-xl p-3"
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-default)',
-            }}
-          >
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Esta semana
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                className="text-sm font-mono font-bold tabular-nums"
-                style={{
-                  color: limite.restantes !== null && limite.restantes <= 3
-                    ? 'var(--warning)'
-                    : corPrimaria,
-                }}
-              >
-                {limite.questoes_semana}/{limite.limite_semanal}
-              </span>
-              {limite.restantes !== null && limite.restantes <= 5 && (
-                <span
-                  className="text-xs px-2 py-0.5 rounded-full"
-                  style={{
-                    background: 'rgba(245, 158, 11, 0.15)',
-                    color: 'var(--warning)',
-                  }}
-                >
-                  {limite.restantes} restantes
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto px-4 pt-6">
+      {/* ═══════════════════════════════════════════════════════════════════
+          CONTEÚDO
+          ═══════════════════════════════════════════════════════════════════ */}
+      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full flex flex-col">
         {status === 'OK' && questao ? (
-          <div className="animate-fade-in-up">
+          <div className="flex-1 flex flex-col animate-fade-in-up">
             <QuestaoCard
               questao={questao}
               componente={componente}
@@ -203,20 +165,20 @@ export default function EstudarPage() {
             />
           </div>
         ) : (
+          /* ═══════════════════════════════════════════════════════════════
+             TELA DE STATUS (Erro, Limite, Completou, etc)
+             ═══════════════════════════════════════════════════════════════ */
           <div
-            className="card p-8 text-center animate-fade-in-up"
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-default)',
-            }}
+            className="rounded-2xl p-6 text-center animate-fade-in-up"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             {/* Ícone */}
             <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
+              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
               style={{
                 background: status === 'LIMITE_SEMANAL' ? 'rgba(245, 158, 11, 0.15)'
                   : status === 'ERRO' ? 'rgba(239, 68, 68, 0.15)'
-                  : status === 'COMPLETOU' ? `${corGlow}`
+                  : status === 'COMPLETOU' ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
                   : 'var(--bg-elevated)',
                 border: status === 'LIMITE_SEMANAL' ? '1px solid rgba(245, 158, 11, 0.3)'
                   : status === 'ERRO' ? '1px solid rgba(239, 68, 68, 0.3)'
@@ -224,16 +186,16 @@ export default function EstudarPage() {
                   : '1px solid var(--border-default)',
               }}
             >
-              {status === 'LIMITE_SEMANAL' && <AlertTriangle className="w-8 h-8" style={{ color: 'var(--warning)' }} />}
-              {status === 'FORA_PERIODO' && <Calendar className="w-8 h-8" style={{ color: 'var(--color-accent)' }} />}
-              {status === 'COMPLETOU' && <CheckCircle2 className="w-8 h-8" style={{ color: corPrimaria }} />}
-              {status === 'ERRO' && <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />}
-              {status === 'SEM_QUESTOES' && <BookOpen className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />}
+              {status === 'LIMITE_SEMANAL' && <AlertTriangle className="w-7 h-7" style={{ color: 'var(--warning)' }} />}
+              {status === 'FORA_PERIODO' && <Calendar className="w-7 h-7" style={{ color: 'var(--color-accent)' }} />}
+              {status === 'COMPLETOU' && <CheckCircle2 className="w-7 h-7" style={{ color: corPrimaria }} />}
+              {status === 'ERRO' && <WifiOff className="w-7 h-7" style={{ color: 'var(--error)' }} />}
+              {status === 'SEM_QUESTOES' && <BookOpen className="w-7 h-7" style={{ color: 'var(--text-muted)' }} />}
             </div>
 
             {/* Título */}
             <h2
-              className="font-display text-xl font-bold mb-3"
+              className="text-lg font-bold mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
               {status === 'LIMITE_SEMANAL' && 'Limite Semanal Atingido'}
@@ -244,29 +206,30 @@ export default function EstudarPage() {
             </h2>
 
             {/* Descrição */}
-            <p className="mb-2" style={{ color: 'var(--text-secondary)' }}>
-              {status === 'LIMITE_SEMANAL' && `Você já respondeu ${limite?.questoes_semana || 15} questões esta semana!`}
-              {status === 'FORA_PERIODO' && 'O período letivo ainda não começou ou está em férias.'}
+            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
+              {status === 'LIMITE_SEMANAL' && `Você respondeu ${limite?.questoes_semana || 15} questões esta semana!`}
+              {status === 'FORA_PERIODO' && 'Período letivo não iniciado ou em férias.'}
               {status === 'COMPLETOU' && `Você completou todas as questões de ${nomeComponente}!`}
               {status === 'ERRO' && erro}
               {status === 'SEM_QUESTOES' && `Ainda não há questões de ${nomeComponente} para seu ano.`}
             </p>
 
-            <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
-              {status === 'LIMITE_SEMANAL' && 'Volte na segunda-feira ou use o modo Desafio!'}
-              {status === 'FORA_PERIODO' && 'Use o modo Desafio para praticar sem limites!'}
-              {status === 'COMPLETOU' && 'Continue praticando no tutor IA!'}
+            <p className="text-xs mb-6" style={{ color: 'var(--text-muted)' }}>
+              {status === 'LIMITE_SEMANAL' && 'Volte na segunda ou use o modo Desafio!'}
+              {status === 'FORA_PERIODO' && 'Use o modo Desafio para praticar!'}
+              {status === 'COMPLETOU' && 'Continue com o tutor IA!'}
               {status === 'ERRO' && 'Tente novamente ou volte mais tarde.'}
               {status === 'SEM_QUESTOES' && 'Tire dúvidas com o tutor IA!'}
             </p>
 
             {/* Botões */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
               {(status === 'LIMITE_SEMANAL' || status === 'FORA_PERIODO') && (
                 <Button
                   variant="secondary"
                   onClick={() => router.push(`/${componente}/desafio`)}
                   leftIcon={<Zap className="w-4 h-4" />}
+                  className="min-h-[48px]"
                 >
                   Modo Desafio
                 </Button>
@@ -275,6 +238,7 @@ export default function EstudarPage() {
                 <Button
                   variant="secondary"
                   onClick={() => router.push(`/${componente}/tutor`)}
+                  className="min-h-[48px]"
                 >
                   Tutor IA
                 </Button>
@@ -284,6 +248,7 @@ export default function EstudarPage() {
                   variant="secondary"
                   onClick={buscarQuestao}
                   leftIcon={<RefreshCw className="w-4 h-4" />}
+                  className="min-h-[48px]"
                 >
                   Tentar Novamente
                 </Button>
@@ -291,35 +256,15 @@ export default function EstudarPage() {
               <Button
                 variant={isFisica ? 'fisica' : 'matematica'}
                 onClick={handleVoltar}
+                className="min-h-[48px]"
               >
                 Voltar ao Menu
               </Button>
             </div>
           </div>
         )}
-
-        {/* Dica simples (sem terminal-box) */}
-        {status === 'OK' && questao && (
-          <div
-            className="mt-6 p-4 rounded-xl animate-fade-in"
-            style={{
-              background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-              border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
-            }}
-          >
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <strong style={{ color: corPrimaria }}>Dica:</strong> Responda em menos de 30 segundos para ganhar bônus de velocidade!
-              {limite && limite.limite_semanal !== null && (
-                <span className="block mt-1" style={{ color: 'var(--text-muted)' }}>
-                  Questões desta semana: {limite.questoes_semana}/{limite.limite_semanal}
-                </span>
-              )}
-            </p>
-          </div>
-        )}
       </main>
 
-      {/* Bottom Navigation */}
       <BottomNav componente={componente} />
     </div>
   )

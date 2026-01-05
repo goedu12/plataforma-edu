@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, ArrowRight } from 'lucide-react'
+import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, ArrowRight, Lightbulb } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import BottomNav from '@/components/BottomNav'
@@ -190,7 +190,9 @@ export default function DesafioPage() {
     return <Loading fullScreen componente={componente} />
   }
 
-  // Tela de Resultado
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TELA DE RESULTADO
+  // ═══════════════════════════════════════════════════════════════════════════
   if (status === 'RESULTADO' && resultado) {
     const porcentagem = Math.round((resultado.acertos / resultado.total) * 100)
     const isPerfeito = resultado.acertos === resultado.total
@@ -198,97 +200,90 @@ export default function DesafioPage() {
     return (
       <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
         <NavigationRail componente={componente} />
+
+        {/* Header Compacto */}
         <header
-          className="px-4 py-4"
-          style={{
-            background: corPrimaria,
-            borderBottom: '1px solid var(--border-default)',
-          }}
+          className="px-4 py-3 sticky top-0 z-10"
+          style={{ background: corPrimaria }}
         >
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <button
               onClick={handleVoltar}
-              className="p-3 -ml-2 rounded-xl transition-colors touch-target lg:hidden"
+              className="p-2 -ml-2 rounded-xl lg:hidden"
               style={{ color: isFisica ? '#000' : '#fff' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
-              <h1
-                className="font-display font-semibold"
-                style={{ color: isFisica ? '#000' : '#fff' }}
-              >
-                Resultado do Desafio
+              <h1 className="font-semibold" style={{ color: isFisica ? '#000' : '#fff' }}>
+                Resultado
               </h1>
             </div>
-            <div className="w-12 lg:hidden" />
+            <div className="w-9 lg:hidden" />
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-4 pt-8 pb-8">
+        <main className="max-w-2xl mx-auto px-4 py-6">
           {/* Card de Resultado */}
           <div
-            className="card p-8 text-center animate-fade-in-up"
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-default)',
-            }}
+            className="rounded-2xl p-6 text-center animate-fade-in-up"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             <div
-              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
               style={{
                 background: isPerfeito || porcentagem >= 60 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                 border: `2px solid ${isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)'}`,
               }}
             >
               <Trophy
-                className="w-10 h-10"
+                className="w-8 h-8"
                 style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
               />
             </div>
 
             <p
-              className="font-display text-5xl font-bold"
+              className="text-4xl font-bold"
               style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
             >
               {resultado.acertos}/{resultado.total}
             </p>
-            <p className="mt-2 text-lg" style={{ color: 'var(--text-secondary)' }}>
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
               {isPerfeito ? 'Perfeito!' : porcentagem >= 60 ? 'Bom trabalho!' : 'Continue praticando!'}
             </p>
 
             <div
-              className="mt-6 pt-4 rounded-xl p-4"
+              className="mt-4 rounded-xl p-3"
               style={{ background: 'var(--bg-elevated)' }}
             >
-              <p className="text-2xl font-bold" style={{ color: 'var(--success)' }}>
+              <p className="text-xl font-bold" style={{ color: 'var(--success)' }}>
                 +{resultado.pontos_ganhos} pontos
               </p>
               {resultado.bonus_perfeito && (
-                <p className="text-sm mt-1" style={{ color: 'var(--warning)' }}>
-                  Incluindo bônus de acerto perfeito!
+                <p className="text-xs mt-1" style={{ color: 'var(--warning)' }}>
+                  Incluindo bônus perfeito!
                 </p>
               )}
             </div>
           </div>
 
           {/* Lista de Respostas */}
-          <div className="mt-6 space-y-3">
-            <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
+          <div className="mt-4 space-y-2">
+            <p className="text-xs font-medium px-1" style={{ color: 'var(--text-muted)' }}>
               Suas Respostas
             </p>
             {resultado.resultados.map((r, index) => (
               <div
                 key={r.questao_id}
-                className="rounded-xl p-4 flex items-center gap-3"
+                className="rounded-xl p-3 flex items-center gap-3"
                 style={{
                   background: 'var(--bg-surface)',
                   border: `1px solid ${r.correta ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
                 }}
               >
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ background: r.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)' }}
                 >
                   {r.correta ? (
@@ -298,10 +293,10 @@ export default function DesafioPage() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                  <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
                     Questão {index + 1}
                   </p>
-                  <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     Sua: {r.resposta_dada || '—'} • Correta: {r.resposta_correta}
                   </p>
                 </div>
@@ -313,7 +308,7 @@ export default function DesafioPage() {
           <Button
             variant={isFisica ? 'fisica' : 'matematica'}
             onClick={handleVoltar}
-            className="w-full mt-8"
+            className="w-full mt-6 min-h-[52px]"
           >
             Voltar ao Menu
           </Button>
@@ -324,58 +319,52 @@ export default function DesafioPage() {
     )
   }
 
-  // Tela de Erro
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TELA DE ERRO
+  // ═══════════════════════════════════════════════════════════════════════════
   if (status === 'ERRO' || status === 'SEM_QUESTOES') {
     return (
       <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
         <NavigationRail componente={componente} />
+
         <header
-          className="px-4 py-4"
-          style={{
-            background: 'var(--bg-surface)',
-            borderBottom: '1px solid var(--border-default)',
-          }}
+          className="px-4 py-3 sticky top-0 z-10"
+          style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
         >
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <button
               onClick={handleVoltar}
-              className="p-3 -ml-2 rounded-xl transition-colors touch-target lg:hidden"
+              className="p-2 -ml-2 rounded-xl lg:hidden"
               style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
-              <h1 className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <h1 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Modo Desafio
               </h1>
             </div>
-            <div className="w-12 lg:hidden" />
+            <div className="w-9 lg:hidden" />
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-4 pt-8">
+        <main className="max-w-2xl mx-auto px-4 py-8">
           <div
-            className="card p-8 text-center animate-fade-in-up"
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-default)',
-            }}
+            className="rounded-2xl p-8 text-center"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
-              }}
+              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
             >
-              <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />
+              <WifiOff className="w-7 h-7" style={{ color: 'var(--error)' }} />
             </div>
-            <h2 className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
               {status === 'SEM_QUESTOES' ? 'Questões Insuficientes' : 'Erro'}
             </h2>
-            <p className="mt-2" style={{ color: 'var(--text-muted)' }}>{erro}</p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-8 justify-center">
+            <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>{erro}</p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-center">
               <Button variant="secondary" onClick={iniciarDesafio} leftIcon={<RefreshCw className="w-4 h-4" />}>
                 Tentar Novamente
               </Button>
@@ -391,7 +380,9 @@ export default function DesafioPage() {
     )
   }
 
-  // Tela do Desafio em Andamento
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TELA DO DESAFIO EM ANDAMENTO - OTIMIZADA
+  // ═══════════════════════════════════════════════════════════════════════════
   const questaoAtualData = questoes[questaoAtual]
   const respostaAtual = respostas[questaoAtual]
   const todasRespondidas = respostas.every(r => r !== null)
@@ -404,36 +395,37 @@ export default function DesafioPage() {
   ] : []
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
-      {/* Header com Timer */}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          HEADER COMPACTO - Timer inline
+          ═══════════════════════════════════════════════════════════════════ */}
       <header
-        className="px-4 py-4 sticky top-0 z-10"
-        style={{
-          background: 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border-default)',
-        }}
+        className="px-4 py-2 sticky top-0 z-10 flex-shrink-0"
+        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
       >
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+          {/* Linha 1: Navegação + Título + Timer */}
+          <div className="flex items-center justify-between gap-2">
             <button
               onClick={handleVoltar}
-              className="p-3 -ml-2 rounded-xl transition-colors touch-target lg:hidden"
+              className="p-2 -ml-2 rounded-lg lg:hidden"
               style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
-              <h1 className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Modo Desafio
-              </h1>
+              <Zap className="w-4 h-4" style={{ color: corPrimaria }} />
+              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                Desafio
+              </span>
             </div>
 
             {/* Timer */}
             <div
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg font-mono text-lg font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
               style={{
                 background: tempoPerigo ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-elevated)',
                 color: tempoPerigo ? 'var(--error)' : corPrimaria,
@@ -445,69 +437,70 @@ export default function DesafioPage() {
             </div>
           </div>
 
-          {/* Progress Indicators */}
-          <div className="flex gap-1">
-            {questoes.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setQuestaoAtual(index)}
-                className="flex-1 h-2 rounded-sm transition-all touch-target"
-                style={{
-                  background: index === questaoAtual
-                    ? corPrimaria
-                    : respostas[index]
-                      ? isFisica ? 'rgba(34, 197, 94, 0.4)' : 'rgba(139, 92, 246, 0.4)'
-                      : 'var(--bg-elevated)',
-                }}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-              Questão {questaoAtual + 1}/{questoes.length}
-            </span>
-            <span className="text-xs" style={{ color: corPrimaria }}>
-              {respostas.filter(r => r !== null).length} respondidas
+          {/* Linha 2: Progress + Counter */}
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex gap-1 flex-1">
+              {questoes.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setQuestaoAtual(index)}
+                  className="flex-1 h-1.5 rounded-full transition-all"
+                  style={{
+                    background: index === questaoAtual
+                      ? corPrimaria
+                      : respostas[index]
+                        ? isFisica ? 'rgba(34, 197, 94, 0.5)' : 'rgba(139, 92, 246, 0.5)'
+                        : 'var(--bg-elevated)',
+                  }}
+                />
+              ))}
+            </div>
+            <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+              {questaoAtual + 1}/{questoes.length}
             </span>
           </div>
         </div>
       </header>
 
-      {/* Conteúdo */}
-      <main className="max-w-2xl mx-auto px-4 pt-6">
+      {/* ═══════════════════════════════════════════════════════════════════
+          CONTEÚDO - Área flexível
+          ═══════════════════════════════════════════════════════════════════ */}
+      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full flex flex-col">
         {questaoAtualData && (
-          <div className="animate-fade-in">
-            {/* Card da Questão */}
+          <div className="flex-1 flex flex-col animate-fade-in">
+            {/* Tag do tema */}
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="px-2 py-1 rounded-lg text-xs font-medium"
+                style={{
+                  background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                  color: corPrimaria,
+                }}
+              >
+                {questaoAtualData.tema}
+              </span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {respostas.filter(r => r !== null).length} respondidas
+              </span>
+            </div>
+
+            {/* Enunciado */}
             <div
-              className="card p-5 mb-6"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-              }}
+              className="p-4 rounded-xl mb-3 flex-shrink-0"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <span
-                  className="px-2 py-1 rounded-md text-xs font-medium"
-                  style={{
-                    background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                    color: corPrimaria,
-                  }}
-                >
-                  {questaoAtualData.tema}
-                </span>
-              </div>
-              <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                 {questaoAtualData.enunciado}
               </p>
             </div>
 
             {/* Alternativas */}
-            <div className="space-y-3 mb-6">
+            <div className="space-y-2 flex-shrink-0">
               {alternativas.map(({ letra, texto }) => (
                 <button
                   key={letra}
                   onClick={() => handleSelecionarResposta(letra)}
-                  className="w-full p-4 rounded-xl flex items-center gap-4 transition-all touch-target"
+                  className="w-full min-h-[52px] px-3 py-3 rounded-xl flex items-center gap-3 transition-all active:scale-[0.98] text-left"
                   style={{
                     background: respostaAtual === letra
                       ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
@@ -516,7 +509,7 @@ export default function DesafioPage() {
                   }}
                 >
                   <span
-                    className="w-10 h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
                     style={{
                       background: respostaAtual === letra ? corPrimaria : 'var(--bg-elevated)',
                       color: respostaAtual === letra ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
@@ -524,7 +517,7 @@ export default function DesafioPage() {
                   >
                     {letra}
                   </span>
-                  <span className="text-left flex-1" style={{ color: 'var(--text-primary)' }}>
+                  <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
                     {texto}
                   </span>
                   {respostaAtual === letra && (
@@ -534,13 +527,30 @@ export default function DesafioPage() {
               ))}
             </div>
 
+            {/* Espaçador flexível */}
+            <div className="flex-1 min-h-4" />
+
+            {/* Dica compacta */}
+            <div
+              className="py-2 px-3 rounded-xl mb-3 flex items-center gap-2"
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.08)' : 'rgba(139, 92, 246, 0.08)',
+                border: '1px dashed var(--border-default)',
+              }}
+            >
+              <Lightbulb className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60}min. Bônus: +{DESAFIO.BONUS_PERFEITO}pts se acertar todas!
+              </p>
+            </div>
+
             {/* Navegação */}
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
                 variant="secondary"
                 onClick={handleAnterior}
                 disabled={questaoAtual === 0}
-                className="flex-1"
+                className="flex-1 min-h-[48px]"
                 leftIcon={<ArrowLeft className="w-4 h-4" />}
               >
                 Anterior
@@ -549,7 +559,7 @@ export default function DesafioPage() {
                 <Button
                   variant={isFisica ? 'fisica' : 'matematica'}
                   onClick={handleProxima}
-                  className="flex-1"
+                  className="flex-1 min-h-[48px]"
                   rightIcon={<ArrowRight className="w-4 h-4" />}
                 >
                   Próxima
@@ -559,7 +569,7 @@ export default function DesafioPage() {
                   variant={isFisica ? 'fisica' : 'matematica'}
                   onClick={() => finalizarDesafio(false)}
                   disabled={!todasRespondidas}
-                  className="flex-1"
+                  className="flex-1 min-h-[48px]"
                 >
                   Finalizar
                 </Button>
@@ -567,26 +577,12 @@ export default function DesafioPage() {
             </div>
 
             {!todasRespondidas && questaoAtual === questoes.length - 1 && (
-              <p className="text-center text-sm mt-4" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-center text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
                 Responda todas as questões para finalizar
               </p>
             )}
           </div>
         )}
-
-        {/* Dica */}
-        <div
-          className="mt-8 p-4 rounded-xl"
-          style={{
-            background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-            border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
-          }}
-        >
-          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            <strong style={{ color: corPrimaria }}>Dica:</strong> {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60} minutos.
-            Acerte todas para ganhar +{DESAFIO.BONUS_PERFEITO} pontos bônus!
-          </p>
-        </div>
       </main>
 
       <BottomNav componente={componente} />
