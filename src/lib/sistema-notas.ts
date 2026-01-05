@@ -354,14 +354,18 @@ export async function nivel3RegrasNegocio(
   // MODO ESTUDO: Verifica período e limite semanal
   const periodo = getPeriodoAtual()
 
-  // Fora do período letivo
+  // Fora do período letivo - permite acesso, mas sem contagem para nota
   if (!periodo) {
     return {
       nivel: 3,
-      passou: false,
-      erro: 'Fora do período letivo. Aguarde o início das aulas.',
-      codigo: 'FORA_PERIODO',
-      dados: { pode_responder: false },
+      passou: true,
+      dados: {
+        limite_semanal: null,
+        questoes_semana: 0,
+        pode_responder: true,
+        motivo: 'Fora do período letivo - modo prática livre',
+        conta_para_nota: false,
+      },
     }
   }
 

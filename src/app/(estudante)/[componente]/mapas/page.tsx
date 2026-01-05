@@ -14,6 +14,8 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
@@ -36,9 +38,14 @@ export default function MapasMentaisPage() {
   const [bimestreFiltro, setBimestreFiltro] = useState<Bimestre | null>(null)
   const [showFiltros, setShowFiltros] = useState(false)
 
-  // Stories mode
-  const [storiesAberto, setStoriesAberto] = useState(false)
+  // Visualização
+  const [modalAberto, setModalAberto] = useState(false) // Desktop: Modal
+  const [storiesAberto, setStoriesAberto] = useState(false) // Mobile: Stories
   const [indiceAtual, setIndiceAtual] = useState(0)
+  const [zoom, setZoom] = useState(1)
+
+  // Detecção de dispositivo
+  const [isMobile, setIsMobile] = useState(false)
 
   // Touch/Swipe state
   const [touchStart, setTouchStart] = useState<number | null>(null)
@@ -48,6 +55,17 @@ export default function MapasMentaisPage() {
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const mapaAtual = mapas[indiceAtual]
+
+  // Detectar mobile vs desktop
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Buscar mapas
   const buscarMapas = async () => {
@@ -83,41 +101,50 @@ export default function MapasMentaisPage() {
     buscarMapas()
   }, [componente, serieFiltro, bimestreFiltro])
 
-  // Navegação Stories
+  // Navegação
   const irParaAnterior = useCallback(() => {
     setIndiceAtual(prev => (prev > 0 ? prev - 1 : mapas.length - 1))
+    setZoom(1)
   }, [mapas.length])
 
   const irParaProximo = useCallback(() => {
     setIndiceAtual(prev => (prev < mapas.length - 1 ? prev + 1 : 0))
+    setZoom(1)
   }, [mapas.length])
 
-  // Abrir stories em um índice específico
-  const abrirStories = (indice: number) => {
+  // Abrir visualização baseado no dispositivo
+  const abrirVisualizacao = (indice: number) => {
     setIndiceAtual(indice)
-    setStoriesAberto(true)
+    setZoom(1)
+    if (isMobile) {
+      setStoriesAberto(true)
+    } else {
+      setModalAberto(true)
+    }
   }
 
-  // Fechar stories
-  const fecharStories = () => {
+  // Fechar visualização
+  const fecharVisualizacao = () => {
     setStoriesAberto(false)
+    setModalAberto(false)
+    setZoom(1)
   }
 
   // Keyboard navigation
   useEffect(() => {
-    if (!storiesAberto) return
+    if (!storiesAberto && !modalAberto) return
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') irParaAnterior()
       else if (e.key === 'ArrowRight') irParaProximo()
-      else if (e.key === 'Escape') fecharStories()
+      else if (e.key === 'Escape') fecharVisualizacao()
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [storiesAberto, irParaAnterior, irParaProximo])
+  }, [storiesAberto, modalAberto, irParaAnterior, irParaProximo])
 
-  // Touch/Swipe handlers
+  // Touch/Swipe handlers (apenas mobile)
   const minSwipeDistance = 50
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -344,7 +371,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
             {mapas.map((mapa, index) => (
               <button
                 key={mapa.id}
-                onClick={() => abrirStories(index)}
+                onClick={() => abrirVisualizacao(index)}
                 className="rounded-xl overflow-hidden text-left transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
               >
@@ -388,7 +415,161 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
         )}
       </main>
 
-      {/* MODO STORIES - Fullscreen */}
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODAL LIGHTBOX - DESKTOP/CHROMEBOOK (≥768px)
+          ═══════════════════════════════════════════════════════════════════════ */}
+      {modalAberto && mapaAtual && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.9)' }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) fecharVisualizacao()
+          }}
+        >
+          {/* Botão Fechar */}
+          <button
+            onClick={fecharVisualizacao}
+            className="absolute top-4 right-4 z-20 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+
+          {/* Seta Esquerda */}
+          <button
+            onClick={irParaAnterior}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          >
+            <ChevronLeft className="w-8 h-8 text-white" />
+          </button>
+
+          {/* Seta Direita */}
+          <button
+            onClick={irParaProximo}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          >
+            <ChevronRight className="w-8 h-8 text-white" />
+          </button>
+
+          {/* Container do Modal */}
+          <div className="relative max-w-5xl w-full mx-4 flex flex-col max-h-[90vh]">
+            {/* Header do Modal */}
+            <div className="flex-shrink-0 bg-black/50 backdrop-blur-sm rounded-t-2xl px-6 py-4 flex items-center justify-between">
+              <div>
+                <h2 className="font-semibold text-white text-lg">{mapaAtual.titulo}</h2>
+                <p className="text-sm text-white/60">
+                  {SERIES_LABELS[mapaAtual.serie]} • {BIMESTRES_LABELS[mapaAtual.bimestre]}
+                </p>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="text-white/60 text-sm">
+                  {indiceAtual + 1} / {mapas.length}
+                </span>
+                {/* Controles de Zoom */}
+                <div className="flex items-center gap-2 bg-white/10 rounded-full px-3 py-1">
+                  <button
+                    onClick={() => setZoom(z => Math.max(0.5, z - 0.25))}
+                    className="p-1 hover:bg-white/10 rounded"
+                  >
+                    <ZoomOut className="w-4 h-4 text-white" />
+                  </button>
+                  <span className="text-white text-sm w-12 text-center">{Math.round(zoom * 100)}%</span>
+                  <button
+                    onClick={() => setZoom(z => Math.min(2, z + 0.25))}
+                    className="p-1 hover:bg-white/10 rounded"
+                  >
+                    <ZoomIn className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Imagem */}
+            <div className="flex-1 overflow-auto bg-black/30 flex items-center justify-center p-4">
+              <img
+                src={mapaAtual.imagem_url}
+                alt={mapaAtual.titulo}
+                className="max-w-full max-h-full object-contain rounded-lg transition-transform"
+                style={{ transform: `scale(${zoom})` }}
+              />
+            </div>
+
+            {/* Footer com Ações */}
+            <div className="flex-shrink-0 bg-black/50 backdrop-blur-sm rounded-b-2xl px-6 py-4">
+              {/* Stats */}
+              <div className="flex items-center gap-6 text-sm text-white/60 mb-4">
+                <span className="flex items-center gap-2">
+                  <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? '#ef4444' : 'inherit' }} />
+                  {mapaAtual.curtidas} curtidas
+                </span>
+                <span className="flex items-center gap-2">
+                  <Download className="w-5 h-5" />
+                  {mapaAtual.downloads} downloads
+                </span>
+              </div>
+
+              {/* Botões de Ação */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => handleCurtir(mapaAtual)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
+                  style={{
+                    background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.1)',
+                    color: mapaAtual.curtido ? '#ef4444' : 'white',
+                    border: `1px solid ${mapaAtual.curtido ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.2)'}`
+                  }}
+                >
+                  <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
+                  {mapaAtual.curtido ? 'Curtido' : 'Curtir'}
+                </button>
+                <button
+                  onClick={() => handleDownload(mapaAtual)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
+                  style={{
+                    background: 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}
+                >
+                  <Download className="w-5 h-5" />
+                  Baixar HD
+                </button>
+                <button
+                  onClick={() => handleCompartilhar(mapaAtual)}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
+                  style={{
+                    background: '#25D366',
+                    color: 'white'
+                  }}
+                >
+                  <Share2 className="w-5 h-5" />
+                  Compartilhar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Miniaturas na parte inferior */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-black/50 backdrop-blur-sm rounded-xl p-2 max-w-[80vw] overflow-x-auto">
+            {mapas.map((mapa, idx) => (
+              <button
+                key={mapa.id}
+                onClick={() => { setIndiceAtual(idx); setZoom(1) }}
+                className={`flex-shrink-0 w-12 h-16 rounded-lg overflow-hidden transition-all ${idx === indiceAtual ? 'ring-2 ring-white scale-110' : 'opacity-50 hover:opacity-100'}`}
+              >
+                <img
+                  src={mapa.thumbnail_url || mapa.imagem_url}
+                  alt={mapa.titulo}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          MODO STORIES - MOBILE (<768px) - OTIMIZADO
+          ═══════════════════════════════════════════════════════════════════════ */}
       {storiesAberto && mapaAtual && (
         <div
           className="fixed inset-0 z-50 bg-black flex flex-col"
@@ -396,12 +577,24 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
-          {/* Header Stories */}
-          <div className="flex-shrink-0 p-3 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10">
+          {/* Indicadores de progresso - topo */}
+          <div className="absolute top-0 left-0 right-0 z-20 px-3 pt-3 flex gap-1">
+            {mapas.map((_, idx) => (
+              <div
+                key={idx}
+                className="h-1 flex-1 rounded-full transition-colors cursor-pointer"
+                style={{ background: idx === indiceAtual ? corPrimaria : 'rgba(255,255,255,0.3)' }}
+                onClick={() => setIndiceAtual(idx)}
+              />
+            ))}
+          </div>
+
+          {/* Header Stories - compacto */}
+          <div className="flex-shrink-0 px-4 pt-6 pb-2 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
             <div className="flex items-center gap-3 min-w-0">
               <button
-                onClick={fecharStories}
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                onClick={fecharVisualizacao}
+                className="w-10 h-10 rounded-full bg-white/10 active:bg-white/20 flex items-center justify-center"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
@@ -412,96 +605,100 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
                 </p>
               </div>
             </div>
-            <span className="text-white/60 text-sm font-medium">
-              {indiceAtual + 1} / {mapas.length}
+            <span className="text-white/60 text-sm font-medium bg-white/10 px-3 py-1 rounded-full">
+              {indiceAtual + 1}/{mapas.length}
             </span>
           </div>
 
-          {/* Indicadores de progresso */}
-          <div className="absolute top-16 left-0 right-0 z-10 px-3 flex gap-1">
-            {mapas.map((_, idx) => (
-              <div
-                key={idx}
-                className="h-0.5 flex-1 rounded-full transition-colors cursor-pointer"
-                style={{ background: idx === indiceAtual ? corPrimaria : 'rgba(255,255,255,0.3)' }}
-                onClick={() => setIndiceAtual(idx)}
-              />
-            ))}
-          </div>
-
-          {/* Imagem Central */}
-          <div className="flex-1 flex items-center justify-center p-4 pt-24 pb-32">
+          {/* Imagem Central - área de swipe */}
+          <div className="flex-1 flex items-center justify-center px-2 py-2">
             <img
               src={mapaAtual.imagem_url}
               alt={mapaAtual.titulo}
-              className="max-w-full max-h-full object-contain rounded-lg"
+              className="max-w-full max-h-full object-contain rounded-xl"
             />
           </div>
 
-          {/* Setas de Navegação - Desktop */}
-          <button
-            onClick={irParaAnterior}
-            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 items-center justify-center transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
-          </button>
-          <button
-            onClick={irParaProximo}
-            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 items-center justify-center transition-colors"
-          >
-            <ChevronRight className="w-6 h-6 text-white" />
-          </button>
-
-          {/* Barra de Ações - Fixa no Bottom */}
-          <div className="flex-shrink-0 absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
-            {/* Stats */}
-            <div className="flex items-center gap-4 text-sm text-white/60 mb-3">
-              <span className="flex items-center gap-1">
+          {/* ═══════════════════════════════════════════════════════════════════
+              BARRA DE AÇÕES MOBILE - OTIMIZADA COM BOTÕES GRANDES (48px)
+              ═══════════════════════════════════════════════════════════════════ */}
+          <div className="flex-shrink-0 px-4 pb-6 pt-2 bg-gradient-to-t from-black via-black/80 to-transparent">
+            {/* Stats compactos */}
+            <div className="flex items-center justify-center gap-6 text-sm text-white/70 mb-4">
+              <span className="flex items-center gap-1.5">
                 <Heart className="w-4 h-4" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? '#ef4444' : 'inherit' }} />
-                {mapaAtual.curtidas} curtidas
+                {mapaAtual.curtidas}
               </span>
-              <span className="flex items-center gap-1">
+              <span className="flex items-center gap-1.5">
                 <Download className="w-4 h-4" />
-                {mapaAtual.downloads} downloads
+                {mapaAtual.downloads}
               </span>
             </div>
 
-            {/* Botões de Ação */}
-            <div className="flex gap-2">
+            {/* Botões de Ação - GRANDES para touch (min 48px) */}
+            <div className="grid grid-cols-4 gap-3">
+              {/* Curtir */}
               <button
                 onClick={() => handleCurtir(mapaAtual)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
                   background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.1)',
                   color: mapaAtual.curtido ? '#ef4444' : 'white',
-                  border: `1px solid ${mapaAtual.curtido ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.2)'}`
+                  minHeight: '72px'
                 }}
               >
-                <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
-                {mapaAtual.curtido ? 'Curtido' : 'Curtir'}
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.1)' }}>
+                  <Heart className="w-6 h-6" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
+                </div>
+                <span className="text-[10px] font-medium">{mapaAtual.curtido ? 'Curtido' : 'Curtir'}</span>
               </button>
+
+              {/* Baixar */}
               <button
                 onClick={() => handleDownload(mapaAtual)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
                   background: 'rgba(255,255,255,0.1)',
                   color: 'white',
-                  border: '1px solid rgba(255,255,255,0.2)'
+                  minHeight: '72px'
                 }}
               >
-                <Download className="w-5 h-5" />
-                Baixar
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  <Download className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-medium">Baixar</span>
               </button>
+
+              {/* WhatsApp */}
               <button
                 onClick={() => handleCompartilhar(mapaAtual)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
+                className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
-                  background: '#25D366',
-                  color: 'white'
+                  background: 'rgba(37, 211, 102, 0.2)',
+                  color: '#25D366',
+                  minHeight: '72px'
                 }}
               >
-                <Share2 className="w-5 h-5" />
-                WhatsApp
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: '#25D366' }}>
+                  <Share2 className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-[10px] font-medium">WhatsApp</span>
+              </button>
+
+              {/* Fechar */}
+              <button
+                onClick={fecharVisualizacao}
+                className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  color: 'white',
+                  minHeight: '72px'
+                }}
+              >
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                  <X className="w-6 h-6" />
+                </div>
+                <span className="text-[10px] font-medium">Fechar</span>
               </button>
             </div>
           </div>
