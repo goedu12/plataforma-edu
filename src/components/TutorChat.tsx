@@ -24,13 +24,13 @@ import type { Componente, MensagemChat } from '@/types'
 type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'MAPA_MENTAL' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
 
 // Badges visuais para cada modo da IA
-const MODO_BADGES: Record<ModoIA, { icone: string; cor: string; label: string }> = {
-  'DIRETO': { icone: '⚡', cor: 'bg-amber-500/20 text-amber-400 border-amber-500/30', label: 'Direto' },
-  'PASSO_A_PASSO': { icone: '📝', cor: 'bg-blue-500/20 text-blue-400 border-blue-500/30', label: 'Passo a Passo' },
-  'MAPA_MENTAL': { icone: '🗺️', cor: 'bg-purple-500/20 text-purple-400 border-purple-500/30', label: 'Mapa Mental' },
-  'ESTIMULAR': { icone: '💪', cor: 'bg-green-500/20 text-green-400 border-green-500/30', label: 'Motivação' },
-  'SOCRATICO': { icone: '🎓', cor: 'bg-orange-500/20 text-orange-400 border-orange-500/30', label: 'Socrático' },
-  'CONVERSACIONAL': { icone: '💬', cor: 'bg-gray-500/20 text-gray-400 border-gray-500/30', label: 'Conversa' },
+const MODO_BADGES: Record<ModoIA, { icone: string; label: string }> = {
+  'DIRETO': { icone: '⚡', label: 'Direto' },
+  'PASSO_A_PASSO': { icone: '📝', label: 'Passo a Passo' },
+  'MAPA_MENTAL': { icone: '🗺️', label: 'Mapa Mental' },
+  'ESTIMULAR': { icone: '💪', label: 'Motivação' },
+  'SOCRATICO': { icone: '🎓', label: 'Socrático' },
+  'CONVERSACIONAL': { icone: '💬', label: 'Conversa' },
 }
 
 // Interface extendida de mensagem com modo
@@ -48,9 +48,7 @@ interface TutorChatProps {
   onClose: () => void
 }
 
-// ═══════════════════════════════════════════════════════════
-// SUGESTÕES ESTILO PERPLEXITY - Organizadas por categoria
-// ═══════════════════════════════════════════════════════════
+// Sugestões iniciais
 const SUGESTOES_INICIAIS = {
   fisica: [
     { icon: Lightbulb, texto: 'Explique as Leis de Newton', prompt: 'Me explique as três Leis de Newton de forma simples e com exemplos do dia a dia' },
@@ -66,7 +64,7 @@ const SUGESTOES_INICIAIS = {
   ],
 }
 
-// Sugestões de continuidade baseadas no contexto
+// Sugestões de continuidade
 const SUGESTOES_CONTINUIDADE = {
   fisica: [
     { texto: 'Me dê mais exemplos', prompt: 'Pode me dar mais exemplos práticos sobre isso?' },
@@ -82,9 +80,7 @@ const SUGESTOES_CONTINUIDADE = {
   ],
 }
 
-// ═══════════════════════════════════════════════════════════
-// FRASES MOTIVACIONAIS PERSONALIZADAS
-// ═══════════════════════════════════════════════════════════
+// Frases motivacionais
 const FRASES_MOTIVACIONAIS = [
   (nome: string) => `Muito bem, ${nome}! Essa é uma ótima pergunta.`,
   (nome: string) => `Excelente dúvida, ${nome}! Vamos resolver isso juntos.`,
@@ -114,16 +110,10 @@ export default function TutorChat({
   const sugestoesContinuidade = SUGESTOES_CONTINUIDADE[componente]
   const primeiroNome = nomeEstudante.split(' ')[0]
 
-  // Cores e estilos baseados no componente
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'fisica-500' : 'matematica-500'
-  const accentBg = isFisica ? 'bg-fisica-500' : 'bg-matematica-500'
-  const accentGlow = isFisica ? 'bg-fisica-500/10' : 'bg-matematica-500/10'
-  const accentBorder = isFisica ? 'border-fisica-500/30' : 'border-matematica-500/30'
-  const accentText = isFisica ? 'text-fisica-500' : 'text-matematica-500'
-  const focusRing = isFisica ? 'focus:ring-fisica-500/50 focus:border-fisica-500' : 'focus:ring-matematica-500/50 focus:border-matematica-500'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  // Mensagem inicial personalizada do tutor
+  // Mensagem inicial
   useEffect(() => {
     const disciplina = componente === 'fisica' ? 'Física' : 'Matemática'
     const mensagemInicial: MensagemChat = {
@@ -135,7 +125,7 @@ export default function TutorChat({
     setMensagens([mensagemInicial])
   }, [nomeTutor, componente, primeiroNome])
 
-  // Scroll automático para última mensagem
+  // Scroll automático
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight
@@ -175,8 +165,6 @@ export default function TutorChat({
       const data = await response.json()
 
       if (data.sucesso) {
-        // Adicionar frase motivacional personalizada ocasionalmente
-        // (mas não para modo DIRETO que precisa ser objetivo)
         let resposta = data.resposta
         if (data.modo !== 'DIRETO' && Math.random() > 0.5 && mensagens.length > 1) {
           const fraseAleatoria = FRASES_MOTIVACIONAIS[Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length)]
@@ -193,7 +181,6 @@ export default function TutorChat({
         }
         setMensagens(prev => [...prev, respostaTutor])
         setUsoHoje(data.uso_hoje)
-        // Mostrar sugestões de continuidade após resposta
         setMostrarSugestoesContinuidade(true)
       } else {
         setErro(data.erro || 'Erro ao comunicar com o tutor')
@@ -230,38 +217,48 @@ export default function TutorChat({
   }
 
   return (
-    <div className="flex flex-col h-full bg-dark-bg">
-      {/* ═══════════════════════════════════════════════════════════
-          HEADER - Glassmorphism 2026
-          ═══════════════════════════════════════════════════════════ */}
-      <div className="flex items-center justify-between p-4 border-b border-border-glass bg-dark-surface/80 backdrop-blur-xl">
+    <div
+      className="flex flex-col h-full"
+      style={{ background: 'var(--bg-base)' }}
+    >
+      {/* Header do Chat */}
+      <div
+        className="flex items-center justify-between p-4 border-b"
+        style={{
+          background: 'var(--bg-surface)',
+          borderColor: 'var(--border-default)'
+        }}
+      >
         <div className="flex items-center gap-3">
-          <div className={`
-            w-12 h-12 rounded-2xl flex items-center justify-center
-            ${isFisica ? 'bg-gradient-to-br from-fisica-500/20 to-fisica-600/10 shadow-glow-green' : 'bg-gradient-to-br from-matematica-500/20 to-matematica-600/10 shadow-glow-lilas'}
-            border border-border-glass
-          `}>
-            <Bot className={`w-6 h-6 ${accentText}`} />
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center"
+            style={{
+              background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+            }}
+          >
+            <Bot className="w-6 h-6" style={{ color: corPrimaria }} />
           </div>
           <div>
-            <h2 className="font-semibold text-text-primary text-lg">{nomeTutor}</h2>
-            <p className="text-xs text-text-tertiary flex items-center gap-1.5">
-              <Sparkles className={`w-3 h-3 ${accentText} animate-pulse-soft`} />
-              IA Generativa • {usoHoje}/{limiteDiario} msgs hoje
+            <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{nomeTutor}</h2>
+            <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+              <Sparkles className="w-3 h-3" style={{ color: corPrimaria }} />
+              IA • {usoHoje}/{limiteDiario} msgs hoje
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={limparChat}
-            className="p-2.5 text-text-tertiary hover:text-text-primary rounded-xl hover:bg-dark-elevated/80 transition-all duration-200 hover:shadow-soft-sm"
+            className="p-2.5 rounded-xl transition-all touch-target"
+            style={{ color: 'var(--text-muted)' }}
             title="Limpar conversa"
           >
             <Trash2 className="w-5 h-5" />
           </button>
           <button
             onClick={onClose}
-            className="p-2.5 text-text-tertiary hover:text-error rounded-xl hover:bg-error/10 transition-all duration-200"
+            className="p-2.5 rounded-xl transition-all touch-target"
+            style={{ color: 'var(--text-muted)' }}
             title="Sair do chat"
           >
             <X className="w-5 h-5" />
@@ -269,48 +266,64 @@ export default function TutorChat({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          ÁREA DE MENSAGENS - Premium 2026
-          ═══════════════════════════════════════════════════════════ */}
-      <div ref={chatRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
+      {/* Área de Mensagens */}
+      <div
+        ref={chatRef}
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        style={{ background: 'var(--bg-base)' }}
+      >
         {mensagens.map(msg => (
           <div
             key={msg.id}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
+            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[85%] p-4 rounded-2xl backdrop-blur-sm transition-all duration-300 ${
-                msg.role === 'user'
-                  ? 'bg-dark-elevated/90 text-text-primary rounded-br-sm border border-border shadow-soft-sm hover:shadow-soft-md'
-                  : isFisica
-                    ? 'bg-gradient-to-br from-fisica-500/10 to-fisica-600/5 border border-fisica-500/20 text-text-primary rounded-bl-sm shadow-soft-sm hover:shadow-glow-green'
-                    : 'bg-gradient-to-br from-matematica-500/10 to-matematica-600/5 border border-matematica-500/20 text-text-primary rounded-bl-sm shadow-soft-sm hover:shadow-glow-lilas'
-              }`}
+              className="max-w-[85%] p-4 rounded-2xl"
+              style={{
+                background: msg.role === 'user'
+                  ? 'var(--bg-elevated)'
+                  : isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                border: msg.role === 'user'
+                  ? '1px solid var(--border-default)'
+                  : `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
+                borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+              }}
             >
               {msg.role === 'assistant' && (
-                <div className={`flex items-center gap-2 mb-2`}>
-                  <Bot className={`w-4 h-4 ${accentText}`} />
-                  <span className={`text-xs font-medium uppercase tracking-wider ${accentText}`}>{nomeTutor}</span>
-                  {/* Badge de modo da IA */}
+                <div className="flex items-center gap-2 mb-2">
+                  <Bot className="w-4 h-4" style={{ color: corPrimaria }} />
+                  <span className="text-xs font-medium" style={{ color: corPrimaria }}>{nomeTutor}</span>
                   {msg.modo && MODO_BADGES[msg.modo] && (
-                    <span className={`ml-auto px-2 py-0.5 rounded-full text-[10px] font-medium border ${MODO_BADGES[msg.modo].cor}`}>
+                    <span
+                      className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-medium"
+                      style={{
+                        background: 'var(--bg-elevated)',
+                        color: 'var(--text-secondary)'
+                      }}
+                    >
                       {MODO_BADGES[msg.modo].icone} {MODO_BADGES[msg.modo].label}
                     </span>
                   )}
                 </div>
               )}
-              <p className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+              <p
+                className="text-sm whitespace-pre-wrap leading-relaxed"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {msg.content}
+              </p>
             </div>
           </div>
         ))}
 
-        {/* ═══════════════════════════════════════════════════════════
-            SUGESTÕES INICIAIS - Glassmorphism Premium
-            ═══════════════════════════════════════════════════════════ */}
+        {/* Sugestões Iniciais */}
         {mostrarSugestoesIniciais && mensagens.length <= 1 && !loading && (
-          <div className="space-y-4 animate-fade-in">
-            <p className="text-xs text-text-tertiary uppercase tracking-wider flex items-center gap-2">
-              <Lightbulb className={`w-3.5 h-3.5 ${accentText}`} />
+          <div className="space-y-4">
+            <p
+              className="text-xs font-medium flex items-center gap-2"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <Lightbulb className="w-3.5 h-3.5" style={{ color: corPrimaria }} />
               Sugestões para você, {primeiroNome}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -318,39 +331,46 @@ export default function TutorChat({
                 <button
                   key={index}
                   onClick={() => enviarMensagem(sugestao.prompt)}
-                  className={`
-                    flex items-start gap-3 p-4 rounded-2xl
-                    bg-dark-surface/80 backdrop-blur-sm border border-border
-                    hover:bg-dark-elevated/90 hover:border-border-hover
-                    transition-all duration-300 text-left group
-                    hover:shadow-soft-md hover:scale-[1.02]
-                    ${isFisica ? 'hover:border-fisica-500/30 hover:shadow-glow-green' : 'hover:border-matematica-500/30 hover:shadow-glow-lilas'}
-                  `}
+                  className="flex items-start gap-3 p-4 rounded-2xl text-left transition-all group touch-target"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-default)',
+                  }}
                 >
-                  <div className={`
-                    w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0
-                    ${isFisica ? 'bg-gradient-to-br from-fisica-500/20 to-fisica-600/10' : 'bg-gradient-to-br from-matematica-500/20 to-matematica-600/10'}
-                    border border-border-glass group-hover:scale-110 transition-transform duration-300
-                  `}>
-                    <sugestao.icon className={`w-5 h-5 ${accentText}`} />
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                    }}
+                  >
+                    <sugestao.icon className="w-5 h-5" style={{ color: corPrimaria }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <span className="text-sm text-text-primary font-medium block">{sugestao.texto}</span>
+                    <span
+                      className="text-sm font-medium block"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {sugestao.texto}
+                    </span>
                   </div>
-                  <ArrowRight className={`w-4 h-4 ${accentText} opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0 mt-1`} />
+                  <ArrowRight
+                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0 mt-1"
+                    style={{ color: corPrimaria }}
+                  />
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════
-            SUGESTÕES DE CONTINUIDADE - Chips Premium
-            ═══════════════════════════════════════════════════════════ */}
+        {/* Sugestões de Continuidade */}
         {mostrarSugestoesContinuidade && !loading && mensagens.length > 2 && (
-          <div className="space-y-3 animate-fade-in">
-            <p className="text-xs text-text-tertiary uppercase tracking-wider flex items-center gap-2">
-              <RefreshCw className={`w-3.5 h-3.5 ${accentText}`} />
+          <div className="space-y-3">
+            <p
+              className="text-xs font-medium flex items-center gap-2"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <RefreshCw className="w-3.5 h-3.5" style={{ color: corPrimaria }} />
               Continue a conversa
             </p>
             <div className="flex flex-wrap gap-2">
@@ -358,14 +378,12 @@ export default function TutorChat({
                 <button
                   key={index}
                   onClick={() => enviarMensagem(sugestao.prompt)}
-                  className={`
-                    px-4 py-2.5 rounded-xl text-xs font-medium
-                    bg-dark-surface/80 backdrop-blur-sm border border-border
-                    hover:bg-dark-elevated/90 hover:border-border-hover
-                    text-text-secondary hover:text-text-primary
-                    transition-all duration-300 hover:scale-105
-                    ${isFisica ? 'hover:border-fisica-500/30 hover:shadow-glow-green' : 'hover:border-matematica-500/30 hover:shadow-glow-lilas'}
-                  `}
+                  className="px-4 py-2.5 rounded-xl text-xs font-medium transition-all touch-target"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-secondary)',
+                  }}
                 >
                   {sugestao.texto}
                 </button>
@@ -374,29 +392,36 @@ export default function TutorChat({
           </div>
         )}
 
-        {/* Loading indicator - Premium */}
+        {/* Loading */}
         {loading && (
-          <div className="flex justify-start animate-slide-up">
-            <div className={`
-              p-4 rounded-2xl rounded-bl-sm backdrop-blur-sm
-              ${isFisica
-                ? 'bg-gradient-to-br from-fisica-500/10 to-fisica-600/5 border border-fisica-500/20 shadow-glow-green'
-                : 'bg-gradient-to-br from-matematica-500/10 to-matematica-600/5 border border-matematica-500/20 shadow-glow-lilas'
-              }
-            `}>
-              <div className={`flex items-center gap-2 mb-2 ${accentText}`}>
-                <Bot className="w-4 h-4 animate-pulse-soft" />
-                <span className="text-xs font-medium uppercase tracking-wider">{nomeTutor}</span>
+          <div className="flex justify-start">
+            <div
+              className="p-4 rounded-2xl"
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                border: `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
+                borderRadius: '16px 16px 16px 4px',
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Bot className="w-4 h-4" style={{ color: corPrimaria }} />
+                <span className="text-xs font-medium" style={{ color: corPrimaria }}>{nomeTutor}</span>
               </div>
               <TypingIndicator />
             </div>
           </div>
         )}
 
-        {/* Erro - Premium */}
+        {/* Erro */}
         {erro && (
-          <div className="p-4 bg-error/10 border border-error/30 rounded-2xl animate-shake backdrop-blur-sm shadow-soft-sm">
-            <div className="flex items-center gap-3 text-error">
+          <div
+            className="p-4 rounded-2xl"
+            style={{
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+            }}
+          >
+            <div className="flex items-center gap-3" style={{ color: 'var(--error)' }}>
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <p className="text-sm font-medium">{erro}</p>
             </div>
@@ -404,85 +429,68 @@ export default function TutorChat({
         )}
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          AVISO DE LIMITE DIÁRIO
-          ═══════════════════════════════════════════════════════════ */}
+      {/* Aviso de Limite Diário */}
       {usoHoje >= limiteDiario && (
-        <div className="px-4 py-4 bg-warning/10 border-t border-warning/30">
+        <div
+          className="px-4 py-4 border-t"
+          style={{
+            background: 'rgba(245, 158, 11, 0.1)',
+            borderColor: 'rgba(245, 158, 11, 0.3)',
+          }}
+        >
           <div className="flex items-center gap-3 mb-3">
-            <MessageCircle className="w-5 h-5 text-warning" />
+            <MessageCircle className="w-5 h-5" style={{ color: 'var(--warning)' }} />
             <div>
-              <p className="text-sm text-text-primary font-medium">
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 Limite diário atingido, {primeiroNome}!
               </p>
-              <p className="text-xs text-text-secondary mt-0.5">
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
                 Você usou suas {limiteDiario} mensagens de hoje. Volte amanhã!
               </p>
             </div>
           </div>
-          <Button
-            variant="secondary"
-            onClick={onClose}
-            className="w-full"
-          >
+          <Button variant="secondary" onClick={onClose} className="w-full">
             Voltar ao Menu
           </Button>
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════
-          INPUT - Glassmorphism Premium 2026
-          ═══════════════════════════════════════════════════════════ */}
+      {/* Input */}
       {usoHoje < limiteDiario && (
-        <div className="p-4 border-t border-border-glass bg-dark-surface/80 backdrop-blur-xl">
+        <div
+          className="p-4 border-t"
+          style={{
+            background: 'var(--bg-surface)',
+            borderColor: 'var(--border-default)'
+          }}
+        >
           <div className="flex gap-3">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
-                placeholder={`Digite sua dúvida, ${primeiroNome}...`}
-                disabled={loading}
-                className={`
-                  w-full px-5 py-4
-                  bg-dark-elevated/80 backdrop-blur-sm border border-border rounded-2xl
-                  text-text-primary text-base placeholder:text-text-tertiary
-                  transition-all duration-300 outline-none
-                  hover:border-border-hover hover:shadow-soft-sm
-                  focus:ring-2 focus:shadow-soft-md
-                  ${isFisica
-                    ? 'focus:ring-fisica-500/30 focus:border-fisica-500/50'
-                    : 'focus:ring-matematica-500/30 focus:border-matematica-500/50'
-                  }
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                `}
-              />
-            </div>
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
+              placeholder={`Digite sua dúvida, ${primeiroNome}...`}
+              disabled={loading}
+              className="flex-1 px-4 py-3 rounded-xl text-base transition-all outline-none"
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--text-primary)',
+              }}
+            />
             <button
               onClick={() => enviarMensagem()}
               disabled={!input.trim() || loading}
-              className={`
-                px-5 py-4 rounded-2xl font-medium
-                transition-all duration-300
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-                ${isFisica
-                  ? 'bg-gradient-to-r from-fisica-500 to-fisica-600 hover:from-fisica-400 hover:to-fisica-500 text-white shadow-soft-sm hover:shadow-glow-green hover:scale-105'
-                  : 'bg-gradient-to-r from-matematica-500 to-matematica-600 hover:from-matematica-400 hover:to-matematica-500 text-white shadow-soft-sm hover:shadow-glow-lilas hover:scale-105'
-                }
-              `}
+              className="px-5 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target"
+              style={{
+                background: corPrimaria,
+                color: isFisica ? '#000' : '#fff',
+              }}
             >
               <Send className="w-5 h-5" />
             </button>
           </div>
-
-          {/* Botão de voltar discreto */}
-          <button
-            onClick={onClose}
-            className="w-full mt-3 py-2.5 text-sm text-text-tertiary hover:text-text-secondary hover:bg-dark-elevated/50 rounded-xl transition-all duration-200"
-          >
-            ← Voltar ao Menu
-          </button>
         </div>
       )}
     </div>

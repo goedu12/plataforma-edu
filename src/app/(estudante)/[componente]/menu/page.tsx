@@ -20,7 +20,9 @@ import {
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import ProfilePhoto from '@/components/ProfilePhoto'
+import ThemeIconToggle from '@/components/ThemeIconToggle'
 import type { Usuario, Componente } from '@/types'
 import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 
@@ -83,27 +85,29 @@ export default function MenuComponentePage() {
   const pontosParaProximo = proximoNivel ? proximoNivel.pontos_min - pontos : 0
 
   const primeiroNome = usuario.nome.split(' ')[0]
-  const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitagoras'
+  const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
 
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const accentGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questoes e pontos' },
-    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 questoes em 5 min' },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões e pontos' },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 questões em 5 min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Refazer erros' },
-    { icon: Bot, label: `Tutor`, href: `/${componente}/tutor`, description: `Duvidas com ${nomeTutor}` },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Sua posicao' },
+    { icon: Bot, label: `Tutor`, href: `/${componente}/tutor`, description: `Dúvidas com ${nomeTutor}` },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Sua posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Medalhas' },
     { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Nota bimestre' },
   ]
 
   return (
     <div
-      className="min-h-screen pb-nav"
+      className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]"
       style={{ background: 'var(--bg-base)' }}
     >
+      {/* Navigation Rail for Desktop */}
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header
         className="px-4 pt-6 pb-6"
@@ -117,7 +121,7 @@ export default function MenuComponentePage() {
                 className="text-sm font-semibold"
                 style={{ color: accentColor }}
               >
-                {componente === 'fisica' ? 'Fisica' : 'Matematica'}
+                {componente === 'fisica' ? 'Física' : 'Matemática'}
               </h1>
               <p
                 className="text-xs"
@@ -127,6 +131,7 @@ export default function MenuComponentePage() {
               </p>
             </div>
             <div className="flex items-center gap-1">
+              <ThemeIconToggle componente={componente} />
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
@@ -181,7 +186,7 @@ export default function MenuComponentePage() {
                 className="font-display text-2xl font-bold"
                 style={{ color: 'var(--text-primary)' }}
               >
-                Ola, {primeiroNome}!
+                Olá, {primeiroNome}!
               </p>
               <div className="flex items-center gap-2 mt-1">
                 <Badge variant={isFisica ? 'fisica' : 'matematica'} size="sm">
@@ -287,7 +292,7 @@ export default function MenuComponentePage() {
               className="text-sm font-mono tabular-nums"
               style={{ color: 'var(--text-secondary)' }}
             >
-              {questoesTotal}/50 questoes
+              {questoesTotal}/50 questões
             </span>
           </div>
 
@@ -316,13 +321,13 @@ export default function MenuComponentePage() {
           )}
         </div>
 
-        {/* Menu Grid */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Menu Grid - Compact Cards */}
+        <div className="grid grid-cols-2 gap-3">
           {menuItems.map((item, index) => (
             <button
               key={item.label}
               onClick={() => router.push(item.href)}
-              className="rounded-xl p-5 text-left transition-all duration-300 hover:translate-y-[-2px] group touch-target"
+              className="rounded-xl p-3 text-left transition-all duration-300 hover:translate-y-[-2px] group touch-target"
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
@@ -337,32 +342,34 @@ export default function MenuComponentePage() {
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <div
-                className="w-12 h-12 rounded-xl mb-3 flex items-center justify-center"
-                style={{
-                  background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                }}
-              >
-                <item.icon className="w-6 h-6" style={{ color: accentColor }} />
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{
+                    background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                  }}
+                >
+                  <item.icon className="w-5 h-5" style={{ color: accentColor }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3
+                    className="font-display font-semibold text-sm"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {item.label}
+                  </h3>
+                  <p
+                    className="text-xs truncate"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    {item.description}
+                  </p>
+                </div>
+                <ChevronRight
+                  className="w-4 h-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: accentColor }}
+                />
               </div>
-
-              <h3
-                className="font-display font-semibold text-sm mb-1"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {item.label}
-              </h3>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                {item.description}
-              </p>
-
-              <ChevronRight
-                className="w-4 h-4 mt-2 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all"
-                style={{ color: accentColor }}
-              />
             </button>
           ))}
         </div>

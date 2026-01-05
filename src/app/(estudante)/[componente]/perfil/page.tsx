@@ -15,13 +15,16 @@ import {
   AlertCircle,
   Loader2,
   Camera,
-  Info
+  Info,
+  Palette
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Loading from '@/components/ui/Loading'
 import ProfilePhoto from '@/components/ProfilePhoto'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
+import ThemeToggle from '@/components/ThemeToggle'
 import type { Usuario, Componente } from '@/types'
 
 export default function PerfilPage() {
@@ -127,7 +130,8 @@ export default function PerfilPage() {
   if (!usuario) return null
 
   return (
-    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header
         className="px-4 pt-4 pb-20"
@@ -254,6 +258,21 @@ export default function PerfilPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Card de Tema */}
+        <div
+          className="card p-6 mb-4 animate-fade-in-up"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', animationDelay: '75ms' }}
+        >
+          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+            <Palette className="w-5 h-5" />
+            Aparência
+          </h3>
+          <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+            Escolha como a plataforma deve aparecer. Auto segue a configuração do seu dispositivo.
+          </p>
+          <ThemeToggle componente={componente} />
         </div>
 
         {/* Card de Alterar Senha */}

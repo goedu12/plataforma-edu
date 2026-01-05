@@ -2,30 +2,15 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, RotateCcw, CheckCircle2, WifiOff, RefreshCw, Clock, AlertCircle } from 'lucide-react'
+import { ArrowLeft, RotateCcw, CheckCircle2, WifiOff, RefreshCw, Clock, BookOpen } from 'lucide-react'
 import QuestaoCard from '@/components/QuestaoCard'
 import Loading from '@/components/ui/Loading'
+import Button from '@/components/ui/Button'
+import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 
 type StatusRevisao = 'OK' | 'SEM_REVISAO' | 'ERRO'
-
-// Cores Koyeb
-const KOYEB = {
-  bg: '#0D0D14',
-  bgCard: '#1A1A2E',
-  bgElevated: '#222238',
-  bgDark: '#12121C',
-  primary: '#00FF88',
-  accent: '#00D4FF',
-  fisica: '#00FF88',
-  matematica: '#A855F7',
-  textPrimary: '#FFFFFF',
-  textSecondary: '#8B8B9A',
-  textMuted: '#5A5A6E',
-  border: 'rgba(255,255,255,0.05)',
-  danger: '#FF4757',
-  warning: '#FFB800',
-}
 
 export default function RevisaoPage() {
   const router = useRouter()
@@ -40,6 +25,10 @@ export default function RevisaoPage() {
   const [totalRevisao, setTotalRevisao] = useState(0)
   const [errouEm, setErrouEm] = useState<string | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const isFisica = componente === 'fisica'
+  const nomeComponente = isFisica ? 'Física' : 'Matemática'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const buscarQuestao = async () => {
     setLoading(true)
@@ -67,16 +56,14 @@ export default function RevisaoPage() {
     } catch (error) {
       console.error('Erro ao buscar questão:', error)
       setStatus('ERRO')
-      setErro('Não foi possível conectar ao servidor. Verifique sua conexão com a internet.')
+      setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
     }
   }
 
   const iniciarTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-    }
+    if (timerRef.current) clearInterval(timerRef.current)
     timerRef.current = setInterval(() => {
       setTempoDecorrido(prev => prev + 1)
     }, 1000)
@@ -95,27 +82,11 @@ export default function RevisaoPage() {
       return
     }
     buscarQuestao()
-
     return () => pararTimer()
   }, [componente])
 
-  const handleResponder = () => {
-    pararTimer()
-  }
+  const handleVoltar = () => router.push(`/${componente}/menu`)
 
-  const handleProxima = () => {
-    buscarQuestao()
-  }
-
-  const handleVoltar = () => {
-    router.push(`/${componente}/menu`)
-  }
-
-  const nomeComponente = componente === 'fisica' ? 'Física' : 'Matemática'
-  const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? KOYEB.fisica : KOYEB.matematica
-
-  // Formatar data de quando errou
   const formatarDataErro = (data: string) => {
     const d = new Date(data)
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
@@ -126,201 +97,171 @@ export default function RevisaoPage() {
   }
 
   return (
-    <div
-      className="min-h-screen pb-8"
-      style={{
-        background: `linear-gradient(180deg, ${KOYEB.bg} 0%, ${KOYEB.bgCard} 100%)`,
-        fontFamily: "'Inter', -apple-system, sans-serif",
-      }}
-    >
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header
         className="px-4 py-4 sticky top-0 z-10"
-        style={{
-          background: KOYEB.warning,
-          boxShadow: `0 4px 20px ${KOYEB.warning}40`,
-        }}
+        style={{ background: 'var(--warning)', boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)' }}
       >
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <button
             onClick={handleVoltar}
-            className="p-2 -ml-2 rounded-xl hover:bg-black/20 transition-colors"
+            className="p-3 -ml-2 rounded-xl hover:bg-black/20 transition-colors touch-target"
+            style={{ color: '#000' }}
           >
-            <ArrowLeft className="w-5 h-5" style={{ color: KOYEB.bg }} />
+            <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <RotateCcw className="w-5 h-5" style={{ color: KOYEB.bg }} />
-            <h1
-              className="font-mono text-sm font-bold tracking-wider uppercase"
-              style={{ color: KOYEB.bg }}
-            >
+            <RotateCcw className="w-5 h-5" style={{ color: '#000' }} />
+            <h1 className="font-display font-semibold" style={{ color: '#000' }}>
               Revisar Erros
             </h1>
           </div>
-          {status === 'OK' && questao && (
+          {status === 'OK' && questao ? (
             <div
               className="flex items-center gap-1 rounded-full px-3 py-1"
               style={{ background: 'rgba(0,0,0,0.2)' }}
             >
-              <Clock className="w-4 h-4" style={{ color: KOYEB.bg }} />
-              <span
-                className="text-sm font-mono tabular-nums"
-                style={{ color: KOYEB.bg }}
-              >
+              <Clock className="w-4 h-4" style={{ color: '#000' }} />
+              <span className="text-sm font-mono tabular-nums" style={{ color: '#000' }}>
                 {tempoDecorrido}s
               </span>
             </div>
+          ) : (
+            <div className="w-12" />
           )}
-          {status !== 'OK' && <div className="w-16" />}
         </div>
       </header>
 
       {/* Conteúdo */}
       <main className="max-w-2xl mx-auto px-4 pt-6">
         {status === 'OK' && questao ? (
-          <div className="animate-slide-up">
-            {/* Info de Revisão - Terminal */}
-            <div className="terminal-box terminal-amber mb-4">
-              <div className="terminal-header">
-                <span className="dot dot-red" />
-                <span className="dot dot-yellow" />
-                <span className="dot dot-green" />
-                <span className="title">revisao.sh</span>
+          <div className="animate-fade-in-up">
+            {/* Info de Revisão */}
+            <div
+              className="p-4 rounded-xl mb-4"
+              style={{
+                background: 'rgba(245, 158, 11, 0.1)',
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <RotateCcw className="w-4 h-4" style={{ color: 'var(--warning)' }} />
+                <span className="text-sm font-medium" style={{ color: 'var(--warning)' }}>
+                  Modo Revisão - {totalRevisao} {totalRevisao === 1 ? 'questão pendente' : 'questões pendentes'}
+                </span>
               </div>
-              <div className="terminal-body">
-                <p className="warning"># Modo Revisao - {totalRevisao} {totalRevisao === 1 ? 'questao pendente' : 'questoes pendentes'}</p>
-                {errouEm && (
-                  <p className="muted">$ Voce errou esta questao em {formatarDataErro(errouEm)}</p>
-                )}
-              </div>
+              {errouEm && (
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  Você errou esta questão em {formatarDataErro(errouEm)}
+                </p>
+              )}
             </div>
 
             <QuestaoCard
               questao={questao}
               componente={componente}
               tempoDecorrido={tempoDecorrido}
-              onResponder={handleResponder}
-              onProxima={handleProxima}
+              onResponder={pararTimer}
+              onProxima={buscarQuestao}
               onVoltar={handleVoltar}
               modo="revisao"
             />
           </div>
         ) : status === 'SEM_REVISAO' ? (
           <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+            className="card p-8 text-center animate-fade-in-up"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             <div
               className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: accentColor }}
+              style={{
+                background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                border: `1px solid ${corPrimaria}`,
+              }}
             >
-              <CheckCircle2 className="w-8 h-8" style={{ color: KOYEB.bg }} />
+              <CheckCircle2 className="w-8 h-8" style={{ color: corPrimaria }} />
             </div>
-            <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
-            >
+            <h2 className="font-display text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
               Tudo Revisado!
             </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
+            <p className="mb-2" style={{ color: 'var(--text-secondary)' }}>
               Você não tem questões de {nomeComponente} para revisar!
             </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
+            <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
               Continue estudando para aprender novos conteúdos.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => router.push(`/${componente}/estudar`)}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
+                leftIcon={<BookOpen className="w-4 h-4" />}
               >
                 Estudar Novas Questões
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={isFisica ? 'fisica' : 'matematica'}
                 onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
               >
                 Voltar ao Menu
-              </button>
+              </Button>
             </div>
           </div>
         ) : status === 'ERRO' ? (
           <div
-            className="rounded-2xl p-8 text-center animate-slide-up"
-            style={{ background: KOYEB.bgCard, border: `1px solid ${KOYEB.border}` }}
+            className="card p-8 text-center animate-fade-in-up"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             <div
               className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: `${KOYEB.danger}20`, border: `1px solid ${KOYEB.danger}40` }}
+              style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
             >
-              <WifiOff className="w-8 h-8" style={{ color: KOYEB.danger }} />
+              <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />
             </div>
-            <h2
-              className="font-mono text-xl font-bold mb-3"
-              style={{ color: KOYEB.textPrimary }}
-            >
+            <h2 className="font-display text-xl font-bold mb-3" style={{ color: 'var(--text-primary)' }}>
               Ops! Erro
             </h2>
-            <p className="mb-2" style={{ color: KOYEB.textSecondary }}>
-              {erro}
-            </p>
-            <p className="text-sm mb-8" style={{ color: KOYEB.textMuted }}>
+            <p className="mb-2" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
+            <p className="text-sm mb-8" style={{ color: 'var(--text-muted)' }}>
               Tente novamente ou volte mais tarde.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
+              <Button
+                variant="secondary"
                 onClick={buscarQuestao}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: 'transparent',
-                  border: `2px solid ${accentColor}`,
-                  color: accentColor,
-                }}
+                leftIcon={<RefreshCw className="w-4 h-4" />}
               >
-                <RefreshCw className="w-4 h-4" />
                 Tentar Novamente
-              </button>
-              <button
+              </Button>
+              <Button
+                variant={isFisica ? 'fisica' : 'matematica'}
                 onClick={handleVoltar}
-                className="px-6 py-3 rounded-lg font-mono text-xs font-bold tracking-wider uppercase transition-all hover:translate-y-[-2px]"
-                style={{
-                  background: accentColor,
-                  color: KOYEB.bg,
-                  boxShadow: `0 4px 20px ${accentColor}40`,
-                }}
               >
                 Voltar ao Menu
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}
 
-        {/* Dicas - Terminal */}
+        {/* Dica */}
         {status === 'OK' && questao && (
-          <div className={`mt-6 terminal-box ${isFisica ? '' : 'terminal-lilas'} animate-fade-in`} style={{ animationDelay: '300ms' }}>
-            <div className="terminal-header">
-              <span className="dot dot-red" />
-              <span className="dot dot-yellow" />
-              <span className="dot dot-green" />
-              <span className="title">dica.sh</span>
-            </div>
-            <div className="terminal-body space-y-1">
-              <p className="comment"># Modo Revisao</p>
-              <p className="text-white">$ Revisar questoes erradas e essencial para fixar o aprendizado!</p>
-              <p className="warning">$ Acertos na revisao contribuem para sua nota bimestral!</p>
-            </div>
+          <div
+            className="mt-6 p-4 rounded-xl animate-fade-in"
+            style={{
+              background: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+            }}
+          >
+            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <strong style={{ color: 'var(--warning)' }}>Dica:</strong> Revisar questões erradas é essencial para fixar o aprendizado!
+              Acertos na revisão contribuem para sua nota bimestral.
+            </p>
           </div>
         )}
       </main>
+
+      <BottomNav componente={componente} />
     </div>
   )
 }
