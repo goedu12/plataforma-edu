@@ -100,14 +100,14 @@ export default function NotasPage() {
       if (pollingRef.current) clearInterval(pollingRef.current)
       pollingRef.current = setInterval(() => {
         if (document.visibilityState === 'visible') buscarNotas(true)
-      }, 5000)
+      }, 30000)
     }
 
     iniciarPolling()
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        if (Date.now() - ultimaAtualizacaoRef.current > 3000) buscarNotas(true)
+        if (Date.now() - ultimaAtualizacaoRef.current > 10000) buscarNotas(true)
         iniciarPolling()
       }
     }

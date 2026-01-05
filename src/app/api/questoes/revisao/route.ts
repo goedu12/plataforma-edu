@@ -61,6 +61,15 @@ export async function GET(request: NextRequest) {
       .eq('componente', componente)
       .eq('correta', true)
 
+    // Buscar respostas do modo revisão (independente de corretas)
+    const { data: respostasRevisadas } = await supabase
+      .from('respostas')
+      .select('questao_id, atualizado_em')
+      .eq('usuario_id', sessao.userId)
+      .eq('componente', componente)
+      .eq('modo', 'revisao')
+      .not('atualizado_em', 'is', null)
+
     // Criar mapa de respostas corretas por questão (mais recente)
     const corretasMap = new Map<string, string>()
     respostasCorretas?.forEach(r => {
@@ -70,7 +79,18 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Filtrar questões erradas que não foram acertadas depois
+    // Criar mapa de questões revisadas (respondidas no modo revisão)
+    const revisadasMap = new Map<string, string>()
+    respostasRevisadas?.forEach(r => {
+      if (r.atualizado_em) {
+        const atual = revisadasMap.get(r.questao_id)
+        if (!atual || r.atualizado_em > atual) {
+          revisadasMap.set(r.questao_id, r.atualizado_em)
+        }
+      }
+    })
+
+    // Filtrar questões erradas que não foram acertadas depois E não foram revisadas depois
     const questoesParaRevisao: Array<{ questao_id: string; errou_em: string }> = []
     const questoesVistas = new Set<string>()
 
@@ -79,8 +99,16 @@ export async function GET(request: NextRequest) {
       questoesVistas.add(resposta.questao_id)
 
       const dataCorreta = corretasMap.get(resposta.questao_id)
-      // Se nunca acertou OU acertou antes de errar
-      if (!dataCorreta || dataCorreta < resposta.criado_em) {
+      const dataRevisada = revisadasMap.get(resposta.questao_id)
+
+      // Verificar se foi acertada depois de errar
+      const acertouDepois = dataCorreta && dataCorreta > resposta.criado_em
+
+      // Verificar se foi revisada depois de errar (independente de acertar)
+      const revisouDepois = dataRevisada && dataRevisada > resposta.criado_em
+
+      // Só adiciona para revisão se NÃO acertou depois E NÃO revisou depois
+      if (!acertouDepois && !revisouDepois) {
         questoesParaRevisao.push({
           questao_id: resposta.questao_id,
           errou_em: resposta.criado_em,

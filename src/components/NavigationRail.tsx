@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookOpen, Bot, User } from 'lucide-react'
+import { Home, BookOpen, Zap, Trophy, User } from 'lucide-react'
 import type { Componente } from '@/types'
 
 interface NavigationRailProps {
@@ -18,7 +18,8 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
   const navItems = [
     { icon: Home, label: 'Início', href: `/${componente}/menu` },
     { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar` },
-    { icon: Bot, label: 'Tutor', href: `/${componente}/tutor` },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio` },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking` },
     { icon: User, label: 'Perfil', href: `/${componente}/perfil` },
   ]
 
@@ -49,6 +50,8 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
           <button
             key={item.label}
             onClick={() => router.push(item.href)}
+            aria-label={item.label}
+            title={item.label}
             className="flex flex-col items-center justify-center gap-1 transition-all"
             style={{
               width: '56px',

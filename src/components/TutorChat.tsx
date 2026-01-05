@@ -132,8 +132,10 @@ export default function TutorChat({
     }
   }, [mensagens, loading])
 
+  const MAX_CARACTERES = 500
+
   const enviarMensagem = async (textoPersonalizado?: string) => {
-    const texto = textoPersonalizado || input.trim()
+    const texto = (textoPersonalizado || input.trim()).slice(0, MAX_CARACTERES)
     if (!texto || loading || usoHoje >= limiteDiario) return
 
     const novaMensagem: MensagemChat = {
@@ -194,6 +196,10 @@ export default function TutorChat({
   }
 
   const limparChat = async () => {
+    if (mensagens.length > 1 && !window.confirm('Tem certeza que deseja limpar a conversa?')) {
+      return
+    }
+
     try {
       await fetch('/api/tutor/limpar', {
         method: 'POST',
@@ -465,20 +471,31 @@ export default function TutorChat({
           }}
         >
           <div className="flex gap-3">
-            <input
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
-              placeholder={`Digite sua dúvida, ${primeiroNome}...`}
-              disabled={loading}
-              className="flex-1 px-4 py-3 rounded-xl text-base transition-all outline-none"
-              style={{
-                background: 'var(--bg-elevated)',
-                border: '1px solid var(--border-default)',
-                color: 'var(--text-primary)',
-              }}
-            />
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value.slice(0, MAX_CARACTERES))}
+                onKeyDown={e => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
+                placeholder={`Digite sua dúvida, ${primeiroNome}...`}
+                disabled={loading}
+                maxLength={MAX_CARACTERES}
+                className="w-full px-4 py-3 rounded-xl text-base transition-all outline-none"
+                style={{
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
+                }}
+              />
+              {input.length > 400 && (
+                <span
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
+                  style={{ color: input.length >= MAX_CARACTERES ? 'var(--error)' : 'var(--text-muted)' }}
+                >
+                  {input.length}/{MAX_CARACTERES}
+                </span>
+              )}
+            </div>
             <button
               onClick={() => enviarMensagem()}
               disabled={!input.trim() || loading}
