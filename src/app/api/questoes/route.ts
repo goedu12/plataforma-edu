@@ -45,8 +45,8 @@ export async function GET(request: NextRequest) {
       statusSemanal = await obterStatusSemanal(supabase, sessao.userId, componente)
       periodo = getPeriodoAtual()
 
-      // Se atingiu limite semanal no modo estudo
-      if (statusSemanal.limite_semanal !== null && !statusSemanal.pode_responder) {
+      // Se atingiu limite semanal no modo estudo (apenas durante período letivo)
+      if (periodo && statusSemanal.limite_semanal !== null && !statusSemanal.pode_responder) {
         return NextResponse.json({
           sucesso: true,
           status: 'LIMITE_SEMANAL',
@@ -59,14 +59,8 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      // Verificar se está fora do período letivo
-      if (!periodo) {
-        return NextResponse.json({
-          sucesso: true,
-          status: 'FORA_PERIODO',
-          mensagem: 'Fora do período letivo. Use o modo Desafio para praticar!',
-        })
-      }
+      // Fora do período letivo = modo prática livre (sem limite)
+      // Permite acesso normal às questões
     }
 
     // ═══════════════════════════════════════════════════════════════════════
