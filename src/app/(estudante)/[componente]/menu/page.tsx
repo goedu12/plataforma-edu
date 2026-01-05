@@ -92,13 +92,13 @@ export default function MenuComponentePage() {
   const accentGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
   const menuItems = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões e pontos' },
-    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 questões em 5 min' },
-    { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Refazer erros' },
-    { icon: Bot, label: `Tutor`, href: `/${componente}/tutor`, description: `Dúvidas com ${nomeTutor}` },
-    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Sua posição' },
-    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: 'Medalhas' },
-    { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Nota bimestre' },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões' },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
+    { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
+    { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
+    { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
+    { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },
+    { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Bimestre' },
   ]
 
   return (
@@ -106,27 +106,18 @@ export default function MenuComponentePage() {
       className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]"
       style={{ background: 'var(--bg-base)' }}
     >
-      {/* Navigation Rail for Desktop */}
       <NavigationRail componente={componente} />
-      {/* Header */}
-      <header
-        className="px-4 pt-6 pb-6"
-        style={{ borderBottom: '1px solid var(--border-default)' }}
-      >
+
+      {/* Header Compacto */}
+      <header className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-default)' }}>
         <div className="max-w-2xl mx-auto">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center justify-between mb-3">
             <div>
-              <h1
-                className="text-sm font-semibold"
-                style={{ color: accentColor }}
-              >
+              <h1 className="text-sm font-semibold" style={{ color: accentColor }}>
                 {componente === 'fisica' ? 'Física' : 'Matemática'}
               </h1>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--text-muted)' }}
-              >
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 Turma {usuario.turma}
               </p>
             </div>
@@ -135,233 +126,139 @@ export default function MenuComponentePage() {
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
-                  className="p-3 rounded-xl transition-all touch-target"
-                  style={{
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-secondary)',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--bg-surface-hover)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent'
-                  }}
+                  className="p-2 rounded-lg transition-all"
+                  style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
                 >
-                  <ArrowLeftRight className="w-5 h-5" />
+                  <ArrowLeftRight className="w-4 h-4" />
                 </button>
               )}
               <button
                 onClick={handleLogout}
-                className="p-3 rounded-xl transition-all touch-target"
-                style={{
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-secondary)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--bg-surface-hover)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                }}
+                className="p-2 rounded-lg transition-all"
+                style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* User Welcome */}
-          <button
-            onClick={() => router.push(`/${componente}/perfil`)}
-            className="mb-6 flex items-center gap-4 w-full text-left group"
-          >
-            <ProfilePhoto
-              fotoUrl={usuario.foto_url}
-              nome={usuario.nome}
-              size="lg"
-              editable={false}
-              componente={componente}
-            />
-            <div>
-              <p
-                className="font-display text-2xl font-bold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                Olá, {primeiroNome}!
-              </p>
-              <div className="flex items-center gap-2 mt-1">
+          {/* User + Stats em linha */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push(`/${componente}/perfil`)}
+              className="flex items-center gap-3 flex-1 min-w-0"
+            >
+              <ProfilePhoto
+                fotoUrl={usuario.foto_url}
+                nome={usuario.nome}
+                size="md"
+                editable={false}
+                componente={componente}
+              />
+              <div className="min-w-0">
+                <p className="font-display text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                  Olá, {primeiroNome}!
+                </p>
                 <Badge variant={isFisica ? 'fisica' : 'matematica'} size="sm">
                   {nivel.emoji} {nivel.nome}
                 </Badge>
               </div>
-              <p
-                className="text-xs mt-1"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Toque para ver perfil
-              </p>
-            </div>
-          </button>
+            </button>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-              }}
-            >
-              <Star className="w-5 h-5 mx-auto mb-2" style={{ color: accentColor }} />
-              <p
-                className="text-2xl font-bold font-mono tabular-nums"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {pontos}
-              </p>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Pontos
-              </p>
-            </div>
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-              }}
-            >
-              <Flame className="w-5 h-5 mx-auto mb-2" style={{ color: 'var(--color-streak)' }} />
-              <p
-                className="text-2xl font-bold font-mono tabular-nums"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {sequenciaDias}
-              </p>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Dias
-              </p>
-            </div>
-            <div
-              className="rounded-xl p-4 text-center"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-              }}
-            >
-              <Target className="w-5 h-5 mx-auto mb-2" style={{ color: accentColor }} />
-              <p
-                className="text-2xl font-bold font-mono tabular-nums"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {taxaAcerto}%
-              </p>
-              <p
-                className="text-xs"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                Acerto
-              </p>
+            {/* Stats inline */}
+            <div className="flex gap-2">
+              {[
+                { icon: Star, value: pontos, label: 'Pontos', color: accentColor },
+                { icon: Flame, value: sequenciaDias, label: 'Dias', color: 'var(--color-streak)' },
+                { icon: Target, value: `${taxaAcerto}%`, label: 'Acerto', color: accentColor },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg px-3 py-2 text-center min-w-[60px]"
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+                >
+                  <stat.icon className="w-4 h-4 mx-auto mb-0.5" style={{ color: stat.color }} />
+                  <p className="text-base font-bold font-mono tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                    {stat.value}
+                  </p>
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-6">
-        {/* Progress Card */}
+      <main className="max-w-2xl mx-auto px-4 py-3">
+        {/* Progress Card Compacto */}
         <div
-          className="rounded-2xl p-5 mb-6"
-          style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-default)',
-          }}
+          className="rounded-xl p-3 mb-3"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
         >
-          <div className="flex items-center justify-between mb-3">
-            <span
-              className="text-xs font-semibold"
-              style={{ color: 'var(--text-muted)' }}
-            >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
               Progresso
             </span>
-            <span
-              className="text-sm font-mono tabular-nums"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+            <span className="text-xs font-mono tabular-nums" style={{ color: 'var(--text-secondary)' }}>
               {questoesTotal}/50 questões
             </span>
           </div>
 
-          <div
-            className="h-2 rounded-full overflow-hidden mb-3"
-            style={{ background: 'var(--bg-elevated)' }}
-          >
+          <div className="flex items-center gap-3">
             <div
-              className="h-full rounded-full transition-all duration-1000 ease-out"
-              style={{
-                width: `${Math.min((questoesTotal / 50) * 100, 100)}%`,
-                background: `linear-gradient(90deg, ${accentColor}, var(--color-accent))`,
-              }}
-            />
-          </div>
-
-          {proximoNivel && (
-            <div className="flex items-center justify-between text-sm">
-              <span style={{ color: 'var(--text-muted)' }}>
-                {nivel.emoji} {nivel.nome}
-              </span>
-              <span style={{ color: accentColor }}>
+              className="flex-1 h-2 rounded-full overflow-hidden"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${Math.min((questoesTotal / 50) * 100, 100)}%`,
+                  background: accentColor,
+                }}
+              />
+            </div>
+            {proximoNivel && (
+              <span className="text-xs whitespace-nowrap" style={{ color: accentColor }}>
                 +{pontosParaProximo} pts para {proximoNivel.nome}
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Menu Grid - Compact Cards */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Menu Grid Compacto */}
+        <div className="grid grid-cols-2 gap-2">
           {menuItems.map((item, index) => (
             <button
               key={item.label}
               onClick={() => router.push(item.href)}
-              className="rounded-xl p-3 text-left transition-all duration-300 hover:translate-y-[-2px] group touch-target"
+              className="rounded-xl p-3 text-left transition-all hover:translate-y-[-1px] group"
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
-                animationDelay: `${index * 50}ms`,
+                animationDelay: `${index * 30}ms`,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = accentColor
-                e.currentTarget.style.boxShadow = `0 0 20px ${accentGlow}`
+                e.currentTarget.style.boxShadow = `0 0 15px ${accentGlow}`
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border-default)'
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{
-                    background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                  }}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)' }}
                 >
-                  <item.icon className="w-5 h-5" style={{ color: accentColor }} />
+                  <item.icon className="w-4 h-4" style={{ color: accentColor }} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3
-                    className="font-display font-semibold text-sm"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
+                  <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                     {item.label}
                   </h3>
-                  <p
-                    className="text-xs truncate"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
+                  <p className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>
                     {item.description}
                   </p>
                 </div>
@@ -375,7 +272,6 @@ export default function MenuComponentePage() {
         </div>
       </main>
 
-      {/* Bottom Navigation */}
       <BottomNav componente={componente} />
     </div>
   )
