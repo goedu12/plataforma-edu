@@ -72,6 +72,7 @@ export default function DashboardProfessorPage() {
   const menuItems = [
     { icon: Users, label: 'Alunos', href: '/professor/alunos', description: 'Gerenciar estudantes', color: 'bg-blue-500' },
     { icon: Upload, label: 'Importar', href: '/professor/importar', description: 'Adicionar questões', color: 'bg-green-500' },
+    { icon: FileText, label: 'Mapas', href: '/professor/mapas', description: 'Mapas mentais', color: 'bg-emerald-500' },
     { icon: BarChart3, label: 'Relatórios', href: '/professor/relatorios', description: 'Ver estatísticas', color: 'bg-purple-500' },
     { icon: Settings, label: 'Config', href: '/professor/config', description: 'Configurações', color: 'bg-gray-500' },
   ]
@@ -260,7 +261,7 @@ export default function DashboardProfessorPage() {
         </Card>
 
         {/* Menu Rápido */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {menuItems.map((item, index) => (
             <Card
               key={item.label}
