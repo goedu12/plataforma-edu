@@ -348,9 +348,6 @@ export default function RevisaoPage() {
               })}
             </div>
 
-            {/* Espaçador flexível */}
-            <div className="flex-1 min-h-4" />
-
             {/* Dica */}
             {!feedback && questao.dica && (
               <div className="mb-3">
