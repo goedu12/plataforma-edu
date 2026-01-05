@@ -6,6 +6,7 @@ import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Troph
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
 
@@ -195,7 +196,8 @@ export default function DesafioPage() {
     const isPerfeito = resultado.acertos === resultado.total
 
     return (
-      <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+      <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+        <NavigationRail componente={componente} />
         <header
           className="px-4 py-4"
           style={{
@@ -203,14 +205,24 @@ export default function DesafioPage() {
             borderBottom: '1px solid var(--border-default)',
           }}
         >
-          <div className="max-w-2xl mx-auto flex items-center justify-center gap-3">
-            <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
-            <h1
-              className="font-display font-semibold"
+          <div className="max-w-2xl mx-auto flex items-center justify-between">
+            <button
+              onClick={handleVoltar}
+              className="p-3 -ml-2 rounded-xl transition-colors touch-target lg:hidden"
               style={{ color: isFisica ? '#000' : '#fff' }}
             >
-              Resultado do Desafio
-            </h1>
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+              <h1
+                className="font-display font-semibold"
+                style={{ color: isFisica ? '#000' : '#fff' }}
+              >
+                Resultado do Desafio
+              </h1>
+            </div>
+            <div className="w-12 lg:hidden" />
           </div>
         </header>
 
@@ -315,7 +327,8 @@ export default function DesafioPage() {
   // Tela de Erro
   if (status === 'ERRO' || status === 'SEM_QUESTOES') {
     return (
-      <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+      <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+        <NavigationRail componente={componente} />
         <header
           className="px-4 py-4"
           style={{
@@ -326,7 +339,7 @@ export default function DesafioPage() {
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <button
               onClick={handleVoltar}
-              className="p-3 -ml-2 rounded-xl transition-colors touch-target"
+              className="p-3 -ml-2 rounded-xl transition-colors touch-target lg:hidden"
               style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />
@@ -337,7 +350,7 @@ export default function DesafioPage() {
                 Modo Desafio
               </h1>
             </div>
-            <div className="w-12" />
+            <div className="w-12 lg:hidden" />
           </div>
         </header>
 
@@ -391,7 +404,8 @@ export default function DesafioPage() {
   ] : []
 
   return (
-    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header com Timer */}
       <header
         className="px-4 py-4 sticky top-0 z-10"
@@ -404,7 +418,7 @@ export default function DesafioPage() {
           <div className="flex items-center justify-between mb-4">
             <button
               onClick={handleVoltar}
-              className="p-3 -ml-2 rounded-xl transition-colors touch-target"
+              className="p-3 -ml-2 rounded-xl transition-colors touch-target lg:hidden"
               style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />

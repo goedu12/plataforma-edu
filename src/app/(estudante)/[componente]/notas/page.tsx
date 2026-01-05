@@ -29,6 +29,7 @@ import {
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
 
 interface NotaBimestre {
@@ -195,7 +196,8 @@ export default function NotasPage() {
   const statusConfig = notaAtual ? getStatusConfig(notaAtual.status, notaAtual.nota_final) : null
 
   return (
-    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header className="text-center pt-6 pb-4 px-6">
         <div className="flex items-center justify-between mb-6 max-w-lg mx-auto">

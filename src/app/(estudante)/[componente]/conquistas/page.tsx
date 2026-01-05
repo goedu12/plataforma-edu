@@ -6,6 +6,7 @@ import { ArrowLeft, Medal, Lock, CheckCircle2, RefreshCw, WifiOff, Target } from
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Conquista } from '@/types'
 
 interface ConquistaComStatus extends Conquista {
@@ -74,7 +75,8 @@ export default function ConquistasPage() {
   }
 
   return (
-    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header
         className="px-4 pt-3 pb-12"

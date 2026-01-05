@@ -23,6 +23,7 @@ import Input from '@/components/ui/Input'
 import Loading from '@/components/ui/Loading'
 import ProfilePhoto from '@/components/ProfilePhoto'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import ThemeToggle from '@/components/ThemeToggle'
 import type { Usuario, Componente } from '@/types'
 
@@ -129,7 +130,8 @@ export default function PerfilPage() {
   if (!usuario) return null
 
   return (
-    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header
         className="px-4 pt-4 pb-20"

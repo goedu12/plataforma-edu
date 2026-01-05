@@ -7,6 +7,7 @@ import QuestaoCard from '@/components/QuestaoCard'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import BottomNav from '@/components/BottomNav'
+import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 
 type StatusRevisao = 'OK' | 'SEM_REVISAO' | 'ERRO'
@@ -96,7 +97,8 @@ export default function RevisaoPage() {
   }
 
   return (
-    <div className="min-h-screen pb-nav" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+      <NavigationRail componente={componente} />
       {/* Header */}
       <header
         className="px-4 py-4 sticky top-0 z-10"
