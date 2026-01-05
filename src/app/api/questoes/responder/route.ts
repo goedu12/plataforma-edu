@@ -349,6 +349,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Função para verificar e desbloquear conquistas
+// Sistema de 10 níveis com requisitos combinados
 async function verificarEDesbloquearConquistas(
   supabase: ReturnType<typeof getSupabaseAdmin>,
   usuarioId: string,
@@ -367,6 +368,7 @@ async function verificarEDesbloquearConquistas(
       .from('conquistas')
       .select('*')
       .or(`componente.is.null,componente.eq.${componente}`)
+      .order('ordem', { ascending: true })
 
     if (!conquistasDisponiveis) return conquistasDesbloqueadas
 
@@ -397,6 +399,13 @@ async function verificarEDesbloquearConquistas(
           break
         case 'acertos':
           elegivel = questoesTotal >= 20 && taxaAcerto >= conquista.requisito_valor
+          break
+        case 'combinado':
+          // Requisitos combinados: deve atender TODOS os critérios
+          const atendePontos = !conquista.req_pontos || pontos >= conquista.req_pontos
+          const atendeQuestoes = !conquista.req_questoes_corretas || questoesCorretas >= conquista.req_questoes_corretas
+          const atendeSequencia = !conquista.req_sequencia_dias || sequenciaDias >= conquista.req_sequencia_dias
+          elegivel = atendePontos && atendeQuestoes && atendeSequencia
           break
       }
 

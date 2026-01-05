@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Atom, Calculator, ChevronRight, LogOut, Flame, Star, TrendingUp } from 'lucide-react'
+import { Atom, Calculator, ChevronRight, LogOut, Flame, Star, TrendingUp, Sparkles } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
+import ThemeIconToggle from '@/components/ThemeIconToggle'
 import type { Usuario } from '@/types'
 import { obterNivelPorPontos } from '@/types'
 
@@ -84,19 +85,22 @@ export default function SelecionarComponentePage() {
               </span>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="p-3 rounded-xl transition-all touch-target"
-            style={{ color: 'var(--text-muted)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--bg-surface-hover)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent'
-            }}
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <ThemeIconToggle />
+            <button
+              onClick={handleLogout}
+              className="p-3 rounded-xl transition-all touch-target"
+              style={{ color: 'var(--text-muted)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--bg-surface-hover)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+              }}
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -347,22 +351,28 @@ export default function SelecionarComponentePage() {
         {/* Dica */}
         <div className="mt-8">
           <div
-            className="rounded-2xl p-4 flex items-center gap-3"
+            className="rounded-2xl p-4 flex items-center gap-4"
             style={{
-              background: 'rgba(249, 115, 22, 0.1)',
-              border: '1px solid rgba(249, 115, 22, 0.3)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
             }}
           >
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(249, 115, 22, 0.2)' }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+              style={{
+                background: 'linear-gradient(135deg, var(--color-fisica), var(--color-matematica))',
+              }}
             >
-              <Flame className="w-5 h-5" style={{ color: 'var(--color-streak)' }} />
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Estude todos os dias para manter sua{' '}
-              <strong style={{ color: 'var(--color-streak)' }}>sequência</strong> ativa!
-            </p>
+            <div>
+              <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                Dica do dia
+              </p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                Estude todos os dias para manter sua sequência ativa!
+              </p>
+            </div>
           </div>
         </div>
       </main>

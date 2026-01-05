@@ -25,12 +25,12 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
-    // Buscar todas as conquistas
+    // Buscar todas as conquistas ordenadas por nível
     const { data: todasConquistas } = await supabase
       .from('conquistas')
       .select('*')
       .or(`componente.is.null,componente.eq.${componente}`)
-      .order('requisito_valor', { ascending: true })
+      .order('ordem', { ascending: true })
 
     // Buscar conquistas desbloqueadas pelo usuário
     const { data: conquistasUsuario } = await supabase
