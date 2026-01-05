@@ -457,26 +457,26 @@ export default function RevisaoPage() {
                   <Button variant="secondary" onClick={handleVoltar} className="flex-1 min-h-[48px]">
                     Menu
                   </Button>
-                  <Button
-                    variant="warning"
+                  <button
                     onClick={buscarQuestao}
-                    className="flex-1 min-h-[48px]"
+                    className="flex-1 min-h-[48px] rounded-xl font-semibold transition-all active:scale-[0.98]"
                     style={{ background: 'var(--warning)', color: '#000' }}
                   >
                     Próxima
-                  </Button>
+                  </button>
                 </>
               ) : (
-                <Button
-                  variant="warning"
+                <button
                   onClick={handleConfirmar}
                   disabled={!selecionada || respondendo}
-                  loading={respondendo}
-                  className="w-full min-h-[52px] text-base"
-                  style={{ background: selecionada ? 'var(--warning)' : undefined, color: selecionada ? '#000' : undefined }}
+                  className="w-full min-h-[52px] text-base rounded-xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
+                  style={{
+                    background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
+                    color: selecionada ? '#000' : 'var(--text-muted)'
+                  }}
                 >
-                  {selecionada ? 'Confirmar' : 'Selecione uma alternativa'}
-                </Button>
+                  {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione uma alternativa'}
+                </button>
               )}
             </div>
           </div>
