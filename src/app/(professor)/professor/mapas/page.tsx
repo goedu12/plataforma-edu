@@ -67,9 +67,9 @@ export default function MapasMentaisUploadPage() {
       return
     }
 
-    // Validar tamanho (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Imagem muito grande. Máximo 10MB.' })
+    // Validar tamanho (max 25MB para A4 300dpi)
+    if (file.size > 25 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Imagem muito grande. Máximo 25MB.' })
       return
     }
 
@@ -283,7 +283,7 @@ export default function MapasMentaisUploadPage() {
                 >
                   <ImageIcon className="w-12 h-12" />
                   <span>Clique para selecionar imagem</span>
-                  <span className="text-sm">PNG, JPG, WebP (máx 10MB)</span>
+                  <span className="text-sm">PNG, JPG, WebP - A4 300dpi (máx 25MB)</span>
                 </button>
               )}
             </div>

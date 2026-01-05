@@ -311,85 +311,112 @@ export default function MapasMentaisPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-4">
             {mapas.map((mapa) => (
               <div
                 key={mapa.id}
                 className="rounded-xl overflow-hidden"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
               >
-                {/* Thumbnail */}
+                {/* Header do Card */}
+                <div className="p-3 flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-default)' }}>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                      {mapa.titulo}
+                    </h3>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {SERIES_LABELS[mapa.serie]} • {BIMESTRES_LABELS[mapa.bimestre]}
+                    </p>
+                  </div>
+                  <span
+                    className="text-[10px] px-2 py-1 rounded-full font-medium whitespace-nowrap ml-2"
+                    style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+                  >
+                    {mapa.serie}ª Série
+                  </span>
+                </div>
+
+                {/* Imagem A4 - proporção vertical */}
                 <button
                   onClick={() => setMapaAberto(mapa)}
-                  className="w-full aspect-[4/3] relative group"
+                  className="w-full relative"
+                  style={{ aspectRatio: '210/297' }} // Proporção A4
                 >
                   <img
                     src={mapa.thumbnail_url || mapa.imagem_url}
                     alt={mapa.titulo}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
+                    style={{ background: 'var(--bg-elevated)' }}
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <ZoomIn className="w-8 h-8 text-white" />
+                  {/* Overlay de zoom no centro */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                    <div className="bg-white/90 rounded-full p-3">
+                      <ZoomIn className="w-6 h-6 text-gray-800" />
+                    </div>
                   </div>
-                  {/* Badge série/bimestre */}
-                  <span
-                    className="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
-                  >
-                    {mapa.serie}ª • {mapa.bimestre}º Bim
-                  </span>
                 </button>
 
-                {/* Info */}
-                <div className="p-3">
-                  <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                    {mapa.titulo}
-                  </h3>
-                  {mapa.tema && (
-                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                      {mapa.tema}
-                    </p>
-                  )}
+                {/* Barra de Ações SEMPRE VISÍVEL */}
+                <div
+                  className="p-3 flex items-center justify-between"
+                  style={{
+                    background: 'var(--bg-elevated)',
+                    borderTop: '1px solid var(--border-default)'
+                  }}
+                >
+                  {/* Stats */}
+                  <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--text-muted)' }}>
+                    <span className="flex items-center gap-1">
+                      <Heart
+                        className="w-4 h-4"
+                        fill={mapa.curtido ? 'currentColor' : 'none'}
+                        style={{ color: mapa.curtido ? '#ef4444' : 'inherit' }}
+                      />
+                      {mapa.curtidas}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Download className="w-4 h-4" />
+                      {mapa.downloads}
+                    </span>
+                  </div>
 
-                  {/* Stats e Ações */}
-                  <div className="flex items-center justify-between mt-2 pt-2" style={{ borderTop: '1px solid var(--border-default)' }}>
-                    <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" fill={mapa.curtido ? 'currentColor' : 'none'} style={{ color: mapa.curtido ? '#ef4444' : 'inherit' }} />
-                        {mapa.curtidas}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Download className="w-3 h-3" />
-                        {mapa.downloads}
-                      </span>
-                    </div>
-
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleCurtir(mapa)}
-                        className="p-1.5 rounded-lg transition-colors"
-                        style={{
-                          background: mapa.curtido ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-elevated)',
-                          color: mapa.curtido ? '#ef4444' : 'var(--text-muted)'
-                        }}
-                      >
-                        <Heart className="w-4 h-4" fill={mapa.curtido ? 'currentColor' : 'none'} />
-                      </button>
-                      <button
-                        onClick={() => handleDownload(mapa)}
-                        className="p-1.5 rounded-lg"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleCompartilhar(mapa)}
-                        className="p-1.5 rounded-lg"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                  {/* Botões de Ação - SEMPRE VISÍVEIS */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleCurtir(mapa)}
+                      className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-all active:scale-95"
+                      style={{
+                        background: mapa.curtido ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-surface)',
+                        color: mapa.curtido ? '#ef4444' : 'var(--text-secondary)',
+                        border: `1px solid ${mapa.curtido ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-default)'}`
+                      }}
+                    >
+                      <Heart className="w-4 h-4" fill={mapa.curtido ? 'currentColor' : 'none'} />
+                      {mapa.curtido ? 'Curtido' : 'Curtir'}
+                    </button>
+                    <button
+                      onClick={() => handleDownload(mapa)}
+                      className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-all active:scale-95"
+                      style={{
+                        background: 'var(--bg-surface)',
+                        color: 'var(--text-secondary)',
+                        border: '1px solid var(--border-default)'
+                      }}
+                    >
+                      <Download className="w-4 h-4" />
+                      Baixar
+                    </button>
+                    <button
+                      onClick={() => handleCompartilhar(mapa)}
+                      className="flex items-center gap-1 px-3 py-2 rounded-lg text-xs font-medium transition-all active:scale-95"
+                      style={{
+                        background: corPrimaria,
+                        color: isFisica ? '#000' : '#fff'
+                      }}
+                    >
+                      <Share2 className="w-4 h-4" />
+                      Enviar
+                    </button>
                   </div>
                 </div>
               </div>
