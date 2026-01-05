@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
@@ -12,9 +12,8 @@ import {
   X,
   RefreshCw,
   ChevronDown,
-  Eye,
-  ZoomIn,
-  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
@@ -37,11 +36,18 @@ export default function MapasMentaisPage() {
   const [bimestreFiltro, setBimestreFiltro] = useState<Bimestre | null>(null)
   const [showFiltros, setShowFiltros] = useState(false)
 
-  // Modal de visualização
-  const [mapaAberto, setMapaAberto] = useState<MapaMentalComStatus | null>(null)
+  // Stories mode
+  const [storiesAberto, setStoriesAberto] = useState(false)
+  const [indiceAtual, setIndiceAtual] = useState(0)
+
+  // Touch/Swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+
+  const mapaAtual = mapas[indiceAtual]
 
   // Buscar mapas
   const buscarMapas = async () => {
@@ -77,6 +83,62 @@ export default function MapasMentaisPage() {
     buscarMapas()
   }, [componente, serieFiltro, bimestreFiltro])
 
+  // Navegação Stories
+  const irParaAnterior = useCallback(() => {
+    setIndiceAtual(prev => (prev > 0 ? prev - 1 : mapas.length - 1))
+  }, [mapas.length])
+
+  const irParaProximo = useCallback(() => {
+    setIndiceAtual(prev => (prev < mapas.length - 1 ? prev + 1 : 0))
+  }, [mapas.length])
+
+  // Abrir stories em um índice específico
+  const abrirStories = (indice: number) => {
+    setIndiceAtual(indice)
+    setStoriesAberto(true)
+  }
+
+  // Fechar stories
+  const fecharStories = () => {
+    setStoriesAberto(false)
+  }
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!storiesAberto) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') irParaAnterior()
+      else if (e.key === 'ArrowRight') irParaProximo()
+      else if (e.key === 'Escape') fecharStories()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [storiesAberto, irParaAnterior, irParaProximo])
+
+  // Touch/Swipe handlers
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe) irParaProximo()
+    else if (isRightSwipe) irParaAnterior()
+  }
+
   // Toggle curtida
   const handleCurtir = async (mapa: MapaMentalComStatus) => {
     try {
@@ -93,11 +155,6 @@ export default function MapasMentaisPage() {
             ? { ...m, curtido: data.curtido, curtidas: data.curtidas }
             : m
         ))
-
-        // Atualizar mapa aberto se for o mesmo
-        if (mapaAberto?.id === mapa.id) {
-          setMapaAberto(prev => prev ? { ...prev, curtido: data.curtido, curtidas: data.curtidas } : null)
-        }
       }
     } catch (error) {
       console.error('Erro ao curtir:', error)
@@ -107,14 +164,12 @@ export default function MapasMentaisPage() {
   // Registrar download
   const handleDownload = async (mapa: MapaMentalComStatus) => {
     try {
-      // Registrar no servidor
       await fetch(`/api/mapas/${mapa.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ acao: 'download' })
       })
 
-      // Fazer download da imagem
       const link = document.createElement('a')
       link.href = mapa.imagem_url
       link.download = `${mapa.titulo.replace(/\s+/g, '_')}.webp`
@@ -122,7 +177,6 @@ export default function MapasMentaisPage() {
       link.click()
       document.body.removeChild(link)
 
-      // Atualizar contador local
       setMapas(prev => prev.map(m =>
         m.id === mapa.id ? { ...m, downloads: m.downloads + 1 } : m
       ))
@@ -131,24 +185,18 @@ export default function MapasMentaisPage() {
     }
   }
 
-  // Compartilhar via WhatsApp
+  // Compartilhar via WhatsApp COM LINK
   const handleCompartilhar = async (mapa: MapaMentalComStatus) => {
-    const texto = `📚 *${mapa.titulo}*\n${mapa.descricao || ''}\n\n${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LABELS[mapa.serie]} - ${BIMESTRES_LABELS[mapa.bimestre]}`
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
+    const linkMapa = `${baseUrl}/mapa/${mapa.id}`
 
-    // Tentar Web Share API primeiro
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: mapa.titulo,
-          text: texto,
-        })
-        return
-      } catch {
-        // Fallback para WhatsApp
-      }
-    }
+    const texto = `📚 *${mapa.titulo}*
 
-    // Fallback: abrir WhatsApp diretamente
+${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LABELS[mapa.serie]} - ${BIMESTRES_LABELS[mapa.bimestre]}
+
+🔗 ${linkMapa}`
+
+    // Abrir WhatsApp diretamente
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(texto)}`
     window.open(whatsappUrl, '_blank')
   }
@@ -169,7 +217,7 @@ export default function MapasMentaisPage() {
 
       {/* Header */}
       <header className="px-4 pt-3 pb-3" style={{ borderBottom: '1px solid var(--border-default)' }}>
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
@@ -223,18 +271,13 @@ export default function MapasMentaisPage() {
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Filtros</span>
                 {temFiltros && (
-                  <button
-                    onClick={limparFiltros}
-                    className="text-xs px-2 py-1 rounded"
-                    style={{ color: corPrimaria }}
-                  >
+                  <button onClick={limparFiltros} className="text-xs px-2 py-1 rounded" style={{ color: corPrimaria }}>
                     Limpar
                   </button>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {/* Série */}
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Série</label>
                   <div className="relative">
@@ -242,22 +285,16 @@ export default function MapasMentaisPage() {
                       value={serieFiltro || ''}
                       onChange={(e) => setSerieFiltro(e.target.value ? parseInt(e.target.value) as SerieEM : null)}
                       className="w-full p-2 pr-8 rounded-lg text-sm appearance-none"
-                      style={{
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border-default)',
-                        color: 'var(--text-primary)'
-                      }}
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     >
                       <option value="">Todas</option>
                       <option value="1">1ª Série</option>
                       <option value="2">2ª Série</option>
                       <option value="3">3ª Série</option>
                     </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </div>
-
-                {/* Bimestre */}
                 <div>
                   <label className="text-xs mb-1 block" style={{ color: 'var(--text-muted)' }}>Bimestre</label>
                   <div className="relative">
@@ -265,11 +302,7 @@ export default function MapasMentaisPage() {
                       value={bimestreFiltro || ''}
                       onChange={(e) => setBimestreFiltro(e.target.value ? parseInt(e.target.value) as Bimestre : null)}
                       className="w-full p-2 pr-8 rounded-lg text-sm appearance-none"
-                      style={{
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border-default)',
-                        color: 'var(--text-primary)'
-                      }}
+                      style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     >
                       <option value="">Todos</option>
                       <option value="1">1º Bimestre</option>
@@ -277,7 +310,7 @@ export default function MapasMentaisPage() {
                       <option value="3">3º Bimestre</option>
                       <option value="4">4º Bimestre</option>
                     </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </div>
               </div>
@@ -286,8 +319,8 @@ export default function MapasMentaisPage() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-4">
+      {/* Content - Grid Responsivo */}
+      <main className="max-w-6xl mx-auto px-4 py-4">
         {erro ? (
           <div className="text-center py-12">
             <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
@@ -297,186 +330,179 @@ export default function MapasMentaisPage() {
           </div>
         ) : mapas.length === 0 ? (
           <div className="text-center py-12">
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: 'var(--bg-surface)' }}
-            >
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'var(--bg-surface)' }}>
               <Map className="w-8 h-8" style={{ color: 'var(--text-muted)' }} />
             </div>
-            <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Nenhum mapa encontrado
-            </h3>
+            <h3 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>Nenhum mapa encontrado</h3>
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
               {temFiltros ? 'Tente ajustar os filtros' : 'Em breve novos mapas serão adicionados'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {mapas.map((mapa) => (
-              <div
+          /* GRID RESPONSIVO: 2 cols mobile, 3 cols tablet, 4 cols desktop */
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {mapas.map((mapa, index) => (
+              <button
                 key={mapa.id}
-                className="rounded-xl overflow-hidden"
+                onClick={() => abrirStories(index)}
+                className="rounded-xl overflow-hidden text-left transition-transform hover:scale-[1.02] active:scale-[0.98]"
                 style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
               >
-                {/* Thumbnail */}
-                <button
-                  onClick={() => setMapaAberto(mapa)}
-                  className="w-full aspect-[4/3] relative group"
-                >
+                {/* Thumbnail com proporção A4 */}
+                <div className="relative" style={{ aspectRatio: '210/297' }}>
                   <img
                     src={mapa.thumbnail_url || mapa.imagem_url}
                     alt={mapa.titulo}
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <ZoomIn className="w-8 h-8 text-white" />
-                  </div>
-                  {/* Badge série/bimestre */}
+                  {/* Gradiente inferior */}
+                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent" />
+                  {/* Badge série */}
                   <span
-                    className="absolute top-2 left-2 text-[10px] px-2 py-0.5 rounded-full font-medium"
+                    className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full font-medium"
                     style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
                   >
-                    {mapa.serie}ª • {mapa.bimestre}º Bim
+                    {mapa.serie}ª
                   </span>
-                </button>
-
-                {/* Info */}
-                <div className="p-3">
-                  <h3 className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                    {mapa.titulo}
-                  </h3>
-                  {mapa.tema && (
-                    <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>
-                      {mapa.tema}
-                    </p>
-                  )}
-
-                  {/* Stats e Ações */}
-                  <div className="flex items-center justify-between mt-2 pt-2" style={{ borderTop: '1px solid var(--border-default)' }}>
-                    <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-                      <span className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" fill={mapa.curtido ? 'currentColor' : 'none'} style={{ color: mapa.curtido ? '#ef4444' : 'inherit' }} />
+                  {/* Título sobre a imagem */}
+                  <div className="absolute inset-x-0 bottom-0 p-2">
+                    <h3 className="font-semibold text-xs text-white line-clamp-2 leading-tight">
+                      {mapa.titulo}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1 text-[10px] text-white/70">
+                      <span className="flex items-center gap-0.5">
+                        <Heart className="w-3 h-3" fill={mapa.curtido ? 'currentColor' : 'none'} />
                         {mapa.curtidas}
                       </span>
-                      <span className="flex items-center gap-1">
+                      <span className="flex items-center gap-0.5">
                         <Download className="w-3 h-3" />
                         {mapa.downloads}
                       </span>
                     </div>
-
-                    <div className="flex gap-1">
-                      <button
-                        onClick={() => handleCurtir(mapa)}
-                        className="p-1.5 rounded-lg transition-colors"
-                        style={{
-                          background: mapa.curtido ? 'rgba(239, 68, 68, 0.1)' : 'var(--bg-elevated)',
-                          color: mapa.curtido ? '#ef4444' : 'var(--text-muted)'
-                        }}
-                      >
-                        <Heart className="w-4 h-4" fill={mapa.curtido ? 'currentColor' : 'none'} />
-                      </button>
-                      <button
-                        onClick={() => handleDownload(mapa)}
-                        className="p-1.5 rounded-lg"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleCompartilhar(mapa)}
-                        className="p-1.5 rounded-lg"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </button>
-                    </div>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
       </main>
 
-      {/* Modal de Visualização */}
-      {mapaAberto && (
+      {/* MODO STORIES - Fullscreen */}
+      {storiesAberto && mapaAtual && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.9)' }}
-          onClick={() => setMapaAberto(null)}
+          className="fixed inset-0 z-50 bg-black flex flex-col"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
-          <div
-            className="relative max-w-4xl w-full max-h-[90vh] overflow-auto rounded-2xl"
-            style={{ background: 'var(--bg-surface)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header do Modal */}
-            <div className="sticky top-0 z-10 p-4 flex items-center justify-between" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
-              <div>
-                <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{mapaAberto.titulo}</h2>
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  {SERIES_LABELS[mapaAberto.serie]} • {BIMESTRES_LABELS[mapaAberto.bimestre]}
+          {/* Header Stories */}
+          <div className="flex-shrink-0 p-3 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent absolute top-0 left-0 right-0 z-10">
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={fecharStories}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+              <div className="min-w-0">
+                <h2 className="font-semibold text-white text-sm truncate">{mapaAtual.titulo}</h2>
+                <p className="text-xs text-white/60">
+                  {SERIES_LABELS[mapaAtual.serie]} • {BIMESTRES_LABELS[mapaAtual.bimestre]}
                 </p>
               </div>
-              <button
-                onClick={() => setMapaAberto(null)}
-                className="p-2 rounded-lg"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
+            <span className="text-white/60 text-sm font-medium">
+              {indiceAtual + 1} / {mapas.length}
+            </span>
+          </div>
 
-            {/* Imagem */}
-            <div className="p-4">
-              <img
-                src={mapaAberto.imagem_url}
-                alt={mapaAberto.titulo}
-                className="w-full rounded-lg"
+          {/* Indicadores de progresso */}
+          <div className="absolute top-16 left-0 right-0 z-10 px-3 flex gap-1">
+            {mapas.map((_, idx) => (
+              <div
+                key={idx}
+                className="h-0.5 flex-1 rounded-full transition-colors cursor-pointer"
+                style={{ background: idx === indiceAtual ? corPrimaria : 'rgba(255,255,255,0.3)' }}
+                onClick={() => setIndiceAtual(idx)}
               />
+            ))}
+          </div>
+
+          {/* Imagem Central */}
+          <div className="flex-1 flex items-center justify-center p-4 pt-24 pb-32">
+            <img
+              src={mapaAtual.imagem_url}
+              alt={mapaAtual.titulo}
+              className="max-w-full max-h-full object-contain rounded-lg"
+            />
+          </div>
+
+          {/* Setas de Navegação - Desktop */}
+          <button
+            onClick={irParaAnterior}
+            className="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 items-center justify-center transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6 text-white" />
+          </button>
+          <button
+            onClick={irParaProximo}
+            className="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 items-center justify-center transition-colors"
+          >
+            <ChevronRight className="w-6 h-6 text-white" />
+          </button>
+
+          {/* Barra de Ações - Fixa no Bottom */}
+          <div className="flex-shrink-0 absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+            {/* Stats */}
+            <div className="flex items-center gap-4 text-sm text-white/60 mb-3">
+              <span className="flex items-center gap-1">
+                <Heart className="w-4 h-4" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? '#ef4444' : 'inherit' }} />
+                {mapaAtual.curtidas} curtidas
+              </span>
+              <span className="flex items-center gap-1">
+                <Download className="w-4 h-4" />
+                {mapaAtual.downloads} downloads
+              </span>
             </div>
 
-            {/* Ações do Modal */}
-            <div className="sticky bottom-0 p-4 flex items-center justify-between gap-3" style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)' }}>
-              <div className="flex items-center gap-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-                <span className="flex items-center gap-1">
-                  <Eye className="w-4 h-4" />
-                  {mapaAberto.visualizacoes}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Heart className="w-4 h-4" fill={mapaAberto.curtido ? 'currentColor' : 'none'} style={{ color: mapaAberto.curtido ? '#ef4444' : 'inherit' }} />
-                  {mapaAberto.curtidas}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Download className="w-4 h-4" />
-                  {mapaAberto.downloads}
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleCurtir(mapaAberto)}
-                  leftIcon={<Heart className="w-4 h-4" fill={mapaAberto.curtido ? 'currentColor' : 'none'} />}
-                  style={{ color: mapaAberto.curtido ? '#ef4444' : undefined }}
-                >
-                  {mapaAberto.curtido ? 'Curtido' : 'Curtir'}
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => handleDownload(mapaAberto)}
-                  leftIcon={<Download className="w-4 h-4" />}
-                >
-                  Baixar
-                </Button>
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={() => handleCompartilhar(mapaAberto)}
-                  leftIcon={<Share2 className="w-4 h-4" />}
-                >
-                  WhatsApp
-                </Button>
-              </div>
+            {/* Botões de Ação */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleCurtir(mapaAtual)}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
+                style={{
+                  background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.1)',
+                  color: mapaAtual.curtido ? '#ef4444' : 'white',
+                  border: `1px solid ${mapaAtual.curtido ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.2)'}`
+                }}
+              >
+                <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
+                {mapaAtual.curtido ? 'Curtido' : 'Curtir'}
+              </button>
+              <button
+                onClick={() => handleDownload(mapaAtual)}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                <Download className="w-5 h-5" />
+                Baixar
+              </button>
+              <button
+                onClick={() => handleCompartilhar(mapaAtual)}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
+                style={{
+                  background: '#25D366',
+                  color: 'white'
+                }}
+              >
+                <Share2 className="w-5 h-5" />
+                WhatsApp
+              </button>
             </div>
           </div>
         </div>

@@ -8,15 +8,26 @@ import type { Componente, SerieEM, Bimestre } from '@/types'
 // API: Upload de Mapa Mental
 // POST - Upload com conversão automática para WebP
 // Apenas professores podem fazer upload
+// Suporta imagens A4 300dpi (2480x3508 pixels)
 // ═══════════════════════════════════════════════════════════
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB original
+const MAX_FILE_SIZE = 25 * 1024 * 1024 // 25MB para imagens A4 300dpi
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
-// Configurações de otimização
+// Configurações otimizadas para A4 300dpi (2480x3508)
 const IMAGE_CONFIG = {
-  main: { width: 1200, quality: 85 },      // Imagem principal
-  thumbnail: { width: 400, quality: 75 },   // Thumbnail para listagem
+  // Imagem principal - mantém alta qualidade para visualização/zoom
+  main: {
+    width: 2480,      // Largura A4 300dpi
+    height: 3508,     // Altura A4 300dpi
+    quality: 90       // Alta qualidade para detalhes
+  },
+  // Thumbnail para grid/listagem
+  thumbnail: {
+    width: 600,       // Largura para cards
+    height: 848,      // Proporção A4
+    quality: 80
+  },
 }
 
 export async function POST(request: NextRequest) {
@@ -110,21 +121,22 @@ export async function POST(request: NextRequest) {
 
     // ═══════════════════════════════════════════════════════════
     // CONVERSÃO PARA WEBP COM SHARP
+    // Otimizado para A4 300dpi (2480x3508 pixels)
     // ═══════════════════════════════════════════════════════════
 
-    // Imagem principal (WebP otimizado)
+    // Imagem principal - alta qualidade para visualização e download
     const mainWebp = await sharp(originalBuffer)
       .webp({ quality: IMAGE_CONFIG.main.quality })
-      .resize(IMAGE_CONFIG.main.width, null, {
+      .resize(IMAGE_CONFIG.main.width, IMAGE_CONFIG.main.height, {
         withoutEnlargement: true,
-        fit: 'inside'
+        fit: 'inside'  // Mantém proporção sem cortar
       })
       .toBuffer()
 
-    // Thumbnail (menor, para listagem)
+    // Thumbnail para grid/listagem (proporcional ao A4)
     const thumbWebp = await sharp(originalBuffer)
       .webp({ quality: IMAGE_CONFIG.thumbnail.quality })
-      .resize(IMAGE_CONFIG.thumbnail.width, null, {
+      .resize(IMAGE_CONFIG.thumbnail.width, IMAGE_CONFIG.thumbnail.height, {
         withoutEnlargement: true,
         fit: 'inside'
       })

@@ -37,7 +37,17 @@ const JWT_AUDIENCE = 'plataforma-edu-users'
 // ═══════════════════════════════════════════════════════════
 
 // Rotas públicas que não precisam de autenticação
-const rotasPublicas = ['/login', '/api/auth', '/api/health', '/api/verificar', '/api/ping', '/api/teste']
+const rotasPublicas = [
+  '/login',
+  '/api/auth',
+  '/api/health',
+  '/api/verificar',
+  '/api/ping',
+  '/api/teste',
+  '/health',
+  '/mapa',              // Página pública de visualização de mapa
+  '/api/mapas/publico', // API pública para buscar mapa por ID
+]
 
 // Rotas que precisam ser professor
 const rotasProfessor = ['/professor', '/api/professor']
