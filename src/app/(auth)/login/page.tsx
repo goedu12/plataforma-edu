@@ -15,6 +15,17 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErro('')
+
+    // Validação de campos
+    if (!email.trim()) {
+      setErro('Digite seu login')
+      return
+    }
+    if (!senha) {
+      setErro('Digite sua senha')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -184,38 +195,14 @@ export default function LoginPage() {
             className="text-sm mb-2"
             style={{ color: 'var(--text-secondary)' }}
           >
-            <span style={{ color: 'var(--color-fisica)' }}>Senha:</span> @estudante
+            <span style={{ color: 'var(--color-fisica)' }}>Senha:</span> fornecida pelo professor
           </p>
           <p
             className="text-xs"
             style={{ color: 'var(--text-muted)' }}
           >
-            Exemplo: mariasilva@1a
+            Exemplo de login: mariasilva@1a
           </p>
-        </div>
-
-        {/* Professor Link */}
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setEmail('professor@admin')
-              setSenha('')
-            }}
-            className="inline-flex items-center gap-2 py-2 px-4 rounded-lg transition-colors touch-target"
-            style={{ color: 'var(--text-tertiary)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'var(--bg-surface-hover)'
-              e.currentTarget.style.color = 'var(--text-secondary)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.color = 'var(--text-tertiary)'
-            }}
-          >
-            <GraduationCap className="w-4 h-4" />
-            <span className="text-sm font-medium">Acesso Professor</span>
-          </button>
         </div>
       </div>
 

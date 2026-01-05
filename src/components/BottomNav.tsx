@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, usePathname } from 'next/navigation'
-import { Home, BookOpen, Trophy, User } from 'lucide-react'
+import { Home, BookOpen, Trophy, User, Zap } from 'lucide-react'
 import type { Componente } from '@/types'
 
 interface BottomNavProps {
@@ -19,6 +19,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
   const items = [
     { icon: Home, label: 'Início', href: `/${componente}/menu` },
     { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar` },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio` },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking` },
     { icon: User, label: 'Perfil', href: `/${componente}/perfil` },
   ]
@@ -43,12 +44,13 @@ export default function BottomNav({ componente }: BottomNavProps) {
           <button
             key={item.label}
             onClick={() => router.push(item.href)}
+            aria-label={item.label}
             className="flex flex-col items-center justify-center"
             style={{
-              gap: '4px',
-              minWidth: '64px',
+              gap: '2px',
+              minWidth: '56px',
               minHeight: '48px',
-              padding: '8px 12px',
+              padding: '6px 8px',
               borderRadius: '12px',
               background: isActive ? activeBg : 'transparent',
               color: isActive ? activeColor : 'var(--text-muted)',
@@ -58,7 +60,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
             }}
           >
             <item.icon style={{ width: '20px', height: '20px' }} />
-            <span style={{ fontSize: '10px', fontWeight: 500 }}>{item.label}</span>
+            <span style={{ fontSize: '9px', fontWeight: 500 }}>{item.label}</span>
           </button>
         )
       })}
