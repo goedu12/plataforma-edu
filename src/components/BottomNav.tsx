@@ -25,6 +25,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
 
   return (
     <nav
+      className="lg:hidden"
       style={{
         position: 'fixed',
         bottom: 0,
