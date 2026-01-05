@@ -433,11 +433,9 @@ export default function RevisaoPage() {
                     {feedback.explicacao && (
                       <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{feedback.explicacao}</p>
                     )}
-                    {feedback.correta && (
-                      <p className="text-xs mt-2" style={{ color: 'var(--success)' }}>
-                        Questão removida da revisão!
-                      </p>
-                    )}
+                    <p className="text-xs mt-2" style={{ color: feedback.correta ? 'var(--success)' : 'var(--text-muted)' }}>
+                      Questão removida da revisão
+                    </p>
                   </div>
                 </div>
               </div>
