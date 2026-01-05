@@ -25,18 +25,11 @@ export default function BottomNav({ componente }: BottomNavProps) {
 
   return (
     <nav
-      className="lg:hidden"
+      className="flex lg:hidden fixed bottom-0 left-0 right-0 items-center justify-around"
       style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
         height: '64px',
         background: 'var(--bg-elevated)',
         borderTop: '1px solid var(--border-default)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-around',
         paddingBottom: 'env(safe-area-inset-bottom, 0)',
         zIndex: 50,
         boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
@@ -50,11 +43,8 @@ export default function BottomNav({ componente }: BottomNavProps) {
           <button
             key={item.label}
             onClick={() => router.push(item.href)}
+            className="flex flex-col items-center justify-center"
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
               gap: '4px',
               minWidth: '64px',
               minHeight: '48px',
