@@ -95,42 +95,35 @@ export default function MapasMentaisUploadPage() {
     setMessage(null)
 
     try {
-      // Converter para base64
-      const reader = new FileReader()
-      reader.readAsDataURL(selectedFile)
+      // Criar FormData para envio
+      const formData = new FormData()
+      formData.append('imagem', selectedFile)
+      formData.append('componente', componente)
+      formData.append('serie', serie.toString())
+      formData.append('bimestre', bimestre.toString())
+      formData.append('titulo', titulo.trim())
 
-      reader.onloadend = async () => {
-        const base64 = reader.result as string
+      const response = await fetch('/api/mapas/upload', {
+        method: 'POST',
+        body: formData, // FormData não precisa de Content-Type header
+      })
 
-        const response = await fetch('/api/mapas/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            componente,
-            serie,
-            bimestre,
-            titulo: titulo.trim(),
-            imagem: base64,
-          }),
-        })
+      const data = await response.json()
 
-        const data = await response.json()
-
-        if (data.sucesso) {
-          setMessage({ type: 'success', text: 'Mapa mental enviado com sucesso!' })
-          setTitulo('')
-          setPreview(null)
-          setSelectedFile(null)
-          if (fileInputRef.current) fileInputRef.current.value = ''
-          carregarMapas()
-        } else {
-          setMessage({ type: 'error', text: data.erro || 'Erro ao enviar mapa' })
-        }
-
-        setUploading(false)
+      if (data.sucesso) {
+        setMessage({ type: 'success', text: data.mensagem || 'Mapa mental enviado com sucesso!' })
+        setTitulo('')
+        setPreview(null)
+        setSelectedFile(null)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        carregarMapas()
+      } else {
+        setMessage({ type: 'error', text: data.erro || 'Erro ao enviar mapa' })
       }
-    } catch {
+    } catch (err) {
+      console.error('Erro upload:', err)
       setMessage({ type: 'error', text: 'Erro ao enviar mapa mental' })
+    } finally {
       setUploading(false)
     }
   }
