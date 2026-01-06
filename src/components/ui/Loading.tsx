@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
+
+// Logo estático da plataforma
+const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome.webp'
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'
   text?: string
   fullScreen?: boolean
   componente?: 'fisica' | 'matematica'
-  logoUrl?: string | null
 }
 
 export default function Loading({
@@ -16,25 +17,7 @@ export default function Loading({
   text,
   fullScreen = false,
   componente = 'fisica',
-  logoUrl: propLogoUrl,
 }: LoadingProps) {
-  const [logoUrl, setLogoUrl] = useState<string | null>(propLogoUrl || null)
-
-  // Buscar logo automaticamente quando fullScreen
-  useEffect(() => {
-    if (fullScreen && !propLogoUrl) {
-      fetch('/api/config')
-        .then(res => res.json())
-        .then(data => {
-          if (data.sucesso && data.configuracoes?.logo_url) {
-            setLogoUrl(data.configuracoes.logo_url)
-          }
-        })
-        .catch(() => {
-          // Silently fail - fallback to text
-        })
-    }
-  }, [fullScreen, propLogoUrl])
 
   const sizeStyles = {
     sm: 'h-5 w-5',
@@ -71,24 +54,12 @@ export default function Loading({
       >
         {/* Logo Studão */}
         <div className="mb-8">
-          {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logoUrl}
-              alt="Studão"
-              className="max-h-[100px] w-auto opacity-95"
-            />
-          ) : (
-            <h1
-              className="text-4xl font-bold tracking-tight"
-              style={{
-                color: '#4ade80',
-                textShadow: '0 0 20px rgba(74, 222, 128, 0.3)'
-              }}
-            >
-              STUDÃO
-            </h1>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LOGO_URL}
+            alt="Studão"
+            className="max-h-[100px] w-auto opacity-95"
+          />
         </div>
         {content}
       </div>

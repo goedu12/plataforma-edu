@@ -400,6 +400,217 @@ export function extrairAnoTurma(turma: string): { ano: number; nivel: NivelEnsin
 }
 
 // ═══════════════════════════════════════════════════════════
+// TIPOS ENEM - Simulado ENEM
+// Sistema separado sem pontuação/gamificação
+// ═══════════════════════════════════════════════════════════
+
+// Alternativas ENEM (5 opções vs 4 do sistema normal)
+export type AlternativaENEM = 'A' | 'B' | 'C' | 'D' | 'E'
+
+// Áreas do ENEM
+export type AreaENEM =
+  | 'ciencias-natureza'
+  | 'matematica'
+  | 'linguagens'
+  | 'ciencias-humanas'
+
+// Subáreas (disciplinas específicas)
+export type SubareaENEM =
+  // Ciências da Natureza
+  | 'fisica'
+  | 'quimica'
+  | 'biologia'
+  // Matemática
+  | 'matematica'
+  // Linguagens
+  | 'portugues'
+  | 'literatura'
+  | 'ingles'
+  | 'espanhol'
+  | 'artes'
+  // Ciências Humanas
+  | 'historia'
+  | 'geografia'
+  | 'filosofia'
+  | 'sociologia'
+
+// Questão ENEM
+export interface QuestaoENEM {
+  id: string
+  id_api?: string
+  ano_prova: number
+  numero_questao: number
+  caderno?: string
+  area: AreaENEM
+  area_nome?: string
+  subarea?: SubareaENEM
+  idioma?: string
+  titulo?: string
+  contexto: string
+  comando?: string
+  imagem_principal?: string
+  imagens_extras?: string[]
+  alternativa_a: string
+  alternativa_b: string
+  alternativa_c: string
+  alternativa_d: string
+  alternativa_e: string
+  imagem_a?: string
+  imagem_b?: string
+  imagem_c?: string
+  imagem_d?: string
+  imagem_e?: string
+  resposta_correta: AlternativaENEM
+  conteudos?: string[]
+  conteudo_principal?: string
+  dificuldade?: Dificuldade
+  tags?: string[]
+  status: StatusQuestao
+  importado_em: string
+}
+
+// Questão ENEM para exibição (sem resposta correta)
+export type QuestaoENEMPublica = Omit<QuestaoENEM, 'resposta_correta'>
+
+// Resposta ENEM
+export interface RespostaENEM {
+  id: string
+  usuario_id: string
+  questao_id: string
+  resposta_dada: AlternativaENEM
+  correta: boolean
+  tempo_segundos: number
+  ano_prova: number
+  area: AreaENEM
+  subarea?: SubareaENEM
+  conteudo_principal?: string
+  modo: 'livre' | 'simulado' | 'revisao'
+  sessao_id?: string
+  criado_em: string
+}
+
+// Conteúdo (para filtragem)
+export interface ConteudoENEM {
+  id: string
+  area: AreaENEM
+  subarea: SubareaENEM
+  codigo: string
+  nome: string
+  descricao?: string
+  palavras_chave?: string[]
+  ordem: number
+  ativo: boolean
+}
+
+// Filtros para busca de questões ENEM
+export interface FiltrosENEM {
+  ano_prova?: number
+  area?: AreaENEM
+  subarea?: SubareaENEM
+  conteudo?: string
+  conteudos?: string[]
+  dificuldade?: Dificuldade
+  apenas_nao_respondidas?: boolean
+}
+
+// Estatísticas do aluno no ENEM
+export interface EstatisticasENEM {
+  total_questoes: number
+  total_corretas: number
+  taxa_acerto: number
+  tempo_medio?: number
+
+  por_area?: {
+    [key in AreaENEM]?: {
+      total: number
+      corretas: number
+      taxa: number
+    }
+  }
+
+  por_subarea?: {
+    [key in SubareaENEM]?: {
+      total: number
+      corretas: number
+      taxa: number
+    }
+  }
+
+  por_ano?: {
+    [ano: number]: {
+      total: number
+      corretas: number
+      taxa: number
+    }
+  }
+}
+
+// Configurações do ENEM
+export const ENEM_CONFIG = {
+  ANOS_DISPONIVEIS: [2019, 2020, 2021, 2022, 2023] as const,
+
+  AREAS: {
+    'ciencias-natureza': {
+      nome: 'Ciências da Natureza',
+      cor: '#22c55e', // Verde
+      icone: '🔬',
+      subareas: ['fisica', 'quimica', 'biologia'] as SubareaENEM[]
+    },
+    'matematica': {
+      nome: 'Matemática',
+      cor: '#3b82f6', // Azul
+      icone: '📐',
+      subareas: ['matematica'] as SubareaENEM[]
+    },
+    'linguagens': {
+      nome: 'Linguagens',
+      cor: '#8b5cf6', // Roxo
+      icone: '📚',
+      subareas: ['portugues', 'literatura', 'ingles', 'espanhol', 'artes'] as SubareaENEM[]
+    },
+    'ciencias-humanas': {
+      nome: 'Ciências Humanas',
+      cor: '#f59e0b', // Amarelo
+      icone: '🌍',
+      subareas: ['historia', 'geografia', 'filosofia', 'sociologia'] as SubareaENEM[]
+    }
+  } as const,
+
+  SUBAREAS_LABELS: {
+    fisica: 'Física',
+    quimica: 'Química',
+    biologia: 'Biologia',
+    matematica: 'Matemática',
+    portugues: 'Português',
+    literatura: 'Literatura',
+    ingles: 'Inglês',
+    espanhol: 'Espanhol',
+    artes: 'Artes',
+    historia: 'História',
+    geografia: 'Geografia',
+    filosofia: 'Filosofia',
+    sociologia: 'Sociologia'
+  } as const,
+
+  QUESTOES_POR_AREA: 45,
+  TEMPO_PROVA_MINUTOS: 180,
+
+  // Mapeamento Studão -> ENEM
+  COMPONENTE_TO_AREA: {
+    fisica: 'ciencias-natureza',
+    matematica: 'matematica'
+  } as Record<Componente, AreaENEM>,
+
+  // Mapeamento ENEM -> Studão (subáreas relevantes)
+  SUBAREA_TO_COMPONENTE: {
+    fisica: 'fisica',
+    matematica: 'matematica'
+  } as Record<string, Componente>,
+
+  NIVEL_MINIMO: 'EM' as NivelEnsino
+} as const
+
+// ═══════════════════════════════════════════════════════════
 // INTERFACE: Mapa Mental
 // Sistema de resumos visuais por série e bimestre
 // ═══════════════════════════════════════════════════════════
