@@ -78,23 +78,24 @@ export default function DashboardProfessorPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-calm-bg">
+    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="bg-gray-800 text-white px-4 pt-6 pb-16">
+      <header className="px-4 pt-6 pb-16" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-accent-orange flex items-center justify-center">
-                <span className="text-white font-bold text-lg">P</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--warning)' }}>
+                <span className="font-bold text-lg" style={{ color: '#000' }}>P</span>
               </div>
               <div>
-                <h1 className="font-display text-lg font-bold">Dashboard</h1>
-                <p className="text-white/70 text-sm">Plataforma EDU • Professor</p>
+                <h1 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Dashboard</h1>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Studão • Professor</p>
               </div>
             </div>
             <button
               onClick={handleLogout}
-              className="p-2.5 rounded-xl hover:bg-white/10 transition-colors"
+              className="p-2.5 rounded-xl transition-colors"
+              style={{ color: 'var(--text-muted)' }}
               title="Sair"
             >
               <LogOut className="w-5 h-5" />
@@ -103,25 +104,25 @@ export default function DashboardProfessorPage() {
 
           {/* Quick Stats Header */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-              <Users className="w-5 h-5 mx-auto mb-1 text-blue-300" />
-              <p className="text-xl font-bold">{stats.fisica.total_estudantes + stats.matematica.total_estudantes}</p>
-              <p className="text-xs text-white/70">Total Alunos</p>
+            <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <Users className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--info)' }} />
+              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.fisica.total_estudantes + stats.matematica.total_estudantes}</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Total Alunos</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-              <Activity className="w-5 h-5 mx-auto mb-1 text-green-300" />
-              <p className="text-xl font-bold">{stats.fisica.ativos_semana + stats.matematica.ativos_semana}</p>
-              <p className="text-xs text-white/70">Ativos (7d)</p>
+            <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <Activity className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--success)' }} />
+              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.fisica.ativos_semana + stats.matematica.ativos_semana}</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ativos (7d)</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-              <Target className="w-5 h-5 mx-auto mb-1 text-yellow-300" />
-              <p className="text-xl font-bold">{Math.round((stats.fisica.taxa_acerto + stats.matematica.taxa_acerto) / 2)}%</p>
-              <p className="text-xs text-white/70">Média Acerto</p>
+            <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <Target className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--warning)' }} />
+              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{Math.round((stats.fisica.taxa_acerto + stats.matematica.taxa_acerto) / 2)}%</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Média Acerto</p>
             </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center">
-              <FileText className="w-5 h-5 mx-auto mb-1 text-purple-300" />
-              <p className="text-xl font-bold">{stats.fisica.total_respostas + stats.matematica.total_respostas}</p>
-              <p className="text-xs text-white/70">Respostas</p>
+            <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <FileText className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--color-matematica)' }} />
+              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.fisica.total_respostas + stats.matematica.total_respostas}</p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Respostas</p>
             </div>
           </div>
         </div>

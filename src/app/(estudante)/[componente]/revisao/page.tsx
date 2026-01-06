@@ -156,12 +156,15 @@ export default function RevisaoPage() {
 
   const getAlternativaStyle = (letra: Alternativa) => {
     if (feedback) {
-      if (letra === feedback.respostaCorreta) {
+      // Só mostra verde se o estudante ACERTOU
+      if (feedback.correta && letra === selecionada) {
         return { background: 'rgba(34, 197, 94, 0.15)', border: '2px solid var(--success)' }
       }
-      if (letra === selecionada && !feedback.correta) {
+      // Mostra vermelho na alternativa errada que o estudante selecionou
+      if (!feedback.correta && letra === selecionada) {
         return { background: 'rgba(239, 68, 68, 0.15)', border: '2px solid var(--error)' }
       }
+      // Outras alternativas ficam neutras
       return { background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', opacity: 0.5 }
     }
     if (selecionada === letra) {
@@ -317,21 +320,21 @@ export default function RevisaoPage() {
                     <span
                       className="w-9 h-9 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
                       style={{
-                        background: feedback && letra === feedback.respostaCorreta
+                        background: feedback && feedback.correta && letra === selecionada
                           ? 'var(--success)'
-                          : feedback && letra === selecionada && !feedback.correta
+                          : feedback && !feedback.correta && letra === selecionada
                             ? 'var(--error)'
                             : selecionada === letra
                               ? 'var(--warning)'
                               : 'var(--bg-elevated)',
-                        color: (feedback && (letra === feedback.respostaCorreta || (letra === selecionada && !feedback.correta))) || selecionada === letra
+                        color: (feedback && letra === selecionada) || selecionada === letra
                           ? '#000'
                           : 'var(--text-muted)',
                       }}
                     >
-                      {feedback && letra === feedback.respostaCorreta ? (
+                      {feedback && feedback.correta && letra === selecionada ? (
                         <CheckCircle2 className="w-5 h-5" />
-                      ) : feedback && letra === selecionada && !feedback.correta ? (
+                      ) : feedback && !feedback.correta && letra === selecionada ? (
                         <XCircle className="w-5 h-5" />
                       ) : (
                         letra
@@ -422,16 +425,11 @@ export default function RevisaoPage() {
                         </span>
                       )}
                     </div>
-                    {!feedback.correta && (
-                      <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                        Correta: <strong style={{ color: 'var(--error)' }}>{feedback.respostaCorreta}</strong>
-                      </p>
-                    )}
                     {feedback.explicacao && (
                       <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{feedback.explicacao}</p>
                     )}
                     <p className="text-xs mt-2" style={{ color: feedback.correta ? 'var(--success)' : 'var(--text-muted)' }}>
-                      Questão removida da revisão
+                      {feedback.correta ? 'Questão removida da revisão' : 'Tente novamente na próxima'}
                     </p>
                   </div>
                 </div>

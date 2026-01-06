@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import {
   ArrowLeft,
   Settings,
@@ -14,6 +15,10 @@ import {
   Target,
   Eye,
   EyeOff,
+  ImageIcon,
+  Upload,
+  Trash2,
+  Loader2,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -22,10 +27,17 @@ import { PONTUACAO } from '@/types'
 
 export default function ConfigProfessorPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(true)
   const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
   const [professor, setProfessor] = useState<{ nome: string; email: string } | null>(null)
+
+  // Logo
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [logoMensagem, setLogoMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
 
   // Alteração de senha
   const [senhaAtual, setSenhaAtual] = useState('')
@@ -35,18 +47,27 @@ export default function ConfigProfessorPage() {
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false)
 
   useEffect(() => {
-    const buscarProfessor = async () => {
+    const buscarDados = async () => {
       try {
-        const response = await fetch('/api/usuario')
-        const data = await response.json()
+        // Buscar dados do professor
+        const userResponse = await fetch('/api/usuario')
+        const userData = await userResponse.json()
 
-        if (data.sucesso && data.usuario) {
+        if (userData.sucesso && userData.usuario) {
           setProfessor({
-            nome: data.usuario.nome,
-            email: data.usuario.email,
+            nome: userData.usuario.nome,
+            email: userData.usuario.email,
           })
         } else {
           router.push('/login')
+          return
+        }
+
+        // Buscar logo atual
+        const logoResponse = await fetch('/api/config/logo')
+        const logoData = await logoResponse.json()
+        if (logoData.sucesso && logoData.logo_url) {
+          setLogoUrl(logoData.logo_url)
         }
       } catch {
         router.push('/login')
@@ -55,14 +76,119 @@ export default function ConfigProfessorPage() {
       }
     }
 
-    buscarProfessor()
+    buscarDados()
   }, [router])
+
+  // Handler para seleção de arquivo de logo
+  const handleLogoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validar tipo
+    const tiposPermitidos = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml']
+    if (!tiposPermitidos.includes(file.type)) {
+      setLogoMensagem({ tipo: 'erro', texto: 'Tipo de arquivo não permitido. Use PNG, JPG, WebP ou SVG.' })
+      return
+    }
+
+    // Validar tamanho (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setLogoMensagem({ tipo: 'erro', texto: 'Arquivo muito grande. Máximo 2MB.' })
+      return
+    }
+
+    // Preview local
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setLogoPreview(event.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Upload do logo
+  const handleLogoUpload = async () => {
+    const file = fileInputRef.current?.files?.[0]
+    if (!file) {
+      setLogoMensagem({ tipo: 'erro', texto: 'Selecione uma imagem primeiro.' })
+      return
+    }
+
+    setUploadingLogo(true)
+    setLogoMensagem(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('logo', file)
+
+      const response = await fetch('/api/config/logo', {
+        method: 'POST',
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (data.sucesso) {
+        setLogoUrl(data.logo_url)
+        setLogoPreview(null)
+        setLogoMensagem({ tipo: 'sucesso', texto: 'Logo atualizado com sucesso!' })
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+      } else {
+        const mensagemErro = data.detalhes
+          ? `${data.erro} (${data.detalhes})`
+          : data.erro || 'Erro ao fazer upload do logo.'
+        setLogoMensagem({ tipo: 'erro', texto: mensagemErro })
+      }
+    } catch {
+      setLogoMensagem({ tipo: 'erro', texto: 'Erro de conexão. Tente novamente.' })
+    } finally {
+      setUploadingLogo(false)
+    }
+  }
+
+  // Remover logo
+  const handleLogoRemove = async () => {
+    if (!confirm('Tem certeza que deseja remover o logo? O logo padrão será exibido.')) {
+      return
+    }
+
+    setUploadingLogo(true)
+    setLogoMensagem(null)
+
+    try {
+      const response = await fetch('/api/config/logo', {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (data.sucesso) {
+        setLogoUrl(null)
+        setLogoPreview(null)
+        setLogoMensagem({ tipo: 'sucesso', texto: 'Logo removido. O logo padrão será exibido.' })
+      } else {
+        setLogoMensagem({ tipo: 'erro', texto: data.erro || 'Erro ao remover logo.' })
+      }
+    } catch {
+      setLogoMensagem({ tipo: 'erro', texto: 'Erro de conexão. Tente novamente.' })
+    } finally {
+      setUploadingLogo(false)
+    }
+  }
+
+  // Cancelar preview
+  const handleCancelPreview = () => {
+    setLogoPreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const alterarSenha = async (e: React.FormEvent) => {
     e.preventDefault()
     setMensagem(null)
 
-    // Validações
     if (!senhaAtual || !novaSenha || !confirmarSenha) {
       setMensagem({ tipo: 'erro', texto: 'Preencha todos os campos' })
       return
@@ -129,7 +255,7 @@ export default function ConfigProfessorPage() {
             </div>
             <div>
               <h1 className="text-title text-text-primary">Configurações</h1>
-              <p className="text-caption text-text-tertiary">Gerencie suas preferências e segurança</p>
+              <p className="text-caption text-text-tertiary">Gerencie o Studão e suas preferências</p>
             </div>
           </div>
         </div>
@@ -137,6 +263,151 @@ export default function ConfigProfessorPage() {
 
       {/* Conteúdo */}
       <main className="max-w-4xl mx-auto p-4 lg:p-6 space-y-6">
+        {/* Gerenciamento de Logo */}
+        <Card>
+          <div className="flex items-center gap-2 mb-4">
+            <ImageIcon className="w-5 h-5 text-primary-500" />
+            <h3 className="text-heading text-text-primary">Logo da Plataforma</h3>
+          </div>
+
+          <p className="text-body text-text-secondary mb-4">
+            Personalize o logo exibido na tela de login do Studão. Recomendamos imagens com fundo transparente (PNG ou WebP).
+          </p>
+
+          {logoMensagem && (
+            <div
+              className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
+                logoMensagem.tipo === 'sucesso'
+                  ? 'bg-success/10 border border-success/20 text-success'
+                  : 'bg-error/10 border border-error/20 text-error'
+              }`}
+            >
+              {logoMensagem.tipo === 'sucesso' ? (
+                <CheckCircle className="w-5 h-5" />
+              ) : (
+                <AlertCircle className="w-5 h-5" />
+              )}
+              <span>{logoMensagem.texto}</span>
+            </div>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Preview do Logo Atual */}
+            <div className="p-6 bg-dark-elevated rounded-xl border border-border">
+              <p className="text-caption text-text-tertiary mb-3">Logo Atual</p>
+              <div className="flex items-center justify-center min-h-[120px] bg-dark-bg rounded-lg p-4">
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt="Logo atual"
+                    width={200}
+                    height={80}
+                    className="max-h-[80px] w-auto object-contain"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="text-center">
+                    <Image
+                      src="/logo-studao.svg"
+                      alt="Logo padrão"
+                      width={200}
+                      height={80}
+                      className="max-h-[80px] w-auto object-contain"
+                    />
+                    <p className="text-xs text-text-muted mt-2">Logo padrão</p>
+                  </div>
+                )}
+              </div>
+              {logoUrl && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleLogoRemove}
+                  disabled={uploadingLogo}
+                  className="w-full mt-3"
+                  leftIcon={uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                >
+                  Remover Logo
+                </Button>
+              )}
+            </div>
+
+            {/* Upload de Novo Logo */}
+            <div className="p-6 bg-dark-elevated rounded-xl border border-border">
+              <p className="text-caption text-text-tertiary mb-3">
+                {logoPreview ? 'Preview do Novo Logo' : 'Enviar Novo Logo'}
+              </p>
+
+              {logoPreview ? (
+                <>
+                  <div className="flex items-center justify-center min-h-[120px] bg-dark-bg rounded-lg p-4 mb-3">
+                    <Image
+                      src={logoPreview}
+                      alt="Preview"
+                      width={200}
+                      height={80}
+                      className="max-h-[80px] w-auto object-contain"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={handleCancelPreview}
+                      disabled={uploadingLogo}
+                      className="flex-1"
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleLogoUpload}
+                      disabled={uploadingLogo}
+                      className="flex-1"
+                      leftIcon={uploadingLogo ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                    >
+                      {uploadingLogo ? 'Enviando...' : 'Confirmar'}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div
+                    className="flex flex-col items-center justify-center min-h-[120px] bg-dark-bg rounded-lg p-4 border-2 border-dashed border-border hover:border-primary-500 transition-colors cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="w-8 h-8 text-text-muted mb-2" />
+                    <p className="text-sm text-text-secondary">Clique para selecionar</p>
+                    <p className="text-xs text-text-muted mt-1">PNG, JPG, WebP ou SVG (max 2MB)</p>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    onChange={handleLogoSelect}
+                    className="hidden"
+                  />
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-accent-500/10 border border-accent-500/20 rounded-lg">
+            <div className="flex gap-2">
+              <Info className="w-4 h-4 text-accent-500 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-accent-300">
+                <p className="font-medium text-accent-400 mb-1">Dicas para um bom logo:</p>
+                <ul className="space-y-0.5">
+                  <li>• Use fundo transparente (PNG ou WebP)</li>
+                  <li>• Resolução recomendada: 560x200 pixels</li>
+                  <li>• Formatos aceitos: PNG, JPG, WebP, SVG</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </Card>
+
         {/* Informações do Professor */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
@@ -159,10 +430,10 @@ export default function ConfigProfessorPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Info className="w-5 h-5 text-accent-500" />
-            <h3 className="text-heading text-text-primary">Configurações da Plataforma</h3>
+            <h3 className="text-heading text-text-primary">Configurações do Studão</h3>
           </div>
           <p className="text-body text-text-secondary mb-4">
-            Estas configurações são definidas globalmente pelo sistema. Para alterá-las, entre em contato com o administrador.
+            Configurações globais do sistema de aprendizado.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="p-4 bg-dark-elevated rounded-xl border border-matematica-500/20">

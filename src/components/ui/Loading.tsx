@@ -1,6 +1,7 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
+import Image from 'next/image'
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'
@@ -45,9 +46,20 @@ export default function Loading({
   if (fullScreen) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
         style={{ background: 'var(--bg-base)' }}
       >
+        {/* Logo Studão */}
+        <div className="mb-8">
+          <Image
+            src="/logo-studao.svg"
+            alt="Studão"
+            width={180}
+            height={72}
+            priority
+            className="opacity-90"
+          />
+        </div>
         {content}
       </div>
     )

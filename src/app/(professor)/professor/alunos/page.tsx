@@ -81,23 +81,24 @@ export default function AlunosProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-calm-bg pb-8">
+    <div className="min-h-screen pb-8" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="bg-gray-800 text-white px-4 pt-4 pb-16">
+      <header className="px-4 pt-4 pb-16" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.push('/professor/dashboard')}
-              className="p-2 -ml-2 rounded-xl hover:bg-white/20 transition-colors"
+              className="p-2 -ml-2 rounded-xl transition-colors"
+              style={{ color: 'var(--text-muted)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div className="text-center">
-              <h1 className="font-semibold flex items-center gap-2">
+              <h1 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                 <Users className="w-5 h-5" />
                 Gerenciar Alunos
               </h1>
-              <p className="text-sm text-white/70">{alunos.length} estudantes cadastrados</p>
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{alunos.length} estudantes cadastrados</p>
             </div>
             <div className="w-10" />
           </div>
