@@ -1,10 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { User, Lock, ArrowRight, Info } from 'lucide-react'
 import Button from '@/components/ui/Button'
+
+interface Configuracoes {
+  nome_plataforma: string
+  versao: string
+  nome_instituicao: string
+  logo_url: string | null
+}
 
 export default function LoginPage() {
   const router = useRouter()
@@ -12,6 +19,33 @@ export default function LoginPage() {
   const [senha, setSenha] = useState('')
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
+  const [config, setConfig] = useState<Configuracoes>({
+    nome_plataforma: 'Studão',
+    versao: '4.0',
+    nome_instituicao: 'Colégio Cora Coralina',
+    logo_url: null
+  })
+
+  // Buscar configurações da plataforma
+  useEffect(() => {
+    const buscarConfig = async () => {
+      try {
+        const response = await fetch('/api/config')
+        const data = await response.json()
+        if (data.sucesso && data.configuracoes) {
+          setConfig({
+            nome_plataforma: data.configuracoes.nome_plataforma || 'Studão',
+            versao: data.configuracoes.versao || '4.0',
+            nome_instituicao: data.configuracoes.nome_instituicao || 'Colégio Cora Coralina',
+            logo_url: data.configuracoes.logo_url || null
+          })
+        }
+      } catch {
+        // Usa valores padrão em caso de erro
+      }
+    }
+    buscarConfig()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,23 +89,35 @@ export default function LoginPage() {
       className="min-h-screen flex flex-col items-center justify-center p-4"
       style={{ background: 'var(--bg-base)' }}
     >
-      {/* Header com Logo */}
+      {/* Header com Logo Dinâmico */}
       <div className="text-center mb-8 animate-fade-in">
         <div className="mx-auto mb-4 flex items-center justify-center">
-          <Image
-            src="/logo-studao.svg"
-            alt="Studão"
-            width={280}
-            height={100}
-            priority
-            className="h-auto"
-          />
+          {config.logo_url ? (
+            <Image
+              src={config.logo_url}
+              alt={config.nome_plataforma}
+              width={280}
+              height={100}
+              priority
+              className="h-auto max-h-[100px] w-auto"
+              unoptimized
+            />
+          ) : (
+            <Image
+              src="/logo-studao.svg"
+              alt="Studão"
+              width={280}
+              height={100}
+              priority
+              className="h-auto"
+            />
+          )}
         </div>
         <p
           className="text-body"
           style={{ color: 'var(--text-secondary)' }}
         >
-          Colégio Cora Coralina
+          {config.nome_instituicao}
         </p>
       </div>
 
@@ -206,7 +252,7 @@ export default function LoginPage() {
           className="text-sm"
           style={{ color: 'var(--text-muted)' }}
         >
-          Studão v4.0
+          {config.nome_plataforma} v{config.versao}
         </p>
       </div>
     </div>
