@@ -1,20 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import type { AlternativaENEM } from '@/types'
+import type { AlternativaENEM, AreaENEM, SubareaENEM } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Submeter resposta
+// API ENEM - Submeter resposta (Suporta questões locais e da API externa)
 // POST /api/enem/responder
-// Não afeta pontos/níveis/conquistas do sistema principal
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface RequestBody {
   questao_id: string
   resposta: AlternativaENEM
+  resposta_correta?: AlternativaENEM  // Enviada quando questão vem da API externa
   tempo_segundos?: number
   modo?: 'livre' | 'simulado' | 'revisao'
   sessao_id?: string
+  // Dados da questão (quando vem da API externa)
+  ano_prova?: number
+  area?: AreaENEM
+  subarea?: SubareaENEM
+  id_api?: string
 }
 
 export async function POST(request: NextRequest) {
@@ -28,7 +33,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body: RequestBody = await request.json()
-    const { questao_id, resposta, tempo_segundos = 0, modo = 'livre', sessao_id } = body
+    const {
+      questao_id,
+      resposta,
+      resposta_correta: respostaCorretaEnviada,
+      tempo_segundos = 0,
+      modo = 'livre',
+      sessao_id,
+      ano_prova: anoProvaEnviado,
+      area: areaEnviada,
+      subarea: subareaEnviada,
+      id_api: idApiEnviado,
+    } = body
 
     // Validação básica
     if (!questao_id || !resposta) {
@@ -61,27 +77,74 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // Buscar questão para verificar resposta
-    const { data: questao } = await supabase
-      .from('questoes_enem')
-      .select('resposta_correta, area, subarea, ano_prova, conteudo_principal')
-      .eq('id', questao_id)
-      .single()
+    const respostaUpperCase = resposta.toUpperCase() as AlternativaENEM
 
-    if (!questao) {
-      return NextResponse.json(
-        { sucesso: false, erro: 'Questão não encontrada' },
-        { status: 404 }
-      )
+    // Detectar se é questão da API externa (ID começa com 'api-')
+    const isQuestaoExterna = questao_id.startsWith('api-')
+    const idApiQuestao = isQuestaoExterna
+      ? (idApiEnviado || questao_id.replace('api-', 'enem-'))
+      : null
+
+    let respostaCorreta: AlternativaENEM
+    let anoProva: number
+    let area: AreaENEM
+    let subarea: SubareaENEM | null = null
+    let conteudoPrincipal: string | null = null
+
+    if (isQuestaoExterna) {
+      // Questão da API externa - usar dados enviados
+      if (!respostaCorretaEnviada || !anoProvaEnviado || !areaEnviada) {
+        return NextResponse.json(
+          { sucesso: false, erro: 'Dados da questão externa incompletos' },
+          { status: 400 }
+        )
+      }
+      respostaCorreta = respostaCorretaEnviada.toUpperCase() as AlternativaENEM
+      anoProva = anoProvaEnviado
+      area = areaEnviada
+      subarea = subareaEnviada || null
+    } else {
+      // Questão local - buscar do banco
+      const { data: questao } = await supabase
+        .from('questoes_enem')
+        .select('resposta_correta, area, subarea, ano_prova, conteudo_principal, id_api')
+        .eq('id', questao_id)
+        .single()
+
+      if (!questao) {
+        return NextResponse.json(
+          { sucesso: false, erro: 'Questão não encontrada' },
+          { status: 404 }
+        )
+      }
+
+      respostaCorreta = questao.resposta_correta as AlternativaENEM
+      anoProva = questao.ano_prova
+      area = questao.area as AreaENEM
+      subarea = questao.subarea as SubareaENEM | null
+      conteudoPrincipal = questao.conteudo_principal
     }
 
-    // Verificar se já respondeu esta questão
-    const { data: respostaExistente } = await supabase
-      .from('respostas_enem')
-      .select('id')
-      .eq('usuario_id', sessao.userId)
-      .eq('questao_id', questao_id)
-      .single()
+    // Verificar se já respondeu esta questão (por questao_id ou id_api)
+    let respostaExistente = null
+
+    if (isQuestaoExterna && idApiQuestao) {
+      const { data } = await supabase
+        .from('respostas_enem')
+        .select('id')
+        .eq('usuario_id', sessao.userId)
+        .eq('id_api_questao', idApiQuestao)
+        .single()
+      respostaExistente = data
+    } else {
+      const { data } = await supabase
+        .from('respostas_enem')
+        .select('id')
+        .eq('usuario_id', sessao.userId)
+        .eq('questao_id', questao_id)
+        .single()
+      respostaExistente = data
+    }
 
     if (respostaExistente && modo !== 'revisao') {
       return NextResponse.json(
@@ -91,8 +154,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se acertou
-    const respostaUpperCase = resposta.toUpperCase() as AlternativaENEM
-    const correta = respostaUpperCase === questao.resposta_correta
+    const correta = respostaUpperCase === respostaCorreta
 
     // Validar tempo
     const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 7200
@@ -121,19 +183,28 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Inserir nova resposta
-      const { error } = await supabase.from('respostas_enem').insert({
+      const dadosResposta: Record<string, any> = {
         usuario_id: sessao.userId,
-        questao_id,
         resposta_dada: respostaUpperCase,
         correta,
         tempo_segundos: tempoValidado,
-        ano_prova: questao.ano_prova,
-        area: questao.area,
-        subarea: questao.subarea,
-        conteudo_principal: questao.conteudo_principal,
+        ano_prova: anoProva,
+        area,
+        subarea,
+        conteudo_principal: conteudoPrincipal,
         modo,
         sessao_id,
-      })
+      }
+
+      // Adicionar referência à questão
+      if (isQuestaoExterna) {
+        dadosResposta.id_api_questao = idApiQuestao
+        // questao_id pode ser null para questões externas
+      } else {
+        dadosResposta.questao_id = questao_id
+      }
+
+      const { error } = await supabase.from('respostas_enem').insert(dadosResposta)
 
       if (error) {
         console.error('Erro ao registrar resposta ENEM:', error)
@@ -161,7 +232,7 @@ export async function POST(request: NextRequest) {
       .from('respostas_enem')
       .select('correta')
       .eq('usuario_id', sessao.userId)
-      .eq('area', questao.area)
+      .eq('area', area)
 
     const totalArea = estatisticasArea?.length || 0
     const corretasArea = estatisticasArea?.filter(r => r.correta).length || 0
@@ -172,13 +243,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sucesso: true,
       correta,
-      resposta_correta: questao.resposta_correta,
+      resposta_correta: respostaCorreta,
       estatisticas_atualizadas: {
         total_questoes: totalQuestoes,
         total_corretas: totalCorretas,
         taxa_acerto: taxaAcerto,
         area: {
-          nome: questao.area,
+          nome: area,
           total: totalArea,
           corretas: corretasArea,
           taxa: taxaArea,

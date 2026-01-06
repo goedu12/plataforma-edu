@@ -47,6 +47,10 @@ export default function SimuladoENEMPage() {
 
   // Estados principais
   const [questao, setQuestao] = useState<Omit<TipoQuestaoENEM, 'resposta_correta'> | null>(null)
+  const [questaoExtra, setQuestaoExtra] = useState<{
+    resposta_correta?: string
+    fonte?: string
+  } | null>(null)
   const [status, setStatus] = useState<StatusQuestao | null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
@@ -141,9 +145,15 @@ export default function SimuladoENEMPage() {
 
         if (data.status === 'OK' && data.questao) {
           setQuestao(data.questao)
+          // Guardar dados extras (resposta_correta para questões externas)
+          setQuestaoExtra({
+            resposta_correta: data._rc,
+            fonte: data.fonte,
+          })
           iniciarTimer()
         } else {
           setQuestao(null)
+          setQuestaoExtra(null)
         }
       } else {
         if (data.status === 'ACESSO_NEGADO') {
@@ -317,6 +327,7 @@ export default function SimuladoENEMPage() {
               total_corretas: estatisticas.total_corretas,
               taxa_acerto: estatisticas.taxa_acerto,
             } : undefined}
+            questaoExtra={questaoExtra || undefined}
           />
         ) : (
           /* ═══════════════════════════════════════════════════════════════

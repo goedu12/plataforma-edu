@@ -35,6 +35,11 @@ interface QuestaoENEMProps {
     total_corretas: number
     taxa_acerto: number
   }
+  // Dados extras para questões da API externa
+  questaoExtra?: {
+    resposta_correta?: string
+    fonte?: string
+  }
 }
 
 interface FeedbackData {
@@ -50,6 +55,7 @@ export default function QuestaoENEM({
   onProxima,
   onVoltar,
   estatisticas,
+  questaoExtra,
 }: QuestaoENEMProps) {
   const [selecionada, setSelecionada] = useState<AlternativaENEM | null>(null)
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
@@ -86,15 +92,30 @@ export default function QuestaoENEM({
     setLoading(true)
     setErro(null)
 
+    // Verificar se é questão da API externa
+    const isQuestaoExterna = questaoExtra?.fonte === 'ENEM-API'
+
     try {
+      // Montar payload - incluir dados extras se for questão externa
+      const payload: Record<string, any> = {
+        questao_id: questao.id,
+        resposta: selecionada,
+        tempo_segundos: tempoDecorrido,
+      }
+
+      // Para questões externas, enviar dados necessários para validação
+      if (isQuestaoExterna && questaoExtra?.resposta_correta) {
+        payload.resposta_correta = questaoExtra.resposta_correta
+        payload.ano_prova = questao.ano_prova
+        payload.area = questao.area
+        payload.subarea = questao.subarea
+        payload.id_api = questao.id_api
+      }
+
       const response = await fetch('/api/enem/responder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questao_id: questao.id,
-          resposta: selecionada,
-          tempo_segundos: tempoDecorrido,
-        }),
+        body: JSON.stringify(payload),
       })
 
       const data = await response.json()

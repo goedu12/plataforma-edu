@@ -4,9 +4,132 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 import type { AreaENEM, SubareaENEM, QuestaoENEM } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Buscar questão
-// GET /api/enem?area=ciencias-natureza&subarea=fisica&ano=2023&conteudo=mecanica
+// API ENEM - Buscar questão (Híbrido: Local + API enem.dev em tempo real)
+// GET /api/enem?area=ciencias-natureza&subarea=fisica&ano=2023
 // ═══════════════════════════════════════════════════════════════════════════
+
+const API_ENEM_BASE = 'https://api.enem.dev/v1'
+
+// Mapeamento de disciplinas da API externa para nossa estrutura
+const DISCIPLINA_MAP: Record<string, { area: AreaENEM; subarea: SubareaENEM }> = {
+  'física': { area: 'ciencias-natureza', subarea: 'fisica' },
+  'matemática': { area: 'matematica', subarea: 'matematica' },
+  'química': { area: 'ciencias-natureza', subarea: 'quimica' },
+  'biologia': { area: 'ciencias-natureza', subarea: 'biologia' },
+}
+
+// Buscar questão da API externa enem.dev
+async function buscarQuestaoExterna(
+  ano: number | null,
+  subarea: SubareaENEM | null,
+  questoesRespondidasIds: Set<string>
+): Promise<QuestaoENEM | null> {
+  try {
+    // Anos disponíveis na API
+    const anosDisponiveis = ano ? [ano] : [2023, 2022, 2021, 2020, 2019, 2018]
+
+    for (const anoAtual of anosDisponiveis) {
+      const response = await fetch(
+        `${API_ENEM_BASE}/exams/${anoAtual}/questions?limit=100`,
+        {
+          headers: { 'Accept': 'application/json' },
+          next: { revalidate: 3600 } // Cache 1 hora
+        }
+      )
+
+      if (!response.ok) continue
+
+      const data = await response.json()
+      const questoes = data.questions || []
+
+      // Filtrar por disciplina se especificado
+      const questoesFiltradas = questoes.filter((q: any) => {
+        const disciplina = q.discipline?.toLowerCase() || ''
+
+        // Se não tem filtro de subarea, aceita física e matemática
+        if (!subarea) {
+          return disciplina.includes('física') || disciplina.includes('matemática')
+        }
+
+        // Filtrar por subarea específica
+        if (subarea === 'fisica') return disciplina.includes('física')
+        if (subarea === 'matematica') return disciplina.includes('matemática')
+        if (subarea === 'quimica') return disciplina.includes('química')
+        if (subarea === 'biologia') return disciplina.includes('biologia')
+
+        return false
+      })
+
+      // Filtrar questões não respondidas
+      const questoesNaoRespondidas = questoesFiltradas.filter((q: any) => {
+        const idApi = `enem-${q.year}-${q.index}`
+        return !questoesRespondidasIds.has(idApi)
+      })
+
+      if (questoesNaoRespondidas.length === 0) continue
+
+      // Selecionar aleatória
+      const questaoExterna = questoesNaoRespondidas[
+        Math.floor(Math.random() * questoesNaoRespondidas.length)
+      ]
+
+      // Converter para nosso formato
+      const disciplina = questaoExterna.discipline?.toLowerCase() || ''
+      let area: AreaENEM = 'ciencias-natureza'
+      let subareaFinal: SubareaENEM = 'fisica'
+
+      for (const [key, value] of Object.entries(DISCIPLINA_MAP)) {
+        if (disciplina.includes(key)) {
+          area = value.area
+          subareaFinal = value.subarea
+          break
+        }
+      }
+
+      const alternativas = questaoExterna.alternatives || []
+      const getAlt = (letra: string) => alternativas.find((a: any) => a.letter === letra)
+
+      // Verificar se tem todas as alternativas
+      if (!getAlt('A') || !getAlt('B') || !getAlt('C') || !getAlt('D') || !getAlt('E')) {
+        continue
+      }
+
+      const questaoConvertida: QuestaoENEM = {
+        id: `api-${questaoExterna.year}-${questaoExterna.index}`,
+        id_api: `enem-${questaoExterna.year}-${questaoExterna.index}`,
+        ano_prova: questaoExterna.year,
+        numero_questao: questaoExterna.index,
+        area,
+        subarea: subareaFinal,
+        titulo: questaoExterna.title || null,
+        contexto: questaoExterna.context || '',
+        comando: questaoExterna.alternativesIntroduction || null,
+        imagem_principal: questaoExterna.files?.[0] || null,
+        imagens_extras: questaoExterna.files?.slice(1) || [],
+        alternativa_a: getAlt('A')?.text || '',
+        alternativa_b: getAlt('B')?.text || '',
+        alternativa_c: getAlt('C')?.text || '',
+        alternativa_d: getAlt('D')?.text || '',
+        alternativa_e: getAlt('E')?.text || '',
+        imagem_a: getAlt('A')?.file || null,
+        imagem_b: getAlt('B')?.file || null,
+        imagem_c: getAlt('C')?.file || null,
+        imagem_d: getAlt('D')?.file || null,
+        imagem_e: getAlt('E')?.file || null,
+        resposta_correta: questaoExterna.correctAlternative?.toUpperCase() || 'A',
+        fonte: 'ENEM-API',
+        status: 'ativa',
+      }
+
+      return questaoConvertida
+    }
+
+    return null
+  } catch (error) {
+    console.error('Erro ao buscar questão externa:', error)
+    return null
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,10 +148,11 @@ export async function GET(request: NextRequest) {
     const ano = anoStr ? parseInt(anoStr) : null
     const conteudo = searchParams.get('conteudo')
     const modo = searchParams.get('modo') || 'aleatorio'
+    const fonte = searchParams.get('fonte') || 'hibrido' // local, api, hibrido
 
     const supabase = getSupabaseAdmin()
 
-    // Verificar se usuário é do Ensino Médio
+    // Verificar se usuário é da 3ª série do Ensino Médio
     const { data: usuario } = await supabase
       .from('usuarios')
       .select('nivel, ano')
@@ -43,109 +167,93 @@ export async function GET(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // Buscar IDs das questões já respondidas
+    // Buscar IDs das questões já respondidas (tanto por id quanto por id_api)
     const { data: respostasUsuario } = await supabase
       .from('respostas_enem')
-      .select('questao_id')
+      .select('questao_id, id_api_questao')
       .eq('usuario_id', sessao.userId)
 
-    const questoesRespondidasSet = new Set(
-      respostasUsuario?.map(r => r.questao_id) || []
-    )
+    const questoesRespondidasIds = new Set<string>()
+    respostasUsuario?.forEach(r => {
+      if (r.questao_id) questoesRespondidasIds.add(r.questao_id)
+      if (r.id_api_questao) questoesRespondidasIds.add(r.id_api_questao)
+    })
 
-    // Construir query de questões
-    let query = supabase
-      .from('questoes_enem')
-      .select('*')
-      .eq('status', 'ativa')
+    // ═══════════════════════════════════════════════════════════════════
+    // ETAPA 1: Tentar buscar do banco local
+    // ═══════════════════════════════════════════════════════════════════
 
-    // Aplicar filtros
-    if (area) {
-      query = query.eq('area', area)
-    }
-    if (subarea) {
-      query = query.eq('subarea', subarea)
-    }
-    if (ano) {
-      query = query.eq('ano_prova', ano)
-    }
-    if (conteudo) {
-      // Buscar por conteúdo principal ou no array de conteúdos
-      query = query.or(`conteudo_principal.eq.${conteudo},conteudos.cs.{${conteudo}}`)
-    }
+    let questaoSelecionada: QuestaoENEM | null = null
+    let totalLocal = 0
 
-    // Buscar questões
-    const { data: questoes, error } = await query.limit(500)
+    if (fonte !== 'api') {
+      let query = supabase
+        .from('questoes_enem')
+        .select('*')
+        .eq('status', 'ativa')
 
-    if (error) {
-      console.error('Erro ao buscar questões ENEM:', error)
-      return NextResponse.json(
-        { sucesso: false, erro: 'Erro ao buscar questões' },
-        { status: 500 }
-      )
-    }
-
-    // Filtrar não respondidas (se modo não for 'todas')
-    let questoesDisponiveis = questoes || []
-    if (modo !== 'todas') {
-      questoesDisponiveis = questoesDisponiveis.filter(
-        q => !questoesRespondidasSet.has(q.id)
-      )
-    }
-
-    // Se não há questões disponíveis
-    if (questoesDisponiveis.length === 0) {
-      const totalArea = questoes?.length || 0
-      const respondidas = questoesRespondidasSet.size
-
-      if (totalArea > 0 && respondidas >= totalArea) {
-        return NextResponse.json({
-          sucesso: true,
-          status: 'COMPLETOU',
-          mensagem: 'Você respondeu todas as questões disponíveis com esses filtros!',
-          estatisticas: {
-            total_filtro: totalArea,
-            respondidas: respondidas,
-            restantes: 0,
-          },
-        })
+      if (area) query = query.eq('area', area)
+      if (subarea) query = query.eq('subarea', subarea)
+      if (ano) query = query.eq('ano_prova', ano)
+      if (conteudo) {
+        query = query.or(`conteudo_principal.eq.${conteudo},conteudos.cs.{${conteudo}}`)
       }
 
+      const { data: questoes } = await query.limit(500)
+      totalLocal = questoes?.length || 0
+
+      // Filtrar não respondidas
+      const questoesDisponiveis = (questoes || []).filter(
+        q => !questoesRespondidasIds.has(q.id) && !questoesRespondidasIds.has(q.id_api || '')
+      )
+
+      if (questoesDisponiveis.length > 0) {
+        questaoSelecionada = modo === 'sequencial'
+          ? questoesDisponiveis[0]
+          : questoesDisponiveis[Math.floor(Math.random() * questoesDisponiveis.length)]
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ETAPA 2: Se não encontrou localmente, buscar da API externa
+    // ═══════════════════════════════════════════════════════════════════
+
+    if (!questaoSelecionada && fonte !== 'local') {
+      questaoSelecionada = await buscarQuestaoExterna(ano, subarea, questoesRespondidasIds)
+    }
+
+    // Se ainda não encontrou
+    if (!questaoSelecionada) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_QUESTOES',
         mensagem: 'Nenhuma questão disponível com os filtros selecionados.',
         estatisticas: {
-          total_filtro: totalArea,
-          respondidas: Math.min(respondidas, totalArea),
+          total_local: totalLocal,
+          respondidas: questoesRespondidasIds.size,
           restantes: 0,
         },
       })
     }
 
-    // Selecionar questão (aleatória ou primeira)
-    const questaoSelecionada = modo === 'sequencial'
-      ? questoesDisponiveis[0]
-      : questoesDisponiveis[Math.floor(Math.random() * questoesDisponiveis.length)]
-
-    // Remover resposta correta antes de enviar ao cliente
-    const { resposta_correta, ...questaoPublica } = questaoSelecionada as QuestaoENEM
+    // Para questões locais, remover resposta correta
+    // Para questões da API externa, enviar resposta_correta (necessário para validação)
+    const isExterna = questaoSelecionada.fonte === 'ENEM-API'
+    const { resposta_correta, ...questaoPublica } = questaoSelecionada
 
     return NextResponse.json({
       sucesso: true,
       status: 'OK',
       questao: questaoPublica,
+      fonte: questaoSelecionada.fonte || 'local',
+      // Enviar resposta_correta apenas para questões externas (cliente precisa enviar de volta)
+      ...(isExterna && { _rc: resposta_correta }),
       estatisticas: {
-        total_filtro: questoes?.length || 0,
-        respondidas: questoesRespondidasSet.size,
-        restantes: questoesDisponiveis.length,
+        total_local: totalLocal,
+        respondidas: questoesRespondidasIds.size,
+        restantes: totalLocal - questoesRespondidasIds.size,
       },
-      filtros_aplicados: {
-        area,
-        subarea,
-        ano,
-        conteudo,
-      },
+      filtros_aplicados: { area, subarea, ano, conteudo },
     })
   } catch (error) {
     console.error('Erro na API ENEM:', error)

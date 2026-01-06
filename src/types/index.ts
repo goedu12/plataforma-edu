@@ -466,7 +466,8 @@ export interface QuestaoENEM {
   dificuldade?: Dificuldade
   tags?: string[]
   status: StatusQuestao
-  importado_em: string
+  fonte?: string  // 'ENEM', 'ENEM-API', etc.
+  importado_em?: string
 }
 
 // Questão ENEM para exibição (sem resposta correta)
