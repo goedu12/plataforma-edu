@@ -17,6 +17,7 @@ import {
   GraduationCap,
   ChevronRight,
   Map,
+  FileText,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
@@ -92,16 +93,27 @@ export default function MenuComponentePage() {
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const accentGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
-  const menuItems = [
+  // Menu base
+  const menuItemsBase = [
     { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões' },
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
+  ]
+
+  // Simulado ENEM apenas para Ensino Médio
+  const menuENEM = usuario.nivel === 'EM'
+    ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado', isNew: true }]
+    : []
+
+  const menuItemsFim = [
     { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },
     { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Bimestre' },
   ]
+
+  const menuItems = [...menuItemsBase, ...menuENEM, ...menuItemsFim]
 
   return (
     <div
@@ -234,7 +246,7 @@ export default function MenuComponentePage() {
             <button
               key={item.label}
               onClick={() => router.push(item.href)}
-              className="rounded-xl p-3 text-left transition-all hover:translate-y-[-1px] group"
+              className="rounded-xl p-3 text-left transition-all hover:translate-y-[-1px] group relative"
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
@@ -249,6 +261,15 @@ export default function MenuComponentePage() {
                 e.currentTarget.style.boxShadow = 'none'
               }}
             >
+              {/* Badge NOVO */}
+              {'isNew' in item && item.isNew && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}
+                >
+                  NOVO
+                </span>
+              )}
               <div className="flex items-center gap-2">
                 <div
                   className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
