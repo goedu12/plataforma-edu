@@ -186,31 +186,53 @@ export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMent
 // ═══════════════════════════════════════════════════════════
 
 export function extrairCodigoMermaid(texto: string): string | null {
-  // Procurar por blocos ```mermaid ou mindmap direto
-  const regexBloco = /```(?:mermaid)?\s*(mindmap[\s\S]*?)```/i
-  const matchBloco = texto.match(regexBloco)
+  if (!texto) return null
 
+  // Método 1: Bloco ```mermaid ... ```
+  const regexMermaid = /```mermaid\s*([\s\S]*?)```/i
+  const matchMermaid = texto.match(regexMermaid)
+  if (matchMermaid && matchMermaid[1].includes('mindmap')) {
+    return matchMermaid[1].trim()
+  }
+
+  // Método 2: Bloco ``` ... ``` com mindmap dentro
+  const regexBloco = /```\s*(mindmap[\s\S]*?)```/i
+  const matchBloco = texto.match(regexBloco)
   if (matchBloco) {
     return matchBloco[1].trim()
   }
 
-  // Procurar por mindmap sem bloco de código
-  const regexDireto = /(mindmap\s+root\([\s\S]*)/i
+  // Método 3: mindmap direto no texto (sem bloco de código)
+  const regexDireto = /^(mindmap\s*\n\s*root[\s\S]*?)(?:\n\n[^a-z\s]|\n📝|\n\*\*|$)/mi
   const matchDireto = texto.match(regexDireto)
-
   if (matchDireto) {
-    // Encontrar o fim do mapa mental (próxima linha vazia dupla ou fim do texto)
-    const linhas = matchDireto[1].split('\n')
-    const linhasMapa: string[] = []
+    return matchDireto[1].trim()
+  }
 
-    for (const linha of linhas) {
-      // Parar se encontrar uma linha que claramente não faz parte do mapa
-      if (linhasMapa.length > 0 && linha.trim() && !linha.startsWith('  ') && !linha.startsWith('\t') && !linha.includes('root')) {
+  // Método 4: Procurar linha por linha
+  const linhas = texto.split('\n')
+  let dentroDoMapa = false
+  const linhasMapa: string[] = []
+
+  for (const linha of linhas) {
+    if (linha.trim().startsWith('mindmap')) {
+      dentroDoMapa = true
+      linhasMapa.push(linha)
+    } else if (dentroDoMapa) {
+      // Continuar se linha está indentada ou vazia
+      if (linha.match(/^[\s\t]/) || linha.trim() === '' || linha.includes('root(')) {
+        linhasMapa.push(linha)
+      } else if (linha.trim().startsWith('```')) {
+        // Fim do bloco
+        break
+      } else if (linhasMapa.length > 2 && !linha.match(/^[\s\t]/)) {
+        // Linha não indentada após já ter conteúdo = fim do mapa
         break
       }
-      linhasMapa.push(linha)
     }
+  }
 
+  if (linhasMapa.length > 2) {
     return linhasMapa.join('\n').trim()
   }
 
