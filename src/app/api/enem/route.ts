@@ -3,35 +3,43 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM v2 - Abordagem simplificada usando apenas API externa
+// API ENEM v3 - Híbrido: Banco Local (Supabase) + API Externa (fallback)
 // GET /api/enem?ano=2023
 // ═══════════════════════════════════════════════════════════════════════════
 
 const API_ENEM_BASE = 'https://api.enem.dev/v1'
+const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
-// Anos disponíveis no ENEM (API suporta 2009-2023)
-const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009]
-
-// Interface da questão retornada pela API externa
-interface QuestaoAPI {
-  title: string | null
-  index: number
-  discipline: string
-  language: string | null
-  year: number
-  context: string
-  files: string[]
-  correctAlternative: string
-  alternativesIntroduction: string | null
-  alternatives: Array<{
-    letter: string
-    text: string
-    file: string | null
-    isCorrect: boolean
-  }>
+// Interface da questão do banco local
+interface QuestaoLocal {
+  id: string
+  id_api: string | null
+  ano_prova: number
+  numero_questao: number
+  area: string
+  area_nome: string | null
+  subarea: string | null
+  titulo: string | null
+  contexto: string
+  comando: string | null
+  imagem_principal: string | null
+  imagens_extras: string[] | null
+  alternativa_a: string
+  alternativa_b: string
+  alternativa_c: string
+  alternativa_d: string
+  alternativa_e: string
+  imagem_a: string | null
+  imagem_b: string | null
+  imagem_c: string | null
+  imagem_d: string | null
+  imagem_e: string | null
+  resposta_correta: string
+  fonte: string | null
+  status: string
 }
 
-// Interface da questão formatada para o frontend
+// Interface para o frontend
 interface QuestaoFormatada {
   id: string
   ano: number
@@ -49,78 +57,105 @@ interface QuestaoFormatada {
   resposta_correta: string
 }
 
-// Buscar questões da API externa
-async function buscarQuestoesAPI(ano: number, limite: number = 100): Promise<QuestaoAPI[]> {
-  try {
-    const response = await fetch(
-      `${API_ENEM_BASE}/exams/${ano}/questions?limit=${limite}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Studao-Platform/2.0',
-        },
-        next: { revalidate: 3600 } // Cache 1 hora
-      }
-    )
+// Formatar questão do banco local
+function formatarQuestaoLocal(q: QuestaoLocal): QuestaoFormatada {
+  const imagens: string[] = []
+  if (q.imagem_principal) imagens.push(q.imagem_principal)
+  if (q.imagens_extras) imagens.push(...q.imagens_extras)
 
-    if (!response.ok) {
-      console.error(`[ENEM API] Erro ${response.status} ao buscar ano ${ano}`)
-      return []
-    }
-
-    const data = await response.json()
-    return data.questions || []
-  } catch (error) {
-    console.error(`[ENEM API] Erro ao buscar questões de ${ano}:`, error)
-    return []
-  }
-}
-
-// Formatar questão para o frontend
-function formatarQuestao(q: QuestaoAPI): QuestaoFormatada | null {
-  // Verificar se tem todas as alternativas válidas
-  const alternativas = q.alternatives || []
-  if (alternativas.length < 5) {
-    return null
-  }
-
-  // Verificar se todas as alternativas A-E existem
-  const letras = ['A', 'B', 'C', 'D', 'E']
-  const alternativasOrdenadas = letras.map(letra => {
-    const alt = alternativas.find(a => a.letter === letra)
-    return alt ? {
-      letra,
-      texto: alt.text || '',
-      imagem: alt.file || null
-    } : null
-  })
-
-  if (alternativasOrdenadas.some(a => a === null)) {
-    return null
+  // Mapear área para nome legível
+  const disciplinaMap: Record<string, string> = {
+    'ciencias-natureza': 'Ciências da Natureza e suas Tecnologias',
+    'matematica': 'Matemática e suas Tecnologias',
+    'linguagens': 'Linguagens, Códigos e suas Tecnologias',
+    'ciencias-humanas': 'Ciências Humanas e suas Tecnologias',
   }
 
   return {
-    id: `enem-${q.year}-${q.index}`,
-    ano: q.year,
-    numero: q.index,
-    disciplina: q.discipline || 'Não especificada',
-    titulo: q.title || null,
-    contexto: q.context || '',
-    comando: q.alternativesIntroduction || null,
-    imagens: q.files || [],
-    alternativas: alternativasOrdenadas as Array<{ letra: string; texto: string; imagem: string | null }>,
-    resposta_correta: (q.correctAlternative || 'A').toUpperCase()
+    id: q.id_api || q.id,
+    ano: q.ano_prova,
+    numero: q.numero_questao,
+    disciplina: disciplinaMap[q.area] || q.area_nome || q.area,
+    titulo: q.titulo,
+    contexto: q.contexto,
+    comando: q.comando,
+    imagens,
+    alternativas: [
+      { letra: 'A', texto: q.alternativa_a, imagem: q.imagem_a },
+      { letra: 'B', texto: q.alternativa_b, imagem: q.imagem_b },
+      { letra: 'C', texto: q.alternativa_c, imagem: q.imagem_c },
+      { letra: 'D', texto: q.alternativa_d, imagem: q.imagem_d },
+      { letra: 'E', texto: q.alternativa_e, imagem: q.imagem_e },
+    ],
+    resposta_correta: q.resposta_correta,
   }
+}
+
+// Buscar da API externa (fallback)
+async function buscarQuestaoAPIExterna(ano: number | null): Promise<QuestaoFormatada | null> {
+  const anosParaBuscar = ano ? [ano] : ANOS_DISPONIVEIS.slice(0, 3)
+
+  for (const anoAtual of anosParaBuscar) {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
+
+      const response = await fetch(
+        `${API_ENEM_BASE}/exams/${anoAtual}/questions?limit=50`,
+        {
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal,
+        }
+      )
+
+      clearTimeout(timeoutId)
+
+      if (!response.ok) continue
+
+      const data = await response.json()
+      const questoes = data.questions || []
+
+      if (questoes.length === 0) continue
+
+      // Selecionar aleatória
+      const q = questoes[Math.floor(Math.random() * questoes.length)]
+
+      // Verificar alternativas
+      const alternativas = q.alternatives || []
+      const letras = ['A', 'B', 'C', 'D', 'E']
+      const altsFormatadas = letras.map(letra => {
+        const alt = alternativas.find((a: any) => a.letter === letra)
+        return alt ? { letra, texto: alt.text || '', imagem: alt.file || null } : null
+      })
+
+      if (altsFormatadas.some(a => a === null)) continue
+
+      return {
+        id: `enem-${q.year}-${q.index}`,
+        ano: q.year,
+        numero: q.index,
+        disciplina: q.discipline || 'ENEM',
+        titulo: q.title || null,
+        contexto: q.context || '',
+        comando: q.alternativesIntroduction || null,
+        imagens: q.files || [],
+        alternativas: altsFormatadas as Array<{ letra: string; texto: string; imagem: string | null }>,
+        resposta_correta: (q.correctAlternative || 'A').toUpperCase(),
+      }
+    } catch (error) {
+      console.error(`[ENEM API] Erro ao buscar ano ${anoAtual}:`, error)
+      continue
+    }
+  }
+
+  return null
 }
 
 export async function GET(request: NextRequest) {
   try {
     const sessao = await obterSessao()
     if (!sessao) {
-      return NextResponse.json(
-        { sucesso: false, erro: 'Não autenticado' },
-        { status: 401 }
-      )
+      return NextResponse.json({ sucesso: false, erro: 'Não autenticado' }, { status: 401 })
     }
 
     const searchParams = request.nextUrl.searchParams
@@ -129,7 +164,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
-    // Verificar se usuário pode acessar (3ª série EM ou professor)
+    // Verificar acesso (3ª série EM ou professor)
     const { data: usuario } = await supabase
       .from('usuarios')
       .select('nivel, ano, tipo')
@@ -146,74 +181,97 @@ export async function GET(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // Buscar IDs das questões já respondidas
+    // Buscar IDs já respondidos
     const { data: respostasUsuario } = await supabase
       .from('respostas_enem')
-      .select('id_api_questao')
+      .select('questao_id, id_api_questao')
       .eq('usuario_id', sessao.userId)
 
-    const questoesRespondidasIds = new Set<string>(
-      respostasUsuario?.map(r => r.id_api_questao).filter(Boolean) || []
-    )
+    const idsRespondidos = new Set<string>()
+    respostasUsuario?.forEach(r => {
+      if (r.questao_id) idsRespondidos.add(r.questao_id)
+      if (r.id_api_questao) idsRespondidos.add(r.id_api_questao)
+    })
 
-    // Determinar anos para buscar
-    const anosParaBuscar = ano ? [ano] : ANOS_DISPONIVEIS.slice(0, 5) // Se não especificar, busca dos 5 anos mais recentes
+    // ═══════════════════════════════════════════════════════════════════
+    // ETAPA 1: Tentar buscar do banco local (Supabase)
+    // ═══════════════════════════════════════════════════════════════════
 
-    // Buscar questões
     let questaoSelecionada: QuestaoFormatada | null = null
+    let fonteUsada = 'nenhuma'
 
-    for (const anoAtual of anosParaBuscar) {
-      const questoesRaw = await buscarQuestoesAPI(anoAtual, 180)
+    // Construir query
+    let query = supabase
+      .from('questoes_enem')
+      .select('*')
+      .eq('status', 'ativa')
 
-      if (questoesRaw.length === 0) continue
+    if (ano) {
+      query = query.eq('ano_prova', ano)
+    }
 
-      // Formatar e filtrar questões válidas
-      const questoesFormatadas = questoesRaw
-        .map(formatarQuestao)
-        .filter((q): q is QuestaoFormatada => q !== null)
+    const { data: questoesLocais, error: erroLocal } = await query.limit(200)
 
+    if (!erroLocal && questoesLocais && questoesLocais.length > 0) {
       // Filtrar não respondidas
-      const questoesDisponiveis = questoesFormatadas.filter(
-        q => !questoesRespondidasIds.has(q.id)
-      )
+      const disponiveis = questoesLocais.filter(q => {
+        const idApi = q.id_api || `local-${q.id}`
+        return !idsRespondidos.has(q.id) && !idsRespondidos.has(idApi)
+      })
 
-      if (questoesDisponiveis.length > 0) {
-        // Selecionar aleatória
-        questaoSelecionada = questoesDisponiveis[
-          Math.floor(Math.random() * questoesDisponiveis.length)
-        ]
-        break
+      if (disponiveis.length > 0) {
+        const questao = disponiveis[Math.floor(Math.random() * disponiveis.length)]
+        questaoSelecionada = formatarQuestaoLocal(questao)
+        fonteUsada = 'banco_local'
       }
     }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ETAPA 2: Se não encontrou, tentar API externa
+    // ═══════════════════════════════════════════════════════════════════
+
+    if (!questaoSelecionada) {
+      console.log('[ENEM] Banco local vazio, tentando API externa...')
+      questaoSelecionada = await buscarQuestaoAPIExterna(ano)
+      if (questaoSelecionada) {
+        fonteUsada = 'api_externa'
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ETAPA 3: Se nenhum funcionou
+    // ═══════════════════════════════════════════════════════════════════
 
     if (!questaoSelecionada) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_QUESTOES',
-        mensagem: ano
-          ? `Você já respondeu todas as questões de ${ano} ou não há questões disponíveis.`
-          : 'Você já respondeu todas as questões disponíveis.',
+        mensagem: 'Nenhuma questão disponível no momento. Tente novamente mais tarde ou escolha outro ano.',
         anos_disponiveis: ANOS_DISPONIVEIS,
-        respondidas: questoesRespondidasIds.size,
+        respondidas: idsRespondidos.size,
+        debug: {
+          questoesLocalEncontradas: questoesLocais?.length || 0,
+          fonteUsada,
+        },
       })
     }
 
-    // Retornar questão (sem a resposta correta no objeto principal)
+    // Retornar questão
     const { resposta_correta, ...questaoPublica } = questaoSelecionada
 
     return NextResponse.json({
       sucesso: true,
       status: 'OK',
       questao: questaoPublica,
-      // Resposta correta codificada (base64) para validação no cliente
       _rc: Buffer.from(resposta_correta).toString('base64'),
       anos_disponiveis: ANOS_DISPONIVEIS,
-      respondidas: questoesRespondidasIds.size,
+      respondidas: idsRespondidos.size,
+      fonte: fonteUsada,
     })
   } catch (error) {
     console.error('Erro na API ENEM:', error)
     return NextResponse.json(
-      { sucesso: false, erro: 'Erro interno do servidor' },
+      { sucesso: false, erro: 'Erro interno do servidor', detalhes: String(error) },
       { status: 500 }
     )
   }
