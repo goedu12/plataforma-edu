@@ -6,6 +6,7 @@ import type { Componente, SerieEM, Bimestre } from '@/types'
 // ═══════════════════════════════════════════════════════════
 // API: Mapas Mentais
 // GET - Listar mapas com filtros (série, bimestre)
+// Estudantes só veem mapas da sua série/ano
 // ═══════════════════════════════════════════════════════════
 
 export async function GET(request: NextRequest) {
@@ -32,6 +33,20 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
+    // Buscar dados do usuário para filtrar por série (estudantes)
+    let serieEstudante: number | null = null
+    if (sessao.tipo === 'estudante') {
+      const { data: usuario } = await supabase
+        .from('usuarios')
+        .select('ano')
+        .eq('id', sessao.userId)
+        .single()
+
+      if (usuario?.ano) {
+        serieEstudante = usuario.ano
+      }
+    }
+
     // Construir query base
     let query = supabase
       .from('mapas_mentais')
@@ -42,8 +57,12 @@ export async function GET(request: NextRequest) {
       .order('bimestre', { ascending: true })
       .order('criado_em', { ascending: false })
 
-    // Aplicar filtros opcionais
-    if (serie) {
+    // Estudantes: filtrar automaticamente pela sua série
+    // Professores: podem ver todos ou filtrar manualmente
+    if (sessao.tipo === 'estudante' && serieEstudante) {
+      query = query.eq('serie', serieEstudante)
+    } else if (serie) {
+      // Filtro manual (professor ou fallback)
       const serieNum = parseInt(serie) as SerieEM
       if ([1, 2, 3].includes(serieNum)) {
         query = query.eq('serie', serieNum)

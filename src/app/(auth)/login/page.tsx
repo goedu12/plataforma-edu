@@ -213,7 +213,7 @@ export default function LoginPage() {
 
         {/* Help Box */}
         <div
-          className="mt-6 p-4 rounded-xl"
+          className="mt-6 p-4 rounded-xl text-center"
           style={{
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border-default)',
@@ -241,7 +241,7 @@ export default function LoginPage() {
             className="text-xs"
             style={{ color: 'var(--text-muted)' }}
           >
-            Exemplo de login: mariasilva@1a
+            Exemplo: mariasilva@1a
           </p>
         </div>
       </div>
