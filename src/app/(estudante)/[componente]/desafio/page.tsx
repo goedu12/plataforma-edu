@@ -527,9 +527,6 @@ export default function DesafioPage() {
               ))}
             </div>
 
-            {/* Espaçador flexível */}
-            <div className="flex-1 min-h-4" />
-
             {/* Dica compacta */}
             <div
               className="py-2 px-3 rounded-xl mb-3 flex items-center gap-2"

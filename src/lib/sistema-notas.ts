@@ -3,7 +3,7 @@
  * SISTEMA DE NOTAS 2025 - NOVA FÓRMULA
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
+ * FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05) + (ACERTOS_DESAFIO × 0,02)
  *
  * COMPONENTES:
  * ───────────────────────────────────────────────────────────────────────────
@@ -19,11 +19,12 @@
  *
  * DESAFIO (modo desafio):
  *   - Limite: SEM LIMITE (pode fazer quantos quiser)
- *   - Não conta para nota bimestral, apenas pontos
+ *   - Valor: cada acerto = +0.02 pontos
+ *   - Fórmula: acertos_desafio × 0.02
  *
  * NOTA FINAL:
  *   - Máximo: 10.0
- *   - nota_final = min(nota_questoes + nota_revisao, 10.0)
+ *   - nota_final = min(nota_questoes + nota_revisao + nota_desafio, 10.0)
  *
  * NÍVEIS DE VERIFICAÇÃO:
  * ═══════════════════════════════════════════════════════════════════════════
@@ -66,8 +67,10 @@ export interface NotaAtualizada {
   // Nova fórmula
   acertos_questoes: number
   acertos_revisao: number
+  acertos_desafio: number
   nota_questoes: number  // acertos_questoes / 12
   nota_revisao: number   // acertos_revisao * 0.05
+  nota_desafio: number   // acertos_desafio * 0.02
   // Controle semanal
   questoes_semana: number
   limite_semanal: number | null
@@ -120,6 +123,11 @@ const LIMITE_SEMANAL_ESTUDO = 15
 const NOTA_MAXIMA_REGULAR = 10.0
 const NOTA_MAXIMA_RECUPERACAO = 6.0
 
+// Constantes para cálculo de nota
+const DIVISOR_QUESTOES = 12       // Cada 12 acertos = 1.0 ponto
+const VALOR_REVISAO = 0.05        // Cada acerto revisão = 0.05 pontos
+const VALOR_DESAFIO = 0.02        // Cada acerto desafio = 0.02 pontos
+
 // ═══════════════════════════════════════════════════════════════════════════
 // FUNÇÕES AUXILIARES
 // ═══════════════════════════════════════════════════════════════════════════
@@ -137,27 +145,32 @@ export function getSegundaFeiraSemana(data: Date = new Date()): string {
 
 /**
  * NOVA FÓRMULA 2025
- * Calcula nota baseada em acertos de questões e revisão
+ * Calcula nota baseada em acertos de questões, revisão e desafio
  *
- * NOTA = (ACERTOS_QUESTOES / 12) + (ACERTOS_REVISAO * 0.05)
+ * NOTA = (ACERTOS_QUESTOES / 12) + (ACERTOS_REVISAO * 0.05) + (ACERTOS_DESAFIO * 0.02)
  * Máximo: 10.0
  */
 export function calcularNotaNova(
   acertosQuestoes: number,
-  acertosRevisao: number
-): { notaQuestoes: number; notaRevisao: number; notaFinal: number } {
+  acertosRevisao: number,
+  acertosDesafio: number = 0
+): { notaQuestoes: number; notaRevisao: number; notaDesafio: number; notaFinal: number } {
   // Cada 12 acertos em questões = 1.0 ponto
-  const notaQuestoes = acertosQuestoes / 12
+  const notaQuestoes = acertosQuestoes / DIVISOR_QUESTOES
 
   // Cada acerto em revisão = 0.05 pontos
-  const notaRevisao = acertosRevisao * 0.05
+  const notaRevisao = acertosRevisao * VALOR_REVISAO
+
+  // Cada acerto em desafio = 0.02 pontos
+  const notaDesafio = acertosDesafio * VALOR_DESAFIO
 
   // Nota final = min(soma, 10.0)
-  const notaFinal = Math.min(notaQuestoes + notaRevisao, 10.0)
+  const notaFinal = Math.min(notaQuestoes + notaRevisao + notaDesafio, NOTA_MAXIMA_REGULAR)
 
   return {
     notaQuestoes: Math.round(notaQuestoes * 100) / 100,
     notaRevisao: Math.round(notaRevisao * 100) / 100,
+    notaDesafio: Math.round(notaDesafio * 100) / 100,
     notaFinal: Math.round(notaFinal * 100) / 100,
   }
 }
@@ -486,16 +499,27 @@ export async function nivel4ProcessamentoCalculo(
       .gte('criado_em', config.regular.inicio)
       .lte('criado_em', config.regular.fim + 'T23:59:59')
 
+    // Buscar ACERTOS de desafio (modo desafio) - tabela desafios
+    const { data: desafiosCompletados } = await supabase
+      .from('desafios')
+      .select('acertos')
+      .eq('usuario_id', userId)
+      .eq('componente', componente)
+      .eq('status', 'completo')
+      .gte('finalizado_em', config.regular.inicio)
+      .lte('finalizado_em', config.regular.fim + 'T23:59:59')
+
     const questoesRespondidas = respostasEstudo?.length || 0
     const acertosQuestoes = respostasEstudo?.filter(r => r.correta === true).length || 0
     const acertosRevisao = respostasRevisao?.length || 0
+    const acertosDesafio = desafiosCompletados?.reduce((sum, d) => sum + (d.acertos || 0), 0) || 0
 
     // Contar dias ativos
     const diasAtivosSet = new Set(respostasEstudo?.map(r => r.criado_em.split('T')[0]) || [])
     const diasAtivos = diasAtivosSet.size
 
-    // NOVA FÓRMULA
-    const { notaQuestoes, notaRevisao, notaFinal } = calcularNotaNova(acertosQuestoes, acertosRevisao)
+    // NOVA FÓRMULA com desafio
+    const { notaQuestoes, notaRevisao, notaDesafio, notaFinal } = calcularNotaNova(acertosQuestoes, acertosRevisao, acertosDesafio)
 
     // Buscar questões da semana atual
     const segundaFeira = getSegundaFeiraSemana()
@@ -520,8 +544,10 @@ export async function nivel4ProcessamentoCalculo(
       // Nova fórmula
       acertos_questoes: acertosQuestoes,
       acertos_revisao: acertosRevisao,
+      acertos_desafio: acertosDesafio,
       nota_questoes: notaQuestoes,
       nota_revisao: notaRevisao,
+      nota_desafio: notaDesafio,
       // Controle semanal
       questoes_semana: questoesSemana,
       limite_semanal: limiteSemanal,
@@ -530,7 +556,7 @@ export async function nivel4ProcessamentoCalculo(
       questoes_respondidas: questoesRespondidas,
       meta_questoes: config.regular.meta,
       dias_ativos: diasAtivos,
-      bonus_frequencia: notaRevisao, // Mapear revisão como bônus
+      bonus_frequencia: notaRevisao + notaDesafio, // Mapear revisão + desafio como bônus
       percentual: Math.round((questoesRespondidas / config.regular.meta) * 100),
     }
 
@@ -679,8 +705,10 @@ export async function verificacaoCompletaParaResponder(
         // Nova fórmula
         acertos_questoes: 0,
         acertos_revisao: 0,
+        acertos_desafio: 0,
         nota_questoes: 0,
         nota_revisao: 0,
+        nota_desafio: 0,
         // Controle semanal
         questoes_semana: nivel3.dados?.questoes_semana as number || 0,
         limite_semanal: nivel3.dados?.limite_semanal as number || null,
@@ -706,8 +734,10 @@ export async function verificacaoCompletaParaResponder(
       // Nova fórmula
       acertos_questoes: 0,
       acertos_revisao: 0,
+      acertos_desafio: 0,
       nota_questoes: 0,
       nota_revisao: 0,
+      nota_desafio: 0,
       // Controle semanal
       questoes_semana: nivel3.dados?.questoes_semana as number || 0,
       limite_semanal: nivel3.dados?.limite_semanal as number | null,

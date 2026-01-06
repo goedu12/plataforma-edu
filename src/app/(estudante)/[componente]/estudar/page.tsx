@@ -155,7 +155,7 @@ export default function EstudarPage() {
       if (data.sucesso) {
         setFeedback({
           correta: data.correta,
-          respostaCorreta: data.correta ? selecionada : (questao.resposta_correta as Alternativa) || selecionada,
+          respostaCorreta: data.resposta_correta as Alternativa, // Usar resposta da API
           explicacao: data.explicacao || 'Continue estudando para melhorar seu desempenho!',
           pontosGanhos: data.pontos_ganhos,
           conquistasDesbloqueadas: data.conquistas_desbloqueadas || [],
@@ -365,9 +365,6 @@ export default function EstudarPage() {
                 )
               })}
             </div>
-
-            {/* Espaçador flexível */}
-            <div className="flex-1 min-h-4" />
 
             {/* Dica */}
             {!feedback && questao.dica && (

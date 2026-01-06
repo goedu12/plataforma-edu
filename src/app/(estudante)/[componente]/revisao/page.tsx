@@ -133,7 +133,7 @@ export default function RevisaoPage() {
       if (data.sucesso) {
         setFeedback({
           correta: data.correta,
-          respostaCorreta: data.correta ? selecionada : (questao.resposta_correta as Alternativa) || selecionada,
+          respostaCorreta: data.resposta_correta as Alternativa, // Usar resposta da API
           explicacao: data.explicacao || 'Continue revisando para fixar o conteúdo!',
           pontosGanhos: data.pontos_ganhos,
           conquistasDesbloqueadas: data.conquistas_desbloqueadas || [],
@@ -347,9 +347,6 @@ export default function RevisaoPage() {
                 )
               })}
             </div>
-
-            {/* Espaçador flexível */}
-            <div className="flex-1 min-h-4" />
 
             {/* Dica */}
             {!feedback && questao.dica && (

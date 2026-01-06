@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
+import sharp from 'sharp'
 
 // ═══════════════════════════════════════════════════════════
 // API: Upload de Foto de Perfil
-// Armazena como base64 no banco (simples e funciona sem storage)
+// Converte para WebP e armazena como base64 no banco
 // POST /api/usuario/foto - Upload nova foto
 // DELETE /api/usuario/foto - Remove foto atual
 // ═══════════════════════════════════════════════════════════
 
-const MAX_FILE_SIZE = 500 * 1024 // 500KB para base64
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+const MAX_FILE_SIZE = 2 * 1024 * 1024 // 2MB (será comprimido para WebP)
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const FOTO_SIZE = 200 // 200x200 pixels para foto de perfil
+const WEBP_QUALITY = 85 // Qualidade do WebP
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,25 +38,34 @@ export async function POST(request: NextRequest) {
     // Validar tipo
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { sucesso: false, erro: 'Formato inválido. Use JPG, PNG ou WebP.' },
+        { sucesso: false, erro: 'Formato inválido. Use JPG, PNG, WebP ou GIF.' },
         { status: 400 }
       )
     }
 
-    // Validar tamanho (menor para base64)
+    // Validar tamanho
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { sucesso: false, erro: 'Arquivo muito grande. Máximo 500KB.' },
+        { sucesso: false, erro: 'Arquivo muito grande. Máximo 2MB.' },
         { status: 400 }
       )
     }
 
     const supabase = getSupabaseAdmin()
 
-    // Converter para base64
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const base64 = buffer.toString('base64')
-    const fotoUrl = `data:${file.type};base64,${base64}`
+    // Converter para WebP otimizado com Sharp
+    const originalBuffer = Buffer.from(await file.arrayBuffer())
+    const webpBuffer = await sharp(originalBuffer)
+      .resize(FOTO_SIZE, FOTO_SIZE, {
+        fit: 'cover',
+        position: 'center'
+      })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer()
+
+    // Converter para base64 no formato WebP
+    const base64 = webpBuffer.toString('base64')
+    const fotoUrl = `data:image/webp;base64,${base64}`
 
     // Atualizar usuário com a foto em base64
     const { error: updateError } = await supabase

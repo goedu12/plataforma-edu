@@ -317,6 +317,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sucesso: true,
       correta,
+      resposta_correta: questao.resposta_correta, // Adicionado para exibir gabarito após responder
       pontos_ganhos: pontosGanhos,
       explicacao: questao.explicacao,
       novo_nivel: ehModoRevisao ? undefined : novoNivel,
@@ -337,6 +338,9 @@ export async function POST(request: NextRequest) {
         questoes_semana: notaAtualizada.questoes_semana,
         limite_semanal: notaAtualizada.limite_semanal,
         pode_continuar: notaAtualizada.pode_responder,
+        // Novos campos para desafio
+        acertos_desafio: notaAtualizada.acertos_desafio,
+        nota_desafio: notaAtualizada.nota_desafio,
       } : null,
     })
   } catch (error) {

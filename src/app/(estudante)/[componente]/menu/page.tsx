@@ -158,7 +158,7 @@ export default function MenuComponentePage() {
                 componente={componente}
               />
               <div className="min-w-0">
-                <p className="font-display text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                <p className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                   Olá, {primeiroNome}!
                 </p>
                 <Badge variant={isFisica ? 'fisica' : 'matematica'} size="sm">
