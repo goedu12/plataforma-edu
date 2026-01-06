@@ -103,14 +103,15 @@ export default function LoginPage() {
               unoptimized
             />
           ) : (
-            <Image
-              src="/logo-studao-dark.webp"
-              alt="Studão"
-              width={320}
-              height={128}
-              priority
-              className="h-auto max-h-[120px] w-auto"
-            />
+            <h1
+              className="text-5xl font-bold tracking-tight"
+              style={{
+                color: '#4ade80',
+                textShadow: '0 0 30px rgba(74, 222, 128, 0.4)'
+              }}
+            >
+              STUDÃO
+            </h1>
           )}
         </div>
         <p

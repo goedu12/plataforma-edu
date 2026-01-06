@@ -1,13 +1,13 @@
 'use client'
 
 import { Loader2 } from 'lucide-react'
-import Image from 'next/image'
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'
   text?: string
   fullScreen?: boolean
   componente?: 'fisica' | 'matematica'
+  logoUrl?: string | null
 }
 
 export default function Loading({
@@ -15,6 +15,7 @@ export default function Loading({
   text,
   fullScreen = false,
   componente = 'fisica',
+  logoUrl,
 }: LoadingProps) {
   const sizeStyles = {
     sm: 'h-5 w-5',
@@ -49,16 +50,26 @@ export default function Loading({
         className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
         style={{ background: 'var(--bg-base)' }}
       >
-        {/* Logo Studão - Dark Mode */}
+        {/* Logo Studão */}
         <div className="mb-8">
-          <Image
-            src="/logo-studao-dark.webp"
-            alt="Studão"
-            width={280}
-            height={112}
-            priority
-            className="opacity-95"
-          />
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoUrl}
+              alt="Studão"
+              className="max-h-[100px] w-auto opacity-95"
+            />
+          ) : (
+            <h1
+              className="text-4xl font-bold tracking-tight"
+              style={{
+                color: '#4ade80',
+                textShadow: '0 0 20px rgba(74, 222, 128, 0.3)'
+              }}
+            >
+              STUDÃO
+            </h1>
+          )}
         </div>
         {content}
       </div>
