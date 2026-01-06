@@ -27,6 +27,15 @@ import ProfilePhoto from '@/components/ProfilePhoto'
 import ThemeIconToggle from '@/components/ThemeIconToggle'
 import type { Usuario, Componente } from '@/types'
 import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
+import type { LucideIcon } from 'lucide-react'
+
+interface MenuItem {
+  icon: LucideIcon
+  label: string
+  href: string
+  description: string
+  isNew?: boolean
+}
 
 export default function MenuComponentePage() {
   const router = useRouter()
@@ -94,7 +103,7 @@ export default function MenuComponentePage() {
   const accentGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
   // Menu base
-  const menuItemsBase = [
+  const menuItemsBase: MenuItem[] = [
     { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões' },
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
@@ -102,18 +111,18 @@ export default function MenuComponentePage() {
   ]
 
   // Simulado ENEM apenas para Ensino Médio
-  const menuENEM = usuario.nivel === 'EM'
+  const menuENEM: MenuItem[] = usuario.nivel === 'EM'
     ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado', isNew: true }]
     : []
 
-  const menuItemsFim = [
+  const menuItemsFim: MenuItem[] = [
     { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },
     { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Bimestre' },
   ]
 
-  const menuItems = [...menuItemsBase, ...menuENEM, ...menuItemsFim]
+  const menuItems: MenuItem[] = [...menuItemsBase, ...menuENEM, ...menuItemsFim]
 
   return (
     <div
@@ -262,7 +271,7 @@ export default function MenuComponentePage() {
               }}
             >
               {/* Badge NOVO */}
-              {'isNew' in item && item.isNew && (
+              {item.isNew && (
                 <span
                   className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full"
                   style={{ background: 'var(--color-accent)', color: '#fff' }}
