@@ -237,35 +237,63 @@ O estudante quer resolver uma questão. Guie a resolução COMPLETA.
 `
 
 export const PROMPT_MODO_MAPA_MENTAL = `
-## MODO: MAPA MENTAL / ESQUEMA
+## MODO: MAPA MENTAL VISUAL
 
 O estudante quer uma visão geral organizada do tópico.
 
-### FORMATO DO MAPA MENTAL:
+### FORMATO OBRIGATÓRIO - GERE UM MAPA MENTAL VISUAL:
 
-📌 **[TÓPICO PRINCIPAL]**
-│
-├── 📚 **Conceito 1**
-│   ├── • Subconceito 1.1
-│   ├── • Subconceito 1.2
-│   └── 📝 Fórmula: \`F = m × a\`
-│
-├── 📚 **Conceito 2**
-│   ├── • Subconceito 2.1
-│   └── • Subconceito 2.2
-│
-├── ⚡ **Dica Importante**
-│   └── "Lembre-se que..."
-│
-└── 🎯 **Resumo**
-    └── Em uma frase: ...
+1. Primeiro, escreva uma breve introdução (2-3 linhas)
 
-### REGRAS:
-- Seja COMPLETO mas ORGANIZADO
-- Use hierarquia clara
-- Inclua fórmulas relevantes com \`código\`
-- Adicione 1-2 exemplos práticos
-- Termine com resumo em 1 frase
+2. Em seguida, gere o mapa mental em formato Mermaid.js EXATAMENTE assim:
+
+\`\`\`mermaid
+mindmap
+  root((TEMA CENTRAL))
+    Conceito 1
+      Detalhe 1.1
+      Detalhe 1.2
+    Conceito 2
+      Detalhe 2.1
+      Detalhe 2.2
+    Conceito 3
+      Detalhe 3.1
+\`\`\`
+
+3. Após o mapa, adicione um resumo com fórmulas importantes
+
+### EXEMPLO COMPLETO:
+
+Vou te mostrar as Leis de Newton de forma visual! 🚀
+
+\`\`\`mermaid
+mindmap
+  root((Leis de Newton))
+    1a Lei - Inercia
+      Corpo em repouso
+      Tende a permanecer
+      Sem forca resultante
+    2a Lei - Fundamental
+      F = m x a
+      Forca = massa x aceleracao
+      Unidade: Newton
+    3a Lei - Acao Reacao
+      Forcas opostas
+      Mesma intensidade
+      Corpos diferentes
+\`\`\`
+
+📝 **Fórmulas importantes:**
+- 2ª Lei: \`F = m × a\`
+- Peso: \`P = m × g\`
+
+### REGRAS IMPORTANTES:
+- SEMPRE use o formato \`\`\`mermaid com mindmap
+- Use ((texto)) para o nó central
+- NÃO use caracteres especiais no mermaid (sem ª, º, ², etc)
+- Use hierarquia por indentação (2 espaços)
+- Máximo 4 níveis de profundidade
+- Inclua fórmulas FORA do mapa mental
 `
 
 export const PROMPT_MODO_ESTIMULAR = `

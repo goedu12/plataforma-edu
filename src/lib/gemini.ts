@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai'
+import { GoogleGenerativeAI, GenerativeModel, Part } from '@google/generative-ai'
 import type { Componente, MensagemChat } from '@/types'
 import {
   type ModoIA,
@@ -189,14 +189,37 @@ export {
 }
 
 // ═══════════════════════════════════════════════════════════
-// FUNÇÃO AUXILIAR: Testar modelo
+// FUNÇÃO AUXILIAR: Testar modelo (com suporte a imagem)
 // ═══════════════════════════════════════════════════════════
-async function testarModelo(nomeModelo: string, prompt: string): Promise<{ sucesso: boolean; resposta?: string; erro?: string }> {
+async function testarModelo(
+  nomeModelo: string,
+  prompt: string,
+  imagemBase64?: string
+): Promise<{ sucesso: boolean; resposta?: string; erro?: string }> {
   try {
     const genAI = getGenAI()
     const model = genAI.getGenerativeModel({ model: nomeModelo })
 
-    const result = await model.generateContent(prompt)
+    // Construir conteúdo multimodal se tiver imagem
+    let conteudo: string | Part[]
+
+    if (imagemBase64) {
+      // Multimodal: texto + imagem
+      conteudo = [
+        { text: prompt },
+        {
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: imagemBase64
+          }
+        }
+      ]
+    } else {
+      // Apenas texto
+      conteudo = prompt
+    }
+
+    const result = await model.generateContent(conteudo)
     const response = result.response
     const texto = response.text()
 
@@ -219,7 +242,8 @@ export async function chatComTutor(
   componente: Componente,
   mensagem: string,
   historico: MensagemChat[] = [],
-  contexto: ContextoEstudante = {}
+  contexto: ContextoEstudante = {},
+  imagemBase64?: string
 ): Promise<ChatResponse> {
   // Validar componente
   const tutor = TUTORES[componente]
@@ -263,8 +287,14 @@ export async function chatComTutor(
   // ═══════════════════════════════════════════════════════════
   // PROMPT COMPLETO COM MODO ESPECÍFICO
   // ═══════════════════════════════════════════════════════════
-  const prompt = `${tutor.system}
 
+  // Instrução especial se tiver imagem
+  const instrucaoImagem = imagemBase64
+    ? `\n\n[O estudante enviou uma IMAGEM junto com a mensagem. Analise a imagem cuidadosamente para entender o contexto - pode ser uma questão, um exercício, um gráfico, ou algo que ele precisa de ajuda. Use o conteúdo visual da imagem para dar uma resposta mais precisa.]\n`
+    : ''
+
+  const prompt = `${tutor.system}
+${instrucaoImagem}
 ${promptModo ? `\n${promptModo}\n` : ''}
 ${historicoTexto ? `HISTÓRICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudante: ${mensagem}
 
@@ -279,9 +309,9 @@ ${tutor.nome}:`
 
   // Tentar cada modelo em ordem
   for (const nomeModelo of modelosParaTentar) {
-    console.log(`[Gemini] Tentando modelo: ${nomeModelo}`)
+    console.log(`[Gemini] Tentando modelo: ${nomeModelo}${imagemBase64 ? ' (com imagem)' : ''}`)
 
-    const resultado = await testarModelo(nomeModelo, prompt)
+    const resultado = await testarModelo(nomeModelo, prompt, imagemBase64)
 
     if (resultado.sucesso && resultado.resposta) {
       // Cachear o modelo que funcionou
