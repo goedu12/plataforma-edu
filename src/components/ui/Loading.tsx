@@ -49,15 +49,15 @@ export default function Loading({
         className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
         style={{ background: 'var(--bg-base)' }}
       >
-        {/* Logo Studão */}
+        {/* Logo Studão - Dark Mode */}
         <div className="mb-8">
           <Image
-            src="/logo-studao.svg"
+            src="/logo-studao-dark.webp"
             alt="Studão"
-            width={180}
-            height={72}
+            width={280}
+            height={112}
             priority
-            className="opacity-90"
+            className="opacity-95"
           />
         </div>
         {content}

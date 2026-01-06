@@ -104,12 +104,12 @@ export default function LoginPage() {
             />
           ) : (
             <Image
-              src="/logo-studao.svg"
+              src="/logo-studao-dark.webp"
               alt="Studão"
-              width={280}
-              height={100}
+              width={320}
+              height={128}
               priority
-              className="h-auto"
+              className="h-auto max-h-[120px] w-auto"
             />
           )}
         </div>
