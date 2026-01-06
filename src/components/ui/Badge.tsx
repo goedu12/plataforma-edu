@@ -4,7 +4,7 @@ import { ReactNode } from 'react'
 
 interface BadgeProps {
   children: ReactNode
-  variant?: 'default' | 'fisica' | 'matematica' | 'streak' | 'success' | 'warning' | 'error'
+  variant?: 'default' | 'fisica' | 'matematica' | 'streak' | 'success' | 'warning' | 'error' | 'info' | 'secondary'
   size?: 'sm' | 'md'
   className?: string
 }
@@ -51,6 +51,16 @@ export default function Badge({
         return {
           background: 'rgba(239, 68, 68, 0.15)',
           color: 'var(--error)',
+        }
+      case 'info':
+        return {
+          background: 'rgba(59, 130, 246, 0.15)',
+          color: '#3b82f6',
+        }
+      case 'secondary':
+        return {
+          background: 'var(--bg-elevated)',
+          color: 'var(--text-muted)',
         }
       default:
         return {
