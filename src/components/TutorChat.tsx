@@ -97,13 +97,7 @@ const SUGESTOES_CONTINUIDADE = {
   ],
 }
 
-const FRASES_MOTIVACIONAIS = [
-  (nome: string) => `Muito bem, ${nome}! Essa é uma ótima pergunta.`,
-  (nome: string) => `Excelente dúvida, ${nome}! Vamos resolver isso juntos.`,
-  (nome: string) => `${nome}, você está no caminho certo!`,
-  (nome: string) => `Boa, ${nome}! Vou te explicar isso de um jeito simples.`,
-  (nome: string) => `${nome}, que bom que você perguntou!`,
-]
+// Removido: frases motivacionais causavam repetição
 
 // ═══════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
@@ -325,16 +319,10 @@ export default function TutorChat({
       const data = await response.json()
 
       if (data.sucesso) {
-        let resposta = data.resposta
-        if (data.modo !== 'DIRETO' && Math.random() > 0.5 && mensagens.length > 1) {
-          const fraseAleatoria = FRASES_MOTIVACIONAIS[Math.floor(Math.random() * FRASES_MOTIVACIONAIS.length)]
-          resposta = `${fraseAleatoria(primeiroNome)}\n\n${resposta}`
-        }
-
         const respostaTutor: MensagemChatComModo = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: resposta,
+          content: data.resposta,
           timestamp: new Date().toISOString(),
           modo: data.modo as ModoIA,
           topico: data.topico,

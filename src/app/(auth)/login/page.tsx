@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, Lock, ArrowRight, Info, GraduationCap } from 'lucide-react'
+import Image from 'next/image'
+import { User, Lock, ArrowRight, Info } from 'lucide-react'
 import Button from '@/components/ui/Button'
 
 export default function LoginPage() {
@@ -54,30 +55,23 @@ export default function LoginPage() {
       className="min-h-screen flex flex-col items-center justify-center p-4"
       style={{ background: 'var(--bg-base)' }}
     >
-      {/* Header */}
+      {/* Header com Logo */}
       <div className="text-center mb-8 animate-fade-in">
-        <div
-          className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
-          style={{ background: 'rgba(34, 197, 94, 0.15)' }}
-        >
-          <span
-            className="text-2xl font-bold"
-            style={{ color: 'var(--color-fisica)' }}
-          >
-            E
-          </span>
+        <div className="mx-auto mb-4 flex items-center justify-center">
+          <Image
+            src="/logo-studao.svg"
+            alt="Studão"
+            width={280}
+            height={100}
+            priority
+            className="h-auto"
+          />
         </div>
-        <h1
-          className="font-display text-3xl font-bold mb-2"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          Plataforma EDU
-        </h1>
         <p
           className="text-body"
           style={{ color: 'var(--text-secondary)' }}
         >
-          Colegio Cora Coralina
+          Colégio Cora Coralina
         </p>
       </div>
 
@@ -212,7 +206,7 @@ export default function LoginPage() {
           className="text-sm"
           style={{ color: 'var(--text-muted)' }}
         >
-          Plataforma EDU v4.0
+          Studão v4.0
         </p>
       </div>
     </div>

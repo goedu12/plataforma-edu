@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 150" fill="none">
+  <!-- STUDÃO text -->
+  <text x="200" y="100" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="60" font-weight="900" fill="#1a4d3e">STUDÃO</text>
+  
+  <!-- Underline -->
+  <path d="M80 115 Q200 125 320 115" stroke="#5cb590" stroke-width="8" stroke-linecap="round" fill="none"/>
+  
+  <!-- Lightbulb above O -->
+  <circle cx="340" cy="50" r="15" fill="#fcd34d" stroke="#1a4d3e" stroke-width="2"/>
+  <path d="M340 65 L340 72" stroke="#1a4d3e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M332 72 L348 72" stroke="#1a4d3e" stroke-width="2"/>
+  <path d="M334 76 L346 76" stroke="#1a4d3e" stroke-width="2"/>
+  
+  <!-- Light rays -->
+  <path d="M340 30 L340 22" stroke="#5cb590" stroke-width="2" stroke-linecap="round"/>
+  <path d="M355 35 L362 28" stroke="#5cb590" stroke-width="2" stroke-linecap="round"/>
+  <path d="M325 35 L318 28" stroke="#5cb590" stroke-width="2" stroke-linecap="round"/>
+</svg>
