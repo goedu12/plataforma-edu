@@ -114,6 +114,6 @@ describe('Types - PONTUACAO', () => {
     expect(PONTUACAO.RESPOSTA_INCORRETA).toBe(0)
     expect(PONTUACAO.BONUS_VELOCIDADE).toBe(2)
     expect(PONTUACAO.BONUS_SEQUENCIA_7_DIAS).toBe(50)
-    expect(PONTUACAO.LIMITE_IA_DIARIO).toBe(30)
+    expect(PONTUACAO.LIMITE_IA_DIARIO).toBe(7)
   })
 })
