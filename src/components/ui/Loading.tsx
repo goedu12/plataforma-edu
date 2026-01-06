@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
 interface LoadingProps {
@@ -15,8 +16,26 @@ export default function Loading({
   text,
   fullScreen = false,
   componente = 'fisica',
-  logoUrl,
+  logoUrl: propLogoUrl,
 }: LoadingProps) {
+  const [logoUrl, setLogoUrl] = useState<string | null>(propLogoUrl || null)
+
+  // Buscar logo automaticamente quando fullScreen
+  useEffect(() => {
+    if (fullScreen && !propLogoUrl) {
+      fetch('/api/config')
+        .then(res => res.json())
+        .then(data => {
+          if (data.sucesso && data.configuracoes?.logo_url) {
+            setLogoUrl(data.configuracoes.logo_url)
+          }
+        })
+        .catch(() => {
+          // Silently fail - fallback to text
+        })
+    }
+  }, [fullScreen, propLogoUrl])
+
   const sizeStyles = {
     sm: 'h-5 w-5',
     md: 'h-8 w-8',
