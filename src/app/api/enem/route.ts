@@ -3,11 +3,10 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM v3 - Híbrido: Banco Local (Supabase) + API Externa (fallback)
-// GET /api/enem?ano=2023
+// API ENEM - Apenas Banco Local (Supabase)
+// GET /api/enem?ano=2023&area=matematica
 // ═══════════════════════════════════════════════════════════════════════════
 
-const API_ENEM_BASE = 'https://api.enem.dev/v1'
 const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
 // Interface da questão do banco local
@@ -58,7 +57,7 @@ interface QuestaoFormatada {
 }
 
 // Formatar questão do banco local
-function formatarQuestaoLocal(q: QuestaoLocal): QuestaoFormatada {
+function formatarQuestao(q: QuestaoLocal): QuestaoFormatada {
   const imagens: string[] = []
   if (q.imagem_principal) imagens.push(q.imagem_principal)
   if (q.imagens_extras) imagens.push(...q.imagens_extras)
@@ -91,66 +90,6 @@ function formatarQuestaoLocal(q: QuestaoLocal): QuestaoFormatada {
   }
 }
 
-// Buscar da API externa (fallback)
-async function buscarQuestaoAPIExterna(ano: number | null): Promise<QuestaoFormatada | null> {
-  const anosParaBuscar = ano ? [ano] : ANOS_DISPONIVEIS.slice(0, 3)
-
-  for (const anoAtual of anosParaBuscar) {
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10s timeout
-
-      const response = await fetch(
-        `${API_ENEM_BASE}/exams/${anoAtual}/questions?limit=50`,
-        {
-          headers: { 'Accept': 'application/json' },
-          signal: controller.signal,
-        }
-      )
-
-      clearTimeout(timeoutId)
-
-      if (!response.ok) continue
-
-      const data = await response.json()
-      const questoes = data.questions || []
-
-      if (questoes.length === 0) continue
-
-      // Selecionar aleatória
-      const q = questoes[Math.floor(Math.random() * questoes.length)]
-
-      // Verificar alternativas
-      const alternativas = q.alternatives || []
-      const letras = ['A', 'B', 'C', 'D', 'E']
-      const altsFormatadas = letras.map(letra => {
-        const alt = alternativas.find((a: any) => a.letter === letra)
-        return alt ? { letra, texto: alt.text || '', imagem: alt.file || null } : null
-      })
-
-      if (altsFormatadas.some(a => a === null)) continue
-
-      return {
-        id: `enem-${q.year}-${q.index}`,
-        ano: q.year,
-        numero: q.index,
-        disciplina: q.discipline || 'ENEM',
-        titulo: q.title || null,
-        contexto: q.context || '',
-        comando: q.alternativesIntroduction || null,
-        imagens: q.files || [],
-        alternativas: altsFormatadas as Array<{ letra: string; texto: string; imagem: string | null }>,
-        resposta_correta: (q.correctAlternative || 'A').toUpperCase(),
-      }
-    } catch (error) {
-      console.error(`[ENEM API] Erro ao buscar ano ${anoAtual}:`, error)
-      continue
-    }
-  }
-
-  return null
-}
-
 export async function GET(request: NextRequest) {
   try {
     const sessao = await obterSessao()
@@ -160,7 +99,9 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const anoParam = searchParams.get('ano')
+    const areaParam = searchParams.get('area')
     const ano = anoParam ? parseInt(anoParam) : null
+    const area = areaParam || null
 
     const supabase = getSupabaseAdmin()
 
@@ -193,13 +134,6 @@ export async function GET(request: NextRequest) {
       if (r.id_api_questao) idsRespondidos.add(r.id_api_questao)
     })
 
-    // ═══════════════════════════════════════════════════════════════════
-    // ETAPA 1: Tentar buscar do banco local (Supabase)
-    // ═══════════════════════════════════════════════════════════════════
-
-    let questaoSelecionada: QuestaoFormatada | null = null
-    let fonteUsada = 'nenhuma'
-
     // Construir query
     let query = supabase
       .from('questoes_enem')
@@ -210,54 +144,53 @@ export async function GET(request: NextRequest) {
       query = query.eq('ano_prova', ano)
     }
 
-    const { data: questoesLocais, error: erroLocal } = await query.limit(200)
-
-    if (!erroLocal && questoesLocais && questoesLocais.length > 0) {
-      // Filtrar não respondidas
-      const disponiveis = questoesLocais.filter(q => {
-        const idApi = q.id_api || `local-${q.id}`
-        return !idsRespondidos.has(q.id) && !idsRespondidos.has(idApi)
-      })
-
-      if (disponiveis.length > 0) {
-        const questao = disponiveis[Math.floor(Math.random() * disponiveis.length)]
-        questaoSelecionada = formatarQuestaoLocal(questao)
-        fonteUsada = 'banco_local'
-      }
+    if (area) {
+      query = query.eq('area', area)
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // ETAPA 2: Se não encontrou, tentar API externa
-    // ═══════════════════════════════════════════════════════════════════
+    const { data: questoesLocais, error: erroLocal } = await query.limit(500)
 
-    if (!questaoSelecionada) {
-      console.log('[ENEM] Banco local vazio, tentando API externa...')
-      questaoSelecionada = await buscarQuestaoAPIExterna(ano)
-      if (questaoSelecionada) {
-        fonteUsada = 'api_externa'
-      }
+    if (erroLocal) {
+      console.error('Erro ao buscar questões:', erroLocal)
+      return NextResponse.json({
+        sucesso: false,
+        erro: 'Erro ao buscar questões do banco de dados',
+      }, { status: 500 })
     }
 
-    // ═══════════════════════════════════════════════════════════════════
-    // ETAPA 3: Se nenhum funcionou
-    // ═══════════════════════════════════════════════════════════════════
-
-    if (!questaoSelecionada) {
+    if (!questoesLocais || questoesLocais.length === 0) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_QUESTOES',
-        mensagem: 'Nenhuma questão disponível no momento. Tente novamente mais tarde ou escolha outro ano.',
+        mensagem: 'Nenhuma questão disponível. Execute o script SQL para popular o banco.',
         anos_disponiveis: ANOS_DISPONIVEIS,
         respondidas: idsRespondidos.size,
-        debug: {
-          questoesLocalEncontradas: questoesLocais?.length || 0,
-          fonteUsada,
-        },
       })
     }
 
-    // Retornar questão
-    const { resposta_correta, ...questaoPublica } = questaoSelecionada
+    // Filtrar não respondidas
+    const disponiveis = questoesLocais.filter(q => {
+      const idApi = q.id_api || `local-${q.id}`
+      return !idsRespondidos.has(q.id) && !idsRespondidos.has(idApi)
+    })
+
+    if (disponiveis.length === 0) {
+      return NextResponse.json({
+        sucesso: true,
+        status: 'TODAS_RESPONDIDAS',
+        mensagem: 'Você já respondeu todas as questões disponíveis!',
+        anos_disponiveis: ANOS_DISPONIVEIS,
+        respondidas: idsRespondidos.size,
+        total_questoes: questoesLocais.length,
+      })
+    }
+
+    // Selecionar questão aleatória
+    const questao = disponiveis[Math.floor(Math.random() * disponiveis.length)]
+    const questaoFormatada = formatarQuestao(questao)
+
+    // Retornar questão (sem a resposta correta visível)
+    const { resposta_correta, ...questaoPublica } = questaoFormatada
 
     return NextResponse.json({
       sucesso: true,
@@ -266,7 +199,8 @@ export async function GET(request: NextRequest) {
       _rc: Buffer.from(resposta_correta).toString('base64'),
       anos_disponiveis: ANOS_DISPONIVEIS,
       respondidas: idsRespondidos.size,
-      fonte: fonteUsada,
+      total_questoes: questoesLocais.length,
+      disponiveis: disponiveis.length,
     })
   } catch (error) {
     console.error('Erro na API ENEM:', error)
