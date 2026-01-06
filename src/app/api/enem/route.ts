@@ -35,11 +35,11 @@ export async function GET(request: NextRequest) {
       .eq('id', sessao.userId)
       .single()
 
-    if (!usuario || usuario.nivel !== 'EM') {
+    if (!usuario || usuario.nivel !== 'EM' || usuario.ano !== 3) {
       return NextResponse.json({
         sucesso: false,
         status: 'ACESSO_NEGADO',
-        erro: 'O Simulado ENEM está disponível apenas para alunos do Ensino Médio.',
+        erro: 'O Simulado ENEM está disponível apenas para alunos da 3ª série do Ensino Médio.',
       }, { status: 403 })
     }
 
