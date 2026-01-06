@@ -217,21 +217,32 @@ export async function GET(request: NextRequest) {
     const conteudo = searchParams.get('conteudo')
     const modo = searchParams.get('modo') || 'aleatorio'
     const fonte = searchParams.get('fonte') || 'hibrido' // local, api, hibrido
+    const debug = searchParams.get('debug') === 'true'
 
     const supabase = getSupabaseAdmin()
+    const debugInfo: Record<string, any> = {}
 
     // Verificar se usuário é da 3ª série do Ensino Médio
-    const { data: usuario } = await supabase
+    const { data: usuario, error: erroUsuario } = await supabase
       .from('usuarios')
-      .select('nivel, ano')
+      .select('nivel, ano, tipo')
       .eq('id', sessao.userId)
       .single()
 
-    if (!usuario || usuario.nivel !== 'EM' || usuario.ano !== 3) {
+    if (debug) {
+      debugInfo.usuario = { nivel: usuario?.nivel, ano: usuario?.ano, tipo: usuario?.tipo }
+    }
+
+    // Permitir professores acessarem para teste (além de alunos 3ª série EM)
+    const isProfessor = usuario?.tipo === 'professor'
+    const isAluno3SerieEM = usuario?.nivel === 'EM' && usuario?.ano === 3
+
+    if (!usuario || (!isProfessor && !isAluno3SerieEM)) {
       return NextResponse.json({
         sucesso: false,
         status: 'ACESSO_NEGADO',
         erro: 'O Simulado ENEM está disponível apenas para alunos da 3ª série do Ensino Médio.',
+        ...(debug && { debug: debugInfo }),
       }, { status: 403 })
     }
 
@@ -247,14 +258,40 @@ export async function GET(request: NextRequest) {
       if (r.id_api_questao) questoesRespondidasIds.add(r.id_api_questao)
     })
 
+    if (debug) {
+      debugInfo.respostasUsuario = questoesRespondidasIds.size
+    }
+
     // ═══════════════════════════════════════════════════════════════════
     // ETAPA 1: Tentar buscar do banco local
     // ═══════════════════════════════════════════════════════════════════
 
     let questaoSelecionada: QuestaoENEM | null = null
     let totalLocal = 0
+    let totalSemFiltro = 0
 
     if (fonte !== 'api') {
+      // Primeiro, verificar total de questões ativas (para diagnóstico)
+      const { count: countTotal } = await supabase
+        .from('questoes_enem')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'ativa')
+
+      totalSemFiltro = countTotal || 0
+
+      if (debug) {
+        debugInfo.totalQuestoesAtivas = totalSemFiltro
+
+        // Verificar áreas disponíveis
+        const { data: areasDisponiveis } = await supabase
+          .from('questoes_enem')
+          .select('area')
+          .eq('status', 'ativa')
+
+        const areasUnicas = [...new Set(areasDisponiveis?.map(q => q.area) || [])]
+        debugInfo.areasDisponiveis = areasUnicas
+      }
+
       let query = supabase
         .from('questoes_enem')
         .select('*')
@@ -267,13 +304,27 @@ export async function GET(request: NextRequest) {
         query = query.or(`conteudo_principal.eq.${conteudo},conteudos.cs.{${conteudo}}`)
       }
 
-      const { data: questoes } = await query.limit(500)
+      const { data: questoes, error: erroQuery } = await query.limit(500)
+
+      if (debug && erroQuery) {
+        debugInfo.erroQuery = erroQuery.message
+      }
+
       totalLocal = questoes?.length || 0
+
+      if (debug) {
+        debugInfo.questoesComFiltro = totalLocal
+        debugInfo.filtrosAplicados = { area, subarea, ano, conteudo }
+      }
 
       // Filtrar não respondidas
       const questoesDisponiveis = (questoes || []).filter(
         q => !questoesRespondidasIds.has(q.id) && !questoesRespondidasIds.has(q.id_api || '')
       )
+
+      if (debug) {
+        debugInfo.questoesNaoRespondidas = questoesDisponiveis.length
+      }
 
       if (questoesDisponiveis.length > 0) {
         questaoSelecionada = modo === 'sequencial'
@@ -291,17 +342,25 @@ export async function GET(request: NextRequest) {
       questaoSelecionada = await buscarQuestaoExterna(ano, subarea, questoesRespondidasIds)
     }
 
+    if (debug) {
+      debugInfo.fonteUsada = !questaoSelecionada ? 'nenhuma' : (questaoSelecionada.fonte || 'local')
+    }
+
     // Se ainda não encontrou
     if (!questaoSelecionada) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_QUESTOES',
-        mensagem: 'Nenhuma questão disponível com os filtros selecionados.',
+        mensagem: totalSemFiltro === 0
+          ? 'Nenhuma questão encontrada no banco de dados. Execute o script de correção SQL.'
+          : 'Nenhuma questão disponível com os filtros selecionados.',
         estatisticas: {
-          total_local: totalLocal,
+          total_banco: totalSemFiltro,
+          total_com_filtro: totalLocal,
           respondidas: questoesRespondidasIds.size,
           restantes: 0,
         },
+        ...(debug && { debug: debugInfo }),
       })
     }
 
@@ -318,16 +377,18 @@ export async function GET(request: NextRequest) {
       // Enviar resposta_correta apenas para questões externas (cliente precisa enviar de volta)
       ...(isExterna && { _rc: resposta_correta }),
       estatisticas: {
-        total_local: totalLocal,
+        total_banco: totalSemFiltro,
+        total_com_filtro: totalLocal,
         respondidas: questoesRespondidasIds.size,
-        restantes: totalLocal - questoesRespondidasIds.size,
+        restantes: Math.max(0, totalLocal - questoesRespondidasIds.size),
       },
       filtros_aplicados: { area, subarea, ano, conteudo },
+      ...(debug && { debug: debugInfo }),
     })
   } catch (error) {
     console.error('Erro na API ENEM:', error)
     return NextResponse.json(
-      { sucesso: false, erro: 'Erro interno do servidor' },
+      { sucesso: false, erro: 'Erro interno do servidor', detalhes: String(error) },
       { status: 500 }
     )
   }
