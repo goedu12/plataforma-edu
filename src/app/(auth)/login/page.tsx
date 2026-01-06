@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation'
 import { User, Lock, ArrowRight, Info } from 'lucide-react'
 import Button from '@/components/ui/Button'
 
+// Logo estático da plataforma
+const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome.webp'
+
 interface Configuracoes {
   nome_plataforma: string
   versao: string
   nome_instituicao: string
-  logo_url: string | null
 }
 
 export default function LoginPage() {
@@ -21,8 +23,7 @@ export default function LoginPage() {
   const [config, setConfig] = useState<Configuracoes>({
     nome_plataforma: 'Studão',
     versao: '4.0',
-    nome_instituicao: 'Colégio Cora Coralina',
-    logo_url: null
+    nome_instituicao: 'Colégio Cora Coralina'
   })
 
   // Buscar configurações da plataforma
@@ -35,8 +36,7 @@ export default function LoginPage() {
           setConfig({
             nome_plataforma: data.configuracoes.nome_plataforma || 'Studão',
             versao: data.configuracoes.versao || '4.0',
-            nome_instituicao: data.configuracoes.nome_instituicao || 'Colégio Cora Coralina',
-            logo_url: data.configuracoes.logo_url || null
+            nome_instituicao: data.configuracoes.nome_instituicao || 'Colégio Cora Coralina'
           })
         }
       } catch {
@@ -91,24 +91,12 @@ export default function LoginPage() {
       {/* Header com Logo Dinâmico */}
       <div className="text-center mb-8 animate-fade-in">
         <div className="mx-auto mb-4 flex items-center justify-center">
-          {config.logo_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={config.logo_url}
-              alt={config.nome_plataforma}
-              className="h-auto max-h-[100px] w-auto"
-            />
-          ) : (
-            <h1
-              className="text-5xl font-bold tracking-tight"
-              style={{
-                color: '#4ade80',
-                textShadow: '0 0 30px rgba(74, 222, 128, 0.4)'
-              }}
-            >
-              STUDÃO
-            </h1>
-          )}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={LOGO_URL}
+            alt={config.nome_plataforma}
+            className="h-auto max-h-[120px] w-auto"
+          />
         </div>
         <p
           className="text-body"
