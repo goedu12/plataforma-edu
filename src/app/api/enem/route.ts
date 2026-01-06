@@ -11,12 +11,34 @@ import type { AreaENEM, SubareaENEM, QuestaoENEM } from '@/types'
 const API_ENEM_BASE = 'https://api.enem.dev/v1'
 
 // Mapeamento de disciplinas da API externa para nossa estrutura
-const DISCIPLINA_MAP: Record<string, { area: AreaENEM; subarea: SubareaENEM }> = {
+// A API usa os nomes das áreas do ENEM, não disciplinas específicas
+const DISCIPLINA_TO_AREA: Record<string, { area: AreaENEM; subarea: SubareaENEM }> = {
+  // Ciências da Natureza - a API pode retornar diferentes formatos
+  'ciências da natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
+  'ciencias da natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
+  'natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
   'física': { area: 'ciencias-natureza', subarea: 'fisica' },
-  'matemática': { area: 'matematica', subarea: 'matematica' },
+  'fisica': { area: 'ciencias-natureza', subarea: 'fisica' },
   'química': { area: 'ciencias-natureza', subarea: 'quimica' },
+  'quimica': { area: 'ciencias-natureza', subarea: 'quimica' },
   'biologia': { area: 'ciencias-natureza', subarea: 'biologia' },
+  // Matemática
+  'matemática': { area: 'matematica', subarea: 'matematica' },
+  'matematica': { area: 'matematica', subarea: 'matematica' },
+  'matemática e suas tecnologias': { area: 'matematica', subarea: 'matematica' },
 }
+
+// Disciplinas que queremos buscar (Física e Matemática para Studão)
+const DISCIPLINAS_ACEITAS = [
+  'ciências da natureza',
+  'ciencias da natureza',
+  'natureza',
+  'física',
+  'fisica',
+  'matemática',
+  'matematica',
+  'matemática e suas tecnologias',
+]
 
 // Buscar questão da API externa enem.dev
 async function buscarQuestaoExterna(
@@ -25,46 +47,78 @@ async function buscarQuestaoExterna(
   questoesRespondidasIds: Set<string>
 ): Promise<QuestaoENEM | null> {
   try {
-    // Anos disponíveis na API
-    const anosDisponiveis = ano ? [ano] : [2023, 2022, 2021, 2020, 2019, 2018]
+    // Anos disponíveis na API (2009-2023)
+    const anosDisponiveis = ano
+      ? [ano]
+      : [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016]
 
     for (const anoAtual of anosDisponiveis) {
+      console.log(`[ENEM API] Buscando questões de ${anoAtual}...`)
+
       const response = await fetch(
-        `${API_ENEM_BASE}/exams/${anoAtual}/questions?limit=100`,
+        `${API_ENEM_BASE}/exams/${anoAtual}/questions?limit=200`,
         {
-          headers: { 'Accept': 'application/json' },
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Studao-Platform/1.0',
+          },
           next: { revalidate: 3600 } // Cache 1 hora
         }
       )
 
-      if (!response.ok) continue
+      if (!response.ok) {
+        console.warn(`[ENEM API] Erro ${response.status} ao buscar ano ${anoAtual}`)
+        continue
+      }
 
       const data = await response.json()
       const questoes = data.questions || []
 
-      // Filtrar por disciplina se especificado
-      const questoesFiltradas = questoes.filter((q: any) => {
-        const disciplina = q.discipline?.toLowerCase() || ''
+      console.log(`[ENEM API] ${anoAtual}: ${questoes.length} questões encontradas`)
 
-        // Se não tem filtro de subarea, aceita física e matemática
-        if (!subarea) {
-          return disciplina.includes('física') || disciplina.includes('matemática')
+      if (questoes.length === 0) continue
+
+      // Filtrar por disciplinas aceitas
+      const questoesFiltradas = questoes.filter((q: any) => {
+        const disciplina = (q.discipline || '').toLowerCase().trim()
+
+        // Verificar se é uma disciplina que aceitamos
+        const aceita = DISCIPLINAS_ACEITAS.some(d =>
+          disciplina.includes(d) || d.includes(disciplina)
+        )
+
+        if (!aceita) return false
+
+        // Se tem filtro de subarea, filtrar mais especificamente
+        if (subarea) {
+          if (subarea === 'fisica') {
+            return disciplina.includes('natureza') || disciplina.includes('física') || disciplina.includes('fisica')
+          }
+          if (subarea === 'matematica') {
+            return disciplina.includes('matemática') || disciplina.includes('matematica')
+          }
+          if (subarea === 'quimica') {
+            return disciplina.includes('química') || disciplina.includes('quimica')
+          }
+          if (subarea === 'biologia') {
+            return disciplina.includes('biologia')
+          }
         }
 
-        // Filtrar por subarea específica
-        if (subarea === 'fisica') return disciplina.includes('física')
-        if (subarea === 'matematica') return disciplina.includes('matemática')
-        if (subarea === 'quimica') return disciplina.includes('química')
-        if (subarea === 'biologia') return disciplina.includes('biologia')
-
-        return false
+        return true
       })
+
+      console.log(`[ENEM API] ${anoAtual}: ${questoesFiltradas.length} após filtro de disciplina`)
+
+      if (questoesFiltradas.length === 0) continue
 
       // Filtrar questões não respondidas
       const questoesNaoRespondidas = questoesFiltradas.filter((q: any) => {
         const idApi = `enem-${q.year}-${q.index}`
         return !questoesRespondidasIds.has(idApi)
       })
+
+      console.log(`[ENEM API] ${anoAtual}: ${questoesNaoRespondidas.length} não respondidas`)
 
       if (questoesNaoRespondidas.length === 0) continue
 
@@ -74,23 +128,32 @@ async function buscarQuestaoExterna(
       ]
 
       // Converter para nosso formato
-      const disciplina = questaoExterna.discipline?.toLowerCase() || ''
+      const disciplina = (questaoExterna.discipline || '').toLowerCase().trim()
       let area: AreaENEM = 'ciencias-natureza'
       let subareaFinal: SubareaENEM = 'fisica'
 
-      for (const [key, value] of Object.entries(DISCIPLINA_MAP)) {
-        if (disciplina.includes(key)) {
-          area = value.area
-          subareaFinal = value.subarea
-          break
-        }
+      // Determinar área e subárea
+      if (disciplina.includes('matemática') || disciplina.includes('matematica')) {
+        area = 'matematica'
+        subareaFinal = 'matematica'
+      } else {
+        // Ciências da Natureza - usar física como padrão
+        area = 'ciencias-natureza'
+        subareaFinal = 'fisica'
       }
 
       const alternativas = questaoExterna.alternatives || []
       const getAlt = (letra: string) => alternativas.find((a: any) => a.letter === letra)
 
       // Verificar se tem todas as alternativas
-      if (!getAlt('A') || !getAlt('B') || !getAlt('C') || !getAlt('D') || !getAlt('E')) {
+      const altA = getAlt('A')
+      const altB = getAlt('B')
+      const altC = getAlt('C')
+      const altD = getAlt('D')
+      const altE = getAlt('E')
+
+      if (!altA || !altB || !altC || !altD || !altE) {
+        console.warn(`[ENEM API] Questão ${questaoExterna.year}-${questaoExterna.index} sem todas alternativas`)
         continue
       }
 
@@ -104,29 +167,34 @@ async function buscarQuestaoExterna(
         titulo: questaoExterna.title || null,
         contexto: questaoExterna.context || '',
         comando: questaoExterna.alternativesIntroduction || null,
+        // Imagens - a API retorna array de URLs
         imagem_principal: questaoExterna.files?.[0] || null,
         imagens_extras: questaoExterna.files?.slice(1) || [],
-        alternativa_a: getAlt('A')?.text || '',
-        alternativa_b: getAlt('B')?.text || '',
-        alternativa_c: getAlt('C')?.text || '',
-        alternativa_d: getAlt('D')?.text || '',
-        alternativa_e: getAlt('E')?.text || '',
-        imagem_a: getAlt('A')?.file || null,
-        imagem_b: getAlt('B')?.file || null,
-        imagem_c: getAlt('C')?.file || null,
-        imagem_d: getAlt('D')?.file || null,
-        imagem_e: getAlt('E')?.file || null,
-        resposta_correta: questaoExterna.correctAlternative?.toUpperCase() || 'A',
+        // Alternativas
+        alternativa_a: altA.text || '',
+        alternativa_b: altB.text || '',
+        alternativa_c: altC.text || '',
+        alternativa_d: altD.text || '',
+        alternativa_e: altE.text || '',
+        // Imagens das alternativas
+        imagem_a: altA.file || null,
+        imagem_b: altB.file || null,
+        imagem_c: altC.file || null,
+        imagem_d: altD.file || null,
+        imagem_e: altE.file || null,
+        resposta_correta: (questaoExterna.correctAlternative || 'A').toUpperCase(),
         fonte: 'ENEM-API',
         status: 'ativa',
       }
 
+      console.log(`[ENEM API] Retornando questão ${questaoConvertida.id}`)
       return questaoConvertida
     }
 
+    console.log('[ENEM API] Nenhuma questão encontrada após verificar todos os anos')
     return null
   } catch (error) {
-    console.error('Erro ao buscar questão externa:', error)
+    console.error('[ENEM API] Erro ao buscar questão externa:', error)
     return null
   }
 }
@@ -219,6 +287,7 @@ export async function GET(request: NextRequest) {
     // ═══════════════════════════════════════════════════════════════════
 
     if (!questaoSelecionada && fonte !== 'local') {
+      console.log('[ENEM] Buscando da API externa...')
       questaoSelecionada = await buscarQuestaoExterna(ano, subarea, questoesRespondidasIds)
     }
 
