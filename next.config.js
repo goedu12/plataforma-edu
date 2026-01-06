@@ -7,29 +7,50 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
+      // Supabase Storage
       {
         protocol: 'https',
-        hostname: '**.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/**',
       },
       {
         protocol: 'https',
         hostname: 'qjrjkjknesacrurvcthu.supabase.co',
-        pathname: '/storage/v1/object/public/**',
+        pathname: '/storage/v1/object/**',
       },
-      // API ENEM - imagens das questões
+      // API ENEM - imagens das questões (domínio principal)
+      {
+        protocol: 'https',
+        hostname: 'api.enem.dev',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: 'enem.dev',
         pathname: '/**',
       },
+      // CDN comum para imagens
       {
         protocol: 'https',
-        hostname: '**.enem.dev',
-        pathname: '/**',
+        hostname: '*.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.amazonaws.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.googleusercontent.com',
+      },
+      // Imgur (caso usado)
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
       },
     ],
     minimumCacheTTL: 60,
+    // Desabilitar otimização para URLs externas problemáticas
+    unoptimized: false,
   },
 
   // Headers de segurança
