@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { componente, mensagem, historico, nomeEstudante } = await request.json()
+    const { componente, mensagem, historico, nomeEstudante, imagem } = await request.json()
 
     if (!componente || !mensagem) {
       return NextResponse.json(
@@ -97,12 +97,18 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Validar imagem se enviada (deve ser base64 válido)
+    const imagemValidada = typeof imagem === 'string' && imagem.length > 0 && imagem.length < 2_000_000
+      ? imagem
+      : undefined
+
     // Chamar o tutor IA com valores validados e contexto
     const resultado = await chatComTutor(
       componente as Componente,
       mensagemValidada,
       historicoValidado,
-      {} // contexto do estudante - pode ser expandido futuramente para rastrear erros, frustrações, etc
+      {}, // contexto do estudante - pode ser expandido futuramente para rastrear erros, frustrações, etc
+      imagemValidada // imagem em base64 (opcional)
     )
 
     if (!resultado.sucesso || !resultado.resposta) {
