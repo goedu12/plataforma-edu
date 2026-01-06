@@ -17,6 +17,17 @@ const nextConfig = {
         hostname: 'qjrjkjknesacrurvcthu.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      // API ENEM - imagens das questões
+      {
+        protocol: 'https',
+        hostname: 'enem.dev',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.enem.dev',
+        pathname: '/**',
+      },
     ],
     minimumCacheTTL: 60,
   },

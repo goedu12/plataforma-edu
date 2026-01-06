@@ -11,7 +11,6 @@ import {
   Calendar,
   BookOpen,
   ChevronDown,
-  BarChart3,
   AlertTriangle,
   CheckCircle2,
   RefreshCw,
@@ -48,6 +47,10 @@ export default function SimuladoENEMPage() {
 
   // Estados principais
   const [questao, setQuestao] = useState<Omit<TipoQuestaoENEM, 'resposta_correta'> | null>(null)
+  const [questaoExtra, setQuestaoExtra] = useState<{
+    resposta_correta?: string
+    fonte?: string
+  } | null>(null)
   const [status, setStatus] = useState<StatusQuestao | null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
@@ -72,7 +75,7 @@ export default function SimuladoENEMPage() {
   // Determinar area ENEM baseado no componente
   const areaENEM: AreaENEM = ENEM_CONFIG.COMPONENTE_TO_AREA[componente] || 'ciencias-natureza'
   const isFisica = componente === 'fisica'
-  const nomeComponente = isFisica ? 'Fisica' : 'Matematica'
+  const nomeComponente = isFisica ? 'Física' : 'Matemática'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   // Subareas disponiveis para o componente
@@ -142,9 +145,15 @@ export default function SimuladoENEMPage() {
 
         if (data.status === 'OK' && data.questao) {
           setQuestao(data.questao)
+          // Guardar dados extras (resposta_correta para questões externas)
+          setQuestaoExtra({
+            resposta_correta: data._rc,
+            fonte: data.fonte,
+          })
           iniciarTimer()
         } else {
           setQuestao(null)
+          setQuestaoExtra(null)
         }
       } else {
         if (data.status === 'ACESSO_NEGADO') {
@@ -158,7 +167,7 @@ export default function SimuladoENEMPage() {
     } catch (error) {
       console.error('Erro ao buscar questao ENEM:', error)
       setStatus('ERRO')
-      setErro('Nao foi possivel conectar ao servidor.')
+      setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
     }
@@ -217,7 +226,7 @@ export default function SimuladoENEMPage() {
   }
 
   if (loading && !questao) {
-    return <Loading fullScreen componente={componente} text="Carregando questao ENEM..." />
+    return <Loading fullScreen componente={componente} text="Carregando questão ENEM..." />
   }
 
   return (
@@ -306,6 +315,7 @@ export default function SimuladoENEMPage() {
       <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full flex flex-col">
         {status === 'OK' && questao ? (
           <QuestaoENEM
+            key={questao.id} // Reset component state on new question
             questao={questao}
             componente={componente}
             tempoDecorrido={tempoDecorrido}
@@ -317,6 +327,7 @@ export default function SimuladoENEMPage() {
               total_corretas: estatisticas.total_corretas,
               taxa_acerto: estatisticas.taxa_acerto,
             } : undefined}
+            questaoExtra={questaoExtra || undefined}
           />
         ) : (
           /* ═══════════════════════════════════════════════════════════════
@@ -349,16 +360,16 @@ export default function SimuladoENEMPage() {
 
             <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               {status === 'ACESSO_NEGADO' && 'Acesso Restrito'}
-              {status === 'COMPLETOU' && 'Parabens!'}
+              {status === 'COMPLETOU' && 'Parabéns!'}
               {status === 'ERRO' && 'Ops! Erro'}
-              {status === 'SEM_QUESTOES' && 'Sem Questoes'}
+              {status === 'SEM_QUESTOES' && 'Sem Questões'}
             </h2>
 
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
               {status === 'ACESSO_NEGADO' && erro}
-              {status === 'COMPLETOU' && 'Voce respondeu todas as questoes com os filtros selecionados!'}
+              {status === 'COMPLETOU' && 'Você respondeu todas as questões com os filtros selecionados!'}
               {status === 'ERRO' && erro}
-              {status === 'SEM_QUESTOES' && 'Nao ha questoes disponiveis com os filtros selecionados.'}
+              {status === 'SEM_QUESTOES' && 'Não há questões disponíveis com os filtros selecionados.'}
             </p>
 
             {/* Estatisticas na tela de conclusao */}
@@ -450,7 +461,7 @@ export default function SimuladoENEMPage() {
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5" style={{ color: corPrimaria }} />
                 <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Filtrar Questoes
+                  Filtrar Questões
                 </h3>
               </div>
               <button
@@ -535,7 +546,7 @@ export default function SimuladoENEMPage() {
                 <div>
                   <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
                     <Target className="w-4 h-4 inline mr-2" />
-                    Conteudo Especifico
+                    Conteúdo Específico
                   </label>
                   <div className="relative">
                     <select
@@ -548,7 +559,7 @@ export default function SimuladoENEMPage() {
                         color: 'var(--text-primary)',
                       }}
                     >
-                      <option value="">Todos os conteudos</option>
+                      <option value="">Todos os conteúdos</option>
                       {conteudosDisponiveis.map(c => (
                         <option key={c.codigo} value={c.codigo}>
                           {c.nome}

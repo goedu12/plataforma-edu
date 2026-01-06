@@ -20,6 +20,20 @@ export async function GET() {
 
     const supabase = getSupabaseAdmin()
 
+    // Verificar se usuário é da 3ª série do Ensino Médio
+    const { data: usuario } = await supabase
+      .from('usuarios')
+      .select('nivel, ano')
+      .eq('id', sessao.userId)
+      .single()
+
+    if (!usuario || usuario.nivel !== 'EM' || usuario.ano !== 3) {
+      return NextResponse.json({
+        sucesso: false,
+        erro: 'O Simulado ENEM está disponível apenas para alunos da 3ª série do Ensino Médio.',
+      }, { status: 403 })
+    }
+
     // Buscar todas as respostas do usuário
     const { data: respostas, error } = await supabase
       .from('respostas_enem')
