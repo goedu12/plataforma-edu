@@ -36,6 +36,7 @@ export default function ConfigProfessorPage() {
   // Logo
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
+  const [logoFile, setLogoFile] = useState<File | null>(null)
   const [uploadingLogo, setUploadingLogo] = useState(false)
   const [logoMensagem, setLogoMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
 
@@ -97,6 +98,10 @@ export default function ConfigProfessorPage() {
       return
     }
 
+    // Armazenar arquivo no estado
+    setLogoFile(file)
+    setLogoMensagem(null)
+
     // Preview local
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -107,8 +112,7 @@ export default function ConfigProfessorPage() {
 
   // Upload do logo
   const handleLogoUpload = async () => {
-    const file = fileInputRef.current?.files?.[0]
-    if (!file) {
+    if (!logoFile) {
       setLogoMensagem({ tipo: 'erro', texto: 'Selecione uma imagem primeiro.' })
       return
     }
@@ -118,7 +122,7 @@ export default function ConfigProfessorPage() {
 
     try {
       const formData = new FormData()
-      formData.append('logo', file)
+      formData.append('logo', logoFile)
 
       const response = await fetch('/api/config/logo', {
         method: 'POST',
@@ -130,6 +134,7 @@ export default function ConfigProfessorPage() {
       if (data.sucesso) {
         setLogoUrl(data.logo_url)
         setLogoPreview(null)
+        setLogoFile(null)
         setLogoMensagem({ tipo: 'sucesso', texto: 'Logo atualizado com sucesso!' })
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
@@ -180,6 +185,7 @@ export default function ConfigProfessorPage() {
   // Cancelar preview
   const handleCancelPreview = () => {
     setLogoPreview(null)
+    setLogoFile(null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }

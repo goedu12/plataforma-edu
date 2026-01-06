@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { User, Lock, ArrowRight, Info } from 'lucide-react'
 import Button from '@/components/ui/Button'
 
@@ -93,24 +92,22 @@ export default function LoginPage() {
       <div className="text-center mb-8 animate-fade-in">
         <div className="mx-auto mb-4 flex items-center justify-center">
           {config.logo_url ? (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={config.logo_url}
               alt={config.nome_plataforma}
-              width={280}
-              height={100}
-              priority
               className="h-auto max-h-[100px] w-auto"
-              unoptimized
             />
           ) : (
-            <Image
-              src="/logo-studao.svg"
-              alt="Studão"
-              width={280}
-              height={100}
-              priority
-              className="h-auto"
-            />
+            <h1
+              className="text-5xl font-bold tracking-tight"
+              style={{
+                color: '#4ade80',
+                textShadow: '0 0 30px rgba(74, 222, 128, 0.4)'
+              }}
+            >
+              STUDÃO
+            </h1>
           )}
         </div>
         <p
