@@ -297,7 +297,7 @@ export default function DesafioPage() {
                     Questão {index + 1}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Sua: {r.resposta_dada || '—'} • Correta: {r.resposta_correta}
+                    Sua resposta: {r.resposta_dada || '—'} • {r.correta ? 'Acertou!' : 'Errou'}
                   </p>
                 </div>
               </div>
