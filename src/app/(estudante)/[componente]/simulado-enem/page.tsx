@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   RefreshCw,
   Target,
+  Layers,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
@@ -59,6 +60,7 @@ export default function SimuladoENEMPage() {
 
   // Estados de filtros
   const [mostrarFiltros, setMostrarFiltros] = useState(false)
+  const [areaSelecionada, setAreaSelecionada] = useState<AreaENEM | null>(null)
   const [anoSelecionado, setAnoSelecionado] = useState<number | null>(null)
   const [subareaSelecionada, setSubareaSelecionada] = useState<SubareaENEM | null>(null)
   const [conteudoSelecionado, setConteudoSelecionado] = useState<string | null>(null)
@@ -72,14 +74,25 @@ export default function SimuladoENEMPage() {
     restantes: number
   } | null>(null)
 
-  // Determinar area ENEM baseado no componente
-  const areaENEM: AreaENEM = ENEM_CONFIG.COMPONENTE_TO_AREA[componente] || 'ciencias-natureza'
+  // Estilos baseados no componente (apenas visual, não filtro)
   const isFisica = componente === 'fisica'
   const nomeComponente = isFisica ? 'Física' : 'Matemática'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  // Subareas disponiveis para o componente
-  const subareasDisponiveis = ENEM_CONFIG.AREAS[areaENEM]?.subareas || []
+  // Todas as áreas disponíveis no ENEM
+  const areasDisponiveis = Object.keys(ENEM_CONFIG.AREAS) as AreaENEM[]
+
+  // Subareas disponíveis baseadas na área selecionada (ou todas se nenhuma área selecionada)
+  const subareasDisponiveis = areaSelecionada
+    ? ENEM_CONFIG.AREAS[areaSelecionada]?.subareas || []
+    : Object.values(ENEM_CONFIG.AREAS).flatMap(a => a.subareas)
+
+  // Resetar subarea quando área mudar
+  useEffect(() => {
+    setSubareaSelecionada(null)
+    setConteudoSelecionado(null)
+    setConteudosDisponiveis([])
+  }, [areaSelecionada])
 
   // Buscar conteudos quando mudar subarea
   useEffect(() => {
@@ -94,7 +107,7 @@ export default function SimuladoENEMPage() {
   const buscarConteudos = async () => {
     try {
       const params = new URLSearchParams()
-      params.set('area', areaENEM)
+      if (areaSelecionada) params.set('area', areaSelecionada)
       if (subareaSelecionada) params.set('subarea', subareaSelecionada)
 
       const response = await fetch(`/api/enem/conteudos?${params}`)
@@ -130,7 +143,8 @@ export default function SimuladoENEMPage() {
 
     try {
       const params = new URLSearchParams()
-      params.set('area', areaENEM)
+      // Só filtrar por área se uma área específica foi selecionada
+      if (areaSelecionada) params.set('area', areaSelecionada)
       if (anoSelecionado) params.set('ano', String(anoSelecionado))
       if (subareaSelecionada) params.set('subarea', subareaSelecionada)
       if (conteudoSelecionado) params.set('conteudo', conteudoSelecionado)
@@ -214,6 +228,7 @@ export default function SimuladoENEMPage() {
   }
 
   const limparFiltros = () => {
+    setAreaSelecionada(null)
     setAnoSelecionado(null)
     setSubareaSelecionada(null)
     setConteudoSelecionado(null)
@@ -269,7 +284,7 @@ export default function SimuladoENEMPage() {
                 style={{ background: 'var(--bg-elevated)' }}
               >
                 <Filter className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                {(anoSelecionado || subareaSelecionada || conteudoSelecionado) && (
+                {(areaSelecionada || anoSelecionado || subareaSelecionada || conteudoSelecionado) && (
                   <span
                     className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
                     style={{ background: corPrimaria }}
@@ -475,6 +490,39 @@ export default function SimuladoENEMPage() {
 
             {/* Filtros */}
             <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+              {/* Área do ENEM */}
+              <div>
+                <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
+                  <Layers className="w-4 h-4 inline mr-2" />
+                  Área do Conhecimento
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setAreaSelecionada(null)}
+                    className="px-3 py-1.5 rounded-lg text-sm transition-all"
+                    style={{
+                      background: !areaSelecionada ? corPrimaria : 'var(--bg-elevated)',
+                      color: !areaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                    }}
+                  >
+                    Todas
+                  </button>
+                  {areasDisponiveis.map(area => (
+                    <button
+                      key={area}
+                      onClick={() => setAreaSelecionada(area)}
+                      className="px-3 py-1.5 rounded-lg text-sm transition-all"
+                      style={{
+                        background: areaSelecionada === area ? corPrimaria : 'var(--bg-elevated)',
+                        color: areaSelecionada === area ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                      }}
+                    >
+                      {ENEM_CONFIG.AREAS[area].nome}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Ano da Prova */}
               <div>
                 <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
@@ -508,7 +556,8 @@ export default function SimuladoENEMPage() {
                 </div>
               </div>
 
-              {/* Subarea */}
+              {/* Subarea/Disciplina (apenas se tiver área selecionada) */}
+              {areaSelecionada && (
               <div>
                 <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
                   <BookOpen className="w-4 h-4 inline mr-2" />
@@ -540,6 +589,7 @@ export default function SimuladoENEMPage() {
                   ))}
                 </div>
               </div>
+              )}
 
               {/* Conteudo (apenas se tiver subarea selecionada) */}
               {subareaSelecionada && conteudosDisponiveis.length > 0 && (

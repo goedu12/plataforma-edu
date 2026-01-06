@@ -13,7 +13,7 @@ const API_ENEM_BASE = 'https://api.enem.dev/v1'
 // Mapeamento de disciplinas da API externa para nossa estrutura
 // A API usa os nomes das áreas do ENEM, não disciplinas específicas
 const DISCIPLINA_TO_AREA: Record<string, { area: AreaENEM; subarea: SubareaENEM }> = {
-  // Ciências da Natureza - a API pode retornar diferentes formatos
+  // Ciências da Natureza
   'ciências da natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
   'ciencias da natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
   'natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
@@ -26,23 +26,65 @@ const DISCIPLINA_TO_AREA: Record<string, { area: AreaENEM; subarea: SubareaENEM 
   'matemática': { area: 'matematica', subarea: 'matematica' },
   'matematica': { area: 'matematica', subarea: 'matematica' },
   'matemática e suas tecnologias': { area: 'matematica', subarea: 'matematica' },
+  // Linguagens
+  'linguagens': { area: 'linguagens', subarea: 'portugues' },
+  'linguagens e códigos': { area: 'linguagens', subarea: 'portugues' },
+  'linguagens, códigos e suas tecnologias': { area: 'linguagens', subarea: 'portugues' },
+  'português': { area: 'linguagens', subarea: 'portugues' },
+  'portugues': { area: 'linguagens', subarea: 'portugues' },
+  'inglês': { area: 'linguagens', subarea: 'ingles' },
+  'ingles': { area: 'linguagens', subarea: 'ingles' },
+  'espanhol': { area: 'linguagens', subarea: 'espanhol' },
+  // Ciências Humanas
+  'ciências humanas': { area: 'ciencias-humanas', subarea: 'historia' },
+  'ciencias humanas': { area: 'ciencias-humanas', subarea: 'historia' },
+  'humanas': { area: 'ciencias-humanas', subarea: 'historia' },
+  'história': { area: 'ciencias-humanas', subarea: 'historia' },
+  'historia': { area: 'ciencias-humanas', subarea: 'historia' },
+  'geografia': { area: 'ciencias-humanas', subarea: 'geografia' },
+  'filosofia': { area: 'ciencias-humanas', subarea: 'filosofia' },
+  'sociologia': { area: 'ciencias-humanas', subarea: 'sociologia' },
 }
 
-// Disciplinas que queremos buscar (Física e Matemática para Studão)
+// Todas as disciplinas do ENEM (buscar de todas as áreas)
 const DISCIPLINAS_ACEITAS = [
+  // Ciências da Natureza
   'ciências da natureza',
   'ciencias da natureza',
   'natureza',
   'física',
   'fisica',
+  'química',
+  'quimica',
+  'biologia',
+  // Matemática
   'matemática',
   'matematica',
   'matemática e suas tecnologias',
+  // Linguagens
+  'linguagens',
+  'linguagens e códigos',
+  'linguagens, códigos e suas tecnologias',
+  'português',
+  'portugues',
+  'inglês',
+  'ingles',
+  'espanhol',
+  // Ciências Humanas
+  'ciências humanas',
+  'ciencias humanas',
+  'humanas',
+  'história',
+  'historia',
+  'geografia',
+  'filosofia',
+  'sociologia',
 ]
 
 // Buscar questão da API externa enem.dev
 async function buscarQuestaoExterna(
   ano: number | null,
+  area: AreaENEM | null,
   subarea: SubareaENEM | null,
   questoesRespondidasIds: Set<string>
 ): Promise<QuestaoENEM | null> {
@@ -89,6 +131,35 @@ async function buscarQuestaoExterna(
 
         if (!aceita) return false
 
+        // Se tem filtro de área, verificar se a disciplina pertence à área
+        if (area) {
+          if (area === 'ciencias-natureza') {
+            const isNatureza = disciplina.includes('natureza') ||
+              disciplina.includes('física') || disciplina.includes('fisica') ||
+              disciplina.includes('química') || disciplina.includes('quimica') ||
+              disciplina.includes('biologia')
+            if (!isNatureza) return false
+          }
+          if (area === 'matematica') {
+            const isMat = disciplina.includes('matemática') || disciplina.includes('matematica')
+            if (!isMat) return false
+          }
+          if (area === 'linguagens') {
+            const isLing = disciplina.includes('linguagens') ||
+              disciplina.includes('português') || disciplina.includes('portugues') ||
+              disciplina.includes('inglês') || disciplina.includes('ingles') ||
+              disciplina.includes('espanhol')
+            if (!isLing) return false
+          }
+          if (area === 'ciencias-humanas') {
+            const isHum = disciplina.includes('humanas') ||
+              disciplina.includes('história') || disciplina.includes('historia') ||
+              disciplina.includes('geografia') || disciplina.includes('filosofia') ||
+              disciplina.includes('sociologia')
+            if (!isHum) return false
+          }
+        }
+
         // Se tem filtro de subarea, filtrar mais especificamente
         if (subarea) {
           if (subarea === 'fisica') {
@@ -102,6 +173,27 @@ async function buscarQuestaoExterna(
           }
           if (subarea === 'biologia') {
             return disciplina.includes('biologia')
+          }
+          if (subarea === 'portugues') {
+            return disciplina.includes('linguagens') || disciplina.includes('português') || disciplina.includes('portugues')
+          }
+          if (subarea === 'ingles') {
+            return disciplina.includes('inglês') || disciplina.includes('ingles')
+          }
+          if (subarea === 'espanhol') {
+            return disciplina.includes('espanhol')
+          }
+          if (subarea === 'historia') {
+            return disciplina.includes('humanas') || disciplina.includes('história') || disciplina.includes('historia')
+          }
+          if (subarea === 'geografia') {
+            return disciplina.includes('geografia')
+          }
+          if (subarea === 'filosofia') {
+            return disciplina.includes('filosofia')
+          }
+          if (subarea === 'sociologia') {
+            return disciplina.includes('sociologia')
           }
         }
 
@@ -129,17 +221,47 @@ async function buscarQuestaoExterna(
 
       // Converter para nosso formato
       const disciplina = (questaoExterna.discipline || '').toLowerCase().trim()
-      let area: AreaENEM = 'ciencias-natureza'
+      let areaFinal: AreaENEM = 'ciencias-natureza'
       let subareaFinal: SubareaENEM = 'fisica'
 
-      // Determinar área e subárea
+      // Determinar área e subárea baseado na disciplina
       if (disciplina.includes('matemática') || disciplina.includes('matematica')) {
-        area = 'matematica'
+        areaFinal = 'matematica'
         subareaFinal = 'matematica'
+      } else if (disciplina.includes('linguagens') || disciplina.includes('português') ||
+                 disciplina.includes('portugues') || disciplina.includes('inglês') ||
+                 disciplina.includes('ingles') || disciplina.includes('espanhol')) {
+        areaFinal = 'linguagens'
+        if (disciplina.includes('inglês') || disciplina.includes('ingles')) {
+          subareaFinal = 'ingles'
+        } else if (disciplina.includes('espanhol')) {
+          subareaFinal = 'espanhol'
+        } else {
+          subareaFinal = 'portugues'
+        }
+      } else if (disciplina.includes('humanas') || disciplina.includes('história') ||
+                 disciplina.includes('historia') || disciplina.includes('geografia') ||
+                 disciplina.includes('filosofia') || disciplina.includes('sociologia')) {
+        areaFinal = 'ciencias-humanas'
+        if (disciplina.includes('geografia')) {
+          subareaFinal = 'geografia'
+        } else if (disciplina.includes('filosofia')) {
+          subareaFinal = 'filosofia'
+        } else if (disciplina.includes('sociologia')) {
+          subareaFinal = 'sociologia'
+        } else {
+          subareaFinal = 'historia'
+        }
       } else {
-        // Ciências da Natureza - usar física como padrão
-        area = 'ciencias-natureza'
-        subareaFinal = 'fisica'
+        // Ciências da Natureza (padrão)
+        areaFinal = 'ciencias-natureza'
+        if (disciplina.includes('química') || disciplina.includes('quimica')) {
+          subareaFinal = 'quimica'
+        } else if (disciplina.includes('biologia')) {
+          subareaFinal = 'biologia'
+        } else {
+          subareaFinal = 'fisica'
+        }
       }
 
       const alternativas = questaoExterna.alternatives || []
@@ -162,7 +284,7 @@ async function buscarQuestaoExterna(
         id_api: `enem-${questaoExterna.year}-${questaoExterna.index}`,
         ano_prova: questaoExterna.year,
         numero_questao: questaoExterna.index,
-        area,
+        area: areaFinal,
         subarea: subareaFinal,
         titulo: questaoExterna.title || null,
         contexto: questaoExterna.context || '',
@@ -339,7 +461,7 @@ export async function GET(request: NextRequest) {
 
     if (!questaoSelecionada && fonte !== 'local') {
       console.log('[ENEM] Buscando da API externa...')
-      questaoSelecionada = await buscarQuestaoExterna(ano, subarea, questoesRespondidasIds)
+      questaoSelecionada = await buscarQuestaoExterna(ano, area, subarea, questoesRespondidasIds)
     }
 
     if (debug) {
