@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Bot } from 'lucide-react'
+import { ArrowLeft, Bot, Zap } from 'lucide-react'
 import TutorChat from '@/components/TutorChat'
 import Loading from '@/components/ui/Loading'
-import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Usuario } from '@/types'
 import { PONTUACAO } from '@/types'
@@ -19,6 +18,7 @@ export default function TutorPage() {
   const [loading, setLoading] = useState(true)
 
   const isFisica = componente === 'fisica'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -56,14 +56,24 @@ export default function TutorPage() {
 
   const nomeTutor = isFisica ? 'Newton' : 'Pitágoras'
   const usoHoje = isFisica ? usuario.fis_uso_ia_hoje : usuario.mat_uso_ia_hoje
+  const limiteDiario = PONTUACAO.LIMITE_IA_DIARIO
+  const percentualUso = Math.min((usoHoje / limiteDiario) * 100, 100)
+  const restantes = Math.max(limiteDiario - usoHoje, 0)
 
   const handleVoltar = () => router.push(`/${componente}/menu`)
+
+  // Cor do indicador baseada no uso
+  const getCorIndicador = () => {
+    if (percentualUso >= 90) return 'var(--error)'
+    if (percentualUso >= 70) return 'var(--warning)'
+    return corPrimaria
+  }
 
   return (
     <div
       className="lg:pl-[72px]"
       style={{
-        height: '100vh',
+        height: '100dvh', // dvh para mobile (dynamic viewport height)
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--bg-base)',
@@ -71,45 +81,84 @@ export default function TutorPage() {
     >
       <NavigationRail componente={componente} />
 
-      {/* Header com botão voltar - visível apenas em mobile */}
+      {/* Header Compacto com indicador de uso */}
       <header
-        className="lg:hidden px-4 py-3 flex items-center gap-3"
+        className="px-4 py-2 flex-shrink-0"
         style={{
           background: 'var(--bg-surface)',
           borderBottom: '1px solid var(--border-default)',
         }}
       >
-        <button
-          onClick={handleVoltar}
-          className="p-2 rounded-xl transition-colors touch-target"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex items-center gap-2">
-          <Bot className="w-5 h-5" style={{ color: isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)' }} />
-          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-            Tutor {nomeTutor}
-          </span>
+        <div className="max-w-2xl mx-auto">
+          {/* Linha 1: Navegação + Título + Indicador */}
+          <div className="flex items-center justify-between gap-2">
+            <button
+              onClick={handleVoltar}
+              className="p-2 -ml-2 rounded-lg lg:hidden"
+              style={{ color: 'var(--text-muted)' }}
+              aria-label="Voltar"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2">
+              <Bot className="w-4 h-4" style={{ color: corPrimaria }} />
+              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                Tutor {nomeTutor}
+              </span>
+            </div>
+
+            {/* Indicador de uso */}
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
+              style={{
+                background: 'var(--bg-elevated)',
+                color: getCorIndicador(),
+              }}
+              title={`${restantes} mensagens restantes hoje`}
+            >
+              <Zap className="w-4 h-4" />
+              <span className="tabular-nums">{restantes}</span>
+            </div>
+          </div>
+
+          {/* Linha 2: Barra de progresso do limite diário */}
+          <div className="flex items-center gap-2 mt-2">
+            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${percentualUso}%`,
+                  background: getCorIndicador(),
+                }}
+              />
+            </div>
+            <span className="text-xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
+              {usoHoje}/{limiteDiario}
+            </span>
+          </div>
         </div>
       </header>
 
-      {/* Chat ocupa todo o espaço disponível */}
+      {/* Chat ocupa todo o espaço disponível - SEM BottomNav */}
       <div
-        className="pb-16 lg:pb-0"
-        style={{ flex: 1, overflow: 'hidden', maxWidth: '672px', margin: '0 auto', width: '100%' }}
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+          maxWidth: '768px', // Mais largo para melhor leitura
+          margin: '0 auto',
+          width: '100%',
+        }}
       >
         <TutorChat
           componente={componente}
           nomeTutor={nomeTutor}
           nomeEstudante={usuario.nome}
           usoHoje={usoHoje}
-          limiteDiario={PONTUACAO.LIMITE_IA_DIARIO}
-          onClose={() => router.push(`/${componente}/menu`)}
+          limiteDiario={limiteDiario}
+          onClose={handleVoltar}
         />
       </div>
-
-      <BottomNav componente={componente} />
     </div>
   )
 }
