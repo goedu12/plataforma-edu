@@ -204,7 +204,49 @@
 
 ---
 
-## PAUTA 7: Navegacao e Acesso
+## PAUTA 7: Filtragem por Conteudo
+
+### Professor Consultor:
+> "Os alunos precisam estudar por CONTEUDO especifico. Por exemplo:
+> - Fisica: Mecanica, Termologia, Optica, Eletromagnetismo, Fisica Moderna
+> - Quimica: Quimica Organica, Inorganica, Fisico-Quimica
+> - Matematica: Geometria, Algebra, Estatistica, Funcoes
+>
+> Isso permite estudo direcionado para dificuldades especificas."
+
+### DBA:
+> "Podemos criar um campo `conteudo` com tags multiplas (array). Uma questao de Fisica pode envolver 'Mecanica' E 'Energia', por exemplo."
+
+### UX Designer:
+> "Na interface, teremos filtros em cascata:
+> 1. Area (CN, Mat)
+> 2. Subarea (Fisica, Quimica, Bio)
+> 3. Conteudo (Mecanica, Termologia...)
+>
+> O aluno seleciona progressivamente para refinar a busca."
+
+### Arquiteto de Software:
+> "Precisaremos de uma tabela auxiliar `conteudos_enem` para padronizar os nomes e facilitar a busca."
+
+### **DECISAO 7:**
+**Filtragem por Conteudo Especifico:**
+- Campo `conteudos` (array de strings) em cada questao
+- Tabela auxiliar `conteudos_enem` com lista padronizada
+- Interface com filtros em cascata (Area -> Subarea -> Conteudo)
+- Classificacao manual/semi-automatica (palavras-chave)
+
+**Conteudos Iniciais:**
+
+| Subarea | Conteudos |
+|---------|-----------|
+| **Fisica** | Mecanica, Termologia, Optica, Ondulatoria, Eletricidade, Magnetismo, Fisica Moderna |
+| **Quimica** | Quimica Geral, Fisico-Quimica, Quimica Organica, Quimica Inorganica, Quimica Ambiental |
+| **Biologia** | Citologia, Genetica, Ecologia, Fisiologia, Evolucao, Botanica, Zoologia |
+| **Matematica** | Algebra, Geometria Plana, Geometria Espacial, Funcoes, Estatistica, Probabilidade, Trigonometria |
+
+---
+
+## PAUTA 8: Navegacao e Acesso
 
 ### UX Designer:
 > "Onde o Simulado ENEM aparece no app?"
@@ -221,7 +263,7 @@
 ### Professor Consultor:
 > "O aluno de Fisica quer praticar CN. O aluno de Matematica quer praticar Mat. Faz sentido contextualizar."
 
-### **DECISAO 7:**
+### **DECISAO 8:**
 **Acesso Contextualizado por Componente:**
 - `/fisica/simulado-enem` -> Foco em Ciencias da Natureza
 - `/matematica/simulado-enem` -> Foco em Matematica
@@ -243,7 +285,8 @@
 | 4 | Metricas separadas, sem pontos | Proposito diferente |
 | 5 | Componente customizado com visual Studao | Consistencia UX |
 | 6 | Cache local com atualizacao anual | Performance e independencia |
-| 7 | Acesso contextualizado por componente | Relevancia para usuario |
+| 7 | **Filtragem por conteudo especifico** | **Estudo direcionado** |
+| 8 | Acesso contextualizado por componente | Relevancia para usuario |
 
 ---
 
@@ -341,6 +384,10 @@ CREATE TABLE questoes_enem (
     -- Resposta
     resposta_correta CHAR(1) NOT NULL CHECK (resposta_correta IN ('A','B','C','D','E')),
 
+    -- Classificacao por Conteudo (NOVO)
+    conteudos TEXT[],                         -- Array de conteudos: ['Mecanica', 'Energia']
+    conteudo_principal VARCHAR(100),          -- Conteudo dominante da questao
+
     -- Metadados
     fonte VARCHAR(50) DEFAULT 'ENEM',
     dificuldade VARCHAR(20) DEFAULT 'medio',  -- Estimativa baseada em estatisticas
@@ -363,10 +410,78 @@ CREATE INDEX idx_enem_subarea ON questoes_enem(subarea);
 CREATE INDEX idx_enem_status ON questoes_enem(status);
 CREATE INDEX idx_enem_area_subarea ON questoes_enem(area, subarea);
 CREATE INDEX idx_enem_ano_area ON questoes_enem(ano_prova, area);
+CREATE INDEX idx_enem_conteudo ON questoes_enem(conteudo_principal);
+CREATE INDEX idx_enem_conteudos ON questoes_enem USING gin(conteudos);
 
 -- Full-text search no contexto
 CREATE INDEX idx_enem_contexto_fts ON questoes_enem
     USING gin(to_tsvector('portuguese', contexto));
+```
+
+### Tabela: conteudos_enem (Catalogo de Conteudos)
+
+```sql
+-- Tabela auxiliar para padronizar conteudos
+CREATE TABLE conteudos_enem (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+
+    -- Hierarquia
+    area VARCHAR(50) NOT NULL,              -- 'ciencias-natureza', 'matematica'
+    subarea VARCHAR(50) NOT NULL,           -- 'fisica', 'quimica', 'biologia', 'matematica'
+
+    -- Conteudo
+    codigo VARCHAR(50) NOT NULL UNIQUE,     -- 'mecanica', 'termologia', etc
+    nome VARCHAR(100) NOT NULL,             -- 'Mecânica'
+    descricao TEXT,                         -- Descricao do conteudo
+
+    -- Palavras-chave para classificacao automatica
+    palavras_chave TEXT[],                  -- ['força', 'movimento', 'velocidade', 'aceleração']
+
+    -- Ordem de exibicao
+    ordem INTEGER DEFAULT 0,
+    ativo BOOLEAN DEFAULT true,
+
+    criado_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indices
+CREATE INDEX idx_conteudos_area ON conteudos_enem(area);
+CREATE INDEX idx_conteudos_subarea ON conteudos_enem(subarea);
+CREATE INDEX idx_conteudos_ativo ON conteudos_enem(ativo);
+
+-- Dados iniciais
+INSERT INTO conteudos_enem (area, subarea, codigo, nome, palavras_chave, ordem) VALUES
+-- FISICA
+('ciencias-natureza', 'fisica', 'mecanica', 'Mecânica', ARRAY['força', 'movimento', 'velocidade', 'aceleração', 'newton', 'atrito', 'inércia'], 1),
+('ciencias-natureza', 'fisica', 'termologia', 'Termologia', ARRAY['temperatura', 'calor', 'dilatação', 'termodinâmica', 'entropia'], 2),
+('ciencias-natureza', 'fisica', 'optica', 'Óptica', ARRAY['luz', 'espelho', 'lente', 'refração', 'reflexão', 'difração'], 3),
+('ciencias-natureza', 'fisica', 'ondulatoria', 'Ondulatória', ARRAY['onda', 'frequência', 'período', 'som', 'acústica', 'ressonância'], 4),
+('ciencias-natureza', 'fisica', 'eletricidade', 'Eletricidade', ARRAY['corrente', 'tensão', 'resistência', 'circuito', 'elétrico', 'potência'], 5),
+('ciencias-natureza', 'fisica', 'magnetismo', 'Magnetismo', ARRAY['campo magnético', 'ímã', 'indução', 'eletromagnetismo'], 6),
+('ciencias-natureza', 'fisica', 'fisica-moderna', 'Física Moderna', ARRAY['quântica', 'relatividade', 'fóton', 'einstein', 'átomo'], 7),
+
+-- QUIMICA
+('ciencias-natureza', 'quimica', 'quimica-geral', 'Química Geral', ARRAY['átomo', 'molécula', 'ligação', 'tabela periódica'], 1),
+('ciencias-natureza', 'quimica', 'fisico-quimica', 'Físico-Química', ARRAY['reação', 'equilíbrio', 'cinética', 'termoquímica', 'eletroquímica'], 2),
+('ciencias-natureza', 'quimica', 'quimica-organica', 'Química Orgânica', ARRAY['carbono', 'hidrocarboneto', 'álcool', 'éster', 'polímero'], 3),
+('ciencias-natureza', 'quimica', 'quimica-inorganica', 'Química Inorgânica', ARRAY['ácido', 'base', 'sal', 'óxido', 'metal'], 4),
+('ciencias-natureza', 'quimica', 'quimica-ambiental', 'Química Ambiental', ARRAY['poluição', 'meio ambiente', 'efeito estufa', 'chuva ácida'], 5),
+
+-- BIOLOGIA
+('ciencias-natureza', 'biologia', 'citologia', 'Citologia', ARRAY['célula', 'membrana', 'núcleo', 'mitocôndria', 'organela'], 1),
+('ciencias-natureza', 'biologia', 'genetica', 'Genética', ARRAY['dna', 'gene', 'cromossomo', 'hereditário', 'mendel'], 2),
+('ciencias-natureza', 'biologia', 'ecologia', 'Ecologia', ARRAY['ecossistema', 'cadeia alimentar', 'biodiversidade', 'sustentabilidade'], 3),
+('ciencias-natureza', 'biologia', 'fisiologia', 'Fisiologia', ARRAY['digestão', 'respiração', 'circulação', 'sistema nervoso'], 4),
+('ciencias-natureza', 'biologia', 'evolucao', 'Evolução', ARRAY['darwin', 'seleção natural', 'especiação', 'adaptação'], 5),
+
+-- MATEMATICA
+('matematica', 'matematica', 'algebra', 'Álgebra', ARRAY['equação', 'inequação', 'polinômio', 'fatoração'], 1),
+('matematica', 'matematica', 'geometria-plana', 'Geometria Plana', ARRAY['triângulo', 'círculo', 'área', 'perímetro', 'polígono'], 2),
+('matematica', 'matematica', 'geometria-espacial', 'Geometria Espacial', ARRAY['cubo', 'esfera', 'cone', 'pirâmide', 'volume'], 3),
+('matematica', 'matematica', 'funcoes', 'Funções', ARRAY['função', 'gráfico', 'domínio', 'imagem', 'exponencial', 'logaritmo'], 4),
+('matematica', 'matematica', 'estatistica', 'Estatística', ARRAY['média', 'mediana', 'moda', 'desvio', 'gráfico', 'tabela'], 5),
+('matematica', 'matematica', 'probabilidade', 'Probabilidade', ARRAY['probabilidade', 'chance', 'evento', 'combinação', 'arranjo'], 6),
+('matematica', 'matematica', 'trigonometria', 'Trigonometria', ARRAY['seno', 'cosseno', 'tangente', 'ângulo', 'radiano'], 7);
 ```
 
 ### Tabela: respostas_enem
@@ -537,6 +652,8 @@ export interface QuestaoENEM {
   imagem_d?: string
   imagem_e?: string
   resposta_correta: AlternativaENEM
+  conteudos?: string[]           // Array de conteudos relacionados
+  conteudo_principal?: string    // Conteudo dominante
   dificuldade?: Dificuldade
   tags?: string[]
   status: StatusQuestao
@@ -598,11 +715,26 @@ export interface EstatisticasENEM {
   }[]
 }
 
-// Filtros para busca
+// Conteudo (para filtragem)
+export interface ConteudoENEM {
+  id: string
+  area: AreaENEM
+  subarea: SubareaENEM
+  codigo: string
+  nome: string
+  descricao?: string
+  palavras_chave?: string[]
+  ordem: number
+  ativo: boolean
+}
+
+// Filtros para busca (COM CONTEUDO)
 export interface FiltrosENEM {
   ano_prova?: number
   area?: AreaENEM
   subarea?: SubareaENEM
+  conteudo?: string            // Codigo do conteudo (ex: 'mecanica')
+  conteudos?: string[]         // Multiplos conteudos
   dificuldade?: Dificuldade
   apenas_nao_respondidas?: boolean
 }
