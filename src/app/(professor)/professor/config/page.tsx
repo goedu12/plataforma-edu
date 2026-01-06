@@ -135,7 +135,10 @@ export default function ConfigProfessorPage() {
           fileInputRef.current.value = ''
         }
       } else {
-        setLogoMensagem({ tipo: 'erro', texto: data.erro || 'Erro ao fazer upload do logo.' })
+        const mensagemErro = data.detalhes
+          ? `${data.erro} (${data.detalhes})`
+          : data.erro || 'Erro ao fazer upload do logo.'
+        setLogoMensagem({ tipo: 'erro', texto: mensagemErro })
       }
     } catch {
       setLogoMensagem({ tipo: 'erro', texto: 'Erro de conexão. Tente novamente.' })

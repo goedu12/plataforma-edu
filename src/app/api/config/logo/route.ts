@@ -147,6 +147,34 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Verificar se o bucket existe
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets()
+
+    if (bucketError) {
+      console.error('Erro ao listar buckets:', bucketError)
+      return NextResponse.json(
+        { sucesso: false, erro: 'Erro ao acessar o storage. Verifique a configuração do Supabase.' },
+        { status: 500 }
+      )
+    }
+
+    const bucketExists = buckets?.some(b => b.name === 'logos')
+    if (!bucketExists) {
+      // Tentar criar o bucket
+      const { error: createBucketError } = await supabase.storage.createBucket('logos', {
+        public: true,
+        fileSizeLimit: 2097152 // 2MB
+      })
+
+      if (createBucketError && !createBucketError.message.includes('already exists')) {
+        console.error('Erro ao criar bucket:', createBucketError)
+        return NextResponse.json(
+          { sucesso: false, erro: 'O bucket "logos" não existe. Crie-o no Supabase Dashboard > Storage.' },
+          { status: 500 }
+        )
+      }
+    }
+
     // Upload do novo logo
     const { error: uploadError } = await supabase.storage
       .from('logos')
@@ -157,8 +185,17 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Erro no upload:', uploadError)
+      // Mensagens de erro mais específicas
+      let mensagemErro = 'Erro ao fazer upload do logo.'
+      if (uploadError.message.includes('row-level security')) {
+        mensagemErro = 'Permissão negada. Configure as políticas RLS do bucket "logos" no Supabase.'
+      } else if (uploadError.message.includes('Bucket not found')) {
+        mensagemErro = 'O bucket "logos" não foi encontrado. Crie-o no Supabase Dashboard.'
+      } else if (uploadError.message.includes('Invalid')) {
+        mensagemErro = 'Arquivo inválido. Tente com outra imagem.'
+      }
       return NextResponse.json(
-        { sucesso: false, erro: 'Erro ao fazer upload do logo. Verifique se o bucket "logos" existe no Supabase.' },
+        { sucesso: false, erro: mensagemErro, detalhes: uploadError.message },
         { status: 500 }
       )
     }
