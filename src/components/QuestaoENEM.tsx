@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import {
   CheckCircle2,
   XCircle,
@@ -16,6 +15,7 @@ import {
 import Button from './ui/Button'
 import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
+import { processarTexto, processarContexto, isTextoValido } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 
@@ -69,13 +69,13 @@ export default function QuestaoENEM({
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  // Alternativas do ENEM (5)
+  // Alternativas do ENEM (5) - com limpeza de texto
   const alternativas: { letra: AlternativaENEM; texto: string; imagem?: string }[] = [
-    { letra: 'A', texto: questao.alternativa_a, imagem: questao.imagem_a },
-    { letra: 'B', texto: questao.alternativa_b, imagem: questao.imagem_b },
-    { letra: 'C', texto: questao.alternativa_c, imagem: questao.imagem_c },
-    { letra: 'D', texto: questao.alternativa_d, imagem: questao.imagem_d },
-    { letra: 'E', texto: questao.alternativa_e, imagem: questao.imagem_e },
+    { letra: 'A', texto: processarTexto(questao.alternativa_a), imagem: questao.imagem_a },
+    { letra: 'B', texto: processarTexto(questao.alternativa_b), imagem: questao.imagem_b },
+    { letra: 'C', texto: processarTexto(questao.alternativa_c), imagem: questao.imagem_c },
+    { letra: 'D', texto: processarTexto(questao.alternativa_d), imagem: questao.imagem_d },
+    { letra: 'E', texto: processarTexto(questao.alternativa_e), imagem: questao.imagem_e },
   ]
 
   // Obter nome da área
@@ -260,9 +260,9 @@ export default function QuestaoENEM({
 
         {/* Texto do contexto/enunciado */}
         <div
-          className="text-sm sm:text-base leading-relaxed prose prose-sm max-w-none"
+          className="text-sm sm:text-base leading-relaxed"
           style={{ color: 'var(--text-primary)' }}
-          dangerouslySetInnerHTML={{ __html: questao.contexto }}
+          dangerouslySetInnerHTML={{ __html: processarContexto(questao.contexto) }}
         />
 
         {/* Comando (texto antes das alternativas) */}
@@ -321,26 +321,36 @@ export default function QuestaoENEM({
               </span>
 
               {/* Conteúdo da alternativa */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 flex items-center">
                 {/* Imagem da alternativa (se houver e for válida) */}
                 {isValidImageUrl(imagem) && (
-                  <div className="mb-2">
+                  <div className="mr-3 flex-shrink-0">
                     <SafeImage
                       src={imagem}
                       alt={`Alternativa ${letra}`}
-                      width={200}
-                      height={150}
-                      className="rounded object-contain max-h-[100px] w-auto"
+                      width={120}
+                      height={80}
+                      className="rounded object-contain max-h-[60px] w-auto"
                       showPlaceholder={false}
                     />
                   </div>
                 )}
                 {/* Texto da alternativa */}
-                <span
-                  className="text-sm sm:text-base"
-                  style={{ color: 'var(--text-primary)' }}
-                  dangerouslySetInnerHTML={{ __html: texto }}
-                />
+                {texto ? (
+                  <span
+                    className="text-sm sm:text-base leading-snug"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {texto}
+                  </span>
+                ) : (
+                  <span
+                    className="text-sm italic"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    (alternativa sem texto)
+                  </span>
+                )}
               </div>
             </button>
           )

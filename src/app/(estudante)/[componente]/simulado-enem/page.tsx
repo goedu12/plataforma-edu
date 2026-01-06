@@ -6,39 +6,51 @@ import {
   ArrowLeft,
   FileText,
   Clock,
-  Filter,
-  X,
   Calendar,
-  BookOpen,
   ChevronDown,
   AlertTriangle,
   CheckCircle2,
+  XCircle,
   RefreshCw,
-  Target,
+  BookOpen,
+  Loader2,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
-import QuestaoENEM from '@/components/QuestaoENEM'
-import type {
-  Componente,
-  QuestaoENEM as TipoQuestaoENEM,
-  AreaENEM,
-  SubareaENEM,
-  ConteudoENEM,
-  EstatisticasENEM,
-  AlternativaENEM,
-} from '@/types'
-import { ENEM_CONFIG } from '@/types'
+import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PAGINA: Simulado ENEM
-// Questoes do ENEM sem pontuacao/gamificacao
+// PÁGINA: Simulado ENEM v2 - Abordagem simplificada
 // ═══════════════════════════════════════════════════════════════════════════
 
-type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'ACESSO_NEGADO'
+const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009]
+
+interface Questao {
+  id: string
+  ano: number
+  numero: number
+  disciplina: string
+  titulo: string | null
+  contexto: string
+  comando: string | null
+  imagens: string[]
+  alternativas: Array<{
+    letra: string
+    texto: string
+    imagem: string | null
+  }>
+}
+
+interface Estatisticas {
+  total_questoes: number
+  total_corretas: number
+  taxa_acerto: number
+}
+
+type Status = 'carregando' | 'ok' | 'sem_questoes' | 'erro' | 'acesso_negado' | 'respondida'
 
 export default function SimuladoENEMPage() {
   const router = useRouter()
@@ -46,135 +58,83 @@ export default function SimuladoENEMPage() {
   const componente = params.componente as Componente
 
   // Estados principais
-  const [questao, setQuestao] = useState<Omit<TipoQuestaoENEM, 'resposta_correta'> | null>(null)
-  const [questaoExtra, setQuestaoExtra] = useState<{
-    resposta_correta?: string
-    fonte?: string
-  } | null>(null)
-  const [status, setStatus] = useState<StatusQuestao | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState<Status>('carregando')
+  const [questao, setQuestao] = useState<Questao | null>(null)
+  const [respostaCorreta, setRespostaCorreta] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+
+  // Estados de filtro
+  const [anoSelecionado, setAnoSelecionado] = useState<number | null>(null)
+  const [mostrarFiltro, setMostrarFiltro] = useState(false)
+
+  // Estados de resposta
+  const [alternativaSelecionada, setAlternativaSelecionada] = useState<string | null>(null)
+  const [respondida, setRespondida] = useState(false)
+  const [acertou, setAcertou] = useState<boolean | null>(null)
+  const [enviando, setEnviando] = useState(false)
+
+  // Timer
   const [tempoDecorrido, setTempoDecorrido] = useState(0)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Estados de filtros
-  const [mostrarFiltros, setMostrarFiltros] = useState(false)
-  const [anoSelecionado, setAnoSelecionado] = useState<number | null>(null)
-  const [subareaSelecionada, setSubareaSelecionada] = useState<SubareaENEM | null>(null)
-  const [conteudoSelecionado, setConteudoSelecionado] = useState<string | null>(null)
-  const [conteudosDisponiveis, setConteudosDisponiveis] = useState<ConteudoENEM[]>([])
+  // Estatísticas
+  const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null)
+  const [respondidas, setRespondidas] = useState(0)
 
-  // Estados de estatisticas
-  const [estatisticas, setEstatisticas] = useState<EstatisticasENEM | null>(null)
-  const [estatisticasQuestao, setEstatisticasQuestao] = useState<{
-    total_filtro: number
-    respondidas: number
-    restantes: number
-  } | null>(null)
-
-  // Determinar area ENEM baseado no componente
-  const areaENEM: AreaENEM = ENEM_CONFIG.COMPONENTE_TO_AREA[componente] || 'ciencias-natureza'
+  // Estilos baseados no componente
   const isFisica = componente === 'fisica'
-  const nomeComponente = isFisica ? 'Física' : 'Matemática'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  // Subareas disponiveis para o componente
-  const subareasDisponiveis = ENEM_CONFIG.AREAS[areaENEM]?.subareas || []
-
-  // Buscar conteudos quando mudar subarea
-  useEffect(() => {
-    if (subareaSelecionada) {
-      buscarConteudos()
-    } else {
-      setConteudosDisponiveis([])
-      setConteudoSelecionado(null)
-    }
-  }, [subareaSelecionada])
-
-  const buscarConteudos = async () => {
-    try {
-      const params = new URLSearchParams()
-      params.set('area', areaENEM)
-      if (subareaSelecionada) params.set('subarea', subareaSelecionada)
-
-      const response = await fetch(`/api/enem/conteudos?${params}`)
-      const data = await response.json()
-
-      if (data.sucesso) {
-        setConteudosDisponiveis(data.conteudos || [])
-      }
-    } catch (error) {
-      console.error('Erro ao buscar conteudos:', error)
-    }
-  }
-
-  // Buscar estatisticas
-  const buscarEstatisticas = async () => {
-    try {
-      const response = await fetch('/api/enem/estatisticas')
-      const data = await response.json()
-
-      if (data.sucesso) {
-        setEstatisticas(data.estatisticas)
-      }
-    } catch (error) {
-      console.error('Erro ao buscar estatisticas:', error)
-    }
-  }
-
-  // Buscar questao
+  // Buscar questão
   const buscarQuestao = async () => {
-    setLoading(true)
-    setErro(null)
+    setStatus('carregando')
+    setQuestao(null)
+    setRespostaCorreta(null)
+    setAlternativaSelecionada(null)
+    setRespondida(false)
+    setAcertou(null)
     setTempoDecorrido(0)
+    pararTimer()
 
     try {
       const params = new URLSearchParams()
-      params.set('area', areaENEM)
       if (anoSelecionado) params.set('ano', String(anoSelecionado))
-      if (subareaSelecionada) params.set('subarea', subareaSelecionada)
-      if (conteudoSelecionado) params.set('conteudo', conteudoSelecionado)
-      params.set('modo', 'aleatorio')
 
       const response = await fetch(`/api/enem?${params}`)
       const data = await response.json()
 
-      if (data.sucesso) {
-        setStatus(data.status)
-        setEstatisticasQuestao(data.estatisticas || null)
-
-        if (data.status === 'OK' && data.questao) {
-          setQuestao(data.questao)
-          // Guardar dados extras (resposta_correta para questões externas)
-          setQuestaoExtra({
-            resposta_correta: data._rc,
-            fonte: data.fonte,
-          })
-          iniciarTimer()
-        } else {
-          setQuestao(null)
-          setQuestaoExtra(null)
-        }
-      } else {
-        if (data.status === 'ACESSO_NEGADO') {
-          setStatus('ACESSO_NEGADO')
+      if (!data.sucesso) {
+        if (response.status === 403) {
+          setStatus('acesso_negado')
           setErro(data.erro)
         } else {
-          setStatus('ERRO')
-          setErro(data.erro || 'Erro ao carregar questao')
+          setStatus('erro')
+          setErro(data.erro || 'Erro desconhecido')
         }
+        return
       }
+
+      if (data.status === 'SEM_QUESTOES') {
+        setStatus('sem_questoes')
+        setRespondidas(data.respondidas || 0)
+        return
+      }
+
+      setQuestao(data.questao)
+      setRespostaCorreta(data._rc) // base64 encoded
+      setRespondidas(data.respondidas || 0)
+      setStatus('ok')
+      iniciarTimer()
     } catch (error) {
-      console.error('Erro ao buscar questao ENEM:', error)
-      setStatus('ERRO')
+      console.error('Erro ao buscar questão:', error)
+      setStatus('erro')
       setErro('Não foi possível conectar ao servidor.')
-    } finally {
-      setLoading(false)
     }
   }
 
+  // Timer
   const iniciarTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
+    pararTimer()
     timerRef.current = setInterval(() => {
       setTempoDecorrido(prev => prev + 1)
     }, 1000)
@@ -187,45 +147,73 @@ export default function SimuladoENEMPage() {
     }
   }
 
-  useEffect(() => {
-    if (!['fisica', 'matematica'].includes(componente)) {
-      router.push('/selecionar')
-      return
-    }
-    buscarQuestao()
-    buscarEstatisticas()
-    return () => pararTimer()
-  }, [componente])
+  // Submeter resposta
+  const submeterResposta = async () => {
+    if (!questao || !alternativaSelecionada || !respostaCorreta || enviando) return
 
-  const handleVoltar = () => router.push(`/${componente}/menu`)
-
-  const handleResponder = (resposta: AlternativaENEM) => {
+    setEnviando(true)
     pararTimer()
-    buscarEstatisticas() // Atualizar estatisticas apos responder
+
+    try {
+      const response = await fetch('/api/enem/responder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questao_id: questao.id,
+          resposta: alternativaSelecionada,
+          resposta_correta: respostaCorreta,
+          tempo_segundos: tempoDecorrido,
+          ano_prova: questao.ano,
+          disciplina: questao.disciplina,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.sucesso) {
+        setAcertou(data.correta)
+        setRespondida(true)
+        setEstatisticas(data.estatisticas)
+        // Decodificar resposta correta para mostrar
+        setRespostaCorreta(data.resposta_correta)
+      } else {
+        setErro(data.erro)
+      }
+    } catch (error) {
+      console.error('Erro ao submeter resposta:', error)
+      setErro('Erro ao enviar resposta.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
-  const handleProxima = () => {
-    buscarQuestao()
-  }
-
-  const aplicarFiltros = () => {
-    setMostrarFiltros(false)
-    buscarQuestao()
-  }
-
-  const limparFiltros = () => {
-    setAnoSelecionado(null)
-    setSubareaSelecionada(null)
-    setConteudoSelecionado(null)
-  }
-
+  // Formatador de tempo
   const formatarTempo = (segundos: number) => {
     const min = Math.floor(segundos / 60)
     const seg = segundos % 60
     return `${min}:${seg.toString().padStart(2, '0')}`
   }
 
-  if (loading && !questao) {
+  // Efeitos
+  useEffect(() => {
+    if (!['fisica', 'matematica'].includes(componente)) {
+      router.push('/selecionar')
+      return
+    }
+    buscarQuestao()
+    return () => pararTimer()
+  }, [componente])
+
+  // Handlers
+  const handleVoltar = () => router.push(`/${componente}/menu`)
+  const handleProxima = () => buscarQuestao()
+  const handleAplicarFiltro = () => {
+    setMostrarFiltro(false)
+    buscarQuestao()
+  }
+
+  // Loading
+  if (status === 'carregando') {
     return <Loading fullScreen componente={componente} text="Carregando questão ENEM..." />
   }
 
@@ -233,56 +221,38 @@ export default function SimuladoENEMPage() {
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          HEADER
-          ═══════════════════════════════════════════════════════════════════ */}
+      {/* Header */}
       <header
-        className="px-4 py-3 sticky top-0 z-10 flex-shrink-0"
+        className="px-4 py-3 sticky top-0 z-10"
         style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
       >
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between gap-2">
-            {/* Voltar */}
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-lg lg:hidden"
-              style={{ color: 'var(--text-muted)' }}
-            >
+            <button onClick={handleVoltar} className="p-2 -ml-2 rounded-lg lg:hidden" style={{ color: 'var(--text-muted)' }}>
               <ArrowLeft className="w-5 h-5" />
             </button>
 
-            {/* Titulo */}
             <div className="flex items-center gap-2">
               <FileText className="w-5 h-5" style={{ color: corPrimaria }} />
-              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Simulado ENEM
-              </span>
-              <Badge variant="info" className="text-xs">NOVO</Badge>
+              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Simulado ENEM</span>
+              <Badge variant="info" className="text-xs">v2</Badge>
             </div>
 
-            {/* Acoes */}
             <div className="flex items-center gap-2">
-              {/* Filtros */}
+              {/* Filtro de ano */}
               <button
-                onClick={() => setMostrarFiltros(true)}
-                className="p-2 rounded-lg relative"
-                style={{ background: 'var(--bg-elevated)' }}
+                onClick={() => setMostrarFiltro(true)}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm"
+                style={{ background: 'var(--bg-elevated)', color: anoSelecionado ? corPrimaria : 'var(--text-muted)' }}
               >
-                <Filter className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-                {(anoSelecionado || subareaSelecionada || conteudoSelecionado) && (
-                  <span
-                    className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                    style={{ background: corPrimaria }}
-                  />
-                )}
+                <Calendar className="w-4 h-4" />
+                <span>{anoSelecionado || 'Ano'}</span>
+                <ChevronDown className="w-4 h-4" />
               </button>
 
               {/* Timer */}
-              {status === 'OK' && questao && (
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm"
-                  style={{ background: 'var(--bg-elevated)', color: corPrimaria }}
-                >
+              {status === 'ok' && questao && !respondida && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm" style={{ background: 'var(--bg-elevated)', color: corPrimaria }}>
                   <Clock className="w-4 h-4" />
                   <span>{formatarTempo(tempoDecorrido)}</span>
                 </div>
@@ -290,310 +260,216 @@ export default function SimuladoENEMPage() {
             </div>
           </div>
 
-          {/* Estatisticas rapidas */}
-          {estatisticas && estatisticas.total_questoes > 0 && (
+          {/* Estatísticas */}
+          {(estatisticas || respondidas > 0) && (
             <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <span>
-                <strong style={{ color: 'var(--text-primary)' }}>{estatisticas.total_questoes}</strong> respondidas
-              </span>
-              <span>
-                <strong style={{ color: 'var(--success)' }}>{estatisticas.taxa_acerto}%</strong> acerto
-              </span>
-              {estatisticasQuestao && (
-                <span>
-                  <strong style={{ color: corPrimaria }}>{estatisticasQuestao.restantes}</strong> restantes
-                </span>
-              )}
+              <span><strong style={{ color: 'var(--text-primary)' }}>{estatisticas?.total_questoes || respondidas}</strong> respondidas</span>
+              {estatisticas && <span><strong style={{ color: 'var(--success)' }}>{estatisticas.taxa_acerto}%</strong> acerto</span>}
             </div>
           )}
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          CONTEUDO
-          ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full flex flex-col">
-        {status === 'OK' && questao ? (
-          <QuestaoENEM
-            key={questao.id} // Reset component state on new question
-            questao={questao}
-            componente={componente}
-            tempoDecorrido={tempoDecorrido}
-            onResponder={handleResponder}
-            onProxima={handleProxima}
-            onVoltar={handleVoltar}
-            estatisticas={estatisticas ? {
-              total_questoes: estatisticas.total_questoes,
-              total_corretas: estatisticas.total_corretas,
-              taxa_acerto: estatisticas.taxa_acerto,
-            } : undefined}
-            questaoExtra={questaoExtra || undefined}
-          />
-        ) : (
-          /* ═══════════════════════════════════════════════════════════════
-             TELA DE STATUS
-             ═══════════════════════════════════════════════════════════════ */
-          <div
-            className="rounded-2xl p-6 text-center animate-fade-in-up"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
-            <div
-              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{
-                background:
-                  status === 'ACESSO_NEGADO' ? 'rgba(239, 68, 68, 0.15)'
-                  : status === 'ERRO' ? 'rgba(239, 68, 68, 0.15)'
-                  : status === 'COMPLETOU' ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
-                  : 'var(--bg-elevated)',
-                border:
-                  status === 'ACESSO_NEGADO' ? '1px solid rgba(239, 68, 68, 0.3)'
-                  : status === 'ERRO' ? '1px solid rgba(239, 68, 68, 0.3)'
-                  : status === 'COMPLETOU' ? `1px solid ${corPrimaria}`
-                  : '1px solid var(--border-default)',
-              }}
-            >
-              {status === 'ACESSO_NEGADO' && <AlertTriangle className="w-7 h-7" style={{ color: 'var(--error)' }} />}
-              {status === 'COMPLETOU' && <CheckCircle2 className="w-7 h-7" style={{ color: corPrimaria }} />}
-              {status === 'ERRO' && <AlertTriangle className="w-7 h-7" style={{ color: 'var(--error)' }} />}
-              {status === 'SEM_QUESTOES' && <BookOpen className="w-7 h-7" style={{ color: 'var(--text-muted)' }} />}
+      {/* Conteúdo Principal */}
+      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full">
+        {/* Estados de erro/sem questões */}
+        {(status === 'erro' || status === 'acesso_negado' || status === 'sem_questoes') && (
+          <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+            <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: status === 'sem_questoes' ? 'var(--bg-elevated)' : 'rgba(239, 68, 68, 0.15)' }}>
+              {status === 'sem_questoes' ? <BookOpen className="w-7 h-7" style={{ color: 'var(--text-muted)' }} /> : <AlertTriangle className="w-7 h-7" style={{ color: 'var(--error)' }} />}
             </div>
-
             <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              {status === 'ACESSO_NEGADO' && 'Acesso Restrito'}
-              {status === 'COMPLETOU' && 'Parabéns!'}
-              {status === 'ERRO' && 'Ops! Erro'}
-              {status === 'SEM_QUESTOES' && 'Sem Questões'}
+              {status === 'sem_questoes' ? 'Sem Questões' : status === 'acesso_negado' ? 'Acesso Restrito' : 'Erro'}
             </h2>
-
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              {status === 'ACESSO_NEGADO' && erro}
-              {status === 'COMPLETOU' && 'Você respondeu todas as questões com os filtros selecionados!'}
-              {status === 'ERRO' && erro}
-              {status === 'SEM_QUESTOES' && 'Não há questões disponíveis com os filtros selecionados.'}
+              {status === 'sem_questoes' ? (anoSelecionado ? `Você já respondeu todas as questões de ${anoSelecionado}.` : 'Você já respondeu todas as questões disponíveis.') : erro}
             </p>
-
-            {/* Estatisticas na tela de conclusao */}
-            {status === 'COMPLETOU' && estatisticas && (
-              <div
-                className="flex justify-around py-4 mb-4 rounded-xl"
-                style={{ background: 'var(--bg-elevated)' }}
-              >
-                <div className="text-center">
-                  <p className="text-2xl font-bold" style={{ color: corPrimaria }}>
-                    {estatisticas.total_questoes}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Respondidas</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold" style={{ color: 'var(--success)' }}>
-                    {estatisticas.total_corretas}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Acertos</p>
-                </div>
-                <div className="text-center">
-                  <p
-                    className="text-2xl font-bold"
-                    style={{
-                      color: estatisticas.taxa_acerto >= 60 ? 'var(--success)'
-                        : estatisticas.taxa_acerto >= 40 ? 'var(--warning)'
-                        : 'var(--error)',
-                    }}
-                  >
-                    {estatisticas.taxa_acerto}%
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Taxa</p>
-                </div>
-              </div>
-            )}
-
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              {(status === 'SEM_QUESTOES' || status === 'COMPLETOU') && (
-                <Button
-                  variant="secondary"
-                  onClick={() => setMostrarFiltros(true)}
-                  leftIcon={<Filter className="w-4 h-4" />}
-                  className="min-h-[48px]"
-                >
-                  Alterar Filtros
+              {status === 'sem_questoes' && (
+                <Button variant="secondary" onClick={() => setMostrarFiltro(true)} className="min-h-[48px]">
+                  Escolher outro ano
                 </Button>
               )}
-              {status === 'ERRO' && (
-                <Button
-                  variant="secondary"
-                  onClick={buscarQuestao}
-                  leftIcon={<RefreshCw className="w-4 h-4" />}
-                  className="min-h-[48px]"
-                >
+              {status === 'erro' && (
+                <Button variant="secondary" onClick={buscarQuestao} leftIcon={<RefreshCw className="w-4 h-4" />} className="min-h-[48px]">
                   Tentar Novamente
                 </Button>
               )}
-              <Button
-                variant={isFisica ? 'fisica' : 'matematica'}
-                onClick={handleVoltar}
-                className="min-h-[48px]"
-              >
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar} className="min-h-[48px]">
                 Voltar ao Menu
               </Button>
             </div>
           </div>
         )}
-      </main>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          MODAL DE FILTROS
-          ═══════════════════════════════════════════════════════════════════ */}
-      {mostrarFiltros && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-          style={{ background: 'rgba(0, 0, 0, 0.6)' }}
-          onClick={() => setMostrarFiltros(false)}
-        >
-          <div
-            className="w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden animate-fade-in-up"
-            style={{ background: 'var(--bg-surface)' }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div
-              className="flex items-center justify-between p-4"
-              style={{ borderBottom: '1px solid var(--border-default)' }}
-            >
-              <div className="flex items-center gap-2">
-                <Filter className="w-5 h-5" style={{ color: corPrimaria }} />
-                <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Filtrar Questões
-                </h3>
+        {/* Questão */}
+        {status === 'ok' && questao && (
+          <div className="space-y-4 animate-fade-in-up">
+            {/* Info da questão */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="default" className="text-xs">ENEM {questao.ano}</Badge>
+                <Badge variant="info" className="text-xs">Q{questao.numero}</Badge>
               </div>
-              <button
-                onClick={() => setMostrarFiltros(false)}
-                className="p-2 rounded-lg"
-                style={{ background: 'var(--bg-elevated)' }}
-              >
-                <X className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-              </button>
+              <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                {questao.disciplina}
+              </span>
             </div>
 
-            {/* Filtros */}
-            <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-              {/* Ano da Prova */}
-              <div>
-                <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
-                  <Calendar className="w-4 h-4 inline mr-2" />
-                  Ano da Prova
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setAnoSelecionado(null)}
-                    className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                    style={{
-                      background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)',
-                      color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
-                    }}
-                  >
-                    Todos
-                  </button>
-                  {ENEM_CONFIG.ANOS_DISPONIVEIS.map(ano => (
-                    <button
-                      key={ano}
-                      onClick={() => setAnoSelecionado(ano)}
-                      className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                      style={{
-                        background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)',
-                        color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
-                      }}
-                    >
-                      {ano}
-                    </button>
-                  ))}
-                </div>
-              </div>
+            {/* Conteúdo da questão */}
+            <div className="rounded-2xl p-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
+              {/* Título */}
+              {questao.titulo && (
+                <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{questao.titulo}</h3>
+              )}
 
-              {/* Subarea */}
-              <div>
-                <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
-                  <BookOpen className="w-4 h-4 inline mr-2" />
-                  Disciplina
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSubareaSelecionada(null)}
-                    className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                    style={{
-                      background: !subareaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                      color: !subareaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
-                    }}
-                  >
-                    Todas
-                  </button>
-                  {subareasDisponiveis.map(sub => (
-                    <button
-                      key={sub}
-                      onClick={() => setSubareaSelecionada(sub)}
-                      className="px-3 py-1.5 rounded-lg text-sm transition-all"
-                      style={{
-                        background: subareaSelecionada === sub ? corPrimaria : 'var(--bg-elevated)',
-                        color: subareaSelecionada === sub ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
-                      }}
-                    >
-                      {ENEM_CONFIG.SUBAREAS_LABELS[sub]}
-                    </button>
+              {/* Imagens */}
+              {questao.imagens.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  {questao.imagens.map((img, idx) => (
+                    <img key={idx} src={img} alt={`Imagem ${idx + 1}`} className="max-w-full rounded-lg mx-auto" style={{ maxHeight: '300px' }} />
                   ))}
-                </div>
-              </div>
-
-              {/* Conteudo (apenas se tiver subarea selecionada) */}
-              {subareaSelecionada && conteudosDisponiveis.length > 0 && (
-                <div>
-                  <label className="text-sm font-medium mb-2 block" style={{ color: 'var(--text-primary)' }}>
-                    <Target className="w-4 h-4 inline mr-2" />
-                    Conteúdo Específico
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={conteudoSelecionado || ''}
-                      onChange={e => setConteudoSelecionado(e.target.value || null)}
-                      className="w-full px-4 py-3 rounded-xl appearance-none cursor-pointer"
-                      style={{
-                        background: 'var(--bg-elevated)',
-                        border: '1px solid var(--border-default)',
-                        color: 'var(--text-primary)',
-                      }}
-                    >
-                      <option value="">Todos os conteúdos</option>
-                      {conteudosDisponiveis.map(c => (
-                        <option key={c.codigo} value={c.codigo}>
-                          {c.nome}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-                      style={{ color: 'var(--text-muted)' }}
-                    />
-                  </div>
                 </div>
               )}
+
+              {/* Contexto */}
+              <div className="text-sm leading-relaxed whitespace-pre-wrap mb-4" style={{ color: 'var(--text-primary)' }}>
+                {questao.contexto}
+              </div>
+
+              {/* Comando */}
+              {questao.comando && (
+                <p className="text-sm font-medium mb-4" style={{ color: 'var(--text-primary)' }}>
+                  {questao.comando}
+                </p>
+              )}
+
+              {/* Alternativas */}
+              <div className="space-y-2">
+                {questao.alternativas.map((alt) => {
+                  const isSelected = alternativaSelecionada === alt.letra
+                  const isCorreta = respondida && respostaCorreta === alt.letra
+                  const isErrada = respondida && isSelected && !isCorreta
+
+                  let bgColor = 'var(--bg-elevated)'
+                  let borderColor = 'transparent'
+
+                  if (respondida) {
+                    if (isCorreta) {
+                      bgColor = 'rgba(34, 197, 94, 0.15)'
+                      borderColor = 'var(--success)'
+                    } else if (isErrada) {
+                      bgColor = 'rgba(239, 68, 68, 0.15)'
+                      borderColor = 'var(--error)'
+                    }
+                  } else if (isSelected) {
+                    bgColor = isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                    borderColor = corPrimaria
+                  }
+
+                  return (
+                    <button
+                      key={alt.letra}
+                      onClick={() => !respondida && setAlternativaSelecionada(alt.letra)}
+                      disabled={respondida}
+                      className="w-full text-left p-3 rounded-xl transition-all flex items-start gap-3"
+                      style={{ background: bgColor, border: `2px solid ${borderColor}` }}
+                    >
+                      <span className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: isSelected || isCorreta ? corPrimaria : 'var(--bg-surface)', color: isSelected || isCorreta ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)' }}>
+                        {alt.letra}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        {alt.imagem && (
+                          <img src={alt.imagem} alt={`Alternativa ${alt.letra}`} className="max-w-full rounded-lg mb-2" style={{ maxHeight: '150px' }} />
+                        )}
+                        <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{alt.texto}</span>
+                      </div>
+                      {respondida && isCorreta && <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />}
+                      {respondida && isErrada && <XCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
-            {/* Footer */}
-            <div
-              className="p-4 flex gap-2"
-              style={{ borderTop: '1px solid var(--border-default)' }}
-            >
-              <Button
-                variant="secondary"
-                onClick={limparFiltros}
-                className="flex-1"
-              >
-                Limpar
-              </Button>
-              <Button
-                variant={isFisica ? 'fisica' : 'matematica'}
-                onClick={aplicarFiltros}
-                className="flex-1"
-              >
-                Aplicar
-              </Button>
+            {/* Feedback após responder */}
+            {respondida && (
+              <div className="rounded-2xl p-4" style={{ background: acertou ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${acertou ? 'var(--success)' : 'var(--error)'}` }}>
+                <div className="flex items-center gap-2 mb-2">
+                  {acertou ? <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} /> : <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />}
+                  <span className="font-semibold" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
+                    {acertou ? 'Resposta Correta!' : 'Resposta Incorreta'}
+                  </span>
+                </div>
+                {!acertou && (
+                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    A resposta correta era: <strong style={{ color: 'var(--success)' }}>{respostaCorreta}</strong>
+                  </p>
+                )}
+                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+                  Tempo: {formatarTempo(tempoDecorrido)}
+                </p>
+              </div>
+            )}
+
+            {/* Botões de ação */}
+            <div className="flex gap-2">
+              {!respondida ? (
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
+                  onClick={submeterResposta}
+                  disabled={!alternativaSelecionada || enviando}
+                  className="flex-1 min-h-[48px]"
+                  leftIcon={enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
+                >
+                  {enviando ? 'Enviando...' : 'Confirmar Resposta'}
+                </Button>
+              ) : (
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
+                  onClick={handleProxima}
+                  className="flex-1 min-h-[48px]"
+                  leftIcon={<RefreshCw className="w-4 h-4" />}
+                >
+                  Próxima Questão
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Modal de filtro de ano */}
+      {mostrarFiltro && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: 'rgba(0, 0, 0, 0.6)' }} onClick={() => setMostrarFiltro(false)}>
+          <div className="w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden animate-fade-in-up" style={{ background: 'var(--bg-surface)' }} onClick={e => e.stopPropagation()}>
+            <div className="p-4" style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Escolher Ano da Prova</h3>
+            </div>
+            <div className="p-4">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setAnoSelecionado(null)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  style={{ background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)', color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)' }}
+                >
+                  Todos
+                </button>
+                {ANOS_DISPONIVEIS.map(ano => (
+                  <button
+                    key={ano}
+                    onClick={() => setAnoSelecionado(ano)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                    style={{ background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)', color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)' }}
+                  >
+                    {ano}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="p-4 flex gap-2" style={{ borderTop: '1px solid var(--border-default)' }}>
+              <Button variant="secondary" onClick={() => setMostrarFiltro(false)} className="flex-1">Cancelar</Button>
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleAplicarFiltro} className="flex-1">Aplicar</Button>
             </div>
           </div>
         </div>
