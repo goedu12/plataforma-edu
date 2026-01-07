@@ -4,43 +4,36 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
-  FileText,
   Clock,
   Calendar,
   ChevronDown,
-  AlertTriangle,
   CheckCircle2,
   XCircle,
-  RefreshCw,
-  BookOpen,
+  ChevronRight,
   Loader2,
+  ZoomIn,
+  X,
+  RotateCcw,
+  Target,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
-import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// PÁGINA: Simulado ENEM v2 - Abordagem simplificada
+// SIMULADO ENEM - Interface Compacta
 // ═══════════════════════════════════════════════════════════════════════════
-
-const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009]
 
 interface Questao {
   id: string
   ano: number
   numero: number
-  disciplina: string
-  titulo: string | null
   contexto: string
-  comando: string | null
   imagens: string[]
   alternativas: Array<{
     letra: string
     texto: string
-    imagem: string | null
   }>
 }
 
@@ -50,24 +43,25 @@ interface Estatisticas {
   taxa_acerto: number
 }
 
-type Status = 'carregando' | 'ok' | 'sem_questoes' | 'erro' | 'acesso_negado' | 'respondida'
+type Status = 'carregando' | 'ok' | 'sem_questoes' | 'erro' | 'acesso_negado'
 
 export default function SimuladoENEMPage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
 
-  // Estados principais
+  // Estados
   const [status, setStatus] = useState<Status>('carregando')
   const [questao, setQuestao] = useState<Questao | null>(null)
   const [respostaCorreta, setRespostaCorreta] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+  const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([])
 
-  // Estados de filtro
+  // Filtros
   const [anoSelecionado, setAnoSelecionado] = useState<number | null>(null)
   const [mostrarFiltro, setMostrarFiltro] = useState(false)
 
-  // Estados de resposta
+  // Resposta
   const [alternativaSelecionada, setAlternativaSelecionada] = useState<string | null>(null)
   const [respondida, setRespondida] = useState(false)
   const [acertou, setAcertou] = useState<boolean | null>(null)
@@ -79,9 +73,13 @@ export default function SimuladoENEMPage() {
 
   // Estatísticas
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null)
-  const [respondidas, setRespondidas] = useState(0)
+  const [totalQuestoes, setTotalQuestoes] = useState(0)
+  const [disponiveis, setDisponiveis] = useState(0)
 
-  // Estilos baseados no componente
+  // Zoom de imagem
+  const [imagemZoom, setImagemZoom] = useState<string | null>(null)
+
+  // Cores
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
@@ -104,53 +102,42 @@ export default function SimuladoENEMPage() {
       const data = await response.json()
 
       if (!data.sucesso) {
-        if (response.status === 403) {
-          setStatus('acesso_negado')
-          setErro(data.erro)
-        } else {
-          setStatus('erro')
-          setErro(data.erro || 'Erro desconhecido')
-        }
+        setStatus(response.status === 403 ? 'acesso_negado' : 'erro')
+        setErro(data.erro)
         return
       }
 
-      if (data.status === 'SEM_QUESTOES') {
+      if (data.anos_disponiveis) setAnosDisponiveis(data.anos_disponiveis)
+      if (data.total_questoes) setTotalQuestoes(data.total_questoes)
+      if (data.disponiveis !== undefined) setDisponiveis(data.disponiveis)
+
+      if (data.status === 'SEM_QUESTOES' || data.status === 'TODAS_RESPONDIDAS') {
         setStatus('sem_questoes')
-        setRespondidas(data.respondidas || 0)
         return
       }
 
       setQuestao(data.questao)
-      setRespostaCorreta(data._rc) // base64 encoded
-      setRespondidas(data.respondidas || 0)
+      setRespostaCorreta(data._rc)
       setStatus('ok')
       iniciarTimer()
-    } catch (error) {
-      console.error('Erro ao buscar questão:', error)
+    } catch {
       setStatus('erro')
-      setErro('Não foi possível conectar ao servidor.')
+      setErro('Erro de conexão')
     }
   }
 
   // Timer
   const iniciarTimer = () => {
     pararTimer()
-    timerRef.current = setInterval(() => {
-      setTempoDecorrido(prev => prev + 1)
-    }, 1000)
+    timerRef.current = setInterval(() => setTempoDecorrido(p => p + 1), 1000)
   }
-
   const pararTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
+    if (timerRef.current) clearInterval(timerRef.current)
   }
 
   // Submeter resposta
   const submeterResposta = async () => {
     if (!questao || !alternativaSelecionada || !respostaCorreta || enviando) return
-
     setEnviando(true)
     pararTimer()
 
@@ -163,38 +150,27 @@ export default function SimuladoENEMPage() {
           resposta: alternativaSelecionada,
           resposta_correta: respostaCorreta,
           tempo_segundos: tempoDecorrido,
-          ano_prova: questao.ano,
-          disciplina: questao.disciplina,
         }),
       })
-
       const data = await response.json()
 
       if (data.sucesso) {
         setAcertou(data.correta)
         setRespondida(true)
         setEstatisticas(data.estatisticas)
-        // Decodificar resposta correta para mostrar
         setRespostaCorreta(data.resposta_correta)
       } else {
         setErro(data.erro)
       }
-    } catch (error) {
-      console.error('Erro ao submeter resposta:', error)
-      setErro('Erro ao enviar resposta.')
+    } catch {
+      setErro('Erro ao enviar')
     } finally {
       setEnviando(false)
     }
   }
 
-  // Formatador de tempo
-  const formatarTempo = (segundos: number) => {
-    const min = Math.floor(segundos / 60)
-    const seg = segundos % 60
-    return `${min}:${seg.toString().padStart(2, '0')}`
-  }
+  const formatarTempo = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
 
-  // Efeitos
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
@@ -204,274 +180,281 @@ export default function SimuladoENEMPage() {
     return () => pararTimer()
   }, [componente])
 
-  // Handlers
-  const handleVoltar = () => router.push(`/${componente}/menu`)
-  const handleProxima = () => buscarQuestao()
-  const handleAplicarFiltro = () => {
-    setMostrarFiltro(false)
-    buscarQuestao()
-  }
-
   // Loading
   if (status === 'carregando') {
-    return <Loading fullScreen componente={componente} text="Carregando questão ENEM..." />
+    return <Loading fullScreen componente={componente} text="Carregando..." />
   }
 
   return (
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header */}
-      <header
-        className="px-4 py-3 sticky top-0 z-10"
-        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-      >
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between gap-2">
-            <button onClick={handleVoltar} className="p-2 -ml-2 rounded-lg lg:hidden" style={{ color: 'var(--text-muted)' }}>
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+      {/* Header Compacto */}
+      <header className="px-3 py-2 sticky top-0 z-10 flex items-center justify-between gap-2" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
+        <div className="flex items-center gap-2">
+          <button onClick={() => router.push(`/${componente}/menu`)} className="p-1.5 -ml-1 rounded-lg lg:hidden" style={{ color: 'var(--text-muted)' }}>
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <Target className="w-4 h-4" style={{ color: corPrimaria }} />
+          <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>ENEM</span>
+          {estatisticas && (
+            <span className="text-xs px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--success)' }}>
+              {estatisticas.taxa_acerto}%
+            </span>
+          )}
+        </div>
 
-            <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5" style={{ color: corPrimaria }} />
-              <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Simulado ENEM</span>
-              <Badge variant="info" className="text-xs">v2</Badge>
-            </div>
+        <div className="flex items-center gap-1.5">
+          {/* Progresso */}
+          {totalQuestoes > 0 && (
+            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              {estatisticas?.total_questoes || 0}/{totalQuestoes}
+            </span>
+          )}
 
-            <div className="flex items-center gap-2">
-              {/* Filtro de ano */}
-              <button
-                onClick={() => setMostrarFiltro(true)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm"
-                style={{ background: 'var(--bg-elevated)', color: anoSelecionado ? corPrimaria : 'var(--text-muted)' }}
-              >
-                <Calendar className="w-4 h-4" />
-                <span>{anoSelecionado || 'Ano'}</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
+          {/* Filtro Ano */}
+          <button
+            onClick={() => setMostrarFiltro(true)}
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs"
+            style={{ background: 'var(--bg-elevated)', color: anoSelecionado ? corPrimaria : 'var(--text-muted)' }}
+          >
+            <Calendar className="w-3 h-3" />
+            <span>{anoSelecionado || 'Ano'}</span>
+            <ChevronDown className="w-3 h-3" />
+          </button>
 
-              {/* Timer */}
-              {status === 'ok' && questao && !respondida && (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm" style={{ background: 'var(--bg-elevated)', color: corPrimaria }}>
-                  <Clock className="w-4 h-4" />
-                  <span>{formatarTempo(tempoDecorrido)}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Estatísticas */}
-          {(estatisticas || respondidas > 0) && (
-            <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <span><strong style={{ color: 'var(--text-primary)' }}>{estatisticas?.total_questoes || respondidas}</strong> respondidas</span>
-              {estatisticas && <span><strong style={{ color: 'var(--success)' }}>{estatisticas.taxa_acerto}%</strong> acerto</span>}
+          {/* Timer */}
+          {status === 'ok' && !respondida && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded font-mono text-xs" style={{ background: 'var(--bg-elevated)', color: corPrimaria }}>
+              <Clock className="w-3 h-3" />
+              {formatarTempo(tempoDecorrido)}
             </div>
           )}
         </div>
       </header>
 
-      {/* Conteúdo Principal */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full">
-        {/* Estados de erro/sem questões */}
-        {(status === 'erro' || status === 'acesso_negado' || status === 'sem_questoes') && (
-          <div className="rounded-2xl p-6 text-center" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-            <div className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: status === 'sem_questoes' ? 'var(--bg-elevated)' : 'rgba(239, 68, 68, 0.15)' }}>
-              {status === 'sem_questoes' ? <BookOpen className="w-7 h-7" style={{ color: 'var(--text-muted)' }} /> : <AlertTriangle className="w-7 h-7" style={{ color: 'var(--error)' }} />}
+      {/* Conteúdo */}
+      <main className="flex-1 overflow-auto">
+        {/* Sem questões */}
+        {status === 'sem_questoes' && (
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
+              <CheckCircle2 className="w-6 h-6" style={{ color: 'var(--success)' }} />
             </div>
-            <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              {status === 'sem_questoes' ? 'Sem Questões' : status === 'acesso_negado' ? 'Acesso Restrito' : 'Erro'}
-            </h2>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              {status === 'sem_questoes' ? (anoSelecionado ? `Você já respondeu todas as questões de ${anoSelecionado}.` : 'Você já respondeu todas as questões disponíveis.') : erro}
+            <h2 className="font-semibold mb-1 text-sm" style={{ color: 'var(--text-primary)' }}>Parabéns!</h2>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+              {anoSelecionado ? `Todas de ${anoSelecionado} respondidas` : 'Todas as questões respondidas'}
             </p>
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              {status === 'sem_questoes' && (
-                <Button variant="secondary" onClick={() => setMostrarFiltro(true)} className="min-h-[48px]">
-                  Escolher outro ano
-                </Button>
-              )}
-              {status === 'erro' && (
-                <Button variant="secondary" onClick={buscarQuestao} leftIcon={<RefreshCw className="w-4 h-4" />} className="min-h-[48px]">
-                  Tentar Novamente
-                </Button>
-              )}
-              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar} className="min-h-[48px]">
-                Voltar ao Menu
-              </Button>
+            <div className="flex gap-2 justify-center">
+              <button onClick={() => setMostrarFiltro(true)} className="px-3 py-1.5 rounded text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                Outro ano
+              </button>
+              <button onClick={() => router.push(`/${componente}/menu`)} className="px-3 py-1.5 rounded text-xs" style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}>
+                Menu
+              </button>
             </div>
+          </div>
+        )}
+
+        {/* Erro */}
+        {(status === 'erro' || status === 'acesso_negado') && (
+          <div className="p-4 text-center">
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.1)' }}>
+              <XCircle className="w-6 h-6" style={{ color: 'var(--error)' }} />
+            </div>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>{erro}</p>
+            <button onClick={buscarQuestao} className="px-3 py-1.5 rounded text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+              <RotateCcw className="w-3 h-3 inline mr-1" />Tentar novamente
+            </button>
           </div>
         )}
 
         {/* Questão */}
         {status === 'ok' && questao && (
-          <div className="space-y-4 animate-fade-in-up">
-            {/* Info da questão */}
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="default" className="text-xs">ENEM {questao.ano}</Badge>
-                <Badge variant="info" className="text-xs">Q{questao.numero}</Badge>
-              </div>
-              <span className="text-xs px-2 py-1 rounded-lg" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                {questao.disciplina}
+          <div className="p-3 space-y-3">
+            {/* Badge ano/número */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}>
+                ENEM {questao.ano}
+              </span>
+              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Questão {questao.numero}
               </span>
             </div>
 
-            {/* Conteúdo da questão */}
-            <div className="rounded-2xl p-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-              {/* Título */}
-              {questao.titulo && (
-                <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>{questao.titulo}</h3>
-              )}
-
-              {/* Imagens */}
-              {questao.imagens.length > 0 && (
-                <div className="mb-4 space-y-2">
-                  {questao.imagens.map((img, idx) => (
-                    <img key={idx} src={img} alt={`Imagem ${idx + 1}`} className="max-w-full rounded-lg mx-auto" style={{ maxHeight: '300px' }} />
-                  ))}
-                </div>
-              )}
-
-              {/* Contexto */}
-              <div className="text-sm leading-relaxed whitespace-pre-wrap mb-4" style={{ color: 'var(--text-primary)' }}>
-                {questao.contexto}
-              </div>
-
-              {/* Comando */}
-              {questao.comando && (
-                <p className="text-sm font-medium mb-4" style={{ color: 'var(--text-primary)' }}>
-                  {questao.comando}
-                </p>
-              )}
-
-              {/* Alternativas */}
-              <div className="space-y-2">
-                {questao.alternativas.map((alt) => {
-                  const isSelected = alternativaSelecionada === alt.letra
-                  const isCorreta = respondida && respostaCorreta === alt.letra
-                  const isErrada = respondida && isSelected && !isCorreta
-
-                  let bgColor = 'var(--bg-elevated)'
-                  let borderColor = 'transparent'
-
-                  if (respondida) {
-                    if (isCorreta) {
-                      bgColor = 'rgba(34, 197, 94, 0.15)'
-                      borderColor = 'var(--success)'
-                    } else if (isErrada) {
-                      bgColor = 'rgba(239, 68, 68, 0.15)'
-                      borderColor = 'var(--error)'
-                    }
-                  } else if (isSelected) {
-                    bgColor = isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
-                    borderColor = corPrimaria
-                  }
-
-                  return (
-                    <button
-                      key={alt.letra}
-                      onClick={() => !respondida && setAlternativaSelecionada(alt.letra)}
-                      disabled={respondida}
-                      className="w-full text-left p-3 rounded-xl transition-all flex items-start gap-3"
-                      style={{ background: bgColor, border: `2px solid ${borderColor}` }}
-                    >
-                      <span className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0" style={{ background: isSelected || isCorreta ? corPrimaria : 'var(--bg-surface)', color: isSelected || isCorreta ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)' }}>
-                        {alt.letra}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        {alt.imagem && (
-                          <img src={alt.imagem} alt={`Alternativa ${alt.letra}`} className="max-w-full rounded-lg mb-2" style={{ maxHeight: '150px' }} />
-                        )}
-                        <span className="text-sm" style={{ color: 'var(--text-primary)' }}>{alt.texto}</span>
-                      </div>
-                      {respondida && isCorreta && <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--success)' }} />}
-                      {respondida && isErrada && <XCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Feedback após responder */}
-            {respondida && (
-              <div className="rounded-2xl p-4" style={{ background: acertou ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${acertou ? 'var(--success)' : 'var(--error)'}` }}>
-                <div className="flex items-center gap-2 mb-2">
-                  {acertou ? <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} /> : <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />}
-                  <span className="font-semibold" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
-                    {acertou ? 'Resposta Correta!' : 'Resposta Incorreta'}
-                  </span>
-                </div>
-                {!acertou && (
-                  <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    A resposta correta era: <strong style={{ color: 'var(--success)' }}>{respostaCorreta}</strong>
-                  </p>
-                )}
-                <p className="text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-                  Tempo: {formatarTempo(tempoDecorrido)}
-                </p>
+            {/* Imagens da questão */}
+            {questao.imagens.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {questao.imagens.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImagemZoom(img)}
+                    className="relative flex-shrink-0 rounded-lg overflow-hidden group"
+                    style={{ background: 'var(--bg-elevated)' }}
+                  >
+                    <img
+                      src={img}
+                      alt={`Figura ${i + 1}`}
+                      className="h-24 w-auto object-contain"
+                      style={{ maxWidth: '160px' }}
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                      <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
 
-            {/* Botões de ação */}
-            <div className="flex gap-2">
-              {!respondida ? (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={submeterResposta}
-                  disabled={!alternativaSelecionada || enviando}
-                  className="flex-1 min-h-[48px]"
-                  leftIcon={enviando ? <Loader2 className="w-4 h-4 animate-spin" /> : undefined}
-                >
-                  {enviando ? 'Enviando...' : 'Confirmar Resposta'}
-                </Button>
-              ) : (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={handleProxima}
-                  className="flex-1 min-h-[48px]"
-                  leftIcon={<RefreshCw className="w-4 h-4" />}
-                >
-                  Próxima Questão
-                </Button>
-              )}
+            {/* Enunciado */}
+            <div
+              className="text-xs leading-relaxed rounded-lg p-3"
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '200px', overflowY: 'auto' }}
+            >
+              {questao.contexto}
             </div>
+
+            {/* Alternativas */}
+            <div className="space-y-1.5">
+              {questao.alternativas.map((alt) => {
+                const isSelected = alternativaSelecionada === alt.letra
+                const isCorreta = respondida && respostaCorreta === alt.letra
+                const isErrada = respondida && isSelected && !isCorreta
+
+                let bg = 'var(--bg-surface)'
+                let border = 'var(--border-default)'
+
+                if (respondida) {
+                  if (isCorreta) {
+                    bg = 'rgba(34,197,94,0.1)'
+                    border = 'var(--success)'
+                  } else if (isErrada) {
+                    bg = 'rgba(239,68,68,0.1)'
+                    border = 'var(--error)'
+                  }
+                } else if (isSelected) {
+                  bg = isFisica ? 'rgba(34,197,94,0.1)' : 'rgba(139,92,246,0.1)'
+                  border = corPrimaria
+                }
+
+                return (
+                  <button
+                    key={alt.letra}
+                    onClick={() => !respondida && setAlternativaSelecionada(alt.letra)}
+                    disabled={respondida}
+                    className="w-full text-left p-2 rounded-lg flex items-start gap-2 transition-all"
+                    style={{ background: bg, border: `1.5px solid ${border}` }}
+                  >
+                    <span
+                      className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                      style={{
+                        background: isSelected || isCorreta ? corPrimaria : 'var(--bg-elevated)',
+                        color: isSelected || isCorreta ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                      }}
+                    >
+                      {alt.letra}
+                    </span>
+                    <span className="text-xs flex-1 pt-0.5" style={{ color: 'var(--text-primary)' }}>
+                      {alt.texto}
+                    </span>
+                    {isCorreta && <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--success)' }} />}
+                    {isErrada && <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />}
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Feedback */}
+            {respondida && (
+              <div
+                className="rounded-lg p-2 flex items-center justify-between"
+                style={{ background: acertou ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}
+              >
+                <div className="flex items-center gap-2">
+                  {acertou ? (
+                    <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} />
+                  ) : (
+                    <XCircle className="w-4 h-4" style={{ color: 'var(--error)' }} />
+                  )}
+                  <span className="text-xs font-medium" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
+                    {acertou ? 'Correto!' : `Errado. Resposta: ${respostaCorreta}`}
+                  </span>
+                </div>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{formatarTempo(tempoDecorrido)}</span>
+              </div>
+            )}
+
+            {/* Botão de ação */}
+            <button
+              onClick={respondida ? buscarQuestao : submeterResposta}
+              disabled={!respondida && (!alternativaSelecionada || enviando)}
+              className="w-full py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+            >
+              {enviando ? (
+                <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
+              ) : respondida ? (
+                <><ChevronRight className="w-4 h-4" /> Próxima</>
+              ) : (
+                'Confirmar'
+              )}
+            </button>
           </div>
         )}
       </main>
 
-      {/* Modal de filtro de ano */}
+      {/* Modal Filtro Ano */}
       {mostrarFiltro && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4" style={{ background: 'rgba(0, 0, 0, 0.6)' }} onClick={() => setMostrarFiltro(false)}>
-          <div className="w-full max-w-md rounded-t-2xl sm:rounded-2xl overflow-hidden animate-fade-in-up" style={{ background: 'var(--bg-surface)' }} onClick={e => e.stopPropagation()}>
-            <div className="p-4" style={{ borderBottom: '1px solid var(--border-default)' }}>
-              <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>Escolher Ano da Prova</h3>
-            </div>
-            <div className="p-4">
-              <div className="flex flex-wrap gap-2">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setMostrarFiltro(false)}>
+          <div className="w-full max-w-sm rounded-t-2xl sm:rounded-2xl p-4" style={{ background: 'var(--bg-surface)' }} onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>Ano da Prova</h3>
+            <div className="flex flex-wrap gap-1.5 mb-4">
+              <button
+                onClick={() => setAnoSelecionado(null)}
+                className="px-3 py-1.5 rounded text-xs font-medium"
+                style={{ background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)', color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
+              >
+                Todos
+              </button>
+              {anosDisponiveis.map(ano => (
                 <button
-                  onClick={() => setAnoSelecionado(null)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                  style={{ background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)', color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)' }}
+                  key={ano}
+                  onClick={() => setAnoSelecionado(ano)}
+                  className="px-3 py-1.5 rounded text-xs font-medium"
+                  style={{ background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)', color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
                 >
-                  Todos
+                  {ano}
                 </button>
-                {ANOS_DISPONIVEIS.map(ano => (
-                  <button
-                    key={ano}
-                    onClick={() => setAnoSelecionado(ano)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    style={{ background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)', color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)' }}
-                  >
-                    {ano}
-                  </button>
-                ))}
-              </div>
+              ))}
             </div>
-            <div className="p-4 flex gap-2" style={{ borderTop: '1px solid var(--border-default)' }}>
-              <Button variant="secondary" onClick={() => setMostrarFiltro(false)} className="flex-1">Cancelar</Button>
-              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleAplicarFiltro} className="flex-1">Aplicar</Button>
+            <div className="flex gap-2">
+              <button onClick={() => setMostrarFiltro(false)} className="flex-1 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                Cancelar
+              </button>
+              <button
+                onClick={() => { setMostrarFiltro(false); buscarQuestao() }}
+                className="flex-1 py-2 rounded-lg text-xs font-medium"
+                style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+              >
+                Aplicar
+              </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Modal Zoom Imagem */}
+      {imagemZoom && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.9)' }} onClick={() => setImagemZoom(null)}>
+          <button className="absolute top-4 right-4 p-2 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+            <X className="w-6 h-6 text-white" />
+          </button>
+          <img
+            src={imagemZoom}
+            alt="Imagem ampliada"
+            className="max-w-full max-h-full object-contain"
+            onClick={e => e.stopPropagation()}
+          />
         </div>
       )}
 

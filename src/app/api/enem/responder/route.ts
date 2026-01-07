@@ -3,17 +3,16 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM v2 - Submeter resposta
+// API ENEM - Submeter resposta
 // POST /api/enem/responder
+// Usa tabela enem_responses
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface RequestBody {
-  questao_id: string       // ex: "enem-2023-45"
+  questao_id: string       // id da questão (ex: "questao_01_2022")
   resposta: string         // A, B, C, D ou E
   resposta_correta: string // base64 encoded
   tempo_segundos?: number
-  ano_prova: number
-  disciplina: string
 }
 
 export async function POST(request: NextRequest) {
@@ -32,12 +31,10 @@ export async function POST(request: NextRequest) {
       resposta,
       resposta_correta: respostaCorretaBase64,
       tempo_segundos = 0,
-      ano_prova,
-      disciplina,
     } = body
 
     // Validação básica
-    if (!questao_id || !resposta || !respostaCorretaBase64 || !ano_prova) {
+    if (!questao_id || !resposta || !respostaCorretaBase64) {
       return NextResponse.json(
         { sucesso: false, erro: 'Dados incompletos' },
         { status: 400 }
@@ -84,10 +81,10 @@ export async function POST(request: NextRequest) {
 
     // Verificar se já respondeu esta questão
     const { data: respostaExistente } = await supabase
-      .from('respostas_enem')
+      .from('enem_responses')
       .select('id')
       .eq('usuario_id', sessao.userId)
-      .eq('id_api_questao', questao_id)
+      .eq('question_id', questao_id)
       .single()
 
     if (respostaExistente) {
@@ -105,29 +102,13 @@ export async function POST(request: NextRequest) {
       ? Math.floor(tempo_segundos)
       : 0
 
-    // Determinar área baseado na disciplina
-    let area = 'outros'
-    const discLower = (disciplina || '').toLowerCase()
-    if (discLower.includes('natureza') || discLower.includes('física') || discLower.includes('química') || discLower.includes('biologia')) {
-      area = 'ciencias-natureza'
-    } else if (discLower.includes('matemática') || discLower.includes('matematica')) {
-      area = 'matematica'
-    } else if (discLower.includes('linguagens') || discLower.includes('português') || discLower.includes('inglês') || discLower.includes('espanhol')) {
-      area = 'linguagens'
-    } else if (discLower.includes('humanas') || discLower.includes('história') || discLower.includes('geografia') || discLower.includes('filosofia') || discLower.includes('sociologia')) {
-      area = 'ciencias-humanas'
-    }
-
-    // Inserir resposta
-    const { error } = await supabase.from('respostas_enem').insert({
+    // Inserir resposta na nova tabela
+    const { error } = await supabase.from('enem_responses').insert({
       usuario_id: sessao.userId,
-      id_api_questao: questao_id,
+      question_id: questao_id,
       resposta_dada: respostaUpperCase,
       correta,
       tempo_segundos: tempoValidado,
-      ano_prova,
-      area,
-      modo: 'livre',
     })
 
     if (error) {
@@ -140,7 +121,7 @@ export async function POST(request: NextRequest) {
 
     // Buscar estatísticas atualizadas
     const { data: estatisticas } = await supabase
-      .from('respostas_enem')
+      .from('enem_responses')
       .select('correta')
       .eq('usuario_id', sessao.userId)
 
