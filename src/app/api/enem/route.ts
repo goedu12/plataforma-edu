@@ -3,24 +3,24 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Banco Local (Supabase) - Tabela enem_questions
+// API ENEM - Banco Local (Supabase) - Tabela enem_questions (CSV)
 // GET /api/enem?ano=2023
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Interface da questão do banco (CSV importado)
+// Interface da questão do CSV importado
 interface QuestaoCSV {
-  id: string                    // id_unico do CSV
-  original_id: string | null    // id original
-  year: number                  // ano
-  exam_year: number | null      // exam
-  image_usage: boolean | null   // IU
-  reader_required: boolean | null // ledor
-  is_cancelled: boolean | null  // anulada
-  question_text: string         // question
-  correct_answer: string        // label (A, B, C, D, E)
-  image_description: unknown    // description (JSONB)
+  id_unico: string           // PK - ex: questao_01_2022
+  id: string | null          // original_id - ex: questao_01
+  ano: number                // year
+  exam: number | null        // exam_year
+  IU: boolean | null         // image_usage
+  ledor: boolean | null      // reader_required
+  anulada: boolean | null    // is_cancelled
+  question: string           // question_text
+  label: string              // correct_answer (A, B, C, D, E)
+  description: unknown       // image_description (JSONB)
   alternatives: string[] | null // alternatives (JSONB array)
-  figure_urls: string[] | null  // figures (JSONB array)
+  figures: string[] | null   // figure_urls (JSONB array)
 }
 
 // Interface para o frontend
@@ -30,43 +30,44 @@ interface QuestaoFormatada {
   numero: number
   contexto: string
   imagens: string[]
-  alternativas: Array<{
-    letra: string
-    texto: string
-  }>
+  alternativas: Array<{ letra: string; texto: string }>
   resposta_correta: string
 }
 
-// Formatar questão do banco CSV
-function formatarQuestao(q: QuestaoCSV, index: number): QuestaoFormatada {
-  // Extrair número da questão do original_id (ex: "questao_01" -> 1)
-  let numero = index + 1
-  if (q.original_id) {
-    const match = q.original_id.match(/(\d+)/)
+// Formatar questão do CSV para o frontend
+function formatarQuestao(q: QuestaoCSV): QuestaoFormatada {
+  // Extrair número da questão do id (ex: "questao_01" -> 1)
+  let numero = 1
+  if (q.id) {
+    const match = q.id.match(/(\d+)/)
     if (match) numero = parseInt(match[1])
   }
 
-  // Formatar alternativas
+  // Formatar alternativas do array JSON
   const letras = ['A', 'B', 'C', 'D', 'E']
   const alternativas = letras.map((letra, i) => ({
     letra,
-    texto: q.alternatives && q.alternatives[i] ? q.alternatives[i] : ''
+    texto: q.alternatives && q.alternatives[i] ? String(q.alternatives[i]) : ''
   }))
 
   // Imagens
   const imagens: string[] = []
-  if (q.figure_urls && Array.isArray(q.figure_urls)) {
-    imagens.push(...q.figure_urls.filter(url => url && url.trim()))
+  if (q.figures && Array.isArray(q.figures)) {
+    q.figures.forEach(url => {
+      if (url && typeof url === 'string' && url.trim()) {
+        imagens.push(url.trim())
+      }
+    })
   }
 
   return {
-    id: q.id,
-    ano: q.year,
+    id: q.id_unico,
+    ano: q.ano,
     numero,
-    contexto: q.question_text || '',
+    contexto: q.question || '',
     imagens,
     alternativas,
-    resposta_correta: q.correct_answer?.toUpperCase() || 'A',
+    resposta_correta: (q.label || 'A').toUpperCase(),
   }
 }
 
@@ -96,17 +97,17 @@ export async function GET(request: NextRequest) {
     if (!usuario || (!isProfessor && !isAluno3SerieEM)) {
       return NextResponse.json({
         sucesso: false,
-        erro: 'O Simulado ENEM está disponível apenas para alunos da 3ª série do Ensino Médio.',
+        erro: 'Simulado ENEM disponível apenas para 3ª série do EM.',
       }, { status: 403 })
     }
 
     // Buscar anos disponíveis
     const { data: anosData } = await supabase
       .from('enem_questions')
-      .select('year')
-      .order('year', { ascending: false })
+      .select('ano')
+      .order('ano', { ascending: false })
 
-    const anosDisponiveis = [...new Set(anosData?.map(a => a.year) || [])]
+    const anosDisponiveis = [...new Set(anosData?.map(a => a.ano) || [])]
 
     // Buscar IDs já respondidos
     const { data: respostasUsuario } = await supabase
@@ -123,19 +124,19 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('enem_questions')
       .select('*')
-      .or('is_cancelled.is.null,is_cancelled.eq.false')
+      .or('anulada.is.null,anulada.eq.false')
 
     if (ano) {
-      query = query.eq('year', ano)
+      query = query.eq('ano', ano)
     }
 
-    const { data: questoes, error: erroQuery } = await query.limit(500)
+    const { data: questoes, error: erroQuery } = await query.limit(1000)
 
     if (erroQuery) {
       console.error('Erro ao buscar questões:', erroQuery)
       return NextResponse.json({
         sucesso: false,
-        erro: 'Erro ao buscar questões do banco de dados',
+        erro: 'Erro ao buscar questões',
       }, { status: 500 })
     }
 
@@ -143,20 +144,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_QUESTOES',
-        mensagem: 'Nenhuma questão disponível. Importe o CSV no Supabase.',
+        mensagem: 'Nenhuma questão disponível. Importe o CSV.',
         anos_disponiveis: anosDisponiveis,
         respondidas: idsRespondidos.size,
       })
     }
 
     // Filtrar não respondidas
-    const disponiveis = questoes.filter(q => !idsRespondidos.has(q.id))
+    const disponiveis = questoes.filter(q => !idsRespondidos.has(q.id_unico))
 
     if (disponiveis.length === 0) {
       return NextResponse.json({
         sucesso: true,
         status: 'TODAS_RESPONDIDAS',
-        mensagem: 'Você já respondeu todas as questões disponíveis!',
+        mensagem: 'Você respondeu todas as questões!',
         anos_disponiveis: anosDisponiveis,
         respondidas: idsRespondidos.size,
         total_questoes: questoes.length,
@@ -165,9 +166,9 @@ export async function GET(request: NextRequest) {
 
     // Selecionar questão aleatória
     const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)]
-    const questaoFormatada = formatarQuestao(questaoRaw, 0)
+    const questaoFormatada = formatarQuestao(questaoRaw)
 
-    // Retornar questão (sem a resposta correta visível)
+    // Retornar sem a resposta correta visível
     const { resposta_correta, ...questaoPublica } = questaoFormatada
 
     return NextResponse.json({
@@ -183,7 +184,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error('Erro na API ENEM:', error)
     return NextResponse.json(
-      { sucesso: false, erro: 'Erro interno do servidor', detalhes: String(error) },
+      { sucesso: false, erro: 'Erro interno', detalhes: String(error) },
       { status: 500 }
     )
   }
