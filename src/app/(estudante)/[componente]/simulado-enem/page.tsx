@@ -19,6 +19,7 @@ import {
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import SafeImage, { isValidImageUrl } from '@/components/ui/SafeImage'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -283,18 +284,20 @@ export default function SimuladoENEMPage() {
             </div>
 
             {/* Imagens da questão */}
-            {questao.imagens.length > 0 && (
+            {questao.imagens.filter(isValidImageUrl).length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
-                {questao.imagens.map((img, i) => (
+                {questao.imagens.filter(isValidImageUrl).map((img, i) => (
                   <button
                     key={i}
                     onClick={() => setImagemZoom(img)}
                     className="relative flex-shrink-0 rounded-lg overflow-hidden group"
                     style={{ background: 'var(--bg-elevated)' }}
                   >
-                    <img
+                    <SafeImage
                       src={img}
                       alt={`Figura ${i + 1}`}
+                      width={160}
+                      height={96}
                       className="h-24 w-auto object-contain"
                       style={{ maxWidth: '160px' }}
                     />
@@ -444,14 +447,16 @@ export default function SimuladoENEMPage() {
       )}
 
       {/* Modal Zoom Imagem */}
-      {imagemZoom && (
+      {imagemZoom && isValidImageUrl(imagemZoom) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.9)' }} onClick={() => setImagemZoom(null)}>
           <button className="absolute top-4 right-4 p-2 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <X className="w-6 h-6 text-white" />
           </button>
-          <img
+          <SafeImage
             src={imagemZoom}
             alt="Imagem ampliada"
+            width={1200}
+            height={800}
             className="max-w-full max-h-full object-contain"
             onClick={e => e.stopPropagation()}
           />
