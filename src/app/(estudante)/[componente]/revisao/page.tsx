@@ -11,7 +11,7 @@ import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 
 type StatusRevisao = 'OK' | 'SEM_REVISAO' | 'ERRO'
-type Alternativa = 'A' | 'B' | 'C' | 'D'
+type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
 
 interface FeedbackData {
   correta: boolean
@@ -196,6 +196,7 @@ export default function RevisaoPage() {
     { letra: 'B' as Alternativa, texto: questao.alternativa_b },
     { letra: 'C' as Alternativa, texto: questao.alternativa_c },
     { letra: 'D' as Alternativa, texto: questao.alternativa_d },
+    ...(questao.alternativa_e ? [{ letra: 'E' as Alternativa, texto: questao.alternativa_e }] : []),
   ] : []
 
   const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
