@@ -15,6 +15,7 @@ import {
   X,
   RotateCcw,
   Target,
+  BookOpen,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
@@ -23,7 +24,7 @@ import SafeImage, { isValidImageUrl } from '@/components/ui/SafeImage'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// SIMULADO ENEM - Interface Compacta
+// SIMULADO ENEM - Interface Compacta com Filtros
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface Questao {
@@ -31,11 +32,13 @@ interface Questao {
   ano: number
   numero: number
   contexto: string
+  comando: string | null
   imagens: string[]
   alternativas: Array<{
     letra: string
     texto: string
   }>
+  area: string
 }
 
 interface Estatisticas {
@@ -57,9 +60,11 @@ export default function SimuladoENEMPage() {
   const [respostaCorreta, setRespostaCorreta] = useState<string | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([])
+  const [areasDisponiveis, setAreasDisponiveis] = useState<string[]>([])
 
   // Filtros
   const [anoSelecionado, setAnoSelecionado] = useState<number | null>(null)
+  const [areaSelecionada, setAreaSelecionada] = useState<string | null>(null)
   const [mostrarFiltro, setMostrarFiltro] = useState(false)
 
   // Resposta
@@ -98,6 +103,7 @@ export default function SimuladoENEMPage() {
     try {
       const params = new URLSearchParams()
       if (anoSelecionado) params.set('ano', String(anoSelecionado))
+      if (areaSelecionada) params.set('area', areaSelecionada)
 
       const response = await fetch(`/api/enem?${params}`)
       const data = await response.json()
@@ -109,6 +115,7 @@ export default function SimuladoENEMPage() {
       }
 
       if (data.anos_disponiveis) setAnosDisponiveis(data.anos_disponiveis)
+      if (data.areas_disponiveis) setAreasDisponiveis(data.areas_disponiveis)
       if (data.total_questoes) setTotalQuestoes(data.total_questoes)
       if (data.disponiveis !== undefined) setDisponiveis(data.disponiveis)
 
@@ -118,7 +125,14 @@ export default function SimuladoENEMPage() {
       }
 
       setQuestao(data.questao)
-      setRespostaCorreta(data._rc)
+      // Decodificar resposta correta de base64
+      if (data._rc) {
+        try {
+          setRespostaCorreta(atob(data._rc))
+        } catch {
+          setRespostaCorreta(data._rc)
+        }
+      }
       setStatus('ok')
       iniciarTimer()
     } catch {
@@ -149,7 +163,7 @@ export default function SimuladoENEMPage() {
         body: JSON.stringify({
           questao_id: questao.id,
           resposta: alternativaSelecionada,
-          resposta_correta: respostaCorreta,
+          resposta_correta: btoa(respostaCorreta),
           tempo_segundos: tempoDecorrido,
         }),
       })
@@ -172,6 +186,12 @@ export default function SimuladoENEMPage() {
 
   const formatarTempo = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
 
+  // Limpar filtros
+  const limparFiltros = () => {
+    setAnoSelecionado(null)
+    setAreaSelecionada(null)
+  }
+
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
@@ -183,7 +203,7 @@ export default function SimuladoENEMPage() {
 
   // Loading
   if (status === 'carregando') {
-    return <Loading fullScreen componente={componente} text="Carregando..." />
+    return <Loading fullScreen componente={componente} text="Carregando questão..." />
   }
 
   return (
@@ -213,14 +233,17 @@ export default function SimuladoENEMPage() {
             </span>
           )}
 
-          {/* Filtro Ano */}
+          {/* Filtros */}
           <button
             onClick={() => setMostrarFiltro(true)}
             className="flex items-center gap-1 px-2 py-1 rounded text-xs"
-            style={{ background: 'var(--bg-elevated)', color: anoSelecionado ? corPrimaria : 'var(--text-muted)' }}
+            style={{
+              background: 'var(--bg-elevated)',
+              color: (anoSelecionado || areaSelecionada) ? corPrimaria : 'var(--text-muted)'
+            }}
           >
             <Calendar className="w-3 h-3" />
-            <span>{anoSelecionado || 'Ano'}</span>
+            <span>{anoSelecionado || 'Filtrar'}</span>
             <ChevronDown className="w-3 h-3" />
           </button>
 
@@ -247,8 +270,8 @@ export default function SimuladoENEMPage() {
               {anoSelecionado ? `Todas de ${anoSelecionado} respondidas` : 'Todas as questões respondidas'}
             </p>
             <div className="flex gap-2 justify-center">
-              <button onClick={() => setMostrarFiltro(true)} className="px-3 py-1.5 rounded text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                Outro ano
+              <button onClick={() => { limparFiltros(); setMostrarFiltro(true); }} className="px-3 py-1.5 rounded text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                Mudar filtro
               </button>
               <button onClick={() => router.push(`/${componente}/menu`)} className="px-3 py-1.5 rounded text-xs" style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}>
                 Menu
@@ -273,18 +296,24 @@ export default function SimuladoENEMPage() {
         {/* Questão */}
         {status === 'ok' && questao && (
           <div className="p-3 space-y-3">
-            {/* Badge ano/número */}
-            <div className="flex items-center gap-2">
+            {/* Badge ano/número/área */}
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs px-2 py-0.5 rounded font-medium" style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}>
                 ENEM {questao.ano}
               </span>
               <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 Questão {questao.numero}
               </span>
+              {questao.area && (
+                <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
+                  <BookOpen className="w-3 h-3 inline mr-1" />
+                  {questao.area}
+                </span>
+              )}
             </div>
 
             {/* Imagens da questão */}
-            {questao.imagens.filter(isValidImageUrl).length > 0 && (
+            {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {questao.imagens.filter(isValidImageUrl).map((img, i) => (
                   <button
@@ -309,10 +338,20 @@ export default function SimuladoENEMPage() {
               </div>
             )}
 
+            {/* Comando/Descrição (se houver) */}
+            {questao.comando && (
+              <div
+                className="text-xs leading-relaxed rounded-lg p-3 italic"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              >
+                {questao.comando}
+              </div>
+            )}
+
             {/* Enunciado */}
             <div
-              className="text-xs leading-relaxed rounded-lg p-3"
-              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '200px', overflowY: 'auto' }}
+              className="text-sm leading-relaxed rounded-lg p-3"
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '250px', overflowY: 'auto' }}
             >
               {questao.contexto}
             </div>
@@ -344,8 +383,8 @@ export default function SimuladoENEMPage() {
                   <button
                     key={alt.letra}
                     onClick={() => !respondida && setAlternativaSelecionada(alt.letra)}
-                    disabled={respondida}
-                    className="w-full text-left p-2 rounded-lg flex items-start gap-2 transition-all"
+                    disabled={respondida || !alt.texto}
+                    className="w-full text-left p-2 rounded-lg flex items-start gap-2 transition-all disabled:opacity-50"
                     style={{ background: bg, border: `1.5px solid ${border}` }}
                   >
                     <span
@@ -357,8 +396,8 @@ export default function SimuladoENEMPage() {
                     >
                       {alt.letra}
                     </span>
-                    <span className="text-xs flex-1 pt-0.5" style={{ color: 'var(--text-primary)' }}>
-                      {alt.texto}
+                    <span className="text-xs flex-1 pt-0.5" style={{ color: alt.texto ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                      {alt.texto || '(alternativa vazia)'}
                     </span>
                     {isCorreta && <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--success)' }} />}
                     {isErrada && <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />}
@@ -387,6 +426,29 @@ export default function SimuladoENEMPage() {
               </div>
             )}
 
+            {/* Estatísticas após responder */}
+            {respondida && estatisticas && (
+              <div className="flex items-center justify-around py-2 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
+                <div className="text-center">
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Respondidas</p>
+                  <p className="text-lg font-bold" style={{ color: corPrimaria }}>{estatisticas.total_questoes}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Acertos</p>
+                  <p className="text-lg font-bold" style={{ color: 'var(--success)' }}>{estatisticas.total_corretas}</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Taxa</p>
+                  <p className="text-lg font-bold" style={{
+                    color: estatisticas.taxa_acerto >= 60 ? 'var(--success)' :
+                           estatisticas.taxa_acerto >= 40 ? 'var(--warning)' : 'var(--error)'
+                  }}>
+                    {estatisticas.taxa_acerto}%
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Botão de ação */}
             <button
               onClick={respondida ? buscarQuestao : submeterResposta}
@@ -397,42 +459,87 @@ export default function SimuladoENEMPage() {
               {enviando ? (
                 <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</>
               ) : respondida ? (
-                <><ChevronRight className="w-4 h-4" /> Próxima</>
+                <><ChevronRight className="w-4 h-4" /> Próxima Questão</>
               ) : (
-                'Confirmar'
+                'Confirmar Resposta'
               )}
             </button>
           </div>
         )}
       </main>
 
-      {/* Modal Filtro Ano */}
+      {/* Modal Filtros */}
       {mostrarFiltro && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setMostrarFiltro(false)}>
           <div className="w-full max-w-sm rounded-t-2xl sm:rounded-2xl p-4" style={{ background: 'var(--bg-surface)' }} onClick={e => e.stopPropagation()}>
-            <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-primary)' }}>Ano da Prova</h3>
-            <div className="flex flex-wrap gap-1.5 mb-4">
-              <button
-                onClick={() => setAnoSelecionado(null)}
-                className="px-3 py-1.5 rounded text-xs font-medium"
-                style={{ background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)', color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
-              >
-                Todos
-              </button>
-              {anosDisponiveis.map(ano => (
+            <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)' }}>Filtrar Questões</h3>
+
+            {/* Filtro por Ano */}
+            <div className="mb-4">
+              <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>Ano da Prova</p>
+              <div className="flex flex-wrap gap-1.5">
                 <button
-                  key={ano}
-                  onClick={() => setAnoSelecionado(ano)}
+                  onClick={() => setAnoSelecionado(null)}
                   className="px-3 py-1.5 rounded text-xs font-medium"
-                  style={{ background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)', color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
+                  style={{ background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)', color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
                 >
-                  {ano}
+                  Todos
                 </button>
-              ))}
+                {anosDisponiveis.map(ano => (
+                  <button
+                    key={ano}
+                    onClick={() => setAnoSelecionado(ano)}
+                    className="px-3 py-1.5 rounded text-xs font-medium"
+                    style={{ background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)', color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
+                  >
+                    {ano}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {/* Filtro por Área */}
+            {areasDisponiveis.length > 0 && (
+              <div className="mb-4">
+                <p className="text-xs mb-2" style={{ color: 'var(--text-muted)' }}>Área do Conhecimento</p>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => setAreaSelecionada(null)}
+                    className="px-3 py-1.5 rounded text-xs font-medium"
+                    style={{ background: !areaSelecionada ? corPrimaria : 'var(--bg-elevated)', color: !areaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
+                  >
+                    Todas
+                  </button>
+                  {areasDisponiveis.map(area => (
+                    <button
+                      key={area}
+                      onClick={() => setAreaSelecionada(area)}
+                      className="px-3 py-1.5 rounded text-xs font-medium truncate max-w-[120px]"
+                      style={{ background: areaSelecionada === area ? corPrimaria : 'var(--bg-elevated)', color: areaSelecionada === area ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}
+                      title={area}
+                    >
+                      {area}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Info */}
+            {disponiveis > 0 && (
+              <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+                {disponiveis} questões disponíveis
+              </p>
+            )}
+
+            {/* Botões */}
             <div className="flex gap-2">
-              <button onClick={() => setMostrarFiltro(false)} className="flex-1 py-2 rounded-lg text-xs" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                Cancelar
+              <button
+                onClick={() => { limparFiltros(); setMostrarFiltro(false); }}
+                className="flex-1 py-2 rounded-lg text-xs"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              >
+                Limpar
               </button>
               <button
                 onClick={() => { setMostrarFiltro(false); buscarQuestao() }}

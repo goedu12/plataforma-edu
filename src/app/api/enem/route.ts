@@ -3,24 +3,26 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Banco Local (Supabase) - Tabela enem_questions (CSV)
-// GET /api/enem?ano=2023
+// API ENEM - Banco Local (Supabase)
+// GET /api/enem?ano=2023&area=Matemática
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Interface da questão do CSV importado
+// Interface da questão conforme CSV importado
 interface QuestaoCSV {
-  id_unico: string           // PK - ex: questao_01_2022
-  id: string | null          // original_id - ex: questao_01
-  ano: number                // year
-  exam: number | null        // exam_year
-  IU: boolean | null         // image_usage
-  ledor: boolean | null      // reader_required
-  anulada: boolean | null    // is_cancelled
-  question: string           // question_text
-  label: string              // correct_answer (A, B, C, D, E)
-  description: unknown       // image_description (JSONB)
-  alternatives: string[] | null // alternatives (JSONB array)
-  figures: string[] | null   // figure_urls (JSONB array)
+  id_unico: string
+  id: string | null
+  num_questao: number | null
+  ano: number
+  exam: number | null
+  area: string | null
+  IU: boolean | null
+  ledor: boolean | null
+  question: string
+  description: string | null
+  alternatives: string[] | null
+  label: string
+  figures: string[] | null
+  anulada: boolean | null
 }
 
 // Interface para o frontend
@@ -29,32 +31,73 @@ interface QuestaoFormatada {
   ano: number
   numero: number
   contexto: string
+  comando: string | null
   imagens: string[]
   alternativas: Array<{ letra: string; texto: string }>
-  resposta_correta: string
+  area: string
+}
+
+// Validar se uma URL de imagem é válida
+function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== 'string') return false
+  const trimmed = url.trim()
+  if (!trimmed) return false
+
+  // Padrões inválidos
+  const invalid = /^(nan|none|null|undefined|\s*)$/i
+  if (invalid.test(trimmed)) return false
+
+  // Deve começar com http ou data:image
+  return trimmed.startsWith('http') || trimmed.startsWith('data:image')
 }
 
 // Formatar questão do CSV para o frontend
 function formatarQuestao(q: QuestaoCSV): QuestaoFormatada {
-  // Extrair número da questão do id (ex: "questao_01" -> 1)
-  let numero = 1
-  if (q.id) {
-    const match = q.id.match(/(\d+)/)
-    if (match) numero = parseInt(match[1])
-  }
+  // Número da questão
+  const numero = q.num_questao || 1
 
   // Formatar alternativas do array JSON
   const letras = ['A', 'B', 'C', 'D', 'E']
+  let alternativasArray: string[] = []
+
+  // Processar alternatives (pode ser array, string JSON, ou null)
+  if (q.alternatives) {
+    if (Array.isArray(q.alternatives)) {
+      alternativasArray = q.alternatives
+    } else if (typeof q.alternatives === 'string') {
+      try {
+        alternativasArray = JSON.parse(q.alternatives)
+      } catch {
+        alternativasArray = []
+      }
+    }
+  }
+
   const alternativas = letras.map((letra, i) => ({
     letra,
-    texto: q.alternatives && q.alternatives[i] ? String(q.alternatives[i]) : ''
+    texto: alternativasArray[i] ? String(alternativasArray[i]).trim() : ''
   }))
 
-  // Imagens
+  // Processar imagens (figures pode ser array, string JSON, ou null)
   const imagens: string[] = []
-  if (q.figures && Array.isArray(q.figures)) {
-    q.figures.forEach(url => {
-      if (url && typeof url === 'string' && url.trim()) {
+  if (q.figures) {
+    let figuresArray: string[] = []
+
+    if (Array.isArray(q.figures)) {
+      figuresArray = q.figures
+    } else if (typeof q.figures === 'string') {
+      try {
+        figuresArray = JSON.parse(q.figures)
+      } catch {
+        // Se não é JSON, pode ser uma URL única
+        if (isValidImageUrl(q.figures)) {
+          figuresArray = [q.figures]
+        }
+      }
+    }
+
+    figuresArray.forEach(url => {
+      if (isValidImageUrl(url)) {
         imagens.push(url.trim())
       }
     })
@@ -65,9 +108,10 @@ function formatarQuestao(q: QuestaoCSV): QuestaoFormatada {
     ano: q.ano,
     numero,
     contexto: q.question || '',
+    comando: q.description || null,
     imagens,
     alternativas,
-    resposta_correta: (q.label || 'A').toUpperCase(),
+    area: q.area || 'Geral'
   }
 }
 
@@ -80,6 +124,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const anoParam = searchParams.get('ano')
+    const areaParam = searchParams.get('area')
     const ano = anoParam ? parseInt(anoParam) : null
 
     const supabase = getSupabaseAdmin()
@@ -105,9 +150,18 @@ export async function GET(request: NextRequest) {
     const { data: anosData } = await supabase
       .from('enem_questions')
       .select('ano')
+      .not('ano', 'is', null)
       .order('ano', { ascending: false })
 
-    const anosDisponiveis = [...new Set(anosData?.map(a => a.ano) || [])]
+    const anosDisponiveis = [...new Set(anosData?.map(a => a.ano).filter(Boolean) || [])]
+
+    // Buscar áreas disponíveis
+    const { data: areasData } = await supabase
+      .from('enem_questions')
+      .select('area')
+      .not('area', 'is', null)
+
+    const areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
 
     // Buscar IDs já respondidos
     const { data: respostasUsuario } = await supabase
@@ -126,11 +180,17 @@ export async function GET(request: NextRequest) {
       .select('*')
       .or('anulada.is.null,anulada.eq.false')
 
+    // Filtro por ano
     if (ano) {
       query = query.eq('ano', ano)
     }
 
-    const { data: questoes, error: erroQuery } = await query.limit(1000)
+    // Filtro por área
+    if (areaParam) {
+      query = query.eq('area', areaParam)
+    }
+
+    const { data: questoes, error: erroQuery } = await query.limit(2000)
 
     if (erroQuery) {
       console.error('Erro ao buscar questões:', erroQuery)
@@ -146,6 +206,7 @@ export async function GET(request: NextRequest) {
         status: 'SEM_QUESTOES',
         mensagem: 'Nenhuma questão disponível. Importe o CSV.',
         anos_disponiveis: anosDisponiveis,
+        areas_disponiveis: areasDisponiveis,
         respondidas: idsRespondidos.size,
       })
     }
@@ -157,8 +218,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         sucesso: true,
         status: 'TODAS_RESPONDIDAS',
-        mensagem: 'Você respondeu todas as questões!',
+        mensagem: ano
+          ? `Você respondeu todas as questões de ${ano}!`
+          : 'Você respondeu todas as questões!',
         anos_disponiveis: anosDisponiveis,
+        areas_disponiveis: areasDisponiveis,
         respondidas: idsRespondidos.size,
         total_questoes: questoes.length,
       })
@@ -166,17 +230,18 @@ export async function GET(request: NextRequest) {
 
     // Selecionar questão aleatória
     const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)]
-    const questaoFormatada = formatarQuestao(questaoRaw)
+    const questaoFormatada = formatarQuestao(questaoRaw as QuestaoCSV)
 
-    // Retornar sem a resposta correta visível
-    const { resposta_correta, ...questaoPublica } = questaoFormatada
+    // Resposta correta (codificada em base64)
+    const respostaCorreta = (questaoRaw.label || 'A').toUpperCase()
 
     return NextResponse.json({
       sucesso: true,
       status: 'OK',
-      questao: questaoPublica,
-      _rc: Buffer.from(resposta_correta).toString('base64'),
+      questao: questaoFormatada,
+      _rc: Buffer.from(respostaCorreta).toString('base64'),
       anos_disponiveis: anosDisponiveis,
+      areas_disponiveis: areasDisponiveis,
       respondidas: idsRespondidos.size,
       total_questoes: questoes.length,
       disponiveis: disponiveis.length,
