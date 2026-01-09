@@ -55,6 +55,141 @@ function isValidImageUrl(url: string | null | undefined): boolean {
   return trimmed.startsWith('http') || trimmed.startsWith('data:image')
 }
 
+// Limpar texto removendo caracteres markdown e placeholders indesejados
+function limparTexto(texto: string | null | undefined): string {
+  if (!texto) return ''
+  let limpo = texto
+  // Remove headers markdown (##, ###, etc)
+  limpo = limpo.replace(/^#{1,6}\s*/gm, '')
+  // Remove colchetes vazios [] e com espaços [ ]
+  limpo = limpo.replace(/\[\s*\]/g, '')
+  // Remove placeholders [[texto]]
+  limpo = limpo.replace(/\[\[[^\]]*\]\]/g, '')
+  // Remove descrições de imagem no formato ["Descrição..."] ou ['Descrição...']
+  limpo = limpo.replace(/\["[^"]*"\]/g, '')
+  limpo = limpo.replace(/\['[^']*'\]/g, '')
+  // Remove ** (negrito markdown) mas mantém o texto
+  limpo = limpo.replace(/\*\*([^*]+)\*\*/g, '$1')
+  // Remove * (itálico markdown) mas mantém o texto
+  limpo = limpo.replace(/\*([^*]+)\*/g, '$1')
+  // Remove múltiplos espaços em branco
+  limpo = limpo.replace(/\s{2,}/g, ' ')
+  // Remove linhas vazias extras
+  limpo = limpo.replace(/\n{3,}/g, '\n\n')
+  return limpo.trim()
+}
+
+// Verifica se o comando deve ser exibido (oculta descrições de imagem)
+function deveExibirComando(comando: string | null | undefined): boolean {
+  if (!comando) return false
+  const textoLimpo = comando.trim().toLowerCase()
+  // Oculta se for descrição de imagem
+  if (textoLimpo.startsWith('descrição da imagem')) return false
+  if (textoLimpo.startsWith('descricao da imagem')) return false
+  if (textoLimpo.startsWith('["descrição')) return false
+  if (textoLimpo.startsWith("['descrição")) return false
+  // Oculta se começar com [" (array JSON de descrição)
+  if (/^\[["']/.test(textoLimpo)) return false
+  // Oculta se for muito curto (provavelmente lixo)
+  if (textoLimpo.length < 5) return false
+  return true
+}
+
+// Detecta se o texto contém uma tabela markdown
+function contemTabela(texto: string): boolean {
+  // Tabela markdown: linhas com | no início/meio e linha separadora com ---
+  const linhas = texto.split('\n')
+  let temPipe = false
+  let temSeparador = false
+  for (const linha of linhas) {
+    if (linha.includes('|')) temPipe = true
+    if (/\|[\s-:]+\|/.test(linha) || /^[\s-:]+\|/.test(linha)) temSeparador = true
+  }
+  return temPipe && temSeparador
+}
+
+// Converte tabela markdown para HTML
+function formatarTabelaMarkdown(texto: string): string {
+  const linhas = texto.split('\n')
+  const resultado: string[] = []
+  let dentroTabela = false
+  let tabelaLinhas: string[] = []
+
+  const processarTabela = (linhasTabela: string[]): string => {
+    if (linhasTabela.length < 2) return linhasTabela.join('\n')
+
+    let html = '<table class="tabela-enem">'
+    let isHeader = true
+
+    for (let i = 0; i < linhasTabela.length; i++) {
+      const linha = linhasTabela[i].trim()
+      // Pula linha separadora (---|---|---)
+      if (/^[\s|:-]+$/.test(linha.replace(/\|/g, '').replace(/-/g, '').replace(/:/g, ''))) {
+        isHeader = false
+        continue
+      }
+
+      const celulas = linha.split('|').map(c => c.trim()).filter(c => c !== '')
+      if (celulas.length === 0) continue
+
+      html += '<tr>'
+      const tag = isHeader && i === 0 ? 'th' : 'td'
+      for (const celula of celulas) {
+        html += `<${tag}>${celula}</${tag}>`
+      }
+      html += '</tr>'
+      if (isHeader && i === 0) isHeader = false
+    }
+
+    html += '</table>'
+    return html
+  }
+
+  for (const linha of linhas) {
+    const temPipe = linha.includes('|')
+
+    if (temPipe) {
+      if (!dentroTabela) {
+        dentroTabela = true
+        tabelaLinhas = []
+      }
+      tabelaLinhas.push(linha)
+    } else {
+      if (dentroTabela) {
+        resultado.push(processarTabela(tabelaLinhas))
+        dentroTabela = false
+        tabelaLinhas = []
+      }
+      resultado.push(linha)
+    }
+  }
+
+  // Processa tabela restante se terminar no final
+  if (dentroTabela && tabelaLinhas.length > 0) {
+    resultado.push(processarTabela(tabelaLinhas))
+  }
+
+  return resultado.join('\n')
+}
+
+// Processa texto completo: limpa e formata tabelas
+function processarTexto(texto: string | null | undefined): { __html: string } {
+  if (!texto) return { __html: '' }
+  let processado = limparTexto(texto)
+
+  // Se contém tabela, converte para HTML
+  if (contemTabela(processado)) {
+    processado = formatarTabelaMarkdown(processado)
+    // Converte quebras de linha restantes em <br>
+    processado = processado.replace(/\n/g, '<br>')
+  } else {
+    // Converte quebras de linha em <br> para texto normal
+    processado = processado.replace(/\n/g, '<br>')
+  }
+
+  return { __html: processado }
+}
+
 export default function SimuladoENEMPage() {
   const router = useRouter()
   const params = useParams()
@@ -211,6 +346,47 @@ export default function SimuladoENEMPage() {
 
   return (
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
+      {/* Estilos para tabelas do ENEM */}
+      <style jsx global>{`
+        .texto-questao .tabela-enem {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 12px 0;
+          font-size: 0.8rem;
+          background: var(--bg-elevated);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .texto-questao .tabela-enem th,
+        .texto-questao .tabela-enem td {
+          padding: 8px 12px;
+          text-align: left;
+          border-bottom: 1px solid var(--border-default);
+        }
+        .texto-questao .tabela-enem th {
+          background: var(--bg-surface);
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        .texto-questao .tabela-enem td {
+          color: var(--text-secondary);
+        }
+        .texto-questao .tabela-enem tr:last-child td {
+          border-bottom: none;
+        }
+        .texto-questao .tabela-enem tr:hover td {
+          background: rgba(0, 0, 0, 0.02);
+        }
+        @media (max-width: 640px) {
+          .texto-questao .tabela-enem {
+            font-size: 0.7rem;
+          }
+          .texto-questao .tabela-enem th,
+          .texto-questao .tabela-enem td {
+            padding: 6px 8px;
+          }
+        }
+      `}</style>
       <NavigationRail componente={componente} />
 
       {/* Header */}
@@ -303,12 +479,12 @@ export default function SimuladoENEMPage() {
               )}
             </div>
 
-            {/* Imagens */}
+            {/* Imagens - Responsivas: mobile 80px, tablet 120px, desktop 160px */}
             {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {questao.imagens.filter(isValidImageUrl).map((img, i) => (
                   <button key={i} onClick={() => setImagemZoom(img)} className="relative flex-shrink-0 rounded-lg overflow-hidden group" style={{ background: 'var(--bg-elevated)' }}>
-                    <img src={img} alt={`Figura ${i + 1}`} className="h-24 w-auto object-contain" style={{ maxWidth: '160px' }} />
+                    <img src={img} alt={`Figura ${i + 1}`} className="h-20 sm:h-28 lg:h-40 w-auto object-contain max-w-[120px] sm:max-w-[180px] lg:max-w-[280px]" />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
                       <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-all" />
                     </div>
@@ -317,17 +493,21 @@ export default function SimuladoENEMPage() {
               </div>
             )}
 
-            {/* Comando */}
-            {questao.comando && (
-              <div className="text-xs leading-relaxed rounded-lg p-3 italic" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                {questao.comando}
-              </div>
+            {/* Comando - só exibe se não for descrição de imagem */}
+            {deveExibirComando(questao.comando) && (
+              <div
+                className="text-xs leading-relaxed rounded-lg p-3 italic"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                dangerouslySetInnerHTML={processarTexto(questao.comando)}
+              />
             )}
 
-            {/* Enunciado */}
-            <div className="text-sm leading-relaxed rounded-lg p-3" style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '250px', overflowY: 'auto' }}>
-              {questao.contexto}
-            </div>
+            {/* Enunciado - com suporte a tabelas formatadas */}
+            <div
+              className="text-sm leading-relaxed rounded-lg p-3 texto-questao"
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '300px', overflowY: 'auto' }}
+              dangerouslySetInnerHTML={processarTexto(questao.contexto)}
+            />
 
             {/* Alternativas */}
             <div className="space-y-1.5">
@@ -359,7 +539,7 @@ export default function SimuladoENEMPage() {
                       {alt.letra}
                     </span>
                     <span className="text-xs flex-1 pt-0.5" style={{ color: alt.texto ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                      {alt.texto || '(alternativa vazia)'}
+                      {alt.texto ? limparTexto(alt.texto) : '(alternativa vazia)'}
                     </span>
                     {isCorreta && <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--success)' }} />}
                     {isErrada && <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />}
