@@ -45,6 +45,7 @@ export default function MenuComponentePage() {
 
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
+  const [mostrarEmBreve, setMostrarEmBreve] = useState(false)
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -115,9 +116,6 @@ export default function MenuComponentePage() {
   const menuENEM: MenuItem[] = (usuario.nivel === 'EM' && usuario.ano === 3)
     ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado', isComingSoon: true }]
     : []
-
-  // Estado para modal "Em breve"
-  const [mostrarEmBreve, setMostrarEmBreve] = useState(false)
 
   const menuItemsFim: MenuItem[] = [
     { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
