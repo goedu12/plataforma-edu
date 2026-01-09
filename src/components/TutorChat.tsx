@@ -13,19 +13,16 @@ import {
   Calculator,
   Sparkles,
   ArrowRight,
-  RefreshCw,
   MessageCircle,
   Mic,
   MicOff,
   Volume2,
   VolumeX,
-  Image as ImageIcon,
   Camera,
   XCircle
 } from 'lucide-react'
 import Button from './ui/Button'
 import { TypingIndicator } from './ui/Loading'
-import MapaMental, { extrairCodigoMermaid } from './MapaMental'
 import { useWebSpeech } from '@/hooks/useWebSpeech'
 import type { Componente, MensagemChat } from '@/types'
 
@@ -33,12 +30,11 @@ import type { Componente, MensagemChat } from '@/types'
 // TIPOS
 // ═══════════════════════════════════════════════════════════
 
-type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'MAPA_MENTAL' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
+type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
 
 const MODO_BADGES: Record<ModoIA, { icone: string; label: string }> = {
   'DIRETO': { icone: '⚡', label: 'Direto' },
   'PASSO_A_PASSO': { icone: '📝', label: 'Passo a Passo' },
-  'MAPA_MENTAL': { icone: '🗺️', label: 'Mapa Mental' },
   'ESTIMULAR': { icone: '💪', label: 'Motivação' },
   'SOCRATICO': { icone: '🎓', label: 'Socrático' },
   'CONVERSACIONAL': { icone: '💬', label: 'Conversa' },
@@ -82,22 +78,7 @@ const SUGESTOES_INICIAIS = {
   ],
 }
 
-const SUGESTOES_CONTINUIDADE = {
-  fisica: [
-    { texto: 'Me dê mais exemplos', prompt: 'Pode me dar mais exemplos práticos sobre isso?' },
-    { texto: 'Explique de outra forma', prompt: 'Não entendi bem, pode explicar de outra forma?' },
-    { texto: 'Crie um mapa mental', prompt: 'Crie um mapa mental visual sobre esse assunto para eu entender melhor' },
-    { texto: 'Exercício para praticar', prompt: 'Me dê um exercício para eu praticar esse conceito' },
-  ],
-  matematica: [
-    { texto: 'Me dê mais exemplos', prompt: 'Pode me dar mais exemplos resolvidos?' },
-    { texto: 'Passo a passo detalhado', prompt: 'Pode explicar novamente com mais detalhes?' },
-    { texto: 'Crie um mapa mental', prompt: 'Crie um mapa mental visual sobre esse tema para eu memorizar melhor' },
-    { texto: 'Exercício para praticar', prompt: 'Me dê um exercício para eu resolver e você corrige' },
-  ],
-}
-
-// Removido: frases motivacionais causavam repetição
+// Removido: sugestões de continuidade e mapas mentais
 
 // ═══════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
@@ -118,7 +99,6 @@ export default function TutorChat({
   const [usoHoje, setUsoHoje] = useState(usoInicial)
   const [erro, setErro] = useState<string | null>(null)
   const [mostrarSugestoesIniciais, setMostrarSugestoesIniciais] = useState(true)
-  const [mostrarSugestoesContinuidade, setMostrarSugestoesContinuidade] = useState(false)
 
   // Estados de imagem
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
@@ -144,11 +124,9 @@ export default function TutorChat({
 
   // Constantes derivadas
   const sugestoesIniciais = SUGESTOES_INICIAIS[componente]
-  const sugestoesContinuidade = SUGESTOES_CONTINUIDADE[componente]
   const primeiroNome = nomeEstudante.split(' ')[0]
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const corPrimariaHex = isFisica ? '#22c55e' : '#8b5cf6'
 
   // ═══════════════════════════════════════════════════════════
   // EFEITOS
@@ -297,7 +275,6 @@ export default function TutorChat({
     setLoading(true)
     setErro(null)
     setMostrarSugestoesIniciais(false)
-    setMostrarSugestoesContinuidade(false)
 
     // Limpar imagem após enviar
     const imagemParaEnviar = imagemBase64
@@ -329,7 +306,6 @@ export default function TutorChat({
         }
         setMensagens(prev => [...prev, respostaTutor])
         setUsoHoje(data.uso_hoje)
-        setMostrarSugestoesContinuidade(true)
       } else {
         setErro(data.erro || 'Erro ao comunicar com o tutor')
       }
@@ -366,7 +342,6 @@ export default function TutorChat({
         },
       ])
       setMostrarSugestoesIniciais(true)
-      setMostrarSugestoesContinuidade(false)
     } catch (error) {
       console.error('Erro ao limpar chat:', error)
     }
@@ -453,9 +428,6 @@ export default function TutorChat({
         style={{ background: 'var(--bg-base)' }}
       >
         {mensagens.map(msg => {
-          // Verificar se tem mapa mental na resposta
-          const codigoMermaid = msg.role === 'assistant' ? extrairCodigoMermaid(msg.content) : null
-
           return (
             <div
               key={msg.id}
@@ -525,13 +497,6 @@ export default function TutorChat({
                 >
                   {msg.content}
                 </p>
-
-                {/* Mapa Mental renderizado */}
-                {codigoMermaid && (
-                  <div className="mt-4">
-                    <MapaMental codigo={codigoMermaid} corPrimaria={corPrimariaHex} />
-                  </div>
-                )}
               </div>
             </div>
           )
@@ -584,34 +549,6 @@ export default function TutorChat({
           </div>
         )}
 
-        {/* Sugestões de Continuidade */}
-        {mostrarSugestoesContinuidade && !loading && mensagens.length > 2 && (
-          <div className="space-y-3">
-            <p
-              className="text-xs font-medium flex items-center gap-2"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <RefreshCw className="w-3.5 h-3.5" style={{ color: corPrimaria }} />
-              Continue a conversa
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {sugestoesContinuidade.map((sugestao, index) => (
-                <button
-                  key={index}
-                  onClick={() => enviarMensagem(sugestao.prompt)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-medium transition-all touch-target"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  {sugestao.texto}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* Loading */}
         {loading && (
