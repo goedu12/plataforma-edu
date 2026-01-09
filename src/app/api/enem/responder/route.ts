@@ -5,12 +5,11 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 // ═══════════════════════════════════════════════════════════════════════════
 // API ENEM - Submeter resposta
 // POST /api/enem/responder
-// Usa tabela enem_responses
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface RequestBody {
-  questao_id: string       // id da questão (ex: "questao_01_2022")
-  resposta: string         // A, B, C, D ou E
+  questao_id: string
+  resposta: string
   resposta_correta: string // base64 encoded
   tempo_segundos?: number
 }
@@ -33,7 +32,6 @@ export async function POST(request: NextRequest) {
       tempo_segundos = 0,
     } = body
 
-    // Validação básica
     if (!questao_id || !resposta || !respostaCorretaBase64) {
       return NextResponse.json(
         { sucesso: false, erro: 'Dados incompletos' },
@@ -49,7 +47,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Decodificar resposta correta
     let respostaCorreta: string
     try {
       respostaCorreta = Buffer.from(respostaCorretaBase64, 'base64').toString('utf-8').toUpperCase()
@@ -75,11 +72,11 @@ export async function POST(request: NextRequest) {
     if (!usuario || (!isProfessor && !isAluno3SerieEM)) {
       return NextResponse.json({
         sucesso: false,
-        erro: 'O Simulado ENEM está disponível apenas para alunos da 3ª série do Ensino Médio.',
+        erro: 'Simulado ENEM disponível apenas para 3ª série do EM.',
       }, { status: 403 })
     }
 
-    // Verificar se já respondeu esta questão
+    // Verificar se já respondeu
     const { data: respostaExistente } = await supabase
       .from('enem_responses')
       .select('id')
@@ -94,15 +91,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se acertou
     const correta = respostaUpperCase === respostaCorreta
-
-    // Validar tempo (máximo 2 horas)
     const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 7200
       ? Math.floor(tempo_segundos)
       : 0
 
-    // Inserir resposta na nova tabela
     const { error } = await supabase.from('enem_responses').insert({
       usuario_id: sessao.userId,
       question_id: questao_id,
@@ -119,7 +112,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Buscar estatísticas atualizadas
+    // Estatísticas atualizadas
     const { data: estatisticas } = await supabase
       .from('enem_responses')
       .select('correta')
