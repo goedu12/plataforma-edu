@@ -35,6 +35,7 @@ interface MenuItem {
   href: string
   description: string
   isNew?: boolean
+  isComingSoon?: boolean
 }
 
 export default function MenuComponentePage() {
@@ -110,10 +111,13 @@ export default function MenuComponentePage() {
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
   ]
 
-  // Simulado ENEM apenas para 3ª série do Ensino Médio
+  // Simulado ENEM apenas para 3ª série do Ensino Médio (temporariamente bloqueado)
   const menuENEM: MenuItem[] = (usuario.nivel === 'EM' && usuario.ano === 3)
-    ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado', isNew: true }]
+    ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado', isComingSoon: true }]
     : []
+
+  // Estado para modal "Em breve"
+  const [mostrarEmBreve, setMostrarEmBreve] = useState(false)
 
   const menuItemsFim: MenuItem[] = [
     { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
@@ -254,12 +258,13 @@ export default function MenuComponentePage() {
           {menuItems.map((item, index) => (
             <button
               key={item.label}
-              onClick={() => router.push(item.href)}
+              onClick={() => item.isComingSoon ? setMostrarEmBreve(true) : router.push(item.href)}
               className="rounded-xl p-3 text-left transition-all hover:translate-y-[-1px] group relative"
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
                 animationDelay: `${index * 30}ms`,
+                opacity: item.isComingSoon ? 0.7 : 1,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = accentColor
@@ -277,6 +282,15 @@ export default function MenuComponentePage() {
                   style={{ background: 'var(--color-accent)', color: '#fff' }}
                 >
                   NOVO
+                </span>
+              )}
+              {/* Badge EM BREVE */}
+              {item.isComingSoon && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full"
+                  style={{ background: 'var(--warning)', color: '#000' }}
+                >
+                  EM BREVE
                 </span>
               )}
               <div className="flex items-center gap-2">
@@ -303,6 +317,45 @@ export default function MenuComponentePage() {
           ))}
         </div>
       </main>
+
+      {/* Modal Em Breve */}
+      {mostrarEmBreve && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setMostrarEmBreve(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 text-center"
+            style={{ background: 'var(--bg-surface)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{ background: 'rgba(245, 158, 11, 0.1)' }}
+            >
+              <FileText className="w-8 h-8" style={{ color: 'var(--warning)' }} />
+            </div>
+            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+              Simulado ENEM
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Estamos preparando questões do ENEM especialmente para você!
+              Este recurso estará disponível em breve.
+            </p>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+              🎯 Fique atento às novidades!
+            </p>
+            <button
+              onClick={() => setMostrarEmBreve(false)}
+              className="w-full py-2.5 rounded-lg font-medium text-sm"
+              style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+            >
+              Entendi
+            </button>
+          </div>
+        </div>
+      )}
 
       <BottomNav componente={componente} />
     </div>
