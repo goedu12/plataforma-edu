@@ -3,11 +3,12 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Banco Local (Supabase)
+// API ENEM - Banco Local (Supabase) - Tabela enem_questions (CSV)
 // GET /api/enem?ano=2023&area=Matemática
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Interface da questão conforme CSV importado
+// Nota: area e num_questao podem não existir se SQL 30 não foi executado
 interface QuestaoCSV {
   id_unico: string
   id: string | null
@@ -42,25 +43,23 @@ function isValidImageUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false
   const trimmed = url.trim()
   if (!trimmed) return false
-
-  // Padrões inválidos
   const invalid = /^(nan|none|null|undefined|\s*)$/i
   if (invalid.test(trimmed)) return false
-
-  // Deve começar com http ou data:image
   return trimmed.startsWith('http') || trimmed.startsWith('data:image')
 }
 
 // Formatar questão do CSV para o frontend
 function formatarQuestao(q: QuestaoCSV): QuestaoFormatada {
-  // Número da questão
-  const numero = q.num_questao || 1
+  // Extrair número da questão do campo id se num_questao não existir
+  let numero = q.num_questao || 1
+  if (!q.num_questao && q.id) {
+    const match = q.id.match(/\d+/)
+    if (match) numero = parseInt(match[0], 10)
+  }
 
-  // Formatar alternativas do array JSON
   const letras = ['A', 'B', 'C', 'D', 'E']
   let alternativasArray: string[] = []
 
-  // Processar alternatives (pode ser array, string JSON, ou null)
   if (q.alternatives) {
     if (Array.isArray(q.alternatives)) {
       alternativasArray = q.alternatives
@@ -78,24 +77,20 @@ function formatarQuestao(q: QuestaoCSV): QuestaoFormatada {
     texto: alternativasArray[i] ? String(alternativasArray[i]).trim() : ''
   }))
 
-  // Processar imagens (figures pode ser array, string JSON, ou null)
   const imagens: string[] = []
   if (q.figures) {
     let figuresArray: string[] = []
-
     if (Array.isArray(q.figures)) {
       figuresArray = q.figures
     } else if (typeof q.figures === 'string') {
       try {
         figuresArray = JSON.parse(q.figures)
       } catch {
-        // Se não é JSON, pode ser uma URL única
         if (isValidImageUrl(q.figures)) {
           figuresArray = [q.figures]
         }
       }
     }
-
     figuresArray.forEach(url => {
       if (isValidImageUrl(url)) {
         imagens.push(url.trim())
@@ -155,13 +150,19 @@ export async function GET(request: NextRequest) {
 
     const anosDisponiveis = [...new Set(anosData?.map(a => a.ano).filter(Boolean) || [])]
 
-    // Buscar áreas disponíveis
-    const { data: areasData } = await supabase
-      .from('enem_questions')
-      .select('area')
-      .not('area', 'is', null)
+    // Buscar áreas disponíveis (pode não existir se SQL 30 não foi executado)
+    let areasDisponiveis: string[] = []
+    try {
+      const { data: areasData } = await supabase
+        .from('enem_questions')
+        .select('area')
+        .not('area', 'is', null)
 
-    const areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
+      areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
+    } catch {
+      // Coluna area pode não existir ainda
+      areasDisponiveis = []
+    }
 
     // Buscar IDs já respondidos
     const { data: respostasUsuario } = await supabase
@@ -180,13 +181,11 @@ export async function GET(request: NextRequest) {
       .select('*')
       .or('anulada.is.null,anulada.eq.false')
 
-    // Filtro por ano
     if (ano) {
       query = query.eq('ano', ano)
     }
-
-    // Filtro por área
-    if (areaParam) {
+    // Filtro por área só funciona se a coluna existir e tiver dados
+    if (areaParam && areasDisponiveis.length > 0) {
       query = query.eq('area', areaParam)
     }
 
