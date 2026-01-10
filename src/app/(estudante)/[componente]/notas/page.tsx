@@ -279,7 +279,7 @@ export default function NotasPage() {
               </div>
             </div>
 
-            {/* Metas Compactas */}
+            {/* Como Ganhar Pontos - Explicação da Fórmula */}
             <div
               className="card p-3"
               style={{
@@ -287,41 +287,83 @@ export default function NotasPage() {
                 border: `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
               }}
             >
-              <p className="text-xs font-medium mb-2" style={{ color: corPrimaria }}>Metas</p>
-              <div className="flex gap-4">
-                {[
-                  { nota: 6, label: '6.0' },
-                  { nota: 8, label: '8.0' },
-                  { nota: 10, label: '10.0' },
-                ].map((meta, i) => {
-                  const atingida = notaAtual.nota_final >= meta.nota
-                  const faltam = Math.max(0, Math.ceil((meta.nota - notaAtual.nota_final) / 0.05))
-                  return (
-                    <div key={i} className="flex items-center gap-2">
-                      <div
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
-                        style={{
-                          background: atingida ? corPrimaria : 'transparent',
-                          border: `2px solid ${atingida ? corPrimaria : 'var(--text-muted)'}`,
-                          color: atingida ? '#fff' : 'var(--text-muted)',
-                        }}
-                      >
-                        {atingida ? '✓' : ''}
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium" style={{ color: atingida ? corPrimaria : 'var(--text-secondary)', textDecoration: atingida ? 'line-through' : 'none' }}>
-                          {meta.label}
-                        </p>
-                        {!atingida && (
-                          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                            -{faltam} acertos
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
+              <p className="text-xs font-medium mb-3" style={{ color: corPrimaria }}>Como Ganhar Pontos</p>
+
+              {/* Barra de progresso da nota */}
+              <div className="mb-3">
+                <div className="flex justify-between text-[10px] mb-1" style={{ color: 'var(--text-muted)' }}>
+                  <span>0</span>
+                  <span style={{ color: notaAtual.nota_final >= 6 ? 'var(--success)' : 'var(--warning)' }}>6.0 (mín)</span>
+                  <span>10</span>
+                </div>
+                <div className="h-2 rounded-full overflow-hidden relative" style={{ background: 'var(--bg-elevated)' }}>
+                  {/* Marcador de 6.0 */}
+                  <div
+                    className="absolute top-0 bottom-0 w-0.5"
+                    style={{ left: '60%', background: 'var(--text-muted)', opacity: 0.5 }}
+                  />
+                  {/* Progresso de acertos (máx 6.0 = 60%) */}
+                  <div
+                    className="h-full rounded-full absolute"
+                    style={{
+                      width: `${Math.min(notaAtual.nota_acertos / 10 * 100, 60)}%`,
+                      background: corPrimaria,
+                      opacity: 0.7
+                    }}
+                  />
+                  {/* Progresso de tempo (máx 4.0 = 40%) */}
+                  <div
+                    className="h-full rounded-full absolute"
+                    style={{
+                      left: `${Math.min(notaAtual.nota_acertos / 10 * 100, 60)}%`,
+                      width: `${Math.min(notaAtual.nota_tempo / 10 * 100, 40)}%`,
+                      background: 'var(--color-accent)'
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-[10px]" style={{ color: corPrimaria }}>
+                    Acertos: {notaAtual.nota_acertos.toFixed(1)}/6.0
+                  </span>
+                  <span className="text-[10px]" style={{ color: 'var(--color-accent)' }}>
+                    Tempo: {notaAtual.nota_tempo.toFixed(1)}/4.0
+                  </span>
+                </div>
               </div>
+
+              {/* Tabela de pontos */}
+              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                <div className="p-2 rounded" style={{ background: 'var(--bg-elevated)' }}>
+                  <p className="font-medium mb-1" style={{ color: corPrimaria }}>Por Acertos (máx 6 pts)</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>Estudar: <b>0.04</b>/acerto</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>Revisão: <b>0.02</b>/acerto</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>Desafio: <b>0.01</b>/acerto</p>
+                </div>
+                <div className="p-2 rounded" style={{ background: 'var(--bg-elevated)' }}>
+                  <p className="font-medium mb-1" style={{ color: 'var(--color-accent)' }}>Por Tempo (máx 4 pts)</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>2 horas: <b>1.0</b> pt</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>3 horas: <b>2.0</b> pts</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>4 horas: <b>3.0</b> pts</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>5+ horas: <b>4.0</b> pts</p>
+                </div>
+              </div>
+
+              {/* Dica contextual */}
+              {notaAtual.nota_final < 10 && (
+                <div className="mt-3 p-2 rounded text-[10px]" style={{ background: 'var(--bg-base)', border: '1px dashed var(--border-default)' }}>
+                  <p style={{ color: 'var(--text-secondary)' }}>
+                    {notaAtual.nota_acertos < 6 && notaAtual.nota_tempo < 4 ? (
+                      <>💡 <b>Dica:</b> Acerte mais questões no modo Estudar (+0.04/acerto) e aumente seu tempo de uso para subir a nota!</>
+                    ) : notaAtual.nota_acertos >= 6 && notaAtual.nota_tempo < 4 ? (
+                      <>💡 <b>Dica:</b> Você atingiu o máximo de acertos! Agora foque em usar o app por mais tempo ({notaAtual.tempo_uso_horas < 2 ? '2h' : notaAtual.tempo_uso_horas < 3 ? '3h' : notaAtual.tempo_uso_horas < 4 ? '4h' : '5h'} para +{notaAtual.tempo_uso_horas < 2 ? '1' : notaAtual.tempo_uso_horas < 3 ? '1' : notaAtual.tempo_uso_horas < 4 ? '1' : '1'} pt).</>
+                    ) : notaAtual.nota_acertos < 6 && notaAtual.nota_tempo >= 4 ? (
+                      <>💡 <b>Dica:</b> Você atingiu o máximo de tempo! Foque em acertar mais questões no modo Estudar (+0.04/acerto).</>
+                    ) : (
+                      <>🎉 <b>Parabéns!</b> Você atingiu a nota máxima!</>
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Botões de Ação */}
