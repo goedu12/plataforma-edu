@@ -2,21 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
-import { NOTAS, BIMESTRES } from '@/types'
+import { NOTAS } from '@/types'
+import { getPeriodoAtual } from '@/lib/sistema-notas'
 
-// Calcular bimestre atual
-function calcularBimestreAtual(): { bimestre: 1 | 2 | 3 | 4; ano: number } {
-  const agora = new Date()
-  const mes = agora.getMonth() + 1
-  const ano = agora.getFullYear()
+// Calcular bimestre atual usando o sistema centralizado
+function calcularBimestreAtual(): { bimestre: 1 | 2 | 3 | 4; ano: number; dataInicio: string; dataFim: string } {
+  const ano = new Date().getFullYear()
+  const periodo = getPeriodoAtual(ano)
 
-  let bimestre: 1 | 2 | 3 | 4 = 1
-  if (mes >= 2 && mes <= 4) bimestre = 1
-  else if (mes >= 5 && mes <= 7) bimestre = 2
-  else if (mes >= 8 && mes <= 10) bimestre = 3
-  else bimestre = 4
+  if (periodo) {
+    return {
+      bimestre: periodo.bimestre,
+      ano,
+      dataInicio: periodo.config.regular.inicio,
+      dataFim: periodo.config.regular.fim,
+    }
+  }
 
-  return { bimestre, ano }
+  // Fallback: se fora do período, usar bimestre 1 do ano atual
+  return {
+    bimestre: 1,
+    ano,
+    dataInicio: `${ano}-01-01`,
+    dataFim: `${ano}-03-24`,
+  }
 }
 
 export async function GET(request: NextRequest) {
@@ -113,10 +122,7 @@ export async function GET(request: NextRequest) {
 
     // Relatório: Notas da Turma
     if (tipo === 'notas_turma') {
-      const { bimestre, ano } = calcularBimestreAtual()
-      const bimestreConfig = BIMESTRES[bimestre]
-      const dataInicio = `${ano}-${String(bimestreConfig.inicio.mes).padStart(2, '0')}-${String(bimestreConfig.inicio.dia).padStart(2, '0')}`
-      const dataFim = `${ano}-${String(bimestreConfig.fim.mes).padStart(2, '0')}-${String(bimestreConfig.fim.dia).padStart(2, '0')}`
+      const { bimestre, ano, dataInicio, dataFim } = calcularBimestreAtual()
 
       // Buscar estudantes da turma (ou todas se não especificada)
       let queryEstudantes = supabase
