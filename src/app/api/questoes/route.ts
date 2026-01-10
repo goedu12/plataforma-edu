@@ -32,6 +32,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Verificar se o estudante tem acesso ao componente solicitado
+    if (!sessao.componentes.includes(componente)) {
+      return NextResponse.json(
+        { sucesso: false, erro: `Você não está matriculado em ${componente === 'fisica' ? 'Física' : 'Matemática'}` },
+        { status: 403 }
+      )
+    }
+
     const supabase = getSupabaseAdmin()
 
     // ═══════════════════════════════════════════════════════════════════════
