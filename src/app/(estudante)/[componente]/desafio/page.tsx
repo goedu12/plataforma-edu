@@ -9,6 +9,7 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
+import { formatarFormula } from '@/lib/formatacao'
 
 type StatusDesafio = 'NOVO' | 'EM_ANDAMENTO' | 'SEM_QUESTOES' | 'ERRO' | 'RESULTADO'
 
@@ -492,7 +493,7 @@ export default function DesafioPage() {
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
               <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                {questaoAtualData.enunciado}
+                {formatarFormula(questaoAtualData.enunciado)}
               </p>
             </div>
 
@@ -520,7 +521,7 @@ export default function DesafioPage() {
                     {letra}
                   </span>
                   <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                    {texto}
+                    {formatarFormula(texto)}
                   </span>
                   {respostaAtual === letra && (
                     <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
