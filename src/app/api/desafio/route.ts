@@ -3,6 +3,7 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
 import { DESAFIO, obterNivelPorPontos } from '@/types'
+import { getPeriodoAtual } from '@/lib/sistema-notas'
 
 // GET - Iniciar um novo desafio
 export async function GET(request: NextRequest) {
@@ -84,12 +85,22 @@ export async function GET(request: NextRequest) {
     }
 
     // Buscar questões aleatórias para o desafio
-    const { data: questoesDisponiveis } = await supabase
+    // Filtrar por bimestre se estiver em período letivo
+    const periodo = getPeriodoAtual()
+
+    let queryDesafio = supabase
       .from('questoes')
       .select('id')
       .eq('componente', componente)
       .eq('ano', usuario.ano)
       .eq('status', 'ativa')
+
+    // Se há período ativo, filtrar por bimestre (questões específicas do bimestre OU sem bimestre definido)
+    if (periodo) {
+      queryDesafio = queryDesafio.or(`bimestre.is.null,bimestre.eq.${periodo.bimestre}`)
+    }
+
+    const { data: questoesDisponiveis } = await queryDesafio
 
     if (!questoesDisponiveis || questoesDisponiveis.length < DESAFIO.QUESTOES) {
       return NextResponse.json({

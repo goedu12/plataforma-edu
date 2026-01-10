@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star } from 'lucide-react'
+import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Medal } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
@@ -77,82 +77,83 @@ export default function RankingPage() {
   }
 
   const posicaoUsuario = ranking.findIndex(r => r.usuario_id === usuario.id) + 1
+  const pontosUsuario = ranking.find(r => r.usuario_id === usuario.id)?.pontos || 0
 
   return (
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header Padronizado */}
-      <header className="page-header">
-        <div className="max-w-lg mx-auto w-full">
-          <div className="flex items-center justify-between">
+      {/* Header com cor */}
+      <header className="px-4 pt-4 pb-5" style={{ background: corPrimaria }}>
+        <div className="max-w-lg mx-auto">
+          <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
-              style={{ color: 'var(--text-secondary)' }}
+              className="w-10 h-10 flex items-center justify-center rounded-xl"
+              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" style={{ color: corPrimaria }} />
-              <span className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Ranking
-              </span>
-              <span
-                className="badge-standard ml-1"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-              >
-                Turma {usuario.turma}
-              </span>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2">
+                <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+                <span
+                  className="font-display text-lg font-bold"
+                  style={{ color: isFisica ? '#000' : '#fff' }}
+                >
+                  Ranking
+                </span>
+              </div>
+              <p className="text-xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
+                Turma {usuario.turma} • {ranking.length} estudantes
+              </p>
             </div>
 
             <button
               onClick={() => buscarDados(true)}
               disabled={atualizando}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
-              style={{ color: 'var(--text-secondary)' }}
+              className="w-10 h-10 flex items-center justify-center rounded-xl"
+              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
             >
               <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          {/* Card de Posição do Usuário */}
+          {/* Card Posição do Usuário */}
           {posicaoUsuario > 0 && (
             <div
-              className="card-standard mt-4 flex items-center justify-between"
-              style={{
-                borderColor: isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)',
-              }}
+              className="rounded-xl p-4 flex items-center justify-between"
+              style={{ background: 'rgba(0,0,0,0.15)' }}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 {posicaoUsuario <= 3 ? (
                   <Crown
                     className="w-8 h-8"
                     style={{
                       color: posicaoUsuario === 1 ? '#FFD700'
-                        : posicaoUsuario === 2 ? '#C0C0C0'
+                        : posicaoUsuario === 2 ? '#E8E8E8'
                         : '#CD7F32',
                     }}
                   />
                 ) : (
-                  <Star className="w-8 h-8" style={{ color: corPrimaria }} />
+                  <Medal className="w-8 h-8" style={{ color: isFisica ? '#000' : '#fff' }} />
                 )}
                 <div>
-                  <p className="text-2xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-2xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
                     Sua Posição
                   </p>
-                  <p className="font-display text-2xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                  <p className="font-display text-3xl font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
                     {posicaoUsuario}º
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-2xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
-                  Total
+                <p className="text-2xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
+                  Seus Pontos
                 </p>
-                <p className="text-xl font-semibold tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-                  {ranking.length}
+                <p className="font-display text-2xl font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
+                  {pontosUsuario}
                 </p>
               </div>
             </div>

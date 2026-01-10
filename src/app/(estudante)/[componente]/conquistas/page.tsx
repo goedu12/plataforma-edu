@@ -29,7 +29,7 @@ const DIFICULDADE_CONFIG: Record<DificuldadeConquista, { label: string; cor: str
   facil: { label: 'Fácil', cor: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)' },
   medio: { label: 'Médio', cor: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' },
   dificil: { label: 'Difícil', cor: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' },
-  muito_dificil: { label: 'Muito Difícil', cor: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)' },
+  muito_dificil: { label: 'Difícil+', cor: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)' },
   lendario: { label: 'Lendário', cor: '#eab308', bg: 'rgba(234, 179, 8, 0.2)' },
 }
 
@@ -86,41 +86,46 @@ export default function ConquistasPage() {
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header Padronizado */}
-      <header className="page-header" style={{ background: corPrimaria, borderBottom: 'none' }}>
-        <div className="max-w-2xl mx-auto w-full">
-          <div className="flex items-center justify-between">
+      {/* Header */}
+      <header className="px-4 pt-4 pb-5" style={{ background: corPrimaria }}>
+        <div className="max-w-2xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
-              style={{ color: isFisica ? '#000' : '#fff' }}
+              className="w-10 h-10 flex items-center justify-center rounded-xl"
+              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
-              <span
-                className="font-display font-semibold"
-                style={{ color: isFisica ? '#000' : '#fff' }}
-              >
-                Conquistas
-              </span>
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-2">
+                <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+                <span
+                  className="font-display text-lg font-bold"
+                  style={{ color: isFisica ? '#000' : '#fff' }}
+                >
+                  Conquistas
+                </span>
+              </div>
+              <p className="text-xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
+                {stats.desbloqueadas} de {stats.total} desbloqueadas
+              </p>
             </div>
 
             <button
               onClick={buscarConquistas}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
-              style={{ color: isFisica ? '#000' : '#fff' }}
+              className="w-10 h-10 flex items-center justify-center rounded-xl"
+              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
             >
               <RefreshCw className="w-5 h-5" />
             </button>
           </div>
 
           {/* Progress Bar */}
-          <div className="flex items-center gap-3 mt-3">
+          <div className="flex items-center gap-3">
             <div
-              className="flex-1 h-2.5 rounded-full overflow-hidden"
+              className="flex-1 h-3 rounded-full overflow-hidden"
               style={{ background: 'rgba(0,0,0,0.2)' }}
             >
               <div
@@ -129,10 +134,10 @@ export default function ConquistasPage() {
               />
             </div>
             <span
-              className="text-sm font-bold tabular-nums min-w-[80px] text-right"
+              className="text-lg font-bold tabular-nums"
               style={{ color: isFisica ? '#000' : '#fff' }}
             >
-              {stats.desbloqueadas}/{stats.total} ({porcentagem}%)
+              {porcentagem}%
             </span>
           </div>
         </div>
@@ -156,27 +161,29 @@ export default function ConquistasPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {conquistas.map((conquista, index) => {
-              const dificuldadeConfig = config(conquista.dificuldade)
-              const isDesbloqueada = conquista.desbloqueada
+          <>
+            {/* Grid 2 Colunas */}
+            <div className="grid grid-cols-2 gap-3">
+              {conquistas.map((conquista, index) => {
+                const dificuldadeConfig = config(conquista.dificuldade)
+                const isDesbloqueada = conquista.desbloqueada
 
-              return (
-                <div
-                  key={conquista.id}
-                  className="list-item animate-fade-in-up"
-                  style={{
-                    border: isDesbloqueada
-                      ? `2px solid ${dificuldadeConfig.cor}`
-                      : '1px solid var(--border-default)',
-                    opacity: isDesbloqueada ? 1 : 0.65,
-                    animationDelay: `${index * 40}ms`,
-                  }}
-                >
-                  <div className="flex items-center gap-4">
-                    {/* Ícone */}
+                return (
+                  <div
+                    key={conquista.id}
+                    className="rounded-xl p-4 text-center animate-fade-in-up"
+                    style={{
+                      background: 'var(--bg-surface)',
+                      border: isDesbloqueada
+                        ? `2px solid ${dificuldadeConfig.cor}`
+                        : '1px solid var(--border-default)',
+                      opacity: isDesbloqueada ? 1 : 0.6,
+                      animationDelay: `${index * 40}ms`,
+                    }}
+                  >
+                    {/* Ícone Grande */}
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                      className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center text-2xl"
                       style={{
                         background: isDesbloqueada ? dificuldadeConfig.bg : 'var(--bg-elevated)',
                         border: isDesbloqueada ? 'none' : '2px dashed var(--border-default)',
@@ -185,47 +192,45 @@ export default function ConquistasPage() {
                       {isDesbloqueada ? (
                         conquista.icone
                       ) : (
-                        <Lock className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                        <Lock className="w-6 h-6" style={{ color: 'var(--text-muted)' }} />
                       )}
                     </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span
-                          className="badge-standard"
-                          style={{ background: dificuldadeConfig.bg, color: dificuldadeConfig.cor }}
-                        >
-                          Nível {conquista.ordem} • {dificuldadeConfig.label}
-                        </span>
-                        {isDesbloqueada && (
-                          <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} />
-                        )}
-                      </div>
-                      <h3
-                        className="font-semibold text-sm"
-                        style={{ color: isDesbloqueada ? 'var(--text-primary)' : 'var(--text-secondary)' }}
-                      >
-                        {conquista.nome}
-                      </h3>
-                    </div>
+                    {/* Badge Nível */}
+                    <span
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold mb-2"
+                      style={{ background: dificuldadeConfig.bg, color: dificuldadeConfig.cor }}
+                    >
+                      {isDesbloqueada && <CheckCircle2 className="w-3 h-3" />}
+                      {conquista.ordem}º • {dificuldadeConfig.label}
+                    </span>
+
+                    {/* Nome */}
+                    <h3
+                      className="font-semibold text-sm mb-2 line-clamp-1"
+                      style={{ color: isDesbloqueada ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+                    >
+                      {conquista.nome}
+                    </h3>
 
                     {/* Requisitos */}
-                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <div className="flex items-center justify-center gap-2 flex-wrap">
                       {conquista.req_pontos && (
-                        <span className="text-2xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
                           <Star className="w-3 h-3" style={{ color: '#eab308' }} />
-                          {conquista.req_pontos.toLocaleString()}
+                          {conquista.req_pontos >= 1000
+                            ? `${(conquista.req_pontos / 1000).toFixed(conquista.req_pontos % 1000 === 0 ? 0 : 1)}k`
+                            : conquista.req_pontos}
                         </span>
                       )}
                       {conquista.req_questoes_corretas && (
-                        <span className="text-2xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
                           <Target className="w-3 h-3" style={{ color: corPrimaria }} />
                           {conquista.req_questoes_corretas}
                         </span>
                       )}
                       {conquista.req_sequencia_dias && (
-                        <span className="text-2xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                        <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
                           <Flame className="w-3 h-3" style={{ color: 'var(--color-streak)' }} />
                           {conquista.req_sequencia_dias}d
                         </span>
@@ -235,17 +240,16 @@ export default function ConquistasPage() {
                           {conquista.requisito_tipo === 'pontos' && `${conquista.requisito_valor} pts`}
                           {conquista.requisito_tipo === 'questoes' && `${conquista.requisito_valor} questões`}
                           {conquista.requisito_tipo === 'sequencia' && `${conquista.requisito_valor} dias`}
-                          {conquista.requisito_tipo === 'acertos' && `${conquista.requisito_valor}%`}
                         </span>
                       )}
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
 
             {/* Legenda */}
-            <div className="flex items-center justify-center gap-6 py-3">
+            <div className="flex items-center justify-center gap-5 py-4 mt-2">
               <span className="text-2xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
                 <Star className="w-3.5 h-3.5" style={{ color: '#eab308' }} /> Pontos
               </span>
@@ -256,7 +260,7 @@ export default function ConquistasPage() {
                 <Flame className="w-3.5 h-3.5" style={{ color: 'var(--color-streak)' }} /> Sequência
               </span>
             </div>
-          </div>
+          </>
         )}
       </main>
 

@@ -17,6 +17,9 @@ export type StatusQuestao = 'ativa' | 'inativa'
 // Dificuldade de Questão
 export type Dificuldade = 'facil' | 'medio' | 'dificil'
 
+// Bimestre (1-4)
+export type Bimestre = 1 | 2 | 3 | 4
+
 // ═══════════════════════════════════════════════════════════
 // INTERFACE: Usuario
 // ═══════════════════════════════════════════════════════════
@@ -63,6 +66,7 @@ export interface Questao {
   id: string
   componente: Componente
   ano: number
+  bimestre?: Bimestre | null  // null = disponível em todos os bimestres
   tema: string
   subtema?: string
   dificuldade: Dificuldade
@@ -618,7 +622,6 @@ export const ENEM_CONFIG = {
 // ═══════════════════════════════════════════════════════════
 
 export type SerieEM = 1 | 2 | 3
-export type Bimestre = 1 | 2 | 3 | 4
 
 export interface MapaMental {
   id: string
