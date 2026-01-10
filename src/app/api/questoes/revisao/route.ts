@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
     for (const questaoRevisao of questoesParaRevisao) {
       const { data: questaoData, error: erroQuestao } = await supabase
         .from('questoes')
-        .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, explicacao, dica, status')
+        .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, explicacao, dica, status')
         .eq('id', questaoRevisao.questao_id)
         .eq('status', 'ativa')
         .single()
@@ -171,6 +171,7 @@ export async function GET(request: NextRequest) {
         alternativa_b: questaoEncontrada.alternativa_b,
         alternativa_c: questaoEncontrada.alternativa_c,
         alternativa_d: questaoEncontrada.alternativa_d,
+        alternativa_e: questaoEncontrada.alternativa_e,
         explicacao: questaoEncontrada.explicacao,
         dica: questaoEncontrada.dica,
       },
