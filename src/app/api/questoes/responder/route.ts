@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!['A', 'B', 'C', 'D'].includes(resposta.toUpperCase())) {
+    if (!['A', 'B', 'C', 'D', 'E'].includes(resposta.toUpperCase())) {
       return NextResponse.json(
         { sucesso: false, erro: 'Resposta inválida' },
         { status: 400 }
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Calcular pontos (sem pontos no modo revisão - é apenas prática)
-    const correta = resposta.toUpperCase() === questao.resposta_correta
+    const correta = resposta.toUpperCase() === questao.resposta_correta?.toUpperCase()
     let pontosGanhos = 0
 
     if (correta && !ehModoRevisao) {
