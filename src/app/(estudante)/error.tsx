@@ -44,7 +44,7 @@ export default function EstudanteError({ error, reset }: ErrorProps) {
             variant="fisica"
             onClick={reset}
             leftIcon={<RefreshCw className="w-5 h-5" />}
-            fullWidth
+            className="w-full"
           >
             Tentar Novamente
           </Button>
@@ -53,7 +53,7 @@ export default function EstudanteError({ error, reset }: ErrorProps) {
             variant="secondary"
             onClick={() => window.location.href = '/selecionar'}
             leftIcon={<Home className="w-5 h-5" />}
-            fullWidth
+            className="w-full"
           >
             Voltar ao Início
           </Button>
