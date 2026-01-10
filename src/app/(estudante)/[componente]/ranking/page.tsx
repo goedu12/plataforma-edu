@@ -82,65 +82,56 @@ export default function RankingPage() {
   return (
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
-      {/* Header */}
-      <header className="px-4 pt-6 pb-4">
+
+      {/* Header Compacto */}
+      <header className="px-4 pt-3 pb-3">
         <div className="max-w-lg mx-auto">
-          {/* Nav */}
-          <div className="flex items-center justify-between mb-6">
+          {/* Nav + Turma em uma linha */}
+          <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-3 rounded-xl transition-all touch-target"
+              className="p-2 rounded-lg transition-all"
               style={{ color: 'var(--text-secondary)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" style={{ color: corPrimaria }} />
-              <span className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <Trophy className="w-4 h-4" style={{ color: corPrimaria }} />
+              <span className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Ranking
+              </span>
+              <span
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}
+              >
+                {usuario.turma}
               </span>
             </div>
 
             <button
               onClick={() => buscarDados(true)}
               disabled={atualizando}
-              className="p-3 rounded-xl transition-all touch-target"
+              className="p-2 rounded-lg transition-all"
               style={{ color: 'var(--text-secondary)' }}
             >
-              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${atualizando ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          {/* Badge Turma */}
-          <div className="text-center mb-6">
-            <div
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-            >
-              <Users className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-              <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                Turma {usuario.turma} • {nomeComponente}
-              </span>
-            </div>
-          </div>
-
-          {/* Posição do usuário */}
+          {/* Card de posição compacto */}
           {posicaoUsuario > 0 && (
             <div
-              className="rounded-2xl p-6 text-center"
+              className="rounded-xl p-3 flex items-center justify-between"
               style={{
                 background: 'var(--bg-surface)',
                 border: `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
               }}
             >
-              <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-                Sua Posição
-              </p>
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center gap-3">
                 {posicaoUsuario <= 3 ? (
                   <Crown
-                    className="w-10 h-10"
+                    className="w-6 h-6"
                     style={{
                       color: posicaoUsuario === 1 ? '#FFD700'
                         : posicaoUsuario === 2 ? '#C0C0C0'
@@ -148,71 +139,50 @@ export default function RankingPage() {
                     }}
                   />
                 ) : (
-                  <Star className="w-10 h-10" style={{ color: corPrimaria }} />
+                  <Star className="w-6 h-6" style={{ color: corPrimaria }} />
                 )}
-                <span
-                  className="font-display text-5xl font-bold tabular-nums"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  {posicaoUsuario}º
-                </span>
+                <div>
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Sua posição</span>
+                  <p className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                    {posicaoUsuario}º
+                  </p>
+                </div>
               </div>
-              <p className="text-sm mt-3" style={{ color: 'var(--text-secondary)' }}>
-                de {ranking.length} estudantes
-              </p>
+              <div className="text-right">
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>de</span>
+                <p className="text-lg font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                  {ranking.length}
+                </p>
+              </div>
             </div>
           )}
         </div>
       </header>
 
       {/* Content */}
-      <main className="max-w-lg mx-auto px-4">
+      <main className="max-w-lg mx-auto px-3 pb-4">
         {erro ? (
           <div
-            className="card p-8 text-center"
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-default)',
-            }}
+            className="card p-6 text-center"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
-            <div
-              className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{ background: 'rgba(239, 68, 68, 0.15)' }}
-            >
-              <WifiOff className="w-8 h-8" style={{ color: 'var(--error)' }} />
-            </div>
-            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
-              {erro}
-            </p>
+            <WifiOff className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
             <Button
               variant={isFisica ? 'fisica' : 'matematica'}
               onClick={() => buscarDados()}
+              size="sm"
               leftIcon={<RefreshCw className="w-4 h-4" />}
             >
               Tentar Novamente
             </Button>
           </div>
         ) : (
-          <>
-            {/* Dica */}
-            <div
-              className="p-4 rounded-xl mb-6"
-              style={{
-                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
-              }}
-            >
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                <strong style={{ color: corPrimaria }}>Dica:</strong> Responda questões corretamente para subir no ranking!
-              </p>
-            </div>
-
-            <RankingTable
-              ranking={ranking}
-              componente={componente}
-              usuarioAtualId={usuario.id}
-            />
-          </>
+          <RankingTable
+            ranking={ranking}
+            componente={componente}
+            usuarioAtualId={usuario.id}
+          />
         )}
       </main>
 
