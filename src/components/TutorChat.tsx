@@ -7,19 +7,14 @@ import {
   Bot,
   AlertCircle,
   X,
-  Lightbulb,
-  BookOpen,
-  HelpCircle,
-  Calculator,
-  Sparkles,
-  ArrowRight,
   MessageCircle,
   Mic,
   MicOff,
   Volume2,
   VolumeX,
   Camera,
-  XCircle
+  XCircle,
+  Keyboard
 } from 'lucide-react'
 import Button from './ui/Button'
 import { TypingIndicator } from './ui/Loading'
@@ -31,14 +26,6 @@ import type { Componente, MensagemChat } from '@/types'
 // ═══════════════════════════════════════════════════════════
 
 type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
-
-const MODO_BADGES: Record<ModoIA, { icone: string; label: string }> = {
-  'DIRETO': { icone: '⚡', label: 'Direto' },
-  'PASSO_A_PASSO': { icone: '📝', label: 'Passo a Passo' },
-  'ESTIMULAR': { icone: '💪', label: 'Motivação' },
-  'SOCRATICO': { icone: '🎓', label: 'Socrático' },
-  'CONVERSACIONAL': { icone: '💬', label: 'Conversa' },
-}
 
 interface MensagemChatComModo extends MensagemChat {
   modo?: ModoIA
@@ -60,25 +47,8 @@ interface TutorChatProps {
 // ═══════════════════════════════════════════════════════════
 
 const MAX_CARACTERES = 500
-const MAX_IMAGE_SIZE = 1024 * 1024 // 1MB após compressão
+const MAX_IMAGE_SIZE = 1024 * 1024 // 1MB apos compressao
 const IMAGE_QUALITY = 0.7
-
-const SUGESTOES_INICIAIS = {
-  fisica: [
-    { icon: Lightbulb, texto: 'Explique as Leis de Newton', prompt: 'Me explique as três Leis de Newton de forma simples e com exemplos do dia a dia' },
-    { icon: Calculator, texto: 'Como calcular velocidade?', prompt: 'Como calculo a velocidade média de um objeto? Me dê exemplos práticos' },
-    { icon: HelpCircle, texto: 'O que é energia cinética?', prompt: 'O que é energia cinética e como calcular? Explique com exemplos' },
-    { icon: BookOpen, texto: 'Movimento circular', prompt: 'Me ensine sobre movimento circular uniforme de forma simples' },
-  ],
-  matematica: [
-    { icon: Lightbulb, texto: 'Equação do 2º grau', prompt: 'Me ensine a resolver equações do segundo grau passo a passo' },
-    { icon: Calculator, texto: 'Regra de três', prompt: 'Me explique como fazer regra de três simples e composta com exemplos' },
-    { icon: HelpCircle, texto: 'Função quadrática', prompt: 'O que é uma função quadrática e como funciona? Me dê exemplos' },
-    { icon: BookOpen, texto: 'Teorema de Pitágoras', prompt: 'Me explique o Teorema de Pitágoras com exemplos práticos' },
-  ],
-}
-
-// Removido: sugestões de continuidade e mapas mentais
 
 // ═══════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
@@ -98,7 +68,6 @@ export default function TutorChat({
   const [loading, setLoading] = useState(false)
   const [usoHoje, setUsoHoje] = useState(usoInicial)
   const [erro, setErro] = useState<string | null>(null)
-  const [mostrarSugestoesIniciais, setMostrarSugestoesIniciais] = useState(true)
 
   // Estados de imagem
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
@@ -123,7 +92,6 @@ export default function TutorChat({
   } = useWebSpeech()
 
   // Constantes derivadas
-  const sugestoesIniciais = SUGESTOES_INICIAIS[componente]
   const primeiroNome = nomeEstudante.split(' ')[0]
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
@@ -134,11 +102,11 @@ export default function TutorChat({
 
   // Mensagem inicial
   useEffect(() => {
-    const disciplina = componente === 'fisica' ? 'Física' : 'Matemática'
+    const disciplina = componente === 'fisica' ? 'Fisica' : 'Matematica'
     const mensagemInicial: MensagemChat = {
       id: '1',
       role: 'assistant',
-      content: `Olá, ${primeiroNome}! 👋\n\nSou o ${nomeTutor}, seu tutor de ${disciplina}! Estou aqui para te ajudar a aprender de forma simples e divertida.\n\n💡 Você pode:\n• Digitar sua dúvida\n• Enviar uma foto da questão 📷\n• Falar sua pergunta 🎤\n• Ouvir minhas explicações 🔊\n\nEscolha uma das perguntas abaixo ou comece do seu jeito!`,
+      content: `${primeiroNome}, sou o ${nomeTutor}, seu tutor de ${disciplina}.\n\nMe conta: o que voce esta estudando ou qual duvida quer resolver?`,
       timestamp: new Date().toISOString(),
     }
     setMensagens([mensagemInicial])
@@ -265,7 +233,7 @@ export default function TutorChat({
     const novaMensagem: MensagemChatComModo = {
       id: Date.now().toString(),
       role: 'user',
-      content: texto || '📷 [Imagem enviada]',
+      content: texto || '[Imagem enviada]',
       timestamp: new Date().toISOString(),
       imagemBase64: imagemBase64 || undefined,
     }
@@ -274,7 +242,6 @@ export default function TutorChat({
     setInput('')
     setLoading(true)
     setErro(null)
-    setMostrarSugestoesIniciais(false)
 
     // Limpar imagem após enviar
     const imagemParaEnviar = imagemBase64
@@ -337,11 +304,10 @@ export default function TutorChat({
         {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `Chat reiniciado, ${primeiroNome}! 🔄\n\nVamos começar de novo? Escolha uma pergunta ou digite sua dúvida!`,
+          content: `Conversa reiniciada. ${primeiroNome}, qual sua duvida?`,
           timestamp: new Date().toISOString(),
         },
       ])
-      setMostrarSugestoesIniciais(true)
     } catch (error) {
       console.error('Erro ao limpar chat:', error)
     }
@@ -395,9 +361,8 @@ export default function TutorChat({
           </div>
           <div>
             <h2 className="font-semibold" style={{ color: 'var(--text-primary)' }}>{nomeTutor}</h2>
-            <p className="text-xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-              <Sparkles className="w-3 h-3" style={{ color: corPrimaria }} />
-              IA • {usoHoje}/{limiteDiario} msgs hoje
+            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+              Tutor IA - {usoHoje}/{limiteDiario} msgs hoje
             </p>
           </div>
         </div>
@@ -450,22 +415,11 @@ export default function TutorChat({
                   <div className="flex items-center gap-2 mb-2">
                     <Bot className="w-4 h-4" style={{ color: corPrimaria }} />
                     <span className="text-xs font-medium" style={{ color: corPrimaria }}>{nomeTutor}</span>
-                    {msg.modo && MODO_BADGES[msg.modo] && (
-                      <span
-                        className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-medium"
-                        style={{
-                          background: 'var(--bg-elevated)',
-                          color: 'var(--text-secondary)'
-                        }}
-                      >
-                        {MODO_BADGES[msg.modo].icone} {MODO_BADGES[msg.modo].label}
-                      </span>
-                    )}
-                    {/* Botão de ouvir resposta */}
+                    {/* Botao de ouvir resposta */}
                     {ttsSupported && (
                       <button
                         onClick={() => toggleSpeaking(msg.content)}
-                        className="p-1 rounded-lg transition-colors hover:bg-black/10"
+                        className="ml-auto p-1 rounded-lg transition-colors hover:bg-black/10"
                         title={isSpeaking ? 'Parar de falar' : 'Ouvir resposta'}
                       >
                         {isSpeaking ? (
@@ -501,54 +455,6 @@ export default function TutorChat({
             </div>
           )
         })}
-
-        {/* Sugestões Iniciais */}
-        {mostrarSugestoesIniciais && mensagens.length <= 1 && !loading && (
-          <div className="space-y-4">
-            <p
-              className="text-xs font-medium flex items-center gap-2"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <Lightbulb className="w-3.5 h-3.5" style={{ color: corPrimaria }} />
-              Sugestões para você, {primeiroNome}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {sugestoesIniciais.map((sugestao, index) => (
-                <button
-                  key={index}
-                  onClick={() => enviarMensagem(sugestao.prompt)}
-                  className="flex items-start gap-3 p-4 rounded-2xl text-left transition-all group touch-target"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                  }}
-                >
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{
-                      background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
-                    }}
-                  >
-                    <sugestao.icon className="w-5 h-5" style={{ color: corPrimaria }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span
-                      className="text-sm font-medium block"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      {sugestao.texto}
-                    </span>
-                  </div>
-                  <ArrowRight
-                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0 mt-1"
-                    style={{ color: corPrimaria }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
 
         {/* Loading */}
         {loading && (
@@ -736,7 +642,7 @@ export default function TutorChat({
             </button>
           </div>
 
-          {/* Dica de interação */}
+          {/* Dica de interacao */}
           <div className="flex items-center justify-center gap-4 mt-3">
             <span className="text-[10px] flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
               <Camera className="w-3 h-3" /> Foto
@@ -747,7 +653,7 @@ export default function TutorChat({
               </span>
             )}
             <span className="text-[10px] flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
-              ⌨️ Texto
+              <Keyboard className="w-3 h-3" /> Texto
             </span>
             {ttsSupported && (
               <span className="text-[10px] flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
