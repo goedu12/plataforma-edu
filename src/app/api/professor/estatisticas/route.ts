@@ -70,15 +70,18 @@ export async function GET(request: NextRequest) {
       .toISOString()
       .split('T')[0]
 
+    // Cast para o tipo correto (Supabase retorna tipo genérico)
+    const estudantesTyped = estudantes as unknown as EstudanteData[]
+
     // Calcular estatísticas por componente
-    const fisicaStats = calcularEstatisticasComponente(estudantes, 'fisica', seteDiasAtras)
-    const matematicaStats = calcularEstatisticasComponente(estudantes, 'matematica', seteDiasAtras)
+    const fisicaStats = calcularEstatisticasComponente(estudantesTyped, 'fisica', seteDiasAtras)
+    const matematicaStats = calcularEstatisticasComponente(estudantesTyped, 'matematica', seteDiasAtras)
 
     // Gerar alertas
-    const alertas = gerarAlertas(estudantes, seteDiasAtras, hoje)
+    const alertas = gerarAlertas(estudantesTyped, seteDiasAtras, hoje)
 
     // Calcular desempenho por turma
-    const desempenho_turmas = calcularDesempenhoPorTurma(estudantes)
+    const desempenho_turmas = calcularDesempenhoPorTurma(estudantesTyped)
 
     return NextResponse.json({
       sucesso: true,
