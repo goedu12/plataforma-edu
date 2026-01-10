@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         // Buscar questões do desafio
         const { data: questoes } = await supabase
           .from('questoes')
-          .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, dica')
+          .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, dica')
           .in('id', desafio.questoes_ids)
 
         return NextResponse.json({
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     // Buscar questões completas
     const { data: questoes } = await supabase
       .from('questoes')
-      .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, dica')
+      .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, dica')
       .in('id', questoesIds)
 
     return NextResponse.json({
@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
       const resultados = desafio.questoes_ids.map((qId: string, index: number) => {
         const questao = questoesMap.get(qId)
         const respostaDada = respostasDadas[index] || null
-        const correta = respostaDada === questao?.resposta_correta
+        const correta = respostaDada?.toUpperCase() === questao?.resposta_correta?.toUpperCase()
         if (correta) acertos++
         return {
           questao_id: qId,

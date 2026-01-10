@@ -71,7 +71,8 @@ export interface Questao {
   alternativa_b: string
   alternativa_c: string
   alternativa_d: string
-  resposta_correta: 'A' | 'B' | 'C' | 'D'
+  alternativa_e?: string
+  resposta_correta: 'A' | 'B' | 'C' | 'D' | 'E'
   explicacao: string
   dica?: string
   status: StatusQuestao
@@ -86,7 +87,7 @@ export interface Resposta {
   usuario_id: string
   questao_id: string
   componente: Componente
-  resposta_dada: 'A' | 'B' | 'C' | 'D'
+  resposta_dada: 'A' | 'B' | 'C' | 'D' | 'E'
   correta: boolean
   tempo_segundos: number
   usou_dica: boolean

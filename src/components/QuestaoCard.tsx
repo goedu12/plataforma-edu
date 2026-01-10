@@ -31,7 +31,7 @@ interface QuestaoCardProps {
   questao: Questao
   componente: Componente
   tempoDecorrido: number
-  onResponder: (resposta: 'A' | 'B' | 'C' | 'D', usouDica: boolean) => void
+  onResponder: (resposta: 'A' | 'B' | 'C' | 'D' | 'E', usouDica: boolean) => void
   onProxima: () => void
   onVoltar: () => void
   modo?: ModoResposta
@@ -39,7 +39,7 @@ interface QuestaoCardProps {
   onNotaAtualizada?: (limite: LimiteInfo) => void
 }
 
-type Alternativa = 'A' | 'B' | 'C' | 'D'
+type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
 
 interface ConquistaDesbloqueada {
   nome: string
@@ -81,6 +81,7 @@ export default function QuestaoCard({
     { letra: 'B', texto: questao.alternativa_b },
     { letra: 'C', texto: questao.alternativa_c },
     { letra: 'D', texto: questao.alternativa_d },
+    ...(questao.alternativa_e ? [{ letra: 'E' as Alternativa, texto: questao.alternativa_e }] : []),
   ]
 
   const handlePedirDica = () => {

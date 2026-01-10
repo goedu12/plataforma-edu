@@ -14,6 +14,7 @@ type StatusDesafio = 'NOVO' | 'EM_ANDAMENTO' | 'SEM_QUESTOES' | 'ERRO' | 'RESULT
 
 interface QuestaoDesafio extends Omit<Questao, 'resposta_correta' | 'explicacao' | 'status' | 'criado_em' | 'ano' | 'subtema'> {
   id: string
+  alternativa_e?: string
 }
 
 interface ResultadoQuestao {
@@ -392,6 +393,7 @@ export default function DesafioPage() {
     { letra: 'B', texto: questaoAtualData.alternativa_b },
     { letra: 'C', texto: questaoAtualData.alternativa_c },
     { letra: 'D', texto: questaoAtualData.alternativa_d },
+    ...(questaoAtualData.alternativa_e ? [{ letra: 'E', texto: questaoAtualData.alternativa_e }] : []),
   ] : []
 
   return (
