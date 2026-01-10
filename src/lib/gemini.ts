@@ -249,6 +249,40 @@ export async function chatComTutor(
     .join('\n\n')
 
   // ═══════════════════════════════════════════════════════════
+  // CONSTRUIR CONTEXTO PERSONALIZADO DO ESTUDANTE
+  // ═══════════════════════════════════════════════════════════
+  const parteContexto: string[] = []
+
+  if (contexto.serie) {
+    parteContexto.push(`Serie: ${contexto.serie}o ano do Ensino Medio`)
+  }
+
+  if (contexto.percentualAcertos !== undefined && contexto.questoesRespondidas) {
+    parteContexto.push(`Desempenho recente: ${contexto.percentualAcertos}% de acertos em ${contexto.questoesRespondidas} questoes`)
+  }
+
+  if (contexto.temasComDificuldade && contexto.temasComDificuldade.length > 0) {
+    parteContexto.push(`Temas com dificuldade: ${contexto.temasComDificuldade.join(', ')}`)
+  }
+
+  if (contexto.notaBimestre !== undefined && contexto.metaBimestre) {
+    const progresso = Math.round((contexto.notaBimestre / contexto.metaBimestre) * 100)
+    parteContexto.push(`Progresso no bimestre: ${contexto.notaBimestre}/${contexto.metaBimestre} pontos (${progresso}%)`)
+  }
+
+  if (contexto.sequenciaDias && contexto.sequenciaDias > 1) {
+    parteContexto.push(`Sequencia de estudo: ${contexto.sequenciaDias} dias consecutivos`)
+  }
+
+  if (contexto.conquistaRecente) {
+    parteContexto.push(`Conquista recente: "${contexto.conquistaRecente}"`)
+  }
+
+  const contextoEstudante = parteContexto.length > 0
+    ? `\nCONTEXTO DO ESTUDANTE (use para personalizar a resposta, mas nao mencione explicitamente esses dados):\n${parteContexto.join('\n')}\n`
+    : ''
+
+  // ═══════════════════════════════════════════════════════════
   // PROMPT COMPLETO COM MODO ESPECÍFICO
   // ═══════════════════════════════════════════════════════════
 
@@ -258,9 +292,9 @@ export async function chatComTutor(
     : ''
 
   const prompt = `${tutor.system}
-${instrucaoImagem}
+${contextoEstudante}${instrucaoImagem}
 ${promptModo ? `\n${promptModo}\n` : ''}
-${historicoTexto ? `HISTÓRICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudante: ${mensagem}
+${historicoTexto ? `HISTORICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudante: ${mensagem}
 
 ${tutor.nome}:`
 

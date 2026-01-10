@@ -21,12 +21,22 @@ export type ModoIA =
   | 'CONVERSACIONAL'
 
 export interface ContextoEstudante {
+  // Contexto de modo (deteccao automatica)
   sequenciaErros?: number
   ultimoResultado?: 'acerto' | 'erro' | null
   nivelFrustracao?: number // 1-10
   nivelEngajamento?: number // 1-10
   precisaMotivacao?: boolean
   msgsSemResposta?: number
+  // Contexto personalizado (dados do estudante)
+  serie?: number
+  temasComDificuldade?: string[]
+  percentualAcertos?: number
+  questoesRespondidas?: number
+  sequenciaDias?: number
+  notaBimestre?: number
+  metaBimestre?: number
+  conquistaRecente?: string
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
