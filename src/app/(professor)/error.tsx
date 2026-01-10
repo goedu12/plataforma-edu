@@ -35,7 +35,7 @@ export default function ProfessorError({ error, reset }: ErrorProps) {
             variant="primary"
             onClick={reset}
             leftIcon={<RefreshCw className="w-5 h-5" />}
-            fullWidth
+            className="w-full"
           >
             Tentar Novamente
           </Button>
@@ -44,7 +44,7 @@ export default function ProfessorError({ error, reset }: ErrorProps) {
             variant="secondary"
             onClick={() => window.location.href = '/professor/dashboard'}
             leftIcon={<Home className="w-5 h-5" />}
-            fullWidth
+            className="w-full"
           >
             Voltar ao Dashboard
           </Button>
