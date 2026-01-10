@@ -3,6 +3,7 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
 import { obterStatusSemanal, getPeriodoAtual } from '@/lib/sistema-notas'
+import { logger } from '@/lib/logger'
 
 // Mapeamento de dificuldade para ordenação correta
 const ORDEM_DIFICULDADE: Record<string, number> = {
@@ -10,6 +11,9 @@ const ORDEM_DIFICULDADE: Record<string, number> = {
   'medio': 2,
   'dificil': 3,
 }
+
+// Componentes válidos para type guard
+const COMPONENTES_VALIDOS = ['fisica', 'matematica'] as const
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,15 +26,19 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams
-    const componente = searchParams.get('componente') as Componente
+    const componenteParam = searchParams.get('componente')
     const modo = searchParams.get('modo') || 'estudo'
 
-    if (!componente || !['fisica', 'matematica'].includes(componente)) {
+    // Validação ANTES do cast - evita comportamento inesperado
+    if (!componenteParam || !COMPONENTES_VALIDOS.includes(componenteParam as typeof COMPONENTES_VALIDOS[number])) {
       return NextResponse.json(
-        { sucesso: false, erro: 'Componente inválido' },
+        { sucesso: false, erro: 'Componente inválido. Use: fisica ou matematica' },
         { status: 400 }
       )
     }
+
+    // Cast seguro APÓS validação
+    const componente = componenteParam as Componente
 
     // Verificar se o estudante tem acesso ao componente solicitado
     if (!sessao.componentes.includes(componente)) {
@@ -115,7 +123,7 @@ export async function GET(request: NextRequest) {
     const { data: todasQuestoes, error } = await query.limit(500)
 
     if (error) {
-      console.error('Erro ao buscar questões:', error)
+      logger.error('Erro ao buscar questões:', error)
       return NextResponse.json(
         { sucesso: false, erro: 'Erro ao buscar questões' },
         { status: 500 }
@@ -191,7 +199,7 @@ export async function GET(request: NextRequest) {
       } : null,
     })
   } catch (error) {
-    console.error('Erro ao buscar questão:', error)
+    logger.error('Erro ao buscar questão:', error)
     return NextResponse.json(
       { sucesso: false, erro: 'Erro interno do servidor' },
       { status: 500 }

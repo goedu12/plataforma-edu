@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Medal } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
@@ -24,7 +24,8 @@ export default function RankingPage() {
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  const buscarDados = async (silencioso = false) => {
+  // Usar useCallback para estabilizar a referência da função
+  const buscarDados = useCallback(async (silencioso = false) => {
     if (!silencioso) setLoading(true)
     else setAtualizando(true)
     setErro(null)
@@ -55,14 +56,13 @@ export default function RankingPage() {
       } else {
         setErro(dataRanking.erro || 'Erro ao carregar ranking')
       }
-    } catch (error) {
-      console.error('Erro ao buscar dados:', error)
+    } catch {
       setErro('Não foi possível conectar ao servidor.')
     } finally {
       setLoading(false)
       setAtualizando(false)
     }
-  }
+  }, [componente, router])
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -70,7 +70,7 @@ export default function RankingPage() {
       return
     }
     buscarDados()
-  }, [router, componente])
+  }, [componente, router, buscarDados])
 
   if (loading || !usuario) {
     return <Loading fullScreen componente={componente} />
@@ -91,20 +91,21 @@ export default function RankingPage() {
               onClick={() => router.push(`/${componente}/menu`)}
               className="w-10 h-10 flex items-center justify-center rounded-xl"
               style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
+              aria-label="Voltar ao menu principal"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-5 h-5" aria-hidden="true" />
             </button>
 
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2">
-                <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+              <h1 className="flex items-center justify-center gap-2">
+                <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} aria-hidden="true" />
                 <span
                   className="font-display text-lg font-bold"
                   style={{ color: isFisica ? '#000' : '#fff' }}
                 >
                   Ranking
                 </span>
-              </div>
+              </h1>
               <p className="text-xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
                 Turma {usuario.turma} • {ranking.length} estudantes
               </p>
@@ -115,8 +116,9 @@ export default function RankingPage() {
               disabled={atualizando}
               className="w-10 h-10 flex items-center justify-center rounded-xl"
               style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
+              aria-label={atualizando ? 'Atualizando ranking...' : 'Atualizar ranking'}
             >
-              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} aria-hidden="true" />
             </button>
           </div>
 
