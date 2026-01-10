@@ -133,36 +133,39 @@ export default function MenuComponentePage() {
     >
       <NavigationRail componente={componente} />
 
-      {/* Header Compacto */}
-      <header className="px-4 py-3" style={{ borderBottom: '1px solid var(--border-default)' }}>
-        <div className="max-w-2xl mx-auto">
+      {/* Header Padronizado */}
+      <header className="page-header">
+        <div className="max-w-2xl mx-auto w-full">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="text-sm font-semibold" style={{ color: accentColor }}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h1 className="font-display font-semibold" style={{ color: accentColor }}>
                 {componente === 'fisica' ? 'Física' : 'Matemática'}
               </h1>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Turma {usuario.turma}
-              </p>
+              <span
+                className="badge-standard"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+              >
+                {usuario.turma}
+              </span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <ThemeIconToggle componente={componente} />
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
-                  className="p-2 rounded-lg transition-all"
+                  className="w-10 h-10 flex items-center justify-center rounded-lg"
                   style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
                 >
-                  <ArrowLeftRight className="w-4 h-4" />
+                  <ArrowLeftRight className="w-5 h-5" />
                 </button>
               )}
               <button
                 onClick={handleLogout}
-                className="p-2 rounded-lg transition-all"
+                className="w-10 h-10 flex items-center justify-center rounded-lg"
                 style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
               >
-                <LogOut className="w-4 h-4" />
+                <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -197,16 +200,12 @@ export default function MenuComponentePage() {
                 { icon: Flame, value: sequenciaDias, label: 'Dias', color: 'var(--color-streak)' },
                 { icon: Target, value: `${taxaAcerto}%`, label: 'Acerto', color: accentColor },
               ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="rounded-lg px-3 py-2 text-center min-w-[60px]"
-                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-                >
-                  <stat.icon className="w-4 h-4 mx-auto mb-0.5" style={{ color: stat.color }} />
-                  <p className="text-base font-bold font-mono tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                <div key={stat.label} className="stat-box min-w-[64px]">
+                  <stat.icon className="w-4 h-4 mx-auto mb-1" style={{ color: stat.color }} />
+                  <p className="text-base font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                     {stat.value}
                   </p>
-                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                  <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -215,24 +214,21 @@ export default function MenuComponentePage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-3">
-        {/* Progress Card Compacto */}
-        <div
-          className="rounded-xl p-3 mb-3"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-              Progresso
+      <main className="max-w-2xl mx-auto px-4 py-4">
+        {/* Progress Card */}
+        <div className="card-standard mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
+              Progresso do Nível
             </span>
-            <span className="text-xs font-mono tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-              {questoesTotal}/50 questões
+            <span className="text-xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
+              {questoesTotal} questões
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div
-              className="flex-1 h-2 rounded-full overflow-hidden"
+              className="flex-1 h-2.5 rounded-full overflow-hidden"
               style={{ background: 'var(--bg-elevated)' }}
             >
               <div
@@ -244,23 +240,21 @@ export default function MenuComponentePage() {
               />
             </div>
             {proximoNivel && (
-              <span className="text-xs whitespace-nowrap" style={{ color: accentColor }}>
-                +{pontosParaProximo} pts para {proximoNivel.nome}
+              <span className="text-xs font-semibold whitespace-nowrap" style={{ color: accentColor }}>
+                +{pontosParaProximo} → {proximoNivel.nome}
               </span>
             )}
           </div>
         </div>
 
-        {/* Menu Grid Compacto */}
-        <div className="grid grid-cols-2 gap-2">
+        {/* Menu Grid */}
+        <div className="grid grid-cols-2 gap-3">
           {menuItems.map((item, index) => (
             <button
               key={item.label}
               onClick={() => item.isComingSoon ? setMostrarEmBreve(true) : router.push(item.href)}
-              className="rounded-xl p-3 text-left transition-all hover:translate-y-[-1px] group relative"
+              className="list-item text-left transition-all hover:translate-y-[-1px] group relative"
               style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
                 animationDelay: `${index * 30}ms`,
                 opacity: item.isComingSoon ? 0.7 : 1,
               }}
@@ -276,7 +270,7 @@ export default function MenuComponentePage() {
               {/* Badge NOVO */}
               {item.isNew && (
                 <span
-                  className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full"
+                  className="absolute -top-1.5 -right-1.5 px-2 py-0.5 text-2xs font-bold rounded-full"
                   style={{ background: 'var(--color-accent)', color: '#fff' }}
                 >
                   NOVO
@@ -285,29 +279,29 @@ export default function MenuComponentePage() {
               {/* Badge EM BREVE */}
               {item.isComingSoon && (
                 <span
-                  className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full"
+                  className="absolute -top-1.5 -right-1.5 px-2 py-0.5 text-2xs font-bold rounded-full"
                   style={{ background: 'var(--warning)', color: '#000' }}
                 >
                   EM BREVE
                 </span>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)' }}
+                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)' }}
                 >
-                  <item.icon className="w-4 h-4" style={{ color: accentColor }} />
+                  <item.icon className="w-5 h-5" style={{ color: accentColor }} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                     {item.label}
                   </h3>
-                  <p className="text-[11px] truncate" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-2xs truncate" style={{ color: 'var(--text-muted)' }}>
                     {item.description}
                   </p>
                 </div>
                 <ChevronRight
-                  className="w-4 h-4 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{ color: accentColor }}
                 />
               </div>
