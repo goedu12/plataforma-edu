@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao, hashSenha } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { gerarSenhaTemporaria } from '@/lib/utils'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
     // Verificar se o usuário existe e é estudante
     const { data: usuario } = await supabase
       .from('usuarios')
-      .select('id, tipo')
+      .select('id, tipo, nome, email')
       .eq('id', usuario_id)
       .single()
 
@@ -37,9 +39,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Resetar senha
-    const novaSenhaHash = await hashSenha('@estudante')
+    // Gerar senha temporária única
+    const novaSenha = gerarSenhaTemporaria()
+    const novaSenhaHash = await hashSenha(novaSenha)
 
+    // Atualizar senha e marcar como não alterada (forçar troca no próximo login)
     await supabase
       .from('usuarios')
       .update({
@@ -48,12 +52,17 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', usuario_id)
 
+    // Log de auditoria (sem expor a senha)
+    logger.info(`Senha resetada pelo professor ${sessao.userId} para estudante ${usuario_id}`)
+
     return NextResponse.json({
       sucesso: true,
-      mensagem: 'Senha resetada para @estudante',
+      mensagem: 'Senha temporária gerada com sucesso',
+      nova_senha: novaSenha, // Exibida apenas uma vez para o professor informar ao aluno
+      aviso: 'Informe esta senha ao estudante. Ele deverá alterá-la no primeiro acesso.',
     })
   } catch (error) {
-    console.error('Erro ao resetar senha:', error)
+    logger.error('Erro ao resetar senha:', error)
     return NextResponse.json(
       { sucesso: false, erro: 'Erro interno do servidor' },
       { status: 500 }

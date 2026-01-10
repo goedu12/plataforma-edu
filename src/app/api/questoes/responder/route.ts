@@ -9,10 +9,12 @@ import {
   type ModoEstudo,
   type NotaAtualizada,
 } from '@/lib/sistema-notas'
+import { checkRespostaRateLimit, getRateLimitHeaders } from '@/lib/rate-limit'
+import { logger } from '@/lib/logger'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // API DE RESPONDER QUESTÕES
-// Com sistema de verificação hierárquica de 5 níveis
+// Com sistema de verificação hierárquica de 5 níveis + Rate Limiting
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function POST(request: NextRequest) {
@@ -22,6 +24,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { sucesso: false, erro: 'Não autenticado' },
         { status: 401 }
+      )
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RATE LIMITING - Proteção contra abuso
+    // ═══════════════════════════════════════════════════════════════════════
+    const rateLimit = checkRespostaRateLimit(sessao.userId)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          sucesso: false,
+          erro: `Muitas requisições. Aguarde ${rateLimit.resetIn} segundos.`,
+          codigo: 'RATE_LIMIT',
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimit),
+        }
       )
     }
 
@@ -138,28 +158,35 @@ export async function POST(request: NextRequest) {
         .eq('id', respostaExistente.id)
 
       if (erroAtualizacao) {
-        console.error('Erro ao atualizar resposta:', erroAtualizacao)
+        logger.error('Erro ao atualizar resposta:', erroAtualizacao)
         return NextResponse.json(
           { sucesso: false, erro: 'Erro ao atualizar resposta' },
           { status: 500 }
         )
       }
     } else {
-      // Inserir nova resposta
-      const { error: erroResposta } = await supabase.from('respostas').insert({
-        usuario_id: sessao.userId,
-        questao_id,
-        componente,
-        resposta_dada: resposta.toUpperCase(),
-        correta,
-        tempo_segundos: tempoValidado,
-        usou_dica: usou_dica || false,
-        pontos_ganhos: pontosGanhos,
-        modo: modoValidado,
-      })
+      // Inserir nova resposta usando upsert para evitar race condition
+      // Se já existir uma resposta (clique duplo rápido), apenas atualiza
+      const { error: erroResposta } = await supabase.from('respostas').upsert(
+        {
+          usuario_id: sessao.userId,
+          questao_id,
+          componente,
+          resposta_dada: resposta.toUpperCase(),
+          correta,
+          tempo_segundos: tempoValidado,
+          usou_dica: usou_dica || false,
+          pontos_ganhos: pontosGanhos,
+          modo: modoValidado,
+        },
+        {
+          onConflict: 'usuario_id,questao_id',
+          ignoreDuplicates: false, // Atualiza se já existir
+        }
+      )
 
       if (erroResposta) {
-        console.error('Erro ao registrar resposta:', erroResposta)
+        logger.error('Erro ao registrar resposta:', erroResposta)
         return NextResponse.json(
           { sucesso: false, erro: 'Erro ao registrar resposta' },
           { status: 500 }
@@ -244,7 +271,7 @@ export async function POST(request: NextRequest) {
         .eq('id', sessao.userId)
 
       if (erroAtualizacaoUsuario) {
-        console.error('Erro ao atualizar usuário:', erroAtualizacaoUsuario)
+        logger.error('Erro ao atualizar usuário:', erroAtualizacaoUsuario)
         return NextResponse.json(
           { sucesso: false, erro: 'Erro ao atualizar pontuação. Tente novamente.' },
           { status: 500 }
@@ -312,13 +339,17 @@ export async function POST(request: NextRequest) {
 
     // ═══════════════════════════════════════════════════════════════════════
     // RESPOSTA COM DADOS COMPLETOS DE NOTA EM TEMPO REAL
+    // SEGURANÇA: Resposta correta só é enviada se o aluno acertou
     // ═══════════════════════════════════════════════════════════════════════
 
     return NextResponse.json({
       sucesso: true,
       correta,
-      resposta_correta: questao.resposta_correta, // Adicionado para exibir gabarito após responder
+      // SEGURANÇA: Só envia a resposta correta se o aluno acertou
+      // Isso evita que scripts coletem gabaritos através de erros propositais
+      resposta_correta: correta ? questao.resposta_correta : undefined,
       pontos_ganhos: pontosGanhos,
+      // Explicação só é mostrada após responder (independente de acerto)
       explicacao: questao.explicacao,
       novo_nivel: ehModoRevisao ? undefined : novoNivel,
       nova_pontuacao: ehModoRevisao ? undefined : novosPontos,
@@ -344,7 +375,7 @@ export async function POST(request: NextRequest) {
       } : null,
     })
   } catch (error) {
-    console.error('Erro ao responder questão:', error)
+    logger.error('Erro ao responder questão:', error)
     return NextResponse.json(
       { sucesso: false, erro: 'Erro interno do servidor' },
       { status: 500 }
@@ -429,7 +460,7 @@ async function verificarEDesbloquearConquistas(
       }
     }
   } catch (error) {
-    console.error('Erro ao verificar conquistas:', error)
+    logger.error('Erro ao verificar conquistas:', error)
   }
 
   return conquistasDesbloqueadas

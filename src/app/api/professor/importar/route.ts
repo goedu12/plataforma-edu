@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao, hashSenha, validarTurma, validarComponenteNivel } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import { normalizarTexto } from '@/lib/utils'
+import { normalizarTexto, gerarSenhaAleatoria } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 import * as XLSX from 'xlsx'
 
@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
     logger.info(`Importação iniciada: ${dados.length} linhas`)
 
     const supabase = getSupabaseAdmin()
-    const senhaHash = await hashSenha('@estudante')
 
     const resultados = {
       total: dados.length,
@@ -105,6 +104,7 @@ export async function POST(request: NextRequest) {
         componente: string
         status: 'novo' | 'atualizado' | 'ignorado' | 'erro'
         erro?: string
+        senha?: string // Senha gerada para novos usuários (exibida apenas uma vez)
       }>,
     }
 
@@ -251,7 +251,10 @@ export async function POST(request: NextRequest) {
             })
           }
         } else {
-          // Criar novo
+          // Criar novo com senha aleatória única
+          const senhaGerada = gerarSenhaAleatoria(8)
+          const senhaHash = await hashSenha(senhaGerada)
+
           await supabase.from('usuarios').insert({
             email,
             senha_hash: senhaHash,
@@ -261,6 +264,7 @@ export async function POST(request: NextRequest) {
             nivel: validacao.nivel!,
             componentes: dadosEstudante.componentes,
             tipo: 'estudante',
+            senha_alterada: false, // Indica que deve trocar a senha no primeiro login
           })
 
           resultados.novos++
@@ -270,6 +274,7 @@ export async function POST(request: NextRequest) {
             turma: dadosEstudante.turma,
             componente: dadosEstudante.componentes.join(', '),
             status: 'novo',
+            senha: senhaGerada, // Senha exibida apenas uma vez para o professor informar ao aluno
           })
         }
       } catch (error) {
