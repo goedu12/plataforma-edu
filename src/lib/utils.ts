@@ -154,6 +154,62 @@ export function truncar(texto: string, tamanho: number): string {
 }
 
 // ═══════════════════════════════════════════════════════════
+// GERAÇÃO DE SENHA SEGURA
+// ═══════════════════════════════════════════════════════════
+const CARACTERES_SENHA = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
+
+/**
+ * Gera uma senha aleatória segura
+ * @param tamanho - Tamanho da senha (padrão: 8)
+ * @returns Senha aleatória
+ */
+export function gerarSenhaAleatoria(tamanho: number = 8): string {
+  let senha = ''
+  const array = new Uint32Array(tamanho)
+
+  // Usar crypto.getRandomValues se disponível (mais seguro)
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(array)
+    for (let i = 0; i < tamanho; i++) {
+      senha += CARACTERES_SENHA[array[i] % CARACTERES_SENHA.length]
+    }
+  } else {
+    // Fallback para Math.random (menos seguro, apenas para desenvolvimento)
+    for (let i = 0; i < tamanho; i++) {
+      senha += CARACTERES_SENHA[Math.floor(Math.random() * CARACTERES_SENHA.length)]
+    }
+  }
+
+  return senha
+}
+
+/**
+ * Gera uma senha temporária com prefixo identificável
+ * @returns Senha temporária no formato "tmp_XXXXXXXX"
+ */
+export function gerarSenhaTemporaria(): string {
+  return `tmp_${gerarSenhaAleatoria(8)}`
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSTANTES DE CONFIGURAÇÃO
+// ═══════════════════════════════════════════════════════════
+
+// Constantes para alertas de estudantes
+export const ALERTAS_CONFIG = {
+  MIN_QUESTOES_PARA_ALERTA: 10,
+  TAXA_ACERTO_MINIMA: 40,
+  DIAS_INATIVIDADE_ALERTA: 7,
+} as const
+
+// Constantes de rate limiting
+export const RATE_LIMIT_CONFIG = {
+  WINDOW_MS: 60 * 1000, // 1 minuto
+  MAX_REQUESTS_API: 100, // máximo 100 requisições por minuto
+  MAX_REQUESTS_RESPOSTA: 30, // máximo 30 respostas por minuto
+} as const
+
+// ═══════════════════════════════════════════════════════════
 // VERIFICAR DATA HOJE
 // ═══════════════════════════════════════════════════════════
 export function ehHoje(data: string | Date | null | undefined): boolean {

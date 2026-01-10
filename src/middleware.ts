@@ -7,13 +7,24 @@ import { jwtVerify } from 'jose'
 // ═══════════════════════════════════════════════════════════
 const JWT_SECRET_RAW = process.env.JWT_SECRET
 
-// Gerar segredo para desenvolvimento (consistente - deve coincidir com auth.ts)
-const DEV_SECRET = 'dev-only-secret-for-local-development-only'
+// Comprimento mínimo recomendado para o secret (32 caracteres = 256 bits)
+const MIN_SECRET_LENGTH = 32
+
+// Gerar segredo para desenvolvimento (consistente - DEVE coincidir com auth.ts)
+// ATENÇÃO: Este segredo NUNCA deve ser usado em produção
+const DEV_SECRET = 'dev-only-secret-32chars-minimum!!'
 
 // Em produção, usa JWT_SECRET obrigatoriamente
 // Em desenvolvimento/build, usa segredo de desenvolvimento
 function getJwtSecret(): Uint8Array {
   if (JWT_SECRET_RAW) {
+    // Validar comprimento mínimo do secret em produção
+    if (process.env.NODE_ENV === 'production' && JWT_SECRET_RAW.length < MIN_SECRET_LENGTH) {
+      console.warn(
+        `[SECURITY WARNING] JWT_SECRET tem apenas ${JWT_SECRET_RAW.length} caracteres. ` +
+        `Recomendado: mínimo ${MIN_SECRET_LENGTH} caracteres.`
+      )
+    }
     return new TextEncoder().encode(JWT_SECRET_RAW)
   }
 

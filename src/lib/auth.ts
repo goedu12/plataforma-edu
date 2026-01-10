@@ -9,18 +9,40 @@ import type { Usuario, Componente, NivelEnsino } from '@/types'
 // ═══════════════════════════════════════════════════════════
 const JWT_SECRET_RAW = process.env.JWT_SECRET
 
+// Comprimento mínimo recomendado para o secret (32 caracteres = 256 bits)
+const MIN_SECRET_LENGTH = 32
+
 // Gerar segredo para desenvolvimento (consistente durante a sessão)
-const DEV_SECRET = 'dev-only-secret-for-local-development-only'
+// ATENÇÃO: Este segredo NUNCA deve ser usado em produção
+const DEV_SECRET = 'dev-only-secret-32chars-minimum!!'
+
+// Flag para rastrear se estamos usando secret de desenvolvimento
+let usingDevSecret = false
 
 // Em produção, usa JWT_SECRET obrigatoriamente
 // Em desenvolvimento/build, usa segredo de desenvolvimento
 function getJwtSecret(): Uint8Array {
   if (JWT_SECRET_RAW) {
+    // Validar comprimento mínimo do secret
+    if (JWT_SECRET_RAW.length < MIN_SECRET_LENGTH) {
+      console.warn(
+        `[SECURITY WARNING] JWT_SECRET tem apenas ${JWT_SECRET_RAW.length} caracteres. ` +
+        `Recomendado: mínimo ${MIN_SECRET_LENGTH} caracteres para segurança adequada.`
+      )
+    }
     return new TextEncoder().encode(JWT_SECRET_RAW)
   }
 
   // Durante build ou em desenvolvimento, permite sem JWT_SECRET
   if (process.env.NODE_ENV !== 'production' || process.env.NEXT_PHASE === 'phase-production-build') {
+    usingDevSecret = true
+    // Log apenas uma vez em desenvolvimento
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[SECURITY WARNING] Usando JWT_SECRET de desenvolvimento. ' +
+        'Configure JWT_SECRET nas variáveis de ambiente para produção.'
+      )
+    }
     return new TextEncoder().encode(DEV_SECRET)
   }
 
@@ -29,6 +51,14 @@ function getJwtSecret(): Uint8Array {
 }
 
 const JWT_SECRET = getJwtSecret()
+
+/**
+ * Verifica se o sistema está usando secret de desenvolvimento
+ * Útil para auditorias de segurança
+ */
+export function isUsingDevSecret(): boolean {
+  return usingDevSecret
+}
 
 // Configurações de segurança do JWT
 const JWT_ISSUER = 'plataforma-edu'

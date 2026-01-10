@@ -65,6 +65,8 @@ export default function NotasPage() {
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false)
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
   const ultimaAtualizacaoRef = useRef<number>(Date.now())
+  const backoffRef = useRef<number>(30000) // Intervalo inicial de 30s
+  const maxBackoff = 120000 // Máximo de 2 minutos
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
@@ -99,31 +101,64 @@ export default function NotasPage() {
       return
     }
 
+    // AbortController para cancelar requisições pendentes ao desmontar
+    const abortController = new AbortController()
+
     buscarNotas()
 
+    // Polling com exponential backoff - reduz carga no servidor
     const iniciarPolling = () => {
-      if (pollingRef.current) clearInterval(pollingRef.current)
-      pollingRef.current = setInterval(() => {
-        if (document.visibilityState === 'visible') buscarNotas(true)
-      }, 30000)
+      if (pollingRef.current) clearTimeout(pollingRef.current)
+
+      const executarPolling = () => {
+        if (abortController.signal.aborted) return
+
+        if (document.visibilityState === 'visible') {
+          buscarNotas(true).then(() => {
+            // Reset do backoff se a requisição foi bem sucedida
+            backoffRef.current = 30000
+          }).catch(() => {
+            // Aumenta o backoff em caso de erro (exponential backoff)
+            backoffRef.current = Math.min(backoffRef.current * 1.5, maxBackoff)
+          })
+        }
+
+        // Agendar próximo polling com o intervalo atual
+        pollingRef.current = setTimeout(executarPolling, backoffRef.current)
+      }
+
+      // Iniciar o primeiro polling após o intervalo inicial
+      pollingRef.current = setTimeout(executarPolling, backoffRef.current)
     }
 
     iniciarPolling()
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        if (Date.now() - ultimaAtualizacaoRef.current > 10000) buscarNotas(true)
+        // Só busca se passou mais de 10 segundos
+        if (Date.now() - ultimaAtualizacaoRef.current > 10000) {
+          buscarNotas(true)
+        }
+        // Reset do backoff quando o usuário volta à aba
+        backoffRef.current = 30000
         iniciarPolling()
+      } else {
+        // Pausa o polling quando a aba está oculta
+        if (pollingRef.current) {
+          clearTimeout(pollingRef.current)
+          pollingRef.current = null
+        }
       }
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current)
+      abortController.abort()
+      if (pollingRef.current) clearTimeout(pollingRef.current)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [componente, buscarNotas])
+  }, [componente, buscarNotas, router])
 
   const getStatusConfig = (status: string, nota: number) => {
     if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' }
