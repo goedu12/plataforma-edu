@@ -91,13 +91,20 @@ export async function GET(request: NextRequest) {
     const questoesRespondidasSet = new Set(respostasUsuario?.map(r => r.questao_id) || [])
 
     // Buscar questões ativas do ano e componente
-    const { data: todasQuestoes, error } = await supabase
+    // Filtrar por bimestre atual se estiver em período letivo
+    let query = supabase
       .from('questoes')
       .select('*')
       .eq('componente', componente)
       .eq('ano', usuario.ano)
       .eq('status', 'ativa')
-      .limit(500)
+
+    // Se há período ativo, filtrar por bimestre (questões específicas do bimestre OU sem bimestre definido)
+    if (periodo) {
+      query = query.or(`bimestre.is.null,bimestre.eq.${periodo.bimestre}`)
+    }
+
+    const { data: todasQuestoes, error } = await query.limit(500)
 
     if (error) {
       console.error('Erro ao buscar questões:', error)
@@ -112,18 +119,27 @@ export async function GET(request: NextRequest) {
 
     // Se não há questões disponíveis
     if (!questoesDisponiveis || questoesDisponiveis.length === 0) {
-      const { count: totalQuestoes } = await supabase
+      // Contar questões considerando o filtro de bimestre
+      let countQuery = supabase
         .from('questoes')
         .select('*', { count: 'exact', head: true })
         .eq('componente', componente)
         .eq('ano', usuario.ano)
         .eq('status', 'ativa')
 
+      if (periodo) {
+        countQuery = countQuery.or(`bimestre.is.null,bimestre.eq.${periodo.bimestre}`)
+      }
+
+      const { count: totalQuestoes } = await countQuery
+
       if (totalQuestoes && questoesRespondidasSet.size >= totalQuestoes) {
         return NextResponse.json({
           sucesso: true,
           status: 'COMPLETOU',
-          mensagem: 'Você completou todas as questões disponíveis!',
+          mensagem: periodo
+            ? `Você completou todas as questões do ${periodo.bimestre}º bimestre!`
+            : 'Você completou todas as questões disponíveis!',
           limite: statusSemanal,
         })
       }
