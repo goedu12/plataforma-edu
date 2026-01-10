@@ -26,10 +26,14 @@ interface NotaBimestre {
   data_inicio: string
   data_fim: string
   dias_restantes: number
-  acertos_questoes: number
+  // Nova fórmula v2
+  acertos_estudo: number
   acertos_revisao: number
-  nota_questoes: number
-  nota_revisao: number
+  acertos_desafio: number
+  tempo_uso_horas: number
+  nota_acertos: number
+  nota_tempo: number
+  // Compatibilidade
   questoes_respondidas: number
   meta_questoes: number
   percentual_questoes: number
@@ -135,7 +139,7 @@ export default function NotasPage() {
 
   const progresso = notaAtual ? (notaAtual.nota_final / 10) * 100 : 0
   const statusConfig = notaAtual ? getStatusConfig(notaAtual.status, notaAtual.nota_final) : null
-  const taxaAcerto = notaAtual ? Math.round((notaAtual.acertos_questoes / Math.max(notaAtual.questoes_respondidas, 1)) * 100) : 0
+  const taxaAcerto = notaAtual ? Math.round((notaAtual.acertos_estudo / Math.max(notaAtual.questoes_respondidas, 1)) * 100) : 0
 
   return (
     <div className="min-h-screen lg:h-screen lg:overflow-hidden pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
@@ -237,10 +241,10 @@ export default function NotasPage() {
             {/* Stats Grid - 4 colunas */}
             <div className="grid grid-cols-4 gap-2">
               {[
-                { icon: Target, label: 'Questões', value: notaAtual.nota_questoes.toFixed(1), sub: `${notaAtual.acertos_questoes} acertos`, color: corPrimaria },
-                { icon: RefreshCw, label: 'Revisão', value: notaAtual.nota_revisao.toFixed(1), sub: `${notaAtual.acertos_revisao} acertos`, color: 'var(--color-accent)' },
+                { icon: Target, label: 'Acertos', value: notaAtual.nota_acertos.toFixed(1), sub: `${notaAtual.acertos_estudo + notaAtual.acertos_revisao + notaAtual.acertos_desafio} total`, color: corPrimaria },
+                { icon: Clock, label: 'Tempo', value: notaAtual.nota_tempo.toFixed(1), sub: `${notaAtual.tempo_uso_horas.toFixed(1)}h uso`, color: 'var(--color-accent)' },
                 { icon: CheckCircle2, label: 'Taxa', value: `${taxaAcerto}%`, sub: 'de acerto', color: 'var(--success)' },
-                { icon: Clock, label: 'Restam', value: notaAtual.dias_restantes.toString(), sub: 'dias', color: 'var(--warning)' },
+                { icon: RefreshCw, label: 'Restam', value: notaAtual.dias_restantes.toString(), sub: 'dias', color: 'var(--warning)' },
               ].map((stat, i) => (
                 <div
                   key={i}
