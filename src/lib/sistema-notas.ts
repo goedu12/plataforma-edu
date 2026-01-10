@@ -92,29 +92,53 @@ export interface VerificacaoCompleta {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// CONFIGURAÇÃO DOS BIMESTRES 2025
+// CONFIGURAÇÃO DOS BIMESTRES 2025 e 2026
 // ═══════════════════════════════════════════════════════════════════════════
 
-const CONFIG_BIMESTRES_2025: Record<1 | 2 | 3 | 4, ConfigBimestre> = {
-  1: {
-    bimestre: 1,
-    regular: { inicio: '2025-02-03', fim: '2025-03-24', meta: 105 },
-    recuperacao: { inicio: '2025-03-25', fim: '2025-04-03' },
+const CONFIG_BIMESTRES: Record<number, Record<1 | 2 | 3 | 4, ConfigBimestre>> = {
+  2025: {
+    1: {
+      bimestre: 1,
+      regular: { inicio: '2025-02-03', fim: '2025-03-24', meta: 105 },
+      recuperacao: { inicio: '2025-03-25', fim: '2025-04-03' },
+    },
+    2: {
+      bimestre: 2,
+      regular: { inicio: '2025-04-04', fim: '2025-06-16', meta: 150 },
+      recuperacao: { inicio: '2025-06-17', fim: '2025-06-26' },
+    },
+    3: {
+      bimestre: 3,
+      regular: { inicio: '2025-08-04', fim: '2025-09-23', meta: 105 },
+      recuperacao: { inicio: '2025-09-24', fim: '2025-10-03' },
+    },
+    4: {
+      bimestre: 4,
+      regular: { inicio: '2025-10-04', fim: '2025-12-04', meta: 135 },
+      recuperacao: { inicio: '2025-12-05', fim: '2025-12-15' },
+    },
   },
-  2: {
-    bimestre: 2,
-    regular: { inicio: '2025-04-04', fim: '2025-06-16', meta: 150 },
-    recuperacao: { inicio: '2025-06-17', fim: '2025-06-26' },
-  },
-  3: {
-    bimestre: 3,
-    regular: { inicio: '2025-08-04', fim: '2025-09-23', meta: 105 },
-    recuperacao: { inicio: '2025-09-24', fim: '2025-10-03' },
-  },
-  4: {
-    bimestre: 4,
-    regular: { inicio: '2025-10-04', fim: '2025-12-04', meta: 135 },
-    recuperacao: { inicio: '2025-12-05', fim: '2025-12-15' },
+  2026: {
+    1: {
+      bimestre: 1,
+      regular: { inicio: '2026-01-01', fim: '2026-03-24', meta: 105 },
+      recuperacao: { inicio: '2026-03-25', fim: '2026-04-03' },
+    },
+    2: {
+      bimestre: 2,
+      regular: { inicio: '2026-04-04', fim: '2026-06-16', meta: 150 },
+      recuperacao: { inicio: '2026-06-17', fim: '2026-06-26' },
+    },
+    3: {
+      bimestre: 3,
+      regular: { inicio: '2026-08-04', fim: '2026-09-23', meta: 105 },
+      recuperacao: { inicio: '2026-09-24', fim: '2026-10-03' },
+    },
+    4: {
+      bimestre: 4,
+      regular: { inicio: '2026-10-04', fim: '2026-12-04', meta: 135 },
+      recuperacao: { inicio: '2026-12-05', fim: '2026-12-15' },
+    },
   },
 }
 
@@ -189,19 +213,23 @@ export function calcularBonusFrequencia(diasAtivos: number): number {
 
 /**
  * Identifica o período atual do calendário letivo
+ * Suporta anos 2025 e 2026
  */
-export function getPeriodoAtual(ano: number = 2025): {
+export function getPeriodoAtual(ano?: number): {
   bimestre: 1 | 2 | 3 | 4
   tipo: TipoPeriodo
   config: ConfigBimestre
   diasRestantes: number
 } | null {
   const hoje = new Date().toISOString().split('T')[0]
+  const anoAtual = ano || new Date().getFullYear()
 
-  if (ano !== 2025) return null
+  // Buscar configuração do ano
+  const configAno = CONFIG_BIMESTRES[anoAtual]
+  if (!configAno) return null
 
   for (const bim of [1, 2, 3, 4] as const) {
-    const config = CONFIG_BIMESTRES_2025[bim]
+    const config = configAno[bim]
 
     // Período regular
     if (hoje >= config.regular.inicio && hoje <= config.regular.fim) {
