@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star, Users } from 'lucide-react'
+import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Star } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
@@ -22,7 +22,6 @@ export default function RankingPage() {
   const [atualizando, setAtualizando] = useState(false)
 
   const isFisica = componente === 'fisica'
-  const nomeComponente = isFisica ? 'Física' : 'Matemática'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const buscarDados = async (silencioso = false) => {
@@ -83,55 +82,53 @@ export default function RankingPage() {
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header Compacto */}
-      <header className="px-4 pt-3 pb-3">
-        <div className="max-w-lg mx-auto">
-          {/* Nav + Turma em uma linha */}
-          <div className="flex items-center justify-between mb-3">
+      {/* Header Padronizado */}
+      <header className="page-header">
+        <div className="max-w-lg mx-auto w-full">
+          <div className="flex items-center justify-between">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="p-2 rounded-lg transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-lg"
               style={{ color: 'var(--text-secondary)' }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
 
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4" style={{ color: corPrimaria }} />
-              <span className="font-display text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <Trophy className="w-5 h-5" style={{ color: corPrimaria }} />
+              <span className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Ranking
               </span>
               <span
-                className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: 'var(--bg-surface)', color: 'var(--text-muted)' }}
+                className="badge-standard ml-1"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
               >
-                {usuario.turma}
+                Turma {usuario.turma}
               </span>
             </div>
 
             <button
               onClick={() => buscarDados(true)}
               disabled={atualizando}
-              className="p-2 rounded-lg transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-lg"
               style={{ color: 'var(--text-secondary)' }}
             >
-              <RefreshCw className={`w-4 h-4 ${atualizando ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
             </button>
           </div>
 
-          {/* Card de posição compacto */}
+          {/* Card de Posição do Usuário */}
           {posicaoUsuario > 0 && (
             <div
-              className="rounded-xl p-3 flex items-center justify-between"
+              className="card-standard mt-4 flex items-center justify-between"
               style={{
-                background: 'var(--bg-surface)',
-                border: `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
+                borderColor: isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)',
               }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 {posicaoUsuario <= 3 ? (
                   <Crown
-                    className="w-6 h-6"
+                    className="w-8 h-8"
                     style={{
                       color: posicaoUsuario === 1 ? '#FFD700'
                         : posicaoUsuario === 2 ? '#C0C0C0'
@@ -139,18 +136,22 @@ export default function RankingPage() {
                     }}
                   />
                 ) : (
-                  <Star className="w-6 h-6" style={{ color: corPrimaria }} />
+                  <Star className="w-8 h-8" style={{ color: corPrimaria }} />
                 )}
                 <div>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Sua posição</span>
-                  <p className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <p className="text-2xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                    Sua Posição
+                  </p>
+                  <p className="font-display text-2xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                     {posicaoUsuario}º
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>de</span>
-                <p className="text-lg font-semibold" style={{ color: 'var(--text-secondary)' }}>
+                <p className="text-2xs uppercase tracking-wide" style={{ color: 'var(--text-muted)' }}>
+                  Total
+                </p>
+                <p className="text-xl font-semibold tabular-nums" style={{ color: 'var(--text-secondary)' }}>
                   {ranking.length}
                 </p>
               </div>
@@ -160,19 +161,14 @@ export default function RankingPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-lg mx-auto px-3 pb-4">
+      <main className="max-w-lg mx-auto px-4 py-4">
         {erro ? (
-          <div
-            className="card p-6 text-center"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
-            <WifiOff className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+          <div className="card-standard text-center py-8">
+            <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--error)' }} />
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
             <Button
               variant={isFisica ? 'fisica' : 'matematica'}
               onClick={() => buscarDados()}
-              size="sm"
-              leftIcon={<RefreshCw className="w-4 h-4" />}
             >
               Tentar Novamente
             </Button>

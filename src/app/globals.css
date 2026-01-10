@@ -183,10 +183,62 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM v4.1 - SCALES PADRONIZADAS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Typography Scale (use em todo o app):
+   text-2xs: 9px  - micro labels, legendas
+   text-xs:  11px - labels pequenos
+   text-sm:  13px - texto secundário
+   text-base: 15px - corpo
+   text-lg:  17px - headings
+   text-xl:  20px - títulos
+   text-2xl: 24px - números destaque
+   text-3xl: 30px - hero
+*/
+
+/* ═══════════════════════════════════════════════════════════════════════════
    TYPOGRAPHY CLASSES
    No uppercase for titles - only for labels
    ═══════════════════════════════════════════════════════════════════════════ */
 @layer utilities {
+  /* Tamanho extra pequeno padronizado */
+  .text-2xs {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  /* Página header padrão */
+  .page-header {
+    @apply flex items-center justify-between px-4 py-3;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  /* Card padrão com padding consistente */
+  .card-standard {
+    @apply rounded-xl p-4;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+  }
+
+  /* List item padrão */
+  .list-item {
+    @apply rounded-xl px-4 py-3;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+  }
+
+  /* Stat box padrão */
+  .stat-box {
+    @apply rounded-lg p-3 text-center;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+  }
+
+  /* Badge padrão */
+  .badge-standard {
+    @apply inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold;
+  }
   .text-hero {
     font-family: 'Nunito', sans-serif;
     font-size: 2.5rem;

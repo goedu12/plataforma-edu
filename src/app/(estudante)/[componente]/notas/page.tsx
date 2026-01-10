@@ -7,13 +7,13 @@ import {
   RefreshCw,
   WifiOff,
   Target,
-  CheckCircle2,
-  AlertTriangle,
   Clock,
   ChevronRight,
   TrendingUp,
   ChevronDown,
   Zap,
+  BookOpen,
+  Calendar,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
@@ -145,25 +145,28 @@ export default function NotasPage() {
     <div className="min-h-screen lg:h-screen lg:overflow-hidden pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      <div className="h-full flex flex-col max-w-lg mx-auto px-4 py-3">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-3">
+      <div className="h-full flex flex-col max-w-lg mx-auto px-4 py-4">
+        {/* Header Padronizado */}
+        <header className="flex items-center justify-between mb-4">
           <button
             onClick={() => router.push(`/${componente}/menu`)}
-            className="p-2 rounded-xl touch-target lg:hidden"
+            className="w-10 h-10 flex items-center justify-center rounded-lg lg:hidden"
             style={{ color: 'var(--text-secondary)' }}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
 
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" style={{ color: corPrimaria }} />
-            <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-              {isFisica ? 'Física' : 'Matemática'}
+            <TrendingUp className="w-5 h-5" style={{ color: corPrimaria }} />
+            <span className="font-display font-semibold" style={{ color: 'var(--text-primary)' }}>
+              Notas
             </span>
             {notaAtual && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                {notaAtual.bimestre}º Bi • {notaAtual.dias_restantes}d
+              <span
+                className="badge-standard ml-1"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+              >
+                {notaAtual.bimestre}º Bimestre
               </span>
             )}
           </div>
@@ -171,17 +174,17 @@ export default function NotasPage() {
           <button
             onClick={() => buscarNotas(false)}
             disabled={atualizando}
-            className="p-2 rounded-xl touch-target"
+            className="w-10 h-10 flex items-center justify-center rounded-lg"
             style={{ color: 'var(--text-secondary)' }}
           >
-            <RefreshCw className={`w-4 h-4 ${atualizando ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} />
           </button>
         </header>
 
         {erro ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="card p-6 text-center" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-              <WifiOff className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+            <div className="card-standard text-center py-8">
+              <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--error)' }} />
               <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
               <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={() => buscarNotas(false)}>
                 Tentar Novamente
@@ -189,27 +192,20 @@ export default function NotasPage() {
             </div>
           </div>
         ) : notaAtual ? (
-          <div className="flex-1 flex flex-col gap-2.5 overflow-auto lg:overflow-hidden">
+          <div className="flex-1 flex flex-col gap-3 overflow-auto lg:overflow-hidden">
 
-            {/* Card Principal - Nota + Progresso Unificado */}
-            <div
-              className="card p-3"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-              }}
-            >
-              {/* Linha 1: Nota + Status */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-baseline gap-1">
-                  <span className="font-display text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
+            {/* Card Principal - Nota */}
+            <div className="card-standard">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-4xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                     {notaAtual.nota_final.toFixed(1)}
                   </span>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>/10</span>
+                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>/10</span>
                 </div>
                 {statusConfig && (
                   <span
-                    className="px-2 py-1 rounded text-[10px] font-medium"
+                    className="badge-standard"
                     style={{ background: statusConfig.bg, color: statusConfig.color }}
                   >
                     {statusConfig.label}
@@ -217,77 +213,69 @@ export default function NotasPage() {
                 )}
               </div>
 
-              {/* Linha 2: Barra de progresso dupla */}
-              <div className="mb-2">
-                <div className="h-2 rounded-full overflow-hidden flex" style={{ background: 'var(--bg-elevated)' }}>
+              {/* Barra de Progresso Dupla */}
+              <div className="mb-3">
+                <div className="h-3 rounded-full overflow-hidden flex" style={{ background: 'var(--bg-elevated)' }}>
                   <div
-                    className="h-full"
+                    className="h-full transition-all duration-500"
                     style={{ width: `${(notaAtual.nota_acertos / 10) * 100}%`, background: corPrimaria }}
                   />
                   <div
-                    className="h-full"
+                    className="h-full transition-all duration-500"
                     style={{ width: `${(notaAtual.nota_tempo / 10) * 100}%`, background: 'var(--color-accent)' }}
                   />
                 </div>
               </div>
 
-              {/* Linha 3: Breakdown compacto */}
-              <div className="flex items-center justify-between text-[10px]">
-                <div className="flex items-center gap-3">
-                  <span style={{ color: corPrimaria }}>
-                    <Target className="w-3 h-3 inline mr-0.5" />
-                    {notaAtual.nota_acertos.toFixed(1)}/6
+              {/* Breakdown */}
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1.5" style={{ color: corPrimaria }}>
+                    <Target className="w-4 h-4" />
+                    <span className="font-semibold">{notaAtual.nota_acertos.toFixed(1)}</span>/6
                   </span>
-                  <span style={{ color: 'var(--color-accent)' }}>
-                    <Clock className="w-3 h-3 inline mr-0.5" />
-                    {notaAtual.nota_tempo.toFixed(1)}/4
+                  <span className="flex items-center gap-1.5" style={{ color: 'var(--color-accent)' }}>
+                    <Clock className="w-4 h-4" />
+                    <span className="font-semibold">{notaAtual.nota_tempo.toFixed(1)}</span>/4
                   </span>
                 </div>
-                <span style={{ color: 'var(--text-muted)' }}>
-                  {notaAtual.questoes_semana}/15 semana
+                <span className="flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
+                  <Calendar className="w-4 h-4" />
+                  {notaAtual.dias_restantes}d restantes
                 </span>
               </div>
             </div>
 
-            {/* Stats Compactos - 2x2 */}
+            {/* Stats Grid */}
             <div className="grid grid-cols-4 gap-2">
               {[
-                { value: totalAcertos, label: 'Acertos', color: corPrimaria },
-                { value: `${notaAtual.tempo_uso_horas.toFixed(1)}h`, label: 'Tempo', color: 'var(--color-accent)' },
-                { value: notaAtual.questoes_respondidas, label: 'Questões', color: 'var(--text-primary)' },
-                { value: notaAtual.dias_ativos, label: 'Dias', color: 'var(--text-primary)' },
+                { icon: Target, value: totalAcertos, label: 'Acertos', color: corPrimaria },
+                { icon: Clock, value: `${notaAtual.tempo_uso_horas.toFixed(1)}h`, label: 'Tempo', color: 'var(--color-accent)' },
+                { icon: BookOpen, value: notaAtual.questoes_respondidas, label: 'Questões', color: 'var(--text-primary)' },
+                { icon: Calendar, value: notaAtual.dias_ativos, label: 'Dias', color: 'var(--text-primary)' },
               ].map((stat, i) => (
-                <div
-                  key={i}
-                  className="p-2 rounded-lg text-center"
-                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-                >
-                  <p className="text-base font-bold" style={{ color: stat.color }}>{stat.value}</p>
-                  <p className="text-[9px]" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                <div key={i} className="stat-box">
+                  <stat.icon className="w-4 h-4 mx-auto mb-1" style={{ color: stat.color }} />
+                  <p className="text-lg font-bold tabular-nums" style={{ color: stat.color }}>{stat.value}</p>
+                  <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
 
             {/* Como Ganhar Pontos - Colapsável */}
-            <div
-              className="card overflow-hidden"
-              style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-default)',
-              }}
-            >
+            <div className="card-standard p-0 overflow-hidden">
               <button
                 onClick={() => setMostrarDetalhes(!mostrarDetalhes)}
-                className="w-full p-2.5 flex items-center justify-between text-left"
+                className="w-full p-4 flex items-center justify-between text-left"
               >
-                <div className="flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5" style={{ color: corPrimaria }} />
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+                <div className="flex items-center gap-3">
+                  <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
+                  <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                     Como ganhar pontos
                   </span>
                 </div>
                 <ChevronDown
-                  className="w-4 h-4 transition-transform"
+                  className="w-5 h-5 transition-transform duration-200"
                   style={{
                     color: 'var(--text-muted)',
                     transform: mostrarDetalhes ? 'rotate(180deg)' : 'rotate(0deg)'
@@ -295,64 +283,69 @@ export default function NotasPage() {
                 />
               </button>
 
-              {/* Conteúdo expandido */}
               <div
-                className="overflow-hidden transition-all duration-200"
-                style={{ maxHeight: mostrarDetalhes ? '200px' : '0px' }}
+                className="overflow-hidden transition-all duration-300"
+                style={{ maxHeight: mostrarDetalhes ? '250px' : '0px' }}
               >
-                <div className="px-2.5 pb-2.5">
-                  <div className="grid grid-cols-2 gap-2 text-[9px]">
-                    <div className="p-2 rounded" style={{ background: 'var(--bg-elevated)' }}>
-                      <p className="font-semibold mb-1" style={{ color: corPrimaria }}>Acertos (máx 6pts)</p>
-                      <div className="space-y-0.5" style={{ color: 'var(--text-secondary)' }}>
-                        <p>Estudar: <b>+0.04</b></p>
-                        <p>Revisão: <b>+0.02</b></p>
-                        <p>Desafio: <b>+0.01</b></p>
+                <div className="px-4 pb-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
+                      <p className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: corPrimaria }}>
+                        <Target className="w-4 h-4" /> Acertos (máx 6pts)
+                      </p>
+                      <div className="space-y-1 text-2xs" style={{ color: 'var(--text-secondary)' }}>
+                        <p>Estudar: <b className="text-xs">+0.04</b></p>
+                        <p>Revisão: <b className="text-xs">+0.02</b></p>
+                        <p>Desafio: <b className="text-xs">+0.01</b></p>
                       </div>
                     </div>
-                    <div className="p-2 rounded" style={{ background: 'var(--bg-elevated)' }}>
-                      <p className="font-semibold mb-1" style={{ color: 'var(--color-accent)' }}>Tempo (máx 4pts)</p>
-                      <div className="space-y-0.5" style={{ color: 'var(--text-secondary)' }}>
-                        <p>2h → <b>1pt</b></p>
-                        <p>3h → <b>2pts</b></p>
-                        <p>4h → <b>3pts</b> • 5h+ → <b>4pts</b></p>
+                    <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
+                      <p className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--color-accent)' }}>
+                        <Clock className="w-4 h-4" /> Tempo (máx 4pts)
+                      </p>
+                      <div className="space-y-1 text-2xs" style={{ color: 'var(--text-secondary)' }}>
+                        <p>2 horas <b className="text-xs">→ 1pt</b></p>
+                        <p>3 horas <b className="text-xs">→ 2pts</b></p>
+                        <p>4h → 3pts • 5h+ → 4pts</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Dica inline - sempre visível */}
+              {/* Dica contextual */}
               {notaAtual.nota_final < 6 && (
                 <div
-                  className="px-2.5 py-2 text-[10px] border-t"
+                  className="px-4 py-3 text-xs border-t"
                   style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
                 >
                   {notaAtual.nota_acertos < 6 ? (
-                    <>Faltam <b style={{ color: corPrimaria }}>{Math.ceil((6 - notaAtual.nota_acertos) / 0.04)} acertos</b> no Estudar para máx de acertos</>
+                    <>
+                      Faltam <b style={{ color: corPrimaria }}>{Math.ceil((6 - notaAtual.nota_acertos) / 0.04)} acertos</b> no Estudar para nota máxima em acertos
+                    </>
                   ) : (
-                    <>Use o app por mais <b style={{ color: 'var(--color-accent)' }}>{Math.ceil(2 - notaAtual.tempo_uso_horas)}h</b> para ganhar pontos de tempo</>
+                    <>
+                      Use o app por mais <b style={{ color: 'var(--color-accent)' }}>{Math.ceil(2 - notaAtual.tempo_uso_horas)}h</b> para ganhar pontos de tempo
+                    </>
                   )}
                 </div>
               )}
             </div>
 
-            {/* Botões de Ação - Fixos no final */}
-            <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
+            {/* Botões de Ação */}
+            <div className="grid grid-cols-2 gap-3 mt-auto pt-2">
               <Button
                 variant={isFisica ? 'fisica' : 'matematica'}
                 onClick={() => router.push(`/${componente}/estudar`)}
                 disabled={!notaAtual.pode_responder}
-                rightIcon={notaAtual.pode_responder ? <ChevronRight className="w-4 h-4" /> : undefined}
-                className="text-sm py-2.5"
+                rightIcon={notaAtual.pode_responder ? <ChevronRight className="w-5 h-5" /> : undefined}
               >
-                {notaAtual.pode_responder ? 'Estudar' : `${notaAtual.questoes_semana}/15`}
+                {notaAtual.pode_responder ? 'Estudar' : `Limite: ${notaAtual.questoes_semana}/15`}
               </Button>
               <Button
                 variant="secondary"
                 onClick={() => router.push(`/${componente}/revisao`)}
-                leftIcon={<RefreshCw className="w-4 h-4" />}
-                className="text-sm py-2.5"
+                leftIcon={<RefreshCw className="w-5 h-5" />}
               >
                 Revisão
               </Button>
