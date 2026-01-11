@@ -832,10 +832,10 @@ export async function atualizarNotaTempoReal(
   componente: Componente,
   modo: ModoEstudo
 ): Promise<NotaAtualizada | null> {
-  // Apenas modo estudo conta para nota bimestral
-  if (modo !== 'estudo') {
-    return null
-  }
+  // Todos os modos contam para nota bimestral (v2):
+  // - Estudar: +0.04 por acerto
+  // - Revisão: +0.02 por acerto
+  // - Desafio: +0.01 por acerto
 
   const periodo = getPeriodoAtual()
   if (!periodo) {
