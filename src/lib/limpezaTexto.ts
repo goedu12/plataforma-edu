@@ -1,9 +1,67 @@
 /**
  * Utilitários para limpeza e formatação de texto das questões ENEM
+ * Versão 2.0 - Com suporte a imagens embutidas e múltiplos textos
  */
 
 // Valores que devem ser tratados como vazio
 const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL']
+
+/**
+ * Valida se é uma URL de imagem válida
+ */
+export function isValidImageUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== 'string') return false
+  const trimmed = url.trim()
+  if (!trimmed) return false
+  if (VALORES_INVALIDOS.includes(trimmed.toLowerCase())) return false
+  return trimmed.startsWith('http') || trimmed.startsWith('data:image')
+}
+
+/**
+ * Extrai URLs de imagens embutidas no texto
+ * Padrões suportados:
+ * - !(url)
+ * - ![alt](url)
+ * - (url.png) ou (url.jpg) etc
+ */
+export function extrairImagensDoTexto(texto: string): { textoLimpo: string; imagens: string[] } {
+  if (!texto) return { textoLimpo: '', imagens: [] }
+
+  const imagens: string[] = []
+  let textoProcessado = texto
+
+  // Padrão 1: !(url) - imagem markdown sem alt
+  textoProcessado = textoProcessado.replace(/!\(([^)]+)\)/g, (_, url) => {
+    if (isValidImageUrl(url)) {
+      imagens.push(url.trim())
+    }
+    return ''
+  })
+
+  // Padrão 2: ![alt](url) - imagem markdown com alt
+  textoProcessado = textoProcessado.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, url) => {
+    if (isValidImageUrl(url)) {
+      imagens.push(url.trim())
+    }
+    return ''
+  })
+
+  // Padrão 3: URLs de imagem soltas (https://...png/jpg/gif/webp)
+  textoProcessado = textoProcessado.replace(
+    /\(?(https?:\/\/[^\s\)]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi,
+    (match, url) => {
+      if (isValidImageUrl(url)) {
+        imagens.push(url.trim())
+      }
+      return ''
+    }
+  )
+
+  return {
+    textoLimpo: textoProcessado.replace(/\s{2,}/g, ' ').trim(),
+    imagens: [...new Set(imagens)] // Remove duplicatas
+  }
+}
 
 /**
  * Limpa texto de alternativas/enunciado removendo caracteres problemáticos
@@ -166,9 +224,170 @@ export function processarTexto(texto: string | null | undefined): string {
 }
 
 /**
- * Processa contexto completo (limpeza + formatação)
+ * Formata seções de texto (TEXTO I, TEXTO II, etc.) com estilo visual
+ */
+function formatarSecoes(html: string): string {
+  // Padrão para TEXTO I, TEXTO II, TEXTO 1, TEXTO 2, etc.
+  const padraoTexto = /\b(TEXTO\s*[IVX\d]+)\b/gi
+
+  html = html.replace(padraoTexto, (match) => {
+    return `<div class="secao-texto-header">${match.toUpperCase()}</div>`
+  })
+
+  // Padrão para Texto I, Texto II (capitalizado)
+  const padraoTextoCapitalizado = /\b(Texto\s*[IVX\d]+)\b/g
+  html = html.replace(padraoTextoCapitalizado, (match) => {
+    return `<div class="secao-texto-header">${match.toUpperCase()}</div>`
+  })
+
+  return html
+}
+
+/**
+ * Converte URLs de imagens em tags <img> clicáveis
+ */
+function converterImagensEmbutidas(texto: string): { html: string; imagensExtraidas: string[] } {
+  const imagensExtraidas: string[] = []
+  let html = texto
+
+  // Padrão 1: !(url) - imagem markdown sem alt
+  html = html.replace(/!\(([^)]+)\)/g, (_, url) => {
+    if (isValidImageUrl(url)) {
+      imagensExtraidas.push(url.trim())
+      return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Imagem da questão" class="imagem-contexto" loading="lazy" /></div>`
+    }
+    return ''
+  })
+
+  // Padrão 2: ![alt](url) - imagem markdown com alt
+  html = html.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, url) => {
+    if (isValidImageUrl(url)) {
+      imagensExtraidas.push(url.trim())
+      return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Imagem da questão" class="imagem-contexto" loading="lazy" /></div>`
+    }
+    return ''
+  })
+
+  // Padrão 3: URLs de imagem soltas no texto
+  html = html.replace(
+    /\(?(https?:\/\/[^\s\)<]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi,
+    (match, url) => {
+      if (isValidImageUrl(url)) {
+        imagensExtraidas.push(url.trim())
+        return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Imagem da questão" class="imagem-contexto" loading="lazy" /></div>`
+      }
+      return match
+    }
+  )
+
+  return { html, imagensExtraidas: [...new Set(imagensExtraidas)] }
+}
+
+/**
+ * Processa contexto completo para exibição com:
+ * - Imagens embutidas convertidas em <img>
+ * - Seções TEXTO I, TEXTO II formatadas
+ * - Formatação matemática
+ * - Limpeza de caracteres
  */
 export function processarContexto(texto: string | null | undefined): string {
-  const limpo = limparContexto(texto)
-  return formatarMatematica(limpo)
+  if (!texto || typeof texto !== 'string') return ''
+
+  let processado = texto.trim()
+
+  // Verificar valores inválidos
+  if (VALORES_INVALIDOS.includes(processado) || VALORES_INVALIDOS.includes(processado.toLowerCase())) {
+    return ''
+  }
+
+  // Remover escapes literais
+  processado = processado
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\r/g, '')
+
+  // Decodificar HTML entities
+  processado = processado
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+
+  // Converter imagens embutidas em tags <img>
+  const { html: comImagens } = converterImagensEmbutidas(processado)
+  processado = comImagens
+
+  // Formatar seções de texto (TEXTO I, TEXTO II)
+  processado = formatarSecoes(processado)
+
+  // Aplicar formatação matemática
+  processado = formatarMatematica(processado)
+
+  // Converter quebras de linha em <br>
+  processado = processado.replace(/\n/g, '<br>')
+
+  // Remover caractere de substituição Unicode
+  processado = processado.replace(/\uFFFD/g, '')
+
+  // Limpar espaços extras
+  processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br><br>')
+
+  return processado.trim()
+}
+
+/**
+ * Processa contexto e retorna tanto o HTML quanto as imagens extraídas
+ */
+export function processarContextoComImagens(texto: string | null | undefined): {
+  html: string
+  imagensExtraidas: string[]
+} {
+  if (!texto || typeof texto !== 'string') {
+    return { html: '', imagensExtraidas: [] }
+  }
+
+  let processado = texto.trim()
+
+  if (VALORES_INVALIDOS.includes(processado) || VALORES_INVALIDOS.includes(processado.toLowerCase())) {
+    return { html: '', imagensExtraidas: [] }
+  }
+
+  // Remover escapes literais
+  processado = processado
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\r/g, '')
+
+  // Decodificar HTML entities
+  processado = processado
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+
+  // Converter imagens embutidas e extrair URLs
+  const { html: comImagens, imagensExtraidas } = converterImagensEmbutidas(processado)
+  processado = comImagens
+
+  // Formatar seções de texto
+  processado = formatarSecoes(processado)
+
+  // Aplicar formatação matemática
+  processado = formatarMatematica(processado)
+
+  // Converter quebras de linha
+  processado = processado.replace(/\n/g, '<br>')
+
+  // Limpar
+  processado = processado.replace(/\uFFFD/g, '')
+  processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br><br>')
+
+  return {
+    html: processado.trim(),
+    imagensExtraidas
+  }
 }
