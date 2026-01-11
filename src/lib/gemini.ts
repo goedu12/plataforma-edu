@@ -279,7 +279,7 @@ export async function chatComTutor(
   }
 
   const contextoEstudante = parteContexto.length > 0
-    ? `\nCONTEXTO DO ESTUDANTE (use para personalizar a resposta, mas nao mencione explicitamente esses dados):\n${parteContexto.join('\n')}\n`
+    ? `\nCONTEXTO DO ESTUDANTE (use para adaptar sua resposta. Se o estudante perguntar sobre seu desempenho, acertos, progresso ou conquistas, pode mencionar esses dados diretamente de forma natural):\n${parteContexto.join('\n')}\n`
     : ''
 
   // ═══════════════════════════════════════════════════════════
