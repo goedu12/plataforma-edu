@@ -1,112 +1,95 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import type { AreaENEM, SubareaENEM, AlternativaENEM } from '@/types'
+import { ENEM_CONFIG } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Banco Local (Supabase) - Tabela enem_questions (CSV)
-// GET /api/enem?ano=2023&area=Matemática
+// API ENEM - Buscar questões para estudantes da 3ª série
+// GET /api/enem - Retorna uma questão aleatória não respondida
+// GET /api/enem?area=matematica - Filtra por área
+// GET /api/enem?ano=2023 - Filtra por ano da prova
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Interface da questão conforme CSV importado
-// Nota: area e num_questao podem não existir se SQL 30 não foi executado
-interface QuestaoCSV {
-  id_unico: string
-  id: string | null
-  num_questao: number | null
-  ano: number
-  exam: number | null
-  area: string | null
-  IU: boolean | null
-  ledor: boolean | null
-  question: string
-  description: string | null
-  alternatives: string[] | null
-  label: string
-  figures: string[] | null
-  anulada: boolean | null
-}
-
-// Interface para o frontend
-interface QuestaoFormatada {
+// Interface da questão no banco (tabela questoes_enem)
+interface QuestaoENEMDB {
   id: string
-  ano: number
-  numero: number
+  id_api: string
+  ano_prova: number
+  numero_questao: number
+  area: AreaENEM
+  subarea: SubareaENEM
+  idioma: string | null
+  titulo: string | null
   contexto: string
   comando: string | null
-  imagens: string[]
-  alternativas: Array<{ letra: string; texto: string }>
-  area: string
+  imagem_principal: string | null
+  imagens_extras: string[] | null
+  alternativa_a: string
+  alternativa_b: string
+  alternativa_c: string
+  alternativa_d: string
+  alternativa_e: string
+  imagem_a: string | null
+  imagem_b: string | null
+  imagem_c: string | null
+  imagem_d: string | null
+  imagem_e: string | null
+  resposta_correta: AlternativaENEM
+  fonte: string
+  status: string
 }
 
-// Validar se uma URL de imagem é válida
-function isValidImageUrl(url: string | null | undefined): boolean {
-  if (!url || typeof url !== 'string') return false
-  const trimmed = url.trim()
-  if (!trimmed) return false
-  const invalid = /^(nan|none|null|undefined|\s*)$/i
-  if (invalid.test(trimmed)) return false
-  return trimmed.startsWith('http') || trimmed.startsWith('data:image')
+// Interface para o frontend (sem resposta correta)
+interface QuestaoFormatada {
+  id: string
+  id_api: string
+  ano_prova: number
+  numero_questao: number
+  area: AreaENEM
+  area_nome: string
+  subarea: SubareaENEM
+  subarea_nome: string
+  idioma: string | null
+  titulo: string | null
+  contexto: string
+  comando: string | null
+  imagem_principal: string | null
+  imagens_extras: string[]
+  alternativas: Array<{
+    letra: AlternativaENEM
+    texto: string
+    imagem: string | null
+  }>
 }
 
-// Formatar questão do CSV para o frontend
-function formatarQuestao(q: QuestaoCSV): QuestaoFormatada {
-  // Extrair número da questão do campo id se num_questao não existir
-  let numero = q.num_questao || 1
-  if (!q.num_questao && q.id) {
-    const match = q.id.match(/\d+/)
-    if (match) numero = parseInt(match[0], 10)
-  }
-
-  const letras = ['A', 'B', 'C', 'D', 'E']
-  let alternativasArray: string[] = []
-
-  if (q.alternatives) {
-    if (Array.isArray(q.alternatives)) {
-      alternativasArray = q.alternatives
-    } else if (typeof q.alternatives === 'string') {
-      try {
-        alternativasArray = JSON.parse(q.alternatives)
-      } catch {
-        alternativasArray = []
-      }
-    }
-  }
-
-  const alternativas = letras.map((letra, i) => ({
-    letra,
-    texto: alternativasArray[i] ? String(alternativasArray[i]).trim() : ''
-  }))
-
-  const imagens: string[] = []
-  if (q.figures) {
-    let figuresArray: string[] = []
-    if (Array.isArray(q.figures)) {
-      figuresArray = q.figures
-    } else if (typeof q.figures === 'string') {
-      try {
-        figuresArray = JSON.parse(q.figures)
-      } catch {
-        if (isValidImageUrl(q.figures)) {
-          figuresArray = [q.figures]
-        }
-      }
-    }
-    figuresArray.forEach(url => {
-      if (isValidImageUrl(url)) {
-        imagens.push(url.trim())
-      }
-    })
-  }
+// Formatar questão para o frontend
+function formatarQuestao(q: QuestaoENEMDB): QuestaoFormatada {
+  const areaConfig = ENEM_CONFIG.AREAS[q.area]
+  const subareaNome = ENEM_CONFIG.SUBAREAS_LABELS[q.subarea] || q.subarea
 
   return {
-    id: q.id_unico,
-    ano: q.ano,
-    numero,
-    contexto: q.question || '',
-    comando: q.description || null,
-    imagens,
-    alternativas,
-    area: q.area || 'Geral'
+    id: q.id,
+    id_api: q.id_api,
+    ano_prova: q.ano_prova,
+    numero_questao: q.numero_questao,
+    area: q.area,
+    area_nome: areaConfig?.nome || q.area,
+    subarea: q.subarea,
+    subarea_nome: subareaNome,
+    idioma: q.idioma,
+    titulo: q.titulo,
+    contexto: q.contexto,
+    comando: q.comando,
+    imagem_principal: q.imagem_principal,
+    imagens_extras: q.imagens_extras || [],
+    alternativas: [
+      { letra: 'A', texto: q.alternativa_a, imagem: q.imagem_a },
+      { letra: 'B', texto: q.alternativa_b, imagem: q.imagem_b },
+      { letra: 'C', texto: q.alternativa_c, imagem: q.imagem_c },
+      { letra: 'D', texto: q.alternativa_d, imagem: q.imagem_d },
+      { letra: 'E', texto: q.alternativa_e, imagem: q.imagem_e },
+    ]
   }
 }
 
@@ -119,120 +102,141 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams
     const anoParam = searchParams.get('ano')
-    const areaParam = searchParams.get('area')
+    const areaParam = searchParams.get('area') as AreaENEM | null
+    const subareaParam = searchParams.get('subarea') as SubareaENEM | null
     const ano = anoParam ? parseInt(anoParam) : null
 
     const supabase = getSupabaseAdmin()
 
     // Verificar acesso (3ª série EM ou professor)
-    const { data: usuario } = await supabase
+    const { data: usuario, error: erroUsuario } = await supabase
       .from('usuarios')
       .select('nivel, ano, tipo')
       .eq('id', sessao.userId)
       .single()
 
-    const isProfessor = usuario?.tipo === 'professor'
-    const isAluno3SerieEM = usuario?.nivel === 'EM' && usuario?.ano === 3
-
-    if (!usuario || (!isProfessor && !isAluno3SerieEM)) {
+    if (erroUsuario || !usuario) {
       return NextResponse.json({
         sucesso: false,
-        erro: 'Simulado ENEM disponível apenas para 3ª série do EM.',
+        erro: 'Usuário não encontrado',
+      }, { status: 404 })
+    }
+
+    const isProfessor = usuario.tipo === 'professor'
+    const isAluno3SerieEM = usuario.nivel === 'EM' && usuario.ano === 3
+
+    if (!isProfessor && !isAluno3SerieEM) {
+      return NextResponse.json({
+        sucesso: false,
+        erro: 'Simulado ENEM disponível apenas para 3ª série do Ensino Médio.',
       }, { status: 403 })
     }
 
     // Buscar anos disponíveis
     const { data: anosData } = await supabase
-      .from('enem_questions')
-      .select('ano')
-      .not('ano', 'is', null)
-      .order('ano', { ascending: false })
+      .from('questoes_enem')
+      .select('ano_prova')
+      .eq('status', 'ativa')
 
-    const anosDisponiveis = [...new Set(anosData?.map(a => a.ano).filter(Boolean) || [])]
+    const anosDisponiveis = [...new Set(anosData?.map(a => a.ano_prova).filter(Boolean) || [])]
+      .sort((a, b) => b - a)
 
-    // Buscar áreas disponíveis (pode não existir se SQL 30 não foi executado)
-    let areasDisponiveis: string[] = []
-    try {
-      const { data: areasData } = await supabase
-        .from('enem_questions')
-        .select('area')
-        .not('area', 'is', null)
+    // Buscar áreas disponíveis
+    const { data: areasData } = await supabase
+      .from('questoes_enem')
+      .select('area')
+      .eq('status', 'ativa')
 
-      areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
-    } catch {
-      // Coluna area pode não existir ainda
-      areasDisponiveis = []
-    }
+    const areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
 
-    // Buscar IDs já respondidos
+    // Buscar subáreas disponíveis
+    const { data: subareasData } = await supabase
+      .from('questoes_enem')
+      .select('subarea')
+      .eq('status', 'ativa')
+
+    const subareasDisponiveis = [...new Set(subareasData?.map(a => a.subarea).filter(Boolean) || [])]
+
+    // Buscar IDs já respondidos pelo usuário
     const { data: respostasUsuario } = await supabase
-      .from('enem_responses')
-      .select('question_id')
+      .from('respostas_enem')
+      .select('questao_id')
       .eq('usuario_id', sessao.userId)
 
-    const idsRespondidos = new Set<string>()
-    respostasUsuario?.forEach(r => {
-      if (r.question_id) idsRespondidos.add(r.question_id)
-    })
+    const idsRespondidos = new Set<string>(
+      respostasUsuario?.map(r => r.questao_id).filter(Boolean) || []
+    )
 
-    // Construir query - excluir questões anuladas
+    // Construir query
     let query = supabase
-      .from('enem_questions')
+      .from('questoes_enem')
       .select('*')
-      .or('anulada.is.null,anulada.eq.false')
+      .eq('status', 'ativa')
 
     if (ano) {
-      query = query.eq('ano', ano)
+      query = query.eq('ano_prova', ano)
     }
-    // Filtro por área só funciona se a coluna existir e tiver dados
-    if (areaParam && areasDisponiveis.length > 0) {
+
+    if (areaParam) {
       query = query.eq('area', areaParam)
     }
 
-    const { data: questoes, error: erroQuery } = await query.limit(2000)
+    if (subareaParam) {
+      query = query.eq('subarea', subareaParam)
+    }
+
+    const { data: questoes, error: erroQuery } = await query.limit(500)
 
     if (erroQuery) {
-      console.error('Erro ao buscar questões:', erroQuery)
+      console.error('Erro ao buscar questões ENEM:', erroQuery)
       return NextResponse.json({
         sucesso: false,
         erro: 'Erro ao buscar questões',
+        detalhes: erroQuery.message
       }, { status: 500 })
     }
 
+    // Verificar se existem questões
     if (!questoes || questoes.length === 0) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_QUESTOES',
-        mensagem: 'Nenhuma questão disponível. Importe o CSV.',
+        mensagem: 'Nenhuma questão disponível. O professor precisa importar questões.',
         anos_disponiveis: anosDisponiveis,
         areas_disponiveis: areasDisponiveis,
+        subareas_disponiveis: subareasDisponiveis,
         respondidas: idsRespondidos.size,
       })
     }
 
     // Filtrar não respondidas
-    const disponiveis = questoes.filter(q => !idsRespondidos.has(q.id_unico))
+    const disponiveis = questoes.filter(q => !idsRespondidos.has(q.id))
 
     if (disponiveis.length === 0) {
+      const filtroTexto = []
+      if (ano) filtroTexto.push(`de ${ano}`)
+      if (areaParam) filtroTexto.push(`de ${ENEM_CONFIG.AREAS[areaParam]?.nome || areaParam}`)
+
       return NextResponse.json({
         sucesso: true,
         status: 'TODAS_RESPONDIDAS',
-        mensagem: ano
-          ? `Você respondeu todas as questões de ${ano}!`
-          : 'Você respondeu todas as questões!',
+        mensagem: filtroTexto.length > 0
+          ? `Você respondeu todas as questões ${filtroTexto.join(' ')}!`
+          : 'Você respondeu todas as questões disponíveis!',
         anos_disponiveis: anosDisponiveis,
         areas_disponiveis: areasDisponiveis,
+        subareas_disponiveis: subareasDisponiveis,
         respondidas: idsRespondidos.size,
         total_questoes: questoes.length,
       })
     }
 
     // Selecionar questão aleatória
-    const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)]
-    const questaoFormatada = formatarQuestao(questaoRaw as QuestaoCSV)
+    const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)] as QuestaoENEMDB
+    const questaoFormatada = formatarQuestao(questaoRaw)
 
     // Resposta correta (codificada em base64)
-    const respostaCorreta = (questaoRaw.label || 'A').toUpperCase()
+    const respostaCorreta = questaoRaw.resposta_correta
 
     return NextResponse.json({
       sucesso: true,
@@ -241,6 +245,7 @@ export async function GET(request: NextRequest) {
       _rc: Buffer.from(respostaCorreta).toString('base64'),
       anos_disponiveis: anosDisponiveis,
       areas_disponiveis: areasDisponiveis,
+      subareas_disponiveis: subareasDisponiveis,
       respondidas: idsRespondidos.size,
       total_questoes: questoes.length,
       disponiveis: disponiveis.length,
