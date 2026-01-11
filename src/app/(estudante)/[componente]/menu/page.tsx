@@ -112,9 +112,9 @@ export default function MenuComponentePage() {
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
   ]
 
-  // Simulado ENEM apenas para 3ª série do Ensino Médio (temporariamente bloqueado)
+  // Simulado ENEM apenas para 3ª série do Ensino Médio
   const menuENEM: MenuItem[] = (usuario.nivel === 'EM' && usuario.ano === 3)
-    ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado', isComingSoon: true }]
+    ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado' }]
     : []
 
   const menuItemsFim: MenuItem[] = [
