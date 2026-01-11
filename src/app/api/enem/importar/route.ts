@@ -7,7 +7,12 @@ import type { AreaENEM, SubareaENEM } from '@/types'
 // API ENEM - Importar questões da API enem.dev
 // POST /api/enem/importar - Importa questões de um ano específico
 // GET /api/enem/importar - Retorna estatísticas da importação
-// Apenas professores podem importar
+//
+// LIMITAÇÕES DA API enem.dev:
+// - Rate Limit: 1 requisição por segundo
+// - Paginação: limit (default 10, max ~100) + offset
+// - Total: ~2700 questões (180 por ano, 2009-2023)
+// - Resposta inclui metadata.hasMore para paginação
 // ═══════════════════════════════════════════════════════════════════════════
 
 const API_ENEM_BASE = 'https://api.enem.dev/v1'
@@ -15,8 +20,15 @@ const API_ENEM_BASE = 'https://api.enem.dev/v1'
 // Anos disponíveis na API (2009-2023)
 const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009]
 
+// Configurações de paginação e rate limit
+const CONFIG = {
+  LIMIT_POR_PAGINA: 50,      // Questões por requisição
+  DELAY_MS: 1100,            // 1.1 segundo entre requisições (respeita rate limit)
+  MAX_TENTATIVAS: 3,         // Tentativas em caso de erro 429
+  DELAY_RETRY_MS: 2000,      // Delay extra após erro 429
+}
+
 // Mapeamento de disciplinas da API para nossa estrutura
-// A API enem.dev usa: linguagens, matematica, ciencias-humanas, ciencias-natureza
 const DISCIPLINA_MAP: Record<string, { area: AreaENEM; subarea: SubareaENEM }> = {
   // Ciências da Natureza
   'fisica': { area: 'ciencias-natureza', subarea: 'fisica' },
@@ -24,7 +36,7 @@ const DISCIPLINA_MAP: Record<string, { area: AreaENEM; subarea: SubareaENEM }> =
   'quimica': { area: 'ciencias-natureza', subarea: 'quimica' },
   'química': { area: 'ciencias-natureza', subarea: 'quimica' },
   'biologia': { area: 'ciencias-natureza', subarea: 'biologia' },
-  'ciencias-natureza': { area: 'ciencias-natureza', subarea: 'fisica' }, // default
+  'ciencias-natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
   'ciências da natureza': { area: 'ciencias-natureza', subarea: 'fisica' },
 
   // Matemática
@@ -42,7 +54,7 @@ const DISCIPLINA_MAP: Record<string, { area: AreaENEM; subarea: SubareaENEM }> =
   'artes': { area: 'linguagens', subarea: 'artes' },
 
   // Ciências Humanas
-  'ciencias-humanas': { area: 'ciencias-humanas', subarea: 'historia' }, // default
+  'ciencias-humanas': { area: 'ciencias-humanas', subarea: 'historia' },
   'ciências humanas': { area: 'ciencias-humanas', subarea: 'historia' },
   'historia': { area: 'ciencias-humanas', subarea: 'historia' },
   'história': { area: 'ciencias-humanas', subarea: 'historia' },
@@ -70,11 +82,27 @@ interface QuestaoAPI {
   }[]
 }
 
+// Resposta da API com metadata de paginação
+interface RespostaAPI {
+  metadata: {
+    limit: number
+    offset: number
+    total: number
+    hasMore: boolean
+  }
+  questions: QuestaoAPI[]
+}
+
 interface RequestBody {
   ano?: number
   anos?: number[]
-  areas?: string[]  // 'todas', 'ciencias-natureza', 'matematica', 'linguagens', 'ciencias-humanas'
+  areas?: string[]
   limite?: number
+}
+
+// Função para aguardar (respeitar rate limit)
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 // Normaliza texto para comparação
@@ -91,7 +119,6 @@ function normalizar(texto: string): string {
 function mapearDisciplina(discipline: string, language: string | null): { area: AreaENEM; subarea: SubareaENEM } | null {
   const disciplinaNormalizada = normalizar(discipline)
 
-  // Verifica mapeamento direto
   for (const [chave, valor] of Object.entries(DISCIPLINA_MAP)) {
     if (disciplinaNormalizada.includes(normalizar(chave))) {
       // Se for linguagens e tiver idioma específico, ajusta a subárea
@@ -105,6 +132,48 @@ function mapearDisciplina(discipline: string, language: string | null): { area: 
         }
       }
       return valor
+    }
+  }
+
+  return null
+}
+
+// Busca questões com retry em caso de rate limit
+async function buscarQuestoesComRetry(
+  ano: number,
+  offset: number,
+  limit: number
+): Promise<RespostaAPI | null> {
+  for (let tentativa = 1; tentativa <= CONFIG.MAX_TENTATIVAS; tentativa++) {
+    try {
+      const response = await fetch(
+        `${API_ENEM_BASE}/exams/${ano}/questions?limit=${limit}&offset=${offset}`,
+        {
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'Plataforma-Edu/1.0'
+          },
+        }
+      )
+
+      if (response.status === 429) {
+        // Rate limit atingido - aguardar e tentar novamente
+        console.log(`[ENEM] Rate limit atingido (tentativa ${tentativa}/${CONFIG.MAX_TENTATIVAS}). Aguardando...`)
+        await sleep(CONFIG.DELAY_RETRY_MS * tentativa)
+        continue
+      }
+
+      if (!response.ok) {
+        console.error(`[ENEM] Erro HTTP ${response.status} ao buscar ano ${ano}, offset ${offset}`)
+        return null
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error(`[ENEM] Erro na tentativa ${tentativa}:`, error)
+      if (tentativa < CONFIG.MAX_TENTATIVAS) {
+        await sleep(CONFIG.DELAY_RETRY_MS)
+      }
     }
   }
 
@@ -142,19 +211,22 @@ export async function POST(request: NextRequest) {
       ano,
       anos = ano ? [ano] : [2023, 2022, 2021, 2020, 2019],
       areas = ['todas'],
-      limite = 500
+      limite = 1000  // Limite total de questões a importar
     } = body
 
     let questoesImportadas = 0
     let questoesAtualizadas = 0
     let questoesIgnoradas = 0
+    let requisicoesFeitas = 0
     const erros: string[] = []
-    const detalhes: { ano: number; importadas: number; area: string }[] = []
+    const detalhes: { ano: number; importadas: number; total_ano: number }[] = []
 
     // Filtra áreas se não for "todas"
     const areasParaImportar = areas.includes('todas')
       ? ['ciencias-natureza', 'matematica', 'linguagens', 'ciencias-humanas']
       : areas
+
+    console.log(`[ENEM] Iniciando importação: anos=${anos.join(',')}, áreas=${areasParaImportar.join(',')}, limite=${limite}`)
 
     for (const anoAtual of anos) {
       if (!ANOS_DISPONIVEIS.includes(anoAtual)) {
@@ -162,33 +234,38 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      if (questoesImportadas >= limite) break
+      if (questoesImportadas >= limite) {
+        console.log(`[ENEM] Limite de ${limite} questões atingido`)
+        break
+      }
 
-      try {
-        // Buscar questões do ano - A API retorna no máximo 180 questões por ano
-        const response = await fetch(
-          `${API_ENEM_BASE}/exams/${anoAtual}/questions?limit=200`,
-          {
-            headers: {
-              'Accept': 'application/json',
-              'User-Agent': 'Plataforma-Edu/1.0'
-            },
-            next: { revalidate: 3600 } // Cache 1 hora
-          }
-        )
+      let offset = 0
+      let hasMore = true
+      let importadasAno = 0
+      let totalAno = 0
 
-        if (!response.ok) {
-          erros.push(`Erro ao buscar ano ${anoAtual}: HTTP ${response.status}`)
-          continue
+      console.log(`[ENEM] Processando ano ${anoAtual}...`)
+
+      // Loop de paginação para buscar TODAS as questões do ano
+      while (hasMore && questoesImportadas < limite) {
+        // Respeitar rate limit
+        if (requisicoesFeitas > 0) {
+          await sleep(CONFIG.DELAY_MS)
         }
 
-        const data = await response.json()
-        const questoes: QuestaoAPI[] = data.questions || []
+        const data = await buscarQuestoesComRetry(anoAtual, offset, CONFIG.LIMIT_POR_PAGINA)
+        requisicoesFeitas++
 
-        console.log(`[ENEM] Ano ${anoAtual}: ${questoes.length} questões encontradas`)
+        if (!data) {
+          erros.push(`Erro ao buscar ano ${anoAtual}, offset ${offset}`)
+          break
+        }
 
-        let importadasAno = 0
-        const areaContagem: Record<string, number> = {}
+        const questoes = data.questions || []
+        hasMore = data.metadata?.hasMore ?? false
+        totalAno = data.metadata?.total || totalAno
+
+        console.log(`[ENEM] Ano ${anoAtual}: offset=${offset}, questões=${questoes.length}, hasMore=${hasMore}, total=${totalAno}`)
 
         for (const q of questoes) {
           if (questoesImportadas >= limite) break
@@ -197,17 +274,16 @@ export async function POST(request: NextRequest) {
           const mapeamento = mapearDisciplina(q.discipline, q.language)
 
           if (!mapeamento) {
-            console.log(`[ENEM] Disciplina não mapeada: ${q.discipline}`)
             questoesIgnoradas++
             continue
           }
 
-          // Verificar se a área está na lista de áreas para importar
+          // Verificar se a área está na lista
           if (!areasParaImportar.includes(mapeamento.area)) {
             continue
           }
 
-          // Verificar se tem 5 alternativas
+          // Verificar alternativas
           if (!q.alternatives || q.alternatives.length !== 5) {
             questoesIgnoradas++
             continue
@@ -223,17 +299,16 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          // Verificar se todas as alternativas existem
           if (!alternativas.a || !alternativas.b || !alternativas.c ||
               !alternativas.d || !alternativas.e) {
             questoesIgnoradas++
             continue
           }
 
-          // ID único para evitar duplicatas
+          // ID único
           const idApi = `enem-api-${q.year}-${q.index}`
 
-          // Preparar dados da questão
+          // Dados da questão
           const dadosQuestao = {
             id_api: idApi,
             ano_prova: q.year,
@@ -262,17 +337,15 @@ export async function POST(request: NextRequest) {
             importado_em: new Date().toISOString(),
           }
 
-          // Inserir ou atualizar questão
-          const { error, data: resultado } = await supabase
+          // Inserir ou atualizar
+          const { error } = await supabase
             .from('questoes_enem')
             .upsert(dadosQuestao, {
               onConflict: 'id_api',
             })
-            .select('id')
-            .single()
 
           if (error) {
-            if (error.code === '23505') { // Duplicate - já existe
+            if (error.code === '23505') {
               questoesAtualizadas++
             } else {
               erros.push(`Erro questão ${q.year}-${q.index}: ${error.message}`)
@@ -280,36 +353,38 @@ export async function POST(request: NextRequest) {
           } else {
             questoesImportadas++
             importadasAno++
-            areaContagem[mapeamento.area] = (areaContagem[mapeamento.area] || 0) + 1
           }
         }
 
-        // Registrar detalhes do ano
-        for (const [area, count] of Object.entries(areaContagem)) {
-          detalhes.push({ ano: anoAtual, importadas: count, area })
-        }
-
-        console.log(`[ENEM] Ano ${anoAtual}: ${importadasAno} questões importadas`)
-
-      } catch (err) {
-        erros.push(`Erro ao processar ano ${anoAtual}: ${err}`)
-        console.error(`[ENEM] Erro ao processar ano ${anoAtual}:`, err)
+        // Avançar para próxima página
+        offset += CONFIG.LIMIT_POR_PAGINA
       }
+
+      detalhes.push({ ano: anoAtual, importadas: importadasAno, total_ano: totalAno })
+      console.log(`[ENEM] Ano ${anoAtual} concluído: ${importadasAno} importadas de ${totalAno} total`)
     }
 
-    // Buscar total de questões no banco
+    // Total no banco
     const { count } = await supabase
       .from('questoes_enem')
       .select('*', { count: 'exact', head: true })
+
+    console.log(`[ENEM] Importação concluída: ${questoesImportadas} novas, ${questoesAtualizadas} atualizadas, ${questoesIgnoradas} ignoradas`)
 
     return NextResponse.json({
       sucesso: true,
       importadas: questoesImportadas,
       atualizadas: questoesAtualizadas,
       ignoradas: questoesIgnoradas,
+      requisicoes: requisicoesFeitas,
       total_banco: count,
       detalhes,
       erros: erros.length > 0 ? erros : undefined,
+      config: {
+        rate_limit: '1 req/segundo',
+        delay_usado: `${CONFIG.DELAY_MS}ms`,
+        limit_por_pagina: CONFIG.LIMIT_POR_PAGINA,
+      }
     })
   } catch (error) {
     console.error('Erro ao importar questões ENEM:', error)
@@ -320,7 +395,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Verificar status da importação e estatísticas
+// GET - Estatísticas da importação
 export async function GET() {
   try {
     const sessao = await obterSessao()
@@ -333,7 +408,6 @@ export async function GET() {
 
     const supabase = getSupabaseAdmin()
 
-    // Estatísticas do banco
     const { data: stats, error } = await supabase
       .from('questoes_enem')
       .select('area, subarea, ano_prova, fonte')
@@ -367,6 +441,12 @@ export async function GET() {
       por_fonte: porFonte,
       anos_disponiveis: ANOS_DISPONIVEIS,
       areas_disponiveis: ['ciencias-natureza', 'matematica', 'linguagens', 'ciencias-humanas'],
+      api_info: {
+        total_questoes_api: '~2700',
+        rate_limit: '1 requisição/segundo',
+        anos: '2009-2023',
+        docs: 'https://docs.enem.dev'
+      }
     })
   } catch (error) {
     console.error('Erro ao buscar status:', error)
