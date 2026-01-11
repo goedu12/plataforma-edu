@@ -1,10 +1,10 @@
 /**
  * Utilitários para limpeza e formatação de texto das questões ENEM
- * Versão 2.0 - Com suporte a imagens embutidas e múltiplos textos
+ * Versão 3.0 - Limpeza completa de markdown e filtros de qualidade
  */
 
 // Valores que devem ser tratados como vazio
-const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL']
+const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
 
 /**
  * Valida se é uma URL de imagem válida
@@ -14,53 +14,52 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
   const trimmed = url.trim()
   if (!trimmed) return false
   if (VALORES_INVALIDOS.includes(trimmed.toLowerCase())) return false
-  return trimmed.startsWith('http') || trimmed.startsWith('data:image')
+  // Deve começar com http ou data:image
+  if (!trimmed.startsWith('http') && !trimmed.startsWith('data:image')) return false
+  // Rejeitar URLs muito curtas ou claramente inválidas
+  if (trimmed.length < 10) return false
+  return true
 }
 
 /**
- * Extrai URLs de imagens embutidas no texto
- * Padrões suportados:
- * - !(url)
- * - ![alt](url)
- * - (url.png) ou (url.jpg) etc
+ * Remove TODA formatação markdown do texto, deixando apenas texto limpo
  */
-export function extrairImagensDoTexto(texto: string): { textoLimpo: string; imagens: string[] } {
-  if (!texto) return { textoLimpo: '', imagens: [] }
+function removerMarkdown(texto: string): string {
+  let limpo = texto
 
-  const imagens: string[] = []
-  let textoProcessado = texto
+  // Remove negrito **texto** ou __texto__
+  limpo = limpo.replace(/\*\*([^*]+)\*\*/g, '$1')
+  limpo = limpo.replace(/__([^_]+)__/g, '$1')
 
-  // Padrão 1: !(url) - imagem markdown sem alt
-  textoProcessado = textoProcessado.replace(/!\(([^)]+)\)/g, (_, url) => {
-    if (isValidImageUrl(url)) {
-      imagens.push(url.trim())
-    }
-    return ''
-  })
+  // Remove itálico *texto* ou _texto_
+  limpo = limpo.replace(/\*([^*]+)\*/g, '$1')
+  limpo = limpo.replace(/_([^_]+)_/g, '$1')
 
-  // Padrão 2: ![alt](url) - imagem markdown com alt
-  textoProcessado = textoProcessado.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, url) => {
-    if (isValidImageUrl(url)) {
-      imagens.push(url.trim())
-    }
-    return ''
-  })
+  // Remove asteriscos soltos
+  limpo = limpo.replace(/\*+/g, '')
 
-  // Padrão 3: URLs de imagem soltas (https://...png/jpg/gif/webp)
-  textoProcessado = textoProcessado.replace(
-    /\(?(https?:\/\/[^\s\)]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi,
-    (match, url) => {
-      if (isValidImageUrl(url)) {
-        imagens.push(url.trim())
-      }
-      return ''
-    }
-  )
+  // Remove underscores soltos no início/fim de palavras
+  limpo = limpo.replace(/\s_|_\s/g, ' ')
 
-  return {
-    textoLimpo: textoProcessado.replace(/\s{2,}/g, ' ').trim(),
-    imagens: [...new Set(imagens)] // Remove duplicatas
-  }
+  // Remove headers markdown (##, ###, etc)
+  limpo = limpo.replace(/^#{1,6}\s*/gm, '')
+
+  // Remove links markdown [texto](url) -> texto
+  limpo = limpo.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+
+  // Remove código inline `código`
+  limpo = limpo.replace(/`([^`]+)`/g, '$1')
+
+  // Remove blocos de código ```código```
+  limpo = limpo.replace(/```[\s\S]*?```/g, '')
+
+  // Remove blockquotes >
+  limpo = limpo.replace(/^>\s*/gm, '')
+
+  // Remove listas - ou *
+  limpo = limpo.replace(/^[\-\*]\s+/gm, '• ')
+
+  return limpo
 }
 
 /**
@@ -76,7 +75,7 @@ export function limparTexto(texto: string | null | undefined): string {
     return ''
   }
 
-  // Remover escapes literais (quando \n vem como texto, não como quebra)
+  // Remover escapes literais
   limpo = limpo
     .replace(/\\n/g, ' ')
     .replace(/\\t/g, ' ')
@@ -94,10 +93,13 @@ export function limparTexto(texto: string | null | undefined): string {
     .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)))
     .replace(/&#x([0-9a-fA-F]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)))
 
-  // Remover caracteres de controle e invisíveis (exceto quebras de linha)
+  // Remover TODA formatação markdown
+  limpo = removerMarkdown(limpo)
+
+  // Remover caracteres de controle e invisíveis
   limpo = limpo.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
 
-  // Remover caractere de substituição Unicode (indica encoding quebrado)
+  // Remover caractere de substituição Unicode
   limpo = limpo.replace(/\uFFFD/g, '')
 
   // Normalizar espaços múltiplos
@@ -110,79 +112,34 @@ export function limparTexto(texto: string | null | undefined): string {
 }
 
 /**
- * Limpa e formata contexto/enunciado para exibição
- */
-export function limparContexto(texto: string | null | undefined): string {
-  if (!texto || typeof texto !== 'string') return ''
-
-  let limpo = texto.trim()
-
-  // Verificar valores inválidos
-  if (VALORES_INVALIDOS.includes(limpo) || VALORES_INVALIDOS.includes(limpo.toLowerCase())) {
-    return ''
-  }
-
-  // Remover escapes literais
-  limpo = limpo
-    .replace(/\\n/g, '\n')
-    .replace(/\\t/g, '\t')
-    .replace(/\\r/g, '')
-
-  // Decodificar HTML entities
-  limpo = limpo
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code)))
-
-  // Converter quebras de linha em <br> para HTML
-  limpo = limpo.replace(/\n/g, '<br>')
-
-  // Remover caractere de substituição
-  limpo = limpo.replace(/\uFFFD/g, '')
-
-  return limpo.trim()
-}
-
-/**
  * Verifica se o texto é válido (não vazio ou inválido)
  */
 export function isTextoValido(texto: string | null | undefined): boolean {
   if (!texto || typeof texto !== 'string') return false
-
   const trimmed = texto.trim()
   if (!trimmed) return false
-
   if (VALORES_INVALIDOS.includes(trimmed) || VALORES_INVALIDOS.includes(trimmed.toLowerCase())) {
     return false
   }
-
   return true
 }
 
 /**
- * Formata LaTeX básico para exibição (se necessário)
- * Remove delimitadores $...$ e formata de forma legível
+ * Formata LaTeX básico para exibição
  */
 export function formatarMatematica(texto: string): string {
   if (!texto) return ''
 
-  // Substituir frações LaTeX por formato mais legível
   let formatado = texto
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1/$2)')
     .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
     .replace(/\\sqrt\[(\d+)\]\{([^}]+)\}/g, '$1√($2)')
 
-  // Substituir potências
   formatado = formatado
     .replace(/\^2/g, '²')
     .replace(/\^3/g, '³')
     .replace(/\^\{(\d+)\}/g, '^$1')
 
-  // Substituir símbolos comuns
   formatado = formatado
     .replace(/\\times/g, '×')
     .replace(/\\div/g, '÷')
@@ -202,13 +159,8 @@ export function formatarMatematica(texto: string): string {
     .replace(/\\mu/g, 'μ')
     .replace(/\\omega/g, 'ω')
 
-  // Remover delimitadores $ de LaTeX inline
   formatado = formatado.replace(/\$([^$]+)\$/g, '$1')
-
-  // Remover comandos LaTeX não reconhecidos
   formatado = formatado.replace(/\\[a-zA-Z]+/g, '')
-
-  // Remover chaves vazias
   formatado = formatado.replace(/\{\}/g, '')
   formatado = formatado.replace(/\{([^{}]+)\}/g, '$1')
 
@@ -224,26 +176,6 @@ export function processarTexto(texto: string | null | undefined): string {
 }
 
 /**
- * Formata seções de texto (TEXTO I, TEXTO II, etc.) com estilo visual
- */
-function formatarSecoes(html: string): string {
-  // Padrão para TEXTO I, TEXTO II, TEXTO 1, TEXTO 2, etc.
-  const padraoTexto = /\b(TEXTO\s*[IVX\d]+)\b/gi
-
-  html = html.replace(padraoTexto, (match) => {
-    return `<div class="secao-texto-header">${match.toUpperCase()}</div>`
-  })
-
-  // Padrão para Texto I, Texto II (capitalizado)
-  const padraoTextoCapitalizado = /\b(Texto\s*[IVX\d]+)\b/g
-  html = html.replace(padraoTextoCapitalizado, (match) => {
-    return `<div class="secao-texto-header">${match.toUpperCase()}</div>`
-  })
-
-  return html
-}
-
-/**
  * Converte URLs de imagens em tags <img> clicáveis
  */
 function converterImagensEmbutidas(texto: string): { html: string; imagensExtraidas: string[] } {
@@ -254,7 +186,7 @@ function converterImagensEmbutidas(texto: string): { html: string; imagensExtrai
   html = html.replace(/!\(([^)]+)\)/g, (_, url) => {
     if (isValidImageUrl(url)) {
       imagensExtraidas.push(url.trim())
-      return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Imagem da questão" class="imagem-contexto" loading="lazy" /></div>`
+      return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Figura" class="imagem-contexto" loading="lazy" /></div>`
     }
     return ''
   })
@@ -263,20 +195,20 @@ function converterImagensEmbutidas(texto: string): { html: string; imagensExtrai
   html = html.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, url) => {
     if (isValidImageUrl(url)) {
       imagensExtraidas.push(url.trim())
-      return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Imagem da questão" class="imagem-contexto" loading="lazy" /></div>`
+      return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Figura" class="imagem-contexto" loading="lazy" /></div>`
     }
     return ''
   })
 
-  // Padrão 3: URLs de imagem soltas no texto
+  // Padrão 3: URLs de imagem soltas no texto (entre parênteses ou não)
   html = html.replace(
-    /\(?(https?:\/\/[^\s\)<]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi,
+    /\(?(https?:\/\/[^\s\)<>]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi,
     (match, url) => {
       if (isValidImageUrl(url)) {
         imagensExtraidas.push(url.trim())
-        return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Imagem da questão" class="imagem-contexto" loading="lazy" /></div>`
+        return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Figura" class="imagem-contexto" loading="lazy" /></div>`
       }
-      return match
+      return ''
     }
   )
 
@@ -284,18 +216,32 @@ function converterImagensEmbutidas(texto: string): { html: string; imagensExtrai
 }
 
 /**
- * Processa contexto completo para exibição com:
- * - Imagens embutidas convertidas em <img>
- * - Seções TEXTO I, TEXTO II formatadas
- * - Formatação matemática
- * - Limpeza de caracteres
+ * Formata seções de texto (TEXTO I, TEXTO II, etc.) com estilo visual
+ */
+function formatarSecoes(html: string): string {
+  // Remove asteriscos ao redor de TEXTO I, TEXTO II, etc.
+  html = html.replace(/\*+\s*(TEXTO\s*[IVX\d]+)\s*\*+/gi, (_, texto) => {
+    return `<div class="secao-texto-header">${texto.toUpperCase()}</div>`
+  })
+
+  // Padrão para TEXTO I, TEXTO II sem asteriscos
+  html = html.replace(/(?<![a-zA-Z])(TEXTO\s*[IVX\d]+)(?![a-zA-Z])/gi, (match) => {
+    // Evita substituir se já foi processado
+    if (match.includes('class=')) return match
+    return `<div class="secao-texto-header">${match.toUpperCase()}</div>`
+  })
+
+  return html
+}
+
+/**
+ * Processa contexto completo para exibição
  */
 export function processarContexto(texto: string | null | undefined): string {
   if (!texto || typeof texto !== 'string') return ''
 
   let processado = texto.trim()
 
-  // Verificar valores inválidos
   if (VALORES_INVALIDOS.includes(processado) || VALORES_INVALIDOS.includes(processado.toLowerCase())) {
     return ''
   }
@@ -315,68 +261,21 @@ export function processarContexto(texto: string | null | undefined): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
 
-  // Converter imagens embutidas em tags <img>
+  // Converter imagens embutidas ANTES de remover markdown
   const { html: comImagens } = converterImagensEmbutidas(processado)
   processado = comImagens
 
-  // Formatar seções de texto (TEXTO I, TEXTO II)
+  // Formatar seções TEXTO I, II (antes de remover markdown)
   processado = formatarSecoes(processado)
 
-  // Aplicar formatação matemática
-  processado = formatarMatematica(processado)
-
-  // Converter quebras de linha em <br>
-  processado = processado.replace(/\n/g, '<br>')
-
-  // Remover caractere de substituição Unicode
-  processado = processado.replace(/\uFFFD/g, '')
-
-  // Limpar espaços extras
-  processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br><br>')
-
-  return processado.trim()
-}
-
-/**
- * Processa contexto e retorna tanto o HTML quanto as imagens extraídas
- */
-export function processarContextoComImagens(texto: string | null | undefined): {
-  html: string
-  imagensExtraidas: string[]
-} {
-  if (!texto || typeof texto !== 'string') {
-    return { html: '', imagensExtraidas: [] }
-  }
-
-  let processado = texto.trim()
-
-  if (VALORES_INVALIDOS.includes(processado) || VALORES_INVALIDOS.includes(processado.toLowerCase())) {
-    return { html: '', imagensExtraidas: [] }
-  }
-
-  // Remover escapes literais
+  // Remover formatação markdown (negrito, itálico, etc.)
+  // Mas preservar as tags HTML que já criamos
   processado = processado
-    .replace(/\\n/g, '\n')
-    .replace(/\\t/g, '\t')
-    .replace(/\\r/g, '')
+    .replace(/\*\*([^*<]+)\*\*/g, '<strong>$1</strong>') // Converte **bold** em <strong>
+    .replace(/\*([^*<]+)\*/g, '<em>$1</em>') // Converte *italic* em <em>
+    .replace(/\*+/g, '') // Remove asteriscos restantes
 
-  // Decodificar HTML entities
-  processado = processado
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ')
-
-  // Converter imagens embutidas e extrair URLs
-  const { html: comImagens, imagensExtraidas } = converterImagensEmbutidas(processado)
-  processado = comImagens
-
-  // Formatar seções de texto
-  processado = formatarSecoes(processado)
-
-  // Aplicar formatação matemática
+  // Formatar matemática
   processado = formatarMatematica(processado)
 
   // Converter quebras de linha
@@ -385,9 +284,107 @@ export function processarContextoComImagens(texto: string | null | undefined): {
   // Limpar
   processado = processado.replace(/\uFFFD/g, '')
   processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br><br>')
+  processado = processado.replace(/\s{2,}/g, ' ')
 
-  return {
-    html: processado.trim(),
-    imagensExtraidas
+  return processado.trim()
+}
+
+/**
+ * Verifica se uma questão tem qualidade suficiente para exibição
+ * Retorna true se a questão pode ser exibida, false se deve ser ocultada
+ */
+export function questaoTemQualidade(questao: {
+  contexto: string | null
+  alternativa_a: string | null
+  alternativa_b: string | null
+  alternativa_c: string | null
+  alternativa_d: string | null
+  alternativa_e: string | null
+  imagem_principal?: string | null
+}): { valida: boolean; motivo?: string } {
+  // 1. Contexto deve existir e ter conteúdo mínimo
+  const contextoLimpo = limparTexto(questao.contexto)
+  if (!contextoLimpo || contextoLimpo.length < 20) {
+    return { valida: false, motivo: 'contexto_vazio' }
   }
+
+  // 2. Verificar alternativas - pelo menos 4 devem ter texto válido
+  const alternativas = [
+    questao.alternativa_a,
+    questao.alternativa_b,
+    questao.alternativa_c,
+    questao.alternativa_d,
+    questao.alternativa_e,
+  ]
+
+  const alternativasValidas = alternativas.filter(alt => {
+    const textoLimpo = limparTexto(alt)
+    // Alternativa válida se tem texto OU é apenas um numeral romano (I, II, III, IV, V)
+    return textoLimpo && (textoLimpo.length >= 1)
+  })
+
+  if (alternativasValidas.length < 4) {
+    return { valida: false, motivo: 'alternativas_insuficientes' }
+  }
+
+  // 3. Se tem imagem principal, verificar se é válida
+  if (questao.imagem_principal && !isValidImageUrl(questao.imagem_principal)) {
+    // Não invalida a questão, mas marca que a imagem é inválida
+  }
+
+  return { valida: true }
+}
+
+/**
+ * Extrai todas as imagens válidas de uma questão
+ */
+export function extrairImagensQuestao(questao: {
+  contexto?: string | null
+  imagem_principal?: string | null
+  imagens_extras?: string[] | null
+  imagem_a?: string | null
+  imagem_b?: string | null
+  imagem_c?: string | null
+  imagem_d?: string | null
+  imagem_e?: string | null
+}): string[] {
+  const imagens: string[] = []
+
+  // Imagem principal
+  if (isValidImageUrl(questao.imagem_principal)) {
+    imagens.push(questao.imagem_principal!)
+  }
+
+  // Imagens extras
+  if (questao.imagens_extras) {
+    for (const img of questao.imagens_extras) {
+      if (isValidImageUrl(img)) {
+        imagens.push(img)
+      }
+    }
+  }
+
+  // Imagens do contexto (embutidas no texto)
+  if (questao.contexto) {
+    const { imagensExtraidas } = converterImagensEmbutidas(questao.contexto)
+    imagens.push(...imagensExtraidas)
+  }
+
+  // Imagens das alternativas
+  const imagensAlternativas = [
+    questao.imagem_a,
+    questao.imagem_b,
+    questao.imagem_c,
+    questao.imagem_d,
+    questao.imagem_e,
+  ]
+
+  for (const img of imagensAlternativas) {
+    if (isValidImageUrl(img)) {
+      imagens.push(img!)
+    }
+  }
+
+  // Remove duplicatas
+  return [...new Set(imagens)]
 }
