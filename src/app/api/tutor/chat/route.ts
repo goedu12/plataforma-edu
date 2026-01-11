@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { chatComTutor, type ContextoEstudante } from '@/lib/gemini'
-import {
-  revisarAteNota10,
-} from '@/lib/revisao-profissional'
 import type { Componente, MensagemChat } from '@/types'
 import { PONTUACAO } from '@/types'
 import { getPeriodoAtual } from '@/lib/sistema-notas'
@@ -240,26 +237,10 @@ export async function POST(request: NextRequest) {
     console.log(`[Tutor IA] Modo: ${resultado.modo}, Tópico: ${resultado.topico}`)
 
     // ═══════════════════════════════════════════════════════════
-    // SISTEMA DE REVISÃO PROFISSIONAL - 3 Revisores
+    // USAR RESPOSTA DIRETA DA IA (sem sistema de revisao que adiciona frases)
+    // O prompt ja foi otimizado com principios de neurociencia
     // ═══════════════════════════════════════════════════════════
-
-    // Determinar ano escolar baseado na turma (ex: "1A" -> 1º ano)
-    const anoEscolar = parseInt(usuario.turma?.charAt(0) || '1', 10)
-    const primeiroNome = nomeEstudante || usuario.nome?.split(' ')[0] || 'Estudante'
-
-    // Submeter resposta para revisão por 3 profissionais até atingir nota 10
-    const resultadoRevisao = revisarAteNota10(
-      resultado.resposta,
-      componente as 'fisica' | 'matematica',
-      primeiroNome,
-      3 // máximo de iterações
-    )
-
-    // Usar conteúdo revisado ou original
-    const respostaFinal = resultadoRevisao.conteudoRevisado || resultado.resposta
-
-    // Log para análise de qualidade (pode ser salvo no banco futuramente)
-    console.log(`[Revisão IA] Nota: ${resultadoRevisao.notaMedia}/100, Aprovado: ${resultadoRevisao.aprovado}, Iterações: ${resultadoRevisao.iteracoes || 1}`)
+    const respostaFinal = resultado.resposta
 
     // Incrementar uso
     const novoUso = usoHoje + 1
@@ -295,15 +276,8 @@ export async function POST(request: NextRequest) {
       resposta: respostaFinal,
       uso_hoje: novoUso,
       limite: PONTUACAO.LIMITE_IA_DIARIO,
-      // Modo e tópico detectados pela IA
       modo: resultado.modo,
       topico: resultado.topico,
-      // Dados de revisão para debug/admin (opcional)
-      revisao: {
-        nota: resultadoRevisao.notaMedia,
-        aprovado: resultadoRevisao.aprovado,
-        iteracoes: resultadoRevisao.iteracoes || 1,
-      },
     })
   } catch (error) {
     console.error('Erro no chat com tutor:', error)
