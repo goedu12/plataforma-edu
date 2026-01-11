@@ -327,13 +327,14 @@ export function processarContexto(
     .replace(/^Questão\s+\d+\s*/i, '')
     .replace(/^(Matemática|Física|Química|Biologia|Português|Literatura|História|Geografia|Filosofia|Sociologia|Inglês|Espanhol)\s*/i, '')
 
-  // Remover referências a "Figura X" (as imagens já estão na galeria)
+  // Estilizar referências a figuras/tabelas como badges discretos
+  // Para figuras: mostra abreviado pois a imagem aparece na galeria com legenda
   processado = processado
-    .replace(/\bFigura\s*\d+\b/gi, '')
-    .replace(/\bImagem\s*\d+\b/gi, '')
-    .replace(/\bQuadro\s*\d+\b/gi, '')
-    .replace(/\bTabela\s*\d+\b/gi, '')
-    .replace(/\bGráfico\s*\d+\b/gi, '')
+    .replace(/\b(Figura|figura)\s*(\d+)\b/g, '<span class="ref-figura">(Fig. $2)</span>')
+    .replace(/\b(Imagem|imagem)\s*(\d+)\b/g, '<span class="ref-figura">(Img. $2)</span>')
+    .replace(/\b(Quadro|quadro)\s*(\d+)\b/g, '<span class="ref-tabela">Quadro $2</span>')
+    .replace(/\b(Tabela|tabela)\s*(\d+)\b/g, '<span class="ref-tabela">Tabela $2</span>')
+    .replace(/\b(Gráfico|gráfico)\s*(\d+)\b/g, '<span class="ref-tabela">Gráfico $2</span>')
 
   // Tratar imagens: remover ou converter dependendo da opção
   if (opcoes?.removerImagens) {

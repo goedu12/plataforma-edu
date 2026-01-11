@@ -368,6 +368,20 @@ export default function SimuladoENEMPage() {
           margin-top: 8px;
         }
 
+        /* Referências a figuras (discreto, pois imagem está na galeria) */
+        .texto-questao .ref-figura {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          font-style: italic;
+        }
+
+        /* Referências a tabelas/quadros (mais visível) */
+        .texto-questao .ref-tabela {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: ${corPrimaria};
+        }
+
         /* Responsivo - Mobile */
         @media (max-width: 640px) {
           .texto-questao {
@@ -514,22 +528,26 @@ export default function SimuladoENEMPage() {
             {imagensValidas.length > 0 && (
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
                 {imagensValidas.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setImagemZoom(img)}
-                    className="relative flex-shrink-0 rounded-xl overflow-hidden group"
-                    style={{ background: 'var(--bg-elevated)' }}
-                  >
-                    <img
-                      src={img}
-                      alt={`Figura ${i + 1}`}
-                      className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
-                      onError={() => handleImageError(img)}
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                      <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
-                    </div>
-                  </button>
+                  <div key={i} className="flex-shrink-0 text-center">
+                    <button
+                      onClick={() => setImagemZoom(img)}
+                      className="relative rounded-xl overflow-hidden group"
+                      style={{ background: 'var(--bg-elevated)' }}
+                    >
+                      <img
+                        src={img}
+                        alt={`Figura ${i + 1}`}
+                        className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
+                        onError={() => handleImageError(img)}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                      </div>
+                    </button>
+                    <span className="text-xs mt-1 block" style={{ color: 'var(--text-muted)' }}>
+                      Figura {i + 1}
+                    </span>
+                  </div>
                 ))}
               </div>
             )}
