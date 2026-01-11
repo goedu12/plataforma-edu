@@ -60,7 +60,10 @@ export interface Usuario {
 }
 
 // ═══════════════════════════════════════════════════════════
-// INTERFACE: Questao
+// INTERFACE: Questao (Sistema Regular)
+// Questões do modo Estudar/Desafio/Revisão
+// NOTA: Questões regulares usam 4 alternativas (A-D)
+// Para questões ENEM com 5 alternativas, use QuestaoENEM
 // ═══════════════════════════════════════════════════════════
 export interface Questao {
   id: string
@@ -75,7 +78,7 @@ export interface Questao {
   alternativa_b: string
   alternativa_c: string
   alternativa_d: string
-  alternativa_e?: string
+  alternativa_e?: string // Opcional - usado apenas se questão tiver 5 alternativas
   resposta_correta: 'A' | 'B' | 'C' | 'D' | 'E'
   explicacao: string
   dica?: string
@@ -257,23 +260,13 @@ export const DESAFIO = {
 } as const
 
 // ═══════════════════════════════════════════════════════════
-// SISTEMA DE NOTAS BIMESTRAIS
+// SISTEMA DE NOTAS BIMESTRAIS - FÓRMULA v2
 // ═══════════════════════════════════════════════════════════
-// @deprecated - Use a FÓRMULA v2 em src/lib/sistema-notas.ts
-// FÓRMULA v2: NOTA = Acertos (máx 6.0) + Tempo (máx 4.0)
+// A fórmula de notas está centralizada em src/lib/sistema-notas.ts
+// NOTA = Acertos (máx 6.0) + Tempo (máx 4.0)
 // - Estudar: +0.04/acerto | Revisão: +0.02/acerto | Desafio: +0.01/acerto
 // - Tempo: 2h=1pt, 3h=2pt, 4h=3pt, 5h+=4pt
-// As constantes abaixo são mantidas apenas para compatibilidade legada
-export const NOTAS = {
-  META_QUESTOES_BIMESTRE: 100, // @deprecated - Usar config em sistema-notas.ts
-  META_DIAS_BIMESTRE: 25, // @deprecated - Usar config em sistema-notas.ts
-  PESO_DESEMPENHO: 0.5, // @deprecated - Fórmula v2 não usa pesos
-  PESO_PARTICIPACAO: 0.3, // @deprecated - Fórmula v2 não usa pesos
-  PESO_FREQUENCIA: 0.2, // @deprecated - Fórmula v2 não usa pesos
-  NOTA_MINIMA_DESEMPENHO: 4.0, // @deprecated
-  NOTA_MINIMA_PARTICIPACAO: 3.0, // @deprecated
-  NOTA_MAXIMA_BLOQUEIO: 5.9, // @deprecated
-} as const
+// Usar: calcularNotaNova() de @/lib/sistema-notas
 
 // ═══════════════════════════════════════════════════════════
 // BIMESTRES
@@ -384,30 +377,10 @@ export function calcularTaxaAcerto(corretas: number, total: number): number {
   return Math.round((corretas / total) * 100)
 }
 
-export function formatarEmail(nome: string, turma: string): string {
-  return `${normalizarTexto(nome)}@${turma.toLowerCase()}`
-}
-
-export function normalizarTexto(texto: string): string {
-  return texto
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9]/g, '') // Remove caracteres especiais
-}
-
-export function extrairAnoTurma(turma: string): { ano: number; nivel: NivelEnsino } {
-  const anoStr = turma.replace(/[^0-9]/g, '')
-  const ano = parseInt(anoStr)
-
-  if (ano >= 1 && ano <= 3) {
-    return { ano, nivel: 'EM' }
-  } else if (ano >= 6 && ano <= 9) {
-    return { ano, nivel: 'EF' }
-  }
-
-  throw new Error('Turma inválida')
-}
+// Funções utilitárias movidas para @/lib/utils:
+// - normalizarTexto()
+// - gerarEmailEstudante() (equivalente a formatarEmail)
+// - extrairAnoTurma() - usar validação no middleware
 
 // ═══════════════════════════════════════════════════════════
 // TIPOS ENEM - Simulado ENEM

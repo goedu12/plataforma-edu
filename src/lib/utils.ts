@@ -56,20 +56,6 @@ export function normalizarTexto(texto: string): string {
     .replace(/[^a-z0-9]/g, '') // Remove caracteres especiais
 }
 
-export function capitalizarNome(nome: string): string {
-  const preposicoes = ['da', 'de', 'do', 'das', 'dos', 'e']
-  return nome
-    .toLowerCase()
-    .split(' ')
-    .map((palavra, index) => {
-      if (index > 0 && preposicoes.includes(palavra)) {
-        return palavra
-      }
-      return palavra.charAt(0).toUpperCase() + palavra.slice(1)
-    })
-    .join(' ')
-}
-
 // ═══════════════════════════════════════════════════════════
 // GERAÇÃO DE EMAIL
 // ═══════════════════════════════════════════════════════════

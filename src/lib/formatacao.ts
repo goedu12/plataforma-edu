@@ -145,25 +145,6 @@ export function formatarFormula(texto: string): string {
 }
 
 /**
- * Formata texto para exibição segura em HTML
- * Preserva formatação matemática mas escapa HTML perigoso
- */
-export function formatarTextoSeguro(texto: string): string {
-  if (!texto) return texto
-
-  // Primeiro aplica formatação de fórmulas
-  let resultado = formatarFormula(texto)
-
-  // Escapa caracteres HTML perigosos (mas preserva os símbolos matemáticos Unicode)
-  resultado = resultado
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-
-  return resultado
-}
-
-/**
  * Detecta se um texto contém notação científica ou fórmulas
  */
 export function contemFormula(texto: string): boolean {

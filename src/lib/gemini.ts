@@ -382,29 +382,5 @@ export async function verificarConectividadeGemini(): Promise<{ ok: boolean; mod
 
 // ═══════════════════════════════════════════════════════════
 // FUNÇÕES DE INFORMAÇÃO DOS TUTORES
-// ═══════════════════════════════════════════════════════════
-export function obterInfoTutor(componente: Componente) {
-  return TUTORES[componente]
-}
-
-export function obterNomeTutor(componente: Componente): string {
-  return TUTORES[componente]?.nome || 'Tutor'
-}
-
-export function obterEmojiTutor(componente: Componente): string {
-  return TUTORES[componente]?.emoji || '🤖'
-}
-
-// ═══════════════════════════════════════════════════════════
-// FUNÇÃO: Obter modelo atualmente em uso
-// ═══════════════════════════════════════════════════════════
-export function obterModeloAtual(): string | null {
-  return modeloFuncionando
-}
-
-// ═══════════════════════════════════════════════════════════
-// FUNÇÃO: Listar modelos disponíveis
-// ═══════════════════════════════════════════════════════════
-export function listarModelosDisponiveis(): readonly string[] {
-  return MODELOS_DISPONIVEIS
-}
+// Funções de info do tutor removidas por não serem utilizadas
+// Se necessário, usar TUTORES[componente] diretamente

@@ -1,7 +1,6 @@
 import {
   obterNivelPorPontos,
   calcularTaxaAcerto,
-  extrairAnoTurma,
   NIVEIS_JOGADOR,
   PONTUACAO,
 } from '@/types'
@@ -62,34 +61,6 @@ describe('Types - calcularTaxaAcerto', () => {
 
   it('handles 100% correctly', () => {
     expect(calcularTaxaAcerto(10, 10)).toBe(100)
-  })
-})
-
-describe('Types - extrairAnoTurma', () => {
-  it('extracts year and level for Ensino Médio', () => {
-    const result = extrairAnoTurma('1A')
-    expect(result.ano).toBe(1)
-    expect(result.nivel).toBe('EM')
-  })
-
-  it('extracts year and level for Ensino Fundamental', () => {
-    const result = extrairAnoTurma('7B')
-    expect(result.ano).toBe(7)
-    expect(result.nivel).toBe('EF')
-  })
-
-  it('handles lowercase turma', () => {
-    const result = extrairAnoTurma('9c')
-    expect(result.ano).toBe(9)
-    expect(result.nivel).toBe('EF')
-  })
-
-  it('throws for invalid turma', () => {
-    expect(() => extrairAnoTurma('5A')).toThrow()
-  })
-
-  it('throws for invalid format', () => {
-    expect(() => extrairAnoTurma('ABC')).toThrow()
   })
 })
 
