@@ -496,7 +496,21 @@ export default function SimuladoENEMPage() {
               )}
             </div>
 
-            {/* Imagens (se houver e não estiverem no contexto) */}
+            {/* 1. Contexto/Enunciado */}
+            <div
+              className="text-base rounded-xl p-4 texto-questao"
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-default)' }}
+              dangerouslySetInnerHTML={processarTextoQuestao(questao.contexto, imagensValidas.length > 0)}
+              onClick={(e) => {
+                const target = e.target as HTMLElement
+                if (target.tagName === 'IMG') {
+                  const src = (target as HTMLImageElement).src
+                  if (isValidImageUrl(src)) setImagemZoom(src)
+                }
+              }}
+            />
+
+            {/* 2. Imagens (se houver) */}
             {imagensValidas.length > 0 && (
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
                 {imagensValidas.map((img, i) => (
@@ -509,7 +523,7 @@ export default function SimuladoENEMPage() {
                     <img
                       src={img}
                       alt={`Figura ${i + 1}`}
-                      className="h-28 sm:h-36 lg:h-48 w-auto object-contain max-w-[180px] sm:max-w-[240px] lg:max-w-[320px]"
+                      className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
                       onError={() => handleImageError(img)}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
@@ -520,7 +534,7 @@ export default function SimuladoENEMPage() {
               </div>
             )}
 
-            {/* Comando */}
+            {/* 3. Comando */}
             {deveExibirComando(questao.comando) && (
               <div
                 className="text-sm leading-relaxed rounded-xl p-4 italic texto-questao"
@@ -529,21 +543,7 @@ export default function SimuladoENEMPage() {
               />
             )}
 
-            {/* Enunciado */}
-            <div
-              className="text-base rounded-xl p-4 texto-questao"
-              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '450px', overflowY: 'auto', border: '1px solid var(--border-default)' }}
-              dangerouslySetInnerHTML={processarTextoQuestao(questao.contexto, imagensValidas.length > 0)}
-              onClick={(e) => {
-                const target = e.target as HTMLElement
-                if (target.tagName === 'IMG') {
-                  const src = (target as HTMLImageElement).src
-                  if (isValidImageUrl(src)) setImagemZoom(src)
-                }
-              }}
-            />
-
-            {/* Alternativas */}
+            {/* 4. Alternativas */}
             <div className="space-y-2">
               {questao.alternativas.map((alt) => {
                 const isSelected = alternativaSelecionada === alt.letra
