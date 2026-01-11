@@ -160,14 +160,34 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Ordenar questões por dificuldade e selecionar a primeira
-    const questoesOrdenadas = questoesDisponiveis.sort((a, b) => {
-      const ordemA = ORDEM_DIFICULDADE[a.dificuldade] || 2
-      const ordemB = ORDEM_DIFICULDADE[b.dificuldade] || 2
-      return ordemA - ordemB
-    })
+    // Agrupar questões por dificuldade
+    const questoesPorDificuldade = {
+      facil: questoesDisponiveis.filter(q => q.dificuldade === 'facil'),
+      medio: questoesDisponiveis.filter(q => q.dificuldade === 'medio'),
+      dificil: questoesDisponiveis.filter(q => q.dificuldade === 'dificil'),
+    }
 
-    const questaoSelecionada = questoesOrdenadas[0]
+    // Selecionar questão com prioridade por dificuldade mas com randomização dentro do grupo
+    // Isso evita que o estudante veja sempre as mesmas questões na mesma ordem
+    let questaoSelecionada = null
+
+    // Prioridade: fácil -> médio -> difícil
+    for (const dificuldade of ['facil', 'medio', 'dificil'] as const) {
+      const grupo = questoesPorDificuldade[dificuldade]
+      if (grupo.length > 0) {
+        // Selecionar aleatoriamente dentro do grupo de mesma dificuldade
+        // Isso garante variedade na experiência do estudante
+        const indiceAleatorio = Math.floor(Math.random() * grupo.length)
+        questaoSelecionada = grupo[indiceAleatorio]
+        break
+      }
+    }
+
+    // Fallback caso nenhum grupo tenha questões (não deveria acontecer)
+    if (!questaoSelecionada) {
+      const indiceAleatorio = Math.floor(Math.random() * questoesDisponiveis.length)
+      questaoSelecionada = questoesDisponiveis[indiceAleatorio]
+    }
 
     // Remover resposta correta da questão enviada ao cliente
     const { resposta_correta, ...questaoSemResposta } = questaoSelecionada
