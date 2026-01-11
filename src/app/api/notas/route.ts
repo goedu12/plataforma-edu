@@ -43,7 +43,7 @@ const CONFIG_BIMESTRES = {
   },
   2026: {
     1: {
-      regular: { inicio: '2026-01-01', fim: '2026-03-24', meta: 105 },
+      regular: { inicio: '2026-02-02', fim: '2026-03-24', meta: 105 },
       recuperacao: { inicio: '2026-03-25', fim: '2026-04-03' },
     },
     2: {

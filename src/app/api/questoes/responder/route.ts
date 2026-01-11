@@ -310,18 +310,6 @@ export async function POST(request: NextRequest) {
             tempo_total_segundos: tempoValidado,
           })
         }
-
-        // ═══════════════════════════════════════════════════════════════════
-        // ATUALIZAÇÃO DE NOTA EM TEMPO REAL (Níveis 4 e 5)
-        // Apenas para modo estudo - a nota é recalculada após cada resposta
-        // ═══════════════════════════════════════════════════════════════════
-
-        notaAtualizada = await atualizarNotaTempoReal(
-          supabase,
-          sessao.userId,
-          componente as Componente,
-          modoValidado
-        )
       }
 
       // Verificar conquistas
@@ -336,6 +324,18 @@ export async function POST(request: NextRequest) {
       )
       conquistasDesbloqueadas.push(...novasConquistas)
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ATUALIZAÇÃO DE NOTA EM TEMPO REAL (Níveis 4 e 5)
+    // Todos os modos contam para nota v2: estudo(+0.04), revisão(+0.02), desafio(+0.01)
+    // ═══════════════════════════════════════════════════════════════════════
+
+    notaAtualizada = await atualizarNotaTempoReal(
+      supabase,
+      sessao.userId,
+      componente as Componente,
+      modoValidado
+    )
 
     // ═══════════════════════════════════════════════════════════════════════
     // RESPOSTA COM DADOS COMPLETOS DE NOTA EM TEMPO REAL
@@ -356,7 +356,7 @@ export async function POST(request: NextRequest) {
       conquistas_desbloqueadas: conquistasDesbloqueadas,
       modo: modoValidado,
 
-      // Dados da nota em tempo real (apenas para modo estudo)
+      // Dados da nota em tempo real (todos os modos contam na v2)
       nota_tempo_real: notaAtualizada ? {
         nota_anterior: notaAtualizada.nota_anterior,
         nota_atual: notaAtualizada.nota_nova,
@@ -369,9 +369,10 @@ export async function POST(request: NextRequest) {
         questoes_semana: notaAtualizada.questoes_semana,
         limite_semanal: notaAtualizada.limite_semanal,
         pode_continuar: notaAtualizada.pode_responder,
-        // Novos campos para desafio
+        // Campos v2
         acertos_desafio: notaAtualizada.acertos_desafio,
-        nota_desafio: notaAtualizada.nota_desafio,
+        nota_acertos: notaAtualizada.nota_acertos,
+        nota_tempo: notaAtualizada.nota_tempo,
       } : null,
     })
   } catch (error) {

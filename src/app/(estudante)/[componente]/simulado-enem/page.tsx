@@ -277,11 +277,16 @@ export default function SimuladoENEMPage() {
         /* Texto base com espaçamento otimizado */
         .texto-questao {
           font-size: 0.9375rem;
-          line-height: 1.5;
+          line-height: 1.6;
           letter-spacing: 0.01em;
+          text-align: justify;
+          text-justify: inter-word;
+          hyphens: auto;
+          -webkit-hyphens: auto;
         }
         .texto-questao p {
-          margin: 0 0 0.75em 0;
+          margin: 0 0 0.85em 0;
+          text-indent: 0;
         }
         .texto-questao p:last-child {
           margin-bottom: 0;
@@ -289,7 +294,7 @@ export default function SimuladoENEMPage() {
         .texto-questao br {
           display: block;
           content: "";
-          margin-top: 0.25em;
+          margin-top: 0.3em;
         }
 
         /* Tabelas */
@@ -368,14 +373,29 @@ export default function SimuladoENEMPage() {
           margin-top: 8px;
         }
 
+        /* Referências a figuras (discreto, pois imagem está na galeria) */
+        .texto-questao .ref-figura {
+          font-size: 0.75rem;
+          color: var(--text-muted);
+          font-style: italic;
+        }
+
+        /* Referências a tabelas/quadros (mais visível) */
+        .texto-questao .ref-tabela {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: ${corPrimaria};
+        }
+
         /* Responsivo - Mobile */
         @media (max-width: 640px) {
           .texto-questao {
             font-size: 0.875rem;
-            line-height: 1.45;
+            line-height: 1.55;
+            text-align: justify;
           }
           .texto-questao p {
-            margin: 0 0 0.6em 0;
+            margin: 0 0 0.7em 0;
           }
           .texto-questao .tabela-enem {
             font-size: 0.7rem;
@@ -514,22 +534,26 @@ export default function SimuladoENEMPage() {
             {imagensValidas.length > 0 && (
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
                 {imagensValidas.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setImagemZoom(img)}
-                    className="relative flex-shrink-0 rounded-xl overflow-hidden group"
-                    style={{ background: 'var(--bg-elevated)' }}
-                  >
-                    <img
-                      src={img}
-                      alt={`Figura ${i + 1}`}
-                      className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
-                      onError={() => handleImageError(img)}
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                      <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
-                    </div>
-                  </button>
+                  <div key={i} className="flex-shrink-0 text-center">
+                    <button
+                      onClick={() => setImagemZoom(img)}
+                      className="relative rounded-xl overflow-hidden group"
+                      style={{ background: 'var(--bg-elevated)' }}
+                    >
+                      <img
+                        src={img}
+                        alt={`Figura ${i + 1}`}
+                        className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
+                        onError={() => handleImageError(img)}
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                      </div>
+                    </button>
+                    <span className="text-xs mt-1 block" style={{ color: 'var(--text-muted)' }}>
+                      Figura {i + 1}
+                    </span>
+                  </div>
                 ))}
               </div>
             )}
@@ -660,141 +684,171 @@ export default function SimuladoENEMPage() {
         )}
       </main>
 
-      {/* Modal de Filtros */}
+      {/* Modal de Filtros - Responsivo */}
       {mostrarFiltro && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setMostrarFiltro(false)}>
-          <div className="w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[80vh] overflow-y-auto" style={{ background: 'var(--bg-surface)' }} onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Filtrar Questões</h3>
-              {temFiltrosAtivos && (
-                <button onClick={limparFiltros} className="text-xs px-3 py-1.5 rounded-lg" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                  Limpar tudo
-                </button>
-              )}
-            </div>
-
-            {/* Filtro por Ano */}
-            <div className="mb-5">
-              <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
-                <Calendar className="w-4 h-4 inline mr-2" />
-                Ano da Prova
-              </p>
-              <div className="flex flex-wrap gap-2">
+        <div
+          className="fixed inset-0 z-50 flex items-end lg:items-center justify-center pb-nav lg:pb-0"
+          style={{ background: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setMostrarFiltro(false)}
+        >
+          <div
+            className="w-full max-h-[80vh] sm:max-h-[85vh] lg:max-w-2xl lg:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+            style={{ background: 'var(--bg-surface)' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header do Modal */}
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b" style={{ borderColor: 'var(--border-default)' }}>
+              <div className="flex items-center gap-3">
+                <Filter className="w-5 h-5" style={{ color: corPrimaria }} />
+                <h3 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Filtrar Questões</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                {temFiltrosAtivos && (
+                  <button
+                    onClick={limparFiltros}
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
+                    style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+                  >
+                    Limpar
+                  </button>
+                )}
                 <button
-                  onClick={() => setAnoSelecionado(null)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                  style={{
-                    background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)',
-                    color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
-                  }}
+                  onClick={() => setMostrarFiltro(false)}
+                  className="p-2 rounded-lg transition-colors hover:opacity-80"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 >
-                  Todos
+                  <X className="w-4 h-4" />
                 </button>
-                {anosDisponiveis.map(ano => (
-                  <button
-                    key={ano}
-                    onClick={() => setAnoSelecionado(ano)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)',
-                      color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
-                    }}
-                  >
-                    {ano}
-                  </button>
-                ))}
               </div>
             </div>
 
-            {/* Filtro por Área */}
-            {areasDisponiveis.length > 0 && (
-              <div className="mb-5">
-                <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  <BookOpen className="w-4 h-4 inline mr-2" />
-                  Área do Conhecimento
+            {/* Conteúdo dos Filtros - Scrollável */}
+            <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-6">
+              {/* Filtro por Ano */}
+              <div>
+                <p className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                  <Calendar className="w-4 h-4" />
+                  Ano da Prova
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
                   <button
-                    onClick={() => setAreaSelecionada(null)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                    onClick={() => setAnoSelecionado(null)}
+                    className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all col-span-2 sm:col-span-1"
                     style={{
-                      background: !areaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                      color: !areaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                      background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)',
+                      color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
                     }}
                   >
-                    Todas
+                    Todos
                   </button>
-                  {areasDisponiveis.map(area => {
-                    const config = ENEM_CONFIG.AREAS[area]
-                    const Icon = AREA_ICONS[area] || BookOpen
-                    return (
-                      <button
-                        key={area}
-                        onClick={() => setAreaSelecionada(area)}
-                        className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2"
-                        style={{
-                          background: areaSelecionada === area ? corPrimaria : 'var(--bg-elevated)',
-                          color: areaSelecionada === area ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
-                        }}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {config?.nome || area}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Filtro por Subárea */}
-            {subareasDisponiveis.length > 0 && (
-              <div className="mb-5">
-                <p className="text-sm font-medium mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  Disciplina
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSubareaSelecionada(null)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      background: !subareaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                      color: !subareaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
-                    }}
-                  >
-                    Todas
-                  </button>
-                  {subareasDisponiveis.map(subarea => (
+                  {anosDisponiveis.map(ano => (
                     <button
-                      key={subarea}
-                      onClick={() => setSubareaSelecionada(subarea)}
-                      className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                      key={ano}
+                      onClick={() => setAnoSelecionado(ano)}
+                      className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
                       style={{
-                        background: subareaSelecionada === subarea ? corPrimaria : 'var(--bg-elevated)',
-                        color: subareaSelecionada === subarea ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                        background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)',
+                        color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
                       }}
                     >
-                      {ENEM_CONFIG.SUBAREAS_LABELS[subarea] || subarea}
+                      {ano}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
 
-            {/* Info de questões disponíveis */}
-            {disponiveis > 0 && (
-              <p className="text-sm mb-5 text-center" style={{ color: 'var(--text-muted)' }}>
-                {disponiveis} questões disponíveis
-              </p>
-            )}
+              {/* Filtro por Área */}
+              {areasDisponiveis.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                    <BookOpen className="w-4 h-4" />
+                    Área do Conhecimento
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setAreaSelecionada(null)}
+                      className="px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                      style={{
+                        background: !areaSelecionada ? corPrimaria : 'var(--bg-elevated)',
+                        color: !areaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                      }}
+                    >
+                      Todas as Áreas
+                    </button>
+                    {areasDisponiveis.map(area => {
+                      const config = ENEM_CONFIG.AREAS[area]
+                      const Icon = AREA_ICONS[area] || BookOpen
+                      return (
+                        <button
+                          key={area}
+                          onClick={() => setAreaSelecionada(area)}
+                          className="px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
+                          style={{
+                            background: areaSelecionada === area ? corPrimaria : 'var(--bg-elevated)',
+                            color: areaSelecionada === area ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                          }}
+                        >
+                          <Icon className="w-4 h-4" />
+                          {config?.nome || area}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
-            {/* Botão aplicar */}
-            <button
-              onClick={() => { setMostrarFiltro(false); buscarQuestao() }}
-              className="w-full py-3 rounded-xl font-semibold text-sm"
-              style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
-            >
-              Aplicar Filtros
-            </button>
+              {/* Filtro por Subárea/Disciplina */}
+              {subareasDisponiveis.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: 'var(--text-secondary)' }}>
+                    <Target className="w-4 h-4" />
+                    Disciplina
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    <button
+                      onClick={() => setSubareaSelecionada(null)}
+                      className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                      style={{
+                        background: !subareaSelecionada ? corPrimaria : 'var(--bg-elevated)',
+                        color: !subareaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                      }}
+                    >
+                      Todas
+                    </button>
+                    {subareasDisponiveis.map(subarea => (
+                      <button
+                        key={subarea}
+                        onClick={() => setSubareaSelecionada(subarea)}
+                        className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all truncate"
+                        style={{
+                          background: subareaSelecionada === subarea ? corPrimaria : 'var(--bg-elevated)',
+                          color: subareaSelecionada === subarea ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                        }}
+                        title={ENEM_CONFIG.SUBAREAS_LABELS[subarea] || subarea}
+                      >
+                        {ENEM_CONFIG.SUBAREAS_LABELS[subarea] || subarea}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer do Modal - Fixo */}
+            <div className="p-4 sm:p-5 border-t" style={{ borderColor: 'var(--border-default)', background: 'var(--bg-surface)' }}>
+              {disponiveis > 0 && (
+                <p className="text-sm mb-3 text-center" style={{ color: 'var(--text-muted)' }}>
+                  <span className="font-semibold" style={{ color: corPrimaria }}>{disponiveis}</span> questões disponíveis
+                </p>
+              )}
+              <button
+                onClick={() => { setMostrarFiltro(false); buscarQuestao() }}
+                className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+              >
+                Aplicar Filtros
+              </button>
+            </div>
           </div>
         </div>
       )}
