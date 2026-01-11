@@ -176,16 +176,71 @@ export function processarTexto(texto: string | null | undefined): string {
 }
 
 /**
- * Converte URLs de imagens em tags <img> clicáveis
+ * Extrai URLs de imagens do texto e retorna as URLs encontradas
+ */
+function extrairImagensDoTexto(texto: string): string[] {
+  const imagensExtraidas: string[] = []
+
+  // Padrão 1: !(url) - imagem markdown sem alt
+  const padraoSemAlt = /!\(([^)]+)\)/g
+  let match
+  while ((match = padraoSemAlt.exec(texto)) !== null) {
+    if (isValidImageUrl(match[1])) {
+      imagensExtraidas.push(match[1].trim())
+    }
+  }
+
+  // Padrão 2: ![alt](url) - imagem markdown com alt
+  const padraoComAlt = /!\[[^\]]*\]\(([^)]+)\)/g
+  while ((match = padraoComAlt.exec(texto)) !== null) {
+    if (isValidImageUrl(match[1])) {
+      imagensExtraidas.push(match[1].trim())
+    }
+  }
+
+  // Padrão 3: URLs de imagem soltas no texto
+  const padraoUrl = /\(?(https?:\/\/[^\s\)<>]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi
+  while ((match = padraoUrl.exec(texto)) !== null) {
+    if (isValidImageUrl(match[1])) {
+      imagensExtraidas.push(match[1].trim())
+    }
+  }
+
+  return [...new Set(imagensExtraidas)]
+}
+
+/**
+ * Remove URLs de imagens do texto (para quando as imagens são exibidas separadamente)
+ */
+function removerImagensDoTexto(texto: string): string {
+  let limpo = texto
+
+  // Remove !(url)
+  limpo = limpo.replace(/!\([^)]+\)/g, '')
+
+  // Remove ![alt](url)
+  limpo = limpo.replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+
+  // Remove URLs de imagem soltas (com ou sem parênteses)
+  limpo = limpo.replace(/\(?(https?:\/\/[^\s\)<>]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi, '')
+
+  // Limpar espaços extras deixados pela remoção
+  limpo = limpo.replace(/\s{2,}/g, ' ')
+  limpo = limpo.replace(/\n\s*\n\s*\n/g, '\n\n')
+
+  return limpo.trim()
+}
+
+/**
+ * Converte URLs de imagens em tags <img> clicáveis (usado quando NÃO há galeria separada)
  */
 function converterImagensEmbutidas(texto: string): { html: string; imagensExtraidas: string[] } {
-  const imagensExtraidas: string[] = []
+  const imagensExtraidas = extrairImagensDoTexto(texto)
   let html = texto
 
   // Padrão 1: !(url) - imagem markdown sem alt
   html = html.replace(/!\(([^)]+)\)/g, (_, url) => {
     if (isValidImageUrl(url)) {
-      imagensExtraidas.push(url.trim())
       return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Figura" class="imagem-contexto" loading="lazy" /></div>`
     }
     return ''
@@ -194,7 +249,6 @@ function converterImagensEmbutidas(texto: string): { html: string; imagensExtrai
   // Padrão 2: ![alt](url) - imagem markdown com alt
   html = html.replace(/!\[[^\]]*\]\(([^)]+)\)/g, (_, url) => {
     if (isValidImageUrl(url)) {
-      imagensExtraidas.push(url.trim())
       return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Figura" class="imagem-contexto" loading="lazy" /></div>`
     }
     return ''
@@ -205,14 +259,13 @@ function converterImagensEmbutidas(texto: string): { html: string; imagensExtrai
     /\(?(https?:\/\/[^\s\)<>]+\.(png|jpg|jpeg|gif|webp|svg))\)?/gi,
     (match, url) => {
       if (isValidImageUrl(url)) {
-        imagensExtraidas.push(url.trim())
         return `<div class="imagem-embutida"><img src="${url.trim()}" alt="Figura" class="imagem-contexto" loading="lazy" /></div>`
       }
       return ''
     }
   )
 
-  return { html, imagensExtraidas: [...new Set(imagensExtraidas)] }
+  return { html, imagensExtraidas }
 }
 
 /**
@@ -236,8 +289,14 @@ function formatarSecoes(html: string): string {
 
 /**
  * Processa contexto completo para exibição
+ * @param texto - O texto a ser processado
+ * @param opcoes - Opções de processamento
+ * @param opcoes.removerImagens - Se true, remove imagens do texto (para quando são exibidas em galeria separada)
  */
-export function processarContexto(texto: string | null | undefined): string {
+export function processarContexto(
+  texto: string | null | undefined,
+  opcoes?: { removerImagens?: boolean }
+): string {
   if (!texto || typeof texto !== 'string') return ''
 
   let processado = texto.trim()
@@ -261,9 +320,13 @@ export function processarContexto(texto: string | null | undefined): string {
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
 
-  // Converter imagens embutidas ANTES de remover markdown
-  const { html: comImagens } = converterImagensEmbutidas(processado)
-  processado = comImagens
+  // Tratar imagens: remover ou converter dependendo da opção
+  if (opcoes?.removerImagens) {
+    processado = removerImagensDoTexto(processado)
+  } else {
+    const { html: comImagens } = converterImagensEmbutidas(processado)
+    processado = comImagens
+  }
 
   // Formatar seções TEXTO I, II (antes de remover markdown)
   processado = formatarSecoes(processado)
@@ -278,13 +341,26 @@ export function processarContexto(texto: string | null | undefined): string {
   // Formatar matemática
   processado = formatarMatematica(processado)
 
-  // Converter quebras de linha
+  // Converter quebras de linha em parágrafos para melhor espaçamento
+  // Primeiro normaliza múltiplas quebras
+  processado = processado.replace(/\n{3,}/g, '\n\n')
+
+  // Quebras duplas viram parágrafos
+  processado = processado.replace(/\n\n/g, '</p><p>')
+
+  // Quebras simples viram <br>
   processado = processado.replace(/\n/g, '<br>')
+
+  // Envolver em parágrafos se não estiver
+  if (!processado.startsWith('<p>') && !processado.startsWith('<div')) {
+    processado = '<p>' + processado + '</p>'
+  }
 
   // Limpar
   processado = processado.replace(/\uFFFD/g, '')
-  processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br><br>')
-  processado = processado.replace(/\s{2,}/g, ' ')
+  processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br>')
+  processado = processado.replace(/<p>\s*<\/p>/g, '') // Remove parágrafos vazios
+  processado = processado.replace(/<p>\s*<br>\s*<\/p>/g, '') // Remove parágrafos só com br
 
   return processado.trim()
 }
