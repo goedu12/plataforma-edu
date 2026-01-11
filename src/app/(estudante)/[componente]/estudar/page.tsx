@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
+import { formatarFormula } from '@/lib/formatacao'
 
 type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'LIMITE_SEMANAL' | 'FORA_PERIODO'
 type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -321,7 +322,7 @@ export default function EstudarPage() {
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
               <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                {questao.enunciado}
+                {formatarFormula(questao.enunciado)}
               </p>
             </div>
 
@@ -364,7 +365,7 @@ export default function EstudarPage() {
                       )}
                     </span>
                     <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                      {texto}
+                      {formatarFormula(texto)}
                     </span>
                     {!feedback && selecionada === letra && (
                       <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
@@ -389,7 +390,7 @@ export default function EstudarPage() {
                       <Lightbulb className="w-4 h-4" style={{ color: corPrimaria }} />
                       <span className="text-xs font-medium" style={{ color: corPrimaria }}>Dica</span>
                     </div>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{questao.dica}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
                   </div>
                 ) : (
                   <button
@@ -482,7 +483,7 @@ export default function EstudarPage() {
                       )}
                     </div>
                     {feedback.explicacao && (
-                      <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{feedback.explicacao}</p>
+                      <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(feedback.explicacao)}</p>
                     )}
                   </div>
                 </div>

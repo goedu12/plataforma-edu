@@ -622,6 +622,7 @@ export async function nivel5PersistenciaNotificacao(
 ): Promise<ResultadoVerificacao> {
   try {
     const { bimestre, config } = periodo
+    const anoLetivo = new Date().getFullYear() // Ano dinâmico
 
     // Verificar se registro existe
     const { data: notaExistente } = await supabase
@@ -629,7 +630,7 @@ export async function nivel5PersistenciaNotificacao(
       .select('id, nota_final')
       .eq('usuario_id', userId)
       .eq('componente', componente)
-      .eq('ano_letivo', 2025)
+      .eq('ano_letivo', anoLetivo)
       .eq('bimestre', bimestre)
       .single()
 
@@ -639,7 +640,7 @@ export async function nivel5PersistenciaNotificacao(
     const dadosNota = {
       usuario_id: userId,
       componente,
-      ano_letivo: 2025,
+      ano_letivo: anoLetivo,
       bimestre,
       questoes_respondidas: notaAtualizada.questoes_respondidas,
       meta_questoes: notaAtualizada.meta_questoes,
