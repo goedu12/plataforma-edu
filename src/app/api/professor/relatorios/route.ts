@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import type { Componente } from '@/types'
-import { NOTAS } from '@/types'
-import { getPeriodoAtual } from '@/lib/sistema-notas'
+import { getPeriodoAtual, calcularNotaNova, calcularPontosTempo } from '@/lib/sistema-notas'
 
 // Calcular bimestre atual usando o sistema centralizado
 function calcularBimestreAtual(): { bimestre: 1 | 2 | 3 | 4; ano: number; dataInicio: string; dataFim: string } {
@@ -148,27 +147,52 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      // Para cada estudante, calcular notas
+      // Para cada estudante, calcular notas usando FÓRMULA v2
       const notasEstudantes = await Promise.all(estudantes.map(async (est) => {
         const notas: Record<string, {
-          questoes_total: number
-          questoes_corretas: number
+          // Dados brutos
+          acertos_estudo: number
+          acertos_revisao: number
+          acertos_desafio: number
+          tempo_uso_horas: number
           dias_ativos: number
-          nota_desempenho: number
-          nota_participacao: number
-          nota_frequencia: number
-          nota_final: number
-          bloqueio: string | null
+          // Fórmula v2
+          nota_acertos: number   // máx 6.0
+          nota_tempo: number     // máx 4.0
+          nota_final: number     // máx 10.0
+          detalhes: { estudo: number; revisao: number; desafio: number }
         }> = {}
 
         for (const comp of est.componentes as Componente[]) {
-          // Buscar respostas
-          const { data: respostas } = await supabase
+          // Buscar respostas modo ESTUDO (acertos + tempo)
+          const { data: respostasEstudo } = await supabase
             .from('respostas')
-            .select('correta')
+            .select('correta, tempo_segundos')
             .eq('usuario_id', est.id)
             .eq('componente', comp)
             .eq('modo', 'estudo')
+            .gte('criado_em', dataInicio)
+            .lte('criado_em', dataFim + 'T23:59:59')
+
+          // Buscar respostas modo REVISÃO (apenas acertos corretos)
+          const { data: respostasRevisao } = await supabase
+            .from('respostas')
+            .select('tempo_segundos')
+            .eq('usuario_id', est.id)
+            .eq('componente', comp)
+            .eq('modo', 'revisao')
+            .eq('correta', true)
+            .gte('criado_em', dataInicio)
+            .lte('criado_em', dataFim + 'T23:59:59')
+
+          // Buscar respostas modo DESAFIO (apenas acertos corretos)
+          const { data: respostasDesafio } = await supabase
+            .from('respostas')
+            .select('tempo_segundos')
+            .eq('usuario_id', est.id)
+            .eq('componente', comp)
+            .eq('modo', 'desafio')
+            .eq('correta', true)
             .gte('criado_em', dataInicio)
             .lte('criado_em', dataFim + 'T23:59:59')
 
@@ -181,45 +205,36 @@ export async function GET(request: NextRequest) {
             .gte('data', dataInicio)
             .lte('data', dataFim)
 
-          const questoesTotal = respostas?.length || 0
-          const questoesCorretas = respostas?.filter(r => r.correta).length || 0
+          // Contadores
+          const acertosEstudo = respostasEstudo?.filter(r => r.correta).length || 0
+          const acertosRevisao = respostasRevisao?.length || 0
+          const acertosDesafio = respostasDesafio?.length || 0
           const diasAtivosCount = diasAtivos?.length || 0
 
-          // Calcular notas
-          const taxaAcerto = questoesTotal > 0 ? questoesCorretas / questoesTotal : 0
-          const nota_desempenho = Math.min(10, Math.round(taxaAcerto * 100) / 10)
-          const participacao = Math.min(1, questoesTotal / NOTAS.META_QUESTOES_BIMESTRE)
-          const nota_participacao = Math.round(participacao * 100) / 10
-          const frequencia = Math.min(1, diasAtivosCount / NOTAS.META_DIAS_BIMESTRE)
-          const nota_frequencia = Math.round(frequencia * 100) / 10
+          // Tempo total em horas
+          const tempoEstudo = respostasEstudo?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
+          const tempoRevisao = respostasRevisao?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
+          const tempoDesafio = respostasDesafio?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
+          const tempoTotalHoras = (tempoEstudo + tempoRevisao + tempoDesafio) / 3600
 
-          let nota_calculada =
-            nota_desempenho * NOTAS.PESO_DESEMPENHO +
-            nota_participacao * NOTAS.PESO_PARTICIPACAO +
-            nota_frequencia * NOTAS.PESO_FREQUENCIA
-
-          nota_calculada = Math.round(nota_calculada * 10) / 10
-
-          let bloqueio: string | null = null
-          let nota_final = nota_calculada
-
-          if (nota_desempenho < NOTAS.NOTA_MINIMA_DESEMPENHO) {
-            bloqueio = 'desempenho_baixo'
-            nota_final = Math.min(nota_final, NOTAS.NOTA_MAXIMA_BLOQUEIO)
-          } else if (nota_participacao < NOTAS.NOTA_MINIMA_PARTICIPACAO) {
-            bloqueio = 'participacao_baixa'
-            nota_final = Math.min(nota_final, NOTAS.NOTA_MAXIMA_BLOQUEIO)
-          }
+          // FÓRMULA v2: Usar a mesma função do sistema de notas
+          const { notaAcertos, notaTempo, notaFinal, detalhes } = calcularNotaNova(
+            acertosEstudo,
+            acertosRevisao,
+            acertosDesafio,
+            tempoTotalHoras
+          )
 
           notas[comp] = {
-            questoes_total: questoesTotal,
-            questoes_corretas: questoesCorretas,
+            acertos_estudo: acertosEstudo,
+            acertos_revisao: acertosRevisao,
+            acertos_desafio: acertosDesafio,
+            tempo_uso_horas: Math.round(tempoTotalHoras * 10) / 10,
             dias_ativos: diasAtivosCount,
-            nota_desempenho,
-            nota_participacao,
-            nota_frequencia,
-            nota_final,
-            bloqueio,
+            nota_acertos: notaAcertos,
+            nota_tempo: notaTempo,
+            nota_final: notaFinal,
+            detalhes,
           }
         }
 
@@ -264,8 +279,12 @@ export async function GET(request: NextRequest) {
         data_fim: dataFim,
         notas: notasEstudantes,
         medias_turma: medias,
-        meta_questoes: NOTAS.META_QUESTOES_BIMESTRE,
-        meta_dias: NOTAS.META_DIAS_BIMESTRE,
+        // Fórmula v2 info
+        formula: {
+          descricao: 'NOTA = Pontos Acertos (máx 6.0) + Pontos Tempo (máx 4.0)',
+          acertos: { estudo: 0.04, revisao: 0.02, desafio: 0.01 },
+          tempo: { '2h': 1, '3h': 2, '4h': 3, '5h+': 4 },
+        },
       })
     }
 

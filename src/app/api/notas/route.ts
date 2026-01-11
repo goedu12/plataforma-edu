@@ -512,8 +512,8 @@ export async function GET(request: NextRequest) {
         questoes_respondidas: questoesRespondidas,
         meta_questoes: config.regular.meta,
         dias_ativos: diasAtivos,
-        // Nova fórmula v2
-        acertos_questoes: acertosEstudo,
+        // Fórmula v2
+        acertos_estudo: acertosEstudo,
         acertos_revisao: acertosRevisao,
         acertos_desafio: acertosDesafio,
         tempo_uso_segundos: tempoTotalSegundos,

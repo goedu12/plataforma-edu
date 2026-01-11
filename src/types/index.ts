@@ -259,15 +259,20 @@ export const DESAFIO = {
 // ═══════════════════════════════════════════════════════════
 // SISTEMA DE NOTAS BIMESTRAIS
 // ═══════════════════════════════════════════════════════════
+// @deprecated - Use a FÓRMULA v2 em src/lib/sistema-notas.ts
+// FÓRMULA v2: NOTA = Acertos (máx 6.0) + Tempo (máx 4.0)
+// - Estudar: +0.04/acerto | Revisão: +0.02/acerto | Desafio: +0.01/acerto
+// - Tempo: 2h=1pt, 3h=2pt, 4h=3pt, 5h+=4pt
+// As constantes abaixo são mantidas apenas para compatibilidade legada
 export const NOTAS = {
-  META_QUESTOES_BIMESTRE: 100, // Meta para nota máxima de participação
-  META_DIAS_BIMESTRE: 25, // Meta para nota máxima de frequência
-  PESO_DESEMPENHO: 0.5, // 50%
-  PESO_PARTICIPACAO: 0.3, // 30%
-  PESO_FREQUENCIA: 0.2, // 20%
-  NOTA_MINIMA_DESEMPENHO: 4.0, // Abaixo disso, nota máxima = 5.9
-  NOTA_MINIMA_PARTICIPACAO: 3.0, // Abaixo disso, nota máxima = 5.9
-  NOTA_MAXIMA_BLOQUEIO: 5.9,
+  META_QUESTOES_BIMESTRE: 100, // @deprecated - Usar config em sistema-notas.ts
+  META_DIAS_BIMESTRE: 25, // @deprecated - Usar config em sistema-notas.ts
+  PESO_DESEMPENHO: 0.5, // @deprecated - Fórmula v2 não usa pesos
+  PESO_PARTICIPACAO: 0.3, // @deprecated - Fórmula v2 não usa pesos
+  PESO_FREQUENCIA: 0.2, // @deprecated - Fórmula v2 não usa pesos
+  NOTA_MINIMA_DESEMPENHO: 4.0, // @deprecated
+  NOTA_MINIMA_PARTICIPACAO: 3.0, // @deprecated
+  NOTA_MAXIMA_BLOQUEIO: 5.9, // @deprecated
 } as const
 
 // ═══════════════════════════════════════════════════════════
