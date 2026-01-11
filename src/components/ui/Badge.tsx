@@ -20,16 +20,17 @@ export default function Badge({
     md: 'px-3 py-1 text-xs',
   }
 
-  const getVariantStyle = () => {
+  // Usar variáveis CSS do design system para consistência com tema claro/escuro
+  const getVariantStyle = (): React.CSSProperties => {
     switch (variant) {
       case 'fisica':
         return {
-          background: 'rgba(34, 197, 94, 0.15)',
+          background: 'var(--color-fisica-glow)',
           color: 'var(--color-fisica)',
         }
       case 'matematica':
         return {
-          background: 'rgba(139, 92, 246, 0.15)',
+          background: 'var(--color-matematica-glow)',
           color: 'var(--color-matematica)',
         }
       case 'streak':
@@ -55,7 +56,7 @@ export default function Badge({
       case 'info':
         return {
           background: 'rgba(59, 130, 246, 0.15)',
-          color: '#3b82f6',
+          color: 'var(--info)',
         }
       case 'secondary':
         return {

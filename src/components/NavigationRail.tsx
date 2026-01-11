@@ -43,6 +43,8 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
         gap: '8px',
         zIndex: 50,
       }}
+      role="navigation"
+      aria-label="Navegação principal"
     >
       {navItems.map((item) => {
         const active = isActive(item.href)
@@ -51,6 +53,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
             key={item.label}
             onClick={() => router.push(item.href)}
             aria-label={item.label}
+            aria-current={active ? 'page' : undefined}
             title={item.label}
             className="flex flex-col items-center justify-center gap-1 transition-all"
             style={{
@@ -66,6 +69,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
                 width: '24px',
                 height: '24px',
               }}
+              aria-hidden="true"
             />
             <span
               style={{

@@ -35,6 +35,8 @@ export default function BottomNav({ componente }: BottomNavProps) {
         zIndex: 50,
         boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
       }}
+      role="navigation"
+      aria-label="Navegação principal"
     >
       {items.map((item) => {
         const isActive = pathname === item.href ||
@@ -45,6 +47,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
             key={item.label}
             onClick={() => router.push(item.href)}
             aria-label={item.label}
+            aria-current={isActive ? 'page' : undefined}
             className="flex flex-col items-center justify-center"
             style={{
               gap: '2px',
@@ -59,7 +62,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
               transition: 'all 0.2s',
             }}
           >
-            <item.icon style={{ width: '20px', height: '20px' }} />
+            <item.icon style={{ width: '20px', height: '20px' }} aria-hidden="true" />
             <span style={{ fontSize: '9px', fontWeight: 500 }}>{item.label}</span>
           </button>
         )

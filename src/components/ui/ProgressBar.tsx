@@ -7,6 +7,8 @@ interface ProgressBarProps {
   size?: 'sm' | 'md' | 'lg'
   componente?: 'fisica' | 'matematica'
   className?: string
+  /** Texto adicional para acessibilidade */
+  ariaLabel?: string
 }
 
 export default function ProgressBar({
@@ -16,6 +18,7 @@ export default function ProgressBar({
   size = 'md',
   componente = 'fisica',
   className = '',
+  ariaLabel,
 }: ProgressBarProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100)
 
@@ -25,25 +28,35 @@ export default function ProgressBar({
     lg: 'h-4',
   }
 
-  const barColor =
-    componente === 'fisica'
-      ? 'bg-gradient-to-r from-fisica-400 to-fisica-600'
-      : 'bg-gradient-to-r from-matematica-400 to-matematica-600'
+  // Usar variáveis CSS do design system
+  const barStyle = {
+    width: `${percentage}%`,
+    background: componente === 'fisica'
+      ? 'linear-gradient(to right, var(--color-fisica-light), var(--color-fisica-dark))'
+      : 'linear-gradient(to right, var(--color-matematica-light), var(--color-matematica-dark))',
+  }
 
   return (
     <div className={`w-full ${className}`}>
-      <div className={`w-full bg-gray-200 rounded-full overflow-hidden ${sizeStyles[size]}`}>
+      <div
+        className={`w-full rounded-full overflow-hidden ${sizeStyles[size]}`}
+        style={{ background: 'var(--bg-overlay)' }}
+      >
         <div
-          className={`${sizeStyles[size]} ${barColor} rounded-full transition-all duration-500 ease-out`}
-          style={{ width: `${percentage}%` }}
+          className={`${sizeStyles[size]} rounded-full transition-all duration-500 ease-out`}
+          style={barStyle}
           role="progressbar"
           aria-valuenow={value}
           aria-valuemin={0}
           aria-valuemax={max}
+          aria-label={ariaLabel || `Progresso: ${Math.round(percentage)}%`}
         />
       </div>
       {showLabel && (
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <div
+          className="flex justify-between text-xs mt-1"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
           <span>
             {value}/{max}
           </span>

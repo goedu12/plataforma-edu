@@ -156,16 +156,20 @@ export default function MenuComponentePage() {
                   onClick={() => router.push('/selecionar')}
                   className="w-10 h-10 flex items-center justify-center rounded-lg"
                   style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
+                  aria-label="Trocar componente"
+                  title="Trocar componente"
                 >
-                  <ArrowLeftRight className="w-5 h-5" />
+                  <ArrowLeftRight className="w-5 h-5" aria-hidden="true" />
                 </button>
               )}
               <button
                 onClick={handleLogout}
                 className="w-10 h-10 flex items-center justify-center rounded-lg"
                 style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
+                aria-label="Sair do sistema"
+                title="Sair"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-5 h-5" aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -175,6 +179,7 @@ export default function MenuComponentePage() {
             <button
               onClick={() => router.push(`/${componente}/perfil`)}
               className="flex items-center gap-3 flex-1 min-w-0"
+              aria-label={`Ver perfil de ${primeiroNome}`}
             >
               <ProfilePhoto
                 fotoUrl={usuario.foto_url}
@@ -310,12 +315,16 @@ export default function MenuComponentePage() {
         </div>
       </main>
 
-      {/* Modal Em Breve */}
+      {/* Modal Em Breve - Acessível */}
       {mostrarEmBreve && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setMostrarEmBreve(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          aria-describedby="modal-description"
         >
           <div
             className="w-full max-w-sm rounded-2xl p-6 text-center"
@@ -325,23 +334,25 @@ export default function MenuComponentePage() {
             <div
               className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
               style={{ background: 'rgba(245, 158, 11, 0.1)' }}
+              aria-hidden="true"
             >
               <FileText className="w-8 h-8" style={{ color: 'var(--warning)' }} />
             </div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 id="modal-title" className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               Simulado ENEM
             </h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+            <p id="modal-description" className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
               Estamos preparando questões do ENEM especialmente para você!
               Este recurso estará disponível em breve.
             </p>
-            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }} aria-hidden="true">
               🎯 Fique atento às novidades!
             </p>
             <button
               onClick={() => setMostrarEmBreve(false)}
               className="w-full py-2.5 rounded-lg font-medium text-sm"
               style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+              autoFocus
             >
               Entendi
             </button>

@@ -24,25 +24,44 @@ export default function Toast({ message, type = 'info', duration = 5000, onClose
     return () => clearTimeout(timer)
   }, [duration, onClose])
 
+  // Usar variáveis CSS do design system
+  const getTypeStyles = () => {
+    switch (type) {
+      case 'success':
+        return {
+          iconColor: 'var(--success)',
+          bg: 'rgba(16, 185, 129, 0.15)',
+          border: 'rgba(16, 185, 129, 0.4)',
+        }
+      case 'error':
+        return {
+          iconColor: 'var(--error)',
+          bg: 'rgba(239, 68, 68, 0.15)',
+          border: 'rgba(239, 68, 68, 0.4)',
+        }
+      case 'warning':
+        return {
+          iconColor: 'var(--warning)',
+          bg: 'rgba(245, 158, 11, 0.15)',
+          border: 'rgba(245, 158, 11, 0.4)',
+        }
+      case 'info':
+      default:
+        return {
+          iconColor: 'var(--info)',
+          bg: 'rgba(59, 130, 246, 0.15)',
+          border: 'rgba(59, 130, 246, 0.4)',
+        }
+    }
+  }
+
+  const styles = getTypeStyles()
+
   const icons = {
-    success: <CheckCircle2 className="w-5 h-5 text-emerald-400" />,
-    error: <XCircle className="w-5 h-5 text-red-400" />,
-    warning: <AlertCircle className="w-5 h-5 text-amber-400" />,
-    info: <Info className="w-5 h-5 text-blue-400" />,
-  }
-
-  const bgColors = {
-    success: 'bg-emerald-900/90 border-emerald-500/40 backdrop-blur-sm',
-    error: 'bg-red-900/90 border-red-500/40 backdrop-blur-sm',
-    warning: 'bg-amber-900/90 border-amber-500/40 backdrop-blur-sm',
-    info: 'bg-blue-900/90 border-blue-500/40 backdrop-blur-sm',
-  }
-
-  const textColors = {
-    success: 'text-emerald-100',
-    error: 'text-red-100',
-    warning: 'text-amber-100',
-    info: 'text-blue-100',
+    success: <CheckCircle2 className="w-5 h-5" style={{ color: styles.iconColor }} />,
+    error: <XCircle className="w-5 h-5" style={{ color: styles.iconColor }} />,
+    warning: <AlertCircle className="w-5 h-5" style={{ color: styles.iconColor }} />,
+    info: <Info className="w-5 h-5" style={{ color: styles.iconColor }} />,
   }
 
   return (
@@ -50,21 +69,33 @@ export default function Toast({ message, type = 'info', duration = 5000, onClose
       className={`
         fixed bottom-4 right-4 z-50 max-w-sm
         flex items-center gap-3 p-4 rounded-xl border shadow-lg
-        transition-all duration-300
-        ${bgColors[type]}
+        backdrop-blur-md transition-all duration-300
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
       `}
+      style={{
+        background: styles.bg,
+        borderColor: styles.border,
+      }}
       role="alert"
+      aria-live="polite"
     >
       {icons[type]}
-      <p className={`flex-1 text-sm font-medium ${textColors[type]}`}>{message}</p>
+      <p
+        className="flex-1 text-sm font-medium"
+        style={{ color: 'var(--text-primary)' }}
+      >
+        {message}
+      </p>
       <button
         onClick={() => {
           setIsVisible(false)
           setTimeout(onClose, 300)
         }}
-        className={`p-1 rounded-full hover:bg-black/5 ${textColors[type]}`}
-        aria-label="Fechar"
+        className="p-1 rounded-full transition-colors"
+        style={{ color: 'var(--text-secondary)' }}
+        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg-surface-hover)'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+        aria-label="Fechar notificação"
       >
         <X className="w-4 h-4" />
       </button>
