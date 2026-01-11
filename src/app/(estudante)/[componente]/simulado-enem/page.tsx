@@ -16,14 +16,17 @@ import {
   RotateCcw,
   Target,
   BookOpen,
+  ImageOff,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { processarContexto, processarTexto, isValidImageUrl } from '@/lib/limpezaTexto'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // SIMULADO ENEM - Interface com Filtros por Ano e Área
+// Versão 2.0 - Com suporte a imagens embutidas e múltiplos textos
 // ═══════════════════════════════════════════════════════════════════════════
 
 interface Questao {
@@ -33,7 +36,7 @@ interface Questao {
   contexto: string
   comando: string | null
   imagens: string[]
-  alternativas: Array<{ letra: string; texto: string }>
+  alternativas: Array<{ letra: string; texto: string; imagem?: string | null }>
   area: string
 }
 
@@ -44,40 +47,6 @@ interface Estatisticas {
 }
 
 type Status = 'carregando' | 'ok' | 'sem_questoes' | 'erro' | 'acesso_negado'
-
-// Validar URL de imagem
-function isValidImageUrl(url: string | null | undefined): boolean {
-  if (!url || typeof url !== 'string') return false
-  const trimmed = url.trim()
-  if (!trimmed) return false
-  const invalid = /^(nan|none|null|undefined|\s*)$/i
-  if (invalid.test(trimmed)) return false
-  return trimmed.startsWith('http') || trimmed.startsWith('data:image')
-}
-
-// Limpar texto removendo caracteres markdown e placeholders indesejados
-function limparTexto(texto: string | null | undefined): string {
-  if (!texto) return ''
-  let limpo = texto
-  // Remove headers markdown (##, ###, etc)
-  limpo = limpo.replace(/^#{1,6}\s*/gm, '')
-  // Remove colchetes vazios [] e com espaços [ ]
-  limpo = limpo.replace(/\[\s*\]/g, '')
-  // Remove placeholders [[texto]]
-  limpo = limpo.replace(/\[\[[^\]]*\]\]/g, '')
-  // Remove descrições de imagem no formato ["Descrição..."] ou ['Descrição...']
-  limpo = limpo.replace(/\["[^"]*"\]/g, '')
-  limpo = limpo.replace(/\['[^']*'\]/g, '')
-  // Remove ** (negrito markdown) mas mantém o texto
-  limpo = limpo.replace(/\*\*([^*]+)\*\*/g, '$1')
-  // Remove * (itálico markdown) mas mantém o texto
-  limpo = limpo.replace(/\*([^*]+)\*/g, '$1')
-  // Remove múltiplos espaços em branco
-  limpo = limpo.replace(/\s{2,}/g, ' ')
-  // Remove linhas vazias extras
-  limpo = limpo.replace(/\n{3,}/g, '\n\n')
-  return limpo.trim()
-}
 
 // Verifica se o comando deve ser exibido (oculta descrições de imagem)
 function deveExibirComando(comando: string | null | undefined): boolean {
@@ -97,7 +66,6 @@ function deveExibirComando(comando: string | null | undefined): boolean {
 
 // Detecta se o texto contém uma tabela markdown
 function contemTabela(texto: string): boolean {
-  // Tabela markdown: linhas com | no início/meio e linha separadora com ---
   const linhas = texto.split('\n')
   let temPipe = false
   let temSeparador = false
@@ -172,19 +140,20 @@ function formatarTabelaMarkdown(texto: string): string {
   return resultado.join('\n')
 }
 
-// Processa texto completo: limpa e formata tabelas
-function processarTexto(texto: string | null | undefined): { __html: string } {
+// Processa texto completo: limpa, formata tabelas e converte imagens
+function processarTextoQuestao(texto: string | null | undefined): { __html: string } {
   if (!texto) return { __html: '' }
-  let processado = limparTexto(texto)
+
+  // Primeiro processa o contexto (converte imagens, formata seções)
+  let processado = processarContexto(texto)
 
   // Se contém tabela, converte para HTML
-  if (contemTabela(processado)) {
-    processado = formatarTabelaMarkdown(processado)
-    // Converte quebras de linha restantes em <br>
-    processado = processado.replace(/\n/g, '<br>')
-  } else {
-    // Converte quebras de linha em <br> para texto normal
-    processado = processado.replace(/\n/g, '<br>')
+  if (contemTabela(texto)) {
+    // Precisa processar a tabela antes da conversão de <br>
+    const textoOriginal = texto.replace(/\\n/g, '\n')
+    const tabelaHtml = formatarTabelaMarkdown(textoOriginal)
+    // Re-processar o resultado da tabela
+    processado = processarContexto(tabelaHtml)
   }
 
   return { __html: processado }
@@ -225,10 +194,16 @@ export default function SimuladoENEMPage() {
 
   // Zoom de imagem
   const [imagemZoom, setImagemZoom] = useState<string | null>(null)
+  const [imagemErro, setImagemErro] = useState<Set<string>>(new Set())
 
   // Cores
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+
+  // Handler para erro de imagem
+  const handleImageError = (url: string) => {
+    setImagemErro(prev => new Set(prev).add(url))
+  }
 
   // Buscar questão
   const buscarQuestao = async () => {
@@ -239,6 +214,7 @@ export default function SimuladoENEMPage() {
     setRespondida(false)
     setAcertou(null)
     setTempoDecorrido(0)
+    setImagemErro(new Set())
     pararTimer()
 
     try {
@@ -265,7 +241,26 @@ export default function SimuladoENEMPage() {
         return
       }
 
-      setQuestao(data.questao)
+      // Processar questão da API
+      const q = data.questao
+      const questaoProcessada: Questao = {
+        id: q.id,
+        ano: q.ano_prova,
+        numero: q.numero_questao,
+        contexto: q.contexto,
+        comando: q.comando,
+        imagens: [q.imagem_principal, ...(q.imagens_extras || [])].filter(isValidImageUrl),
+        alternativas: q.alternativas || [
+          { letra: 'A', texto: q.alternativa_a, imagem: q.imagem_a },
+          { letra: 'B', texto: q.alternativa_b, imagem: q.imagem_b },
+          { letra: 'C', texto: q.alternativa_c, imagem: q.imagem_c },
+          { letra: 'D', texto: q.alternativa_d, imagem: q.imagem_d },
+          { letra: 'E', texto: q.alternativa_e, imagem: q.imagem_e },
+        ],
+        area: q.area_nome || q.area || '',
+      }
+
+      setQuestao(questaoProcessada)
       if (data._rc) {
         try {
           setRespostaCorreta(atob(data._rc))
@@ -346,8 +341,9 @@ export default function SimuladoENEMPage() {
 
   return (
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
-      {/* Estilos para tabelas do ENEM */}
+      {/* Estilos para questões ENEM */}
       <style jsx global>{`
+        /* Tabelas */
         .texto-questao .tabela-enem {
           width: 100%;
           border-collapse: collapse;
@@ -374,9 +370,40 @@ export default function SimuladoENEMPage() {
         .texto-questao .tabela-enem tr:last-child td {
           border-bottom: none;
         }
-        .texto-questao .tabela-enem tr:hover td {
-          background: rgba(0, 0, 0, 0.02);
+
+        /* Imagens embutidas no texto */
+        .texto-questao .imagem-embutida {
+          margin: 16px 0;
+          text-align: center;
         }
+        .texto-questao .imagem-contexto {
+          max-width: 100%;
+          max-height: 300px;
+          object-fit: contain;
+          border-radius: 8px;
+          background: var(--bg-elevated);
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .texto-questao .imagem-contexto:hover {
+          transform: scale(1.02);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Seções de texto (TEXTO I, TEXTO II) */
+        .texto-questao .secao-texto-header {
+          display: inline-block;
+          background: var(--bg-elevated);
+          color: var(--text-primary);
+          font-weight: 700;
+          font-size: 0.75rem;
+          padding: 4px 12px;
+          border-radius: 6px;
+          margin: 16px 0 8px 0;
+          border-left: 3px solid ${corPrimaria};
+        }
+
+        /* Responsivo */
         @media (max-width: 640px) {
           .texto-questao .tabela-enem {
             font-size: 0.7rem;
@@ -384,6 +411,13 @@ export default function SimuladoENEMPage() {
           .texto-questao .tabela-enem th,
           .texto-questao .tabela-enem td {
             padding: 6px 8px;
+          }
+          .texto-questao .imagem-contexto {
+            max-height: 200px;
+          }
+          .texto-questao .secao-texto-header {
+            font-size: 0.7rem;
+            padding: 3px 10px;
           }
         }
       `}</style>
@@ -479,12 +513,22 @@ export default function SimuladoENEMPage() {
               )}
             </div>
 
-            {/* Imagens - Responsivas: mobile 80px, tablet 120px, desktop 160px */}
-            {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
+            {/* Imagens separadas (não embutidas no texto) */}
+            {questao.imagens && questao.imagens.filter(img => isValidImageUrl(img) && !imagemErro.has(img)).length > 0 && (
               <div className="flex gap-2 overflow-x-auto pb-1">
-                {questao.imagens.filter(isValidImageUrl).map((img, i) => (
-                  <button key={i} onClick={() => setImagemZoom(img)} className="relative flex-shrink-0 rounded-lg overflow-hidden group" style={{ background: 'var(--bg-elevated)' }}>
-                    <img src={img} alt={`Figura ${i + 1}`} className="h-20 sm:h-28 lg:h-40 w-auto object-contain max-w-[120px] sm:max-w-[180px] lg:max-w-[280px]" />
+                {questao.imagens.filter(img => isValidImageUrl(img) && !imagemErro.has(img)).map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setImagemZoom(img)}
+                    className="relative flex-shrink-0 rounded-lg overflow-hidden group"
+                    style={{ background: 'var(--bg-elevated)' }}
+                  >
+                    <img
+                      src={img}
+                      alt={`Figura ${i + 1}`}
+                      className="h-24 sm:h-32 lg:h-44 w-auto object-contain max-w-[150px] sm:max-w-[200px] lg:max-w-[300px]"
+                      onError={() => handleImageError(img)}
+                    />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
                       <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-all" />
                     </div>
@@ -496,17 +540,27 @@ export default function SimuladoENEMPage() {
             {/* Comando - só exibe se não for descrição de imagem */}
             {deveExibirComando(questao.comando) && (
               <div
-                className="text-xs leading-relaxed rounded-lg p-3 italic"
+                className="text-xs leading-relaxed rounded-lg p-3 italic texto-questao"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
-                dangerouslySetInnerHTML={processarTexto(questao.comando)}
+                dangerouslySetInnerHTML={processarTextoQuestao(questao.comando)}
               />
             )}
 
-            {/* Enunciado - com suporte a tabelas formatadas */}
+            {/* Enunciado - com suporte a imagens embutidas e seções */}
             <div
               className="text-sm leading-relaxed rounded-lg p-3 texto-questao"
-              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '300px', overflowY: 'auto' }}
-              dangerouslySetInnerHTML={processarTexto(questao.contexto)}
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '400px', overflowY: 'auto' }}
+              dangerouslySetInnerHTML={processarTextoQuestao(questao.contexto)}
+              onClick={(e) => {
+                // Captura cliques em imagens para zoom
+                const target = e.target as HTMLElement
+                if (target.tagName === 'IMG') {
+                  const src = (target as HTMLImageElement).src
+                  if (isValidImageUrl(src)) {
+                    setImagemZoom(src)
+                  }
+                }
+              }}
             />
 
             {/* Alternativas */}
@@ -515,6 +569,7 @@ export default function SimuladoENEMPage() {
                 const isSelected = alternativaSelecionada === alt.letra
                 const isCorreta = respondida && respostaCorreta === alt.letra
                 const isErrada = respondida && isSelected && !isCorreta
+                const textoProcessado = processarTexto(alt.texto)
 
                 let bg = 'var(--bg-surface)'
                 let border = 'var(--border-default)'
@@ -532,17 +587,42 @@ export default function SimuladoENEMPage() {
                     key={alt.letra}
                     onClick={() => !respondida && setAlternativaSelecionada(alt.letra)}
                     disabled={respondida || !alt.texto}
-                    className="w-full text-left p-2 rounded-lg flex items-start gap-2 transition-all disabled:opacity-50"
+                    className="w-full text-left p-2.5 rounded-lg flex items-start gap-2.5 transition-all disabled:opacity-50"
                     style={{ background: bg, border: `1.5px solid ${border}` }}
                   >
-                    <span className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0" style={{ background: isSelected || isCorreta ? corPrimaria : 'var(--bg-elevated)', color: isSelected || isCorreta ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)' }}>
+                    <span
+                      className="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                      style={{
+                        background: isSelected || isCorreta ? corPrimaria : 'var(--bg-elevated)',
+                        color: isSelected || isCorreta ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                      }}
+                    >
                       {alt.letra}
                     </span>
-                    <span className="text-xs flex-1 pt-0.5" style={{ color: alt.texto ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-                      {alt.texto ? limparTexto(alt.texto) : '(alternativa vazia)'}
-                    </span>
-                    {isCorreta && <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--success)' }} />}
-                    {isErrada && <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />}
+                    <div className="flex-1 min-w-0">
+                      {/* Imagem da alternativa */}
+                      {alt.imagem && isValidImageUrl(alt.imagem) && !imagemErro.has(alt.imagem) && (
+                        <img
+                          src={alt.imagem}
+                          alt={`Alternativa ${alt.letra}`}
+                          className="max-h-20 w-auto object-contain rounded mb-1.5"
+                          onError={() => handleImageError(alt.imagem!)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setImagemZoom(alt.imagem!)
+                          }}
+                        />
+                      )}
+                      {/* Texto da alternativa */}
+                      <span
+                        className="text-sm leading-relaxed"
+                        style={{ color: alt.texto ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                      >
+                        {textoProcessado || '(alternativa sem texto)'}
+                      </span>
+                    </div>
+                    {isCorreta && <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--success)' }} />}
+                    {isErrada && <XCircle className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: 'var(--error)' }} />}
                   </button>
                 )
               })}
@@ -550,10 +630,10 @@ export default function SimuladoENEMPage() {
 
             {/* Feedback */}
             {respondida && (
-              <div className="rounded-lg p-2 flex items-center justify-between" style={{ background: acertou ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}>
+              <div className="rounded-lg p-3 flex items-center justify-between" style={{ background: acertou ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}>
                 <div className="flex items-center gap-2">
-                  {acertou ? <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} /> : <XCircle className="w-4 h-4" style={{ color: 'var(--error)' }} />}
-                  <span className="text-xs font-medium" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
+                  {acertou ? <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} /> : <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />}
+                  <span className="text-sm font-medium" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
                     {acertou ? 'Correto!' : `Errado. Resposta: ${respostaCorreta}`}
                   </span>
                 </div>
@@ -563,18 +643,18 @@ export default function SimuladoENEMPage() {
 
             {/* Estatísticas */}
             {respondida && estatisticas && (
-              <div className="flex items-center justify-around py-2 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
+              <div className="flex items-center justify-around py-3 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
                 <div className="text-center">
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Respondidas</p>
-                  <p className="text-lg font-bold" style={{ color: corPrimaria }}>{estatisticas.total_questoes}</p>
+                  <p className="text-xl font-bold" style={{ color: corPrimaria }}>{estatisticas.total_questoes}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Acertos</p>
-                  <p className="text-lg font-bold" style={{ color: 'var(--success)' }}>{estatisticas.total_corretas}</p>
+                  <p className="text-xl font-bold" style={{ color: 'var(--success)' }}>{estatisticas.total_corretas}</p>
                 </div>
                 <div className="text-center">
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Taxa</p>
-                  <p className="text-lg font-bold" style={{ color: estatisticas.taxa_acerto >= 60 ? 'var(--success)' : estatisticas.taxa_acerto >= 40 ? 'var(--warning)' : 'var(--error)' }}>
+                  <p className="text-xl font-bold" style={{ color: estatisticas.taxa_acerto >= 60 ? 'var(--success)' : estatisticas.taxa_acerto >= 40 ? 'var(--warning)' : 'var(--error)' }}>
                     {estatisticas.taxa_acerto}%
                   </p>
                 </div>
@@ -585,7 +665,7 @@ export default function SimuladoENEMPage() {
             <button
               onClick={respondida ? buscarQuestao : submeterResposta}
               disabled={!respondida && (!alternativaSelecionada || enviando)}
-              className="w-full py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              className="w-full py-3 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
             >
               {enviando ? <><Loader2 className="w-4 h-4 animate-spin" /> Enviando...</> : respondida ? <><ChevronRight className="w-4 h-4" /> Próxima Questão</> : 'Confirmar Resposta'}
@@ -650,7 +730,16 @@ export default function SimuladoENEMPage() {
           <button className="absolute top-4 right-4 p-2 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
             <X className="w-6 h-6 text-white" />
           </button>
-          <img src={imagemZoom} alt="Imagem ampliada" className="max-w-full max-h-full object-contain" onClick={e => e.stopPropagation()} />
+          <img
+            src={imagemZoom}
+            alt="Imagem ampliada"
+            className="max-w-full max-h-full object-contain rounded-lg"
+            onClick={e => e.stopPropagation()}
+            onError={() => {
+              handleImageError(imagemZoom)
+              setImagemZoom(null)
+            }}
+          />
         </div>
       )}
 
