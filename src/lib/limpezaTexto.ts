@@ -320,6 +320,21 @@ export function processarContexto(
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
 
+  // Remover informações redundantes do início (já aparecem nos badges)
+  // Remove linhas tipo "ENEM 2014", "Questão 162", "Matemática" no início
+  processado = processado
+    .replace(/^ENEM\s+\d{4}\s*/i, '')
+    .replace(/^Questão\s+\d+\s*/i, '')
+    .replace(/^(Matemática|Física|Química|Biologia|Português|Literatura|História|Geografia|Filosofia|Sociologia|Inglês|Espanhol)\s*/i, '')
+
+  // Remover referências a "Figura X" (as imagens já estão na galeria)
+  processado = processado
+    .replace(/\bFigura\s*\d+\b/gi, '')
+    .replace(/\bImagem\s*\d+\b/gi, '')
+    .replace(/\bQuadro\s*\d+\b/gi, '')
+    .replace(/\bTabela\s*\d+\b/gi, '')
+    .replace(/\bGráfico\s*\d+\b/gi, '')
+
   // Tratar imagens: remover ou converter dependendo da opção
   if (opcoes?.removerImagens) {
     processado = removerImagensDoTexto(processado)
@@ -331,12 +346,19 @@ export function processarContexto(
   // Formatar seções TEXTO I, II (antes de remover markdown)
   processado = formatarSecoes(processado)
 
-  // Remover formatação markdown (negrito, itálico, etc.)
-  // Mas preservar as tags HTML que já criamos
-  processado = processado
-    .replace(/\*\*([^*<]+)\*\*/g, '<strong>$1</strong>') // Converte **bold** em <strong>
-    .replace(/\*([^*<]+)\*/g, '<em>$1</em>') // Converte *italic* em <em>
-    .replace(/\*+/g, '') // Remove asteriscos restantes
+  // Converter markdown para HTML
+  // _texto_ para itálico (underscore)
+  processado = processado.replace(/_([^_<]+)_/g, '<em>$1</em>')
+
+  // **texto** para negrito
+  processado = processado.replace(/\*\*([^*<]+)\*\*/g, '<strong>$1</strong>')
+
+  // *texto* para itálico
+  processado = processado.replace(/\*([^*<]+)\*/g, '<em>$1</em>')
+
+  // Remove asteriscos e underscores restantes
+  processado = processado.replace(/\*+/g, '')
+  processado = processado.replace(/_+/g, ' ')
 
   // Formatar matemática
   processado = formatarMatematica(processado)
@@ -356,11 +378,13 @@ export function processarContexto(
     processado = '<p>' + processado + '</p>'
   }
 
-  // Limpar
+  // Limpar espaços extras e elementos vazios
   processado = processado.replace(/\uFFFD/g, '')
   processado = processado.replace(/<br>\s*<br>\s*<br>/g, '<br>')
-  processado = processado.replace(/<p>\s*<\/p>/g, '') // Remove parágrafos vazios
-  processado = processado.replace(/<p>\s*<br>\s*<\/p>/g, '') // Remove parágrafos só com br
+  processado = processado.replace(/<p>\s*<\/p>/g, '')
+  processado = processado.replace(/<p>\s*<br>\s*<\/p>/g, '')
+  processado = processado.replace(/\s{2,}/g, ' ')
+  processado = processado.replace(/<br>\s*<br>/g, '<br>')
 
   return processado.trim()
 }
