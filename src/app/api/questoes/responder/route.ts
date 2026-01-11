@@ -338,9 +338,10 @@ export async function POST(request: NextRequest) {
         questoes_semana: notaAtualizada.questoes_semana,
         limite_semanal: notaAtualizada.limite_semanal,
         pode_continuar: notaAtualizada.pode_responder,
-        // Novos campos para desafio
+        // Campos v2
         acertos_desafio: notaAtualizada.acertos_desafio,
-        nota_desafio: notaAtualizada.nota_desafio,
+        nota_acertos: notaAtualizada.nota_acertos,
+        nota_tempo: notaAtualizada.nota_tempo,
       } : null,
     })
   } catch (error) {

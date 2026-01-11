@@ -1,30 +1,24 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * SISTEMA DE NOTAS 2025 - NOVA FÓRMULA
+ * SISTEMA DE NOTAS 2025 - FÓRMULA v2
  * ═══════════════════════════════════════════════════════════════════════════
  *
- * FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05) + (ACERTOS_DESAFIO × 0,02)
+ * FÓRMULA: NOTA = Pontos por Acertos (máx 6.0) + Pontos por Tempo (máx 4.0)
  *
- * COMPONENTES:
+ * PONTOS POR ACERTOS (máximo 6.0 pontos):
  * ───────────────────────────────────────────────────────────────────────────
- * QUESTÕES (modo estudo):
- *   - Limite: 15 questões por semana
- *   - Valor: cada 12 acertos = +1.0 ponto
- *   - Fórmula: acertos_questoes ÷ 12
+ * - Modo Estudar: cada acerto = +0.04 pontos
+ * - Modo Revisão: cada acerto = +0.02 pontos
+ * - Modo Desafio: cada acerto = +0.01 pontos
  *
- * REVISÃO (modo revisão):
- *   - Limite: SEM LIMITE
- *   - Valor: cada acerto = +0.05 pontos
- *   - Fórmula: acertos_revisao × 0.05
+ * PONTOS POR TEMPO DE USO (máximo 4.0 pontos):
+ * ───────────────────────────────────────────────────────────────────────────
+ * - 2 horas de uso = 1.0 ponto
+ * - 3 horas de uso = 2.0 pontos
+ * - 4 horas de uso = 3.0 pontos
+ * - 5+ horas de uso = 4.0 pontos
  *
- * DESAFIO (modo desafio):
- *   - Limite: SEM LIMITE (pode fazer quantos quiser)
- *   - Valor: cada acerto = +0.02 pontos
- *   - Fórmula: acertos_desafio × 0.02
- *
- * NOTA FINAL:
- *   - Máximo: 10.0
- *   - nota_final = min(nota_questoes + nota_revisao + nota_desafio, 10.0)
+ * NOTA MÁXIMA: 10.0
  *
  * NÍVEIS DE VERIFICAÇÃO:
  * ═══════════════════════════════════════════════════════════════════════════
@@ -64,13 +58,14 @@ export interface ResultadoVerificacao {
 export interface NotaAtualizada {
   nota_anterior: number
   nota_nova: number
-  // Nova fórmula
-  acertos_questoes: number
+  // Fórmula v2
+  acertos_estudo: number
   acertos_revisao: number
   acertos_desafio: number
-  nota_questoes: number  // acertos_questoes / 12
-  nota_revisao: number   // acertos_revisao * 0.05
-  nota_desafio: number   // acertos_desafio * 0.02
+  tempo_uso_horas: number
+  nota_acertos: number   // máx 6.0
+  nota_tempo: number     // máx 4.0
+  detalhes: { estudo: number; revisao: number; desafio: number }
   // Controle semanal
   questoes_semana: number
   limite_semanal: number | null
@@ -121,7 +116,7 @@ const CONFIG_BIMESTRES: Record<number, Record<1 | 2 | 3 | 4, ConfigBimestre>> = 
   2026: {
     1: {
       bimestre: 1,
-      regular: { inicio: '2026-01-01', fim: '2026-03-24', meta: 105 },
+      regular: { inicio: '2026-02-02', fim: '2026-03-24', meta: 105 },
       recuperacao: { inicio: '2026-03-25', fim: '2026-04-03' },
     },
     2: {
@@ -147,10 +142,12 @@ const LIMITE_SEMANAL_ESTUDO = 15
 const NOTA_MAXIMA_REGULAR = 10.0
 const NOTA_MAXIMA_RECUPERACAO = 6.0
 
-// Constantes para cálculo de nota
-const DIVISOR_QUESTOES = 12       // Cada 12 acertos = 1.0 ponto
-const VALOR_REVISAO = 0.05        // Cada acerto revisão = 0.05 pontos
-const VALOR_DESAFIO = 0.02        // Cada acerto desafio = 0.02 pontos
+// Constantes para cálculo de nota v2
+const VALOR_ACERTO_ESTUDO = 0.04  // Cada acerto no modo estudar = +0.04 pontos
+const VALOR_ACERTO_REVISAO = 0.02 // Cada acerto no modo revisão = +0.02 pontos
+const VALOR_ACERTO_DESAFIO = 0.01 // Cada acerto no modo desafio = +0.01 pontos
+const NOTA_MAXIMA_ACERTOS = 6.0   // Máximo de pontos por acertos
+const NOTA_MAXIMA_TEMPO = 4.0     // Máximo de pontos por tempo de uso
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FUNÇÕES AUXILIARES
@@ -168,34 +165,61 @@ export function getSegundaFeiraSemana(data: Date = new Date()): string {
 }
 
 /**
- * NOVA FÓRMULA 2025
- * Calcula nota baseada em acertos de questões, revisão e desafio
+ * Calcula pontos por tempo de uso
+ * 2h = 1pt, 3h = 2pt, 4h = 3pt, 5h+ = 4pt
+ */
+export function calcularPontosTempo(tempoHoras: number): number {
+  if (tempoHoras >= 5) return 4.0
+  if (tempoHoras >= 4) return 3.0
+  if (tempoHoras >= 3) return 2.0
+  if (tempoHoras >= 2) return 1.0
+  return 0
+}
+
+/**
+ * FÓRMULA v2 - 2025
+ * Calcula nota baseada em acertos + tempo de uso
  *
- * NOTA = (ACERTOS_QUESTOES / 12) + (ACERTOS_REVISAO * 0.05) + (ACERTOS_DESAFIO * 0.02)
+ * NOTA = Pontos por Acertos (máx 6.0) + Pontos por Tempo (máx 4.0)
+ * - Estudar: +0.04 por acerto
+ * - Revisão: +0.02 por acerto
+ * - Desafio: +0.01 por acerto
+ * - Tempo: 2h=1pt, 3h=2pt, 4h=3pt, 5h+=4pt
+ *
  * Máximo: 10.0
  */
 export function calcularNotaNova(
-  acertosQuestoes: number,
+  acertosEstudo: number,
   acertosRevisao: number,
-  acertosDesafio: number = 0
-): { notaQuestoes: number; notaRevisao: number; notaDesafio: number; notaFinal: number } {
-  // Cada 12 acertos em questões = 1.0 ponto
-  const notaQuestoes = acertosQuestoes / DIVISOR_QUESTOES
+  acertosDesafio: number = 0,
+  tempoUsoHoras: number = 0
+): {
+  notaAcertos: number
+  notaTempo: number
+  notaFinal: number
+  detalhes: { estudo: number; revisao: number; desafio: number }
+} {
+  // Pontos por acertos (máximo 6.0)
+  const pontosEstudo = acertosEstudo * VALOR_ACERTO_ESTUDO
+  const pontosRevisao = acertosRevisao * VALOR_ACERTO_REVISAO
+  const pontosDesafio = acertosDesafio * VALOR_ACERTO_DESAFIO
+  const notaAcertos = Math.min(NOTA_MAXIMA_ACERTOS, pontosEstudo + pontosRevisao + pontosDesafio)
 
-  // Cada acerto em revisão = 0.05 pontos
-  const notaRevisao = acertosRevisao * VALOR_REVISAO
-
-  // Cada acerto em desafio = 0.02 pontos
-  const notaDesafio = acertosDesafio * VALOR_DESAFIO
+  // Pontos por tempo de uso (máximo 4.0)
+  const notaTempo = calcularPontosTempo(tempoUsoHoras)
 
   // Nota final = min(soma, 10.0)
-  const notaFinal = Math.min(notaQuestoes + notaRevisao + notaDesafio, NOTA_MAXIMA_REGULAR)
+  const notaFinal = Math.min(notaAcertos + notaTempo, NOTA_MAXIMA_REGULAR)
 
   return {
-    notaQuestoes: Math.round(notaQuestoes * 100) / 100,
-    notaRevisao: Math.round(notaRevisao * 100) / 100,
-    notaDesafio: Math.round(notaDesafio * 100) / 100,
+    notaAcertos: Math.round(notaAcertos * 100) / 100,
+    notaTempo: Math.round(notaTempo * 100) / 100,
     notaFinal: Math.round(notaFinal * 100) / 100,
+    detalhes: {
+      estudo: Math.round(pontosEstudo * 100) / 100,
+      revisao: Math.round(pontosRevisao * 100) / 100,
+      desafio: Math.round(pontosDesafio * 100) / 100,
+    },
   }
 }
 
@@ -487,7 +511,7 @@ function getProximaSegunda(): string {
 
 /**
  * NÍVEL 4: Processamento e Cálculo de Nota
- * NOVA FÓRMULA: NOTA = (ACERTOS_QUESTÕES ÷ 12) + (ACERTOS_REVISÃO × 0,05)
+ * FÓRMULA v2: NOTA = Pontos Acertos (máx 6) + Pontos Tempo (máx 4)
  */
 export async function nivel4ProcessamentoCalculo(
   supabase: SupabaseClient,
@@ -506,20 +530,20 @@ export async function nivel4ProcessamentoCalculo(
   const config = periodo.config
 
   try {
-    // Buscar ACERTOS de questões (modo estudo)
+    // Buscar respostas do modo estudo (acertos + tempo)
     const { data: respostasEstudo } = await supabase
       .from('respostas')
-      .select('id, criado_em, correta')
+      .select('id, criado_em, correta, tempo_segundos')
       .eq('usuario_id', userId)
       .eq('componente', componente)
       .eq('modo', 'estudo')
       .gte('criado_em', config.regular.inicio)
       .lte('criado_em', config.regular.fim + 'T23:59:59')
 
-    // Buscar ACERTOS de revisão (modo revisao)
+    // Buscar respostas do modo revisão (acertos + tempo)
     const { data: respostasRevisao } = await supabase
       .from('respostas')
-      .select('id')
+      .select('id, correta, tempo_segundos')
       .eq('usuario_id', userId)
       .eq('componente', componente)
       .eq('modo', 'revisao')
@@ -527,27 +551,41 @@ export async function nivel4ProcessamentoCalculo(
       .gte('criado_em', config.regular.inicio)
       .lte('criado_em', config.regular.fim + 'T23:59:59')
 
-    // Buscar ACERTOS de desafio (modo desafio) - tabela desafios
-    const { data: desafiosCompletados } = await supabase
-      .from('desafios')
-      .select('acertos')
+    // Buscar respostas do modo desafio (acertos + tempo)
+    const { data: respostasDesafio } = await supabase
+      .from('respostas')
+      .select('id, correta, tempo_segundos')
       .eq('usuario_id', userId)
       .eq('componente', componente)
-      .eq('status', 'completo')
-      .gte('finalizado_em', config.regular.inicio)
-      .lte('finalizado_em', config.regular.fim + 'T23:59:59')
+      .eq('modo', 'desafio')
+      .eq('correta', true)
+      .gte('criado_em', config.regular.inicio)
+      .lte('criado_em', config.regular.fim + 'T23:59:59')
 
+    // Contadores
     const questoesRespondidas = respostasEstudo?.length || 0
-    const acertosQuestoes = respostasEstudo?.filter(r => r.correta === true).length || 0
+    const acertosEstudo = respostasEstudo?.filter(r => r.correta === true).length || 0
     const acertosRevisao = respostasRevisao?.length || 0
-    const acertosDesafio = desafiosCompletados?.reduce((sum, d) => sum + (d.acertos || 0), 0) || 0
+    const acertosDesafio = respostasDesafio?.length || 0
+
+    // Calcular tempo total de uso em horas
+    const tempoEstudo = respostasEstudo?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
+    const tempoRevisao = respostasRevisao?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
+    const tempoDesafio = respostasDesafio?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
+    const tempoTotalSegundos = tempoEstudo + tempoRevisao + tempoDesafio
+    const tempoTotalHoras = tempoTotalSegundos / 3600
 
     // Contar dias ativos
     const diasAtivosSet = new Set(respostasEstudo?.map(r => r.criado_em.split('T')[0]) || [])
     const diasAtivos = diasAtivosSet.size
 
-    // NOVA FÓRMULA com desafio
-    const { notaQuestoes, notaRevisao, notaDesafio, notaFinal } = calcularNotaNova(acertosQuestoes, acertosRevisao, acertosDesafio)
+    // FÓRMULA v2: Acertos + Tempo
+    const { notaAcertos, notaTempo, notaFinal, detalhes } = calcularNotaNova(
+      acertosEstudo,
+      acertosRevisao,
+      acertosDesafio,
+      tempoTotalHoras
+    )
 
     // Buscar questões da semana atual
     const segundaFeira = getSegundaFeiraSemana()
@@ -569,22 +607,23 @@ export async function nivel4ProcessamentoCalculo(
     const notaAtualizada: NotaAtualizada = {
       nota_anterior: 0, // Será preenchido depois
       nota_nova: notaFinal,
-      // Nova fórmula
-      acertos_questoes: acertosQuestoes,
+      // Fórmula v2
+      acertos_estudo: acertosEstudo,
       acertos_revisao: acertosRevisao,
       acertos_desafio: acertosDesafio,
-      nota_questoes: notaQuestoes,
-      nota_revisao: notaRevisao,
-      nota_desafio: notaDesafio,
+      tempo_uso_horas: tempoTotalHoras,
+      nota_acertos: notaAcertos,
+      nota_tempo: notaTempo,
+      detalhes,
       // Controle semanal
       questoes_semana: questoesSemana,
       limite_semanal: limiteSemanal,
       pode_responder: limiteSemanal === null || questoesSemana < limiteSemanal,
-      // Legado
+      // Legado (mantido para compatibilidade)
       questoes_respondidas: questoesRespondidas,
       meta_questoes: config.regular.meta,
       dias_ativos: diasAtivos,
-      bonus_frequencia: notaRevisao + notaDesafio, // Mapear revisão + desafio como bônus
+      bonus_frequencia: detalhes.revisao + detalhes.desafio,
       percentual: Math.round((questoesRespondidas / config.regular.meta) * 100),
     }
 
@@ -593,8 +632,8 @@ export async function nivel4ProcessamentoCalculo(
       passou: true,
       dados: {
         nota_atualizada: notaAtualizada,
-        nota_questoes: notaQuestoes,
-        nota_revisao: notaRevisao,
+        nota_acertos: notaAcertos,
+        nota_tempo: notaTempo,
         nota_final: notaFinal,
       },
     }
@@ -731,13 +770,14 @@ export async function verificacaoCompletaParaResponder(
       dados_nota: {
         nota_anterior: 0,
         nota_nova: 0,
-        // Nova fórmula
-        acertos_questoes: 0,
+        // Fórmula v2
+        acertos_estudo: 0,
         acertos_revisao: 0,
         acertos_desafio: 0,
-        nota_questoes: 0,
-        nota_revisao: 0,
-        nota_desafio: 0,
+        tempo_uso_horas: 0,
+        nota_acertos: 0,
+        nota_tempo: 0,
+        detalhes: { estudo: 0, revisao: 0, desafio: 0 },
         // Controle semanal
         questoes_semana: nivel3.dados?.questoes_semana as number || 0,
         limite_semanal: nivel3.dados?.limite_semanal as number || null,
@@ -760,13 +800,14 @@ export async function verificacaoCompletaParaResponder(
     dados_nota: {
       nota_anterior: 0,
       nota_nova: 0,
-      // Nova fórmula
-      acertos_questoes: 0,
+      // Fórmula v2
+      acertos_estudo: 0,
       acertos_revisao: 0,
       acertos_desafio: 0,
-      nota_questoes: 0,
-      nota_revisao: 0,
-      nota_desafio: 0,
+      tempo_uso_horas: 0,
+      nota_acertos: 0,
+      nota_tempo: 0,
+      detalhes: { estudo: 0, revisao: 0, desafio: 0 },
       // Controle semanal
       questoes_semana: nivel3.dados?.questoes_semana as number || 0,
       limite_semanal: nivel3.dados?.limite_semanal as number | null,
