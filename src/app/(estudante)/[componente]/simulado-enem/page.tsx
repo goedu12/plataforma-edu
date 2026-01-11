@@ -277,11 +277,16 @@ export default function SimuladoENEMPage() {
         /* Texto base com espaçamento otimizado */
         .texto-questao {
           font-size: 0.9375rem;
-          line-height: 1.5;
+          line-height: 1.6;
           letter-spacing: 0.01em;
+          text-align: justify;
+          text-justify: inter-word;
+          hyphens: auto;
+          -webkit-hyphens: auto;
         }
         .texto-questao p {
-          margin: 0 0 0.75em 0;
+          margin: 0 0 0.85em 0;
+          text-indent: 0;
         }
         .texto-questao p:last-child {
           margin-bottom: 0;
@@ -289,7 +294,7 @@ export default function SimuladoENEMPage() {
         .texto-questao br {
           display: block;
           content: "";
-          margin-top: 0.25em;
+          margin-top: 0.3em;
         }
 
         /* Tabelas */
@@ -386,10 +391,11 @@ export default function SimuladoENEMPage() {
         @media (max-width: 640px) {
           .texto-questao {
             font-size: 0.875rem;
-            line-height: 1.45;
+            line-height: 1.55;
+            text-align: justify;
           }
           .texto-questao p {
-            margin: 0 0 0.6em 0;
+            margin: 0 0 0.7em 0;
           }
           .texto-questao .tabela-enem {
             font-size: 0.7rem;
