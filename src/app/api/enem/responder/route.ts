@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import type { AlternativaENEM, AreaENEM, SubareaENEM } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // API ENEM - Submeter resposta
@@ -10,7 +11,7 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 interface RequestBody {
   questao_id: string
   resposta: string
-  resposta_correta: string // base64 encoded
+  resposta_correta?: string // base64 encoded (para questões externas)
   tempo_segundos?: number
 }
 
@@ -32,27 +33,17 @@ export async function POST(request: NextRequest) {
       tempo_segundos = 0,
     } = body
 
-    if (!questao_id || !resposta || !respostaCorretaBase64) {
+    if (!questao_id || !resposta) {
       return NextResponse.json(
         { sucesso: false, erro: 'Dados incompletos' },
         { status: 400 }
       )
     }
 
-    const respostaUpperCase = resposta.toUpperCase()
+    const respostaUpperCase = resposta.toUpperCase() as AlternativaENEM
     if (!['A', 'B', 'C', 'D', 'E'].includes(respostaUpperCase)) {
       return NextResponse.json(
         { sucesso: false, erro: 'Resposta inválida. Use A, B, C, D ou E.' },
-        { status: 400 }
-      )
-    }
-
-    let respostaCorreta: string
-    try {
-      respostaCorreta = Buffer.from(respostaCorretaBase64, 'base64').toString('utf-8').toUpperCase()
-    } catch {
-      return NextResponse.json(
-        { sucesso: false, erro: 'Resposta correta inválida' },
         { status: 400 }
       )
     }
@@ -76,12 +67,47 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
+    // Buscar questão no banco para obter resposta correta e metadados
+    const { data: questao, error: erroQuestao } = await supabase
+      .from('questoes_enem')
+      .select('id, resposta_correta, ano_prova, area, subarea')
+      .eq('id', questao_id)
+      .single()
+
+    let respostaCorreta: string
+    let anoProva: number | null = null
+    let area: AreaENEM | null = null
+    let subarea: SubareaENEM | null = null
+
+    if (questao) {
+      // Questão encontrada no banco - usar resposta correta do banco
+      respostaCorreta = questao.resposta_correta
+      anoProva = questao.ano_prova
+      area = questao.area
+      subarea = questao.subarea
+    } else if (respostaCorretaBase64) {
+      // Questão externa - usar resposta enviada (base64)
+      try {
+        respostaCorreta = Buffer.from(respostaCorretaBase64, 'base64').toString('utf-8').toUpperCase()
+      } catch {
+        return NextResponse.json(
+          { sucesso: false, erro: 'Resposta correta inválida' },
+          { status: 400 }
+        )
+      }
+    } else {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Questão não encontrada' },
+        { status: 404 }
+      )
+    }
+
     // Verificar se já respondeu
     const { data: respostaExistente } = await supabase
-      .from('enem_responses')
+      .from('respostas_enem')
       .select('id')
       .eq('usuario_id', sessao.userId)
-      .eq('question_id', questao_id)
+      .eq('questao_id', questao_id)
       .single()
 
     if (respostaExistente) {
@@ -96,25 +122,30 @@ export async function POST(request: NextRequest) {
       ? Math.floor(tempo_segundos)
       : 0
 
-    const { error } = await supabase.from('enem_responses').insert({
+    // Inserir resposta
+    const { error: erroInsert } = await supabase.from('respostas_enem').insert({
       usuario_id: sessao.userId,
-      question_id: questao_id,
+      questao_id: questao_id,
       resposta_dada: respostaUpperCase,
       correta,
       tempo_segundos: tempoValidado,
+      ano_prova: anoProva,
+      area: area,
+      subarea: subarea,
+      modo: 'livre',
     })
 
-    if (error) {
-      console.error('Erro ao registrar resposta ENEM:', error)
+    if (erroInsert) {
+      console.error('Erro ao registrar resposta ENEM:', erroInsert)
       return NextResponse.json(
-        { sucesso: false, erro: 'Erro ao registrar resposta' },
+        { sucesso: false, erro: 'Erro ao registrar resposta', detalhes: erroInsert.message },
         { status: 500 }
       )
     }
 
     // Estatísticas atualizadas
     const { data: estatisticas } = await supabase
-      .from('enem_responses')
+      .from('respostas_enem')
       .select('correta')
       .eq('usuario_id', sessao.userId)
 
@@ -137,7 +168,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erro ao responder questão ENEM:', error)
     return NextResponse.json(
-      { sucesso: false, erro: 'Erro interno do servidor' },
+      { sucesso: false, erro: 'Erro interno do servidor', detalhes: String(error) },
       { status: 500 }
     )
   }
