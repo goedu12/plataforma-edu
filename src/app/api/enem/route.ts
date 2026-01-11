@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { questaoTemQualidade, extrairImagensQuestao, isValidImageUrl } from '@/lib/limpezaTexto'
 import type { AreaENEM, SubareaENEM, AlternativaENEM } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 
@@ -9,6 +10,8 @@ import { ENEM_CONFIG } from '@/types'
 // GET /api/enem - Retorna uma questão aleatória não respondida
 // GET /api/enem?area=matematica - Filtra por área
 // GET /api/enem?ano=2023 - Filtra por ano da prova
+// GET /api/enem?subarea=fisica - Filtra por subárea
+// Inclui filtro de qualidade para ocultar questões mal formatadas
 // ═══════════════════════════════════════════════════════════════════════════
 
 // Interface da questão no banco (tabela questoes_enem)
@@ -56,6 +59,7 @@ interface QuestaoFormatada {
   comando: string | null
   imagem_principal: string | null
   imagens_extras: string[]
+  todas_imagens: string[] // Todas as imagens válidas extraídas
   alternativas: Array<{
     letra: AlternativaENEM
     texto: string
@@ -67,6 +71,18 @@ interface QuestaoFormatada {
 function formatarQuestao(q: QuestaoENEMDB): QuestaoFormatada {
   const areaConfig = ENEM_CONFIG.AREAS[q.area]
   const subareaNome = ENEM_CONFIG.SUBAREAS_LABELS[q.subarea] || q.subarea
+
+  // Extrair todas as imagens válidas
+  const todasImagens = extrairImagensQuestao({
+    contexto: q.contexto,
+    imagem_principal: q.imagem_principal,
+    imagens_extras: q.imagens_extras,
+    imagem_a: q.imagem_a,
+    imagem_b: q.imagem_b,
+    imagem_c: q.imagem_c,
+    imagem_d: q.imagem_d,
+    imagem_e: q.imagem_e,
+  })
 
   return {
     id: q.id,
@@ -81,16 +97,31 @@ function formatarQuestao(q: QuestaoENEMDB): QuestaoFormatada {
     titulo: q.titulo,
     contexto: q.contexto,
     comando: q.comando,
-    imagem_principal: q.imagem_principal,
-    imagens_extras: q.imagens_extras || [],
+    imagem_principal: isValidImageUrl(q.imagem_principal) ? q.imagem_principal : null,
+    imagens_extras: (q.imagens_extras || []).filter(isValidImageUrl),
+    todas_imagens: todasImagens,
     alternativas: [
-      { letra: 'A', texto: q.alternativa_a, imagem: q.imagem_a },
-      { letra: 'B', texto: q.alternativa_b, imagem: q.imagem_b },
-      { letra: 'C', texto: q.alternativa_c, imagem: q.imagem_c },
-      { letra: 'D', texto: q.alternativa_d, imagem: q.imagem_d },
-      { letra: 'E', texto: q.alternativa_e, imagem: q.imagem_e },
+      { letra: 'A', texto: q.alternativa_a, imagem: isValidImageUrl(q.imagem_a) ? q.imagem_a : null },
+      { letra: 'B', texto: q.alternativa_b, imagem: isValidImageUrl(q.imagem_b) ? q.imagem_b : null },
+      { letra: 'C', texto: q.alternativa_c, imagem: isValidImageUrl(q.imagem_c) ? q.imagem_c : null },
+      { letra: 'D', texto: q.alternativa_d, imagem: isValidImageUrl(q.imagem_d) ? q.imagem_d : null },
+      { letra: 'E', texto: q.alternativa_e, imagem: isValidImageUrl(q.imagem_e) ? q.imagem_e : null },
     ]
   }
+}
+
+// Verificar se uma questão passa no filtro de qualidade
+function verificarQualidade(q: QuestaoENEMDB): boolean {
+  const resultado = questaoTemQualidade({
+    contexto: q.contexto,
+    alternativa_a: q.alternativa_a,
+    alternativa_b: q.alternativa_b,
+    alternativa_c: q.alternativa_c,
+    alternativa_d: q.alternativa_d,
+    alternativa_e: q.alternativa_e,
+    imagem_principal: q.imagem_principal,
+  })
+  return resultado.valida
 }
 
 export async function GET(request: NextRequest) {
@@ -149,11 +180,17 @@ export async function GET(request: NextRequest) {
 
     const areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
 
-    // Buscar subáreas disponíveis
-    const { data: subareasData } = await supabase
+    // Buscar subáreas disponíveis (filtradas por área se selecionada)
+    let subareasQuery = supabase
       .from('questoes_enem')
       .select('subarea')
       .eq('status', 'ativa')
+
+    if (areaParam) {
+      subareasQuery = subareasQuery.eq('area', areaParam)
+    }
+
+    const { data: subareasData } = await subareasQuery
 
     const subareasDisponiveis = [...new Set(subareasData?.map(a => a.subarea).filter(Boolean) || [])]
 
@@ -185,7 +222,7 @@ export async function GET(request: NextRequest) {
       query = query.eq('subarea', subareaParam)
     }
 
-    const { data: questoes, error: erroQuery } = await query.limit(500)
+    const { data: questoes, error: erroQuery } = await query.limit(1000)
 
     if (erroQuery) {
       console.error('Erro ao buscar questões ENEM:', erroQuery)
@@ -209,13 +246,18 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Filtrar não respondidas
-    const disponiveis = questoes.filter(q => !idsRespondidos.has(q.id))
+    // Filtrar por qualidade E não respondidas
+    const questoesComQualidade = questoes.filter(q => verificarQualidade(q as QuestaoENEMDB))
+    const disponiveis = questoesComQualidade.filter(q => !idsRespondidos.has(q.id))
+
+    // Log para debug
+    console.log(`[ENEM] Total: ${questoes.length}, Com qualidade: ${questoesComQualidade.length}, Disponíveis: ${disponiveis.length}`)
 
     if (disponiveis.length === 0) {
       const filtroTexto = []
       if (ano) filtroTexto.push(`de ${ano}`)
       if (areaParam) filtroTexto.push(`de ${ENEM_CONFIG.AREAS[areaParam]?.nome || areaParam}`)
+      if (subareaParam) filtroTexto.push(`de ${ENEM_CONFIG.SUBAREAS_LABELS[subareaParam] || subareaParam}`)
 
       return NextResponse.json({
         sucesso: true,
@@ -227,7 +269,7 @@ export async function GET(request: NextRequest) {
         areas_disponiveis: areasDisponiveis,
         subareas_disponiveis: subareasDisponiveis,
         respondidas: idsRespondidos.size,
-        total_questoes: questoes.length,
+        total_questoes: questoesComQualidade.length,
       })
     }
 
@@ -247,7 +289,7 @@ export async function GET(request: NextRequest) {
       areas_disponiveis: areasDisponiveis,
       subareas_disponiveis: subareasDisponiveis,
       respondidas: idsRespondidos.size,
-      total_questoes: questoes.length,
+      total_questoes: questoesComQualidade.length,
       disponiveis: disponiveis.length,
     })
   } catch (error) {
