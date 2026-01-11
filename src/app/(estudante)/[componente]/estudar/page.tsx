@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
@@ -113,12 +113,12 @@ export default function EstudarPage() {
     }, 1000)
   }
 
-  const pararTimer = () => {
+  const pararTimer = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -127,7 +127,8 @@ export default function EstudarPage() {
     }
     buscarQuestao()
     return () => pararTimer()
-  }, [componente])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [componente, router, pararTimer])
 
   const handleVoltar = () => router.push(`/${componente}/menu`)
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
@@ -47,15 +47,7 @@ export default function PerfilPage() {
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const nomeComponente = isFisica ? 'Física' : 'Matemática'
 
-  useEffect(() => {
-    if (!['fisica', 'matematica'].includes(componente)) {
-      router.push('/selecionar')
-      return
-    }
-    buscarUsuario()
-  }, [componente, router])
-
-  const buscarUsuario = async () => {
+  const buscarUsuario = useCallback(async () => {
     try {
       const response = await fetch('/api/usuario')
       const data = await response.json()
@@ -70,7 +62,15 @@ export default function PerfilPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    if (!['fisica', 'matematica'].includes(componente)) {
+      router.push('/selecionar')
+      return
+    }
+    buscarUsuario()
+  }, [componente, router, buscarUsuario])
 
   const handleAlterarSenha = async (e: React.FormEvent) => {
     e.preventDefault()

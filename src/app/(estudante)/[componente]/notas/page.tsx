@@ -123,7 +123,7 @@ export default function NotasPage() {
       if (pollingRef.current) clearInterval(pollingRef.current)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [componente, buscarNotas])
+  }, [componente, router, buscarNotas])
 
   const getStatusConfig = (status: string, nota: number) => {
     if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' }

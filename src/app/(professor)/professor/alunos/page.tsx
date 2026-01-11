@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Users, Search, GraduationCap, Filter, Atom, Calculator, Key } from 'lucide-react'
 import Card from '@/components/ui/Card'
@@ -19,7 +19,7 @@ export default function AlunosProfessorPage() {
   const [busca, setBusca] = useState('')
   const [resetando, setResetando] = useState<string | null>(null)
 
-  const buscarAlunos = async () => {
+  const buscarAlunos = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -40,11 +40,11 @@ export default function AlunosProfessorPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [turmaFiltro, componenteFiltro, router])
 
   useEffect(() => {
     buscarAlunos()
-  }, [turmaFiltro, componenteFiltro])
+  }, [buscarAlunos])
 
   const handleResetSenha = async (usuarioId: string) => {
     if (!confirm('Tem certeza que deseja resetar a senha deste aluno para @estudante?')) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft,
@@ -38,7 +38,7 @@ export default function MapasMentaisUploadPage() {
   const [viewingMapa, setViewingMapa] = useState<MapaMental | null>(null)
 
   // Carregar mapas existentes
-  const carregarMapas = async () => {
+  const carregarMapas = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch(`/api/mapas?componente=${componente}&serie=${serie}&bimestre=${bimestre}`)
@@ -51,11 +51,11 @@ export default function MapasMentaisUploadPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [componente, serie, bimestre])
 
   useEffect(() => {
     carregarMapas()
-  }, [componente, serie, bimestre])
+  }, [carregarMapas])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

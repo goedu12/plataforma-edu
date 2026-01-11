@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Medal } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
@@ -24,7 +24,7 @@ export default function RankingPage() {
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  const buscarDados = async (silencioso = false) => {
+  const buscarDados = useCallback(async (silencioso = false) => {
     if (!silencioso) setLoading(true)
     else setAtualizando(true)
     setErro(null)
@@ -62,7 +62,7 @@ export default function RankingPage() {
       setLoading(false)
       setAtualizando(false)
     }
-  }
+  }, [router, componente])
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -70,7 +70,7 @@ export default function RankingPage() {
       return
     }
     buscarDados()
-  }, [router, componente])
+  }, [router, componente, buscarDados])
 
   if (loading || !usuario) {
     return <Loading fullScreen componente={componente} />

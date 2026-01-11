@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
@@ -252,7 +252,8 @@ export default function SimuladoENEMPage() {
     }
     buscarQuestao()
     return () => pararTimer()
-  }, [componente])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [componente, router])
 
   // Quando muda a área, limpa a subárea
   useEffect(() => {

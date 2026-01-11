@@ -68,7 +68,7 @@ export default function MapasMentaisPage() {
   }, [])
 
   // Buscar mapas
-  const buscarMapas = async () => {
+  const buscarMapas = useCallback(async () => {
     setLoading(true)
     setErro(null)
 
@@ -91,7 +91,7 @@ export default function MapasMentaisPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [componente, serieFiltro, bimestreFiltro])
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -99,7 +99,7 @@ export default function MapasMentaisPage() {
       return
     }
     buscarMapas()
-  }, [componente, serieFiltro, bimestreFiltro])
+  }, [componente, router, buscarMapas])
 
   // Navegação
   const irParaAnterior = useCallback(() => {

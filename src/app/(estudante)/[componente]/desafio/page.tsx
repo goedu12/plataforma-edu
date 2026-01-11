@@ -152,7 +152,8 @@ export default function DesafioPage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [componente])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [componente, router])
 
   const handleSelecionarResposta = async (letra: string) => {
     if (!desafioId || !questoes[questaoAtual]) return

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
@@ -47,7 +47,7 @@ export default function ConquistasPage() {
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const nomeComponente = isFisica ? 'Física' : 'Matemática'
 
-  const buscarConquistas = async () => {
+  const buscarConquistas = useCallback(async () => {
     setLoading(true)
     setErro(null)
 
@@ -67,7 +67,7 @@ export default function ConquistasPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [componente])
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -75,7 +75,7 @@ export default function ConquistasPage() {
       return
     }
     buscarConquistas()
-  }, [componente, router])
+  }, [componente, router, buscarConquistas])
 
   if (loading) return <Loading fullScreen componente={componente} />
 
