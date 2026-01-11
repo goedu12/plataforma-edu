@@ -38,16 +38,19 @@ describe('Button Component', () => {
 
   it('applies fisica variant styles', () => {
     render(<Button variant="fisica">Física</Button>)
-    expect(screen.getByRole('button')).toHaveClass('from-fisica-500')
+    const button = screen.getByRole('button')
+    expect(button).toHaveStyle({ background: 'var(--color-fisica)' })
   })
 
   it('applies matematica variant styles', () => {
     render(<Button variant="matematica">Matemática</Button>)
-    expect(screen.getByRole('button')).toHaveClass('from-matematica-500')
+    const button = screen.getByRole('button')
+    expect(button).toHaveStyle({ background: 'var(--color-matematica)' })
   })
 
   it('applies secondary variant styles', () => {
     render(<Button variant="secondary">Secondary</Button>)
-    expect(screen.getByRole('button')).toHaveClass('bg-dark-surface/80')
+    const button = screen.getByRole('button')
+    expect(button).toHaveStyle({ background: 'transparent' })
   })
 })
