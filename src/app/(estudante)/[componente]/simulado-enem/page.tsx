@@ -687,12 +687,12 @@ export default function SimuladoENEMPage() {
       {/* Modal de Filtros - Responsivo */}
       {mostrarFiltro && (
         <div
-          className="fixed inset-0 z-50 flex items-end lg:items-center justify-center"
+          className="fixed inset-0 z-50 flex items-end lg:items-center justify-center pb-nav lg:pb-0"
           style={{ background: 'rgba(0,0,0,0.6)' }}
           onClick={() => setMostrarFiltro(false)}
         >
           <div
-            className="w-full h-[85vh] sm:h-auto sm:max-h-[85vh] lg:max-w-2xl lg:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
+            className="w-full max-h-[80vh] sm:max-h-[85vh] lg:max-w-2xl lg:mx-4 rounded-t-3xl sm:rounded-3xl overflow-hidden flex flex-col"
             style={{ background: 'var(--bg-surface)' }}
             onClick={e => e.stopPropagation()}
           >
