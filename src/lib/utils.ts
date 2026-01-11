@@ -140,7 +140,9 @@ export function truncar(texto: string, tamanho: number): string {
 }
 
 // ═══════════════════════════════════════════════════════════
-// VERIFICAR DATA HOJE
+// VERIFICAR DATA HOJE (sem timezone específico)
+// Para operações com timezone Brasil, use @/lib/timezone:
+// - ehHojeBrasil() / ehOntemBrasil() - com fuso America/Sao_Paulo
 // ═══════════════════════════════════════════════════════════
 export function ehHoje(data: string | Date | null | undefined): boolean {
   if (!data) return false
