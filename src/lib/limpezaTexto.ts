@@ -392,6 +392,7 @@ export function processarContexto(
 /**
  * Verifica se uma questão tem qualidade suficiente para exibição
  * Retorna true se a questão pode ser exibida, false se deve ser ocultada
+ * Critérios rigorosos para garantir boa experiência ao estudante
  */
 export function questaoTemQualidade(questao: {
   contexto: string | null
@@ -401,14 +402,47 @@ export function questaoTemQualidade(questao: {
   alternativa_d: string | null
   alternativa_e: string | null
   imagem_principal?: string | null
+  imagens_extras?: string[] | null
 }): { valida: boolean; motivo?: string } {
+  const contexto = questao.contexto || ''
+
   // 1. Contexto deve existir e ter conteúdo mínimo
-  const contextoLimpo = limparTexto(questao.contexto)
-  if (!contextoLimpo || contextoLimpo.length < 20) {
+  const contextoLimpo = limparTexto(contexto)
+  if (!contextoLimpo || contextoLimpo.length < 30) {
     return { valida: false, motivo: 'contexto_vazio' }
   }
 
-  // 2. Verificar alternativas - pelo menos 4 devem ter texto válido
+  // 2. Verificar se tem referência a figura/imagem sem ter imagem válida
+  const temReferenciaFigura = /\b(Figura|Imagem|Quadro|Tabela|Gráfico)\s*\d+/i.test(contexto)
+  const temImagemValida = isValidImageUrl(questao.imagem_principal) ||
+    (questao.imagens_extras && questao.imagens_extras.some(img => isValidImageUrl(img))) ||
+    /!\([^)]+\)/.test(contexto) || // !(url) no texto
+    /!\[[^\]]*\]\([^)]+\)/.test(contexto) // ![alt](url) no texto
+
+  if (temReferenciaFigura && !temImagemValida) {
+    return { valida: false, motivo: 'referencia_figura_sem_imagem' }
+  }
+
+  // 3. Verificar problemas de formatação graves
+  // URLs soltas no texto (não formatadas como imagem)
+  const urlsSoltas = contexto.match(/https?:\/\/[^\s<>"]+/g) || []
+  const urlsNaoImagem = urlsSoltas.filter(url => !isValidImageUrl(url))
+  if (urlsNaoImagem.length > 2) {
+    return { valida: false, motivo: 'muitas_urls_soltas' }
+  }
+
+  // 4. Verificar se tem muito markdown não processável
+  const asteriscosExcessivos = (contexto.match(/\*{3,}/g) || []).length
+  if (asteriscosExcessivos > 3) {
+    return { valida: false, motivo: 'formatacao_quebrada' }
+  }
+
+  // 5. Verificar se contexto é JSON ou array malformado
+  if (/^\s*[\[\{]/.test(contexto) && /[\]\}]\s*$/.test(contexto)) {
+    return { valida: false, motivo: 'contexto_json' }
+  }
+
+  // 6. Verificar alternativas - pelo menos 4 devem ter texto válido
   const alternativas = [
     questao.alternativa_a,
     questao.alternativa_b,
@@ -418,18 +452,39 @@ export function questaoTemQualidade(questao: {
   ]
 
   const alternativasValidas = alternativas.filter(alt => {
+    if (!alt) return false
     const textoLimpo = limparTexto(alt)
-    // Alternativa válida se tem texto OU é apenas um numeral romano (I, II, III, IV, V)
-    return textoLimpo && (textoLimpo.length >= 1)
+    // Alternativa válida se tem texto de pelo menos 1 caractere
+    // Aceita numerais romanos (I, II, III, IV, V) como válidos
+    return textoLimpo && textoLimpo.length >= 1
   })
 
   if (alternativasValidas.length < 4) {
     return { valida: false, motivo: 'alternativas_insuficientes' }
   }
 
-  // 3. Se tem imagem principal, verificar se é válida
-  if (questao.imagem_principal && !isValidImageUrl(questao.imagem_principal)) {
-    // Não invalida a questão, mas marca que a imagem é inválida
+  // 7. Verificar se alternativas são apenas letras/números isolados sem sentido
+  const alternativasComConteudo = alternativas.filter(alt => {
+    if (!alt) return false
+    const limpo = limparTexto(alt)
+    // Deve ter mais que apenas um caractere ou ser numeral romano
+    return limpo && (limpo.length > 2 || /^[IVX]+$/i.test(limpo) || /^\d+$/.test(limpo))
+  })
+
+  if (alternativasComConteudo.length < 3) {
+    return { valida: false, motivo: 'alternativas_sem_conteudo' }
+  }
+
+  // 8. Verificar se tem TEXTO I e TEXTO II mas sem conteúdo entre eles
+  if (/TEXTO\s+I/i.test(contexto) && /TEXTO\s+II/i.test(contexto)) {
+    const partes = contexto.split(/TEXTO\s+I+/i)
+    if (partes.length > 1) {
+      const textoI = partes[1]?.split(/TEXTO\s+II/i)[0] || ''
+      const textoII = partes[1]?.split(/TEXTO\s+II/i)[1] || ''
+      if (limparTexto(textoI).length < 20 || limparTexto(textoII).length < 20) {
+        return { valida: false, motivo: 'textos_vazios' }
+      }
+    }
   }
 
   return { valida: true }

@@ -120,6 +120,7 @@ function verificarQualidade(q: QuestaoENEMDB): boolean {
     alternativa_d: q.alternativa_d,
     alternativa_e: q.alternativa_e,
     imagem_principal: q.imagem_principal,
+    imagens_extras: q.imagens_extras,
   })
   return resultado.valida
 }
