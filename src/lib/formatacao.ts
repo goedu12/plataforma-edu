@@ -55,7 +55,10 @@ const SUBSCRIPT_MAP: Record<string, string> = {
 }
 
 // Símbolos especiais de física/matemática
-const SIMBOLOS_ESPECIAIS: Record<string, string> = {
+// Separados em categorias para aplicar word boundaries corretamente
+
+// Símbolos que NÃO precisam de word boundary (operadores, LaTeX com \)
+const SIMBOLOS_OPERADORES: Record<string, string> = {
   // Operadores e comparadores
   '>=': '≥',
   '<=': '≤',
@@ -72,106 +75,61 @@ const SIMBOLOS_ESPECIAIS: Record<string, string> = {
   '<=>': '⇔',
   '...': '…',
 
-  // Letras gregas minúsculas
-  'alfa': 'α',
-  'alpha': 'α',
+  // LaTeX com backslash (sempre seguro)
   '\\alpha': 'α',
-  'beta': 'β',
   '\\beta': 'β',
-  'gama': 'γ',
-  'gamma': 'γ',
   '\\gamma': 'γ',
-  'delta': 'δ',
   '\\delta': 'δ',
-  'epsilon': 'ε',
   '\\epsilon': 'ε',
-  'zeta': 'ζ',
   '\\zeta': 'ζ',
-  'eta': 'η',
   '\\eta': 'η',
-  'theta': 'θ',
   '\\theta': 'θ',
-  'iota': 'ι',
-  'kappa': 'κ',
   '\\kappa': 'κ',
-  'lambda': 'λ',
   '\\lambda': 'λ',
-  'mu': 'μ',
   '\\mu': 'μ',
-  'nu': 'ν',
   '\\nu': 'ν',
-  'xi': 'ξ',
   '\\xi': 'ξ',
-  'pi': 'π',
   '\\pi': 'π',
-  'rho': 'ρ',
   '\\rho': 'ρ',
-  'sigma': 'σ',
   '\\sigma': 'σ',
-  'tau': 'τ',
   '\\tau': 'τ',
-  'upsilon': 'υ',
-  'phi': 'φ',
   '\\phi': 'φ',
-  'chi': 'χ',
   '\\chi': 'χ',
-  'psi': 'ψ',
   '\\psi': 'ψ',
-  'omega': 'ω',
   '\\omega': 'ω',
-
-  // Letras gregas maiúsculas
-  'Delta': 'Δ',
   '\\Delta': 'Δ',
-  'Gamma': 'Γ',
   '\\Gamma': 'Γ',
-  'Theta': 'Θ',
   '\\Theta': 'Θ',
-  'Lambda': 'Λ',
   '\\Lambda': 'Λ',
-  'Sigma': 'Σ',
   '\\Sigma': 'Σ',
-  'Phi': 'Φ',
   '\\Phi': 'Φ',
-  'Psi': 'Ψ',
   '\\Psi': 'Ψ',
-  'Omega': 'Ω',
   '\\Omega': 'Ω',
-  'ohm': 'Ω',
-
-  // Símbolos matemáticos
-  'inf': '∞',
   '\\infty': '∞',
-  'sqrt': '√',
   '\\sqrt': '√',
-  'raiz': '√',
-  'partial': '∂',
   '\\partial': '∂',
-  'nabla': '∇',
   '\\nabla': '∇',
-  'integral': '∫',
   '\\int': '∫',
-  'sum': 'Σ',
   '\\sum': 'Σ',
-  'prod': 'Π',
   '\\prod': 'Π',
-  'propto': '∝',
   '\\propto': '∝',
-  'proporcional': '∝',
-
-  // Unidades e constantes
-  'graus': '°',
-  'deg': '°',
   '\\degree': '°',
-  'celsius': '°C',
-  'angstrom': 'Å',
   '\\AA': 'Å',
-  'hbar': 'ℏ',
   '\\hbar': 'ℏ',
-  'ell': 'ℓ',
   '\\ell': 'ℓ',
+  '\\times': '×',
+  '\\cdot': '·',
+  '\\approx': '≈',
+  '\\neq': '≠',
+  '\\leq': '≤',
+  '\\geq': '≥',
+  '\\pm': '±',
+  '\\mp': '∓',
+  '\\perp': '⊥',
+  '\\parallel': '∥',
+  '\\angle': '∠',
 
-  // Frações comuns
+  // Frações (seguro pois tem /)
   '1/2': '½',
   '1/3': '⅓',
   '2/3': '⅔',
@@ -187,32 +145,69 @@ const SIMBOLOS_ESPECIAIS: Record<string, string> = {
   '3/8': '⅜',
   '5/8': '⅝',
   '7/8': '⅞',
+}
 
-  // Outros símbolos úteis
+// Símbolos que PRECISAM de word boundary (podem aparecer dentro de palavras)
+// Estes só serão substituídos se forem palavras isoladas
+const SIMBOLOS_PALAVRAS: Record<string, string> = {
+  // Letras gregas por extenso (precisam de word boundary)
+  'alfa': 'α',
+  'alpha': 'α',
+  'beta': 'β',
+  'gama': 'γ',
+  'gamma': 'γ',
+  'delta': 'δ',
+  'epsilon': 'ε',
+  'zeta': 'ζ',
+  'eta': 'η',
+  'theta': 'θ',
+  'iota': 'ι',
+  'kappa': 'κ',
+  'lambda': 'λ',
+  'upsilon': 'υ',
+  'phi': 'φ',
+  'chi': 'χ',
+  'psi': 'ψ',
+  'omega': 'ω',
+  'Delta': 'Δ',
+  'Gamma': 'Γ',
+  'Theta': 'Θ',
+  'Lambda': 'Λ',
+  'Sigma': 'Σ',
+  'Phi': 'Φ',
+  'Psi': 'Ψ',
+  'Omega': 'Ω',
+  'ohm': 'Ω',
+
+  // Símbolos matemáticos por extenso
+  'inf': '∞',
+  'sqrt': '√',
+  'raiz': '√',
+  'partial': '∂',
+  'nabla': '∇',
+  'integral': '∫',
+  'propto': '∝',
+  'proporcional': '∝',
+
+  // Unidades e constantes
+  'graus': '°',
+  'deg': '°',
+  'celsius': '°C',
+  'angstrom': 'Å',
+  'hbar': 'ℏ',
+  'ell': 'ℓ',
+
+  // Outros símbolos por extenso
   'vezes': '×',
   'times': '×',
-  '\\times': '×',
   'cdot': '·',
-  '\\cdot': '·',
-  'div': '÷',
   'approx': '≈',
-  '\\approx': '≈',
   'neq': '≠',
-  '\\neq': '≠',
   'leq': '≤',
-  '\\leq': '≤',
   'geq': '≥',
-  '\\geq': '≥',
-  'pm': '±',
-  '\\pm': '±',
-  'mp': '∓',
-  '\\mp': '∓',
   'perp': '⊥',
-  '\\perp': '⊥',
   'parallel': '∥',
-  '\\parallel': '∥',
   'angle': '∠',
-  '\\angle': '∠',
 }
 
 /**
@@ -284,20 +279,33 @@ export function formatarFormula(texto: string): string {
   // Subscript com letra única: v_i → vᵢ (apenas para letras comuns em subscript)
   resultado = resultado.replace(/_([aeonx])\b/gi, (_, sub) => paraSubscript(sub.toLowerCase()))
 
-  // 5. Símbolos especiais (ordenados por tamanho para evitar conflitos)
-  const simbolosOrdenados = Object.entries(SIMBOLOS_ESPECIAIS)
+  // 5. Símbolos operadores (sem word boundary - são seguros)
+  const operadoresOrdenados = Object.entries(SIMBOLOS_OPERADORES)
     .sort((a, b) => b[0].length - a[0].length)
 
-  for (const [texto_original, simbolo] of simbolosOrdenados) {
-    // Case insensitive para palavras gregas, mas case sensitive para maiúsculas
-    const isCaseSensitive = texto_original[0] === texto_original[0].toUpperCase() &&
-                            texto_original[0] !== texto_original[0].toLowerCase()
-    const flags = isCaseSensitive ? 'g' : 'gi'
-    const regex = new RegExp(texto_original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags)
+  for (const [texto_original, simbolo] of operadoresOrdenados) {
+    const escaped = texto_original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(escaped, 'g')
     resultado = resultado.replace(regex, simbolo)
   }
 
-  // 6. Limpar espaços múltiplos
+  // 6. Símbolos palavras (COM word boundary - evita substituir dentro de palavras)
+  // Ex: "campo" não deve virar "ca∓o" por causa de "mp"
+  const palavrasOrdenadas = Object.entries(SIMBOLOS_PALAVRAS)
+    .sort((a, b) => b[0].length - a[0].length)
+
+  for (const [texto_original, simbolo] of palavrasOrdenadas) {
+    const escaped = texto_original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    // Case sensitive para maiúsculas (Delta, Sigma, etc.)
+    const isCaseSensitive = texto_original[0] === texto_original[0].toUpperCase() &&
+                            texto_original[0] !== texto_original[0].toLowerCase()
+    const flags = isCaseSensitive ? 'g' : 'gi'
+    // Word boundary \b garante que só match palavras completas
+    const regex = new RegExp(`\\b${escaped}\\b`, flags)
+    resultado = resultado.replace(regex, simbolo)
+  }
+
+  // 7. Limpar espaços múltiplos
   resultado = resultado.replace(/\s+/g, ' ').trim()
 
   return resultado
