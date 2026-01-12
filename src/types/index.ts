@@ -579,13 +579,13 @@ export const ENEM_CONFIG = {
   QUESTOES_POR_AREA: 45,
   TEMPO_PROVA_MINUTOS: 180,
 
-  // Mapeamento Studão -> ENEM
+  // Mapeamento Seu10 -> ENEM
   COMPONENTE_TO_AREA: {
     fisica: 'ciencias-natureza',
     matematica: 'matematica'
   } as Record<Componente, AreaENEM>,
 
-  // Mapeamento ENEM -> Studão (subáreas relevantes)
+  // Mapeamento ENEM -> Seu10 (subáreas relevantes)
   SUBAREA_TO_COMPONENTE: {
     fisica: 'fisica',
     matematica: 'matematica'

@@ -27,7 +27,7 @@ import { ENEM_CONFIG } from '@/types'
 
 interface QuestaoENEMProps {
   questao: Omit<QuestaoENEM, 'resposta_correta'>
-  componente?: Componente  // Para herdar cores do Studão
+  componente?: Componente  // Para herdar cores do Seu10
   tempoDecorrido: number
   onResponder: (resposta: AlternativaENEM) => void
   onProxima: () => void

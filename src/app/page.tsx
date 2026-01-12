@@ -59,7 +59,7 @@ export default function HomePage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LOGO_URL}
-            alt="Studão"
+            alt="Seu10"
             className="h-auto max-h-[140px] w-auto animate-pulse"
           />
         </div>

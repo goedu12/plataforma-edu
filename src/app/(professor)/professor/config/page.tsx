@@ -130,7 +130,7 @@ export default function ConfigProfessorPage() {
             </div>
             <div>
               <h1 className="text-title text-text-primary">Configurações</h1>
-              <p className="text-caption text-text-tertiary">Gerencie o Studão e suas preferências</p>
+              <p className="text-caption text-text-tertiary">Gerencie o Seu10 e suas preferências</p>
             </div>
           </div>
         </div>
@@ -160,7 +160,7 @@ export default function ConfigProfessorPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Info className="w-5 h-5 text-accent-500" />
-            <h3 className="text-heading text-text-primary">Configurações do Studão</h3>
+            <h3 className="text-heading text-text-primary">Configurações do Seu10</h3>
           </div>
           <p className="text-body text-text-secondary mb-4">
             Configurações globais do sistema de aprendizado.

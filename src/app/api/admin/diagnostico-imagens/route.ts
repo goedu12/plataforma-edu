@@ -91,7 +91,7 @@ async function testarUrlHttp(url: string, timeoutMs = 8000): Promise<{
       method: 'HEAD',
       signal: controller.signal,
       headers: {
-        'User-Agent': 'Studao-Platform/1.0 ImageChecker'
+        'User-Agent': 'Seu10-Platform/1.0 ImageChecker'
       }
     })
 

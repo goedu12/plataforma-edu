@@ -52,12 +52,12 @@ export default function Loading({
         className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
         style={{ background: 'var(--bg-base)' }}
       >
-        {/* Logo Studão */}
+        {/* Logo Seu10 */}
         <div className="mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LOGO_URL}
-            alt="Studão"
+            alt="Seu10"
             className="max-h-[100px] w-auto opacity-95"
           />
         </div>
