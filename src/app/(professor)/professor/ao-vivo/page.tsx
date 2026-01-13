@@ -56,10 +56,10 @@ interface AlunoAtivo {
   turma: string
   componente: Componente
   ultima_atividade: string
-  tipo_atividade: string
+  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao'
   questoes_sessao: number
   acertos_sessao: number
-  tempo_ativo_minutos: number
+  taxa_acerto: number
 }
 
 interface EstatisticasTempoReal {
@@ -74,6 +74,7 @@ interface EstatisticasTempoReal {
     turma: string
     ativos: number
     questoes: number
+    taxa_acerto: number
   }[]
 }
 
@@ -619,7 +620,7 @@ export default function DashboardAoVivoPage() {
                               {aluno.nome}
                             </p>
                             <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                              {aluno.turma} • {aluno.questoes_sessao} questões • {aluno.acertos_sessao} acertos
+                              {aluno.turma} • {aluno.questoes_sessao}q • {aluno.taxa_acerto}% acerto
                             </p>
                           </div>
 
@@ -668,9 +669,23 @@ export default function DashboardAoVivoPage() {
                               {turma.ativos} ativos
                             </span>
                           </div>
-                          <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                            {turma.questoes} questões
-                          </span>
+                          <div className="flex items-center gap-3 text-sm">
+                            <span style={{ color: 'var(--text-secondary)' }}>
+                              {turma.questoes}q
+                            </span>
+                            <span
+                              className="font-medium"
+                              style={{
+                                color: turma.taxa_acerto >= 70
+                                  ? 'var(--success)'
+                                  : turma.taxa_acerto >= 50
+                                  ? 'var(--warning)'
+                                  : 'var(--error)',
+                              }}
+                            >
+                              {turma.taxa_acerto}%
+                            </span>
+                          </div>
                         </div>
                       ))
                     )}
