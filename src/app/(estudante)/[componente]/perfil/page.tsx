@@ -5,21 +5,15 @@ import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
   User,
-  Lock,
   Mail,
   GraduationCap,
   Calendar,
-  Eye,
-  EyeOff,
   Check,
   AlertCircle,
-  Loader2,
   Camera,
   Info,
   Palette
 } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
 import Loading from '@/components/ui/Loading'
 import ProfilePhoto from '@/components/ProfilePhoto'
 import BottomNav from '@/components/BottomNav'
@@ -34,14 +28,7 @@ export default function PerfilPage() {
 
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
-  const [salvando, setSalvando] = useState(false)
   const [mensagem, setMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
-
-  const [senhaAtual, setSenhaAtual] = useState('')
-  const [novaSenha, setNovaSenha] = useState('')
-  const [confirmarSenha, setConfirmarSenha] = useState('')
-  const [mostrarSenhaAtual, setMostrarSenhaAtual] = useState(false)
-  const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false)
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
@@ -69,52 +56,6 @@ export default function PerfilPage() {
       router.push('/login')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleAlterarSenha = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setMensagem(null)
-
-    if (!senhaAtual || !novaSenha || !confirmarSenha) {
-      setMensagem({ tipo: 'erro', texto: 'Preencha todos os campos' })
-      return
-    }
-
-    if (novaSenha.length < 6) {
-      setMensagem({ tipo: 'erro', texto: 'A nova senha deve ter pelo menos 6 caracteres' })
-      return
-    }
-
-    if (novaSenha !== confirmarSenha) {
-      setMensagem({ tipo: 'erro', texto: 'As senhas não coincidem' })
-      return
-    }
-
-    setSalvando(true)
-
-    try {
-      const response = await fetch('/api/auth/alterar-senha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha_atual: senhaAtual, nova_senha: novaSenha })
-      })
-
-      const data = await response.json()
-
-      if (data.sucesso) {
-        setMensagem({ tipo: 'sucesso', texto: 'Senha alterada com sucesso!' })
-        setSenhaAtual('')
-        setNovaSenha('')
-        setConfirmarSenha('')
-      } else {
-        setMensagem({ tipo: 'erro', texto: data.erro || 'Erro ao alterar senha' })
-      }
-    } catch (error) {
-      console.error('Erro ao alterar senha:', error)
-      setMensagem({ tipo: 'erro', texto: 'Erro de conexão. Tente novamente.' })
-    } finally {
-      setSalvando(false)
     }
   }
 
@@ -273,81 +214,6 @@ export default function PerfilPage() {
             Escolha como a plataforma deve aparecer. Auto segue a configuração do seu dispositivo.
           </p>
           <ThemeToggle componente={componente} />
-        </div>
-
-        {/* Card de Alterar Senha */}
-        <div
-          className="card p-6 animate-fade-in-up"
-          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)', animationDelay: '100ms' }}
-        >
-          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-            <Lock className="w-5 h-5" />
-            Alterar Senha
-          </h3>
-
-          <form onSubmit={handleAlterarSenha} className="space-y-4">
-            <div>
-              <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Senha Atual</label>
-              <div className="relative">
-                <Input
-                  type={mostrarSenhaAtual ? 'text' : 'password'}
-                  value={senhaAtual}
-                  onChange={(e) => setSenhaAtual(e.target.value)}
-                  placeholder="Digite sua senha atual"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 touch-target"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {mostrarSenhaAtual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Nova Senha</label>
-              <div className="relative">
-                <Input
-                  type={mostrarNovaSenha ? 'text' : 'password'}
-                  value={novaSenha}
-                  onChange={(e) => setNovaSenha(e.target.value)}
-                  placeholder="Digite a nova senha (mín. 6 caracteres)"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 touch-target"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {mostrarNovaSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>Confirmar Nova Senha</label>
-              <Input
-                type={mostrarNovaSenha ? 'text' : 'password'}
-                value={confirmarSenha}
-                onChange={(e) => setConfirmarSenha(e.target.value)}
-                placeholder="Confirme a nova senha"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              variant={isFisica ? 'fisica' : 'matematica'}
-              className="w-full"
-              disabled={salvando}
-              leftIcon={salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-            >
-              {salvando ? 'Salvando...' : 'Alterar Senha'}
-            </Button>
-          </form>
         </div>
       </main>
 
