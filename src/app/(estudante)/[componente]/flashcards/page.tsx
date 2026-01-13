@@ -370,7 +370,7 @@ export default function FlashCardsPage() {
           <div className="flex items-center justify-between">
             <BackButton
               onClick={() => (tela === 'selecao' ? router.push(`/${componente}/menu`) : reiniciar())}
-              className="mobile-only"
+              mobileOnly
             />
 
             <div className="flex items-center gap-2">

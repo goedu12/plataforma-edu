@@ -183,7 +183,7 @@ export default function NotasPage() {
       <div className="h-full flex flex-col max-w-lg mx-auto px-4 py-4">
         {/* Header Padronizado */}
         <header className="flex items-center justify-between mb-3">
-          <BackButton href={`/${componente}/menu`} className="mobile-only" />
+          <BackButton href={`/${componente}/menu`} mobileOnly />
 
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" style={{ color: corPrimaria }} />

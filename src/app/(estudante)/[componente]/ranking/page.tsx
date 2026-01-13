@@ -88,7 +88,7 @@ export default function RankingPage() {
       <header className="compact-mobile-x pt-3 pb-4" style={{ background: corPrimaria }}>
         <div className="max-w-lg mx-auto">
           <div className="flex items-center justify-between mb-3">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="text-center">
               <h1 className="flex items-center justify-center gap-2">

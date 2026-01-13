@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
+import { BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
@@ -64,10 +63,8 @@ export default function EstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [feedback, setFeedback] = useState<FeedbackData | null>(null)
   const [respondendo, setRespondendo] = useState(false)
-  const [mostrarDetalhesNota, setMostrarDetalhesNota] = useState(false)
 
   const isFisica = componente === 'fisica'
-  const nomeComponente = isFisica ? 'Física' : 'Matemática'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const buscarQuestao = async () => {
@@ -77,7 +74,6 @@ export default function EstudarPage() {
     setMostrarDica(false)
     setUsouDica(false)
     setFeedback(null)
-    setMostrarDetalhesNota(false)
 
     try {
       const response = await fetch(`/api/questoes?componente=${componente}&modo=estudo`)
@@ -157,8 +153,8 @@ export default function EstudarPage() {
       if (data.sucesso) {
         setFeedback({
           correta: data.correta,
-          respostaCorreta: data.resposta_correta as Alternativa, // Usar resposta da API
-          explicacao: data.explicacao || 'Continue estudando para melhorar seu desempenho!',
+          respostaCorreta: data.resposta_correta as Alternativa,
+          explicacao: data.explicacao || '',
           pontosGanhos: data.pontos_ganhos,
           conquistasDesbloqueadas: data.conquistas_desbloqueadas || [],
           notaTempoReal: data.nota_tempo_real || null,
@@ -187,16 +183,12 @@ export default function EstudarPage() {
 
   const getAlternativaStyle = (letra: Alternativa) => {
     if (feedback) {
-      // Se acertou: mostrar verde na resposta correta (que é a selecionada)
       if (feedback.correta && letra === selecionada) {
-        return { background: 'rgba(34, 197, 94, 0.15)', border: '2px solid var(--success)' }
+        return { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
       }
-      // Se errou: mostrar vermelho APENAS na alternativa errada que o estudante escolheu
-      // NÃO revelar qual é a correta
       if (!feedback.correta && letra === selecionada) {
-        return { background: 'rgba(239, 68, 68, 0.15)', border: '2px solid var(--error)' }
+        return { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
       }
-      // Outras alternativas ficam desabilitadas
       return { background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', opacity: 0.5 }
     }
     if (selecionada === letra) {
@@ -206,13 +198,6 @@ export default function EstudarPage() {
       }
     }
     return { background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }
-  }
-
-  const getNotaColor = (nota: number) => {
-    if (nota >= 7) return 'var(--success)'
-    if (nota >= 6) return '#4ade80'
-    if (nota >= 5) return 'var(--warning)'
-    return 'var(--error)'
   }
 
   const formatarTempo = (segundos: number) => {
@@ -234,291 +219,276 @@ export default function EstudarPage() {
   ] : []
 
   const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
-  const dificuldadeColor = { facil: 'success', medio: 'warning', dificil: 'error' } as const
+  const dificuldadeColor = { facil: '#10b981', medio: '#f59e0b', dificil: '#ef4444' } as const
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          HEADER COMPACTO - Mobile-First
-          ═══════════════════════════════════════════════════════════════════ */}
-      <header className="mobile-header flex-shrink-0">
-        <div className="max-w-2xl mx-auto">
-          {/* Linha 1: Navegação + Título + Timer */}
-          <div className="flex items-center justify-between gap-2">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+      {status === 'OK' && questao ? (
+        <>
+          {/* ══════════════════════════════════════════════════════════════
+              HEADER ULTRA COMPACTO
+              ══════════════════════════════════════════════════════════════ */}
+          <header className="header-chromebook flex-shrink-0">
+            <div className="max-w-2xl mx-auto">
+              {/* Linha única: Back + Tags + Título + Timer + Progress */}
+              <div className="flex items-center gap-2 lg:gap-3">
+                <BackButton href={`/${componente}/menu`} mobileOnly />
 
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4" style={{ color: corPrimaria }} />
-              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                Estudar
-              </span>
-            </div>
+                {/* Tags inline - só no desktop */}
+                <div className="hidden lg:flex items-center gap-1.5">
+                  <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                    {questao.tema}
+                  </span>
+                  <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: dificuldadeColor[questao.dificuldade] }}>
+                    {dificuldadeLabel[questao.dificuldade]}
+                  </span>
+                </div>
 
-            {/* Timer */}
-            {status === 'OK' && questao && (
-              <div
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-sm"
-                style={{ background: 'var(--bg-elevated)', color: corPrimaria }}
-              >
-                <Clock className="w-4 h-4" />
-                <span>{formatarTempo(tempoDecorrido)}</span>
-              </div>
-            )}
+                <div className="flex items-center gap-1.5 flex-1 lg:flex-none lg:ml-auto">
+                  <BookOpen className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} />
+                  <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>
+                    Estudar
+                  </span>
+                </div>
 
-            {!(status === 'OK' && questao) && <div className="w-11 mobile-only" />}
-          </div>
+                {/* Timer */}
+                <div className="timer-chromebook" style={{ color: corPrimaria }}>
+                  <Clock className="w-3.5 h-3.5 lg:w-3 lg:h-3" />
+                  <span>{formatarTempo(tempoDecorrido)}</span>
+                </div>
 
-          {/* Linha 2: Progress da semana */}
-          {status === 'OK' && limite && limite.limite_semanal !== null && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex gap-1 flex-1">
-                {Array.from({ length: limite.limite_semanal }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 h-1.5 rounded-full transition-all"
-                    style={{
-                      background: index < limite.questoes_semana
-                        ? corPrimaria
-                        : 'var(--bg-elevated)',
-                    }}
-                  />
-                ))}
-              </div>
-              <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                {limite.questoes_semana}/{limite.limite_semanal}
-              </span>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* ═══════════════════════════════════════════════════════════════════
-          CONTEÚDO - Otimizado para Mobile
-          ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto mobile-content w-full flex flex-col">
-        {status === 'OK' && questao ? (
-          <div className="flex-1 flex flex-col animate-fade-in">
-            {/* Tags */}
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant={componente}>{questao.tema}</Badge>
-              <Badge variant={dificuldadeColor[questao.dificuldade]}>
-                {dificuldadeLabel[questao.dificuldade]}
-              </Badge>
-            </div>
-
-            {/* Enunciado */}
-            <div className="card-compact mb-2 flex-shrink-0">
-              <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(questao.enunciado)}
-              </p>
-            </div>
-
-            {/* Alternativas - Compactas para Mobile */}
-            <div className="space-y-1.5 flex-shrink-0">
-              {alternativas.map(({ letra, texto }) => {
-                const style = getAlternativaStyle(letra)
-                return (
-                  <button
-                    key={letra}
-                    onClick={() => !feedback && !respondendo && setSelecionada(letra)}
-                    disabled={!!feedback || respondendo}
-                    className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
-                    style={style}
-                  >
-                    <span
-                      className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
-                      style={{
-                        background: feedback && feedback.correta && letra === selecionada
-                          ? 'var(--success)'
-                          : feedback && !feedback.correta && letra === selecionada
-                            ? 'var(--error)'
-                            : selecionada === letra
-                              ? corPrimaria
-                              : 'var(--bg-elevated)',
-                        color: (feedback && letra === selecionada) || selecionada === letra
-                          ? isFisica ? '#000' : '#fff'
-                          : 'var(--text-muted)',
-                      }}
-                    >
-                      {feedback && feedback.correta && letra === selecionada ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : feedback && !feedback.correta && letra === selecionada ? (
-                        <XCircle className="w-4 h-4" />
-                      ) : (
-                        letra
-                      )}
-                    </span>
-                    <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                      {formatarFormula(texto)}
-                    </span>
-                    {!feedback && selecionada === letra && (
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Dica */}
-            {!feedback && questao.dica && (
-              <div className="mb-3">
-                {mostrarDica ? (
-                  <div
-                    className="p-3 rounded-xl"
-                    style={{
-                      background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                      border: '1px dashed var(--border-default)',
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Lightbulb className="w-4 h-4" style={{ color: corPrimaria }} />
-                      <span className="text-xs font-medium" style={{ color: corPrimaria }}>Dica</span>
+                {/* Progress inline - só desktop */}
+                {limite && limite.limite_semanal !== null && (
+                  <div className="hidden lg:flex items-center gap-1.5">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: Math.min(limite.limite_semanal, 15) }).map((_, index) => (
+                        <div
+                          key={index}
+                          className="w-1.5 h-3 rounded-sm"
+                          style={{
+                            background: index < limite.questoes_semana ? corPrimaria : 'var(--bg-elevated)',
+                          }}
+                        />
+                      ))}
                     </div>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => { setMostrarDica(true); setUsouDica(true) }}
-                    className="w-full py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                    style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
-                  >
-                    <Lightbulb className="w-4 h-4" />
-                    <span className="text-sm">Precisa de ajuda? Ver dica (-5 pts)</span>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Conquistas */}
-            {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
-              <div
-                className="rounded-xl p-3 mb-3 text-center animate-fade-in"
-                style={{ background: 'rgba(245, 158, 11, 0.15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
-              >
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Trophy className="w-4 h-4" style={{ color: 'var(--warning)' }} />
-                  <span className="font-bold text-sm" style={{ color: 'var(--warning)' }}>Nova Conquista!</span>
-                </div>
-                <div className="flex flex-wrap justify-center gap-1">
-                  {feedback.conquistasDesbloqueadas.map((c, i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}>
-                      {c.icone} {c.nome}
+                    <span className="text-[10px] font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                      {limite.questoes_semana}/{limite.limite_semanal}
                     </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Nota em tempo real */}
-            {feedback && feedback.notaTempoReal && (
-              <div
-                className="rounded-xl p-3 mb-3 animate-fade-in"
-                style={{
-                  background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                  border: '1px solid var(--border-default)',
-                }}
-              >
-                <button onClick={() => setMostrarDetalhesNota(!mostrarDetalhesNota)} className="w-full flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium" style={{ color: corPrimaria }}>Sua Nota</span>
-                    {feedback.notaTempoReal.mudou && <TrendingUp className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold" style={{ color: getNotaColor(feedback.notaTempoReal.nota_atual) }}>
-                      {feedback.notaTempoReal.nota_atual.toFixed(2)}
-                    </span>
-                    {mostrarDetalhesNota ? <ChevronUp className="w-4 h-4" style={{ color: 'var(--text-muted)' }} /> : <ChevronDown className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />}
-                  </div>
-                </button>
-                {mostrarDetalhesNota && (
-                  <div className="mt-2 pt-2 text-xs flex flex-wrap gap-x-4" style={{ borderTop: '1px solid var(--border-default)', color: 'var(--text-muted)' }}>
-                    <span>Progresso: <strong>{feedback.notaTempoReal.questoes_respondidas}/{feedback.notaTempoReal.meta_questoes}</strong></span>
-                    <span>Dias ativos: <strong style={{ color: 'var(--success)' }}>{feedback.notaTempoReal.dias_ativos}</strong></span>
                   </div>
                 )}
               </div>
-            )}
 
-            {/* Feedback */}
-            {feedback && (
-              <div
-                className="rounded-xl p-3 mb-3 animate-fade-in"
-                style={{
-                  background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
-                }}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
-                  >
-                    {feedback.correta ? <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} /> : <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />}
+              {/* Progress mobile - linha separada */}
+              {limite && limite.limite_semanal !== null && (
+                <div className="flex lg:hidden items-center gap-2 mt-1.5">
+                  <div className="flex gap-0.5 flex-1">
+                    {Array.from({ length: limite.limite_semanal }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="flex-1 h-1 rounded-full"
+                        style={{ background: index < limite.questoes_semana ? corPrimaria : 'var(--bg-elevated)' }}
+                      />
+                    ))}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm" style={{ color: feedback.correta ? 'var(--success)' : 'var(--error)' }}>
-                        {feedback.correta ? 'Correto!' : 'Incorreto'}
-                      </span>
-                      {feedback.correta && feedback.pontosGanhos > 0 && (
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}>
-                          +{feedback.pontosGanhos} pts
-                        </span>
-                      )}
-                    </div>
-                    {feedback.explicacao && (
-                      <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(feedback.explicacao)}</p>
-                    )}
-                  </div>
+                  <span className="text-[10px] font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                    {limite.questoes_semana}/{limite.limite_semanal}
+                  </span>
                 </div>
-              </div>
-            )}
-
-            {/* Erro */}
-            {erro && (
-              <div className="rounded-xl p-3 mb-3" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
-              </div>
-            )}
-
-            {/* Botões */}
-            <div className="flex gap-2">
-              {feedback ? (
-                <>
-                  <Button variant="secondary" onClick={handleVoltar} className="flex-1 min-h-[48px]">
-                    Menu
-                  </Button>
-                  {feedback.notaTempoReal?.pode_continuar !== false ? (
-                    <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarQuestao} className="flex-1 min-h-[48px]">
-                      Próxima
-                    </Button>
-                  ) : (
-                    <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 min-h-[48px]" leftIcon={<Zap className="w-4 h-4" />}>
-                      Desafio
-                    </Button>
-                  )}
-                </>
-              ) : (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={handleConfirmar}
-                  disabled={!selecionada || respondendo}
-                  loading={respondendo}
-                  className="w-full min-h-[52px] text-base"
-                >
-                  {selecionada ? 'Confirmar' : 'Selecione uma alternativa'}
-                </Button>
               )}
             </div>
-          </div>
-        ) : (
-          /* ═══════════════════════════════════════════════════════════════
-             TELA DE STATUS
-             ═══════════════════════════════════════════════════════════════ */
+          </header>
+
+          {/* ══════════════════════════════════════════════════════════════
+              CONTEÚDO - Tudo junto sem espaço extra
+              ══════════════════════════════════════════════════════════════ */}
+          <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+            {/* Container único scrollável - conteúdo + botão juntos */}
+            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5">
+              <div className="space-chromebook">
+                {/* Tags mobile */}
+                <div className="flex lg:hidden items-center gap-1.5 mb-1">
+                  <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                    {questao.tema}
+                  </span>
+                  <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: dificuldadeColor[questao.dificuldade] }}>
+                    {dificuldadeLabel[questao.dificuldade]}
+                  </span>
+                </div>
+
+                {/* Enunciado */}
+                <div className="card-chromebook">
+                  <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
+                    {formatarFormula(questao.enunciado)}
+                  </p>
+                </div>
+
+                {/* Alternativas - Ultra compactas */}
+                <div className="space-chromebook">
+                  {alternativas.map(({ letra, texto }) => {
+                    const style = getAlternativaStyle(letra)
+                    return (
+                      <button
+                        key={letra}
+                        onClick={() => !feedback && !respondendo && setSelecionada(letra)}
+                        disabled={!!feedback || respondendo}
+                        className="alternativa-chromebook"
+                        style={style}
+                      >
+                        <span
+                          className="alternativa-letra-compact"
+                          style={{
+                            background: feedback && feedback.correta && letra === selecionada
+                              ? 'var(--success)'
+                              : feedback && !feedback.correta && letra === selecionada
+                                ? 'var(--error)'
+                                : selecionada === letra
+                                  ? corPrimaria
+                                  : 'var(--bg-elevated)',
+                            color: (feedback && letra === selecionada) || selecionada === letra
+                              ? isFisica ? '#000' : '#fff'
+                              : 'var(--text-muted)',
+                          }}
+                        >
+                          {feedback && feedback.correta && letra === selecionada ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : feedback && !feedback.correta && letra === selecionada ? (
+                            <XCircle className="w-3.5 h-3.5" />
+                          ) : (
+                            letra
+                          )}
+                        </span>
+                        <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
+                          {formatarFormula(texto)}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Dica - compacta */}
+                {!feedback && questao.dica && (
+                  <div>
+                    {mostrarDica ? (
+                      <div className="feedback-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)', border: '1px dashed var(--border-default)' }}>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <Lightbulb className="icon-chromebook" style={{ color: corPrimaria }} />
+                          <span className="text-[10px] font-medium" style={{ color: corPrimaria }}>Dica</span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setMostrarDica(true); setUsouDica(true) }}
+                        className="w-full py-1.5 lg:py-1 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs lg:text-[11px]"
+                        style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
+                      >
+                        <Lightbulb className="icon-chromebook" />
+                        <span>Ver dica (-5 pts)</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Feedback compacto */}
+                {feedback && (
+                  <div
+                    className="feedback-chromebook flex items-center gap-2"
+                    style={{
+                      background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                      border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                    }}
+                  >
+                    <div
+                      className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
+                      style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                    >
+                      {feedback.correta ? <CheckCircle2 className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold" style={{ color: feedback.correta ? 'var(--success)' : 'var(--error)' }}>
+                          {feedback.correta ? 'Correto!' : 'Incorreto'}
+                        </span>
+                        {feedback.correta && feedback.pontosGanhos > 0 && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}>
+                            +{feedback.pontosGanhos} pts
+                          </span>
+                        )}
+                        {feedback.notaTempoReal && (
+                          <span className="text-[10px] ml-auto" style={{ color: 'var(--text-muted)' }}>
+                            Nota: <strong style={{ color: feedback.notaTempoReal.nota_atual >= 7 ? 'var(--success)' : feedback.notaTempoReal.nota_atual >= 5 ? 'var(--warning)' : 'var(--error)' }}>
+                              {feedback.notaTempoReal.nota_atual.toFixed(1)}
+                            </strong>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Conquistas - inline e compacto */}
+                {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Trophy className="w-3.5 h-3.5" style={{ color: 'var(--warning)' }} />
+                    {feedback.conquistasDesbloqueadas.map((c, i) => (
+                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}>
+                        {c.icone} {c.nome}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Erro */}
+                {erro && (
+                  <div className="feedback-chromebook" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                    <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
+                  </div>
+                )}
+
+                {/* ══════════════════════════════════════════════════════════════
+                    BOTÕES - Logo abaixo do conteúdo (sem espaço extra)
+                    ══════════════════════════════════════════════════════════════ */}
+                <div className="flex gap-2 mt-2 lg:mt-1.5">
+                  {feedback ? (
+                    <>
+                      <Button variant="secondary" onClick={handleVoltar} className="flex-1 btn-chromebook">
+                        Menu
+                      </Button>
+                      {feedback.notaTempoReal?.pode_continuar !== false ? (
+                        <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarQuestao} className="flex-1 btn-chromebook">
+                          Próxima
+                        </Button>
+                      ) : (
+                        <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}>
+                          Desafio
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <Button
+                      variant={isFisica ? 'fisica' : 'matematica'}
+                      onClick={handleConfirmar}
+                      disabled={!selecionada || respondendo}
+                      loading={respondendo}
+                      className="w-full btn-chromebook"
+                    >
+                      {selecionada ? 'Confirmar' : 'Selecione'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </main>
+        </>
+      ) : (
+        /* ══════════════════════════════════════════════════════════════════
+           TELA DE STATUS (limite, erro, etc)
+           ══════════════════════════════════════════════════════════════════ */
+        <main className="flex-1 flex items-center justify-center p-4">
           <div
-            className="rounded-2xl p-6 text-center animate-fade-in-up"
+            className="rounded-2xl p-6 text-center animate-fade-in-up max-w-md w-full"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             <div
@@ -528,10 +498,6 @@ export default function EstudarPage() {
                   : status === 'ERRO' ? 'rgba(239, 68, 68, 0.15)'
                   : status === 'COMPLETOU' ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
                   : 'var(--bg-elevated)',
-                border: status === 'LIMITE_SEMANAL' ? '1px solid rgba(245, 158, 11, 0.3)'
-                  : status === 'ERRO' ? '1px solid rgba(239, 68, 68, 0.3)'
-                  : status === 'COMPLETOU' ? `1px solid ${corPrimaria}`
-                  : '1px solid var(--border-default)',
               }}
             >
               {status === 'LIMITE_SEMANAL' && <AlertTriangle className="w-7 h-7" style={{ color: 'var(--warning)' }} />}
@@ -549,40 +515,32 @@ export default function EstudarPage() {
               {status === 'SEM_QUESTOES' && 'Sem Questões'}
             </h2>
 
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
-              {status === 'LIMITE_SEMANAL' && `Você respondeu ${limite?.questoes_semana || 15} questões esta semana!`}
-              {status === 'FORA_PERIODO' && 'Período letivo não iniciado ou em férias.'}
-              {status === 'COMPLETOU' && `Você completou todas as questões de ${nomeComponente}!`}
-              {status === 'ERRO' && erro}
-              {status === 'SEM_QUESTOES' && `Ainda não há questões de ${nomeComponente} para seu ano.`}
-            </p>
-
-            <p className="text-xs mb-6" style={{ color: 'var(--text-muted)' }}>
-              {status === 'LIMITE_SEMANAL' && 'Volte na segunda ou use o modo Desafio!'}
+            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+              {status === 'LIMITE_SEMANAL' && `Você respondeu ${limite?.questoes_semana || 15} questões esta semana. Volte na segunda ou use o modo Desafio!`}
               {status === 'FORA_PERIODO' && 'Use o modo Desafio para praticar!'}
-              {status === 'COMPLETOU' && 'Continue com o tutor IA!'}
-              {status === 'ERRO' && 'Tente novamente ou volte mais tarde.'}
-              {status === 'SEM_QUESTOES' && 'Tire dúvidas com o tutor IA!'}
+              {status === 'COMPLETOU' && 'Você completou todas as questões!'}
+              {status === 'ERRO' && erro}
+              {status === 'SEM_QUESTOES' && 'Ainda não há questões para seu ano.'}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
               {(status === 'LIMITE_SEMANAL' || status === 'FORA_PERIODO') && (
-                <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} leftIcon={<Zap className="w-4 h-4" />} className="min-h-[48px]">
+                <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} leftIcon={<Zap className="w-4 h-4" />}>
                   Modo Desafio
                 </Button>
               )}
               {status === 'ERRO' && (
-                <Button variant="secondary" onClick={buscarQuestao} leftIcon={<RefreshCw className="w-4 h-4" />} className="min-h-[48px]">
+                <Button variant="secondary" onClick={buscarQuestao} leftIcon={<RefreshCw className="w-4 h-4" />}>
                   Tentar Novamente
                 </Button>
               )}
-              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar} className="min-h-[48px]">
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar}>
                 Voltar ao Menu
               </Button>
             </div>
           </div>
-        )}
-      </main>
+        </main>
+      )}
 
       <BottomNav componente={componente} />
     </div>

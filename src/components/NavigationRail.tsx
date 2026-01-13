@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, BookOpen, Zap, Trophy, User } from 'lucide-react'
+import { Home, BookOpen, Zap, Trophy, User, RotateCcw, TrendingUp, Sparkles } from 'lucide-react'
 import type { Componente } from '@/types'
 
 interface NavigationRailProps {
@@ -11,14 +12,19 @@ interface NavigationRailProps {
 export default function NavigationRail({ componente }: NavigationRailProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const [expanded, setExpanded] = useState(false)
 
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const activeBg = isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
 
   const navItems = [
     { icon: Home, label: 'Início', href: `/${componente}/menu` },
     { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar` },
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio` },
+    { icon: RotateCcw, label: 'Revisão', href: `/${componente}/revisao` },
+    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards` },
+    { icon: TrendingUp, label: 'Notas', href: `/${componente}/notas` },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking` },
     { icon: User, label: 'Perfil', href: `/${componente}/perfil` },
   ]
@@ -28,22 +34,56 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
   return (
     <nav
       className="hidden lg:flex"
+      onMouseEnter={() => setExpanded(true)}
+      onMouseLeave={() => setExpanded(false)}
       style={{
         position: 'fixed',
         left: 0,
         top: 0,
         bottom: 0,
-        width: '72px',
+        width: expanded ? '200px' : '72px',
         background: 'var(--bg-elevated)',
         borderRight: '1px solid var(--border-default)',
         flexDirection: 'column',
-        alignItems: 'center',
-        paddingTop: '24px',
-        paddingBottom: '24px',
-        gap: '8px',
+        alignItems: expanded ? 'stretch' : 'center',
+        paddingTop: '16px',
+        paddingBottom: '16px',
+        paddingLeft: expanded ? '12px' : '8px',
+        paddingRight: expanded ? '12px' : '8px',
+        gap: '4px',
         zIndex: 50,
+        transition: 'width 0.2s ease, padding 0.2s ease',
+        overflowX: 'hidden',
       }}
     >
+      {/* Logo/Título no topo */}
+      <div
+        className="flex items-center gap-3 mb-4 px-2"
+        style={{
+          minHeight: '40px',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <div
+          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: accentColor }}
+        >
+          <span className="font-bold text-lg" style={{ color: isFisica ? '#000' : '#fff' }}>
+            {isFisica ? 'F' : 'M'}
+          </span>
+        </div>
+        {expanded && (
+          <span
+            className="font-semibold text-sm"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {isFisica ? 'Física' : 'Matemática'}
+          </span>
+        )}
+      </div>
+
+      {/* Items de navegação */}
       {navItems.map((item) => {
         const active = isActive(item.href)
         return (
@@ -51,30 +91,35 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
             key={item.label}
             onClick={() => router.push(item.href)}
             aria-label={item.label}
-            title={item.label}
-            className="flex flex-col items-center justify-center gap-1 transition-all"
+            title={!expanded ? item.label : undefined}
+            className="flex items-center gap-3 transition-all"
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '16px',
-              background: active ? (isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)') : 'transparent',
+              minHeight: '48px',
+              padding: expanded ? '0 12px' : '0',
+              justifyContent: expanded ? 'flex-start' : 'center',
+              borderRadius: '12px',
+              background: active ? activeBg : 'transparent',
               color: active ? accentColor : 'var(--text-secondary)',
             }}
           >
             <item.icon
+              className="flex-shrink-0"
               style={{
-                width: '24px',
-                height: '24px',
+                width: '22px',
+                height: '22px',
               }}
             />
-            <span
-              style={{
-                fontSize: '10px',
-                fontWeight: active ? 600 : 400,
-              }}
-            >
-              {item.label}
-            </span>
+            {expanded && (
+              <span
+                style={{
+                  fontSize: '14px',
+                  fontWeight: active ? 600 : 400,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {item.label}
+              </span>
+            )}
           </button>
         )
       })}

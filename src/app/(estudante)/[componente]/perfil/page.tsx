@@ -80,7 +80,7 @@ export default function PerfilPage() {
       >
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="text-center">
               <h1
                 className="font-display font-semibold flex items-center gap-2"
