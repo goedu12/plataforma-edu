@@ -448,13 +448,12 @@ export default function DesafioPage() {
       </header>
 
       {/* ══════════════════════════════════════════════════════════════════
-          CONTEÚDO - Tudo visível sem scroll no Chromebook
+          CONTEÚDO - Tudo junto sem espaço extra
           ══════════════════════════════════════════════════════════════════ */}
       <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
         {questaoAtualData && (
-          <div className="flex-1 flex flex-col min-h-0">
-            {/* Área de conteúdo */}
-            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 space-chromebook">
+          <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5">
+            <div className="space-chromebook">
               {/* Tag mobile */}
               <div className="flex lg:hidden items-center gap-2">
                 <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
@@ -501,13 +500,11 @@ export default function DesafioPage() {
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* ══════════════════════════════════════════════════════════════════
-                BOTÕES FIXOS - Sempre visíveis
-                ══════════════════════════════════════════════════════════════════ */}
-            <div className="actions-chromebook flex-shrink-0">
-              <div className="flex gap-2">
+              {/* ══════════════════════════════════════════════════════════════════
+                  BOTÕES - Logo abaixo do conteúdo (sem espaço extra)
+                  ══════════════════════════════════════════════════════════════════ */}
+              <div className="flex gap-2 mt-2 lg:mt-1.5">
                 <Button
                   variant="secondary"
                   onClick={handleAnterior}

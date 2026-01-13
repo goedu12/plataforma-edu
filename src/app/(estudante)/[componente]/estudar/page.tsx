@@ -301,12 +301,12 @@ export default function EstudarPage() {
           </header>
 
           {/* ══════════════════════════════════════════════════════════════
-              CONTEÚDO - Tudo visível sem scroll no Chromebook
+              CONTEÚDO - Tudo junto sem espaço extra
               ══════════════════════════════════════════════════════════════ */}
           <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 flex flex-col min-h-0">
-              {/* Área de conteúdo - scroll apenas se necessário */}
-              <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 space-chromebook">
+            {/* Container único scrollável - conteúdo + botão juntos */}
+            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5">
+              <div className="space-chromebook">
                 {/* Tags mobile */}
                 <div className="flex lg:hidden items-center gap-1.5 mb-1">
                   <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
@@ -446,38 +446,38 @@ export default function EstudarPage() {
                     <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
                   </div>
                 )}
-              </div>
 
-              {/* ══════════════════════════════════════════════════════════════
-                  BOTÕES FIXOS - Sempre visíveis
-                  ══════════════════════════════════════════════════════════════ */}
-              <div className="actions-chromebook flex-shrink-0">
-                {feedback ? (
-                  <>
-                    <Button variant="secondary" onClick={handleVoltar} className="flex-1 btn-chromebook">
-                      Menu
+                {/* ══════════════════════════════════════════════════════════════
+                    BOTÕES - Logo abaixo do conteúdo (sem espaço extra)
+                    ══════════════════════════════════════════════════════════════ */}
+                <div className="flex gap-2 mt-2 lg:mt-1.5">
+                  {feedback ? (
+                    <>
+                      <Button variant="secondary" onClick={handleVoltar} className="flex-1 btn-chromebook">
+                        Menu
+                      </Button>
+                      {feedback.notaTempoReal?.pode_continuar !== false ? (
+                        <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarQuestao} className="flex-1 btn-chromebook">
+                          Próxima
+                        </Button>
+                      ) : (
+                        <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}>
+                          Desafio
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <Button
+                      variant={isFisica ? 'fisica' : 'matematica'}
+                      onClick={handleConfirmar}
+                      disabled={!selecionada || respondendo}
+                      loading={respondendo}
+                      className="w-full btn-chromebook"
+                    >
+                      {selecionada ? 'Confirmar' : 'Selecione'}
                     </Button>
-                    {feedback.notaTempoReal?.pode_continuar !== false ? (
-                      <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarQuestao} className="flex-1 btn-chromebook">
-                        Próxima
-                      </Button>
-                    ) : (
-                      <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}>
-                        Desafio
-                      </Button>
-                    )}
-                  </>
-                ) : (
-                  <Button
-                    variant={isFisica ? 'fisica' : 'matematica'}
-                    onClick={handleConfirmar}
-                    disabled={!selecionada || respondendo}
-                    loading={respondendo}
-                    className="w-full btn-chromebook"
-                  >
-                    {selecionada ? 'Confirmar' : 'Selecione'}
-                  </Button>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </main>

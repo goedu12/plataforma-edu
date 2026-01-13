@@ -267,12 +267,12 @@ export default function RevisaoPage() {
           </header>
 
           {/* ══════════════════════════════════════════════════════════════════
-              CONTEÚDO - Tudo visível sem scroll no Chromebook
+              CONTEÚDO - Tudo junto sem espaço extra
               ══════════════════════════════════════════════════════════════════ */}
           <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 flex flex-col min-h-0">
-              {/* Área de conteúdo */}
-              <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 space-chromebook">
+            {/* Container único scrollável */}
+            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5">
+              <div className="space-chromebook">
                 {/* Info de quando errou - só mobile */}
                 {errouEm && (
                   <div className="lg:hidden px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
@@ -421,38 +421,38 @@ export default function RevisaoPage() {
                     <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
                   </div>
                 )}
-              </div>
 
-              {/* ══════════════════════════════════════════════════════════════════
-                  BOTÕES FIXOS - Sempre visíveis
-                  ══════════════════════════════════════════════════════════════════ */}
-              <div className="actions-chromebook flex-shrink-0">
-                {feedback ? (
-                  <div className="flex gap-2">
-                    <Button variant="secondary" onClick={handleVoltar} className="flex-1 btn-chromebook">
-                      Menu
-                    </Button>
+                {/* ══════════════════════════════════════════════════════════════════
+                    BOTÕES - Logo abaixo do conteúdo (sem espaço extra)
+                    ══════════════════════════════════════════════════════════════════ */}
+                <div className="mt-2 lg:mt-1.5">
+                  {feedback ? (
+                    <div className="flex gap-2">
+                      <Button variant="secondary" onClick={handleVoltar} className="flex-1 btn-chromebook">
+                        Menu
+                      </Button>
+                      <button
+                        onClick={buscarQuestao}
+                        className="flex-1 btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98]"
+                        style={{ background: 'var(--warning)', color: '#000' }}
+                      >
+                        Próxima
+                      </button>
+                    </div>
+                  ) : (
                     <button
-                      onClick={buscarQuestao}
-                      className="flex-1 btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98]"
-                      style={{ background: 'var(--warning)', color: '#000' }}
+                      onClick={handleConfirmar}
+                      disabled={!selecionada || respondendo}
+                      className="w-full btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
+                      style={{
+                        background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
+                        color: selecionada ? '#000' : 'var(--text-muted)'
+                      }}
                     >
-                      Próxima
+                      {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione'}
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleConfirmar}
-                    disabled={!selecionada || respondendo}
-                    className="w-full btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
-                    style={{
-                      background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
-                      color: selecionada ? '#000' : 'var(--text-muted)'
-                    }}
-                  >
-                    {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione'}
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </main>
