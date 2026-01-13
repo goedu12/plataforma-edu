@@ -91,7 +91,7 @@ export default function DashboardProfessorPage() {
               </div>
               <div>
                 <h1 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Dashboard</h1>
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Studão • Professor</p>
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>seu10 • Professor</p>
               </div>
             </div>
             <button

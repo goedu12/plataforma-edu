@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 
 // Valores padrão para quando a tabela não existir ou houver erro
 const CONFIGURACOES_PADRAO = {
-  nome_plataforma: 'Studão',
-  versao: '4.0',
+  nome_plataforma: 'seu10',
+  versao: '1.0',
   nome_instituicao: 'Colégio Cora Coralina',
   logo_url: null,
   logo_largura: '280',
