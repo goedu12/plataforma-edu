@@ -22,6 +22,9 @@ import {
   Radio,
   Eye,
   Award,
+  UserX,
+  Percent,
+  Timer,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -62,19 +65,35 @@ interface AlunoAtivo {
   taxa_acerto: number
 }
 
+// NOVO: Aluno inativo
+interface AlunoInativo {
+  id: string
+  nome: string
+  turma: string
+  componentes: Componente[]
+  ultimo_acesso: string | null
+}
+
 interface EstatisticasTempoReal {
   alunos_ativos_agora: number
+  alunos_inativos: number
+  total_alunos_turma: number
   questoes_ultimos_5min: number
   questoes_ultimos_30min: number
+  questoes_periodo_total: number
   taxa_acerto_tempo_real: number
+  taxa_participacao: number
   usando_tutor: number
   fazendo_desafio: number
   fazendo_revisao: number
   por_turma: {
     turma: string
     ativos: number
+    inativos: number
+    total: number
     questoes: number
     taxa_acerto: number
+    taxa_participacao: number
   }[]
 }
 
@@ -82,8 +101,10 @@ interface DadosTempoReal {
   sucesso: boolean
   atividades: AtividadeTempoReal[]
   alunos_ativos: AlunoAtivo[]
+  alunos_inativos: AlunoInativo[]
   estatisticas: EstatisticasTempoReal
   turmas_disponiveis: string[]
+  periodo_minutos: number
   ultima_atualizacao: string
 }
 
@@ -102,6 +123,12 @@ export default function DashboardAoVivoPage() {
   const [componenteFiltro, setComponenteFiltro] = useState<Componente | ''>('')
   const [showFiltros, setShowFiltros] = useState(false)
 
+  // Período de monitoramento (em minutos)
+  const [periodoMinutos, setPeriodoMinutos] = useState(60) // 60 min padrão para 1 aula
+
+  // Aba ativa na sidebar (ativos/inativos)
+  const [abaAlunos, setAbaAlunos] = useState<'ativos' | 'inativos'>('ativos')
+
   // Auto-refresh
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [intervalo, setIntervalo] = useState(5) // segundos
@@ -116,6 +143,7 @@ export default function DashboardAoVivoPage() {
       const params = new URLSearchParams()
       if (turmaFiltro) params.set('turma', turmaFiltro)
       if (componenteFiltro) params.set('componente', componenteFiltro)
+      params.set('periodo', String(periodoMinutos))
 
       const url = `/api/professor/atividades-tempo-real${params.toString() ? `?${params}` : ''}`
       const response = await fetch(url)
@@ -135,7 +163,7 @@ export default function DashboardAoVivoPage() {
     } finally {
       setLoading(false)
     }
-  }, [turmaFiltro, componenteFiltro, router])
+  }, [turmaFiltro, componenteFiltro, periodoMinutos, router])
 
   // Efeito inicial e quando filtros mudam
   useEffect(() => {
@@ -384,6 +412,29 @@ export default function DashboardAoVivoPage() {
 
               <div className="flex-1 min-w-[150px]">
                 <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
+                  Periodo de monitoramento
+                </label>
+                <select
+                  value={periodoMinutos}
+                  onChange={(e) => setPeriodoMinutos(Number(e.target.value))}
+                  className="w-full px-3 py-2 rounded-lg text-sm"
+                  style={{
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-primary)',
+                  }}
+                >
+                  <option value={15}>15 minutos</option>
+                  <option value={30}>30 minutos</option>
+                  <option value={45}>45 minutos (1 aula)</option>
+                  <option value={60}>60 minutos</option>
+                  <option value={90}>90 minutos (2 aulas)</option>
+                  <option value={120}>120 minutos</option>
+                </select>
+              </div>
+
+              <div className="flex-1 min-w-[150px]">
+                <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
                   Intervalo de atualização
                 </label>
                 <select
@@ -440,13 +491,25 @@ export default function DashboardAoVivoPage() {
         ) : dados ? (
           <>
             {/* Cards de estatísticas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               <StatCard
-                icon={<Users className="w-5 h-5" />}
-                label="Alunos Ativos"
-                value={dados.estatisticas.alunos_ativos_agora}
+                icon={<Percent className="w-5 h-5" />}
+                label="Participação"
+                value={`${dados.estatisticas.taxa_participacao}%`}
                 color="var(--success)"
                 pulse
+              />
+              <StatCard
+                icon={<Users className="w-5 h-5" />}
+                label="Ativos"
+                value={`${dados.estatisticas.alunos_ativos_agora}/${dados.estatisticas.total_alunos_turma}`}
+                color="var(--success)"
+              />
+              <StatCard
+                icon={<UserX className="w-5 h-5" />}
+                label="Inativos"
+                value={dados.estatisticas.alunos_inativos}
+                color={dados.estatisticas.alunos_inativos > 0 ? "var(--error)" : "var(--text-muted)"}
               />
               <StatCard
                 icon={<Activity className="w-5 h-5" />}
@@ -473,9 +536,9 @@ export default function DashboardAoVivoPage() {
                 color="var(--color-fisica)"
               />
               <StatCard
-                icon={<TrendingUp className="w-5 h-5" />}
-                label="Questões (30min)"
-                value={dados.estatisticas.questoes_ultimos_30min}
+                icon={<Timer className="w-5 h-5" />}
+                label={`Total (${periodoMinutos}min)`}
+                value={dados.estatisticas.questoes_periodo_total}
                 color="var(--text-muted)"
               />
             </div>
@@ -558,84 +621,164 @@ export default function DashboardAoVivoPage() {
                 </Card>
               </div>
 
-              {/* Sidebar: Alunos ativos + Por turma */}
+              {/* Sidebar: Alunos ativos/inativos + Por turma */}
               <div className="space-y-6">
-                {/* Alunos ativos agora */}
+                {/* Card de alunos com abas */}
                 <Card>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                      <Eye className="w-5 h-5 text-success" />
-                      Alunos Ativos
-                    </h2>
-                    <span
-                      className="flex items-center gap-1 text-sm"
-                      style={{ color: 'var(--success)' }}
+                  {/* Abas de navegação */}
+                  <div className="flex border-b mb-4" style={{ borderColor: 'var(--border-default)' }}>
+                    <button
+                      onClick={() => setAbaAlunos('ativos')}
+                      className={`flex-1 pb-2 text-sm font-medium flex items-center justify-center gap-2 border-b-2 transition-colors ${
+                        abaAlunos === 'ativos' ? 'border-success' : 'border-transparent'
+                      }`}
+                      style={{
+                        color: abaAlunos === 'ativos' ? 'var(--success)' : 'var(--text-muted)',
+                      }}
                     >
-                      <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                      {dados.alunos_ativos.length} online
-                    </span>
+                      <Eye className="w-4 h-4" />
+                      Ativos ({dados.alunos_ativos.length})
+                    </button>
+                    <button
+                      onClick={() => setAbaAlunos('inativos')}
+                      className={`flex-1 pb-2 text-sm font-medium flex items-center justify-center gap-2 border-b-2 transition-colors ${
+                        abaAlunos === 'inativos' ? 'border-error' : 'border-transparent'
+                      }`}
+                      style={{
+                        color: abaAlunos === 'inativos' ? 'var(--error)' : 'var(--text-muted)',
+                      }}
+                    >
+                      <UserX className="w-4 h-4" />
+                      Inativos ({dados.alunos_inativos.length})
+                    </button>
                   </div>
 
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                    {dados.alunos_ativos.length === 0 ? (
-                      <div className="text-center py-6" style={{ color: 'var(--text-muted)' }}>
-                        <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm">Nenhum aluno ativo</p>
-                      </div>
-                    ) : (
-                      dados.alunos_ativos.map((aluno) => (
-                        <div
-                          key={`${aluno.id}-${aluno.componente}`}
-                          className="flex items-center gap-3 p-2 rounded-lg"
-                          style={{ background: 'var(--bg-elevated)' }}
-                        >
-                          <div className="relative">
-                            <div
-                              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                              style={{
-                                background:
-                                  aluno.componente === 'fisica'
-                                    ? 'var(--color-fisica)'
-                                    : 'var(--color-matematica)',
-                              }}
-                            >
-                              {aluno.nome.charAt(0).toUpperCase()}
-                            </div>
-                            <span
-                              className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
-                              style={{
-                                borderColor: 'var(--bg-elevated)',
-                                background:
-                                  aluno.tipo_atividade === 'desafio'
-                                    ? 'var(--warning)'
-                                    : aluno.tipo_atividade === 'tutor'
-                                    ? 'var(--info)'
-                                    : 'var(--success)',
-                              }}
-                            />
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                              {aluno.nome}
-                            </p>
-                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                              {aluno.turma} • {aluno.questoes_sessao}q • {aluno.taxa_acerto}% acerto
-                            </p>
-                          </div>
-
-                          <div className="text-right">
-                            <Badge
-                              variant={aluno.componente === 'fisica' ? 'fisica' : 'matematica'}
-                              size="sm"
-                            >
-                              {aluno.componente === 'fisica' ? 'Fís' : 'Mat'}
-                            </Badge>
-                          </div>
+                  {/* Conteúdo da aba Ativos */}
+                  {abaAlunos === 'ativos' && (
+                    <div className="space-y-2 max-h-[350px] overflow-y-auto">
+                      {dados.alunos_ativos.length === 0 ? (
+                        <div className="text-center py-6" style={{ color: 'var(--text-muted)' }}>
+                          <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Nenhum aluno ativo</p>
                         </div>
-                      ))
-                    )}
-                  </div>
+                      ) : (
+                        dados.alunos_ativos.map((aluno) => (
+                          <div
+                            key={`${aluno.id}-${aluno.componente}`}
+                            className="flex items-center gap-3 p-2 rounded-lg"
+                            style={{ background: 'var(--bg-elevated)' }}
+                          >
+                            <div className="relative">
+                              <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                                style={{
+                                  background:
+                                    aluno.componente === 'fisica'
+                                      ? 'var(--color-fisica)'
+                                      : 'var(--color-matematica)',
+                                }}
+                              >
+                                {aluno.nome.charAt(0).toUpperCase()}
+                              </div>
+                              <span
+                                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
+                                style={{
+                                  borderColor: 'var(--bg-elevated)',
+                                  background:
+                                    aluno.tipo_atividade === 'desafio'
+                                      ? 'var(--warning)'
+                                      : aluno.tipo_atividade === 'tutor'
+                                      ? 'var(--info)'
+                                      : 'var(--success)',
+                                }}
+                              />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                                {aluno.nome}
+                              </p>
+                              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                {aluno.turma} • {aluno.questoes_sessao}q • {aluno.taxa_acerto}% acerto
+                              </p>
+                            </div>
+
+                            <div className="text-right">
+                              <Badge
+                                variant={aluno.componente === 'fisica' ? 'fisica' : 'matematica'}
+                                size="sm"
+                              >
+                                {aluno.componente === 'fisica' ? 'Fís' : 'Mat'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+
+                  {/* Conteúdo da aba Inativos */}
+                  {abaAlunos === 'inativos' && (
+                    <div className="space-y-2 max-h-[350px] overflow-y-auto">
+                      {dados.alunos_inativos.length === 0 ? (
+                        <div className="text-center py-6" style={{ color: 'var(--success)' }}>
+                          <CheckCircle className="w-10 h-10 mx-auto mb-2" />
+                          <p className="text-sm font-medium">Todos participando!</p>
+                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                            Nenhum aluno inativo no período
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-xs mb-2 px-2" style={{ color: 'var(--text-muted)' }}>
+                            Alunos sem atividade nos últimos {periodoMinutos} minutos:
+                          </p>
+                          {dados.alunos_inativos.map((aluno) => (
+                            <div
+                              key={aluno.id}
+                              className="flex items-center gap-3 p-2 rounded-lg"
+                              style={{ background: 'var(--bg-elevated)' }}
+                            >
+                              <div
+                                className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
+                                style={{
+                                  background: 'var(--error)',
+                                  color: 'white',
+                                  opacity: 0.7,
+                                }}
+                              >
+                                {aluno.nome.charAt(0).toUpperCase()}
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                                  {aluno.nome}
+                                </p>
+                                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                                  {aluno.turma}
+                                  {aluno.ultimo_acesso && (
+                                    <> • Último acesso: {new Date(aluno.ultimo_acesso).toLocaleDateString('pt-BR')}</>
+                                  )}
+                                </p>
+                              </div>
+
+                              <div className="flex gap-1">
+                                {aluno.componentes.map((comp) => (
+                                  <Badge
+                                    key={comp}
+                                    variant={comp === 'fisica' ? 'fisica' : 'matematica'}
+                                    size="sm"
+                                  >
+                                    {comp === 'fisica' ? 'Fís' : 'Mat'}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </Card>
 
                 {/* Por turma */}
@@ -654,37 +797,79 @@ export default function DashboardAoVivoPage() {
                       dados.estatisticas.por_turma.map((turma) => (
                         <div
                           key={turma.turma}
-                          className="flex items-center justify-between p-2 rounded-lg"
+                          className="p-3 rounded-lg"
                           style={{ background: 'var(--bg-elevated)' }}
                         >
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between mb-2">
                             <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
                               {turma.turma}
                             </span>
                             <span
-                              className="flex items-center gap-1 text-xs"
-                              style={{ color: 'var(--success)' }}
-                            >
-                              <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                              {turma.ativos} ativos
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-3 text-sm">
-                            <span style={{ color: 'var(--text-secondary)' }}>
-                              {turma.questoes}q
-                            </span>
-                            <span
-                              className="font-medium"
+                              className="text-sm font-bold"
                               style={{
-                                color: turma.taxa_acerto >= 70
+                                color: turma.taxa_participacao >= 80
                                   ? 'var(--success)'
-                                  : turma.taxa_acerto >= 50
+                                  : turma.taxa_participacao >= 50
                                   ? 'var(--warning)'
                                   : 'var(--error)',
                               }}
                             >
-                              {turma.taxa_acerto}%
+                              {turma.taxa_participacao}% participação
                             </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-3">
+                              <span
+                                className="flex items-center gap-1"
+                                style={{ color: 'var(--success)' }}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-success" />
+                                {turma.ativos} ativos
+                              </span>
+                              {turma.inativos > 0 && (
+                                <span
+                                  className="flex items-center gap-1"
+                                  style={{ color: 'var(--error)' }}
+                                >
+                                  <span className="w-1.5 h-1.5 rounded-full bg-error" />
+                                  {turma.inativos} inativos
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span style={{ color: 'var(--text-muted)' }}>
+                                {turma.questoes}q
+                              </span>
+                              <span
+                                className="font-medium"
+                                style={{
+                                  color: turma.taxa_acerto >= 70
+                                    ? 'var(--success)'
+                                    : turma.taxa_acerto >= 50
+                                    ? 'var(--warning)'
+                                    : 'var(--error)',
+                                }}
+                              >
+                                {turma.taxa_acerto}%
+                              </span>
+                            </div>
+                          </div>
+                          {/* Barra de progresso de participação */}
+                          <div
+                            className="h-1 rounded-full mt-2 overflow-hidden"
+                            style={{ background: 'var(--bg-surface)' }}
+                          >
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${turma.taxa_participacao}%`,
+                                background: turma.taxa_participacao >= 80
+                                  ? 'var(--success)'
+                                  : turma.taxa_participacao >= 50
+                                  ? 'var(--warning)'
+                                  : 'var(--error)',
+                              }}
+                            />
                           </div>
                         </div>
                       ))
