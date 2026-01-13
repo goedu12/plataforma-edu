@@ -517,7 +517,7 @@ export async function nivel4ProcessamentoCalculo(
   supabase: SupabaseClient,
   userId: string,
   componente: Componente,
-  periodo: { bimestre: 1 | 2 | 3 | 4; tipo: TipoPeriodo; config: ConfigBimestre } | null
+  periodo: { bimestre: 1 | 2 | 3 | 4; tipo: TipoPeriodo; config: ConfigBimestre; diasRestantes?: number } | null
 ): Promise<ResultadoVerificacao> {
   if (!periodo) {
     return {
@@ -528,6 +528,25 @@ export async function nivel4ProcessamentoCalculo(
   }
 
   const config = periodo.config
+  const hoje = new Date().toISOString().split('T')[0]
+
+  // Determinar intervalo de datas para buscar respostas
+  // Se estamos fora do período (diasRestantes = 0 e data atual < inicio), usar últimos 30 dias
+  const periodoReal = getPeriodoAtual()
+  let dataInicio: string
+  let dataFim: string
+
+  if (periodoReal) {
+    // Período real ativo - usar datas do bimestre
+    dataInicio = config.regular.inicio
+    dataFim = config.regular.fim
+  } else {
+    // Fora do período (férias/prática) - usar últimos 30 dias
+    const data30DiasAtras = new Date()
+    data30DiasAtras.setDate(data30DiasAtras.getDate() - 30)
+    dataInicio = data30DiasAtras.toISOString().split('T')[0]
+    dataFim = hoje
+  }
 
   try {
     // Buscar respostas do modo estudo (acertos + tempo)
@@ -537,8 +556,8 @@ export async function nivel4ProcessamentoCalculo(
       .eq('usuario_id', userId)
       .eq('componente', componente)
       .eq('modo', 'estudo')
-      .gte('criado_em', config.regular.inicio)
-      .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .gte('criado_em', dataInicio)
+      .lte('criado_em', dataFim + 'T23:59:59')
 
     // Buscar respostas do modo revisão (acertos + tempo)
     const { data: respostasRevisao } = await supabase
@@ -548,8 +567,8 @@ export async function nivel4ProcessamentoCalculo(
       .eq('componente', componente)
       .eq('modo', 'revisao')
       .eq('correta', true)
-      .gte('criado_em', config.regular.inicio)
-      .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .gte('criado_em', dataInicio)
+      .lte('criado_em', dataFim + 'T23:59:59')
 
     // Buscar respostas do modo desafio (acertos + tempo)
     const { data: respostasDesafio } = await supabase
@@ -559,8 +578,8 @@ export async function nivel4ProcessamentoCalculo(
       .eq('componente', componente)
       .eq('modo', 'desafio')
       .eq('correta', true)
-      .gte('criado_em', config.regular.inicio)
-      .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .gte('criado_em', dataInicio)
+      .lte('criado_em', dataFim + 'T23:59:59')
 
     // Contadores
     const questoesRespondidas = respostasEstudo?.length || 0
@@ -825,6 +844,8 @@ export async function verificacaoCompletaParaResponder(
 /**
  * Atualiza nota em tempo real após uma resposta correta
  * Esta função é chamada APÓS registrar a resposta
+ *
+ * IMPORTANTE: Funciona mesmo fora do período letivo (modo prática)
  */
 export async function atualizarNotaTempoReal(
   supabase: SupabaseClient,
@@ -837,9 +858,22 @@ export async function atualizarNotaTempoReal(
   // - Revisão: +0.02 por acerto
   // - Desafio: +0.01 por acerto
 
-  const periodo = getPeriodoAtual()
+  let periodo = getPeriodoAtual()
+
+  // Se não há período ativo, criar período de prática (não persiste notas oficiais)
+  // Isso permite feedback em tempo real mesmo fora do calendário letivo
   if (!periodo) {
-    return null
+    // Usar o próximo bimestre disponível ou criar período de prática
+    const anoAtual = new Date().getFullYear()
+    const configAno = CONFIG_BIMESTRES[anoAtual] || CONFIG_BIMESTRES[2025]
+
+    // Criar período virtual de prática baseado no 1º bimestre
+    periodo = {
+      bimestre: 1,
+      tipo: 'regular' as TipoPeriodo,
+      config: configAno[1],
+      diasRestantes: 0,
+    }
   }
 
   // NÍVEL 4: Calcular nota atualizada
@@ -850,8 +884,11 @@ export async function atualizarNotaTempoReal(
 
   const notaAtualizada = nivel4.dados.nota_atualizada as NotaAtualizada
 
-  // NÍVEL 5: Persistir nota
-  await nivel5PersistenciaNotificacao(supabase, userId, componente, notaAtualizada, periodo)
+  // Só persiste nota se estiver em período ativo real
+  const periodoReal = getPeriodoAtual()
+  if (periodoReal) {
+    await nivel5PersistenciaNotificacao(supabase, userId, componente, notaAtualizada, periodoReal)
+  }
 
   return notaAtualizada
 }
