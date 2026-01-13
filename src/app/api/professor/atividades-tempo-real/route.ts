@@ -176,59 +176,64 @@ export async function GET(request: NextRequest) {
     const chatRecente = chatResult.data || []
     const turmasDisponiveis = turmasResult
 
-    // 5. Aplicar filtros e montar estruturas
-    type RespostaComUsuario = {
-      id: string
-      usuario_id: string
-      componente: string
-      correta: boolean
-      tempo_segundos: number
-      pontos_ganhos: number
-      criado_em: string
-      modo?: string
-      usuarios: { id: string; nome: string; turma: string; ativo: boolean }
-      questoes: { tema: string } | null
+    // 5. Processar e normalizar dados do Supabase
+    // O Supabase pode retornar relações como array ou objeto dependendo da query
+    interface UsuarioInfo { id: string; nome: string; turma: string; ativo: boolean }
+    interface QuestaoInfo { tema: string }
+
+    // Função para extrair primeiro item de array ou retornar objeto
+    const extrairRelacao = <T>(dados: T | T[] | null): T | null => {
+      if (!dados) return null
+      if (Array.isArray(dados)) return dados[0] || null
+      return dados
     }
 
-    type DesafioComUsuario = {
-      id: string
-      usuario_id: string
-      componente: string
-      acertos: number
-      questoes_total: number
-      status: string
-      criado_em: string
-      usuarios: { id: string; nome: string; turma: string; ativo: boolean }
-    }
-
-    type ChatComUsuario = {
-      id: string
-      usuario_id: string
-      componente: string
-      criado_em: string
-      usuarios: { id: string; nome: string; turma: string; ativo: boolean }
-    }
-
-    // Filtrar por turma e componente
-    const filtrarPorTurmaEComponente = <T extends { usuarios: { turma: string }; componente: string }>(
-      items: T[]
-    ): T[] => {
-      return items.filter(item => {
-        if (turmaFiltro && item.usuarios.turma !== turmaFiltro) return false
-        if (componenteFiltro && item.componente !== componenteFiltro) return false
+    // Processar respostas
+    const respostasFiltradas = (respostasRecentes || [])
+      .map(r => ({
+        ...r,
+        usuarios: extrairRelacao(r.usuarios as UsuarioInfo | UsuarioInfo[]),
+        questoes: extrairRelacao(r.questoes as QuestaoInfo | QuestaoInfo[] | null),
+      }))
+      .filter(r => {
+        if (!r.usuarios) return false
+        if (turmaFiltro && r.usuarios.turma !== turmaFiltro) return false
+        if (componenteFiltro && r.componente !== componenteFiltro) return false
         return true
       })
-    }
 
-    const respostasFiltradas = filtrarPorTurmaEComponente(respostasRecentes as RespostaComUsuario[])
-    const desafiosFiltrados = filtrarPorTurmaEComponente(desafiosRecentes as DesafioComUsuario[])
-    const chatFiltrado = filtrarPorTurmaEComponente(chatRecente as ChatComUsuario[])
+    // Processar desafios
+    const desafiosFiltrados = (desafiosRecentes || [])
+      .map(d => ({
+        ...d,
+        usuarios: extrairRelacao(d.usuarios as UsuarioInfo | UsuarioInfo[]),
+      }))
+      .filter(d => {
+        if (!d.usuarios) return false
+        if (turmaFiltro && d.usuarios.turma !== turmaFiltro) return false
+        if (componenteFiltro && d.componente !== componenteFiltro) return false
+        return true
+      })
+
+    // Processar chat
+    const chatFiltrado = (chatRecente || [])
+      .map(c => ({
+        ...c,
+        usuarios: extrairRelacao(c.usuarios as UsuarioInfo | UsuarioInfo[]),
+      }))
+      .filter(c => {
+        if (!c.usuarios) return false
+        if (turmaFiltro && c.usuarios.turma !== turmaFiltro) return false
+        if (componenteFiltro && c.componente !== componenteFiltro) return false
+        return true
+      })
 
     // 6. Montar lista de atividades
     const atividades: AtividadeTempoReal[] = []
 
     // Respostas
     for (const resposta of respostasFiltradas) {
+      if (!resposta.usuarios) continue
       const isRevisao = resposta.modo === 'revisao'
 
       atividades.push({
@@ -251,6 +256,7 @@ export async function GET(request: NextRequest) {
 
     // Desafios
     for (const desafio of desafiosFiltrados) {
+      if (!desafio.usuarios) continue
       atividades.push({
         id: desafio.id,
         tipo: desafio.status === 'em_andamento' ? 'desafio_iniciado' : 'desafio_completo',
@@ -267,7 +273,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Tutor (agrupar por usuário para evitar spam)
-    const tutorPorUsuario = new Map<string, ChatComUsuario>()
+    type ChatProcessado = typeof chatFiltrado[number]
+    const tutorPorUsuario = new Map<string, ChatProcessado>()
     for (const chat of chatFiltrado) {
       const key = `${chat.usuario_id}-${chat.componente}`
       if (!tutorPorUsuario.has(key)) {
@@ -276,6 +283,7 @@ export async function GET(request: NextRequest) {
     }
 
     for (const chat of tutorPorUsuario.values()) {
+      if (!chat.usuarios) continue
       atividades.push({
         id: chat.id,
         tipo: 'tutor',
@@ -295,6 +303,7 @@ export async function GET(request: NextRequest) {
     const alunosAtivosMap = new Map<string, AlunoAtivo>()
 
     for (const resposta of respostasFiltradas) {
+      if (!resposta.usuarios) continue
       const key = `${resposta.usuario_id}-${resposta.componente}`
       const existente = alunosAtivosMap.get(key)
 
@@ -323,6 +332,7 @@ export async function GET(request: NextRequest) {
 
     // Marcar quem está em desafio
     for (const desafio of desafiosFiltrados) {
+      if (!desafio.usuarios) continue
       if (desafio.status !== 'em_andamento') continue
 
       const key = `${desafio.usuario_id}-${desafio.componente}`
@@ -346,6 +356,7 @@ export async function GET(request: NextRequest) {
 
     // Marcar quem está usando tutor
     for (const chat of tutorPorUsuario.values()) {
+      if (!chat.usuarios) continue
       const key = `${chat.usuario_id}-${chat.componente}`
       const existente = alunosAtivosMap.get(key)
       if (existente) {
@@ -380,6 +391,7 @@ export async function GET(request: NextRequest) {
     const estatsPorTurma = new Map<string, { ativos: Set<string>; questoes: number; acertos: number }>()
 
     for (const resposta of respostasFiltradas) {
+      if (!resposta.usuarios) continue
       const turma = resposta.usuarios.turma
       const stats = estatsPorTurma.get(turma) || { ativos: new Set(), questoes: 0, acertos: 0 }
       stats.ativos.add(resposta.usuario_id)
