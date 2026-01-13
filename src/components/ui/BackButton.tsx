@@ -8,7 +8,12 @@ interface BackButtonProps {
   onClick?: () => void
   label?: string
   showLabel?: boolean
+  showLabelOnDesktop?: boolean
   className?: string
+  /** Se true, esconde no desktop (lg+). Default: false - sempre visível */
+  mobileOnly?: boolean
+  /** Usa versão compacta no desktop */
+  compactOnDesktop?: boolean
 }
 
 /**
@@ -16,13 +21,17 @@ interface BackButtonProps {
  * - Sempre em verde (#22c55e) para alta visibilidade
  * - Touch target de 44px mínimo
  * - Usado em todas as páginas para navegação consistente
+ * - Opção de esconder em desktop quando NavigationRail está presente
  */
 export default function BackButton({
   href,
   onClick,
   label = 'Voltar',
   showLabel = false,
+  showLabelOnDesktop = false,
   className = '',
+  mobileOnly = false,
+  compactOnDesktop = false,
 }: BackButtonProps) {
   const router = useRouter()
 
@@ -36,14 +45,24 @@ export default function BackButton({
     }
   }
 
+  // Monta as classes dinamicamente
+  const classes = [
+    'back-button',
+    showLabel ? 'back-button-label' : '',
+    mobileOnly ? 'mobile-only' : '',
+    compactOnDesktop ? 'lg:back-button-desktop' : '',
+    className,
+  ].filter(Boolean).join(' ')
+
   return (
     <button
       onClick={handleClick}
-      className={`back-button ${showLabel ? 'back-button-label' : ''} ${className}`}
+      className={classes}
       aria-label={label}
     >
       <ArrowLeft className="w-5 h-5" />
-      {showLabel && <span>{label}</span>}
+      {showLabel && <span className="sm:inline">{label}</span>}
+      {showLabelOnDesktop && !showLabel && <span className="hidden lg:inline ml-1">{label}</span>}
     </button>
   )
 }

@@ -90,7 +90,7 @@ export default function ConquistasPage() {
       <header className="compact-mobile-x pt-3 pb-4" style={{ background: corPrimaria }}>
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-3">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="text-center">
               <div className="flex items-center justify-center gap-2">

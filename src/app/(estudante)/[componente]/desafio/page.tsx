@@ -207,7 +207,7 @@ export default function DesafioPage() {
         {/* Header Compacto */}
         <header className="mobile-header" style={{ background: corPrimaria, borderColor: 'transparent' }}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
               <h1 className="font-semibold" style={{ color: isFisica ? '#000' : '#fff' }}>
@@ -323,7 +323,7 @@ export default function DesafioPage() {
 
         <header className="mobile-header">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
               <h1 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -391,7 +391,7 @@ export default function DesafioPage() {
         <div className="max-w-2xl mx-auto">
           {/* Linha 1: Navegação + Título + Timer */}
           <div className="flex items-center justify-between gap-2">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4" style={{ color: corPrimaria }} />

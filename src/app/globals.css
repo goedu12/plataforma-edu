@@ -1002,16 +1002,29 @@ img {
     background: var(--color-fisica);
     color: #000;
     box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+    flex-shrink: 0;
   }
   .back-button:hover {
     background: var(--color-fisica-light);
     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+    transform: scale(1.02);
+  }
+  .back-button:focus-visible {
+    outline: 2px solid var(--color-fisica);
+    outline-offset: 2px;
   }
   .back-button:active {
     background: var(--color-fisica-dark);
+    transform: scale(0.95);
   }
   .back-button-label {
     padding: 10px 16px;
+  }
+  /* Versão compacta para desktop (menor mas ainda visível) */
+  .back-button-desktop {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -1047,7 +1060,15 @@ img {
     @apply sticky top-0 z-20 px-3 py-2 sm:px-4 sm:py-3;
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border-default);
-    backdrop-filter: blur(8px);
+  }
+  /* Blur apenas em dispositivos que suportam bem (não mobile antigo) */
+  @supports (backdrop-filter: blur(8px)) {
+    @media (min-width: 640px) {
+      .mobile-header {
+        backdrop-filter: blur(8px);
+        background: rgba(var(--bg-surface-rgb, 10, 10, 10), 0.9);
+      }
+    }
   }
 
   /* Mobile content area - optimized padding */
@@ -1072,14 +1093,29 @@ img {
     @apply w-full sm:w-auto;
   }
 
-  /* Hide on mobile, show on desktop */
+  /* Visibility classes - não forçam display type */
   .desktop-only {
-    @apply hidden lg:flex;
+    display: none !important;
+  }
+  @media (min-width: 1024px) {
+    .desktop-only {
+      display: flex !important;
+    }
+    .desktop-only-block {
+      display: block !important;
+    }
+    .desktop-only-inline {
+      display: inline-flex !important;
+    }
   }
 
-  /* Show on mobile, hide on desktop */
   .mobile-only {
-    @apply flex lg:hidden;
+    display: flex !important;
+  }
+  @media (min-width: 1024px) {
+    .mobile-only {
+      display: none !important;
+    }
   }
 
   /* Compact list item for mobile */
@@ -1112,6 +1148,122 @@ img {
   /* Flex column that fills available space */
   .flex-fill {
     @apply flex flex-col flex-1 min-h-0;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     DESKTOP & CHROMEBOOK UTILITIES
+     ───────────────────────────────────────────────────────── */
+
+  /* Container responsivo que aproveita bem o espaço */
+  .container-responsive {
+    @apply w-full mx-auto px-4;
+    max-width: 100%;
+  }
+  @media (min-width: 640px) {
+    .container-responsive {
+      max-width: 640px;
+    }
+  }
+  @media (min-width: 768px) {
+    .container-responsive {
+      max-width: 720px;
+    }
+  }
+  /* Chromebook típico 1366x768 */
+  @media (min-width: 1024px) {
+    .container-responsive {
+      max-width: 800px;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  /* Desktop grande */
+  @media (min-width: 1280px) {
+    .container-responsive {
+      max-width: 900px;
+    }
+  }
+
+  /* Grid que adapta para desktop */
+  .grid-desktop {
+    @apply grid grid-cols-1 gap-3;
+  }
+  @media (min-width: 768px) {
+    .grid-desktop {
+      @apply grid-cols-2;
+    }
+  }
+  @media (min-width: 1024px) {
+    .grid-desktop {
+      @apply grid-cols-3 gap-4;
+    }
+  }
+
+  /* Texto legível em todas as telas */
+  .text-readable {
+    @apply text-sm leading-relaxed;
+  }
+  @media (min-width: 640px) {
+    .text-readable {
+      @apply text-base;
+    }
+  }
+  @media (min-width: 1024px) {
+    .text-readable {
+      line-height: 1.7;
+    }
+  }
+
+  /* Card otimizado para desktop */
+  .card-desktop {
+    @apply rounded-xl p-4;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+  }
+  @media (min-width: 1024px) {
+    .card-desktop {
+      @apply p-5 rounded-2xl;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-desktop:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  /* Header desktop com mais espaço */
+  .header-desktop {
+    @apply px-4 py-3;
+  }
+  @media (min-width: 1024px) {
+    .header-desktop {
+      @apply px-6 py-4;
+    }
+  }
+
+  /* Espaçamento que respira em desktop */
+  .space-desktop {
+    @apply space-y-3;
+  }
+  @media (min-width: 1024px) {
+    .space-desktop {
+      @apply space-y-4;
+    }
+  }
+
+  /* Padding maior em desktop para conforto visual */
+  .p-desktop {
+    @apply p-3;
+  }
+  @media (min-width: 640px) {
+    .p-desktop {
+      @apply p-4;
+    }
+  }
+  @media (min-width: 1024px) {
+    .p-desktop {
+      @apply p-5;
+    }
   }
 }
 

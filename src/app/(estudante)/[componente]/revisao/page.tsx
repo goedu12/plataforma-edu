@@ -215,7 +215,7 @@ export default function RevisaoPage() {
         <div className="max-w-2xl mx-auto">
           {/* Linha 1: Navegação + Título + Timer */}
           <div className="flex items-center justify-between gap-2">
-            <BackButton href={`/${componente}/menu`} className="mobile-only" />
+            <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="flex items-center gap-2">
               <RotateCcw className="w-4 h-4" style={{ color: 'var(--warning)' }} />
