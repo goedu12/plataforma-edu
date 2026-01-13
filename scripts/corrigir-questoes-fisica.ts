@@ -71,24 +71,25 @@ const CORRECOES: Record<string, string> = {
   'Â¾': '¾',
   'Â±': '±',
   'Âµ': 'µ',  // micro
-  'â€"': '–',  // en dash
-  'â€"': '—',  // em dash
-  'â€œ': '"',  // aspas esquerda
-  'â€': '"',   // aspas direita
-  'â€˜': ''',  // apóstrofo esquerdo
-  'â€™': ''',  // apóstrofo direito
-  'â†'': '→',  // seta direita
-  'â†'': '←',  // seta esquerda
-  'â‰¤': '≤',  // menor ou igual
-  'â‰¥': '≥',  // maior ou igual
-  'â‰ ': '≠',  // diferente
-  'Ï€': 'π',   // pi
-  'Î©': 'Ω',   // omega (ohm)
-  'Î¼': 'μ',   // mu
-  'Î"': 'Δ',   // delta
-  'Î£': 'Σ',   // sigma
-  'âˆš': '√',  // raiz quadrada
-  'âˆž': '∞',  // infinito
+
+  // Símbolos tipográficos (usando unicode para evitar problemas de parsing)
+  '\u2013': '–',  // en dash
+  '\u2014': '—',  // em dash
+  '\u201C': '"',  // aspas esquerda
+  '\u201D': '"',  // aspas direita
+  '\u2018': '\u2019',  // apóstrofo
+  '\u2192': '→',  // seta direita
+  '\u2190': '←',  // seta esquerda
+  '\u2264': '≤',  // menor ou igual
+  '\u2265': '≥',  // maior ou igual
+  '\u2260': '≠',  // diferente
+  '\u03C0': 'π',  // pi
+  '\u03A9': 'Ω',  // omega (ohm)
+  '\u03BC': 'μ',  // mu
+  '\u0394': 'Δ',  // delta
+  '\u03A3': 'Σ',  // sigma
+  '\u221A': '√',  // raiz quadrada
+  '\u221E': '∞',  // infinito
 
   // Espaços e caracteres invisíveis
   '\u00A0': ' ',  // non-breaking space → espaço normal
