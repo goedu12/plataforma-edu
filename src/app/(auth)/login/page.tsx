@@ -23,7 +23,7 @@ export default function LoginPage() {
   const [config, setConfig] = useState<Configuracoes>({
     nome_plataforma: 'seu10',
     versao: '1.0',
-    nome_instituicao: 'Colégio Cora Coralina'
+    nome_instituicao: ''
   })
 
   // Buscar configurações da plataforma
@@ -36,7 +36,7 @@ export default function LoginPage() {
           setConfig({
             nome_plataforma: data.configuracoes.nome_plataforma || 'seu10',
             versao: data.configuracoes.versao || '1.0',
-            nome_instituicao: data.configuracoes.nome_instituicao || 'Colégio Cora Coralina'
+            nome_instituicao: data.configuracoes.nome_instituicao || ''
           })
         }
       } catch {
@@ -88,33 +88,27 @@ export default function LoginPage() {
       className="min-h-screen flex flex-col items-center justify-center p-4"
       style={{ background: 'var(--bg-base)' }}
     >
-      {/* Header com Logo Dinâmico */}
-      <div className="text-center mb-8 animate-fade-in">
-        <div className="mx-auto mb-4 flex items-center justify-center">
+      {/* Header com Logo */}
+      <div className="text-center mb-10 animate-fade-in">
+        <div className="mx-auto flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LOGO_URL}
             alt={config.nome_plataforma}
-            className="h-auto max-h-[120px] w-auto"
+            className="h-auto max-h-[100px] w-auto"
           />
         </div>
-        <p
-          className="text-body"
-          style={{ color: 'var(--text-secondary)' }}
-        >
-          {config.nome_instituicao}
-        </p>
       </div>
 
       {/* Login Card */}
       <div
-        className="w-full max-w-md p-6 rounded-2xl animate-slide-up"
+        className="w-full max-w-md p-8 rounded-2xl animate-slide-up"
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-default)',
         }}
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
               className="text-label block mb-2"
@@ -198,7 +192,7 @@ export default function LoginPage() {
 
         {/* Help Box */}
         <div
-          className="mt-6 p-4 rounded-xl text-center"
+          className="mt-8 p-5 rounded-xl text-center"
           style={{
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border-default)',
@@ -232,12 +226,18 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-center animate-fade-in">
+      <div className="mt-10 text-center animate-fade-in">
         <p
-          className="text-sm"
+          className="text-sm font-medium"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
+          seu10.com
+        </p>
+        <p
+          className="text-xs mt-1"
           style={{ color: 'var(--text-muted)' }}
         >
-          {config.nome_plataforma} v{config.versao}
+          versão {config.versao}
         </p>
       </div>
     </div>

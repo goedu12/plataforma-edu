@@ -15,15 +15,19 @@ import {
   Sparkles,
   Target,
   Clock,
-  Filter,
   Play,
+  BookOpen,
+  Star,
+  Award,
+  TrendingUp,
+  Brain,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
-import type { Componente } from '@/types'
+import type { Componente, Usuario } from '@/types'
 import type {
   FlashCard,
   FlashCardQuiz,
@@ -33,9 +37,8 @@ import type {
   TemaFlashCard,
   SessaoFlashCard,
   RespostaFlashCard,
-  PONTUACAO_PADRAO,
 } from '@/types/flashcards'
-import { LABELS_ANO, LABELS_DIFICULDADE, CORES_DIFICULDADE } from '@/types/flashcards'
+import { LABELS_ANO, LABELS_DIFICULDADE } from '@/types/flashcards'
 
 // Pontuação
 const PONTUACAO = {
@@ -51,10 +54,24 @@ const PONTUACAO = {
 
 type Tela = 'selecao' | 'jogando' | 'resultado'
 
+// Mapear ano do usuário para AnoEscolar
+function mapearAnoUsuario(ano: number, nivel: string): AnoEscolar | null {
+  if (nivel === 'EM') {
+    if (ano === 1) return '1ano'
+    if (ano === 2) return '2ano'
+    if (ano === 3) return '3ano'
+  }
+  return null
+}
+
 export default function FlashCardsPage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
+
+  // Estados do usuário
+  const [usuario, setUsuario] = useState<Usuario | null>(null)
+  const [anoDoUsuario, setAnoDoUsuario] = useState<AnoEscolar | null>(null)
 
   // Estados da tela
   const [tela, setTela] = useState<Tela>('selecao')
@@ -63,7 +80,6 @@ export default function FlashCardsPage() {
 
   // Estados de seleção
   const [temas, setTemas] = useState<TemaFlashCard[]>([])
-  const [anoSelecionado, setAnoSelecionado] = useState<AnoEscolar | null>(null)
   const [temaSelecionado, setTemaSelecionado] = useState<string | null>(null)
   const [quantidadeQuestoes, setQuantidadeQuestoes] = useState(10)
 
@@ -86,25 +102,38 @@ export default function FlashCardsPage() {
   const nomeComponente = isFisica ? 'Física' : 'Matemática'
 
   // ═══════════════════════════════════════════════════════════════════
-  // CARREGAR TEMAS DISPONÍVEIS
+  // CARREGAR USUÁRIO E TEMAS
   // ═══════════════════════════════════════════════════════════════════
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
       return
     }
-    carregarTemas()
+    carregarDados()
   }, [componente])
 
-  const carregarTemas = async () => {
+  const carregarDados = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/flashcards?componente=${componente}&action=temas`)
-      const data = await response.json()
-      if (data.sucesso) {
-        setTemas(data.temas || [])
+      // Buscar usuário
+      const userResponse = await fetch('/api/usuario')
+      const userData = await userResponse.json()
+
+      if (userData.sucesso && userData.usuario) {
+        setUsuario(userData.usuario)
+        const anoMapeado = mapearAnoUsuario(userData.usuario.ano, userData.usuario.nivel)
+        setAnoDoUsuario(anoMapeado)
+
+        // Buscar temas filtrados pelo ano do usuário
+        const anoParam = anoMapeado ? `&ano=${anoMapeado}` : ''
+        const temasResponse = await fetch(`/api/flashcards?componente=${componente}&action=temas${anoParam}`)
+        const temasData = await temasResponse.json()
+
+        if (temasData.sucesso) {
+          setTemas(temasData.temas || [])
+        }
       } else {
-        setErro(data.erro || 'Erro ao carregar temas')
+        router.push('/login')
       }
     } catch {
       setErro('Erro de conexão')
@@ -121,15 +150,16 @@ export default function FlashCardsPage() {
     setErro(null)
 
     try {
-      const params = new URLSearchParams({
+      const searchParams = new URLSearchParams({
         componente,
         action: 'questoes',
         limite: quantidadeQuestoes.toString(),
       })
-      if (anoSelecionado) params.append('ano', anoSelecionado)
-      if (temaSelecionado) params.append('tema', temaSelecionado)
+      // Sempre filtrar pelo ano do usuário
+      if (anoDoUsuario) searchParams.append('ano', anoDoUsuario)
+      if (temaSelecionado) searchParams.append('tema', temaSelecionado)
 
-      const response = await fetch(`/api/flashcards?${params}`)
+      const response = await fetch(`/api/flashcards?${searchParams}`)
       const data = await response.json()
 
       if (data.sucesso && data.questoes?.length > 0) {
@@ -147,7 +177,7 @@ export default function FlashCardsPage() {
         setTela('jogando')
         iniciarTimer()
       } else {
-        setErro(data.erro || 'Nenhuma questão encontrada para os filtros selecionados')
+        setErro(data.erro || 'Nenhuma questão encontrada')
       }
     } catch {
       setErro('Erro ao carregar questões')
@@ -188,7 +218,6 @@ export default function FlashCardsPage() {
     const questao = sessao.questoes[questaoAtualIndex]
     let correta = false
 
-    // Verificar resposta baseado no tipo
     if (questao.tipo === 'quiz') {
       correta = respostaUsuario === (questao as FlashCardQuiz).respostaCorreta
     } else if (questao.tipo === 'vf') {
@@ -200,7 +229,6 @@ export default function FlashCardsPage() {
       correta = respostasValidas.includes(respostaStr)
     }
 
-    // Calcular pontos
     let pontosGanhos = 0
     let novaSequencia = sessao.sequenciaAtual
 
@@ -208,23 +236,16 @@ export default function FlashCardsPage() {
       setAnimacaoCorreta(true)
       setTimeout(() => setAnimacaoCorreta(false), 600)
 
-      pontosGanhos = Math.round(
-        PONTUACAO.base * PONTUACAO.multiplicadorDificuldade[questao.dificuldade]
-      )
-      if (usouDica) {
-        pontosGanhos = Math.max(0, pontosGanhos - PONTUACAO.penalididadeDica)
-      }
+      pontosGanhos = Math.round(PONTUACAO.base * PONTUACAO.multiplicadorDificuldade[questao.dificuldade])
+      if (usouDica) pontosGanhos = Math.max(0, pontosGanhos - PONTUACAO.penalididadeDica)
       novaSequencia++
-      if (novaSequencia > 1) {
-        pontosGanhos += PONTUACAO.bonusSequencia * (novaSequencia - 1)
-      }
+      if (novaSequencia > 1) pontosGanhos += PONTUACAO.bonusSequencia * (novaSequencia - 1)
     } else {
       setAnimacaoErrada(true)
       setTimeout(() => setAnimacaoErrada(false), 600)
       novaSequencia = 0
     }
 
-    // Registrar resposta
     const resposta: RespostaFlashCard = {
       questao_id: questao.id,
       resposta: respostaUsuario,
@@ -255,7 +276,6 @@ export default function FlashCardsPage() {
     if (!sessao) return
 
     if (questaoAtualIndex + 1 >= sessao.questoes.length) {
-      // Fim do jogo
       pararTimer()
       salvarProgresso()
       setTela('resultado')
@@ -281,7 +301,7 @@ export default function FlashCardsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           componente,
-          ano: anoSelecionado,
+          ano: anoDoUsuario,
           tema: temaSelecionado,
           respostas: sessao.respostas,
           pontos_totais: sessao.pontos,
@@ -308,6 +328,12 @@ export default function FlashCardsPage() {
   }
 
   const jogarNovamente = () => {
+    setSessao(null)
+    setQuestaoAtualIndex(0)
+    setRespostaUsuario(null)
+    setMostrarResultado(false)
+    setUsouDica(false)
+    setMostrarDica(false)
     iniciarSessao()
   }
 
@@ -320,6 +346,7 @@ export default function FlashCardsPage() {
   }
 
   const questaoAtual = sessao?.questoes[questaoAtualIndex]
+  const totalQuestoesDisponiveis = temas.reduce((acc, t) => acc + t.totalQuestoes, 0)
 
   return (
     <div
@@ -332,162 +359,242 @@ export default function FlashCardsPage() {
           HEADER
           ═══════════════════════════════════════════════════════════════════ */}
       <header
-        className="px-4 py-3 sticky top-0 z-10 flex-shrink-0"
-        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
+        className="sticky top-0 z-10 flex-shrink-0"
+        style={{
+          background: tela === 'selecao'
+            ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.15) 0%, var(--bg-surface) 100%)`
+            : 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-default)',
+        }}
       >
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <button
-            onClick={() => (tela === 'selecao' ? router.push(`/${componente}/menu`) : reiniciar())}
-            className="p-2 -ml-2 rounded-lg lg:hidden"
-            style={{ color: 'var(--text-muted)' }}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => (tela === 'selecao' ? router.push(`/${componente}/menu`) : reiniciar())}
+              className="p-2 -ml-2 rounded-xl transition-colors hover:bg-black/5"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
 
-          <div className="flex items-center gap-2">
-            <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
-            <span className="font-bold" style={{ color: 'var(--text-primary)' }}>
-              FlashCards
-            </span>
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: `rgba(${corPrimariaRgb}, 0.15)` }}
+              >
+                <Sparkles className="w-4 h-4" style={{ color: corPrimaria }} />
+              </div>
+              <div>
+                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  FlashCards
+                </span>
+                {anoDoUsuario && tela === 'selecao' && (
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {LABELS_ANO[anoDoUsuario]} • {nomeComponente}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {tela === 'jogando' && sessao && (
+              <div className="flex items-center gap-2">
+                {sessao.sequenciaAtual > 0 && (
+                  <div
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-sm font-bold animate-bounce-subtle"
+                    style={{ background: `rgba(${corPrimariaRgb}, 0.15)`, color: corPrimaria }}
+                  >
+                    <Flame className="w-4 h-4" />
+                    <span>{sessao.sequenciaAtual}</span>
+                  </div>
+                )}
+                <div
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-sm font-bold"
+                  style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}
+                >
+                  <Star className="w-4 h-4" />
+                  <span>{sessao.pontos}</span>
+                </div>
+              </div>
+            )}
+
+            {tela === 'selecao' && <div className="w-10" />}
           </div>
 
+          {/* Progress bar durante o jogo */}
           {tela === 'jogando' && sessao && (
-            <div className="flex items-center gap-3">
-              {/* Sequência */}
-              {sessao.sequenciaAtual > 0 && (
-                <div
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-bold"
-                  style={{ background: `rgba(${corPrimariaRgb}, 0.15)`, color: corPrimaria }}
-                >
-                  <Flame className="w-4 h-4" />
-                  <span>{sessao.sequenciaAtual}</span>
+            <div className="mt-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500 ease-out"
+                    style={{
+                      width: `${((questaoAtualIndex + (mostrarResultado ? 1 : 0)) / sessao.questoes.length) * 100}%`,
+                      background: `linear-gradient(90deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                    }}
+                  />
                 </div>
-              )}
-              {/* Pontos */}
-              <div
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-bold"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--warning)' }}
-              >
-                <Trophy className="w-4 h-4" />
-                <span>{sessao.pontos}</span>
+                <span className="text-sm font-bold tabular-nums min-w-[40px] text-right" style={{ color: corPrimaria }}>
+                  {questaoAtualIndex + 1}/{sessao.questoes.length}
+                </span>
               </div>
             </div>
           )}
-
-          {tela === 'selecao' && <div className="w-10 lg:hidden" />}
         </div>
-
-        {/* Progress bar */}
-        {tela === 'jogando' && sessao && (
-          <div className="max-w-2xl mx-auto mt-2">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-                <div
-                  className="h-full rounded-full transition-all duration-300"
-                  style={{
-                    width: `${((questaoAtualIndex + (mostrarResultado ? 1 : 0)) / sessao.questoes.length) * 100}%`,
-                    background: corPrimaria,
-                  }}
-                />
-              </div>
-              <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                {questaoAtualIndex + 1}/{sessao.questoes.length}
-              </span>
-            </div>
-          </div>
-        )}
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════
           CONTEÚDO
           ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full">
-        {/* TELA DE SELEÇÃO */}
+      <main className="flex-1 max-w-2xl mx-auto px-4 py-5 w-full">
+        {/* ═══════════════════════════════════════════════════════════════════
+            TELA DE SELEÇÃO
+            ═══════════════════════════════════════════════════════════════════ */}
         {tela === 'selecao' && (
-          <div className="space-y-6 animate-fade-in">
-            {/* Título */}
-            <div className="text-center">
-              <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                FlashCards de {nomeComponente}
-              </h1>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                Teste seus conhecimentos de forma rápida e divertida!
-              </p>
-            </div>
-
-            {/* Seleção de Ano */}
+          <div className="space-y-5 animate-fade-in">
+            {/* Hero Card */}
             <div
-              className="p-4 rounded-xl"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+              className="relative overflow-hidden rounded-3xl p-6 text-center"
+              style={{
+                background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
+                border: `2px solid rgba(${corPrimariaRgb}, 0.3)`,
+              }}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <Filter className="w-4 h-4" style={{ color: corPrimaria }} />
-                <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  Selecione o Ano
-                </span>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => setAnoSelecionado(null)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+              {/* Decorative elements */}
+              <div
+                className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20"
+                style={{ background: corPrimaria }}
+              />
+              <div
+                className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full opacity-10"
+                style={{ background: corPrimaria }}
+              />
+
+              <div className="relative">
+                <div
+                  className="w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"
                   style={{
-                    background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)',
-                    color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
                   }}
                 >
-                  Todos
-                </button>
-                {(['1ano', '2ano', '3ano'] as AnoEscolar[]).map((ano) => (
-                  <button
-                    key={ano}
-                    onClick={() => setAnoSelecionado(ano)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)',
-                      color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
-                    }}
+                  <Brain className="w-10 h-10" style={{ color: isFisica ? '#000' : '#fff' }} />
+                </div>
+
+                <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                  FlashCards de {nomeComponente}
+                </h1>
+
+                {anoDoUsuario && (
+                  <div
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-3"
+                    style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
                   >
-                    {LABELS_ANO[ano]}
-                  </button>
-                ))}
+                    <BookOpen className="w-4 h-4" style={{ color: corPrimaria }} />
+                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {LABELS_ANO[anoDoUsuario]} do Ensino Médio
+                    </span>
+                  </div>
+                )}
+
+                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                  {totalQuestoesDisponiveis} questões disponíveis para você
+                </p>
               </div>
+            </div>
+
+            {/* Estatísticas rápidas */}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { icon: Target, label: 'Tipos', value: '3', sublabel: 'Quiz, V/F, Complete' },
+                { icon: Zap, label: 'Temas', value: String(temas.length), sublabel: 'Disponíveis' },
+                { icon: Award, label: 'Pontos', value: '+10', sublabel: 'Por acerto' },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="p-4 rounded-2xl text-center"
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+                >
+                  <stat.icon className="w-5 h-5 mx-auto mb-2" style={{ color: corPrimaria }} />
+                  <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.sublabel}</p>
+                </div>
+              ))}
             </div>
 
             {/* Seleção de Tema */}
             <div
-              className="p-4 rounded-xl"
+              className="p-5 rounded-2xl"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="w-4 h-4" style={{ color: corPrimaria }} />
-                <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  Selecione o Tema
-                </span>
+              <div className="flex items-center gap-2 mb-4">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: `rgba(${corPrimariaRgb}, 0.15)` }}
+                >
+                  <Target className="w-4 h-4" style={{ color: corPrimaria }} />
+                </div>
+                <div>
+                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Escolha um Tema
+                  </span>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    Ou pratique todos de uma vez
+                  </p>
+                </div>
               </div>
-              <div className="flex gap-2 flex-wrap">
+
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setTemaSelecionado(null)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  className="p-4 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{
-                    background: !temaSelecionado ? corPrimaria : 'var(--bg-elevated)',
-                    color: !temaSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                    background: !temaSelecionado
+                      ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.1) 100%)`
+                      : 'var(--bg-elevated)',
+                    border: !temaSelecionado ? `2px solid ${corPrimaria}` : '1px solid var(--border-default)',
                   }}
                 >
-                  Todos
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">🎯</span>
+                    <div>
+                      <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                        Todos os Temas
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        {totalQuestoesDisponiveis} questões
+                      </p>
+                    </div>
+                  </div>
+                  {!temaSelecionado && (
+                    <CheckCircle2 className="w-5 h-5 mt-2" style={{ color: corPrimaria }} />
+                  )}
                 </button>
+
                 {temas.map((tema) => (
                   <button
                     key={tema.id}
                     onClick={() => setTemaSelecionado(tema.nome)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1"
+                    className="p-4 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
-                      background: temaSelecionado === tema.nome ? corPrimaria : 'var(--bg-elevated)',
-                      color: temaSelecionado === tema.nome ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                      background: temaSelecionado === tema.nome
+                        ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.1) 100%)`
+                        : 'var(--bg-elevated)',
+                      border: temaSelecionado === tema.nome ? `2px solid ${corPrimaria}` : '1px solid var(--border-default)',
                     }}
                   >
-                    <span>{tema.icone}</span>
-                    <span>{tema.nome}</span>
-                    <span className="opacity-60">({tema.totalQuestoes})</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{tema.icone}</span>
+                      <div>
+                        <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          {tema.nome}
+                        </p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          {tema.totalQuestoes} questões
+                        </p>
+                      </div>
+                    </div>
+                    {temaSelecionado === tema.nome && (
+                      <CheckCircle2 className="w-5 h-5 mt-2" style={{ color: corPrimaria }} />
+                    )}
                   </button>
                 ))}
               </div>
@@ -495,24 +602,33 @@ export default function FlashCardsPage() {
 
             {/* Quantidade de Questões */}
             <div
-              className="p-4 rounded-xl"
+              className="p-5 rounded-2xl"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-4 h-4" style={{ color: corPrimaria }} />
-                <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  Quantidade de Questões
+              <div className="flex items-center gap-2 mb-4">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: `rgba(${corPrimariaRgb}, 0.15)` }}
+                >
+                  <Sparkles className="w-4 h-4" style={{ color: corPrimaria }} />
+                </div>
+                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  Quantas questões?
                 </span>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                {[5, 10, 15, 20, 30].map((qtd) => (
+
+              <div className="flex gap-2">
+                {[5, 10, 15, 20].map((qtd) => (
                   <button
                     key={qtd}
                     onClick={() => setQuantidadeQuestoes(qtd)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                    className="flex-1 py-3 px-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
-                      background: quantidadeQuestoes === qtd ? corPrimaria : 'var(--bg-elevated)',
+                      background: quantidadeQuestoes === qtd
+                        ? `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`
+                        : 'var(--bg-elevated)',
                       color: quantidadeQuestoes === qtd ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                      border: quantidadeQuestoes === qtd ? 'none' : '1px solid var(--border-default)',
                     }}
                   >
                     {qtd}
@@ -524,198 +640,247 @@ export default function FlashCardsPage() {
             {/* Erro */}
             {erro && (
               <div
-                className="p-4 rounded-xl"
+                className="p-4 rounded-2xl flex items-center gap-3"
                 style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
               >
-                <p className="text-sm" style={{ color: 'var(--error)' }}>
-                  {erro}
-                </p>
+                <XCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                <p className="text-sm" style={{ color: 'var(--error)' }}>{erro}</p>
               </div>
             )}
 
             {/* Botão Iniciar */}
-            <Button
-              variant={isFisica ? 'fisica' : 'matematica'}
+            <button
               onClick={iniciarSessao}
-              loading={loading}
-              className="w-full min-h-[56px] text-lg"
-              leftIcon={<Play className="w-5 h-5" />}
+              disabled={loading}
+              className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              style={{
+                background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                color: isFisica ? '#000' : '#fff',
+                boxShadow: `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`,
+              }}
             >
-              Iniciar FlashCards
-            </Button>
+              <Play className="w-6 h-6" />
+              <span>Começar Agora!</span>
+            </button>
           </div>
         )}
 
-        {/* TELA DE JOGO */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            TELA DE JOGO
+            ═══════════════════════════════════════════════════════════════════ */}
         {tela === 'jogando' && sessao && questaoAtual && (
           <div className="space-y-4 animate-fade-in">
             {/* Card da Questão */}
             <div
-              className="p-5 rounded-2xl"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+              className="rounded-3xl overflow-hidden"
+              style={{
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+              }}
             >
-              {/* Tags */}
-              <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Badge variant={componente}>{questaoAtual.tema}</Badge>
-                <Badge
-                  variant={
-                    questaoAtual.dificuldade === 'facil'
-                      ? 'success'
-                      : questaoAtual.dificuldade === 'medio'
-                        ? 'warning'
+              {/* Header do Card */}
+              <div
+                className="px-5 py-3 flex items-center justify-between"
+                style={{
+                  background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.1) 0%, transparent 100%)`,
+                  borderBottom: '1px solid var(--border-default)',
+                }}
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant={componente}>{questaoAtual.tema}</Badge>
+                  <Badge
+                    variant={
+                      questaoAtual.dificuldade === 'facil' ? 'success'
+                        : questaoAtual.dificuldade === 'medio' ? 'warning'
                         : 'error'
-                  }
+                    }
+                  >
+                    {LABELS_DIFICULDADE[questaoAtual.dificuldade]}
+                  </Badge>
+                </div>
+                <span
+                  className="text-xs px-3 py-1 rounded-full font-medium"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 >
-                  {LABELS_DIFICULDADE[questaoAtual.dificuldade]}
-                </Badge>
-                <span className="text-xs px-2 py-1 rounded-full" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                  {questaoAtual.tipo === 'quiz' ? 'Quiz' : questaoAtual.tipo === 'vf' ? 'V ou F' : 'Complete'}
+                  {questaoAtual.tipo === 'quiz' ? '📝 Quiz' : questaoAtual.tipo === 'vf' ? '✓✗ V ou F' : '✏️ Complete'}
                 </span>
               </div>
 
               {/* Pergunta */}
-              <p className="text-lg font-medium leading-relaxed mb-4" style={{ color: 'var(--text-primary)' }}>
-                {questaoAtual.pergunta}
-              </p>
+              <div className="p-5">
+                <p className="text-lg font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                  {questaoAtual.pergunta}
+                </p>
+              </div>
 
-              {/* Opções baseadas no tipo */}
-              {questaoAtual.tipo === 'quiz' && (
-                <div className="space-y-2">
-                  {(questaoAtual as FlashCardQuiz).opcoes.map((opcao, index) => {
-                    const selecionada = respostaUsuario === index
-                    const correta = (questaoAtual as FlashCardQuiz).respostaCorreta === index
-                    const errada = mostrarResultado && selecionada && !correta
+              {/* Opções */}
+              <div className="px-5 pb-5">
+                {/* Quiz */}
+                {questaoAtual.tipo === 'quiz' && (
+                  <div className="space-y-2">
+                    {(questaoAtual as FlashCardQuiz).opcoes.map((opcao, index) => {
+                      const selecionada = respostaUsuario === index
+                      const correta = (questaoAtual as FlashCardQuiz).respostaCorreta === index
+                      const errada = mostrarResultado && selecionada && !correta
 
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => !mostrarResultado && setRespostaUsuario(index)}
-                        disabled={mostrarResultado}
-                        className="w-full p-4 rounded-xl flex items-center gap-3 transition-all text-left"
-                        style={{
-                          background: mostrarResultado && correta
-                            ? 'rgba(34, 197, 94, 0.15)'
-                            : errada
-                              ? 'rgba(239, 68, 68, 0.15)'
-                              : selecionada
-                                ? `rgba(${corPrimariaRgb}, 0.15)`
-                                : 'var(--bg-elevated)',
-                          border: mostrarResultado && correta
-                            ? '2px solid var(--success)'
-                            : errada
-                              ? '2px solid var(--error)'
-                              : selecionada
-                                ? `2px solid ${corPrimaria}`
-                                : '1px solid var(--border-default)',
-                        }}
-                      >
-                        <span
-                          className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0"
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => !mostrarResultado && setRespostaUsuario(index)}
+                          disabled={mostrarResultado}
+                          className="w-full p-4 rounded-2xl flex items-center gap-4 transition-all text-left hover:scale-[1.01] active:scale-[0.99]"
                           style={{
                             background: mostrarResultado && correta
-                              ? 'var(--success)'
+                              ? 'rgba(34, 197, 94, 0.15)'
                               : errada
-                                ? 'var(--error)'
+                                ? 'rgba(239, 68, 68, 0.15)'
                                 : selecionada
-                                  ? corPrimaria
-                                  : 'var(--bg-surface)',
-                            color: (mostrarResultado && correta) || errada || selecionada
-                              ? (isFisica ? '#000' : '#fff')
-                              : 'var(--text-muted)',
+                                  ? `rgba(${corPrimariaRgb}, 0.15)`
+                                  : 'var(--bg-elevated)',
+                            border: mostrarResultado && correta
+                              ? '2px solid var(--success)'
+                              : errada
+                                ? '2px solid var(--error)'
+                                : selecionada
+                                  ? `2px solid ${corPrimaria}`
+                                  : '1px solid var(--border-default)',
+                            transform: selecionada && !mostrarResultado ? 'scale(1.01)' : 'scale(1)',
                           }}
                         >
-                          {mostrarResultado && correta ? (
-                            <CheckCircle2 className="w-5 h-5" />
-                          ) : errada ? (
-                            <XCircle className="w-5 h-5" />
-                          ) : (
-                            String.fromCharCode(65 + index)
-                          )}
-                        </span>
-                        <span className="flex-1" style={{ color: 'var(--text-primary)' }}>
-                          {opcao}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
+                          <span
+                            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold flex-shrink-0 transition-all"
+                            style={{
+                              background: mostrarResultado && correta
+                                ? 'var(--success)'
+                                : errada
+                                  ? 'var(--error)'
+                                  : selecionada
+                                    ? corPrimaria
+                                    : 'var(--bg-surface)',
+                              color: (mostrarResultado && correta) || errada || selecionada
+                                ? (isFisica ? '#000' : '#fff')
+                                : 'var(--text-muted)',
+                            }}
+                          >
+                            {mostrarResultado && correta ? (
+                              <CheckCircle2 className="w-5 h-5" />
+                            ) : errada ? (
+                              <XCircle className="w-5 h-5" />
+                            ) : (
+                              String.fromCharCode(65 + index)
+                            )}
+                          </span>
+                          <span className="flex-1 font-medium" style={{ color: 'var(--text-primary)' }}>
+                            {opcao}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
 
-              {questaoAtual.tipo === 'vf' && (
-                <div className="flex gap-3">
-                  {[
-                    { valor: true, label: 'Verdadeiro', icone: '✓' },
-                    { valor: false, label: 'Falso', icone: '✗' },
-                  ].map(({ valor, label, icone }) => {
-                    const selecionada = respostaUsuario === valor
-                    const correta = (questaoAtual as FlashCardVF).respostaCorreta === valor
-                    const errada = mostrarResultado && selecionada && !correta
+                {/* V ou F */}
+                {questaoAtual.tipo === 'vf' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { valor: true, label: 'Verdadeiro', icone: '✓', cor: 'var(--success)' },
+                      { valor: false, label: 'Falso', icone: '✗', cor: 'var(--error)' },
+                    ].map(({ valor, label, icone, cor }) => {
+                      const selecionada = respostaUsuario === valor
+                      const correta = (questaoAtual as FlashCardVF).respostaCorreta === valor
+                      const errada = mostrarResultado && selecionada && !correta
 
-                    return (
-                      <button
-                        key={label}
-                        onClick={() => !mostrarResultado && setRespostaUsuario(valor)}
-                        disabled={mostrarResultado}
-                        className="flex-1 p-4 rounded-xl flex flex-col items-center gap-2 transition-all"
-                        style={{
-                          background: mostrarResultado && correta
-                            ? 'rgba(34, 197, 94, 0.15)'
-                            : errada
-                              ? 'rgba(239, 68, 68, 0.15)'
-                              : selecionada
-                                ? `rgba(${corPrimariaRgb}, 0.15)`
-                                : 'var(--bg-elevated)',
-                          border: mostrarResultado && correta
+                      return (
+                        <button
+                          key={label}
+                          onClick={() => !mostrarResultado && setRespostaUsuario(valor)}
+                          disabled={mostrarResultado}
+                          className="p-6 rounded-2xl flex flex-col items-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          style={{
+                            background: mostrarResultado && correta
+                              ? 'rgba(34, 197, 94, 0.15)'
+                              : errada
+                                ? 'rgba(239, 68, 68, 0.15)'
+                                : selecionada
+                                  ? `rgba(${corPrimariaRgb}, 0.15)`
+                                  : 'var(--bg-elevated)',
+                            border: mostrarResultado && correta
+                              ? '2px solid var(--success)'
+                              : errada
+                                ? '2px solid var(--error)'
+                                : selecionada
+                                  ? `2px solid ${corPrimaria}`
+                                  : '1px solid var(--border-default)',
+                          }}
+                        >
+                          <span
+                            className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold"
+                            style={{
+                              background: mostrarResultado && correta
+                                ? 'var(--success)'
+                                : errada
+                                  ? 'var(--error)'
+                                  : selecionada
+                                    ? corPrimaria
+                                    : 'var(--bg-surface)',
+                              color: (mostrarResultado && correta) || errada || selecionada
+                                ? '#fff'
+                                : cor,
+                            }}
+                          >
+                            {icone}
+                          </span>
+                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            {label}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Complete */}
+                {questaoAtual.tipo === 'complete' && (
+                  <div>
+                    <input
+                      type="text"
+                      value={respostaUsuario?.toString() || ''}
+                      onChange={(e) => !mostrarResultado && setRespostaUsuario(e.target.value)}
+                      disabled={mostrarResultado}
+                      placeholder="Digite sua resposta..."
+                      autoFocus
+                      className="w-full p-5 rounded-2xl text-lg font-medium transition-all"
+                      style={{
+                        background: 'var(--bg-elevated)',
+                        border: mostrarResultado
+                          ? sessao.respostas[questaoAtualIndex]?.correta
                             ? '2px solid var(--success)'
-                            : errada
-                              ? '2px solid var(--error)'
-                              : selecionada
-                                ? `2px solid ${corPrimaria}`
-                                : '1px solid var(--border-default)',
-                        }}
+                            : '2px solid var(--error)'
+                          : `2px solid ${respostaUsuario ? corPrimaria : 'var(--border-default)'}`,
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !mostrarResultado && respostaUsuario) {
+                          verificarResposta()
+                        }
+                      }}
+                    />
+                    {mostrarResultado && !sessao.respostas[questaoAtualIndex]?.correta && (
+                      <div
+                        className="mt-3 p-3 rounded-xl flex items-center gap-2"
+                        style={{ background: 'rgba(34, 197, 94, 0.1)' }}
                       >
-                        <span className="text-2xl">{icone}</span>
-                        <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {label}
+                        <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} />
+                        <span className="text-sm" style={{ color: 'var(--success)' }}>
+                          Resposta: <strong>{(questaoAtual as FlashCardComplete).respostaCorreta}</strong>
                         </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-
-              {questaoAtual.tipo === 'complete' && (
-                <div>
-                  <input
-                    type="text"
-                    value={respostaUsuario?.toString() || ''}
-                    onChange={(e) => !mostrarResultado && setRespostaUsuario(e.target.value)}
-                    disabled={mostrarResultado}
-                    placeholder="Digite sua resposta..."
-                    className="w-full p-4 rounded-xl text-lg transition-all"
-                    style={{
-                      background: 'var(--bg-elevated)',
-                      border: mostrarResultado
-                        ? sessao.respostas[questaoAtualIndex]?.correta
-                          ? '2px solid var(--success)'
-                          : '2px solid var(--error)'
-                        : '1px solid var(--border-default)',
-                      color: 'var(--text-primary)',
-                      outline: 'none',
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !mostrarResultado && respostaUsuario) {
-                        verificarResposta()
-                      }
-                    }}
-                  />
-                  {mostrarResultado && !sessao.respostas[questaoAtualIndex]?.correta && (
-                    <p className="mt-2 text-sm" style={{ color: 'var(--success)' }}>
-                      Resposta correta: <strong>{(questaoAtual as FlashCardComplete).respostaCorreta}</strong>
-                    </p>
-                  )}
-                </div>
-              )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Dica */}
@@ -723,37 +888,30 @@ export default function FlashCardsPage() {
               <div>
                 {mostrarDica ? (
                   <div
-                    className="p-4 rounded-xl"
+                    className="p-4 rounded-2xl"
                     style={{
-                      background: `rgba(${corPrimariaRgb}, 0.1)`,
-                      border: '1px dashed var(--border-default)',
+                      background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.1) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
+                      border: `1px dashed ${corPrimaria}`,
                     }}
                   >
                     <div className="flex items-center gap-2 mb-2">
-                      <Lightbulb className="w-4 h-4" style={{ color: corPrimaria }} />
-                      <span className="text-sm font-medium" style={{ color: corPrimaria }}>
-                        Dica
-                      </span>
+                      <Lightbulb className="w-5 h-5" style={{ color: corPrimaria }} />
+                      <span className="font-semibold" style={{ color: corPrimaria }}>Dica</span>
                     </div>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {questaoAtual.dica}
-                    </p>
+                    <p style={{ color: 'var(--text-secondary)' }}>{questaoAtual.dica}</p>
                   </div>
                 ) : (
                   <button
-                    onClick={() => {
-                      setMostrarDica(true)
-                      setUsouDica(true)
-                    }}
-                    className="w-full py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all"
+                    onClick={() => { setMostrarDica(true); setUsouDica(true) }}
+                    className="w-full py-4 px-5 rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
                     style={{
                       background: 'var(--bg-surface)',
                       border: '1px dashed var(--border-default)',
                       color: 'var(--text-muted)',
                     }}
                   >
-                    <Lightbulb className="w-4 h-4" />
-                    <span className="text-sm">Ver dica (-5 pts)</span>
+                    <Lightbulb className="w-5 h-5" />
+                    <span className="font-medium">Precisa de ajuda? Ver dica (-5 pts)</span>
                   </button>
                 )}
               </div>
@@ -762,201 +920,227 @@ export default function FlashCardsPage() {
             {/* Feedback */}
             {mostrarResultado && questaoAtual.explicacao && (
               <div
-                className="p-4 rounded-xl animate-fade-in"
+                className="p-5 rounded-2xl animate-fade-in"
                 style={{
                   background: sessao.respostas[questaoAtualIndex]?.correta
-                    ? 'rgba(34, 197, 94, 0.15)'
-                    : 'rgba(239, 68, 68, 0.15)',
+                    ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)'
+                    : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)',
                   border: `1px solid ${sessao.respostas[questaoAtualIndex]?.correta ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
                 }}
               >
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-4">
                   <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{
                       background: sessao.respostas[questaoAtualIndex]?.correta
-                        ? 'rgba(34, 197, 94, 0.2)'
-                        : 'rgba(239, 68, 68, 0.2)',
+                        ? 'var(--success)'
+                        : 'var(--error)',
                     }}
                   >
                     {sessao.respostas[questaoAtualIndex]?.correta ? (
-                      <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} />
+                      <CheckCircle2 className="w-6 h-6 text-white" />
                     ) : (
-                      <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />
+                      <XCircle className="w-6 h-6 text-white" />
                     )}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
                       <span
-                        className="font-semibold"
+                        className="font-bold text-lg"
                         style={{
                           color: sessao.respostas[questaoAtualIndex]?.correta ? 'var(--success)' : 'var(--error)',
                         }}
                       >
-                        {sessao.respostas[questaoAtualIndex]?.correta ? 'Correto!' : 'Incorreto'}
+                        {sessao.respostas[questaoAtualIndex]?.correta ? 'Muito bem!' : 'Não foi dessa vez'}
                       </span>
                       {sessao.respostas[questaoAtualIndex]?.correta && sessao.respostas[questaoAtualIndex]?.pontos_ganhos > 0 && (
                         <span
-                          className="text-xs px-2 py-0.5 rounded-full"
+                          className="px-2 py-1 rounded-lg text-sm font-bold"
                           style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}
                         >
                           +{sessao.respostas[questaoAtualIndex]?.pontos_ganhos} pts
                         </span>
                       )}
                     </div>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                      {questaoAtual.explicacao}
-                    </p>
+                    <p style={{ color: 'var(--text-secondary)' }}>{questaoAtual.explicacao}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Botões de Ação */}
-            <div className="flex gap-3">
-              {!mostrarResultado ? (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={verificarResposta}
-                  disabled={respostaUsuario === null}
-                  className="flex-1 min-h-[52px]"
-                >
-                  Confirmar
-                </Button>
+            {/* Botão de Ação */}
+            <button
+              onClick={mostrarResultado ? proximaQuestao : verificarResposta}
+              disabled={respostaUsuario === null && !mostrarResultado}
+              className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              style={{
+                background: respostaUsuario === null && !mostrarResultado
+                  ? 'var(--bg-elevated)'
+                  : `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                color: respostaUsuario === null && !mostrarResultado
+                  ? 'var(--text-muted)'
+                  : (isFisica ? '#000' : '#fff'),
+                boxShadow: respostaUsuario !== null || mostrarResultado
+                  ? `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`
+                  : 'none',
+              }}
+            >
+              {mostrarResultado ? (
+                <>
+                  <span>{questaoAtualIndex + 1 >= sessao.questoes.length ? 'Ver Resultado' : 'Próxima Questão'}</span>
+                  <ChevronRight className="w-5 h-5" />
+                </>
               ) : (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={proximaQuestao}
-                  className="flex-1 min-h-[52px]"
-                  rightIcon={<ChevronRight className="w-5 h-5" />}
-                >
-                  {questaoAtualIndex + 1 >= sessao.questoes.length ? 'Ver Resultado' : 'Próxima'}
-                </Button>
+                <span>{respostaUsuario === null ? 'Selecione uma resposta' : 'Confirmar Resposta'}</span>
               )}
-            </div>
+            </button>
           </div>
         )}
 
-        {/* TELA DE RESULTADO */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            TELA DE RESULTADO
+            ═══════════════════════════════════════════════════════════════════ */}
         {tela === 'resultado' && sessao && (
-          <div className="space-y-6 animate-fade-in">
+          <div className="space-y-5 animate-fade-in">
             {/* Card Principal */}
             <div
-              className="p-6 rounded-2xl text-center"
+              className="relative overflow-hidden rounded-3xl p-8 text-center"
               style={{
-                background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.15) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
-                border: `1px solid ${corPrimaria}`,
+                background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
+                border: `2px solid ${corPrimaria}`,
               }}
             >
-              <div
-                className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
-                style={{ background: corPrimaria }}
-              >
-                <Trophy className="w-10 h-10" style={{ color: isFisica ? '#000' : '#fff' }} />
+              {/* Confetti decorativo */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {[...Array(20)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute w-2 h-2 rounded-full animate-float"
+                    style={{
+                      background: i % 2 === 0 ? corPrimaria : 'var(--warning)',
+                      left: `${Math.random() * 100}%`,
+                      top: `${Math.random() * 100}%`,
+                      animationDelay: `${Math.random() * 2}s`,
+                      opacity: 0.3,
+                    }}
+                  />
+                ))}
               </div>
 
-              <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-                Sessão Concluída!
-              </h2>
+              <div className="relative">
+                <div
+                  className="w-24 h-24 rounded-3xl mx-auto mb-5 flex items-center justify-center shadow-2xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                  }}
+                >
+                  <Trophy className="w-12 h-12" style={{ color: isFisica ? '#000' : '#fff' }} />
+                </div>
 
-              <div className="text-4xl font-bold mb-1" style={{ color: corPrimaria }}>
-                {sessao.pontos} pts
+                <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                  Parabéns!
+                </h2>
+
+                <div
+                  className="text-5xl font-bold mb-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  {sessao.pontos} pts
+                </div>
+
+                <p className="text-lg" style={{ color: 'var(--text-muted)' }}>
+                  {sessao.respostas.filter((r) => r.correta).length} de {sessao.questoes.length} corretas
+                </p>
               </div>
-
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                {sessao.respostas.filter((r) => r.correta).length} de {sessao.questoes.length} corretas
-              </p>
             </div>
 
             {/* Estatísticas */}
             <div className="grid grid-cols-2 gap-3">
-              <div
-                className="p-4 rounded-xl text-center"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-              >
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Target className="w-4 h-4" style={{ color: 'var(--success)' }} />
-                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Taxa de Acerto
-                  </span>
+              {[
+                {
+                  icon: Target,
+                  label: 'Taxa de Acerto',
+                  value: `${Math.round((sessao.respostas.filter((r) => r.correta).length / sessao.questoes.length) * 100)}%`,
+                  color: 'var(--success)',
+                  bg: 'rgba(34, 197, 94, 0.1)',
+                },
+                {
+                  icon: Flame,
+                  label: 'Maior Sequência',
+                  value: sessao.maiorSequencia.toString(),
+                  color: 'var(--warning)',
+                  bg: 'rgba(245, 158, 11, 0.1)',
+                },
+                {
+                  icon: Clock,
+                  label: 'Tempo Total',
+                  value: `${Math.floor((Date.now() - sessao.tempoInicio) / 1000 / 60)}:${String(Math.floor((Date.now() - sessao.tempoInicio) / 1000) % 60).padStart(2, '0')}`,
+                  color: 'var(--color-accent)',
+                  bg: 'rgba(59, 130, 246, 0.1)',
+                },
+                {
+                  icon: TrendingUp,
+                  label: 'Média por Questão',
+                  value: `${Math.round(sessao.pontos / sessao.questoes.length)} pts`,
+                  color: corPrimaria,
+                  bg: `rgba(${corPrimariaRgb}, 0.1)`,
+                },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="p-5 rounded-2xl"
+                  style={{ background: stat.bg, border: '1px solid var(--border-default)' }}
+                >
+                  <stat.icon className="w-6 h-6 mb-2" style={{ color: stat.color }} />
+                  <p className="text-2xl font-bold mb-1" style={{ color: stat.color }}>
+                    {stat.value}
+                  </p>
+                  <p className="text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                    {stat.label}
+                  </p>
                 </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--success)' }}>
-                  {Math.round((sessao.respostas.filter((r) => r.correta).length / sessao.questoes.length) * 100)}%
-                </span>
-              </div>
-
-              <div
-                className="p-4 rounded-xl text-center"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-              >
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Flame className="w-4 h-4" style={{ color: 'var(--warning)' }} />
-                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Maior Sequência
-                  </span>
-                </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--warning)' }}>
-                  {sessao.maiorSequencia}
-                </span>
-              </div>
-
-              <div
-                className="p-4 rounded-xl text-center"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-              >
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Clock className="w-4 h-4" style={{ color: 'var(--color-accent)' }} />
-                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Tempo Total
-                  </span>
-                </div>
-                <span className="text-2xl font-bold" style={{ color: 'var(--color-accent)' }}>
-                  {Math.floor((Date.now() - sessao.tempoInicio) / 1000 / 60)}:{String(Math.floor((Date.now() - sessao.tempoInicio) / 1000) % 60).padStart(2, '0')}
-                </span>
-              </div>
-
-              <div
-                className="p-4 rounded-xl text-center"
-                style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-              >
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Lightbulb className="w-4 h-4" style={{ color: corPrimaria }} />
-                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                    Dicas Usadas
-                  </span>
-                </div>
-                <span className="text-2xl font-bold" style={{ color: corPrimaria }}>
-                  {sessao.respostas.filter((r) => r.usou_dica).length}
-                </span>
-              </div>
+              ))}
             </div>
 
             {/* Botões */}
-            <div className="flex flex-col gap-3">
-              <Button
-                variant={isFisica ? 'fisica' : 'matematica'}
+            <div className="space-y-3 pt-2">
+              <button
                 onClick={jogarNovamente}
-                className="w-full min-h-[52px]"
-                leftIcon={<RotateCcw className="w-5 h-5" />}
+                className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                style={{
+                  background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                  color: isFisica ? '#000' : '#fff',
+                  boxShadow: `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`,
+                }}
               >
-                Jogar Novamente
-              </Button>
+                <RotateCcw className="w-5 h-5" />
+                <span>Jogar Novamente</span>
+              </button>
 
-              <Button
-                variant="secondary"
+              <button
                 onClick={reiniciar}
-                className="w-full min-h-[48px]"
+                className="w-full py-4 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                style={{
+                  background: 'var(--bg-surface)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
+                }}
               >
-                Escolher Novo Tema
-              </Button>
+                <Target className="w-5 h-5" />
+                <span>Escolher Novo Tema</span>
+              </button>
 
-              <Button
-                variant="secondary"
+              <button
                 onClick={() => router.push(`/${componente}/menu`)}
-                className="w-full min-h-[48px]"
+                className="w-full py-4 rounded-2xl font-semibold transition-all hover:scale-[1.01]"
+                style={{ color: 'var(--text-muted)' }}
               >
                 Voltar ao Menu
-              </Button>
+              </button>
             </div>
           </div>
         )}
@@ -975,11 +1159,27 @@ export default function FlashCardsPage() {
         }
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
+          20% { transform: translateX(-8px); }
+          40% { transform: translateX(8px); }
+          60% { transform: translateX(-8px); }
+          80% { transform: translateX(8px); }
         }
         .animate-shake {
-          animation: shake 0.4s ease-in-out;
+          animation: shake 0.5s ease-in-out;
+        }
+        @keyframes bounce-subtle {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        .animate-bounce-subtle {
+          animation: bounce-subtle 1s ease-in-out infinite;
+        }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.6; }
+        }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
         }
       `}</style>
     </div>

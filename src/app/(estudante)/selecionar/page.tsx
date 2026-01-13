@@ -75,7 +75,7 @@ export default function SelecionarComponentePage() {
                 className="font-display font-bold"
                 style={{ color: 'var(--text-primary)' }}
               >
-                Plataforma EDU
+                seu10.com
               </h1>
               <span
                 className="text-sm"

@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 const CONFIGURACOES_PADRAO = {
   nome_plataforma: 'seu10',
   versao: '1.0',
-  nome_instituicao: 'Colégio Cora Coralina',
+  nome_instituicao: '',
   logo_url: null,
   logo_largura: '280',
   logo_altura: '100',

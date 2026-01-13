@@ -303,6 +303,27 @@ export async function GET(request: NextRequest) {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+    // DETERMINAR INTERVALO DE DATAS PARA BUSCAR RESPOSTAS
+    // ═══════════════════════════════════════════════════════════════════════
+    // Se estamos fora do período letivo, usar últimos 30 dias para mostrar progresso
+
+    const hoje = new Date().toISOString().split('T')[0]
+    let dataInicioBusca: string
+    let dataFimBusca: string
+
+    if (periodoAtual) {
+      // Período ativo - usar datas do bimestre
+      dataInicioBusca = config.regular.inicio
+      dataFimBusca = config.regular.fim
+    } else {
+      // Fora do período (férias/prática) - usar últimos 30 dias
+      const data30DiasAtras = new Date()
+      data30DiasAtras.setDate(data30DiasAtras.getDate() - 30)
+      dataInicioBusca = data30DiasAtras.toISOString().split('T')[0]
+      dataFimBusca = hoje
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     // BUSCAR DADOS DO PERÍODO - NOVA FÓRMULA v2
     // ═══════════════════════════════════════════════════════════════════════
 
@@ -313,8 +334,8 @@ export async function GET(request: NextRequest) {
       .eq('usuario_id', sessao.userId)
       .eq('componente', componente)
       .eq('modo', 'estudo')
-      .gte('criado_em', config.regular.inicio)
-      .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .gte('criado_em', dataInicioBusca)
+      .lte('criado_em', dataFimBusca + 'T23:59:59')
       .order('criado_em', { ascending: true })
 
     // Buscar respostas de REVISÃO - ACERTOS + TEMPO
@@ -325,8 +346,8 @@ export async function GET(request: NextRequest) {
       .eq('componente', componente)
       .eq('modo', 'revisao')
       .eq('correta', true)
-      .gte('criado_em', config.regular.inicio)
-      .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .gte('criado_em', dataInicioBusca)
+      .lte('criado_em', dataFimBusca + 'T23:59:59')
 
     // Buscar respostas de DESAFIO - ACERTOS + TEMPO
     const { data: respostasDesafio } = await supabase
@@ -336,8 +357,8 @@ export async function GET(request: NextRequest) {
       .eq('componente', componente)
       .eq('modo', 'desafio')
       .eq('correta', true)
-      .gte('criado_em', config.regular.inicio)
-      .lte('criado_em', config.regular.fim + 'T23:59:59')
+      .gte('criado_em', dataInicioBusca)
+      .lte('criado_em', dataFimBusca + 'T23:59:59')
 
     // Contadores para nova fórmula v2
     const acertosEstudo = respostasEstudo?.filter(r => r.correta === true).length || 0
@@ -380,9 +401,9 @@ export async function GET(request: NextRequest) {
     })
 
     // Gerar evolução diária (questões acumuladas e nota)
-    const hoje = new Date().toISOString().split('T')[0]
-    const dataFimGrafico = hoje < config.regular.fim ? hoje : config.regular.fim
-    const todasAsDatas = gerarListaDatas(config.regular.inicio, dataFimGrafico)
+    // Usar datas de busca em vez de config (para funcionar fora do período)
+    const dataFimGrafico = hoje < dataFimBusca ? hoje : dataFimBusca
+    const todasAsDatas = gerarListaDatas(dataInicioBusca, dataFimGrafico)
 
     let questoesAcumuladas = 0
     let diasAtivosAcumulados = 0
@@ -404,7 +425,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Agrupar por semana para timeline
-    const progressoSemanal = agruparPorSemana(respostasEstudo || [], config.regular.inicio)
+    const progressoSemanal = agruparPorSemana(respostasEstudo || [], dataInicioBusca)
       .map(s => ({
         ...s,
         limite: 15,
@@ -412,7 +433,7 @@ export async function GET(request: NextRequest) {
       }))
 
     // Calcular semana atual
-    const diffDaysHoje = Math.floor((new Date(hoje).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
+    const diffDaysHoje = Math.floor((new Date(hoje).getTime() - new Date(dataInicioBusca).getTime()) / (1000 * 60 * 60 * 24))
     const semanaAtual = Math.max(1, Math.floor(diffDaysHoje / 7) + 1)
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -568,8 +589,11 @@ export async function GET(request: NextRequest) {
     const mediaQuestoesPorDia = diasAtivos > 0 ? Math.round((questoesRespondidas / diasAtivos) * 10) / 10 : 0
 
     // Projeção de nota final (se mantiver o ritmo atual)
-    const diasDecorridos = Math.max(1, Math.floor((new Date(hoje).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24)))
-    const diasTotais = Math.floor((new Date(config.regular.fim).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
+    // Usar datas de busca para cálculo correto fora do período
+    const diasDecorridos = Math.max(1, Math.floor((new Date(hoje).getTime() - new Date(dataInicioBusca).getTime()) / (1000 * 60 * 60 * 24)))
+    const diasTotais = periodoAtual
+      ? Math.floor((new Date(config.regular.fim).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
+      : 30 // Fora do período, usar 30 dias como referência
     const taxaDiaria = questoesRespondidas / diasDecorridos
     const projecaoQuestoes = Math.round(taxaDiaria * diasTotais)
     const projecaoNota = calcularNotaRegular(

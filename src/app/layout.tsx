@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Plataforma EDU - Colégio Cora Coralina',
+  title: 'seu10.com - Plataforma Educacional',
   description: 'Plataforma educacional para estudo de Física e Matemática',
   keywords: ['educação', 'física', 'matemática', 'estudos', 'escola'],
   authors: [{ name: 'Prof. Leonardo' }],
