@@ -3,7 +3,7 @@
 import { Loader2 } from 'lucide-react'
 
 // Logo Seu10 da plataforma
-const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/ChatGPT%20Image%2012%20de%20jan.%20de%202026,%2020_56_57.png'
+const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome%20(1).png'
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'
