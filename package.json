@@ -1,7 +1,7 @@
 {
-  "name": "plataforma-edu",
-  "version": "1.0.1",
-  "description": "Plataforma Educacional Web - Colégio Cora Coralina",
+  "name": "seu10",
+  "version": "1.0.0",
+  "description": "seu10 - Plataforma Educacional",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 
-// Logo estático da plataforma (mesmo do login)
-const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome.webp'
+// Logo estático da plataforma seu10
+const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome%20(1).png'
 
 export default function HomePage() {
   const router = useRouter()
@@ -59,7 +59,7 @@ export default function HomePage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LOGO_URL}
-            alt="Studão"
+            alt="seu10"
             className="h-auto max-h-[140px] w-auto animate-pulse"
           />
         </div>

@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { User, Lock, ArrowRight, Info } from 'lucide-react'
 import Button from '@/components/ui/Button'
 
-// Logo estático da plataforma
-const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome.webp'
+// Logo estático da plataforma seu10
+const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome%20(1).png'
 
 interface Configuracoes {
   nome_plataforma: string
@@ -21,8 +21,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [config, setConfig] = useState<Configuracoes>({
-    nome_plataforma: 'Studão',
-    versao: '4.0',
+    nome_plataforma: 'seu10',
+    versao: '1.0',
     nome_instituicao: 'Colégio Cora Coralina'
   })
 
@@ -34,8 +34,8 @@ export default function LoginPage() {
         const data = await response.json()
         if (data.sucesso && data.configuracoes) {
           setConfig({
-            nome_plataforma: data.configuracoes.nome_plataforma || 'Studão',
-            versao: data.configuracoes.versao || '4.0',
+            nome_plataforma: data.configuracoes.nome_plataforma || 'seu10',
+            versao: data.configuracoes.versao || '1.0',
             nome_instituicao: data.configuracoes.nome_instituicao || 'Colégio Cora Coralina'
           })
         }

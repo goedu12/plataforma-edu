@@ -2,8 +2,8 @@
 
 import { Loader2 } from 'lucide-react'
 
-// Logo estático da plataforma
-const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome.webp'
+// Logo estático da plataforma seu10
+const LOGO_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/logos/Design%20sem%20nome%20(1).png'
 
 interface LoadingProps {
   size?: 'sm' | 'md' | 'lg'
@@ -52,12 +52,12 @@ export default function Loading({
         className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
         style={{ background: 'var(--bg-base)' }}
       >
-        {/* Logo Studão */}
+        {/* Logo seu10 */}
         <div className="mb-8">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LOGO_URL}
-            alt="Studão"
+            alt="seu10"
             className="max-h-[100px] w-auto opacity-95"
           />
         </div>
