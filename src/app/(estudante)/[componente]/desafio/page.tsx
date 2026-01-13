@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, ArrowRight, Lightbulb } from 'lucide-react'
+import { Zap, Clock, CheckCircle2, XCircle, WifiOff, RefreshCw, Trophy, ArrowRight, Lightbulb, ArrowLeft } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
@@ -204,25 +205,16 @@ export default function DesafioPage() {
         <NavigationRail componente={componente} />
 
         {/* Header Compacto */}
-        <header
-          className="px-4 py-3 sticky top-0 z-10"
-          style={{ background: corPrimaria }}
-        >
+        <header className="mobile-header" style={{ background: corPrimaria, borderColor: 'transparent' }}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-xl lg:hidden"
-              style={{ color: isFisica ? '#000' : '#fff' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
               <h1 className="font-semibold" style={{ color: isFisica ? '#000' : '#fff' }}>
                 Resultado
               </h1>
             </div>
-            <div className="w-9 lg:hidden" />
+            <div className="w-11 mobile-only" />
           </div>
         </header>
 
@@ -329,25 +321,16 @@ export default function DesafioPage() {
       <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
         <NavigationRail componente={componente} />
 
-        <header
-          className="px-4 py-3 sticky top-0 z-10"
-          style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-        >
+        <header className="mobile-header">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-xl lg:hidden"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
             <div className="flex items-center gap-2">
               <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
               <h1 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
                 Modo Desafio
               </h1>
             </div>
-            <div className="w-9 lg:hidden" />
+            <div className="w-11 mobile-only" />
           </div>
         </header>
 
@@ -402,22 +385,13 @@ export default function DesafioPage() {
       <NavigationRail componente={componente} />
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HEADER COMPACTO - Timer inline
+          HEADER COMPACTO - Mobile-First
           ═══════════════════════════════════════════════════════════════════ */}
-      <header
-        className="px-4 py-2 sticky top-0 z-10 flex-shrink-0"
-        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-      >
+      <header className="mobile-header flex-shrink-0">
         <div className="max-w-2xl mx-auto">
           {/* Linha 1: Navegação + Título + Timer */}
           <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-lg lg:hidden"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
 
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4" style={{ color: corPrimaria }} />
@@ -428,7 +402,7 @@ export default function DesafioPage() {
 
             {/* Timer */}
             <div
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-sm font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
               style={{
                 background: tempoPerigo ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-elevated)',
                 color: tempoPerigo ? 'var(--error)' : corPrimaria,

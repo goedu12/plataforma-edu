@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Users, Search, Filter, Atom, Calculator, Key, Copy, Check } from 'lucide-react'
+import { Users, Search, Filter, Atom, Calculator, Key, Copy, Check } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
 import Loading from '@/components/ui/Loading'
 import Toast from '@/components/ui/Toast'
+import BackButton from '@/components/ui/BackButton'
 import type { Usuario } from '@/types'
 
 // Estado do toast
@@ -137,16 +138,10 @@ export default function AlunosProfessorPage() {
   return (
     <div className="min-h-screen pb-8" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="px-4 pt-4 pb-16" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
+      <header className="mobile-header pb-12" style={{ background: 'var(--bg-surface)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push('/professor/dashboard')}
-              className="p-2 -ml-2 rounded-xl transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href="/professor/dashboard" />
             <div className="text-center">
               <h1 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                 <Users className="w-5 h-5" />

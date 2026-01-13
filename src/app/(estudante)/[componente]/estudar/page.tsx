@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
+import { BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp, ChevronDown, ChevronUp } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
@@ -240,22 +241,13 @@ export default function EstudarPage() {
       <NavigationRail componente={componente} />
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HEADER COMPACTO - Estilo Desafio
+          HEADER COMPACTO - Mobile-First
           ═══════════════════════════════════════════════════════════════════ */}
-      <header
-        className="px-4 py-2 sticky top-0 z-10 flex-shrink-0"
-        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-      >
+      <header className="mobile-header flex-shrink-0">
         <div className="max-w-2xl mx-auto">
           {/* Linha 1: Navegação + Título + Timer */}
           <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-lg lg:hidden"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
 
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" style={{ color: corPrimaria }} />
@@ -267,7 +259,7 @@ export default function EstudarPage() {
             {/* Timer */}
             {status === 'OK' && questao && (
               <div
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-sm"
                 style={{ background: 'var(--bg-elevated)', color: corPrimaria }}
               >
                 <Clock className="w-4 h-4" />
@@ -275,7 +267,7 @@ export default function EstudarPage() {
               </div>
             )}
 
-            {!(status === 'OK' && questao) && <div className="w-16 lg:hidden" />}
+            {!(status === 'OK' && questao) && <div className="w-11 mobile-only" />}
           </div>
 
           {/* Linha 2: Progress da semana */}
@@ -303,9 +295,9 @@ export default function EstudarPage() {
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CONTEÚDO
+          CONTEÚDO - Otimizado para Mobile
           ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full flex flex-col">
+      <main className="flex-1 max-w-2xl mx-auto mobile-content w-full flex flex-col">
         {status === 'OK' && questao ? (
           <div className="flex-1 flex flex-col animate-fade-in">
             {/* Tags */}
@@ -317,17 +309,14 @@ export default function EstudarPage() {
             </div>
 
             {/* Enunciado */}
-            <div
-              className="p-4 rounded-xl mb-3 flex-shrink-0"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-            >
-              <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+            <div className="card-compact mb-2 flex-shrink-0">
+              <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
                 {formatarFormula(questao.enunciado)}
               </p>
             </div>
 
-            {/* Alternativas */}
-            <div className="space-y-2 flex-shrink-0">
+            {/* Alternativas - Compactas para Mobile */}
+            <div className="space-y-1.5 flex-shrink-0">
               {alternativas.map(({ letra, texto }) => {
                 const style = getAlternativaStyle(letra)
                 return (
@@ -335,14 +324,12 @@ export default function EstudarPage() {
                     key={letra}
                     onClick={() => !feedback && !respondendo && setSelecionada(letra)}
                     disabled={!!feedback || respondendo}
-                    className="w-full min-h-[52px] px-3 py-3 rounded-xl flex items-center gap-3 transition-all active:scale-[0.98] text-left"
+                    className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
                     style={style}
                   >
                     <span
-                      className="w-9 h-9 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
                       style={{
-                        // Se acertou: verde na selecionada (que é a correta)
-                        // Se errou: vermelho na selecionada (NÃO revelar a correta)
                         background: feedback && feedback.correta && letra === selecionada
                           ? 'var(--success)'
                           : feedback && !feedback.correta && letra === selecionada
@@ -355,20 +342,19 @@ export default function EstudarPage() {
                           : 'var(--text-muted)',
                       }}
                     >
-                      {/* Se acertou: mostrar check na selecionada */}
                       {feedback && feedback.correta && letra === selecionada ? (
-                        <CheckCircle2 className="w-5 h-5" />
+                        <CheckCircle2 className="w-4 h-4" />
                       ) : feedback && !feedback.correta && letra === selecionada ? (
-                        <XCircle className="w-5 h-5" />
+                        <XCircle className="w-4 h-4" />
                       ) : (
                         letra
                       )}
                     </span>
-                    <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
+                    <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
                       {formatarFormula(texto)}
                     </span>
                     {!feedback && selecionada === letra && (
-                      <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
                     )}
                   </button>
                 )

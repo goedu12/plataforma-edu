@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, RotateCcw, CheckCircle2, XCircle, WifiOff, RefreshCw, BookOpen, Clock, Lightbulb, Trophy, AlertCircle } from 'lucide-react'
+import { RotateCcw, CheckCircle2, XCircle, WifiOff, RefreshCw, BookOpen, Clock, Lightbulb, Trophy, AlertCircle } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
@@ -208,22 +209,13 @@ export default function RevisaoPage() {
       <NavigationRail componente={componente} />
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HEADER COMPACTO - Estilo Desafio (cor warning)
+          HEADER COMPACTO - Mobile-First
           ═══════════════════════════════════════════════════════════════════ */}
-      <header
-        className="px-4 py-2 sticky top-0 z-10 flex-shrink-0"
-        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-      >
+      <header className="mobile-header flex-shrink-0">
         <div className="max-w-2xl mx-auto">
           {/* Linha 1: Navegação + Título + Timer */}
           <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-lg lg:hidden"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
 
             <div className="flex items-center gap-2">
               <RotateCcw className="w-4 h-4" style={{ color: 'var(--warning)' }} />
@@ -235,7 +227,7 @@ export default function RevisaoPage() {
             {/* Timer */}
             {status === 'OK' && questao && (
               <div
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-mono text-sm"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-sm"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--warning)' }}
               >
                 <Clock className="w-4 h-4" />
@@ -243,7 +235,7 @@ export default function RevisaoPage() {
               </div>
             )}
 
-            {!(status === 'OK' && questao) && <div className="w-16 lg:hidden" />}
+            {!(status === 'OK' && questao) && <div className="w-11 mobile-only" />}
           </div>
 
           {/* Linha 2: Progress de pendentes */}

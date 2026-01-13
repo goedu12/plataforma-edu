@@ -14,7 +14,6 @@ import {
   Target,
   TrendingUp,
   RefreshCw,
-  ArrowLeft,
   Filter,
   Atom,
   Calculator,
@@ -29,6 +28,7 @@ import {
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -253,30 +253,21 @@ export default function DashboardAoVivoPage() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header
-        className="sticky top-0 z-10 px-4 py-4"
-        style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}
-      >
+      <header className="mobile-header">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push('/professor/dashboard')}
-                className="p-2 rounded-lg transition-colors hover:bg-[var(--bg-elevated)]"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+              <BackButton href="/professor/dashboard" />
               <div className="flex items-center gap-2">
                 <div className="relative">
                   <Radio className="w-5 h-5" style={{ color: 'var(--success)' }} />
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success rounded-full animate-pulse" />
                 </div>
                 <div>
-                  <h1 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Acompanhamento ao Vivo
+                  <h1 className="font-display text-base sm:text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                    Ao Vivo
                   </h1>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  <p className="text-xs hidden sm:block" style={{ color: 'var(--text-muted)' }}>
                     Atualização: {autoRefresh ? `a cada ${intervalo}s` : 'pausada'}
                     {ultimaAtualizacao && (
                       <span className="ml-2">

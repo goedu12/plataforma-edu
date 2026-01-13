@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   RefreshCw,
   WifiOff,
   Target,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
@@ -182,14 +182,8 @@ export default function NotasPage() {
 
       <div className="h-full flex flex-col max-w-lg mx-auto px-4 py-4">
         {/* Header Padronizado */}
-        <header className="flex items-center justify-between mb-4">
-          <button
-            onClick={() => router.push(`/${componente}/menu`)}
-            className="w-10 h-10 flex items-center justify-center rounded-lg lg:hidden"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+        <header className="flex items-center justify-between mb-3">
+          <BackButton href={`/${componente}/menu`} className="mobile-only" />
 
           <div className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5" style={{ color: corPrimaria }} />

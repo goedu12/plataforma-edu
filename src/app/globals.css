@@ -989,6 +989,130 @@ img {
   .delay-150 { animation-delay: 150ms; }
   .delay-200 { animation-delay: 200ms; }
   .delay-300 { animation-delay: 300ms; }
+
+  /* ─────────────────────────────────────────────────────────
+     BACK BUTTON - SEMPRE VERDE E DESTACADO
+     ───────────────────────────────────────────────────────── */
+  .back-button {
+    @apply flex items-center justify-center gap-2 rounded-xl font-semibold;
+    @apply transition-all duration-200 active:scale-95;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 10px;
+    background: var(--color-fisica);
+    color: #000;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+  }
+  .back-button:hover {
+    background: var(--color-fisica-light);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  }
+  .back-button:active {
+    background: var(--color-fisica-dark);
+  }
+  .back-button-label {
+    padding: 10px 16px;
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     MOBILE-FIRST UTILITIES
+     ───────────────────────────────────────────────────────── */
+
+  /* Compact spacing for mobile */
+  .compact-mobile {
+    @apply p-3 sm:p-4;
+  }
+  .compact-mobile-y {
+    @apply py-2 sm:py-3;
+  }
+  .compact-mobile-x {
+    @apply px-3 sm:px-4;
+  }
+
+  /* Compact gaps */
+  .gap-compact {
+    @apply gap-2 sm:gap-3;
+  }
+
+  /* Compact text */
+  .text-compact {
+    @apply text-sm sm:text-base;
+  }
+  .text-compact-sm {
+    @apply text-xs sm:text-sm;
+  }
+
+  /* Mobile header - compact and sticky */
+  .mobile-header {
+    @apply sticky top-0 z-20 px-3 py-2 sm:px-4 sm:py-3;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-default);
+    backdrop-filter: blur(8px);
+  }
+
+  /* Mobile content area - optimized padding */
+  .mobile-content {
+    @apply px-3 py-3 sm:px-4 sm:py-4;
+  }
+
+  /* Compact card for mobile */
+  .card-compact {
+    @apply rounded-xl p-3 sm:p-4;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+  }
+
+  /* Grid that adapts well to mobile */
+  .grid-mobile {
+    @apply grid grid-cols-2 gap-2 sm:gap-3;
+  }
+
+  /* Full width on mobile, auto on desktop */
+  .w-mobile-full {
+    @apply w-full sm:w-auto;
+  }
+
+  /* Hide on mobile, show on desktop */
+  .desktop-only {
+    @apply hidden lg:flex;
+  }
+
+  /* Show on mobile, hide on desktop */
+  .mobile-only {
+    @apply flex lg:hidden;
+  }
+
+  /* Compact list item for mobile */
+  .list-item-compact {
+    @apply rounded-xl px-3 py-2.5 sm:px-4 sm:py-3;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+  }
+
+  /* Minimal scroll container */
+  .scroll-minimal {
+    @apply overflow-y-auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Fixed bottom action bar for mobile */
+  .action-bar-bottom {
+    @apply fixed bottom-0 left-0 right-0 p-3 z-30;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-default);
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+  }
+
+  /* Page with bottom action bar */
+  .pb-action-bar {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
+  }
+
+  /* Flex column that fills available space */
+  .flex-fill {
+    @apply flex flex-col flex-1 min-h-0;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
