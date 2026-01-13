@@ -5,7 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import { RotateCcw, CheckCircle2, XCircle, WifiOff, RefreshCw, BookOpen, Clock, Lightbulb, Trophy, AlertCircle } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
-import Badge from '@/components/ui/Badge'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
@@ -37,7 +36,6 @@ export default function RevisaoPage() {
   const [errouEm, setErrouEm] = useState<string | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Estados da questão
   const [selecionada, setSelecionada] = useState<Alternativa | null>(null)
   const [mostrarDica, setMostrarDica] = useState(false)
   const [usouDica, setUsouDica] = useState(false)
@@ -135,13 +133,12 @@ export default function RevisaoPage() {
       if (data.sucesso) {
         setFeedback({
           correta: data.correta,
-          respostaCorreta: data.resposta_correta as Alternativa, // Usar resposta da API
-          explicacao: data.explicacao || 'Continue revisando para fixar o conteúdo!',
+          respostaCorreta: data.resposta_correta as Alternativa,
+          explicacao: data.explicacao || '',
           pontosGanhos: data.pontos_ganhos,
           conquistasDesbloqueadas: data.conquistas_desbloqueadas || [],
         })
 
-        // Atualizar contador de revisões
         if (data.correta && totalRevisao > 0) {
           setTotalRevisao(prev => prev - 1)
         }
@@ -158,22 +155,16 @@ export default function RevisaoPage() {
 
   const getAlternativaStyle = (letra: Alternativa) => {
     if (feedback) {
-      // Só mostra verde se o estudante ACERTOU
       if (feedback.correta && letra === selecionada) {
-        return { background: 'rgba(34, 197, 94, 0.15)', border: '2px solid var(--success)' }
+        return { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
       }
-      // Mostra vermelho na alternativa errada que o estudante selecionou
       if (!feedback.correta && letra === selecionada) {
-        return { background: 'rgba(239, 68, 68, 0.15)', border: '2px solid var(--error)' }
+        return { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
       }
-      // Outras alternativas ficam neutras
       return { background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', opacity: 0.5 }
     }
     if (selecionada === letra) {
-      return {
-        background: 'rgba(245, 158, 11, 0.15)',
-        border: '2px solid var(--warning)',
-      }
+      return { background: 'rgba(245, 158, 11, 0.15)', border: '2px solid var(--warning)' }
     }
     return { background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }
   }
@@ -202,368 +193,324 @@ export default function RevisaoPage() {
   ] : []
 
   const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
-  const dificuldadeColor = { facil: 'success', medio: 'warning', dificil: 'error' } as const
+  const dificuldadeColor = { facil: '#10b981', medio: '#f59e0b', dificil: '#ef4444' } as const
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          HEADER COMPACTO - Mobile-First
-          ═══════════════════════════════════════════════════════════════════ */}
-      <header className="mobile-header flex-shrink-0">
-        <div className="max-w-2xl mx-auto">
-          {/* Linha 1: Navegação + Título + Timer */}
-          <div className="flex items-center justify-between gap-2">
-            <BackButton href={`/${componente}/menu`} mobileOnly />
+      {status === 'OK' && questao ? (
+        <>
+          {/* ══════════════════════════════════════════════════════════════════
+              HEADER ULTRA COMPACTO
+              ══════════════════════════════════════════════════════════════════ */}
+          <header className="header-chromebook flex-shrink-0">
+            <div className="max-w-2xl mx-auto">
+              <div className="flex items-center gap-2 lg:gap-3">
+                <BackButton href={`/${componente}/menu`} mobileOnly />
 
-            <div className="flex items-center gap-2">
-              <RotateCcw className="w-4 h-4" style={{ color: 'var(--warning)' }} />
-              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                Revisar
-              </span>
-            </div>
+                {/* Tags inline - desktop */}
+                <div className="hidden lg:flex items-center gap-1.5">
+                  <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                    {questao.tema}
+                  </span>
+                  <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: dificuldadeColor[questao.dificuldade] }}>
+                    {dificuldadeLabel[questao.dificuldade]}
+                  </span>
+                  <span className="badge-chromebook" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}>
+                    Revisão
+                  </span>
+                </div>
 
-            {/* Timer */}
-            {status === 'OK' && questao && (
-              <div
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-sm"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--warning)' }}
-              >
-                <Clock className="w-4 h-4" />
-                <span>{formatarTempo(tempoDecorrido)}</span>
-              </div>
-            )}
+                <div className="flex items-center gap-1.5 flex-1 lg:flex-none lg:ml-auto">
+                  <RotateCcw className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--warning)' }} />
+                  <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>
+                    Revisar
+                  </span>
+                </div>
 
-            {!(status === 'OK' && questao) && <div className="w-11 mobile-only" />}
-          </div>
+                {/* Timer */}
+                <div className="timer-chromebook" style={{ color: 'var(--warning)' }}>
+                  <Clock className="w-3.5 h-3.5 lg:w-3 lg:h-3" />
+                  <span>{formatarTempo(tempoDecorrido)}</span>
+                </div>
 
-          {/* Linha 2: Progress de pendentes */}
-          {status === 'OK' && totalRevisao > 0 && (
-            <div className="flex items-center gap-2 mt-2">
-              <div className="flex gap-1 flex-1">
-                {Array.from({ length: Math.min(totalRevisao, 10) }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 h-1.5 rounded-full transition-all"
-                    style={{ background: 'var(--warning)' }}
-                  />
-                ))}
-                {totalRevisao > 10 && (
-                  <div className="flex-1 h-1.5 rounded-full" style={{ background: 'var(--bg-elevated)' }} />
+                {/* Progress inline - desktop */}
+                {totalRevisao > 0 && (
+                  <div className="hidden lg:flex items-center gap-1.5">
+                    <div className="flex gap-0.5">
+                      {Array.from({ length: Math.min(totalRevisao, 10) }).map((_, index) => (
+                        <div key={index} className="w-1.5 h-3 rounded-sm" style={{ background: 'var(--warning)' }} />
+                      ))}
+                    </div>
+                    <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                      {totalRevisao} pend.
+                    </span>
+                  </div>
                 )}
               </div>
-              <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                {totalRevisao} {totalRevisao === 1 ? 'pendente' : 'pendentes'}
-              </span>
-            </div>
-          )}
-        </div>
-      </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          CONTEÚDO - Otimizado para Mobile e Chromebook
-          ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col overflow-hidden">
-        {status === 'OK' && questao ? (
-          <div className="flex-1 flex flex-col min-h-0">
-            {/* Área scrollável */}
-            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 space-y-2">
-              {/* Info de quando errou */}
-              {errouEm && (
-                <div
-                  className="px-3 py-2 rounded-lg flex items-center gap-2"
-                  style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
-                >
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--warning)' }} />
-                  <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                    Você errou esta questão em {formatarDataErro(errouEm)}
+              {/* Progress mobile */}
+              {totalRevisao > 0 && (
+                <div className="flex lg:hidden items-center gap-2 mt-1.5">
+                  <div className="flex gap-0.5 flex-1">
+                    {Array.from({ length: Math.min(totalRevisao, 10) }).map((_, index) => (
+                      <div key={index} className="flex-1 h-1 rounded-full" style={{ background: 'var(--warning)' }} />
+                    ))}
+                  </div>
+                  <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                    {totalRevisao} pendentes
                   </span>
                 </div>
               )}
+            </div>
+          </header>
 
-              {/* Tags */}
-              <div className="flex items-center gap-2">
-                <Badge variant={componente}>{questao.tema}</Badge>
-                <Badge variant={dificuldadeColor[questao.dificuldade]}>
-                  {dificuldadeLabel[questao.dificuldade]}
-                </Badge>
-                <Badge variant="warning">Revisão</Badge>
-              </div>
+          {/* ══════════════════════════════════════════════════════════════════
+              CONTEÚDO - Tudo visível sem scroll no Chromebook
+              ══════════════════════════════════════════════════════════════════ */}
+          <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Área de conteúdo */}
+              <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 space-chromebook">
+                {/* Info de quando errou - só mobile */}
+                {errouEm && (
+                  <div className="lg:hidden px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                    <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--warning)' }} />
+                    <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
+                      Você errou em {formatarDataErro(errouEm)}
+                    </span>
+                  </div>
+                )}
 
-              {/* Enunciado */}
-              <div className="card-compact">
-                <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                  {formatarFormula(questao.enunciado)}
-                </p>
-              </div>
+                {/* Tags mobile */}
+                <div className="flex lg:hidden items-center gap-1.5">
+                  <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                    {questao.tema}
+                  </span>
+                  <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: dificuldadeColor[questao.dificuldade] }}>
+                    {dificuldadeLabel[questao.dificuldade]}
+                  </span>
+                  <span className="badge-chromebook" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}>
+                    Revisão
+                  </span>
+                </div>
 
-              {/* Alternativas */}
-              <div className="space-y-1.5">
-                {alternativas.map(({ letra, texto }) => {
-                  const style = getAlternativaStyle(letra)
-                  return (
-                    <button
-                      key={letra}
-                      onClick={() => !feedback && !respondendo && setSelecionada(letra)}
-                      disabled={!!feedback || respondendo}
-                      className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
-                      style={style}
-                    >
-                      <span
-                        className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
-                        style={{
-                          background: feedback && feedback.correta && letra === selecionada
-                            ? 'var(--success)'
-                            : feedback && !feedback.correta && letra === selecionada
-                              ? 'var(--error)'
-                              : selecionada === letra
-                                ? 'var(--warning)'
-                                : 'var(--bg-elevated)',
-                          color: (feedback && letra === selecionada) || selecionada === letra
-                            ? '#000'
-                            : 'var(--text-muted)',
-                        }}
+                {/* Enunciado */}
+                <div className="card-chromebook">
+                  <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
+                    {formatarFormula(questao.enunciado)}
+                  </p>
+                </div>
+
+                {/* Alternativas - Ultra compactas */}
+                <div className="space-chromebook">
+                  {alternativas.map(({ letra, texto }) => {
+                    const style = getAlternativaStyle(letra)
+                    return (
+                      <button
+                        key={letra}
+                        onClick={() => !feedback && !respondendo && setSelecionada(letra)}
+                        disabled={!!feedback || respondendo}
+                        className="alternativa-chromebook"
+                        style={style}
                       >
-                        {feedback && feedback.correta && letra === selecionada ? (
-                          <CheckCircle2 className="w-4 h-4" />
-                        ) : feedback && !feedback.correta && letra === selecionada ? (
-                          <XCircle className="w-4 h-4" />
-                        ) : (
-                          letra
+                        <span
+                          className="alternativa-letra-compact"
+                          style={{
+                            background: feedback && feedback.correta && letra === selecionada
+                              ? 'var(--success)'
+                              : feedback && !feedback.correta && letra === selecionada
+                                ? 'var(--error)'
+                                : selecionada === letra
+                                  ? 'var(--warning)'
+                                  : 'var(--bg-elevated)',
+                            color: (feedback && letra === selecionada) || selecionada === letra
+                              ? '#000'
+                              : 'var(--text-muted)',
+                          }}
+                        >
+                          {feedback && feedback.correta && letra === selecionada ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : feedback && !feedback.correta && letra === selecionada ? (
+                            <XCircle className="w-3.5 h-3.5" />
+                          ) : (
+                            letra
+                          )}
+                        </span>
+                        <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
+                          {formatarFormula(texto)}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Dica - compacta */}
+                {!feedback && questao.dica && (
+                  <div>
+                    {mostrarDica ? (
+                      <div className="feedback-chromebook" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px dashed var(--border-default)' }}>
+                        <div className="flex items-center gap-1 mb-0.5">
+                          <Lightbulb className="icon-chromebook" style={{ color: 'var(--warning)' }} />
+                          <span className="text-[10px] font-medium" style={{ color: 'var(--warning)' }}>Dica</span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setMostrarDica(true); setUsouDica(true) }}
+                        className="w-full py-1.5 lg:py-1 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs lg:text-[11px]"
+                        style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
+                      >
+                        <Lightbulb className="icon-chromebook" />
+                        <span>Ver dica</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Feedback compacto */}
+                {feedback && (
+                  <div
+                    className="feedback-chromebook flex items-center gap-2"
+                    style={{
+                      background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                      border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                    }}
+                  >
+                    <div
+                      className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
+                      style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                    >
+                      {feedback.correta ? <CheckCircle2 className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold" style={{ color: feedback.correta ? 'var(--success)' : 'var(--error)' }}>
+                          {feedback.correta ? 'Correto!' : 'Incorreto'}
+                        </span>
+                        {feedback.correta && feedback.pontosGanhos > 0 && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}>
+                            +{feedback.pontosGanhos} pts
+                          </span>
                         )}
+                        <span className="text-[10px] ml-auto" style={{ color: feedback.correta ? 'var(--success)' : 'var(--text-muted)' }}>
+                          {feedback.correta ? 'Removida da revisão' : 'Tente novamente'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Conquistas - inline */}
+                {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <Trophy className="w-3.5 h-3.5" style={{ color: 'var(--warning)' }} />
+                    {feedback.conquistasDesbloqueadas.map((c, i) => (
+                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}>
+                        {c.icone} {c.nome}
                       </span>
-                      <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                        {formatarFormula(texto)}
-                      </span>
-                      {!feedback && selecionada === letra && (
-                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--warning)' }} />
-                      )}
-                    </button>
-                  )
-                })}
+                    ))}
+                  </div>
+                )}
+
+                {/* Erro */}
+                {erro && (
+                  <div className="feedback-chromebook" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                    <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
+                  </div>
+                )}
               </div>
 
-            {/* Dica */}
-            {!feedback && questao.dica && (
-              <div className="mb-3">
-                {mostrarDica ? (
-                  <div
-                    className="p-3 rounded-xl"
-                    style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px dashed var(--border-default)' }}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <Lightbulb className="w-4 h-4" style={{ color: 'var(--warning)' }} />
-                      <span className="text-xs font-medium" style={{ color: 'var(--warning)' }}>Dica</span>
-                    </div>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
+              {/* ══════════════════════════════════════════════════════════════════
+                  BOTÕES FIXOS - Sempre visíveis
+                  ══════════════════════════════════════════════════════════════════ */}
+              <div className="actions-chromebook flex-shrink-0">
+                {feedback ? (
+                  <div className="flex gap-2">
+                    <Button variant="secondary" onClick={handleVoltar} className="flex-1 btn-chromebook">
+                      Menu
+                    </Button>
+                    <button
+                      onClick={buscarQuestao}
+                      className="flex-1 btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98]"
+                      style={{ background: 'var(--warning)', color: '#000' }}
+                    >
+                      Próxima
+                    </button>
                   </div>
                 ) : (
                   <button
-                    onClick={() => { setMostrarDica(true); setUsouDica(true) }}
-                    className="w-full py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                    style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
+                    onClick={handleConfirmar}
+                    disabled={!selecionada || respondendo}
+                    className="w-full btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
+                    style={{
+                      background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
+                      color: selecionada ? '#000' : 'var(--text-muted)'
+                    }}
                   >
-                    <Lightbulb className="w-4 h-4" />
-                    <span className="text-sm">Precisa de ajuda? Ver dica</span>
+                    {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione'}
                   </button>
                 )}
               </div>
-            )}
-
-            {/* Conquistas */}
-            {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
-              <div
-                className="rounded-xl p-3 mb-3 text-center animate-fade-in"
-                style={{ background: 'rgba(245, 158, 11, 0.15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
-              >
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Trophy className="w-4 h-4" style={{ color: 'var(--warning)' }} />
-                  <span className="font-bold text-sm" style={{ color: 'var(--warning)' }}>Nova Conquista!</span>
-                </div>
-                <div className="flex flex-wrap justify-center gap-1">
-                  {feedback.conquistasDesbloqueadas.map((c, i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}>
-                      {c.icone} {c.nome}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Feedback */}
-            {feedback && (
-              <div
-                className="rounded-xl p-3 mb-3 animate-fade-in"
-                style={{
-                  background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
-                }}
-              >
-                <div className="flex items-start gap-3">
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
-                  >
-                    {feedback.correta ? <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} /> : <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm" style={{ color: feedback.correta ? 'var(--success)' : 'var(--error)' }}>
-                        {feedback.correta ? 'Correto!' : 'Incorreto'}
-                      </span>
-                      {feedback.correta && feedback.pontosGanhos > 0 && (
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}>
-                          +{feedback.pontosGanhos} pts
-                        </span>
-                      )}
-                    </div>
-                    {feedback.explicacao && (
-                      <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(feedback.explicacao)}</p>
-                    )}
-                    <p className="text-xs mt-2" style={{ color: feedback.correta ? 'var(--success)' : 'var(--text-muted)' }}>
-                      {feedback.correta ? 'Questão removida da revisão' : 'Tente novamente na próxima'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Erro */}
-            {erro && (
-              <div className="rounded-xl p-3 mb-3" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
-              </div>
-            )}
-
             </div>
-            {/* Fim da área scrollável */}
-
-            {/* Botões - FIXOS na parte inferior */}
+          </main>
+        </>
+      ) : status === 'SEM_REVISAO' ? (
+        /* ══════════════════════════════════════════════════════════════════
+           TUDO REVISADO
+           ══════════════════════════════════════════════════════════════════ */
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="card-chromebook p-6 text-center max-w-md w-full">
             <div
-              className="flex-shrink-0 px-3 py-3 sm:px-4 sm:py-4 flex gap-2"
-              style={{
-                background: 'var(--bg-surface)',
-                borderTop: '1px solid var(--border-default)',
-              }}
+              className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
+              style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', border: `1px solid ${corPrimaria}` }}
             >
-              {feedback ? (
-                <>
-                  <Button variant="secondary" onClick={handleVoltar} className="flex-1 min-h-[48px]">
-                    Menu
-                  </Button>
-                  <button
-                    onClick={buscarQuestao}
-                    className="flex-1 min-h-[48px] rounded-xl font-semibold transition-all active:scale-[0.98]"
-                    style={{ background: 'var(--warning)', color: '#000' }}
-                  >
-                    Próxima
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={handleConfirmar}
-                  disabled={!selecionada || respondendo}
-                  className="w-full min-h-[52px] text-base rounded-xl font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
-                  style={{
-                    background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
-                    color: selecionada ? '#000' : 'var(--text-muted)'
-                  }}
-                >
-                  {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione uma alternativa'}
-                </button>
-              )}
-            </div>
-          </div>
-        ) : status === 'SEM_REVISAO' ? (
-          /* ═══════════════════════════════════════════════════════════════
-             TUDO REVISADO
-             ═══════════════════════════════════════════════════════════════ */
-          <div
-            className="rounded-2xl p-6 text-center animate-fade-in-up"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
-            <div
-              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{
-                background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                border: `1px solid ${corPrimaria}`,
-              }}
-            >
-              <CheckCircle2 className="w-7 h-7" style={{ color: corPrimaria }} />
+              <CheckCircle2 className="w-6 h-6" style={{ color: corPrimaria }} />
             </div>
 
-            <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h2 className="text-base font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
               Tudo Revisado!
             </h2>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>
-              Você não tem questões de {nomeComponente} para revisar!
-            </p>
-            <p className="text-xs mb-6" style={{ color: 'var(--text-muted)' }}>
-              Continue estudando para aprender novos conteúdos.
+            <p className="text-xs mb-4" style={{ color: 'var(--text-secondary)' }}>
+              Você não tem questões de {nomeComponente} para revisar. Continue estudando!
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button
-                variant="secondary"
-                onClick={() => router.push(`/${componente}/estudar`)}
-                leftIcon={<BookOpen className="w-4 h-4" />}
-                className="min-h-[48px]"
-              >
-                Estudar Novas
+            <div className="flex gap-2 justify-center">
+              <Button variant="secondary" onClick={() => router.push(`/${componente}/estudar`)} leftIcon={<BookOpen className="w-3.5 h-3.5" />} className="btn-chromebook">
+                Estudar
               </Button>
-              <Button
-                variant={isFisica ? 'fisica' : 'matematica'}
-                onClick={handleVoltar}
-                className="min-h-[48px]"
-              >
-                Voltar ao Menu
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar} className="btn-chromebook">
+                Menu
               </Button>
             </div>
           </div>
-        ) : status === 'ERRO' ? (
-          /* ═══════════════════════════════════════════════════════════════
-             ERRO
-             ═══════════════════════════════════════════════════════════════ */
-          <div
-            className="rounded-2xl p-6 text-center animate-fade-in-up"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
-            <div
-              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
-            >
-              <WifiOff className="w-7 h-7" style={{ color: 'var(--error)' }} />
+        </main>
+      ) : status === 'ERRO' ? (
+        /* ══════════════════════════════════════════════════════════════════
+           ERRO
+           ══════════════════════════════════════════════════════════════════ */
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="card-chromebook p-6 text-center max-w-md w-full">
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+              <WifiOff className="w-6 h-6" style={{ color: 'var(--error)' }} />
             </div>
 
-            <h2 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              Ops! Erro
-            </h2>
-            <p className="text-sm mb-1" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
-            <p className="text-xs mb-6" style={{ color: 'var(--text-muted)' }}>
-              Tente novamente ou volte mais tarde.
-            </p>
+            <h2 className="text-base font-bold mb-1" style={{ color: 'var(--text-primary)' }}>Erro</h2>
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>{erro}</p>
 
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button
-                variant="secondary"
-                onClick={buscarQuestao}
-                leftIcon={<RefreshCw className="w-4 h-4" />}
-                className="min-h-[48px]"
-              >
-                Tentar Novamente
+            <div className="flex gap-2 justify-center">
+              <Button variant="secondary" onClick={buscarQuestao} leftIcon={<RefreshCw className="w-3.5 h-3.5" />} className="btn-chromebook">
+                Tentar
               </Button>
-              <Button
-                variant={isFisica ? 'fisica' : 'matematica'}
-                onClick={handleVoltar}
-                className="min-h-[48px]"
-              >
-                Voltar ao Menu
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar} className="btn-chromebook">
+                Menu
               </Button>
             </div>
           </div>
-        ) : null}
-      </main>
+        </main>
+      ) : null}
 
       <BottomNav componente={componente} />
     </div>

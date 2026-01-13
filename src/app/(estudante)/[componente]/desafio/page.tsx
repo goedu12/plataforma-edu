@@ -204,13 +204,12 @@ export default function DesafioPage() {
       <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
         <NavigationRail componente={componente} />
 
-        {/* Header Compacto */}
-        <header className="mobile-header" style={{ background: corPrimaria, borderColor: 'transparent' }}>
+        <header className="header-chromebook" style={{ background: corPrimaria, borderColor: 'transparent' }}>
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
-              <h1 className="font-semibold" style={{ color: isFisica ? '#000' : '#fff' }}>
+              <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: isFisica ? '#000' : '#fff' }} />
+              <h1 className="font-semibold text-sm lg:text-xs" style={{ color: isFisica ? '#000' : '#fff' }}>
                 Resultado
               </h1>
             </div>
@@ -218,91 +217,79 @@ export default function DesafioPage() {
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-4 py-6">
-          {/* Card de Resultado */}
-          <div
-            className="rounded-2xl p-6 text-center animate-fade-in-up"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
+        <main className="max-w-2xl mx-auto px-3 py-4 lg:px-4 lg:py-3">
+          {/* Card de Resultado - Compacto */}
+          <div className="card-chromebook text-center p-4 lg:p-3">
             <div
-              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+              className="w-12 h-12 lg:w-10 lg:h-10 rounded-full mx-auto mb-2 flex items-center justify-center"
               style={{
                 background: isPerfeito || porcentagem >= 60 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                 border: `2px solid ${isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)'}`,
               }}
             >
               <Trophy
-                className="w-8 h-8"
+                className="w-6 h-6 lg:w-5 lg:h-5"
                 style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
               />
             </div>
 
             <p
-              className="text-4xl font-bold"
+              className="text-2xl lg:text-xl font-bold"
               style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
             >
               {resultado.acertos}/{resultado.total}
             </p>
-            <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
               {isPerfeito ? 'Perfeito!' : porcentagem >= 60 ? 'Bom trabalho!' : 'Continue praticando!'}
             </p>
 
-            <div
-              className="mt-4 rounded-xl p-3"
-              style={{ background: 'var(--bg-elevated)' }}
-            >
-              <p className="text-xl font-bold" style={{ color: 'var(--success)' }}>
-                +{resultado.pontos_ganhos} pontos
+            <div className="mt-2 rounded-lg p-2" style={{ background: 'var(--bg-elevated)' }}>
+              <p className="text-lg lg:text-base font-bold" style={{ color: 'var(--success)' }}>
+                +{resultado.pontos_ganhos} pts
               </p>
               {resultado.bonus_perfeito && (
-                <p className="text-xs mt-1" style={{ color: 'var(--warning)' }}>
-                  Incluindo bônus perfeito!
-                </p>
+                <p className="text-[10px]" style={{ color: 'var(--warning)' }}>Bônus perfeito!</p>
               )}
             </div>
           </div>
 
-          {/* Lista de Respostas */}
-          <div className="mt-4 space-y-2">
-            <p className="text-xs font-medium px-1" style={{ color: 'var(--text-muted)' }}>
+          {/* Lista de Respostas - Compacta */}
+          <div className="mt-3 space-y-1">
+            <p className="text-[10px] font-medium px-1" style={{ color: 'var(--text-muted)' }}>
               Suas Respostas
             </p>
             {resultado.resultados.map((r, index) => (
               <div
                 key={r.questao_id}
-                className="rounded-xl p-3 flex items-center gap-3"
+                className="rounded-lg p-2 flex items-center gap-2"
                 style={{
                   background: 'var(--bg-surface)',
                   border: `1px solid ${r.correta ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
                 }}
               >
                 <div
-                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
                   style={{ background: r.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)' }}
                 >
                   {r.correta ? (
-                    <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} />
+                    <CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />
                   ) : (
-                    <XCircle className="w-5 h-5" style={{ color: 'var(--error)' }} />
+                    <XCircle className="w-3.5 h-3.5" style={{ color: 'var(--error)' }} />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm" style={{ color: 'var(--text-primary)' }}>
-                    Questão {index + 1}
-                  </p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Sua resposta: {r.resposta_dada || '—'} • {r.correta ? 'Acertou!' : 'Errou'}
+                  <p className="font-medium text-xs" style={{ color: 'var(--text-primary)' }}>
+                    Q{index + 1}: {r.resposta_dada || '—'} {r.correta ? '✓' : '✗'}
                   </p>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Botão Voltar */}
           <Button
             variant={isFisica ? 'fisica' : 'matematica'}
             onClick={handleVoltar}
-            className="w-full mt-6 min-h-[52px]"
+            className="w-full mt-4 btn-chromebook"
           >
             Voltar ao Menu
           </Button>
@@ -321,39 +308,34 @@ export default function DesafioPage() {
       <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
         <NavigationRail componente={componente} />
 
-        <header className="mobile-header">
+        <header className="header-chromebook">
           <div className="max-w-2xl mx-auto flex items-center justify-between">
             <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5" style={{ color: corPrimaria }} />
-              <h1 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Modo Desafio
-              </h1>
+              <Zap className="w-4 h-4" style={{ color: corPrimaria }} />
+              <h1 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Desafio</h1>
             </div>
             <div className="w-11 mobile-only" />
           </div>
         </header>
 
         <main className="max-w-2xl mx-auto px-4 py-8">
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
+          <div className="card-chromebook p-6 text-center">
             <div
-              className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
+              className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
               style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
             >
-              <WifiOff className="w-7 h-7" style={{ color: 'var(--error)' }} />
+              <WifiOff className="w-6 h-6" style={{ color: 'var(--error)' }} />
             </div>
-            <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+            <h2 className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>
               {status === 'SEM_QUESTOES' ? 'Questões Insuficientes' : 'Erro'}
             </h2>
-            <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>{erro}</p>
-            <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-center">
-              <Button variant="secondary" onClick={iniciarDesafio} leftIcon={<RefreshCw className="w-4 h-4" />}>
-                Tentar Novamente
+            <p className="mt-1 text-xs" style={{ color: 'var(--text-muted)' }}>{erro}</p>
+            <div className="flex gap-2 mt-4 justify-center">
+              <Button variant="secondary" onClick={iniciarDesafio} leftIcon={<RefreshCw className="w-3.5 h-3.5" />} className="btn-chromebook">
+                Tentar
               </Button>
-              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar}>
+              <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={handleVoltar} className="btn-chromebook">
                 Voltar
               </Button>
             </div>
@@ -366,7 +348,7 @@ export default function DesafioPage() {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // TELA DO DESAFIO EM ANDAMENTO - OTIMIZADA
+  // TELA DO DESAFIO EM ANDAMENTO - ULTRA COMPACTA
   // ═══════════════════════════════════════════════════════════════════════════
   const questaoAtualData = questoes[questaoAtual]
   const respostaAtual = respostas[questaoAtual]
@@ -381,47 +363,73 @@ export default function DesafioPage() {
   ] : []
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          HEADER COMPACTO - Mobile-First
-          ═══════════════════════════════════════════════════════════════════ */}
-      <header className="mobile-header flex-shrink-0">
+      {/* ══════════════════════════════════════════════════════════════════
+          HEADER ULTRA COMPACTO
+          ══════════════════════════════════════════════════════════════════ */}
+      <header className="header-chromebook flex-shrink-0">
         <div className="max-w-2xl mx-auto">
-          {/* Linha 1: Navegação + Título + Timer */}
-          <div className="flex items-center justify-between gap-2">
+          {/* Linha 1: Back + Título + Timer + Progress (desktop) */}
+          <div className="flex items-center gap-2 lg:gap-3">
             <BackButton href={`/${componente}/menu`} mobileOnly />
 
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4" style={{ color: corPrimaria }} />
-              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+            {/* Tag tema - só desktop */}
+            <span className="hidden lg:inline badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+              {questaoAtualData?.tema}
+            </span>
+
+            <div className="flex items-center gap-1.5 flex-1 lg:flex-none lg:ml-auto">
+              <Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} />
+              <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>
                 Desafio
               </span>
             </div>
 
             {/* Timer */}
             <div
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg font-mono text-sm font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
+              className={`timer-chromebook font-bold ${tempoPerigo ? 'animate-pulse' : ''}`}
               style={{
                 background: tempoPerigo ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-elevated)',
                 color: tempoPerigo ? 'var(--error)' : corPrimaria,
-                border: `1px solid ${tempoPerigo ? 'rgba(239, 68, 68, 0.3)' : 'var(--border-default)'}`,
+                border: `1px solid ${tempoPerigo ? 'rgba(239, 68, 68, 0.3)' : 'transparent'}`,
               }}
             >
-              <Clock className="w-4 h-4" />
+              <Clock className="w-3 h-3" />
               <span>{formatarTempo(tempoRestante)}</span>
             </div>
-          </div>
 
-          {/* Linha 2: Progress + Counter */}
-          <div className="flex items-center gap-2 mt-2">
-            <div className="flex gap-1 flex-1">
+            {/* Progress inline - desktop */}
+            <div className="hidden lg:flex items-center gap-1">
               {questoes.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setQuestaoAtual(index)}
-                  className="flex-1 h-1.5 rounded-full transition-all"
+                  className="w-4 h-2 rounded-sm transition-all"
+                  style={{
+                    background: index === questaoAtual
+                      ? corPrimaria
+                      : respostas[index]
+                        ? isFisica ? 'rgba(34, 197, 94, 0.5)' : 'rgba(139, 92, 246, 0.5)'
+                        : 'var(--bg-elevated)',
+                  }}
+                />
+              ))}
+              <span className="text-[10px] ml-1 tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                {questaoAtual + 1}/{questoes.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Progress mobile */}
+          <div className="flex lg:hidden items-center gap-2 mt-1.5">
+            <div className="flex gap-0.5 flex-1">
+              {questoes.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setQuestaoAtual(index)}
+                  className="flex-1 h-1 rounded-full"
                   style={{
                     background: index === questaoAtual
                       ? corPrimaria
@@ -432,51 +440,45 @@ export default function DesafioPage() {
                 />
               ))}
             </div>
-            <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-[10px] tabular-nums" style={{ color: 'var(--text-muted)' }}>
               {questaoAtual + 1}/{questoes.length}
             </span>
           </div>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          CONTEÚDO - Área flexível com botões fixos
-          ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col overflow-hidden">
+      {/* ══════════════════════════════════════════════════════════════════
+          CONTEÚDO - Tudo visível sem scroll no Chromebook
+          ══════════════════════════════════════════════════════════════════ */}
+      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
         {questaoAtualData && (
           <div className="flex-1 flex flex-col min-h-0">
-            {/* Área scrollável - enunciado e alternativas */}
-            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 space-y-2">
-              {/* Tag do tema */}
-              <div className="flex items-center gap-2">
-                <span
-                  className="px-2 py-1 rounded-lg text-xs font-medium"
-                  style={{
-                    background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                    color: corPrimaria,
-                  }}
-                >
+            {/* Área de conteúdo */}
+            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 space-chromebook">
+              {/* Tag mobile */}
+              <div className="flex lg:hidden items-center gap-2">
+                <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
                   {questaoAtualData.tema}
                 </span>
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                   {respostas.filter(r => r !== null).length} respondidas
                 </span>
               </div>
 
               {/* Enunciado */}
-              <div className="card-compact">
-                <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+              <div className="card-chromebook">
+                <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
                   {formatarFormula(questaoAtualData.enunciado)}
                 </p>
               </div>
 
-              {/* Alternativas */}
-              <div className="space-y-1.5">
+              {/* Alternativas - Ultra compactas */}
+              <div className="space-chromebook">
                 {alternativas.map(({ letra, texto }) => (
                   <button
                     key={letra}
                     onClick={() => handleSelecionarResposta(letra)}
-                    className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
+                    className="alternativa-chromebook"
                     style={{
                       background: respostaAtual === letra
                         ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
@@ -485,7 +487,7 @@ export default function DesafioPage() {
                     }}
                   >
                     <span
-                      className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
+                      className="alternativa-letra-compact"
                       style={{
                         background: respostaAtual === letra ? corPrimaria : 'var(--bg-elevated)',
                         color: respostaAtual === letra ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
@@ -493,64 +495,45 @@ export default function DesafioPage() {
                     >
                       {letra}
                     </span>
-                    <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
+                    <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
                       {formatarFormula(texto)}
                     </span>
-                    {respostaAtual === letra && (
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
-                    )}
                   </button>
                 ))}
               </div>
-
-              {/* Dica compacta */}
-              <div
-                className="py-2 px-3 rounded-xl flex items-center gap-2"
-                style={{
-                  background: isFisica ? 'rgba(34, 197, 94, 0.08)' : 'rgba(139, 92, 246, 0.08)',
-                  border: '1px dashed var(--border-default)',
-                }}
-              >
-                <Lightbulb className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60}min. Bônus: +{DESAFIO.BONUS_PERFEITO}pts se acertar todas!
-                </p>
-              </div>
             </div>
 
-            {/* Botões - FIXOS na parte inferior */}
-            <div
-              className="flex-shrink-0 px-3 py-3 sm:px-4 sm:py-4"
-              style={{
-                background: 'var(--bg-surface)',
-                borderTop: '1px solid var(--border-default)',
-              }}
-            >
+            {/* ══════════════════════════════════════════════════════════════════
+                BOTÕES FIXOS - Sempre visíveis
+                ══════════════════════════════════════════════════════════════════ */}
+            <div className="actions-chromebook flex-shrink-0">
               <div className="flex gap-2">
                 <Button
                   variant="secondary"
                   onClick={handleAnterior}
                   disabled={questaoAtual === 0}
-                  className="flex-1 min-h-[48px]"
-                  leftIcon={<ArrowLeft className="w-4 h-4" />}
+                  className="flex-1 btn-chromebook"
+                  leftIcon={<ArrowLeft className="w-3.5 h-3.5" />}
                 >
-                  Anterior
+                  <span className="hidden sm:inline">Anterior</span>
+                  <span className="sm:hidden">Ant</span>
                 </Button>
                 {questaoAtual < questoes.length - 1 ? (
                   <Button
                     variant={isFisica ? 'fisica' : 'matematica'}
                     onClick={handleProxima}
-                    className="flex-1 min-h-[48px]"
-                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                    className="flex-1 btn-chromebook"
+                    rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
                   >
-                    Próxima
+                    <span className="hidden sm:inline">Próxima</span>
+                    <span className="sm:hidden">Próx</span>
                   </Button>
                 ) : (
                   <Button
                     variant={isFisica ? 'fisica' : 'matematica'}
                     onClick={() => finalizarDesafio(false)}
                     disabled={!todasRespondidas}
-                    className="flex-1 min-h-[48px]"
+                    className="flex-1 btn-chromebook"
                   >
                     Finalizar
                   </Button>
@@ -558,8 +541,8 @@ export default function DesafioPage() {
               </div>
 
               {!todasRespondidas && questaoAtual === questoes.length - 1 && (
-                <p className="text-center text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-                  Responda todas as questões para finalizar
+                <p className="text-center text-[10px] mt-1" style={{ color: 'var(--text-muted)' }}>
+                  Responda todas para finalizar
                 </p>
               )}
             </div>
