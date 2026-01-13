@@ -23,7 +23,7 @@ export default function LoginPage() {
   const [config, setConfig] = useState<Configuracoes>({
     nome_plataforma: 'seu10',
     versao: '1.0',
-    nome_instituicao: 'Colégio Cora Coralina'
+    nome_instituicao: ''
   })
 
   // Buscar configurações da plataforma
@@ -36,7 +36,7 @@ export default function LoginPage() {
           setConfig({
             nome_plataforma: data.configuracoes.nome_plataforma || 'seu10',
             versao: data.configuracoes.versao || '1.0',
-            nome_instituicao: data.configuracoes.nome_instituicao || 'Colégio Cora Coralina'
+            nome_instituicao: data.configuracoes.nome_instituicao || ''
           })
         }
       } catch {

@@ -201,7 +201,7 @@ ${mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERI
 
         {/* Branding */}
         <p className="text-center text-xs text-gray-500 mt-4">
-          📚 Plataforma EDU • Colégio Cora Coralina
+          📚 seu10.com
         </p>
       </footer>
     </div>
