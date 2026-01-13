@@ -295,71 +295,73 @@ export default function EstudarPage() {
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CONTEÚDO - Otimizado para Mobile
+          CONTEÚDO - Otimizado para Mobile e Chromebook
           ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto mobile-content w-full flex flex-col">
+      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col overflow-hidden">
         {status === 'OK' && questao ? (
-          <div className="flex-1 flex flex-col animate-fade-in">
-            {/* Tags */}
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant={componente}>{questao.tema}</Badge>
-              <Badge variant={dificuldadeColor[questao.dificuldade]}>
-                {dificuldadeLabel[questao.dificuldade]}
-              </Badge>
-            </div>
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Área scrollável - enunciado, alternativas, feedback */}
+            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 space-y-2">
+              {/* Tags */}
+              <div className="flex items-center gap-2">
+                <Badge variant={componente}>{questao.tema}</Badge>
+                <Badge variant={dificuldadeColor[questao.dificuldade]}>
+                  {dificuldadeLabel[questao.dificuldade]}
+                </Badge>
+              </div>
 
-            {/* Enunciado */}
-            <div className="card-compact mb-2 flex-shrink-0">
-              <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(questao.enunciado)}
-              </p>
-            </div>
+              {/* Enunciado */}
+              <div className="card-compact">
+                <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                  {formatarFormula(questao.enunciado)}
+                </p>
+              </div>
 
-            {/* Alternativas - Compactas para Mobile */}
-            <div className="space-y-1.5 flex-shrink-0">
-              {alternativas.map(({ letra, texto }) => {
-                const style = getAlternativaStyle(letra)
-                return (
-                  <button
-                    key={letra}
-                    onClick={() => !feedback && !respondendo && setSelecionada(letra)}
-                    disabled={!!feedback || respondendo}
-                    className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
-                    style={style}
-                  >
-                    <span
-                      className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
-                      style={{
-                        background: feedback && feedback.correta && letra === selecionada
-                          ? 'var(--success)'
-                          : feedback && !feedback.correta && letra === selecionada
-                            ? 'var(--error)'
-                            : selecionada === letra
-                              ? corPrimaria
-                              : 'var(--bg-elevated)',
-                        color: (feedback && letra === selecionada) || selecionada === letra
-                          ? isFisica ? '#000' : '#fff'
-                          : 'var(--text-muted)',
-                      }}
+              {/* Alternativas - Compactas para Mobile */}
+              <div className="space-y-1.5">
+                {alternativas.map(({ letra, texto }) => {
+                  const style = getAlternativaStyle(letra)
+                  return (
+                    <button
+                      key={letra}
+                      onClick={() => !feedback && !respondendo && setSelecionada(letra)}
+                      disabled={!!feedback || respondendo}
+                      className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
+                      style={style}
                     >
-                      {feedback && feedback.correta && letra === selecionada ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : feedback && !feedback.correta && letra === selecionada ? (
-                        <XCircle className="w-4 h-4" />
-                      ) : (
-                        letra
+                      <span
+                        className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
+                        style={{
+                          background: feedback && feedback.correta && letra === selecionada
+                            ? 'var(--success)'
+                            : feedback && !feedback.correta && letra === selecionada
+                              ? 'var(--error)'
+                              : selecionada === letra
+                                ? corPrimaria
+                                : 'var(--bg-elevated)',
+                          color: (feedback && letra === selecionada) || selecionada === letra
+                            ? isFisica ? '#000' : '#fff'
+                            : 'var(--text-muted)',
+                        }}
+                      >
+                        {feedback && feedback.correta && letra === selecionada ? (
+                          <CheckCircle2 className="w-4 h-4" />
+                        ) : feedback && !feedback.correta && letra === selecionada ? (
+                          <XCircle className="w-4 h-4" />
+                        ) : (
+                          letra
+                        )}
+                      </span>
+                      <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
+                        {formatarFormula(texto)}
+                      </span>
+                      {!feedback && selecionada === letra && (
+                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
                       )}
-                    </span>
-                    <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                      {formatarFormula(texto)}
-                    </span>
-                    {!feedback && selecionada === letra && (
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
-                    )}
-                  </button>
-                )
-              })}
-            </div>
+                    </button>
+                  )
+                })}
+              </div>
 
             {/* Dica */}
             {!feedback && questao.dica && (
@@ -483,8 +485,17 @@ export default function EstudarPage() {
               </div>
             )}
 
-            {/* Botões */}
-            <div className="flex gap-2">
+            </div>
+            {/* Fim da área scrollável */}
+
+            {/* Botões - FIXOS na parte inferior */}
+            <div
+              className="flex-shrink-0 px-3 py-3 sm:px-4 sm:py-4 flex gap-2"
+              style={{
+                background: 'var(--bg-surface)',
+                borderTop: '1px solid var(--border-default)',
+              }}
+            >
               {feedback ? (
                 <>
                   <Button variant="secondary" onClick={handleVoltar} className="flex-1 min-h-[48px]">

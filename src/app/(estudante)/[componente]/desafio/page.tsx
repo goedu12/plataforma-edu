@@ -440,121 +440,129 @@ export default function DesafioPage() {
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          CONTEÚDO - Área flexível
+          CONTEÚDO - Área flexível com botões fixos
           ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-4 w-full flex flex-col">
+      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col overflow-hidden">
         {questaoAtualData && (
-          <div className="flex-1 flex flex-col animate-fade-in">
-            {/* Tag do tema */}
-            <div className="flex items-center gap-2 mb-2">
-              <span
-                className="px-2 py-1 rounded-lg text-xs font-medium"
-                style={{
-                  background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                  color: corPrimaria,
-                }}
-              >
-                {questaoAtualData.tema}
-              </span>
-              <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {respostas.filter(r => r !== null).length} respondidas
-              </span>
-            </div>
-
-            {/* Enunciado */}
-            <div
-              className="p-4 rounded-xl mb-3 flex-shrink-0"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-            >
-              <p className="text-sm sm:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(questaoAtualData.enunciado)}
-              </p>
-            </div>
-
-            {/* Alternativas */}
-            <div className="space-y-2 flex-shrink-0">
-              {alternativas.map(({ letra, texto }) => (
-                <button
-                  key={letra}
-                  onClick={() => handleSelecionarResposta(letra)}
-                  className="w-full min-h-[52px] px-3 py-3 rounded-xl flex items-center gap-3 transition-all active:scale-[0.98] text-left"
+          <div className="flex-1 flex flex-col min-h-0">
+            {/* Área scrollável - enunciado e alternativas */}
+            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4 space-y-2">
+              {/* Tag do tema */}
+              <div className="flex items-center gap-2">
+                <span
+                  className="px-2 py-1 rounded-lg text-xs font-medium"
                   style={{
-                    background: respostaAtual === letra
-                      ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
-                      : 'var(--bg-surface)',
-                    border: `2px solid ${respostaAtual === letra ? corPrimaria : 'var(--border-default)'}`,
+                    background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                    color: corPrimaria,
                   }}
                 >
-                  <span
-                    className="w-9 h-9 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
+                  {questaoAtualData.tema}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {respostas.filter(r => r !== null).length} respondidas
+                </span>
+              </div>
+
+              {/* Enunciado */}
+              <div className="card-compact">
+                <p className="text-compact leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                  {formatarFormula(questaoAtualData.enunciado)}
+                </p>
+              </div>
+
+              {/* Alternativas */}
+              <div className="space-y-1.5">
+                {alternativas.map(({ letra, texto }) => (
+                  <button
+                    key={letra}
+                    onClick={() => handleSelecionarResposta(letra)}
+                    className="w-full min-h-[48px] px-2.5 py-2.5 rounded-xl flex items-center gap-2.5 transition-all active:scale-[0.98] text-left"
                     style={{
-                      background: respostaAtual === letra ? corPrimaria : 'var(--bg-elevated)',
-                      color: respostaAtual === letra ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+                      background: respostaAtual === letra
+                        ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                        : 'var(--bg-surface)',
+                      border: `2px solid ${respostaAtual === letra ? corPrimaria : 'var(--border-default)'}`,
                     }}
                   >
-                    {letra}
-                  </span>
-                  <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                    {formatarFormula(texto)}
-                  </span>
-                  {respostaAtual === letra && (
-                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
-                  )}
-                </button>
-              ))}
+                    <span
+                      className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm"
+                      style={{
+                        background: respostaAtual === letra ? corPrimaria : 'var(--bg-elevated)',
+                        color: respostaAtual === letra ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+                      }}
+                    >
+                      {letra}
+                    </span>
+                    <span className="text-compact-sm flex-1" style={{ color: 'var(--text-primary)' }}>
+                      {formatarFormula(texto)}
+                    </span>
+                    {respostaAtual === letra && (
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Dica compacta */}
+              <div
+                className="py-2 px-3 rounded-xl flex items-center gap-2"
+                style={{
+                  background: isFisica ? 'rgba(34, 197, 94, 0.08)' : 'rgba(139, 92, 246, 0.08)',
+                  border: '1px dashed var(--border-default)',
+                }}
+              >
+                <Lightbulb className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60}min. Bônus: +{DESAFIO.BONUS_PERFEITO}pts se acertar todas!
+                </p>
+              </div>
             </div>
 
-            {/* Dica compacta */}
+            {/* Botões - FIXOS na parte inferior */}
             <div
-              className="py-2 px-3 rounded-xl mb-3 flex items-center gap-2"
+              className="flex-shrink-0 px-3 py-3 sm:px-4 sm:py-4"
               style={{
-                background: isFisica ? 'rgba(34, 197, 94, 0.08)' : 'rgba(139, 92, 246, 0.08)',
-                border: '1px dashed var(--border-default)',
+                background: 'var(--bg-surface)',
+                borderTop: '1px solid var(--border-default)',
               }}
             >
-              <Lightbulb className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                {DESAFIO.QUESTOES} questões em {DESAFIO.TEMPO_SEGUNDOS / 60}min. Bônus: +{DESAFIO.BONUS_PERFEITO}pts se acertar todas!
-              </p>
-            </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={handleAnterior}
+                  disabled={questaoAtual === 0}
+                  className="flex-1 min-h-[48px]"
+                  leftIcon={<ArrowLeft className="w-4 h-4" />}
+                >
+                  Anterior
+                </Button>
+                {questaoAtual < questoes.length - 1 ? (
+                  <Button
+                    variant={isFisica ? 'fisica' : 'matematica'}
+                    onClick={handleProxima}
+                    className="flex-1 min-h-[48px]"
+                    rightIcon={<ArrowRight className="w-4 h-4" />}
+                  >
+                    Próxima
+                  </Button>
+                ) : (
+                  <Button
+                    variant={isFisica ? 'fisica' : 'matematica'}
+                    onClick={() => finalizarDesafio(false)}
+                    disabled={!todasRespondidas}
+                    className="flex-1 min-h-[48px]"
+                  >
+                    Finalizar
+                  </Button>
+                )}
+              </div>
 
-            {/* Navegação */}
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                onClick={handleAnterior}
-                disabled={questaoAtual === 0}
-                className="flex-1 min-h-[48px]"
-                leftIcon={<ArrowLeft className="w-4 h-4" />}
-              >
-                Anterior
-              </Button>
-              {questaoAtual < questoes.length - 1 ? (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={handleProxima}
-                  className="flex-1 min-h-[48px]"
-                  rightIcon={<ArrowRight className="w-4 h-4" />}
-                >
-                  Próxima
-                </Button>
-              ) : (
-                <Button
-                  variant={isFisica ? 'fisica' : 'matematica'}
-                  onClick={() => finalizarDesafio(false)}
-                  disabled={!todasRespondidas}
-                  className="flex-1 min-h-[48px]"
-                >
-                  Finalizar
-                </Button>
+              {!todasRespondidas && questaoAtual === questoes.length - 1 && (
+                <p className="text-center text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
+                  Responda todas as questões para finalizar
+                </p>
               )}
             </div>
-
-            {!todasRespondidas && questaoAtual === questoes.length - 1 && (
-              <p className="text-center text-xs mt-2" style={{ color: 'var(--text-muted)' }}>
-                Responda todas as questões para finalizar
-              </p>
-            )}
           </div>
         )}
       </main>
