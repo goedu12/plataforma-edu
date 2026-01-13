@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   User,
   Mail,
   GraduationCap,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import ProfilePhoto from '@/components/ProfilePhoto'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import ThemeToggle from '@/components/ThemeToggle'
@@ -75,18 +75,12 @@ export default function PerfilPage() {
       <NavigationRail componente={componente} />
       {/* Header */}
       <header
-        className="px-4 pt-4 pb-20"
+        className="compact-mobile-x pt-3 pb-16"
         style={{ background: corPrimaria }}
       >
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <button
-              onClick={() => router.push(`/${componente}/menu`)}
-              className="p-3 -ml-2 rounded-xl hover:bg-black/20 transition-colors touch-target"
-              style={{ color: isFisica ? '#000' : '#fff' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+          <div className="flex items-center justify-between mb-4">
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
             <div className="text-center">
               <h1
                 className="font-display font-semibold flex items-center gap-2"

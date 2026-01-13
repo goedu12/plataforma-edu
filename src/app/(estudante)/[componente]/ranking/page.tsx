@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Trophy, RefreshCw, WifiOff, Crown, Medal } from 'lucide-react'
+import { Trophy, RefreshCw, WifiOff, Crown, Medal } from 'lucide-react'
 import RankingTable from '@/components/RankingTable'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Usuario, RankingItem } from '@/types'
@@ -84,17 +85,10 @@ export default function RankingPage() {
       <NavigationRail componente={componente} />
 
       {/* Header com cor */}
-      <header className="px-4 pt-4 pb-5" style={{ background: corPrimaria }}>
+      <header className="compact-mobile-x pt-3 pb-4" style={{ background: corPrimaria }}>
         <div className="max-w-lg mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push(`/${componente}/menu`)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl"
-              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
-              aria-label="Voltar ao menu principal"
-            >
-              <ArrowLeft className="w-5 h-5" aria-hidden="true" />
-            </button>
+          <div className="flex items-center justify-between mb-3">
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
 
             <div className="text-center">
               <h1 className="flex items-center justify-center gap-2">

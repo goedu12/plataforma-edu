@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   Zap,
   CheckCircle2,
   XCircle,
@@ -25,6 +24,7 @@ import {
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Usuario } from '@/types'
@@ -356,26 +356,22 @@ export default function FlashCardsPage() {
       <NavigationRail componente={componente} />
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HEADER
+          HEADER - Mobile-First
           ═══════════════════════════════════════════════════════════════════ */}
       <header
-        className="sticky top-0 z-10 flex-shrink-0"
+        className="mobile-header flex-shrink-0"
         style={{
           background: tela === 'selecao'
             ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.15) 0%, var(--bg-surface) 100%)`
             : 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border-default)',
         }}
       >
-        <div className="max-w-2xl mx-auto px-4 py-3">
+        <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between">
-            <button
+            <BackButton
               onClick={() => (tela === 'selecao' ? router.push(`/${componente}/menu`) : reiniciar())}
-              className="p-2 -ml-2 rounded-xl transition-colors hover:bg-black/5"
-              style={{ color: 'var(--text-muted)' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+              className="mobile-only"
+            />
 
             <div className="flex items-center gap-2">
               <div

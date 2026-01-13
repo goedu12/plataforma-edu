@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   Medal,
   Lock,
   CheckCircle2,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Conquista, DificuldadeConquista } from '@/types'
@@ -87,16 +87,10 @@ export default function ConquistasPage() {
       <NavigationRail componente={componente} />
 
       {/* Header */}
-      <header className="px-4 pt-4 pb-5" style={{ background: corPrimaria }}>
+      <header className="compact-mobile-x pt-3 pb-4" style={{ background: corPrimaria }}>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => router.push(`/${componente}/menu`)}
-              className="w-10 h-10 flex items-center justify-center rounded-xl"
-              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+          <div className="flex items-center justify-between mb-3">
+            <BackButton href={`/${componente}/menu`} className="mobile-only" />
 
             <div className="text-center">
               <div className="flex items-center justify-center gap-2">
