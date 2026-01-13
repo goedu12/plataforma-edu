@@ -356,10 +356,10 @@ export default function FlashCardsPage() {
       <NavigationRail componente={componente} />
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HEADER - Mobile-First
+          HEADER - Mobile-First + Chromebook Compact
           ═══════════════════════════════════════════════════════════════════ */}
       <header
-        className="mobile-header flex-shrink-0"
+        className={`mobile-header flex-shrink-0 ${tela === 'jogando' ? 'header-chromebook' : ''}`}
         style={{
           background: tela === 'selecao'
             ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.15) 0%, var(--bg-surface) 100%)`
@@ -418,9 +418,9 @@ export default function FlashCardsPage() {
 
           {/* Progress bar durante o jogo */}
           {tela === 'jogando' && sessao && (
-            <div className="mt-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+            <div className="mt-2 lg:mt-1.5">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 progress-chromebook overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
                   <div
                     className="h-full rounded-full transition-all duration-500 ease-out"
                     style={{
@@ -429,7 +429,7 @@ export default function FlashCardsPage() {
                     }}
                   />
                 </div>
-                <span className="text-sm font-bold tabular-nums min-w-[40px] text-right" style={{ color: corPrimaria }}>
+                <span className="text-xs lg:text-[11px] font-bold tabular-nums min-w-[36px] text-right" style={{ color: corPrimaria }}>
                   {questaoAtualIndex + 1}/{sessao.questoes.length}
                 </span>
               </div>
@@ -441,7 +441,7 @@ export default function FlashCardsPage() {
       {/* ═══════════════════════════════════════════════════════════════════
           CONTEÚDO
           ═══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto px-4 py-5 w-full">
+      <main className={`flex-1 max-w-2xl mx-auto w-full ${tela === 'jogando' ? 'px-3 py-2 lg:px-4 lg:py-1.5' : 'px-4 py-5'}`}>
         {/* ═══════════════════════════════════════════════════════════════════
             TELA DE SELEÇÃO
             ═══════════════════════════════════════════════════════════════════ */}
@@ -665,56 +665,61 @@ export default function FlashCardsPage() {
             TELA DE JOGO
             ═══════════════════════════════════════════════════════════════════ */}
         {tela === 'jogando' && sessao && questaoAtual && (
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-2 lg:space-y-1.5 animate-fade-in">
             {/* Card da Questão */}
             <div
-              className="rounded-3xl overflow-hidden"
+              className="rounded-2xl lg:rounded-xl overflow-hidden"
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
-                boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
               }}
             >
               {/* Header do Card */}
               <div
-                className="px-5 py-3 flex items-center justify-between"
+                className="px-3 py-2 lg:px-3 lg:py-1.5 flex items-center justify-between"
                 style={{
                   background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.1) 0%, transparent 100%)`,
                   borderBottom: '1px solid var(--border-default)',
                 }}
               >
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant={componente}>{questaoAtual.tema}</Badge>
-                  <Badge
-                    variant={
-                      questaoAtual.dificuldade === 'facil' ? 'success'
-                        : questaoAtual.dificuldade === 'medio' ? 'warning'
-                        : 'error'
-                    }
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="badge-chromebook" style={{ background: `rgba(${corPrimariaRgb}, 0.15)`, color: corPrimaria }}>
+                    {questaoAtual.tema}
+                  </span>
+                  <span
+                    className="badge-chromebook"
+                    style={{
+                      background: questaoAtual.dificuldade === 'facil' ? 'rgba(34, 197, 94, 0.15)'
+                        : questaoAtual.dificuldade === 'medio' ? 'rgba(245, 158, 11, 0.15)'
+                        : 'rgba(239, 68, 68, 0.15)',
+                      color: questaoAtual.dificuldade === 'facil' ? 'var(--success)'
+                        : questaoAtual.dificuldade === 'medio' ? 'var(--warning)'
+                        : 'var(--error)'
+                    }}
                   >
                     {LABELS_DIFICULDADE[questaoAtual.dificuldade]}
-                  </Badge>
+                  </span>
                 </div>
                 <span
-                  className="text-xs px-3 py-1 rounded-full font-medium"
+                  className="text-[10px] lg:text-[9px] px-2 py-0.5 rounded-full font-medium"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
                 >
-                  {questaoAtual.tipo === 'quiz' ? '📝 Quiz' : questaoAtual.tipo === 'vf' ? '✓✗ V ou F' : '✏️ Complete'}
+                  {questaoAtual.tipo === 'quiz' ? '📝 Quiz' : questaoAtual.tipo === 'vf' ? '✓✗ V/F' : '✏️ Complete'}
                 </span>
               </div>
 
               {/* Pergunta */}
-              <div className="p-5">
-                <p className="text-lg font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+              <div className="p-3 lg:p-2.5">
+                <p className="enunciado-chromebook font-medium" style={{ color: 'var(--text-primary)' }}>
                   {questaoAtual.pergunta}
                 </p>
               </div>
 
               {/* Opções */}
-              <div className="px-5 pb-5">
+              <div className="px-3 pb-3 lg:px-2.5 lg:pb-2">
                 {/* Quiz */}
                 {questaoAtual.tipo === 'quiz' && (
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 lg:space-y-1">
                     {(questaoAtual as FlashCardQuiz).opcoes.map((opcao, index) => {
                       const selecionada = respostaUsuario === index
                       const correta = (questaoAtual as FlashCardQuiz).respostaCorreta === index
@@ -725,7 +730,7 @@ export default function FlashCardsPage() {
                           key={index}
                           onClick={() => !mostrarResultado && setRespostaUsuario(index)}
                           disabled={mostrarResultado}
-                          className="w-full p-4 rounded-2xl flex items-center gap-4 transition-all text-left hover:scale-[1.01] active:scale-[0.99]"
+                          className="alternativa-chromebook w-full transition-all text-left"
                           style={{
                             background: mostrarResultado && correta
                               ? 'rgba(34, 197, 94, 0.15)'
@@ -741,11 +746,10 @@ export default function FlashCardsPage() {
                                 : selecionada
                                   ? `2px solid ${corPrimaria}`
                                   : '1px solid var(--border-default)',
-                            transform: selecionada && !mostrarResultado ? 'scale(1.01)' : 'scale(1)',
                           }}
                         >
                           <span
-                            className="w-10 h-10 rounded-xl flex items-center justify-center font-bold flex-shrink-0 transition-all"
+                            className="alternativa-letra-compact"
                             style={{
                               background: mostrarResultado && correta
                                 ? 'var(--success)'
@@ -760,14 +764,14 @@ export default function FlashCardsPage() {
                             }}
                           >
                             {mostrarResultado && correta ? (
-                              <CheckCircle2 className="w-5 h-5" />
+                              <CheckCircle2 className="w-3.5 h-3.5" />
                             ) : errada ? (
-                              <XCircle className="w-5 h-5" />
+                              <XCircle className="w-3.5 h-3.5" />
                             ) : (
                               String.fromCharCode(65 + index)
                             )}
                           </span>
-                          <span className="flex-1 font-medium" style={{ color: 'var(--text-primary)' }}>
+                          <span className="flex-1 texto-alternativa-chromebook font-medium" style={{ color: 'var(--text-primary)' }}>
                             {opcao}
                           </span>
                         </button>
@@ -778,7 +782,7 @@ export default function FlashCardsPage() {
 
                 {/* V ou F */}
                 {questaoAtual.tipo === 'vf' && (
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-2 lg:gap-1.5">
                     {[
                       { valor: true, label: 'Verdadeiro', icone: '✓', cor: 'var(--success)' },
                       { valor: false, label: 'Falso', icone: '✗', cor: 'var(--error)' },
@@ -792,7 +796,7 @@ export default function FlashCardsPage() {
                           key={label}
                           onClick={() => !mostrarResultado && setRespostaUsuario(valor)}
                           disabled={mostrarResultado}
-                          className="p-6 rounded-2xl flex flex-col items-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                          className="p-3 lg:p-2.5 rounded-xl flex flex-col items-center gap-2 lg:gap-1.5 transition-all"
                           style={{
                             background: mostrarResultado && correta
                               ? 'rgba(34, 197, 94, 0.15)'
@@ -811,7 +815,7 @@ export default function FlashCardsPage() {
                           }}
                         >
                           <span
-                            className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold"
+                            className="w-10 h-10 lg:w-8 lg:h-8 rounded-xl lg:rounded-lg flex items-center justify-center text-xl lg:text-lg font-bold"
                             style={{
                               background: mostrarResultado && correta
                                 ? 'var(--success)'
@@ -827,7 +831,7 @@ export default function FlashCardsPage() {
                           >
                             {icone}
                           </span>
-                          <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                          <span className="text-sm lg:text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
                             {label}
                           </span>
                         </button>
@@ -846,7 +850,7 @@ export default function FlashCardsPage() {
                       disabled={mostrarResultado}
                       placeholder="Digite sua resposta..."
                       autoFocus
-                      className="w-full p-5 rounded-2xl text-lg font-medium transition-all"
+                      className="w-full p-3 lg:p-2.5 rounded-xl text-sm lg:text-[13px] font-medium transition-all"
                       style={{
                         background: 'var(--bg-elevated)',
                         border: mostrarResultado
@@ -865,11 +869,11 @@ export default function FlashCardsPage() {
                     />
                     {mostrarResultado && !sessao.respostas[questaoAtualIndex]?.correta && (
                       <div
-                        className="mt-3 p-3 rounded-xl flex items-center gap-2"
+                        className="mt-1.5 p-2 lg:p-1.5 rounded-lg flex items-center gap-1.5"
                         style={{ background: 'rgba(34, 197, 94, 0.1)' }}
                       >
-                        <CheckCircle2 className="w-4 h-4" style={{ color: 'var(--success)' }} />
-                        <span className="text-sm" style={{ color: 'var(--success)' }}>
+                        <CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />
+                        <span className="text-xs lg:text-[11px]" style={{ color: 'var(--success)' }}>
                           Resposta: <strong>{(questaoAtual as FlashCardComplete).respostaCorreta}</strong>
                         </span>
                       </div>
@@ -884,30 +888,30 @@ export default function FlashCardsPage() {
               <div>
                 {mostrarDica ? (
                   <div
-                    className="p-4 rounded-2xl"
+                    className="feedback-chromebook"
                     style={{
                       background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.1) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
                       border: `1px dashed ${corPrimaria}`,
                     }}
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Lightbulb className="w-5 h-5" style={{ color: corPrimaria }} />
-                      <span className="font-semibold" style={{ color: corPrimaria }}>Dica</span>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Lightbulb className="icon-chromebook" style={{ color: corPrimaria }} />
+                      <span className="text-xs font-semibold" style={{ color: corPrimaria }}>Dica</span>
                     </div>
-                    <p style={{ color: 'var(--text-secondary)' }}>{questaoAtual.dica}</p>
+                    <p className="text-xs lg:text-[11px]" style={{ color: 'var(--text-secondary)' }}>{questaoAtual.dica}</p>
                   </div>
                 ) : (
                   <button
                     onClick={() => { setMostrarDica(true); setUsouDica(true) }}
-                    className="w-full py-4 px-5 rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+                    className="w-full py-2 lg:py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all"
                     style={{
                       background: 'var(--bg-surface)',
                       border: '1px dashed var(--border-default)',
                       color: 'var(--text-muted)',
                     }}
                   >
-                    <Lightbulb className="w-5 h-5" />
-                    <span className="font-medium">Precisa de ajuda? Ver dica (-5 pts)</span>
+                    <Lightbulb className="icon-chromebook" />
+                    <span className="text-xs lg:text-[11px] font-medium">Ver dica (-5 pts)</span>
                   </button>
                 )}
               </div>
@@ -916,7 +920,7 @@ export default function FlashCardsPage() {
             {/* Feedback */}
             {mostrarResultado && questaoAtual.explicacao && (
               <div
-                className="p-5 rounded-2xl animate-fade-in"
+                className="feedback-chromebook animate-fade-in"
                 style={{
                   background: sessao.respostas[questaoAtualIndex]?.correta
                     ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)'
@@ -924,9 +928,9 @@ export default function FlashCardsPage() {
                   border: `1px solid ${sessao.respostas[questaoAtualIndex]?.correta ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
                 }}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-2">
                   <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                    className="w-8 h-8 lg:w-6 lg:h-6 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
                       background: sessao.respostas[questaoAtualIndex]?.correta
                         ? 'var(--success)'
@@ -934,15 +938,15 @@ export default function FlashCardsPage() {
                     }}
                   >
                     {sessao.respostas[questaoAtualIndex]?.correta ? (
-                      <CheckCircle2 className="w-6 h-6 text-white" />
+                      <CheckCircle2 className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white" />
                     ) : (
-                      <XCircle className="w-6 h-6 text-white" />
+                      <XCircle className="w-4 h-4 lg:w-3.5 lg:h-3.5 text-white" />
                     )}
                   </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1.5 mb-1">
                       <span
-                        className="font-bold text-lg"
+                        className="font-bold text-sm lg:text-xs"
                         style={{
                           color: sessao.respostas[questaoAtualIndex]?.correta ? 'var(--success)' : 'var(--error)',
                         }}
@@ -951,14 +955,14 @@ export default function FlashCardsPage() {
                       </span>
                       {sessao.respostas[questaoAtualIndex]?.correta && sessao.respostas[questaoAtualIndex]?.pontos_ganhos > 0 && (
                         <span
-                          className="px-2 py-1 rounded-lg text-sm font-bold"
+                          className="px-1.5 py-0.5 rounded text-[10px] font-bold"
                           style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}
                         >
                           +{sessao.respostas[questaoAtualIndex]?.pontos_ganhos} pts
                         </span>
                       )}
                     </div>
-                    <p style={{ color: 'var(--text-secondary)' }}>{questaoAtual.explicacao}</p>
+                    <p className="text-xs lg:text-[11px] leading-snug" style={{ color: 'var(--text-secondary)' }}>{questaoAtual.explicacao}</p>
                   </div>
                 </div>
               </div>
@@ -968,7 +972,7 @@ export default function FlashCardsPage() {
             <button
               onClick={mostrarResultado ? proximaQuestao : verificarResposta}
               disabled={respostaUsuario === null && !mostrarResultado}
-              className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              className="btn-chromebook w-full py-3 lg:py-2 px-4 font-bold text-sm lg:text-[13px] flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               style={{
                 background: respostaUsuario === null && !mostrarResultado
                   ? 'var(--bg-elevated)'
@@ -976,18 +980,15 @@ export default function FlashCardsPage() {
                 color: respostaUsuario === null && !mostrarResultado
                   ? 'var(--text-muted)'
                   : (isFisica ? '#000' : '#fff'),
-                boxShadow: respostaUsuario !== null || mostrarResultado
-                  ? `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`
-                  : 'none',
               }}
             >
               {mostrarResultado ? (
                 <>
-                  <span>{questaoAtualIndex + 1 >= sessao.questoes.length ? 'Ver Resultado' : 'Próxima Questão'}</span>
-                  <ChevronRight className="w-5 h-5" />
+                  <span>{questaoAtualIndex + 1 >= sessao.questoes.length ? 'Ver Resultado' : 'Próxima'}</span>
+                  <ChevronRight className="w-4 h-4" />
                 </>
               ) : (
-                <span>{respostaUsuario === null ? 'Selecione uma resposta' : 'Confirmar Resposta'}</span>
+                <span>{respostaUsuario === null ? 'Selecione uma resposta' : 'Confirmar'}</span>
               )}
             </button>
           </div>
