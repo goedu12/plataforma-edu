@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Activity,
   Target,
+  Radio,
 } from 'lucide-react'
 import Card, { TerminalCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -70,6 +71,7 @@ export default function DashboardProfessorPage() {
   }
 
   const menuItems = [
+    { icon: Radio, label: 'Ao Vivo', href: '/professor/ao-vivo', description: 'Tempo real', color: 'bg-red-500', pulse: true },
     { icon: Users, label: 'Alunos', href: '/professor/alunos', description: 'Gerenciar estudantes', color: 'bg-blue-500' },
     { icon: Upload, label: 'Importar', href: '/professor/importar', description: 'Adicionar questões', color: 'bg-green-500' },
     { icon: FileText, label: 'Mapas', href: '/professor/mapas', description: 'Mapas mentais', color: 'bg-emerald-500' },
@@ -262,7 +264,7 @@ export default function DashboardProfessorPage() {
         </Card>
 
         {/* Menu Rápido */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {menuItems.map((item, index) => (
             <Card
               key={item.label}
@@ -271,8 +273,11 @@ export default function DashboardProfessorPage() {
               className="animate-slide-up group"
               style={{ animationDelay: `${400 + index * 50}ms` }}
             >
-              <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${item.color}`}>
+              <div className={`w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center ${item.color} relative`}>
                 <item.icon className="w-6 h-6 text-white" />
+                {'pulse' in item && item.pulse && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                )}
               </div>
               <h3 className="font-semibold text-text-primary text-center">{item.label}</h3>
               <p className="text-xs text-text-muted text-center">{item.description}</p>
