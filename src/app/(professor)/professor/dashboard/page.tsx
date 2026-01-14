@@ -13,7 +13,6 @@ import {
   Atom,
   Calculator,
   Upload,
-  ChevronRight,
   Activity,
   Target,
   Radio,
@@ -73,7 +72,7 @@ export default function DashboardProfessorPage() {
   const menuItems = [
     { icon: Radio, label: 'Ao Vivo', href: '/professor/ao-vivo', description: 'Tempo real', color: 'bg-red-500', pulse: true },
     { icon: Users, label: 'Alunos', href: '/professor/alunos', description: 'Gerenciar estudantes', color: 'bg-blue-500' },
-    { icon: Upload, label: 'Importar', href: '/professor/importar', description: 'Adicionar questões', color: 'bg-green-500' },
+    { icon: Upload, label: 'Importar', href: '/professor/importar', description: 'Importar estudantes', color: 'bg-green-500' },
     { icon: FileText, label: 'Mapas', href: '/professor/mapas', description: 'Mapas mentais', color: 'bg-emerald-500' },
     { icon: BarChart3, label: 'Relatórios', href: '/professor/relatorios', description: 'Ver estatísticas', color: 'bg-purple-500' },
     { icon: Settings, label: 'Config', href: '/professor/config', description: 'Configurações', color: 'bg-gray-500' },
@@ -108,12 +107,12 @@ export default function DashboardProfessorPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
               <Users className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--info)' }} />
-              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.fisica.total_estudantes + stats.matematica.total_estudantes}</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.total_alunos_unicos ?? (stats.fisica.total_estudantes + stats.matematica.total_estudantes)}</p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Total Alunos</p>
             </div>
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
               <Activity className="w-5 h-5 mx-auto mb-1" style={{ color: 'var(--success)' }} />
-              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.fisica.ativos_semana + stats.matematica.ativos_semana}</p>
+              <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stats.ativos_unicos ?? (stats.fisica.ativos_semana + stats.matematica.ativos_semana)}</p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Ativos (7d)</p>
             </div>
             <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
@@ -291,7 +290,7 @@ export default function DashboardProfessorPage() {
             <div className="space-y-1">
               <p><span className="text-green-400">$</span> <span className="text-gray-500">plataforma --status</span></p>
               <p><span className="text-blue-400">INFO:</span> Sistema operacional</p>
-              <p><span className="text-yellow-400">ALUNOS:</span> {stats.fisica.total_estudantes + stats.matematica.total_estudantes} cadastrados</p>
+              <p><span className="text-yellow-400">ALUNOS:</span> {stats.total_alunos_unicos ?? (stats.fisica.total_estudantes + stats.matematica.total_estudantes)} cadastrados</p>
               <p><span className="text-green-400">UPTIME:</span> 99.9% disponibilidade</p>
             </div>
           </TerminalCard>

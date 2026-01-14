@@ -181,6 +181,9 @@ export interface EstatisticasProfessor {
   matematica: EstatisticasComponente
   alertas: AlertaEstudante[]
   desempenho_turmas: DesempenhoTurma[]
+  // Totais únicos (sem duplicar alunos com múltiplos componentes)
+  total_alunos_unicos?: number
+  ativos_unicos?: number
 }
 
 export interface AlertaEstudante {
