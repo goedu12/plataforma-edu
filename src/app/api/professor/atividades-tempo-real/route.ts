@@ -133,6 +133,7 @@ export async function GET(request: NextRequest) {
       todosAlunosResult, // NOVO: buscar todos os alunos para identificar inativos
     ] = await Promise.all([
       // Query 1: Respostas no período
+      // NOTA: Usando FK explícita para evitar ambiguidade quando há múltiplas FKs
       supabase
         .from('respostas')
         .select(`
@@ -144,8 +145,8 @@ export async function GET(request: NextRequest) {
           pontos_ganhos,
           criado_em,
           modo,
-          usuarios (id, nome, turma, ativo, tipo),
-          questoes (tema)
+          usuarios!fk_respostas_usuario (id, nome, turma, ativo, tipo),
+          questoes!fk_respostas_questao (tema)
         `)
         .gte('criado_em', periodoAtras)
         .order('criado_em', { ascending: false })
@@ -199,6 +200,12 @@ export async function GET(request: NextRequest) {
       logger.error('Erro ao buscar respostas:', respostasResult.error)
     }
 
+    // DEBUG: Log para diagnóstico
+    console.log('[DEBUG] Respostas brutas:', respostasResult.data?.length || 0)
+    if (respostasResult.data && respostasResult.data.length > 0) {
+      console.log('[DEBUG] Primeira resposta:', JSON.stringify(respostasResult.data[0], null, 2))
+    }
+
     // 4. Processar resultados
     const respostasRecentes = respostasResult.data || []
     const desafiosRecentes = desafiosResult.data || []
@@ -223,12 +230,24 @@ export async function GET(request: NextRequest) {
     }
 
     // Processar respostas (filtrando apenas estudantes ativos)
-    const respostasFiltradas = (respostasRecentes || [])
+    const respostasMapeadas = (respostasRecentes || [])
       .map(r => ({
         ...r,
         usuarios: extrairRelacao(r.usuarios as UsuarioInfo | UsuarioInfo[]),
         questoes: extrairRelacao(r.questoes as QuestaoInfo | QuestaoInfo[] | null),
       }))
+
+    // DEBUG: Ver quantas têm usuario válido
+    const comUsuario = respostasMapeadas.filter(r => r.usuarios !== null)
+    const comUsuarioAtivo = comUsuario.filter(r => isEstudanteAtivo(r.usuarios))
+    console.log('[DEBUG] Respostas mapeadas:', respostasMapeadas.length)
+    console.log('[DEBUG] Com usuario:', comUsuario.length)
+    console.log('[DEBUG] Com usuario ativo (estudante):', comUsuarioAtivo.length)
+    if (respostasMapeadas.length > 0 && !respostasMapeadas[0].usuarios) {
+      console.log('[DEBUG] Problema: usuarios é null na primeira resposta')
+    }
+
+    const respostasFiltradas = respostasMapeadas
       .filter(r => {
         if (!isEstudanteAtivo(r.usuarios)) return false
         if (turmaFiltro && r.usuarios!.turma !== turmaFiltro) return false
