@@ -113,13 +113,13 @@ export default function ConfigProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-dark-surface border-b border-border px-4 py-6">
+      <header className="bg-white border-b border-border px-4 py-6">
         <div className="max-w-4xl mx-auto">
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-body">Voltar ao Dashboard</span>
@@ -129,8 +129,8 @@ export default function ConfigProfessorPage() {
               <Settings className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-title text-text-primary">Configurações</h1>
-              <p className="text-caption text-text-tertiary">Gerencie o seu10 e suas preferências</p>
+              <h1 className="text-title text-slate-800">Configurações</h1>
+              <p className="text-caption text-slate-500">Gerencie o seu10 e suas preferências</p>
             </div>
           </div>
         </div>
@@ -141,17 +141,17 @@ export default function ConfigProfessorPage() {
         {/* Informações do Professor */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-text-tertiary" />
-            <h3 className="text-heading text-text-primary">Sua Conta</h3>
+            <Shield className="w-5 h-5 text-slate-500" />
+            <h3 className="text-heading text-slate-800">Sua Conta</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-dark-elevated rounded-xl">
-              <label className="text-caption text-text-tertiary">Nome</label>
-              <p className="font-medium text-text-primary">{professor?.nome}</p>
+            <div className="p-4 bg-white rounded-xl">
+              <label className="text-caption text-slate-500">Nome</label>
+              <p className="font-medium text-slate-800">{professor?.nome}</p>
             </div>
-            <div className="p-4 bg-dark-elevated rounded-xl">
-              <label className="text-caption text-text-tertiary">Email</label>
-              <p className="font-medium text-text-primary">{professor?.email}</p>
+            <div className="p-4 bg-white rounded-xl">
+              <label className="text-caption text-slate-500">Email</label>
+              <p className="font-medium text-slate-800">{professor?.email}</p>
             </div>
           </div>
         </Card>
@@ -160,27 +160,27 @@ export default function ConfigProfessorPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Info className="w-5 h-5 text-accent-500" />
-            <h3 className="text-heading text-text-primary">Configurações do seu10</h3>
+            <h3 className="text-heading text-slate-800">Configurações do seu10</h3>
           </div>
-          <p className="text-body text-text-secondary mb-4">
+          <p className="text-body text-slate-600 mb-4">
             Configurações globais do sistema de aprendizado.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-dark-elevated rounded-xl border border-matematica-500/20">
+            <div className="p-4 bg-white rounded-xl border border-matematica-500/20">
               <div className="flex items-center gap-2 mb-2">
                 <Bot className="w-5 h-5 text-matematica-500" />
-                <span className="font-medium text-text-primary">Limite Tutor IA</span>
+                <span className="font-medium text-slate-800">Limite Tutor IA</span>
               </div>
               <p className="text-2xl font-bold text-matematica-500">{PONTUACAO.LIMITE_IA_DIARIO}</p>
-              <p className="text-caption text-text-tertiary">interações por dia por aluno</p>
+              <p className="text-caption text-slate-500">interações por dia por aluno</p>
             </div>
-            <div className="p-4 bg-dark-elevated rounded-xl border border-primary-500/20">
+            <div className="p-4 bg-white rounded-xl border border-primary-500/20">
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-5 h-5 text-primary-500" />
-                <span className="font-medium text-text-primary">Meta Semanal</span>
+                <span className="font-medium text-slate-800">Meta Semanal</span>
               </div>
               <p className="text-2xl font-bold text-primary-500">50</p>
-              <p className="text-caption text-text-tertiary">questões por semana</p>
+              <p className="text-caption text-slate-500">questões por semana</p>
             </div>
           </div>
           <div className="mt-4 p-4 bg-accent-500/10 border border-accent-500/20 rounded-xl">
@@ -203,7 +203,7 @@ export default function ConfigProfessorPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Key className="w-5 h-5 text-warning" />
-            <h3 className="text-heading text-text-primary">Alterar Senha</h3>
+            <h3 className="text-heading text-slate-800">Alterar Senha</h3>
           </div>
 
           {mensagem && (
@@ -225,7 +225,7 @@ export default function ConfigProfessorPage() {
 
           <form onSubmit={alterarSenha} className="space-y-4">
             <div>
-              <label className="block text-caption text-text-secondary mb-2">
+              <label className="block text-caption text-slate-600 mb-2">
                 Senha Atual
               </label>
               <div className="relative">
@@ -233,13 +233,13 @@ export default function ConfigProfessorPage() {
                   type={mostrarSenhaAtual ? 'text' : 'password'}
                   value={senhaAtual}
                   onChange={e => setSenhaAtual(e.target.value)}
-                  className="w-full px-4 py-3 bg-dark-elevated border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-text-primary placeholder-text-muted pr-12 transition-all"
+                  className="w-full px-4 py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-slate-800 placeholder-text-muted pr-12 transition-all"
                   placeholder="Digite sua senha atual"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 transition-colors"
                 >
                   {mostrarSenhaAtual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -247,7 +247,7 @@ export default function ConfigProfessorPage() {
             </div>
 
             <div>
-              <label className="block text-caption text-text-secondary mb-2">
+              <label className="block text-caption text-slate-600 mb-2">
                 Nova Senha
               </label>
               <div className="relative">
@@ -255,13 +255,13 @@ export default function ConfigProfessorPage() {
                   type={mostrarNovaSenha ? 'text' : 'password'}
                   value={novaSenha}
                   onChange={e => setNovaSenha(e.target.value)}
-                  className="w-full px-4 py-3 bg-dark-elevated border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-text-primary placeholder-text-muted pr-12 transition-all"
+                  className="w-full px-4 py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-slate-800 placeholder-text-muted pr-12 transition-all"
                   placeholder="Digite a nova senha (mínimo 6 caracteres)"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 transition-colors"
                 >
                   {mostrarNovaSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -269,14 +269,14 @@ export default function ConfigProfessorPage() {
             </div>
 
             <div>
-              <label className="block text-caption text-text-secondary mb-2">
+              <label className="block text-caption text-slate-600 mb-2">
                 Confirmar Nova Senha
               </label>
               <input
                 type="password"
                 value={confirmarSenha}
                 onChange={e => setConfirmarSenha(e.target.value)}
-                className="w-full px-4 py-3 bg-dark-elevated border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-text-primary placeholder-text-muted transition-all"
+                className="w-full px-4 py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-slate-800 placeholder-text-muted transition-all"
                 placeholder="Confirme a nova senha"
               />
             </div>

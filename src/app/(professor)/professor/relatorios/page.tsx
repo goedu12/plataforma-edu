@@ -420,13 +420,13 @@ export default function RelatoriosProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header className="bg-dark-surface border-b border-border px-4 py-6">
+      <header className="bg-white border-b border-border px-4 py-6">
         <div className="max-w-6xl mx-auto">
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-body">Voltar ao Dashboard</span>
@@ -436,8 +436,8 @@ export default function RelatoriosProfessorPage() {
               <BarChart3 className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-title text-text-primary">Relatórios</h1>
-              <p className="text-caption text-text-tertiary">Exporte dados e visualize estatísticas</p>
+              <h1 className="text-title text-slate-800">Relatórios</h1>
+              <p className="text-caption text-slate-500">Exporte dados e visualize estatísticas</p>
             </div>
           </div>
         </div>
@@ -448,12 +448,12 @@ export default function RelatoriosProfessorPage() {
         {/* Filtros */}
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5 text-text-tertiary" />
-            <h3 className="text-heading text-text-primary">Filtros</h3>
+            <Filter className="w-5 h-5 text-slate-500" />
+            <h3 className="text-heading text-slate-800">Filtros</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-caption text-text-secondary mb-2">Turma</label>
+              <label className="block text-caption text-slate-600 mb-2">Turma</label>
               <select
                 value={filtroTurma}
                 onChange={e => setFiltroTurma(e.target.value)}
@@ -466,7 +466,7 @@ export default function RelatoriosProfessorPage() {
               </select>
             </div>
             <div>
-              <label className="block text-caption text-text-secondary mb-2">Componente</label>
+              <label className="block text-caption text-slate-600 mb-2">Componente</label>
               <select
                 value={filtroComponente}
                 onChange={e => setFiltroComponente(e.target.value as Componente | '')}
@@ -483,7 +483,7 @@ export default function RelatoriosProfessorPage() {
         {/* Estatísticas Resumidas */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="stat-card-2026 text-center">
-            <Users className="w-8 h-8 mx-auto mb-2 text-text-tertiary" />
+            <Users className="w-8 h-8 mx-auto mb-2 text-slate-500" />
             <p className="stat-value">{estatisticas.total}</p>
             <p className="stat-label">Estudantes</p>
           </div>
@@ -510,7 +510,7 @@ export default function RelatoriosProfessorPage() {
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FileSpreadsheet className="w-5 h-5 text-success" />
-            <h3 className="text-heading text-text-primary">Exportar para Excel</h3>
+            <h3 className="text-heading text-slate-800">Exportar para Excel</h3>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             <button
@@ -518,10 +518,10 @@ export default function RelatoriosProfessorPage() {
               disabled={exportando || estudantesFiltrados.length === 0}
               className="export-btn"
             >
-              <Download className="w-5 h-5 text-text-tertiary" />
+              <Download className="w-5 h-5 text-slate-500" />
               <div className="text-left">
-                <p className="text-body font-medium text-text-primary">Relatório Geral</p>
-                <p className="text-caption text-text-tertiary">Todos os dados de todos os alunos</p>
+                <p className="text-body font-medium text-slate-800">Relatório Geral</p>
+                <p className="text-caption text-slate-500">Todos os dados de todos os alunos</p>
               </div>
             </button>
 
@@ -555,7 +555,7 @@ export default function RelatoriosProfessorPage() {
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="w-5 h-5 text-error" />
-            <h3 className="text-heading text-text-primary">Exportar para PDF</h3>
+            <h3 className="text-heading text-slate-800">Exportar para PDF</h3>
             <Badge variant="default" size="sm">Novo</Badge>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
@@ -566,8 +566,8 @@ export default function RelatoriosProfessorPage() {
             >
               <FileText className="w-5 h-5 text-error" />
               <div className="text-left">
-                <p className="text-body font-medium text-text-primary">PDF Geral</p>
-                <p className="text-caption text-text-tertiary">Relatório completo formatado</p>
+                <p className="text-body font-medium text-slate-800">PDF Geral</p>
+                <p className="text-caption text-slate-500">Relatório completo formatado</p>
               </div>
             </button>
 
@@ -596,7 +596,7 @@ export default function RelatoriosProfessorPage() {
             </button>
           </div>
           {exportando && (
-            <p className="text-center text-caption text-text-tertiary mt-4">
+            <p className="text-center text-caption text-slate-500 mt-4">
               Gerando relatório...
             </p>
           )}
@@ -606,8 +606,8 @@ export default function RelatoriosProfessorPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-text-tertiary" />
-              <h3 className="text-heading text-text-primary">Prévia dos Dados</h3>
+              <Calendar className="w-5 h-5 text-slate-500" />
+              <h3 className="text-heading text-slate-800">Prévia dos Dados</h3>
             </div>
             <Badge>{estudantesFiltrados.length} registros</Badge>
           </div>
@@ -659,12 +659,12 @@ export default function RelatoriosProfessorPage() {
               </tbody>
             </table>
             {estudantesFiltrados.length > 10 && (
-              <p className="text-center text-caption text-text-tertiary mt-4">
+              <p className="text-center text-caption text-slate-500 mt-4">
                 Mostrando 10 de {estudantesFiltrados.length} registros. Exporte o Excel para ver todos.
               </p>
             )}
             {estudantesFiltrados.length === 0 && (
-              <p className="text-center text-text-tertiary py-8">
+              <p className="text-center text-slate-500 py-8">
                 Nenhum estudante encontrado com os filtros selecionados.
               </p>
             )}

@@ -59,11 +59,11 @@ export default function DashboardProfessorPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-calm-bg flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <Card className="text-center py-8 max-w-md">
           <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-text-primary mb-2">Erro ao carregar</h2>
-          <p className="text-text-secondary">Não foi possível carregar as estatísticas.</p>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Erro ao carregar</h2>
+          <p className="text-slate-600">Não foi possível carregar as estatísticas.</p>
         </Card>
       </div>
     )
@@ -140,8 +140,8 @@ export default function DashboardProfessorPage() {
                 <Atom className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg text-text-primary">Física</h2>
-                <p className="text-sm text-text-secondary">
+                <h2 className="font-semibold text-lg text-slate-800">Física</h2>
+                <p className="text-sm text-slate-600">
                   {stats.fisica.total_estudantes} estudantes matriculados
                 </p>
               </div>
@@ -149,21 +149,21 @@ export default function DashboardProfessorPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Respostas</p>
-                <p className="font-bold text-lg text-text-primary">{stats.fisica.total_respostas}</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Respostas</p>
+                <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{stats.fisica.total_respostas}</p>
               </div>
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Taxa Acerto</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Taxa Acerto</p>
                 <p className="font-bold text-lg text-fisica-500">{stats.fisica.taxa_acerto}%</p>
               </div>
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Ativos (7d)</p>
-                <p className="font-bold text-lg text-text-primary">{stats.fisica.ativos_semana}</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Ativos (7d)</p>
+                <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{stats.fisica.ativos_semana}</p>
               </div>
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Média Pts</p>
-                <p className="font-bold text-lg text-text-primary">{Math.round(stats.fisica.media_pontos)}</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Média Pts</p>
+                <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{Math.round(stats.fisica.media_pontos)}</p>
               </div>
             </div>
           </Card>
@@ -175,8 +175,8 @@ export default function DashboardProfessorPage() {
                 <Calculator className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg text-text-primary">Matemática</h2>
-                <p className="text-sm text-text-secondary">
+                <h2 className="font-semibold text-lg text-slate-800">Matemática</h2>
+                <p className="text-sm text-slate-600">
                   {stats.matematica.total_estudantes} estudantes matriculados
                 </p>
               </div>
@@ -184,21 +184,21 @@ export default function DashboardProfessorPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Respostas</p>
-                <p className="font-bold text-lg text-text-primary">{stats.matematica.total_respostas}</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Respostas</p>
+                <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{stats.matematica.total_respostas}</p>
               </div>
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Taxa Acerto</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Taxa Acerto</p>
                 <p className="font-bold text-lg text-matematica-500">{stats.matematica.taxa_acerto}%</p>
               </div>
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Ativos (7d)</p>
-                <p className="font-bold text-lg text-text-primary">{stats.matematica.ativos_semana}</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Ativos (7d)</p>
+                <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{stats.matematica.ativos_semana}</p>
               </div>
-              <div className="bg-calm-elevated rounded-xl p-3 text-center">
-                <p className="text-text-muted text-xs mb-1">Média Pts</p>
-                <p className="font-bold text-lg text-text-primary">{Math.round(stats.matematica.media_pontos)}</p>
+              <div className="rounded-xl p-3 text-center" style={{ background: 'var(--bg-surface-hover)' }}>
+                <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Média Pts</p>
+                <p className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>{Math.round(stats.matematica.media_pontos)}</p>
               </div>
             </div>
           </Card>
@@ -207,7 +207,7 @@ export default function DashboardProfessorPage() {
         {/* Alertas */}
         {stats.alertas.length > 0 && (
           <Card className="mb-6 animate-slide-up border-l-4 border-warning" style={{ animationDelay: '200ms' }}>
-            <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+            <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-warning" />
               Atenção Necessária
             </h3>
@@ -215,14 +215,15 @@ export default function DashboardProfessorPage() {
               {stats.alertas.slice(0, 5).map((alerta, index) => (
                 <div
                   key={`${alerta.usuario_id}-${alerta.componente}-${index}`}
-                  className="flex items-center gap-3 p-3 bg-calm-elevated rounded-xl"
+                  className="flex items-center gap-3 p-3 rounded-xl"
+                  style={{ background: 'var(--bg-surface-hover)' }}
                 >
                   <div className={`w-2 h-2 rounded-full ${alerta.tipo === 'inativo' ? 'bg-error' : 'bg-warning'}`} />
                   <div className="flex-1">
-                    <p className="font-medium text-text-primary">
-                      {alerta.nome} <span className="text-text-muted">({alerta.turma})</span>
+                    <p className="font-medium text-slate-800">
+                      {alerta.nome} <span className="text-slate-500">({alerta.turma})</span>
                     </p>
-                    <p className="text-sm text-text-secondary">{alerta.descricao}</p>
+                    <p className="text-sm text-slate-600">{alerta.descricao}</p>
                   </div>
                   <Badge variant={alerta.componente === 'fisica' ? 'fisica' : 'matematica'} size="sm">
                     {alerta.componente === 'fisica' ? 'Física' : 'Matemática'}
@@ -235,18 +236,18 @@ export default function DashboardProfessorPage() {
 
         {/* Desempenho por Turma */}
         <Card className="mb-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
-          <h3 className="font-semibold text-text-primary mb-4 flex items-center gap-2">
+          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-success" />
             Desempenho por Turma
           </h3>
           <div className="space-y-3">
             {stats.desempenho_turmas.map((turma) => (
               <div key={`${turma.turma}-${turma.componente}`} className="flex items-center gap-4">
-                <span className="font-medium text-text-primary w-12 text-sm">{turma.turma}</span>
+                <span className="font-medium text-slate-800 w-12 text-sm">{turma.turma}</span>
                 <Badge variant={turma.componente === 'fisica' ? 'fisica' : 'matematica'} size="sm">
                   {turma.componente === 'fisica' ? 'Fís' : 'Mat'}
                 </Badge>
-                <div className="flex-1 h-2 bg-calm-elevated rounded-full overflow-hidden">
+                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-overlay)' }}>
                   <div
                     className={`h-full rounded-full transition-all duration-1000 ease-out ${
                       turma.componente === 'fisica' ? 'bg-fisica-500' : 'bg-matematica-500'
@@ -254,7 +255,7 @@ export default function DashboardProfessorPage() {
                     style={{ width: `${turma.media_acerto}%` }}
                   />
                 </div>
-                <span className="text-sm font-medium text-text-primary w-12 text-right">
+                <span className="text-sm font-medium text-slate-800 w-12 text-right">
                   {turma.media_acerto}%
                 </span>
               </div>
@@ -278,8 +279,8 @@ export default function DashboardProfessorPage() {
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
                 )}
               </div>
-              <h3 className="font-semibold text-text-primary text-center">{item.label}</h3>
-              <p className="text-xs text-text-muted text-center">{item.description}</p>
+              <h3 className="font-semibold text-slate-800 text-center">{item.label}</h3>
+              <p className="text-xs text-slate-500 text-center">{item.description}</p>
             </Card>
           ))}
         </div>

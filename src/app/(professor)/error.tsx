@@ -16,17 +16,17 @@ export default function ProfessorError({ error, reset }: ErrorProps) {
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-dark-bg">
-      <div className="bg-dark-surface border border-border rounded-2xl max-w-md w-full text-center py-8 px-6">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-50">
+      <div className="bg-white border border-border rounded-2xl max-w-md w-full text-center py-8 px-6">
         <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-red-500/10">
           <AlertTriangle className="w-8 h-8 text-red-500" />
         </div>
 
-        <h1 className="text-xl font-bold mb-2 text-text-primary">
+        <h1 className="text-xl font-bold mb-2 text-slate-800">
           Algo deu errado
         </h1>
 
-        <p className="text-sm mb-6 text-text-secondary">
+        <p className="text-sm mb-6 text-slate-600">
           Desculpe, ocorreu um erro inesperado. Por favor, tente novamente.
         </p>
 
@@ -52,10 +52,10 @@ export default function ProfessorError({ error, reset }: ErrorProps) {
 
         {process.env.NODE_ENV === 'development' && error.message && (
           <details className="mt-6 text-left">
-            <summary className="text-xs cursor-pointer text-text-muted">
+            <summary className="text-xs cursor-pointer text-slate-500">
               Detalhes do erro (desenvolvimento)
             </summary>
-            <pre className="mt-2 p-3 rounded-lg text-xs overflow-auto bg-dark-elevated text-text-secondary">
+            <pre className="mt-2 p-3 rounded-lg text-xs overflow-auto bg-white text-slate-600">
               {error.message}
             </pre>
           </details>

@@ -100,13 +100,13 @@ export default function ImportarProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg pb-8">
+    <div className="min-h-screen bg-slate-50 pb-8">
       {/* Header */}
-      <header className="bg-dark-surface border-b border-border px-4 py-6">
+      <header className="bg-white border-b border-border px-4 py-6">
         <div className="max-w-2xl mx-auto">
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors mb-4"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors mb-4"
           >
             <ArrowLeft className="w-5 h-5" />
             <span className="text-body">Voltar ao Dashboard</span>
@@ -116,8 +116,8 @@ export default function ImportarProfessorPage() {
               <Upload className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-title text-text-primary">Importar Estudantes</h1>
-              <p className="text-caption text-text-tertiary">Adicione estudantes via planilha</p>
+              <h1 className="text-title text-slate-800">Importar Estudantes</h1>
+              <p className="text-caption text-slate-500">Adicione estudantes via planilha</p>
             </div>
           </div>
         </div>
@@ -154,7 +154,7 @@ export default function ImportarProfessorPage() {
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Upload className="w-5 h-5 text-primary-500" />
-            <h3 className="text-heading text-text-primary">Enviar Arquivo</h3>
+            <h3 className="text-heading text-slate-800">Enviar Arquivo</h3>
           </div>
           <div
             onDrop={handleDrop}
@@ -165,7 +165,7 @@ export default function ImportarProfessorPage() {
               transition-all duration-300
               ${arquivo
                 ? 'border-primary-500/50 bg-primary-500/10'
-                : 'border-border hover:border-border-hover hover:bg-dark-elevated'}
+                : 'border-border hover:border-border-hover hover:bg-white'}
             `}
           >
             <input
@@ -178,21 +178,21 @@ export default function ImportarProfessorPage() {
             {arquivo ? (
               <>
                 <FileSpreadsheet className="w-12 h-12 text-primary-500 mx-auto mb-3" />
-                <p className="font-medium text-text-primary">{arquivo.name}</p>
-                <p className="text-caption text-text-tertiary mt-1">
+                <p className="font-medium text-slate-800">{arquivo.name}</p>
+                <p className="text-caption text-slate-500 mt-1">
                   Clique para trocar o arquivo
                 </p>
               </>
             ) : (
               <>
-                <Upload className="w-12 h-12 text-text-tertiary mx-auto mb-3" />
-                <p className="font-medium text-text-secondary">
+                <Upload className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <p className="font-medium text-slate-600">
                   Arraste o arquivo aqui
                 </p>
-                <p className="text-caption text-text-tertiary mt-1">
+                <p className="text-caption text-slate-500 mt-1">
                   ou clique para selecionar
                 </p>
-                <p className="text-caption text-text-muted mt-2">
+                <p className="text-caption text-slate-500 mt-2">
                   Formatos: .xlsx, .csv
                 </p>
               </>
@@ -217,12 +217,12 @@ export default function ImportarProfessorPage() {
               {resultado.sucesso ? (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-success" />
-                  <h3 className="text-heading text-text-primary">Importação Concluída</h3>
+                  <h3 className="text-heading text-slate-800">Importação Concluída</h3>
                 </>
               ) : (
                 <>
                   <AlertCircle className="w-5 h-5 text-warning" />
-                  <h3 className="text-heading text-text-primary">Importação com Alertas</h3>
+                  <h3 className="text-heading text-slate-800">Importação com Alertas</h3>
                 </>
               )}
             </div>
@@ -264,7 +264,7 @@ export default function ImportarProfessorPage() {
                         }`}
                       />
                     )}
-                    <span className="flex-1 truncate text-text-primary">{item.nome}</span>
+                    <span className="flex-1 truncate text-slate-800">{item.nome}</span>
                     <Badge variant="default" size="sm">
                       {item.turma}
                     </Badge>
