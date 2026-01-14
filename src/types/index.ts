@@ -28,6 +28,7 @@ export interface Usuario {
   email: string
   nome: string
   turma: string
+  colegio?: string | null  // Colégio/Escola do estudante
   ano: number
   nivel: NivelEnsino
   componentes: Componente[]
