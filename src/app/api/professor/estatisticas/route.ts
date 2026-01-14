@@ -83,12 +83,27 @@ export async function GET(request: NextRequest) {
     // Calcular desempenho por turma
     const desempenho_turmas = calcularDesempenhoPorTurma(estudantesTyped)
 
+    // Calcular totais únicos (sem duplicar alunos com múltiplos componentes)
+    const totalAlunosUnicos = estudantesTyped.length
+    const ativosUnicosSet = new Set<string>()
+    estudantesTyped.forEach(e => {
+      const fisAtivo = e.fis_ultimo_estudo && e.fis_ultimo_estudo >= seteDiasAtras
+      const matAtivo = e.mat_ultimo_estudo && e.mat_ultimo_estudo >= seteDiasAtras
+      if (fisAtivo || matAtivo) {
+        ativosUnicosSet.add(e.id)
+      }
+    })
+    const ativosUnicos = ativosUnicosSet.size
+
     return NextResponse.json({
       sucesso: true,
       fisica: fisicaStats,
       matematica: matematicaStats,
       alertas: alertas.slice(0, MAX_ALERTAS),
       desempenho_turmas,
+      // Totais únicos para evitar contagem duplicada no dashboard
+      total_alunos_unicos: totalAlunosUnicos,
+      ativos_unicos: ativosUnicos,
       paginacao: {
         pagina,
         limite,

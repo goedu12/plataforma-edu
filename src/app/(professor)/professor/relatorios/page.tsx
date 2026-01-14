@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   Download,
   FileSpreadsheet,
+  FileText,
   Filter,
   Users,
   BarChart3,
@@ -19,6 +20,8 @@ import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
 import type { Componente } from '@/types'
 import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 interface Estudante {
   id: string
@@ -139,21 +142,261 @@ export default function RelatoriosProfessorPage() {
           }))
       }
 
+      // Verificar se há dados
+      if (dados.length === 0) {
+        alert('Nenhum dado para exportar.')
+        return
+      }
+
       // Criar workbook
       const wb = XLSX.utils.book_new()
       const ws = XLSX.utils.json_to_sheet(dados)
 
       // Ajustar largura das colunas
-      const colWidths = Object.keys(dados[0] || {}).map(key => ({
+      const colWidths = Object.keys(dados[0]).map(key => ({
         wch: Math.max(key.length, 15)
       }))
       ws['!cols'] = colWidths
 
       XLSX.utils.book_append_sheet(wb, ws, 'Relatório')
       XLSX.writeFile(wb, nomeArquivo)
-    } catch (error) {
-      console.error('Erro ao exportar:', error)
+    } catch {
       alert('Erro ao exportar relatório. Tente novamente.')
+    } finally {
+      setExportando(false)
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EXPORTAR PDF - Relatório completo em uma única página
+  // ═══════════════════════════════════════════════════════════════════════════
+  const exportarPDF = async (tipo: 'geral' | 'fisica' | 'matematica') => {
+    setExportando(true)
+
+    try {
+      // Filtrar estudantes conforme tipo
+      let estudantesParaExportar = estudantesFiltrados
+      let titulo = 'Relatório Geral'
+      let corTema = '#10b981' // verde padrão
+
+      if (tipo === 'fisica') {
+        estudantesParaExportar = estudantesFiltrados.filter(e => e.componentes.includes('fisica'))
+        titulo = 'Relatório de Física'
+        corTema = '#22c55e'
+      } else if (tipo === 'matematica') {
+        estudantesParaExportar = estudantesFiltrados.filter(e => e.componentes.includes('matematica'))
+        titulo = 'Relatório de Matemática'
+        corTema = '#a855f7'
+      }
+
+      if (estudantesParaExportar.length === 0) {
+        alert('Nenhum dado para exportar.')
+        return
+      }
+
+      // Criar documento PDF (A4 landscape para caber mais colunas)
+      const doc = new jsPDF({
+        orientation: estudantesParaExportar.length > 20 ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      })
+
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 10
+      let yPos = margin
+
+      // ─────────────────────────────────────────────────────────────
+      // CABEÇALHO
+      // ─────────────────────────────────────────────────────────────
+      doc.setFillColor(corTema)
+      doc.rect(0, 0, pageWidth, 25, 'F')
+
+      doc.setTextColor(255, 255, 255)
+      doc.setFontSize(18)
+      doc.setFont('helvetica', 'bold')
+      doc.text(titulo, margin, 12)
+
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'normal')
+      const dataAtual = new Date().toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      doc.text(`Gerado em: ${dataAtual}`, margin, 20)
+
+      // Filtros aplicados
+      const filtrosTexto = []
+      if (filtroTurma) filtrosTexto.push(`Turma: ${filtroTurma}`)
+      if (filtroComponente) filtrosTexto.push(`Componente: ${filtroComponente}`)
+      if (filtrosTexto.length > 0) {
+        doc.text(`Filtros: ${filtrosTexto.join(' | ')}`, pageWidth - margin - 60, 20)
+      }
+
+      yPos = 35
+
+      // ─────────────────────────────────────────────────────────────
+      // ESTATÍSTICAS RESUMIDAS
+      // ─────────────────────────────────────────────────────────────
+      doc.setTextColor(0, 0, 0)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Resumo Estatístico', margin, yPos)
+      yPos += 8
+
+      // Cards de estatísticas
+      const cardWidth = (pageWidth - margin * 2 - 15) / 4
+      const cardHeight = 20
+
+      // Calcular estatísticas
+      const totalAlunos = estudantesParaExportar.length
+      const mediaFis = tipo !== 'matematica'
+        ? Math.round(estudantesParaExportar.filter(e => e.componentes.includes('fisica')).reduce((acc, e) => acc + e.fis_pontos, 0) / Math.max(1, estudantesParaExportar.filter(e => e.componentes.includes('fisica')).length))
+        : 0
+      const mediaMat = tipo !== 'fisica'
+        ? Math.round(estudantesParaExportar.filter(e => e.componentes.includes('matematica')).reduce((acc, e) => acc + e.mat_pontos, 0) / Math.max(1, estudantesParaExportar.filter(e => e.componentes.includes('matematica')).length))
+        : 0
+      const taxaFis = tipo !== 'matematica'
+        ? calcularTaxaAcerto(
+            estudantesParaExportar.filter(e => e.componentes.includes('fisica')).reduce((acc, e) => acc + e.fis_questoes_corretas, 0),
+            estudantesParaExportar.filter(e => e.componentes.includes('fisica')).reduce((acc, e) => acc + e.fis_questoes_total, 0)
+          )
+        : 0
+      const taxaMat = tipo !== 'fisica'
+        ? calcularTaxaAcerto(
+            estudantesParaExportar.filter(e => e.componentes.includes('matematica')).reduce((acc, e) => acc + e.mat_questoes_corretas, 0),
+            estudantesParaExportar.filter(e => e.componentes.includes('matematica')).reduce((acc, e) => acc + e.mat_questoes_total, 0)
+          )
+        : 0
+
+      const cards = [
+        { label: 'Total de Alunos', value: totalAlunos.toString(), color: '#3b82f6' },
+        { label: tipo === 'matematica' ? 'Média Matemática' : 'Média Física', value: tipo === 'matematica' ? `${mediaMat} pts` : `${mediaFis} pts`, color: tipo === 'matematica' ? '#a855f7' : '#22c55e' },
+        { label: tipo === 'matematica' ? 'Taxa Acerto Mat' : 'Taxa Acerto Fís', value: tipo === 'matematica' ? `${taxaMat}%` : `${taxaFis}%`, color: tipo === 'matematica' ? '#a855f7' : '#22c55e' },
+        { label: tipo === 'geral' ? 'Média Matemática' : 'Total Questões', value: tipo === 'geral' ? `${mediaMat} pts` : estudantesParaExportar.reduce((acc, e) => acc + (tipo === 'fisica' ? e.fis_questoes_total : e.mat_questoes_total), 0).toString(), color: tipo === 'geral' ? '#a855f7' : '#f59e0b' },
+      ]
+
+      cards.forEach((card, i) => {
+        const x = margin + i * (cardWidth + 5)
+
+        // Fundo do card
+        doc.setFillColor(245, 245, 245)
+        doc.roundedRect(x, yPos, cardWidth, cardHeight, 2, 2, 'F')
+
+        // Borda colorida superior
+        doc.setFillColor(card.color)
+        doc.rect(x, yPos, cardWidth, 3, 'F')
+
+        // Texto
+        doc.setFontSize(14)
+        doc.setFont('helvetica', 'bold')
+        doc.setTextColor(0, 0, 0)
+        doc.text(card.value, x + cardWidth / 2, yPos + 11, { align: 'center' })
+
+        doc.setFontSize(8)
+        doc.setFont('helvetica', 'normal')
+        doc.setTextColor(100, 100, 100)
+        doc.text(card.label, x + cardWidth / 2, yPos + 17, { align: 'center' })
+      })
+
+      yPos += cardHeight + 10
+
+      // ─────────────────────────────────────────────────────────────
+      // TABELA DE ALUNOS
+      // ─────────────────────────────────────────────────────────────
+      doc.setTextColor(0, 0, 0)
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Detalhamento por Aluno', margin, yPos)
+      yPos += 5
+
+      // Preparar dados da tabela
+      let colunas: string[] = []
+      let linhas: (string | number)[][] = []
+
+      if (tipo === 'geral') {
+        colunas = ['Nome', 'Turma', 'Fís Pts', 'Fís %', 'Fís Seq', 'Mat Pts', 'Mat %', 'Mat Seq']
+        linhas = estudantesParaExportar.map(e => [
+          e.nome.length > 25 ? e.nome.substring(0, 25) + '...' : e.nome,
+          e.turma,
+          e.componentes.includes('fisica') ? e.fis_pontos : '-',
+          e.componentes.includes('fisica') ? `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%` : '-',
+          e.componentes.includes('fisica') ? e.fis_sequencia_dias : '-',
+          e.componentes.includes('matematica') ? e.mat_pontos : '-',
+          e.componentes.includes('matematica') ? `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%` : '-',
+          e.componentes.includes('matematica') ? e.mat_sequencia_dias : '-',
+        ])
+      } else if (tipo === 'fisica') {
+        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Sequência']
+        linhas = estudantesParaExportar.map(e => [
+          e.nome.length > 30 ? e.nome.substring(0, 30) + '...' : e.nome,
+          e.turma,
+          e.fis_pontos,
+          e.fis_questoes_total,
+          e.fis_questoes_corretas,
+          `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%`,
+          e.fis_sequencia_dias,
+        ])
+      } else {
+        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Sequência']
+        linhas = estudantesParaExportar.map(e => [
+          e.nome.length > 30 ? e.nome.substring(0, 30) + '...' : e.nome,
+          e.turma,
+          e.mat_pontos,
+          e.mat_questoes_total,
+          e.mat_questoes_corretas,
+          `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%`,
+          e.mat_sequencia_dias,
+        ])
+      }
+
+      // Gerar tabela com autoTable
+      autoTable(doc, {
+        startY: yPos,
+        head: [colunas],
+        body: linhas,
+        theme: 'striped',
+        headStyles: {
+          fillColor: corTema,
+          textColor: [255, 255, 255],
+          fontStyle: 'bold',
+          fontSize: 9,
+        },
+        bodyStyles: {
+          fontSize: 8,
+          cellPadding: 2,
+        },
+        alternateRowStyles: {
+          fillColor: [248, 248, 248],
+        },
+        margin: { left: margin, right: margin },
+        tableWidth: 'auto',
+        // Ajuste de escala para caber em uma página
+        didDrawPage: (data) => {
+          // Rodapé em cada página
+          const pageCount = doc.getNumberOfPages()
+          doc.setFontSize(8)
+          doc.setTextColor(150, 150, 150)
+          doc.text(
+            `Página ${data.pageNumber} de ${pageCount} | seu10 - Plataforma Educacional`,
+            pageWidth / 2,
+            pageHeight - 5,
+            { align: 'center' }
+          )
+        },
+      })
+
+      // ─────────────────────────────────────────────────────────────
+      // SALVAR PDF
+      // ─────────────────────────────────────────────────────────────
+      const nomeArquivo = `relatorio_${tipo}_${new Date().toISOString().split('T')[0]}.pdf`
+      doc.save(nomeArquivo)
+
+    } catch {
+      alert('Erro ao gerar PDF. Tente novamente.')
     } finally {
       setExportando(false)
     }
@@ -263,7 +506,7 @@ export default function RelatoriosProfessorPage() {
           </div>
         </div>
 
-        {/* Opções de Exportação */}
+        {/* Opções de Exportação Excel */}
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FileSpreadsheet className="w-5 h-5 text-success" />
@@ -302,6 +545,52 @@ export default function RelatoriosProfessorPage() {
               <Calculator className="w-5 h-5 text-matematica-500" />
               <div className="text-left">
                 <p className="text-body font-medium text-matematica-500">Relatório Matemática</p>
+                <p className="text-caption text-matematica-400">{estatisticas.matematica} alunos</p>
+              </div>
+            </button>
+          </div>
+        </Card>
+
+        {/* Opções de Exportação PDF */}
+        <Card className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="w-5 h-5 text-error" />
+            <h3 className="text-heading text-text-primary">Exportar para PDF</h3>
+            <Badge variant="default" size="sm">Novo</Badge>
+          </div>
+          <div className="grid md:grid-cols-3 gap-4">
+            <button
+              onClick={() => exportarPDF('geral')}
+              disabled={exportando || estudantesFiltrados.length === 0}
+              className="export-btn"
+            >
+              <FileText className="w-5 h-5 text-error" />
+              <div className="text-left">
+                <p className="text-body font-medium text-text-primary">PDF Geral</p>
+                <p className="text-caption text-text-tertiary">Relatório completo formatado</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => exportarPDF('fisica')}
+              disabled={exportando || estatisticas.fisica === 0}
+              className="export-btn export-fisica"
+            >
+              <FileText className="w-5 h-5 text-fisica-500" />
+              <div className="text-left">
+                <p className="text-body font-medium text-fisica-500">PDF Física</p>
+                <p className="text-caption text-fisica-400">{estatisticas.fisica} alunos</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => exportarPDF('matematica')}
+              disabled={exportando || estatisticas.matematica === 0}
+              className="export-btn export-matematica"
+            >
+              <FileText className="w-5 h-5 text-matematica-500" />
+              <div className="text-left">
+                <p className="text-body font-medium text-matematica-500">PDF Matemática</p>
                 <p className="text-caption text-matematica-400">{estatisticas.matematica} alunos</p>
               </div>
             </button>
