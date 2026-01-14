@@ -123,6 +123,8 @@ export async function GET(request: NextRequest) {
     const trintaMinAtras = new Date(agora.getTime() - 30 * 60 * 1000).toISOString()
 
     // 3. Executar todas as queries em paralelo
+    // NOTA: Removemos filtros em tabelas relacionadas (usuarios.tipo) pois podem falhar silenciosamente
+    // A filtragem por tipo estudante é feita no código após buscar os dados
     const [
       respostasResult,
       desafiosResult,
@@ -142,12 +144,10 @@ export async function GET(request: NextRequest) {
           pontos_ganhos,
           criado_em,
           modo,
-          usuarios!inner (id, nome, turma, ativo),
+          usuarios (id, nome, turma, ativo, tipo),
           questoes (tema)
         `)
         .gte('criado_em', periodoAtras)
-        .eq('usuarios.tipo', 'estudante')
-        .eq('usuarios.ativo', true)
         .order('criado_em', { ascending: false })
         .limit(MAX_ATIVIDADES),
 
@@ -162,11 +162,9 @@ export async function GET(request: NextRequest) {
           questoes_total,
           status,
           criado_em,
-          usuarios!inner (id, nome, turma, ativo)
+          usuarios (id, nome, turma, ativo, tipo)
         `)
         .gte('criado_em', periodoAtras)
-        .eq('usuarios.tipo', 'estudante')
-        .eq('usuarios.ativo', true)
         .order('criado_em', { ascending: false }),
 
       // Query 3: Uso do tutor no período
@@ -177,12 +175,10 @@ export async function GET(request: NextRequest) {
           usuario_id,
           componente,
           criado_em,
-          usuarios!inner (id, nome, turma, ativo)
+          usuarios (id, nome, turma, ativo, tipo)
         `)
         .gte('criado_em', periodoAtras)
         .eq('role', 'user')
-        .eq('usuarios.tipo', 'estudante')
-        .eq('usuarios.ativo', true)
         .order('criado_em', { ascending: false })
         .limit(200),
 
@@ -211,7 +207,7 @@ export async function GET(request: NextRequest) {
     const todosAlunos = todosAlunosResult.data || []
 
     // 5. Processar e normalizar dados do Supabase
-    interface UsuarioInfo { id: string; nome: string; turma: string; ativo: boolean }
+    interface UsuarioInfo { id: string; nome: string; turma: string; ativo: boolean; tipo: string }
     interface QuestaoInfo { tema: string }
 
     const extrairRelacao = <T>(dados: T | T[] | null): T | null => {
@@ -220,7 +216,13 @@ export async function GET(request: NextRequest) {
       return dados
     }
 
-    // Processar respostas
+    // Função auxiliar para verificar se é estudante ativo
+    const isEstudanteAtivo = (usuario: UsuarioInfo | null): boolean => {
+      if (!usuario) return false
+      return usuario.tipo === 'estudante' && usuario.ativo === true
+    }
+
+    // Processar respostas (filtrando apenas estudantes ativos)
     const respostasFiltradas = (respostasRecentes || [])
       .map(r => ({
         ...r,
@@ -228,34 +230,34 @@ export async function GET(request: NextRequest) {
         questoes: extrairRelacao(r.questoes as QuestaoInfo | QuestaoInfo[] | null),
       }))
       .filter(r => {
-        if (!r.usuarios) return false
-        if (turmaFiltro && r.usuarios.turma !== turmaFiltro) return false
+        if (!isEstudanteAtivo(r.usuarios)) return false
+        if (turmaFiltro && r.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && r.componente !== componenteFiltro) return false
         return true
       })
 
-    // Processar desafios
+    // Processar desafios (filtrando apenas estudantes ativos)
     const desafiosFiltrados = (desafiosRecentes || [])
       .map(d => ({
         ...d,
         usuarios: extrairRelacao(d.usuarios as UsuarioInfo | UsuarioInfo[]),
       }))
       .filter(d => {
-        if (!d.usuarios) return false
-        if (turmaFiltro && d.usuarios.turma !== turmaFiltro) return false
+        if (!isEstudanteAtivo(d.usuarios)) return false
+        if (turmaFiltro && d.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && d.componente !== componenteFiltro) return false
         return true
       })
 
-    // Processar chat
+    // Processar chat (filtrando apenas estudantes ativos)
     const chatFiltrado = (chatRecente || [])
       .map(c => ({
         ...c,
         usuarios: extrairRelacao(c.usuarios as UsuarioInfo | UsuarioInfo[]),
       }))
       .filter(c => {
-        if (!c.usuarios) return false
-        if (turmaFiltro && c.usuarios.turma !== turmaFiltro) return false
+        if (!isEstudanteAtivo(c.usuarios)) return false
+        if (turmaFiltro && c.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && c.componente !== componenteFiltro) return false
         return true
       })
