@@ -13,6 +13,8 @@ import {
   MessageCircle,
   Target,
   TrendingUp,
+  TrendingDown,
+  Minus,
   RefreshCw,
   Filter,
   Atom,
@@ -24,6 +26,14 @@ import {
   UserX,
   Percent,
   Timer,
+  Heart,
+  Download,
+  Map,
+  Trophy,
+  Star,
+  Layers,
+  AlertTriangle,
+  Hourglass,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -37,7 +47,7 @@ import type { Componente } from '@/types'
 
 interface AtividadeTempoReal {
   id: string
-  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao'
+  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao' | 'mapa_curtido' | 'mapa_baixado' | 'flashcard'
   usuario_id: string
   usuario_nome: string
   turma: string
@@ -50,6 +60,7 @@ interface AtividadeTempoReal {
     tempo_segundos?: number
     acertos?: number
     total?: number
+    mapa_titulo?: string
   }
 }
 
@@ -59,10 +70,12 @@ interface AlunoAtivo {
   turma: string
   componente: Componente
   ultima_atividade: string
-  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao'
+  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao' | 'flashcard' | 'mapa'
   questoes_sessao: number
   acertos_sessao: number
   taxa_acerto: number
+  nota_atual?: number
+  posicao_ranking?: number
 }
 
 // NOVO: Aluno inativo
@@ -86,6 +99,14 @@ interface EstatisticasTempoReal {
   usando_tutor: number
   fazendo_desafio: number
   fazendo_revisao: number
+  mapas_curtidos: number
+  mapas_baixados: number
+  media_nota_ativos: number
+  // Métricas avançadas
+  tempo_medio_segundos: number
+  temas_com_dificuldade: { tema: string; taxa_erro: number; quantidade: number }[]
+  tendencia_acerto: 'subindo' | 'estavel' | 'descendo'
+  alunos_precisando_ajuda: number
   por_turma: {
     turma: string
     ativos: number
@@ -220,7 +241,12 @@ export default function DashboardAoVivoPage() {
       case 'tutor':
         return <MessageCircle className="w-4 h-4 text-info" />
       case 'revisao':
-        return <BookOpen className="w-4 h-4 text-purple-500" />
+      case 'flashcard':
+        return <Layers className="w-4 h-4 text-purple-500" />
+      case 'mapa_curtido':
+        return <Heart className="w-4 h-4 text-pink-500" />
+      case 'mapa_baixado':
+        return <Download className="w-4 h-4 text-cyan-500" />
       default:
         return <Activity className="w-4 h-4" />
     }
@@ -240,7 +266,12 @@ export default function DashboardAoVivoPage() {
       case 'tutor':
         return 'Usando o tutor IA'
       case 'revisao':
-        return 'Fazendo revisão'
+      case 'flashcard':
+        return 'Fazendo revisão com FlashCards'
+      case 'mapa_curtido':
+        return `Curtiu mapa: ${atividade.detalhes.mapa_titulo || 'Mapa mental'}`
+      case 'mapa_baixado':
+        return `Baixou mapa: ${atividade.detalhes.mapa_titulo || 'Mapa mental'}`
       default:
         return 'Atividade'
     }
@@ -481,8 +512,8 @@ export default function DashboardAoVivoPage() {
           </Card>
         ) : dados ? (
           <>
-            {/* Cards de estatísticas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+            {/* Cards de estatísticas - Linha 1: Participação e Performance */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
               <StatCard
                 icon={<Percent className="w-5 h-5" />}
                 label="Participação"
@@ -497,22 +528,43 @@ export default function DashboardAoVivoPage() {
                 color="var(--success)"
               />
               <StatCard
-                icon={<UserX className="w-5 h-5" />}
-                label="Inativos"
-                value={dados.estatisticas.alunos_inativos}
-                color={dados.estatisticas.alunos_inativos > 0 ? "var(--error)" : "var(--text-muted)"}
+                icon={<Target className="w-5 h-5" />}
+                label="Taxa Acerto"
+                value={`${dados.estatisticas.taxa_acerto_tempo_real}%`}
+                color={dados.estatisticas.taxa_acerto_tempo_real >= 60 ? "var(--success)" : dados.estatisticas.taxa_acerto_tempo_real >= 40 ? "var(--warning)" : "var(--error)"}
               />
+              <StatCard
+                icon={
+                  dados.estatisticas.tendencia_acerto === 'subindo' ? <TrendingUp className="w-5 h-5" /> :
+                  dados.estatisticas.tendencia_acerto === 'descendo' ? <TrendingDown className="w-5 h-5" /> :
+                  <Minus className="w-5 h-5" />
+                }
+                label="Tendência"
+                value={dados.estatisticas.tendencia_acerto === 'subindo' ? '↑' : dados.estatisticas.tendencia_acerto === 'descendo' ? '↓' : '→'}
+                color={dados.estatisticas.tendencia_acerto === 'subindo' ? "var(--success)" : dados.estatisticas.tendencia_acerto === 'descendo' ? "var(--error)" : "var(--text-muted)"}
+              />
+              <StatCard
+                icon={<AlertTriangle className="w-5 h-5" />}
+                label="Precisam Ajuda"
+                value={dados.estatisticas.alunos_precisando_ajuda}
+                color={dados.estatisticas.alunos_precisando_ajuda > 0 ? "var(--error)" : "var(--success)"}
+                pulse={dados.estatisticas.alunos_precisando_ajuda > 0}
+              />
+              <StatCard
+                icon={<Hourglass className="w-5 h-5" />}
+                label="Tempo Médio"
+                value={dados.estatisticas.tempo_medio_segundos > 0 ? `${dados.estatisticas.tempo_medio_segundos}s` : '-'}
+                color="var(--info)"
+              />
+            </div>
+
+            {/* Cards de estatísticas - Linha 2: Atividades e Recursos */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
               <StatCard
                 icon={<Activity className="w-5 h-5" />}
                 label="Questões (5min)"
                 value={dados.estatisticas.questoes_ultimos_5min}
                 color="var(--info)"
-              />
-              <StatCard
-                icon={<Target className="w-5 h-5" />}
-                label="Taxa Acerto"
-                value={`${dados.estatisticas.taxa_acerto_tempo_real}%`}
-                color="var(--warning)"
               />
               <StatCard
                 icon={<Zap className="w-5 h-5" />}
@@ -527,12 +579,51 @@ export default function DashboardAoVivoPage() {
                 color="var(--color-fisica)"
               />
               <StatCard
-                icon={<Timer className="w-5 h-5" />}
-                label={`Total (${periodoMinutos}min)`}
-                value={dados.estatisticas.questoes_periodo_total}
-                color="var(--text-muted)"
+                icon={<Layers className="w-5 h-5" />}
+                label="Revisão"
+                value={dados.estatisticas.fazendo_revisao}
+                color="var(--purple-500)"
+              />
+              <StatCard
+                icon={<Star className="w-5 h-5" />}
+                label="Média Notas"
+                value={dados.estatisticas.media_nota_ativos > 0 ? dados.estatisticas.media_nota_ativos.toFixed(1) : '-'}
+                color="var(--warning)"
+              />
+              <StatCard
+                icon={<Map className="w-5 h-5" />}
+                label="Mapas"
+                value={dados.estatisticas.mapas_baixados + dados.estatisticas.mapas_curtidos}
+                color="var(--cyan-500)"
               />
             </div>
+
+            {/* Alertas de Temas com Dificuldade */}
+            {dados.estatisticas.temas_com_dificuldade.length > 0 && (
+              <div
+                className="p-3 rounded-xl mb-6 flex items-start gap-3"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                }}
+              >
+                <AlertTriangle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-error mb-1">Temas com Dificuldade</p>
+                  <div className="flex flex-wrap gap-2">
+                    {dados.estatisticas.temas_com_dificuldade.map((tema) => (
+                      <span
+                        key={tema.tema}
+                        className="px-2 py-1 rounded-lg text-xs font-medium"
+                        style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--error)' }}
+                      >
+                        {tema.tema}: {tema.taxa_erro}% erro ({tema.quantidade}q)
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Grid principal: Feed + Alunos ativos */}
             <div className="grid lg:grid-cols-3 gap-6">
@@ -680,6 +771,10 @@ export default function DashboardAoVivoPage() {
                                       ? 'var(--warning)'
                                       : aluno.tipo_atividade === 'tutor'
                                       ? 'var(--info)'
+                                      : aluno.tipo_atividade === 'mapa'
+                                      ? 'var(--pink-500)'
+                                      : aluno.tipo_atividade === 'flashcard' || aluno.tipo_atividade === 'revisao'
+                                      ? 'var(--purple-500)'
                                       : 'var(--success)',
                                 }}
                               />
@@ -689,9 +784,30 @@ export default function DashboardAoVivoPage() {
                               <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                                 {aluno.nome}
                               </p>
-                              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                {aluno.turma} • {aluno.questoes_sessao}q • {aluno.taxa_acerto}% acerto
-                              </p>
+                              <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                                <span>{aluno.turma}</span>
+                                <span>•</span>
+                                <span>{aluno.questoes_sessao}q</span>
+                                <span>•</span>
+                                <span>{aluno.taxa_acerto}%</span>
+                                {aluno.nota_atual !== undefined && aluno.nota_atual !== null && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="font-medium" style={{ color: aluno.nota_atual >= 6 ? 'var(--success)' : aluno.nota_atual >= 4 ? 'var(--warning)' : 'var(--error)' }}>
+                                      {aluno.nota_atual.toFixed(1)}
+                                    </span>
+                                  </>
+                                )}
+                                {aluno.posicao_ranking && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-0.5">
+                                      <Trophy className="w-3 h-3" style={{ color: aluno.posicao_ranking <= 3 ? 'var(--warning)' : 'var(--text-muted)' }} />
+                                      {aluno.posicao_ranking}º
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
 
                             <div className="text-right">
