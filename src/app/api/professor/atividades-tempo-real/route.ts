@@ -12,7 +12,7 @@ import type { Componente } from '@/types'
 // Tipos para as atividades
 export interface AtividadeTempoReal {
   id: string
-  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao'
+  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao' | 'mapa_curtido' | 'mapa_baixado' | 'flashcard'
   usuario_id: string
   usuario_nome: string
   turma: string
@@ -26,6 +26,7 @@ export interface AtividadeTempoReal {
     acertos?: number
     total?: number
     modo?: string
+    mapa_titulo?: string
   }
 }
 
@@ -35,10 +36,12 @@ export interface AlunoAtivo {
   turma: string
   componente: Componente
   ultima_atividade: string
-  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao'
+  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao' | 'flashcard' | 'mapa'
   questoes_sessao: number
   acertos_sessao: number
   taxa_acerto: number
+  nota_atual?: number
+  posicao_ranking?: number
 }
 
 // NOVO: Aluno inativo (não participou no período)
@@ -62,6 +65,10 @@ export interface EstatisticasTempoReal {
   usando_tutor: number
   fazendo_desafio: number
   fazendo_revisao: number
+  fazendo_flashcard: number
+  mapas_curtidos: number
+  mapas_baixados: number
+  media_nota_ativos: number
   por_turma: {
     turma: string
     ativos: number
@@ -92,6 +99,23 @@ const MAX_ATIVIDADES = 500 // aumentado para turmas grandes
 // Cache simples para turmas (atualiza a cada 5 minutos)
 let turmasCache: { data: string[]; timestamp: number } | null = null
 const TURMAS_CACHE_TTL = 5 * 60 * 1000
+
+// Função auxiliar para obter o bimestre atual baseado na data
+function obterBimestreAtual(): number {
+  const agora = new Date()
+  const mes = agora.getMonth() + 1 // 0-indexed
+
+  // Calendário típico escolar brasileiro:
+  // 1º bimestre: Fev-Abr (meses 2-4)
+  // 2º bimestre: Mai-Jul (meses 5-7)
+  // 3º bimestre: Ago-Set (meses 8-9)
+  // 4º bimestre: Out-Dez (meses 10-12)
+  // Janeiro: considera como 4º bimestre do ano anterior ou 1º do novo ano
+  if (mes <= 4) return 1
+  if (mes <= 7) return 2
+  if (mes <= 9) return 3
+  return 4
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -131,6 +155,9 @@ export async function GET(request: NextRequest) {
       chatResult,
       turmasResult,
       todosAlunosResult, // NOVO: buscar todos os alunos para identificar inativos
+      mapasCurtidasResult, // NOVO: curtidas em mapas mentais
+      mapasDownloadsResult, // NOVO: downloads de mapas mentais
+      notasResult, // NOVO: notas dos alunos
     ] = await Promise.all([
       // Query 1: Respostas no período
       // NOTA: Usando FK explícita para evitar ambiguidade quando há múltiplas FKs
@@ -187,12 +214,48 @@ export async function GET(request: NextRequest) {
       getTurmasDisponiveis(supabase),
 
       // Query 5: NOVO - Todos os alunos ativos (para identificar inativos)
+      // Inclui pontos para calcular ranking
       supabase
         .from('usuarios')
-        .select('id, nome, turma, componentes, ultimo_acesso')
+        .select('id, nome, turma, componentes, ultimo_acesso, fis_pontos, mat_pontos')
         .eq('tipo', 'estudante')
         .eq('ativo', true)
         .order('nome'),
+
+      // Query 6: NOVO - Curtidas em mapas mentais no período
+      supabase
+        .from('mapas_curtidas')
+        .select(`
+          id,
+          mapa_id,
+          usuario_id,
+          criado_em,
+          usuarios (id, nome, turma, ativo, tipo),
+          mapas_mentais (titulo, componente)
+        `)
+        .gte('criado_em', periodoAtras)
+        .order('criado_em', { ascending: false }),
+
+      // Query 7: NOVO - Downloads de mapas mentais no período
+      supabase
+        .from('mapas_downloads')
+        .select(`
+          id,
+          mapa_id,
+          usuario_id,
+          criado_em,
+          usuarios (id, nome, turma, ativo, tipo),
+          mapas_mentais (titulo, componente)
+        `)
+        .gte('criado_em', periodoAtras)
+        .order('criado_em', { ascending: false }),
+
+      // Query 8: NOVO - Notas dos alunos no bimestre atual
+      supabase
+        .from('notas_2025')
+        .select('usuario_id, componente, nota_final, status')
+        .eq('ano_letivo', 2025)
+        .eq('bimestre', obterBimestreAtual()),
     ])
 
     // Verificar erros
@@ -212,10 +275,40 @@ export async function GET(request: NextRequest) {
     const chatRecente = chatResult.data || []
     const turmasDisponiveis = turmasResult
     const todosAlunos = todosAlunosResult.data || []
+    const mapasCurtidas = mapasCurtidasResult.data || []
+    const mapasDownloads = mapasDownloadsResult.data || []
+    const notasAlunos = notasResult.data || []
+
+    // Criar mapa de notas por aluno e componente
+    const notasPorAluno = new Map<string, { fisica?: number; matematica?: number }>()
+    for (const nota of notasAlunos) {
+      const key = nota.usuario_id
+      const existente = notasPorAluno.get(key) || {}
+      existente[nota.componente as 'fisica' | 'matematica'] = nota.nota_final
+      notasPorAluno.set(key, existente)
+    }
+
+    // Calcular ranking por componente
+    const rankingFisica = [...todosAlunos]
+      .filter(a => a.fis_pontos > 0)
+      .sort((a, b) => b.fis_pontos - a.fis_pontos)
+      .reduce((acc, aluno, idx) => {
+        acc.set(aluno.id, idx + 1)
+        return acc
+      }, new Map<string, number>())
+
+    const rankingMatematica = [...todosAlunos]
+      .filter(a => a.mat_pontos > 0)
+      .sort((a, b) => b.mat_pontos - a.mat_pontos)
+      .reduce((acc, aluno, idx) => {
+        acc.set(aluno.id, idx + 1)
+        return acc
+      }, new Map<string, number>())
 
     // 5. Processar e normalizar dados do Supabase
     interface UsuarioInfo { id: string; nome: string; turma: string; ativo: boolean; tipo: string }
     interface QuestaoInfo { tema: string }
+    interface MapaInfo { titulo: string; componente: string }
 
     const extrairRelacao = <T>(dados: T | T[] | null): T | null => {
       if (!dados) return null
@@ -278,6 +371,34 @@ export async function GET(request: NextRequest) {
         if (!isEstudanteAtivo(c.usuarios)) return false
         if (turmaFiltro && c.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && c.componente !== componenteFiltro) return false
+        return true
+      })
+
+    // Processar curtidas em mapas (filtrando apenas estudantes ativos)
+    const curtidasFiltradas = (mapasCurtidas || [])
+      .map(c => ({
+        ...c,
+        usuarios: extrairRelacao(c.usuarios as UsuarioInfo | UsuarioInfo[]),
+        mapas_mentais: extrairRelacao(c.mapas_mentais as MapaInfo | MapaInfo[] | null),
+      }))
+      .filter(c => {
+        if (!isEstudanteAtivo(c.usuarios)) return false
+        if (turmaFiltro && c.usuarios!.turma !== turmaFiltro) return false
+        if (componenteFiltro && c.mapas_mentais?.componente !== componenteFiltro) return false
+        return true
+      })
+
+    // Processar downloads de mapas (filtrando apenas estudantes ativos)
+    const downloadsFiltrados = (mapasDownloads || [])
+      .map(d => ({
+        ...d,
+        usuarios: extrairRelacao(d.usuarios as UsuarioInfo | UsuarioInfo[]),
+        mapas_mentais: extrairRelacao(d.mapas_mentais as MapaInfo | MapaInfo[] | null),
+      }))
+      .filter(d => {
+        if (!isEstudanteAtivo(d.usuarios)) return false
+        if (turmaFiltro && d.usuarios!.turma !== turmaFiltro) return false
+        if (componenteFiltro && d.mapas_mentais?.componente !== componenteFiltro) return false
         return true
       })
 
@@ -353,6 +474,40 @@ export async function GET(request: NextRequest) {
         componente: chat.componente as Componente,
         timestamp: chat.criado_em,
         detalhes: {},
+      })
+    }
+
+    // Curtidas em mapas
+    for (const curtida of curtidasFiltradas) {
+      if (!curtida.usuarios || !curtida.mapas_mentais) continue
+      atividades.push({
+        id: curtida.id,
+        tipo: 'mapa_curtido',
+        usuario_id: curtida.usuario_id,
+        usuario_nome: curtida.usuarios.nome,
+        turma: curtida.usuarios.turma,
+        componente: (curtida.mapas_mentais.componente || 'fisica') as Componente,
+        timestamp: curtida.criado_em,
+        detalhes: {
+          mapa_titulo: curtida.mapas_mentais.titulo,
+        },
+      })
+    }
+
+    // Downloads de mapas
+    for (const download of downloadsFiltrados) {
+      if (!download.usuarios || !download.mapas_mentais) continue
+      atividades.push({
+        id: download.id,
+        tipo: 'mapa_baixado',
+        usuario_id: download.usuario_id,
+        usuario_nome: download.usuarios.nome,
+        turma: download.usuarios.turma,
+        componente: (download.mapas_mentais.componente || 'fisica') as Componente,
+        timestamp: download.criado_em,
+        detalhes: {
+          mapa_titulo: download.mapas_mentais.titulo,
+        },
       })
     }
 
@@ -443,6 +598,63 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Marcar quem está interagindo com mapas
+    for (const curtida of curtidasFiltradas) {
+      if (!curtida.usuarios || !curtida.mapas_mentais) continue
+      idsAtivos.add(curtida.usuario_id)
+
+      const componente = (curtida.mapas_mentais.componente || 'fisica') as Componente
+      const key = `${curtida.usuario_id}-${componente}`
+      if (!alunosAtivosMap.has(key)) {
+        alunosAtivosMap.set(key, {
+          id: curtida.usuario_id,
+          nome: curtida.usuarios.nome,
+          turma: curtida.usuarios.turma,
+          componente,
+          ultima_atividade: curtida.criado_em,
+          tipo_atividade: 'mapa',
+          questoes_sessao: 0,
+          acertos_sessao: 0,
+          taxa_acerto: 0,
+        })
+      }
+    }
+
+    for (const download of downloadsFiltrados) {
+      if (!download.usuarios || !download.mapas_mentais) continue
+      idsAtivos.add(download.usuario_id)
+
+      const componente = (download.mapas_mentais.componente || 'fisica') as Componente
+      const key = `${download.usuario_id}-${componente}`
+      if (!alunosAtivosMap.has(key)) {
+        alunosAtivosMap.set(key, {
+          id: download.usuario_id,
+          nome: download.usuarios.nome,
+          turma: download.usuarios.turma,
+          componente,
+          ultima_atividade: download.criado_em,
+          tipo_atividade: 'mapa',
+          questoes_sessao: 0,
+          acertos_sessao: 0,
+          taxa_acerto: 0,
+        })
+      }
+    }
+
+    // Adicionar nota e ranking aos alunos ativos
+    for (const [key, aluno] of alunosAtivosMap.entries()) {
+      const notas = notasPorAluno.get(aluno.id)
+      if (notas) {
+        aluno.nota_atual = notas[aluno.componente as 'fisica' | 'matematica']
+      }
+
+      if (aluno.componente === 'fisica') {
+        aluno.posicao_ranking = rankingFisica.get(aluno.id)
+      } else {
+        aluno.posicao_ranking = rankingMatematica.get(aluno.id)
+      }
+    }
+
     const alunosAtivos = Array.from(alunosAtivosMap.values())
       .sort((a, b) => new Date(b.ultima_atividade).getTime() - new Date(a.ultima_atividade).getTime())
 
@@ -525,6 +737,21 @@ export async function GET(request: NextRequest) {
     const fazendoRevisao = respostasFiltradas.filter(r => r.modo === 'revisao').length > 0
       ? new Set(respostasFiltradas.filter(r => r.modo === 'revisao').map(r => `${r.usuario_id}-${r.componente}`)).size
       : 0
+    const fazendoFlashcard = respostasFiltradas.filter(r => r.modo === 'revisao').length > 0
+      ? new Set(respostasFiltradas.filter(r => r.modo === 'revisao').map(r => `${r.usuario_id}-${r.componente}`)).size
+      : 0
+
+    // Contagens de mapas
+    const totalCurtidas = curtidasFiltradas.length
+    const totalDownloads = downloadsFiltrados.length
+
+    // Média de notas dos alunos ativos
+    const notasAtivos = alunosAtivos
+      .filter(a => a.nota_atual !== undefined && a.nota_atual !== null)
+      .map(a => a.nota_atual!)
+    const mediaNotaAtivos = notasAtivos.length > 0
+      ? Math.round((notasAtivos.reduce((a, b) => a + b, 0) / notasAtivos.length) * 10) / 10
+      : 0
 
     const estatisticas: EstatisticasTempoReal = {
       alunos_ativos_agora: idsAtivos.size,
@@ -538,6 +765,10 @@ export async function GET(request: NextRequest) {
       usando_tutor: usandoTutor,
       fazendo_desafio: desafiosEmAndamento,
       fazendo_revisao: fazendoRevisao,
+      fazendo_flashcard: fazendoFlashcard,
+      mapas_curtidos: totalCurtidas,
+      mapas_baixados: totalDownloads,
+      media_nota_ativos: mediaNotaAtivos,
       por_turma: porTurma,
     }
 

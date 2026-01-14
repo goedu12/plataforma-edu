@@ -24,6 +24,12 @@ import {
   UserX,
   Percent,
   Timer,
+  Heart,
+  Download,
+  Map,
+  Trophy,
+  Star,
+  Layers,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -37,7 +43,7 @@ import type { Componente } from '@/types'
 
 interface AtividadeTempoReal {
   id: string
-  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao'
+  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao' | 'mapa_curtido' | 'mapa_baixado' | 'flashcard'
   usuario_id: string
   usuario_nome: string
   turma: string
@@ -50,6 +56,7 @@ interface AtividadeTempoReal {
     tempo_segundos?: number
     acertos?: number
     total?: number
+    mapa_titulo?: string
   }
 }
 
@@ -59,10 +66,12 @@ interface AlunoAtivo {
   turma: string
   componente: Componente
   ultima_atividade: string
-  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao'
+  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao' | 'flashcard' | 'mapa'
   questoes_sessao: number
   acertos_sessao: number
   taxa_acerto: number
+  nota_atual?: number
+  posicao_ranking?: number
 }
 
 // NOVO: Aluno inativo
@@ -86,6 +95,10 @@ interface EstatisticasTempoReal {
   usando_tutor: number
   fazendo_desafio: number
   fazendo_revisao: number
+  fazendo_flashcard: number
+  mapas_curtidos: number
+  mapas_baixados: number
+  media_nota_ativos: number
   por_turma: {
     turma: string
     ativos: number
@@ -220,7 +233,12 @@ export default function DashboardAoVivoPage() {
       case 'tutor':
         return <MessageCircle className="w-4 h-4 text-info" />
       case 'revisao':
-        return <BookOpen className="w-4 h-4 text-purple-500" />
+      case 'flashcard':
+        return <Layers className="w-4 h-4 text-purple-500" />
+      case 'mapa_curtido':
+        return <Heart className="w-4 h-4 text-pink-500" />
+      case 'mapa_baixado':
+        return <Download className="w-4 h-4 text-cyan-500" />
       default:
         return <Activity className="w-4 h-4" />
     }
@@ -240,7 +258,12 @@ export default function DashboardAoVivoPage() {
       case 'tutor':
         return 'Usando o tutor IA'
       case 'revisao':
-        return 'Fazendo revisão'
+      case 'flashcard':
+        return 'Fazendo revisão com FlashCards'
+      case 'mapa_curtido':
+        return `Curtiu mapa: ${atividade.detalhes.mapa_titulo || 'Mapa mental'}`
+      case 'mapa_baixado':
+        return `Baixou mapa: ${atividade.detalhes.mapa_titulo || 'Mapa mental'}`
       default:
         return 'Atividade'
     }
@@ -481,8 +504,8 @@ export default function DashboardAoVivoPage() {
           </Card>
         ) : dados ? (
           <>
-            {/* Cards de estatísticas */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
+            {/* Cards de estatísticas - Linha 1: Participação e Alunos */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
               <StatCard
                 icon={<Percent className="w-5 h-5" />}
                 label="Participação"
@@ -515,6 +538,16 @@ export default function DashboardAoVivoPage() {
                 color="var(--warning)"
               />
               <StatCard
+                icon={<Star className="w-5 h-5" />}
+                label="Média Notas"
+                value={dados.estatisticas.media_nota_ativos > 0 ? dados.estatisticas.media_nota_ativos.toFixed(1) : '-'}
+                color="var(--warning)"
+              />
+            </div>
+
+            {/* Cards de estatísticas - Linha 2: Atividades */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+              <StatCard
                 icon={<Zap className="w-5 h-5" />}
                 label="Em Desafio"
                 value={dados.estatisticas.fazendo_desafio}
@@ -525,6 +558,24 @@ export default function DashboardAoVivoPage() {
                 label="Usando Tutor"
                 value={dados.estatisticas.usando_tutor}
                 color="var(--color-fisica)"
+              />
+              <StatCard
+                icon={<Layers className="w-5 h-5" />}
+                label="FlashCards"
+                value={dados.estatisticas.fazendo_flashcard}
+                color="var(--purple-500)"
+              />
+              <StatCard
+                icon={<Map className="w-5 h-5" />}
+                label="Mapas Baixados"
+                value={dados.estatisticas.mapas_baixados}
+                color="var(--cyan-500)"
+              />
+              <StatCard
+                icon={<Heart className="w-5 h-5" />}
+                label="Mapas Curtidos"
+                value={dados.estatisticas.mapas_curtidos}
+                color="var(--pink-500)"
               />
               <StatCard
                 icon={<Timer className="w-5 h-5" />}
@@ -680,6 +731,10 @@ export default function DashboardAoVivoPage() {
                                       ? 'var(--warning)'
                                       : aluno.tipo_atividade === 'tutor'
                                       ? 'var(--info)'
+                                      : aluno.tipo_atividade === 'mapa'
+                                      ? 'var(--pink-500)'
+                                      : aluno.tipo_atividade === 'flashcard' || aluno.tipo_atividade === 'revisao'
+                                      ? 'var(--purple-500)'
                                       : 'var(--success)',
                                 }}
                               />
@@ -689,9 +744,30 @@ export default function DashboardAoVivoPage() {
                               <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                                 {aluno.nome}
                               </p>
-                              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                {aluno.turma} • {aluno.questoes_sessao}q • {aluno.taxa_acerto}% acerto
-                              </p>
+                              <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
+                                <span>{aluno.turma}</span>
+                                <span>•</span>
+                                <span>{aluno.questoes_sessao}q</span>
+                                <span>•</span>
+                                <span>{aluno.taxa_acerto}%</span>
+                                {aluno.nota_atual !== undefined && aluno.nota_atual !== null && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="font-medium" style={{ color: aluno.nota_atual >= 6 ? 'var(--success)' : aluno.nota_atual >= 4 ? 'var(--warning)' : 'var(--error)' }}>
+                                      {aluno.nota_atual.toFixed(1)}
+                                    </span>
+                                  </>
+                                )}
+                                {aluno.posicao_ranking && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-0.5">
+                                      <Trophy className="w-3 h-3" style={{ color: aluno.posicao_ranking <= 3 ? 'var(--warning)' : 'var(--text-muted)' }} />
+                                      {aluno.posicao_ranking}º
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
 
                             <div className="text-right">
