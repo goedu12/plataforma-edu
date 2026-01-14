@@ -80,9 +80,10 @@ export default function ImportarProfessorPage() {
   }
 
   const downloadModelo = (tipo: 'xlsx' | 'csv') => {
+    // Colunas: nome, turma, componente, colegio (opcional)
     const conteudo =
       tipo === 'csv'
-        ? 'nome,turma,componente\nMaria Silva,1A,fisica\nMaria Silva,1A,matematica\nJoão Pedro,7B,matematica'
+        ? 'nome,turma,componente,colegio\nMaria Silva,1A,fisica,Colégio Dom Bosco\nMaria Silva,1A,matematica,Colégio Dom Bosco\nJoão Pedro da Costa,2B,matematica,Escola Santa Maria'
         : ''
 
     if (tipo === 'csv') {
@@ -134,9 +135,12 @@ export default function ImportarProfessorPage() {
           </div>
           <div className="terminal-body space-y-2">
             <p className="comment"># Instrucoes para importar estudantes</p>
-            <p className="text-white">$ Baixe o modelo e preencha com os dados dos estudantes</p>
-            <p className="text-white">$ Cada linha representa um estudante com um componente</p>
+            <p className="text-white">$ Colunas: nome, turma, componente, colegio (opcional)</p>
             <p className="text-white">$ Se o estudante tiver 2 componentes, adicione 2 linhas</p>
+            <p className="comment"># Como funciona o acesso:</p>
+            <p className="text-white">$ Email: primeironome.ultimonome@turma</p>
+            <p className="text-white">$ Exemplo: joao.silva@1a</p>
+            <p className="text-white">$ Senha padrao: @estudante</p>
             <div className="mt-4">
               <Button variant="secondary" onClick={() => downloadModelo('csv')}>
                 <FileSpreadsheet className="w-5 h-5" />

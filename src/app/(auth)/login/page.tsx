@@ -123,7 +123,7 @@ export default function LoginPage() {
               />
               <input
                 type="text"
-                placeholder="seunome@turma"
+                placeholder="primeironome.ultimonome@turma"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 className="input pl-12"
@@ -220,7 +220,7 @@ export default function LoginPage() {
             className="text-xs"
             style={{ color: 'var(--text-muted)' }}
           >
-            Exemplo: mariasilva@1a
+            Exemplo: maria.silva@1a
           </p>
         </div>
       </div>

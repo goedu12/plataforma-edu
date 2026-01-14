@@ -72,19 +72,36 @@ export function capitalizarNome(nome: string): string {
 
 // ═══════════════════════════════════════════════════════════
 // GERAÇÃO DE EMAIL
+// Formato: primeironome.ultimonome@turma (ex: joao.silva@1a)
 // ═══════════════════════════════════════════════════════════
 export function gerarEmailEstudante(nome: string, turma: string): string {
-  const nomeNormalizado = normalizarTexto(nome)
+  // Separar o nome em partes e remover preposições
+  const preposicoes = ['da', 'de', 'do', 'das', 'dos', 'e']
+  const partes = nome
+    .trim()
+    .split(/\s+/)
+    .filter(p => !preposicoes.includes(p.toLowerCase()))
+    .map(p => normalizarTexto(p))
+    .filter(p => p.length > 0)
+
+  // Pegar primeiro e último nome
+  const primeiroNome = partes[0] || ''
+  const ultimoNome = partes.length > 1 ? partes[partes.length - 1] : ''
+
+  // Montar email: primeironome.ultimonome@turma ou primeironome@turma se só tiver um nome
+  const nomeEmail = ultimoNome ? `${primeiroNome}.${ultimoNome}` : primeiroNome
   const turmaNormalizada = turma.toLowerCase()
-  return `${nomeNormalizado}@${turmaNormalizada}`
+
+  return `${nomeEmail}@${turmaNormalizada}`
 }
 
 // ═══════════════════════════════════════════════════════════
 // VALIDAÇÕES
 // ═══════════════════════════════════════════════════════════
 export function validarEmail(email: string): boolean {
-  // Formato: nome@turma (ex: joaosilva@1a)
-  const regex = /^[a-z0-9]+@[0-9]+[a-z]$/
+  // Formato: primeironome.ultimonome@turma (ex: joao.silva@1a)
+  // Também aceita formato antigo: nome@turma (ex: joaosilva@1a)
+  const regex = /^[a-z0-9]+(\.[a-z0-9]+)?@[0-9]+[a-z]$/
   return regex.test(email.toLowerCase())
 }
 

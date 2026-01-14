@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao, hashSenha, validarTurma, validarComponenteNivel } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import { normalizarTexto, gerarSenhaAleatoria } from '@/lib/utils'
+import { gerarEmailEstudante } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 import * as XLSX from 'xlsx'
 
@@ -9,10 +9,14 @@ import * as XLSX from 'xlsx'
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 const MAX_LINHAS = 1000
 
+// Senha padrão para todos os estudantes
+const SENHA_PADRAO_ESTUDANTE = '@estudante'
+
 interface LinhaImportacao {
   nome: string
   turma: string
   componente: string
+  colegio?: string // Novo campo opcional
 }
 
 export async function POST(request: NextRequest) {
@@ -112,6 +116,7 @@ export async function POST(request: NextRequest) {
     const estudantesPorChave = new Map<string, {
       nome: string
       turma: string
+      colegio: string | null
       componentes: string[]
       linhas: number[]
     }>()
@@ -123,6 +128,7 @@ export async function POST(request: NextRequest) {
       const nome = linha.nome?.trim()
       const turma = linha.turma?.toString().trim().toUpperCase()
       const componente = linha.componente?.toString().trim().toLowerCase()
+      const colegio = linha.colegio?.toString().trim() || null
 
       // Validações básicas
       if (!nome || !turma || !componente) {
@@ -184,18 +190,25 @@ export async function POST(request: NextRequest) {
         continue
       }
 
-      // Agrupar componentes por estudante
-      const chave = `${normalizarTexto(nome)}@${turma.toLowerCase()}`
-      if (estudantesPorChave.has(chave)) {
-        const existente = estudantesPorChave.get(chave)!
+      // Gerar email no formato primeironome.ultimonome@turma
+      const email = gerarEmailEstudante(nome, turma)
+
+      // Agrupar componentes por estudante (usando email como chave)
+      if (estudantesPorChave.has(email)) {
+        const existente = estudantesPorChave.get(email)!
         existente.linhas.push(numLinha)
         if (!existente.componentes.includes(compNormalizado)) {
           existente.componentes.push(compNormalizado)
         }
+        // Atualizar colégio se não estava definido antes
+        if (!existente.colegio && colegio) {
+          existente.colegio = colegio
+        }
       } else {
-        estudantesPorChave.set(chave, {
+        estudantesPorChave.set(email, {
           nome,
           turma,
+          colegio,
           componentes: [compNormalizado],
           linhas: [numLinha],
         })
@@ -251,15 +264,15 @@ export async function POST(request: NextRequest) {
             })
           }
         } else {
-          // Criar novo com senha aleatória única
-          const senhaGerada = gerarSenhaAleatoria(8)
-          const senhaHash = await hashSenha(senhaGerada)
+          // Criar novo com senha padrão @estudante
+          const senhaHash = await hashSenha(SENHA_PADRAO_ESTUDANTE)
 
           await supabase.from('usuarios').insert({
             email,
             senha_hash: senhaHash,
             nome: dadosEstudante.nome,
             turma: dadosEstudante.turma,
+            colegio: dadosEstudante.colegio,
             ano: validacao.ano!,
             nivel: validacao.nivel!,
             componentes: dadosEstudante.componentes,
@@ -274,7 +287,7 @@ export async function POST(request: NextRequest) {
             turma: dadosEstudante.turma,
             componente: dadosEstudante.componentes.join(', '),
             status: 'novo',
-            senha: senhaGerada, // Senha exibida apenas uma vez para o professor informar ao aluno
+            senha: SENHA_PADRAO_ESTUDANTE, // Senha padrão para todos
           })
         }
       } catch (error) {
