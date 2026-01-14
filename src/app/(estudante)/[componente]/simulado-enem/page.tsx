@@ -177,13 +177,9 @@ export default function SimuladoENEMPage() {
       }
 
       setQuestao(data.questao)
-      if (data._rc) {
-        try {
-          setRespostaCorreta(atob(data._rc))
-        } catch {
-          setRespostaCorreta(data._rc)
-        }
-      }
+      // Resposta correta não é mais enviada pelo servidor (segurança)
+      // Será retornada apenas após submeter a resposta
+      setRespostaCorreta(null)
       setStatus('ok')
       iniciarTimer()
     } catch {
@@ -203,7 +199,7 @@ export default function SimuladoENEMPage() {
 
   // Submeter resposta
   const submeterResposta = async () => {
-    if (!questao || !alternativaSelecionada || !respostaCorreta || enviando) return
+    if (!questao || !alternativaSelecionada || enviando) return
     setEnviando(true)
     pararTimer()
 
@@ -214,7 +210,6 @@ export default function SimuladoENEMPage() {
         body: JSON.stringify({
           questao_id: questao.id,
           resposta: alternativaSelecionada,
-          resposta_correta: btoa(respostaCorreta),
           tempo_segundos: tempoDecorrido,
         }),
       })

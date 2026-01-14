@@ -56,6 +56,7 @@ export default function EstudarPage() {
   const [tempoDecorrido, setTempoDecorrido] = useState(0)
   const [limite, setLimite] = useState<LimiteInfo | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   // Estados da questão
   const [selecionada, setSelecionada] = useState<Alternativa | null>(null)
@@ -68,6 +69,12 @@ export default function EstudarPage() {
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const buscarQuestao = async () => {
+    // Cancelar requisição anterior se existir
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+
     setLoading(true)
     setErro(null)
     setSelecionada(null)
@@ -76,7 +83,9 @@ export default function EstudarPage() {
     setFeedback(null)
 
     try {
-      const response = await fetch(`/api/questoes?componente=${componente}&modo=estudo`)
+      const response = await fetch(`/api/questoes?componente=${componente}&modo=estudo`, {
+        signal: abortControllerRef.current.signal
+      })
       const data = await response.json()
 
       if (data.sucesso) {
@@ -95,6 +104,10 @@ export default function EstudarPage() {
         setErro(data.erro || 'Erro ao carregar questão')
       }
     } catch (error) {
+      // Ignorar erros de requisição cancelada (componente desmontado)
+      if (error instanceof Error && error.name === 'AbortError') {
+        return
+      }
       console.error('Erro ao buscar questão:', error)
       setStatus('ERRO')
       setErro('Não foi possível conectar ao servidor.')
@@ -123,7 +136,13 @@ export default function EstudarPage() {
       return
     }
     buscarQuestao()
-    return () => pararTimer()
+    return () => {
+      pararTimer()
+      // Cancelar requisições pendentes ao desmontar
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
   }, [componente])
 
   const handleVoltar = () => router.push(`/${componente}/menu`)

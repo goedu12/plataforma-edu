@@ -67,17 +67,26 @@ export default function NotasPage() {
   const ultimaAtualizacaoRef = useRef<number>(Date.now())
   const backoffRef = useRef<number>(30000) // Intervalo inicial de 30s
   const maxBackoff = 120000 // Máximo de 2 minutos
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   const buscarNotas = useCallback(async (silencioso = false) => {
+    // Cancelar requisição anterior se existir
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+    abortControllerRef.current = new AbortController()
+
     if (!silencioso) setLoading(true)
     else setAtualizando(true)
     setErro(null)
 
     try {
-      const response = await fetch(`/api/notas?componente=${componente}&_t=${Date.now()}`)
+      const response = await fetch(`/api/notas?componente=${componente}&_t=${Date.now()}`, {
+        signal: abortControllerRef.current.signal
+      })
       const data = await response.json()
 
       if (data.sucesso) {
@@ -87,6 +96,10 @@ export default function NotasPage() {
         setErro(data.erro || 'Erro ao carregar notas')
       }
     } catch (error) {
+      // Ignorar erros de requisição cancelada
+      if (error instanceof Error && error.name === 'AbortError') {
+        return
+      }
       console.error('Erro ao buscar notas:', error)
       if (!silencioso) setErro('Não foi possível conectar ao servidor.')
     } finally {
@@ -95,14 +108,16 @@ export default function NotasPage() {
     }
   }, [componente])
 
+  // Flag para controlar se o componente está montado
+  const isMountedRef = useRef(true)
+
   useEffect(() => {
+    isMountedRef.current = true
+
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
       return
     }
-
-    // AbortController para cancelar requisições pendentes ao desmontar
-    const abortController = new AbortController()
 
     buscarNotas()
 
@@ -111,7 +126,8 @@ export default function NotasPage() {
       if (pollingRef.current) clearTimeout(pollingRef.current)
 
       const executarPolling = () => {
-        if (abortController.signal.aborted) return
+        // Verificar se componente ainda está montado
+        if (!isMountedRef.current) return
 
         if (document.visibilityState === 'visible') {
           buscarNotas(true).then(() => {
@@ -124,7 +140,9 @@ export default function NotasPage() {
         }
 
         // Agendar próximo polling com o intervalo atual
-        pollingRef.current = setTimeout(executarPolling, backoffRef.current)
+        if (isMountedRef.current) {
+          pollingRef.current = setTimeout(executarPolling, backoffRef.current)
+        }
       }
 
       // Iniciar o primeiro polling após o intervalo inicial
@@ -134,6 +152,8 @@ export default function NotasPage() {
     iniciarPolling()
 
     const handleVisibilityChange = () => {
+      if (!isMountedRef.current) return
+
       if (document.visibilityState === 'visible') {
         // Só busca se passou mais de 10 segundos
         if (Date.now() - ultimaAtualizacaoRef.current > 10000) {
@@ -154,7 +174,10 @@ export default function NotasPage() {
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      abortController.abort()
+      isMountedRef.current = false
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
       if (pollingRef.current) clearTimeout(pollingRef.current)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }

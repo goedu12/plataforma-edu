@@ -11,7 +11,6 @@ import type { AlternativaENEM, AreaENEM, SubareaENEM } from '@/types'
 interface RequestBody {
   questao_id: string
   resposta: string
-  resposta_correta?: string // base64 encoded (para questões externas)
   tempo_segundos?: number
 }
 
@@ -29,7 +28,6 @@ export async function POST(request: NextRequest) {
     const {
       questao_id,
       resposta,
-      resposta_correta: respostaCorretaBase64,
       tempo_segundos = 0,
     } = body
 
@@ -67,40 +65,25 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // Buscar questão no banco para obter resposta correta e metadados
-    const { data: questao, error: erroQuestao } = await supabase
+    // SEGURANÇA: Buscar resposta correta APENAS do banco de dados
+    // Nunca confiar em dados enviados pelo cliente
+    const { data: questao } = await supabase
       .from('questoes_enem')
       .select('id, resposta_correta, ano_prova, area, subarea')
       .eq('id', questao_id)
       .single()
 
-    let respostaCorreta: string
-    let anoProva: number | null = null
-    let area: AreaENEM | null = null
-    let subarea: SubareaENEM | null = null
-
-    if (questao) {
-      // Questão encontrada no banco - usar resposta correta do banco
-      respostaCorreta = questao.resposta_correta
-      anoProva = questao.ano_prova
-      area = questao.area
-      subarea = questao.subarea
-    } else if (respostaCorretaBase64) {
-      // Questão externa - usar resposta enviada (base64)
-      try {
-        respostaCorreta = Buffer.from(respostaCorretaBase64, 'base64').toString('utf-8').toUpperCase()
-      } catch {
-        return NextResponse.json(
-          { sucesso: false, erro: 'Resposta correta inválida' },
-          { status: 400 }
-        )
-      }
-    } else {
+    if (!questao) {
       return NextResponse.json(
         { sucesso: false, erro: 'Questão não encontrada' },
         { status: 404 }
       )
     }
+
+    const respostaCorreta = questao.resposta_correta
+    const anoProva = questao.ano_prova
+    const area = questao.area as AreaENEM
+    const subarea = questao.subarea as SubareaENEM
 
     // Verificar se já respondeu
     const { data: respostaExistente } = await supabase
