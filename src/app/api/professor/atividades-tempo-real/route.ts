@@ -12,7 +12,8 @@ import type { Componente } from '@/types'
 // Tipos para as atividades
 export interface AtividadeTempoReal {
   id: string
-  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao' | 'mapa_curtido' | 'mapa_baixado' | 'flashcard'
+  // NOTA: 'revisao' inclui flashcards (são questões em modo revisão)
+  tipo: 'resposta' | 'desafio_iniciado' | 'desafio_completo' | 'tutor' | 'revisao' | 'mapa_curtido' | 'mapa_baixado'
   usuario_id: string
   usuario_nome: string
   turma: string
@@ -36,7 +37,8 @@ export interface AlunoAtivo {
   turma: string
   componente: Componente
   ultima_atividade: string
-  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao' | 'flashcard' | 'mapa'
+  // NOTA: 'revisao' inclui flashcards (são questões em modo revisão)
+  tipo_atividade: 'estudo' | 'desafio' | 'tutor' | 'revisao' | 'mapa'
   questoes_sessao: number
   acertos_sessao: number
   taxa_acerto: number
@@ -144,7 +146,12 @@ export async function GET(request: NextRequest) {
     // 2. Parâmetros
     const searchParams = request.nextUrl.searchParams
     const turmaFiltro = searchParams.get('turma') || null
-    const componenteFiltro = searchParams.get('componente') as Componente | null
+    const componenteParam = searchParams.get('componente')
+    // Validar componente para evitar valores inválidos
+    const componenteFiltro: Componente | null =
+      componenteParam === 'fisica' || componenteParam === 'matematica'
+        ? componenteParam
+        : null
 
     // NOVO: Período configurável (em minutos)
     let periodoMinutos = parseInt(searchParams.get('periodo') || String(PERIODO_PADRAO))
@@ -648,7 +655,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Adicionar nota e ranking aos alunos ativos
-    for (const [key, aluno] of alunosAtivosMap.entries()) {
+    for (const aluno of alunosAtivosMap.values()) {
       const notas = notasPorAluno.get(aluno.id)
       if (notas) {
         aluno.nota_atual = notas[aluno.componente as 'fisica' | 'matematica']
@@ -676,20 +683,16 @@ export async function GET(request: NextRequest) {
       }))
       .sort((a, b) => a.nome.localeCompare(b.nome))
 
-    // 9. Calcular estatísticas
-    const respostas5min = respostasFiltradas.filter(r => new Date(r.criado_em) >= new Date(cincoMinAtras))
-    const respostas30min = respostasFiltradas.filter(r => new Date(r.criado_em) >= new Date(trintaMinAtras))
-
-    const taxaAcertoTempoReal = respostas5min.length > 0
-      ? Math.round((respostas5min.filter(r => r.correta).length / respostas5min.length) * 100)
-      : 0
+    // ═══════════════════════════════════════════════════════════════════════════
+    // 9. CALCULAR TODAS AS ESTATÍSTICAS EM ÚNICO PASS (OTIMIZADO)
+    // Antes eram 11+ iterações, agora são apenas 2 (inicialização + cálculo)
+    // ═══════════════════════════════════════════════════════════════════════════
 
     const totalAlunosTurma = alunosFiltrados.length
-    const taxaParticipacao = totalAlunosTurma > 0
-      ? Math.round((idsAtivos.size / totalAlunosTurma) * 100)
-      : 0
+    const dataLimite5min = new Date(cincoMinAtras)
+    const dataLimite30min = new Date(trintaMinAtras)
 
-    // Estatísticas por turma
+    // Estatísticas por turma - inicializar com todos os alunos
     const estatsPorTurma = new Map<string, {
       ativos: Set<string>
       questoes: number
@@ -697,7 +700,6 @@ export async function GET(request: NextRequest) {
       totalAlunos: number
     }>()
 
-    // Inicializar com todos os alunos
     for (const aluno of alunosFiltrados) {
       const stats = estatsPorTurma.get(aluno.turma) || {
         ativos: new Set(),
@@ -709,21 +711,80 @@ export async function GET(request: NextRequest) {
       estatsPorTurma.set(aluno.turma, stats)
     }
 
-    // Adicionar estatísticas de respostas
+    // Contadores consolidados (único pass sobre respostasFiltradas)
+    const batch = {
+      // Período 5min
+      count5min: 0,
+      acertos5min: 0,
+      // Período 5-30min (anteriores)
+      countAnteriores: 0,
+      acertosAnteriores: 0,
+      // Tempo médio
+      tempoTotal: 0,
+      countComTempo: 0,
+      // Revisão
+      revisaoPorUsuario: new Set<string>(),
+      // Temas
+      porTema: new Map<string, { acertos: number; total: number }>(),
+    }
+
     for (const resposta of respostasFiltradas) {
       if (!resposta.usuarios) continue
+
+      const dataResposta = new Date(resposta.criado_em)
+      const isRecente5min = dataResposta >= dataLimite5min
+      const isAnteriores = dataResposta >= dataLimite30min && dataResposta < dataLimite5min
+
+      // Contagens por período de tempo
+      if (isRecente5min) {
+        batch.count5min++
+        if (resposta.correta) batch.acertos5min++
+      }
+      if (isAnteriores) {
+        batch.countAnteriores++
+        if (resposta.correta) batch.acertosAnteriores++
+      }
+
+      // Estatísticas por turma
       const turma = resposta.usuarios.turma
-      const stats = estatsPorTurma.get(turma) || {
+      const turmaStats = estatsPorTurma.get(turma) || {
         ativos: new Set(),
         questoes: 0,
         acertos: 0,
         totalAlunos: 0
       }
-      stats.ativos.add(resposta.usuario_id)
-      stats.questoes++
-      if (resposta.correta) stats.acertos++
-      estatsPorTurma.set(turma, stats)
+      turmaStats.ativos.add(resposta.usuario_id)
+      turmaStats.questoes++
+      if (resposta.correta) turmaStats.acertos++
+      estatsPorTurma.set(turma, turmaStats)
+
+      // Modo revisão (flashcards)
+      if (resposta.modo === 'revisao') {
+        batch.revisaoPorUsuario.add(`${resposta.usuario_id}-${resposta.componente}`)
+      }
+
+      // Tempo médio
+      if (resposta.tempo_segundos && resposta.tempo_segundos > 0) {
+        batch.tempoTotal += resposta.tempo_segundos
+        batch.countComTempo++
+      }
+
+      // Estatísticas por tema
+      const tema = resposta.questoes?.tema || 'Sem tema'
+      const temaStats = batch.porTema.get(tema) || { acertos: 0, total: 0 }
+      temaStats.total++
+      if (resposta.correta) temaStats.acertos++
+      batch.porTema.set(tema, temaStats)
     }
+
+    // Derivar métricas dos contadores
+    const taxaAcertoTempoReal = batch.count5min > 0
+      ? Math.round((batch.acertos5min / batch.count5min) * 100)
+      : 0
+
+    const taxaParticipacao = totalAlunosTurma > 0
+      ? Math.round((idsAtivos.size / totalAlunosTurma) * 100)
+      : 0
 
     const porTurma = Array.from(estatsPorTurma.entries())
       .map(([turma, stats]) => ({
@@ -740,43 +801,34 @@ export async function GET(request: NextRequest) {
     // Contagens específicas
     const desafiosEmAndamento = desafiosFiltrados.filter(d => d.status === 'em_andamento').length
     const usandoTutor = tutorPorUsuario.size
-    const fazendoRevisao = new Set(
-      respostasFiltradas.filter(r => r.modo === 'revisao').map(r => `${r.usuario_id}-${r.componente}`)
-    ).size
+    const fazendoRevisao = batch.revisaoPorUsuario.size
 
     // Contagens de mapas
     const totalCurtidas = curtidasFiltradas.length
     const totalDownloads = downloadsFiltrados.length
 
     // Média de notas dos alunos ativos
-    const notasAtivos = alunosAtivos
-      .filter(a => a.nota_atual !== undefined && a.nota_atual !== null)
-      .map(a => a.nota_atual!)
-    const mediaNotaAtivos = notasAtivos.length > 0
-      ? Math.round((notasAtivos.reduce((a, b) => a + b, 0) / notasAtivos.length) * 10) / 10
-      : 0
+    let somaNotas = 0
+    let countNotas = 0
+    for (const aluno of alunosAtivos) {
+      if (aluno.nota_atual !== undefined && aluno.nota_atual !== null) {
+        somaNotas += aluno.nota_atual
+        countNotas++
+      }
+    }
+    const mediaNotaAtivos = countNotas > 0 ? Math.round((somaNotas / countNotas) * 10) / 10 : 0
 
     // ═══════════════════════════════════════════════════════════════════════════
     // MÉTRICAS AVANÇADAS PARA PROFESSOR SENIOR
     // ═══════════════════════════════════════════════════════════════════════════
 
-    // 1. Tempo médio por questão (apenas respostas com tempo válido)
-    const respostasComTempo = respostasFiltradas.filter(r => r.tempo_segundos && r.tempo_segundos > 0)
-    const tempoMedioSegundos = respostasComTempo.length > 0
-      ? Math.round(respostasComTempo.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) / respostasComTempo.length)
+    // 1. Tempo médio por questão
+    const tempoMedioSegundos = batch.countComTempo > 0
+      ? Math.round(batch.tempoTotal / batch.countComTempo)
       : 0
 
     // 2. Temas com dificuldade (taxa de erro > 40% e pelo menos 3 respostas)
-    const estatsPorTema = new Map<string, { acertos: number; total: number }>()
-    for (const r of respostasFiltradas) {
-      const tema = r.questoes?.tema || 'Sem tema'
-      const stats = estatsPorTema.get(tema) || { acertos: 0, total: 0 }
-      stats.total++
-      if (r.correta) stats.acertos++
-      estatsPorTema.set(tema, stats)
-    }
-
-    const temasComDificuldade = Array.from(estatsPorTema.entries())
+    const temasComDificuldade = Array.from(batch.porTema.entries())
       .map(([tema, stats]) => ({
         tema,
         taxa_erro: stats.total > 0 ? Math.round(((stats.total - stats.acertos) / stats.total) * 100) : 0,
@@ -786,33 +838,33 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.taxa_erro - a.taxa_erro)
       .slice(0, 5) // Top 5 temas problemáticos
 
-    // 3. Tendência de acerto (comparar últimos 5min vs 30min anteriores)
-    const acertos30min = respostas30min.filter(r => r.correta).length
-    const total30min = respostas30min.length
-    const taxa30min = total30min > 0 ? (acertos30min / total30min) * 100 : 0
-
-    const acertos5min = respostas5min.filter(r => r.correta).length
-    const total5min = respostas5min.length
-    const taxa5min = total5min > 0 ? (acertos5min / total5min) * 100 : 0
+    // 3. Tendência de acerto (comparar últimos 5min vs período 5-30min atrás)
+    // IMPORTANTE: Comparamos períodos SEM sobreposição para análise válida
+    const taxa5min = batch.count5min > 0 ? (batch.acertos5min / batch.count5min) * 100 : 0
+    const taxaAnterior = batch.countAnteriores > 0 ? (batch.acertosAnteriores / batch.countAnteriores) * 100 : 0
 
     let tendenciaAcerto: 'subindo' | 'estavel' | 'descendo' = 'estavel'
-    if (total5min >= 5 && total30min >= 10) {
-      const diferenca = taxa5min - taxa30min
+    // Precisa de pelo menos 5 respostas em cada período para ser significativo
+    if (batch.count5min >= 5 && batch.countAnteriores >= 5) {
+      const diferenca = taxa5min - taxaAnterior
       if (diferenca > 10) tendenciaAcerto = 'subindo'
       else if (diferenca < -10) tendenciaAcerto = 'descendo'
     }
 
     // 4. Alunos precisando de ajuda (taxa de acerto < 40% com pelo menos 5 questões)
-    const alunosPrecisandoAjuda = alunosAtivos.filter(
-      a => a.questoes_sessao >= 5 && a.taxa_acerto < 40
-    ).length
+    let alunosPrecisandoAjuda = 0
+    for (const aluno of alunosAtivos) {
+      if (aluno.questoes_sessao >= 5 && aluno.taxa_acerto < 40) {
+        alunosPrecisandoAjuda++
+      }
+    }
 
     const estatisticas: EstatisticasTempoReal = {
       alunos_ativos_agora: idsAtivos.size,
       alunos_inativos: alunosInativos.length,
       total_alunos_turma: totalAlunosTurma,
-      questoes_ultimos_5min: respostas5min.length,
-      questoes_ultimos_30min: respostas30min.length,
+      questoes_ultimos_5min: batch.count5min,
+      questoes_ultimos_30min: batch.count5min + batch.countAnteriores, // 5min + 5-30min
       questoes_periodo_total: respostasFiltradas.length,
       taxa_acerto_tempo_real: taxaAcertoTempoReal,
       taxa_participacao: taxaParticipacao,
