@@ -13,6 +13,8 @@ import {
   MessageCircle,
   Target,
   TrendingUp,
+  TrendingDown,
+  Minus,
   RefreshCw,
   Filter,
   Atom,
@@ -30,6 +32,8 @@ import {
   Trophy,
   Star,
   Layers,
+  AlertTriangle,
+  Hourglass,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
@@ -95,10 +99,14 @@ interface EstatisticasTempoReal {
   usando_tutor: number
   fazendo_desafio: number
   fazendo_revisao: number
-  fazendo_flashcard: number
   mapas_curtidos: number
   mapas_baixados: number
   media_nota_ativos: number
+  // Métricas avançadas
+  tempo_medio_segundos: number
+  temas_com_dificuldade: { tema: string; taxa_erro: number; quantidade: number }[]
+  tendencia_acerto: 'subindo' | 'estavel' | 'descendo'
+  alunos_precisando_ajuda: number
   por_turma: {
     turma: string
     ativos: number
@@ -504,7 +512,7 @@ export default function DashboardAoVivoPage() {
           </Card>
         ) : dados ? (
           <>
-            {/* Cards de estatísticas - Linha 1: Participação e Alunos */}
+            {/* Cards de estatísticas - Linha 1: Participação e Performance */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
               <StatCard
                 icon={<Percent className="w-5 h-5" />}
@@ -520,33 +528,44 @@ export default function DashboardAoVivoPage() {
                 color="var(--success)"
               />
               <StatCard
-                icon={<UserX className="w-5 h-5" />}
-                label="Inativos"
-                value={dados.estatisticas.alunos_inativos}
-                color={dados.estatisticas.alunos_inativos > 0 ? "var(--error)" : "var(--text-muted)"}
+                icon={<Target className="w-5 h-5" />}
+                label="Taxa Acerto"
+                value={`${dados.estatisticas.taxa_acerto_tempo_real}%`}
+                color={dados.estatisticas.taxa_acerto_tempo_real >= 60 ? "var(--success)" : dados.estatisticas.taxa_acerto_tempo_real >= 40 ? "var(--warning)" : "var(--error)"}
               />
+              <StatCard
+                icon={
+                  dados.estatisticas.tendencia_acerto === 'subindo' ? <TrendingUp className="w-5 h-5" /> :
+                  dados.estatisticas.tendencia_acerto === 'descendo' ? <TrendingDown className="w-5 h-5" /> :
+                  <Minus className="w-5 h-5" />
+                }
+                label="Tendência"
+                value={dados.estatisticas.tendencia_acerto === 'subindo' ? '↑' : dados.estatisticas.tendencia_acerto === 'descendo' ? '↓' : '→'}
+                color={dados.estatisticas.tendencia_acerto === 'subindo' ? "var(--success)" : dados.estatisticas.tendencia_acerto === 'descendo' ? "var(--error)" : "var(--text-muted)"}
+              />
+              <StatCard
+                icon={<AlertTriangle className="w-5 h-5" />}
+                label="Precisam Ajuda"
+                value={dados.estatisticas.alunos_precisando_ajuda}
+                color={dados.estatisticas.alunos_precisando_ajuda > 0 ? "var(--error)" : "var(--success)"}
+                pulse={dados.estatisticas.alunos_precisando_ajuda > 0}
+              />
+              <StatCard
+                icon={<Hourglass className="w-5 h-5" />}
+                label="Tempo Médio"
+                value={dados.estatisticas.tempo_medio_segundos > 0 ? `${dados.estatisticas.tempo_medio_segundos}s` : '-'}
+                color="var(--info)"
+              />
+            </div>
+
+            {/* Cards de estatísticas - Linha 2: Atividades e Recursos */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
               <StatCard
                 icon={<Activity className="w-5 h-5" />}
                 label="Questões (5min)"
                 value={dados.estatisticas.questoes_ultimos_5min}
                 color="var(--info)"
               />
-              <StatCard
-                icon={<Target className="w-5 h-5" />}
-                label="Taxa Acerto"
-                value={`${dados.estatisticas.taxa_acerto_tempo_real}%`}
-                color="var(--warning)"
-              />
-              <StatCard
-                icon={<Star className="w-5 h-5" />}
-                label="Média Notas"
-                value={dados.estatisticas.media_nota_ativos > 0 ? dados.estatisticas.media_nota_ativos.toFixed(1) : '-'}
-                color="var(--warning)"
-              />
-            </div>
-
-            {/* Cards de estatísticas - Linha 2: Atividades */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
               <StatCard
                 icon={<Zap className="w-5 h-5" />}
                 label="Em Desafio"
@@ -561,29 +580,50 @@ export default function DashboardAoVivoPage() {
               />
               <StatCard
                 icon={<Layers className="w-5 h-5" />}
-                label="FlashCards"
-                value={dados.estatisticas.fazendo_flashcard}
+                label="Revisão"
+                value={dados.estatisticas.fazendo_revisao}
                 color="var(--purple-500)"
               />
               <StatCard
+                icon={<Star className="w-5 h-5" />}
+                label="Média Notas"
+                value={dados.estatisticas.media_nota_ativos > 0 ? dados.estatisticas.media_nota_ativos.toFixed(1) : '-'}
+                color="var(--warning)"
+              />
+              <StatCard
                 icon={<Map className="w-5 h-5" />}
-                label="Mapas Baixados"
-                value={dados.estatisticas.mapas_baixados}
+                label="Mapas"
+                value={dados.estatisticas.mapas_baixados + dados.estatisticas.mapas_curtidos}
                 color="var(--cyan-500)"
               />
-              <StatCard
-                icon={<Heart className="w-5 h-5" />}
-                label="Mapas Curtidos"
-                value={dados.estatisticas.mapas_curtidos}
-                color="var(--pink-500)"
-              />
-              <StatCard
-                icon={<Timer className="w-5 h-5" />}
-                label={`Total (${periodoMinutos}min)`}
-                value={dados.estatisticas.questoes_periodo_total}
-                color="var(--text-muted)"
-              />
             </div>
+
+            {/* Alertas de Temas com Dificuldade */}
+            {dados.estatisticas.temas_com_dificuldade.length > 0 && (
+              <div
+                className="p-3 rounded-xl mb-6 flex items-start gap-3"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                }}
+              >
+                <AlertTriangle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-error mb-1">Temas com Dificuldade</p>
+                  <div className="flex flex-wrap gap-2">
+                    {dados.estatisticas.temas_com_dificuldade.map((tema) => (
+                      <span
+                        key={tema.tema}
+                        className="px-2 py-1 rounded-lg text-xs font-medium"
+                        style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--error)' }}
+                      >
+                        {tema.tema}: {tema.taxa_erro}% erro ({tema.quantidade}q)
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Grid principal: Feed + Alunos ativos */}
             <div className="grid lg:grid-cols-3 gap-6">

@@ -65,10 +65,14 @@ export interface EstatisticasTempoReal {
   usando_tutor: number
   fazendo_desafio: number
   fazendo_revisao: number
-  fazendo_flashcard: number
   mapas_curtidos: number
   mapas_baixados: number
   media_nota_ativos: number
+  // Novas métricas avançadas
+  tempo_medio_segundos: number
+  temas_com_dificuldade: { tema: string; taxa_erro: number; quantidade: number }[]
+  tendencia_acerto: 'subindo' | 'estavel' | 'descendo'
+  alunos_precisando_ajuda: number
   por_turma: {
     turma: string
     ativos: number
@@ -115,6 +119,15 @@ function obterBimestreAtual(): number {
   if (mes <= 7) return 2
   if (mes <= 9) return 3
   return 4
+}
+
+// Função auxiliar para obter o ano letivo atual
+function obterAnoLetivoAtual(): number {
+  const agora = new Date()
+  const mes = agora.getMonth() + 1
+  // Se for janeiro, pode ser do ano anterior (férias)
+  if (mes === 1) return agora.getFullYear() - 1
+  return agora.getFullYear()
 }
 
 export async function GET(request: NextRequest) {
@@ -250,23 +263,26 @@ export async function GET(request: NextRequest) {
         .gte('criado_em', periodoAtras)
         .order('criado_em', { ascending: false }),
 
-      // Query 8: NOVO - Notas dos alunos no bimestre atual
+      // Query 8: Notas dos alunos no bimestre atual (ano dinâmico)
       supabase
         .from('notas_2025')
         .select('usuario_id, componente, nota_final, status')
-        .eq('ano_letivo', 2025)
+        .eq('ano_letivo', obterAnoLetivoAtual())
         .eq('bimestre', obterBimestreAtual()),
     ])
 
-    // Verificar erros
-    if (respostasResult.error) {
-      logger.error('Erro ao buscar respostas:', respostasResult.error)
-    }
+    // Verificar erros de todas as queries
+    const erros: string[] = []
+    if (respostasResult.error) erros.push(`respostas: ${respostasResult.error.message}`)
+    if (desafiosResult.error) erros.push(`desafios: ${desafiosResult.error.message}`)
+    if (chatResult.error) erros.push(`chat: ${chatResult.error.message}`)
+    if (todosAlunosResult.error) erros.push(`alunos: ${todosAlunosResult.error.message}`)
+    if (mapasCurtidasResult.error) erros.push(`curtidas: ${mapasCurtidasResult.error.message}`)
+    if (mapasDownloadsResult.error) erros.push(`downloads: ${mapasDownloadsResult.error.message}`)
+    if (notasResult.error) erros.push(`notas: ${notasResult.error.message}`)
 
-    // DEBUG: Log para diagnóstico
-    console.log('[DEBUG] Respostas brutas:', respostasResult.data?.length || 0)
-    if (respostasResult.data && respostasResult.data.length > 0) {
-      console.log('[DEBUG] Primeira resposta:', JSON.stringify(respostasResult.data[0], null, 2))
+    if (erros.length > 0) {
+      logger.warn('Erros parciais no dashboard:', erros.join('; '))
     }
 
     // 4. Processar resultados
@@ -329,16 +345,6 @@ export async function GET(request: NextRequest) {
         usuarios: extrairRelacao(r.usuarios as UsuarioInfo | UsuarioInfo[]),
         questoes: extrairRelacao(r.questoes as QuestaoInfo | QuestaoInfo[] | null),
       }))
-
-    // DEBUG: Ver quantas têm usuario válido
-    const comUsuario = respostasMapeadas.filter(r => r.usuarios !== null)
-    const comUsuarioAtivo = comUsuario.filter(r => isEstudanteAtivo(r.usuarios))
-    console.log('[DEBUG] Respostas mapeadas:', respostasMapeadas.length)
-    console.log('[DEBUG] Com usuario:', comUsuario.length)
-    console.log('[DEBUG] Com usuario ativo (estudante):', comUsuarioAtivo.length)
-    if (respostasMapeadas.length > 0 && !respostasMapeadas[0].usuarios) {
-      console.log('[DEBUG] Problema: usuarios é null na primeira resposta')
-    }
 
     const respostasFiltradas = respostasMapeadas
       .filter(r => {
@@ -734,12 +740,9 @@ export async function GET(request: NextRequest) {
     // Contagens específicas
     const desafiosEmAndamento = desafiosFiltrados.filter(d => d.status === 'em_andamento').length
     const usandoTutor = tutorPorUsuario.size
-    const fazendoRevisao = respostasFiltradas.filter(r => r.modo === 'revisao').length > 0
-      ? new Set(respostasFiltradas.filter(r => r.modo === 'revisao').map(r => `${r.usuario_id}-${r.componente}`)).size
-      : 0
-    const fazendoFlashcard = respostasFiltradas.filter(r => r.modo === 'revisao').length > 0
-      ? new Set(respostasFiltradas.filter(r => r.modo === 'revisao').map(r => `${r.usuario_id}-${r.componente}`)).size
-      : 0
+    const fazendoRevisao = new Set(
+      respostasFiltradas.filter(r => r.modo === 'revisao').map(r => `${r.usuario_id}-${r.componente}`)
+    ).size
 
     // Contagens de mapas
     const totalCurtidas = curtidasFiltradas.length
@@ -753,6 +756,57 @@ export async function GET(request: NextRequest) {
       ? Math.round((notasAtivos.reduce((a, b) => a + b, 0) / notasAtivos.length) * 10) / 10
       : 0
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MÉTRICAS AVANÇADAS PARA PROFESSOR SENIOR
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    // 1. Tempo médio por questão (apenas respostas com tempo válido)
+    const respostasComTempo = respostasFiltradas.filter(r => r.tempo_segundos && r.tempo_segundos > 0)
+    const tempoMedioSegundos = respostasComTempo.length > 0
+      ? Math.round(respostasComTempo.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) / respostasComTempo.length)
+      : 0
+
+    // 2. Temas com dificuldade (taxa de erro > 40% e pelo menos 3 respostas)
+    const estatsPorTema = new Map<string, { acertos: number; total: number }>()
+    for (const r of respostasFiltradas) {
+      const tema = r.questoes?.tema || 'Sem tema'
+      const stats = estatsPorTema.get(tema) || { acertos: 0, total: 0 }
+      stats.total++
+      if (r.correta) stats.acertos++
+      estatsPorTema.set(tema, stats)
+    }
+
+    const temasComDificuldade = Array.from(estatsPorTema.entries())
+      .map(([tema, stats]) => ({
+        tema,
+        taxa_erro: stats.total > 0 ? Math.round(((stats.total - stats.acertos) / stats.total) * 100) : 0,
+        quantidade: stats.total,
+      }))
+      .filter(t => t.quantidade >= 3 && t.taxa_erro >= 40)
+      .sort((a, b) => b.taxa_erro - a.taxa_erro)
+      .slice(0, 5) // Top 5 temas problemáticos
+
+    // 3. Tendência de acerto (comparar últimos 5min vs 30min anteriores)
+    const acertos30min = respostas30min.filter(r => r.correta).length
+    const total30min = respostas30min.length
+    const taxa30min = total30min > 0 ? (acertos30min / total30min) * 100 : 0
+
+    const acertos5min = respostas5min.filter(r => r.correta).length
+    const total5min = respostas5min.length
+    const taxa5min = total5min > 0 ? (acertos5min / total5min) * 100 : 0
+
+    let tendenciaAcerto: 'subindo' | 'estavel' | 'descendo' = 'estavel'
+    if (total5min >= 5 && total30min >= 10) {
+      const diferenca = taxa5min - taxa30min
+      if (diferenca > 10) tendenciaAcerto = 'subindo'
+      else if (diferenca < -10) tendenciaAcerto = 'descendo'
+    }
+
+    // 4. Alunos precisando de ajuda (taxa de acerto < 40% com pelo menos 5 questões)
+    const alunosPrecisandoAjuda = alunosAtivos.filter(
+      a => a.questoes_sessao >= 5 && a.taxa_acerto < 40
+    ).length
+
     const estatisticas: EstatisticasTempoReal = {
       alunos_ativos_agora: idsAtivos.size,
       alunos_inativos: alunosInativos.length,
@@ -765,10 +819,14 @@ export async function GET(request: NextRequest) {
       usando_tutor: usandoTutor,
       fazendo_desafio: desafiosEmAndamento,
       fazendo_revisao: fazendoRevisao,
-      fazendo_flashcard: fazendoFlashcard,
       mapas_curtidos: totalCurtidas,
       mapas_baixados: totalDownloads,
       media_nota_ativos: mediaNotaAtivos,
+      // Novas métricas avançadas
+      tempo_medio_segundos: tempoMedioSegundos,
+      temas_com_dificuldade: temasComDificuldade,
+      tendencia_acerto: tendenciaAcerto,
+      alunos_precisando_ajuda: alunosPrecisandoAjuda,
       por_turma: porTurma,
     }
 
