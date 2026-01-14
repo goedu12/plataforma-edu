@@ -149,19 +149,19 @@ export default function MapasMentaisUploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-calm-bg">
+    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="bg-gray-800 text-white px-4 py-4">
+      <header className="px-4 py-4 border-b" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-display text-lg font-bold">Mapas Mentais</h1>
-            <p className="text-white/70 text-sm">Upload e gerenciamento</p>
+            <h1 className="font-display text-lg font-bold text-slate-800">Mapas Mentais</h1>
+            <p className="text-slate-500 text-sm">Upload e gerenciamento</p>
           </div>
         </div>
       </header>
@@ -189,7 +189,7 @@ export default function MapasMentaisUploadPage() {
               <select
                 value={componente}
                 onChange={(e) => setComponente(e.target.value as Componente)}
-                className="w-full p-3 rounded-xl bg-calm-elevated text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
+                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
               >
                 <option value="fisica">Física</option>
                 <option value="matematica">Matemática</option>
@@ -202,7 +202,7 @@ export default function MapasMentaisUploadPage() {
               <select
                 value={serie}
                 onChange={(e) => setSerie(Number(e.target.value) as SerieEM)}
-                className="w-full p-3 rounded-xl bg-calm-elevated text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
+                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
               >
                 <option value={1}>1ª Série</option>
                 <option value={2}>2ª Série</option>
@@ -216,7 +216,7 @@ export default function MapasMentaisUploadPage() {
               <select
                 value={bimestre}
                 onChange={(e) => setBimestre(Number(e.target.value) as Bimestre)}
-                className="w-full p-3 rounded-xl bg-calm-elevated text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
+                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
               >
                 <option value={1}>1º Bimestre</option>
                 <option value={2}>2º Bimestre</option>
@@ -243,7 +243,7 @@ export default function MapasMentaisUploadPage() {
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex: Introdução à Física - Grandezas e Unidades"
-                className="w-full p-3 rounded-xl bg-calm-elevated text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500 placeholder:text-slate-500"
+                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500 placeholder:text-slate-500"
               />
             </div>
 
@@ -263,7 +263,7 @@ export default function MapasMentaisUploadPage() {
                   <img
                     src={preview}
                     alt="Preview"
-                    className="w-full max-h-96 object-contain rounded-xl bg-calm-elevated"
+                    className="w-full max-h-96 object-contain rounded-xl bg-slate-100"
                   />
                   <button
                     onClick={() => {
@@ -331,7 +331,7 @@ export default function MapasMentaisUploadPage() {
               {mapas.map((mapa) => (
                 <div
                   key={mapa.id}
-                  className="bg-calm-elevated rounded-xl overflow-hidden group"
+                  className="bg-slate-100 rounded-xl overflow-hidden group"
                 >
                   <div className="relative aspect-video">
                     <img

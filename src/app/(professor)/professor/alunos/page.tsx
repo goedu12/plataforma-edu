@@ -258,7 +258,7 @@ export default function AlunosProfessorPage() {
 
           {alunosFiltrados.length === 0 && (
             <Card className="text-center py-10 animate-slide-up">
-              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-calm-elevated">
+              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-slate-100">
                 <Users className="w-8 h-8 text-slate-500" />
               </div>
               <h2 className="text-xl font-bold text-slate-800 mb-2">
