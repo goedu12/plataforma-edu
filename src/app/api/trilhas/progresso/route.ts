@@ -8,13 +8,13 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import { verificarAutenticacao } from '@/lib/auth'
+import { obterSessao } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação
-    const auth = await verificarAutenticacao(request)
-    if (!auth) {
+    const sessao = await obterSessao()
+    if (!sessao) {
       return NextResponse.json(
         { erro: 'Não autorizado' },
         { status: 401 }
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Buscar progresso usando função SQL
     const { data, error } = await supabase.rpc('buscar_progresso_trilha', {
-      p_usuario_id: auth.id,
+      p_usuario_id: sessao.userId,
       p_serie: serie || null
     })
 
@@ -69,8 +69,8 @@ export async function GET(request: NextRequest) {
 // DELETE: Pausar trilha
 export async function DELETE(request: NextRequest) {
   try {
-    const auth = await verificarAutenticacao(request)
-    if (!auth) {
+    const sessao = await obterSessao()
+    if (!sessao) {
       return NextResponse.json(
         { erro: 'Não autorizado' },
         { status: 401 }
@@ -91,7 +91,7 @@ export async function DELETE(request: NextRequest) {
 
     // Pausar trilha usando função SQL
     const { data, error } = await supabase.rpc('pausar_trilha', {
-      p_usuario_id: auth.id,
+      p_usuario_id: sessao.userId,
       p_serie: serie
     })
 
