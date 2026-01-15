@@ -8,13 +8,13 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import { verificarAutenticacao } from '@/lib/auth'
+import { obterSessao } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação
-    const auth = await verificarAutenticacao(request)
-    if (!auth) {
+    const sessao = await obterSessao()
+    if (!sessao) {
       return NextResponse.json(
         { erro: 'Não autorizado' },
         { status: 401 }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // Responder questão usando função SQL
     const { data, error } = await supabase.rpc('responder_questao_trilha', {
-      p_usuario_id: auth.id,
+      p_usuario_id: sessao.userId,
       p_questao_id: questao_id,
       p_resposta: resposta.toUpperCase(),
       p_tempo_segundos: tempo_segundos,
