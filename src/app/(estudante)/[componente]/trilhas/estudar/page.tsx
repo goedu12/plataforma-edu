@@ -12,6 +12,7 @@ import {
   Target,
   Trophy,
   HelpCircle,
+  Zap,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
@@ -60,6 +61,7 @@ export default function TrilhasEstudarPage() {
   const [questaoAtual, setQuestaoAtual] = useState(0)
   const [progresso, setProgresso] = useState<Progresso | null>(null)
   const [loading, setLoading] = useState(true)
+  const [gerando, setGerando] = useState(false)
   const [respondendo, setRespondendo] = useState(false)
   const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(null)
   const [mostrarResultado, setMostrarResultado] = useState(false)
@@ -68,7 +70,7 @@ export default function TrilhasEstudarPage() {
   const [tempoInicio, setTempoInicio] = useState<number>(0)
   const [serie, setSerie] = useState<string>('')
 
-  const carregarQuestoes = useCallback(async (userSerie: string) => {
+  const carregarQuestoes = useCallback(async (userSerie: string, tentativa: number = 1): Promise<boolean> => {
     try {
       const res = await fetch(`/api/trilhas/questoes?serie=${userSerie}`)
       const data = await res.json()
@@ -76,6 +78,16 @@ export default function TrilhasEstudarPage() {
       if (data.questoes && data.questoes.length > 0) {
         setQuestoes(data.questoes)
         setTempoInicio(Date.now())
+        setGerando(false)
+        return true
+      } else if (data.gerando) {
+        // Questões estão sendo geradas, aguardar e tentar novamente
+        setGerando(true)
+        if (tentativa < 5) {
+          console.log(`Questões sendo geradas, tentativa ${tentativa}/5...`)
+          await new Promise(resolve => setTimeout(resolve, 3000))
+          return carregarQuestoes(userSerie, tentativa + 1)
+        }
       } else if (data.erro) {
         console.error('Erro:', data.erro)
       }
@@ -83,8 +95,13 @@ export default function TrilhasEstudarPage() {
       if (data.progresso) {
         setProgresso(data.progresso)
       }
+
+      setGerando(false)
+      return false
     } catch (error) {
       console.error('Erro ao carregar questões:', error)
+      setGerando(false)
+      return false
     }
   }, [])
 
@@ -196,8 +213,8 @@ export default function TrilhasEstudarPage() {
 
   // Se não tem questões
   if (questoes.length === 0) {
-    // Verifica se é porque completou ou porque não há questões no banco
-    const semQuestoes = !progresso || progresso.questoes_semana === 0
+    // Verifica se está gerando, completou ou não há questões
+    const completouSemana = progresso && progresso.questoes_semana > 0 && progresso.questoes_respondidas >= progresso.questoes_semana
 
     return (
       <div
@@ -210,28 +227,58 @@ export default function TrilhasEstudarPage() {
             className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
             style={{ background: 'var(--bg-elevated)' }}
           >
-            {semQuestoes ? (
-              <Clock className="w-10 h-10" style={{ color: 'var(--color-warning)' }} />
-            ) : (
+            {gerando ? (
+              <div className="animate-spin">
+                <Zap className="w-10 h-10" style={{ color: accentColor }} />
+              </div>
+            ) : completouSemana ? (
               <Trophy className="w-10 h-10" style={{ color: accentColor }} />
+            ) : (
+              <Clock className="w-10 h-10" style={{ color: 'var(--color-warning)' }} />
             )}
           </div>
           <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            {semQuestoes ? 'Questões em Preparação' : 'Parabéns!'}
+            {gerando ? 'Gerando Questões...' : completouSemana ? 'Parabéns!' : 'Questões em Preparação'}
           </h2>
           <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-            {semQuestoes
-              ? 'As questões desta trilha ainda estão sendo preparadas. Em breve você poderá estudar por aqui!'
-              : 'Você completou todas as questões desta semana! Volte na próxima semana para mais questões.'
+            {gerando
+              ? 'Nossa IA está criando questões personalizadas para você. Aguarde alguns segundos...'
+              : completouSemana
+                ? 'Você completou todas as questões desta semana! Volte na próxima semana para mais questões.'
+                : 'As questões desta trilha ainda estão sendo preparadas. Clique em tentar novamente.'
             }
           </p>
-          <button
-            onClick={() => router.push(`/${componente}/trilhas`)}
-            className="px-6 py-3 rounded-lg font-medium"
-            style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
-          >
-            Voltar para Trilhas
-          </button>
+          {gerando ? (
+            <div className="flex items-center justify-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: accentColor }} />
+              <span>Isso pode levar alguns segundos</span>
+            </div>
+          ) : (
+            <div className="flex gap-3 justify-center">
+              {!completouSemana && (
+                <button
+                  onClick={() => {
+                    setGerando(true)
+                    carregarQuestoes(serie)
+                  }}
+                  className="px-6 py-3 rounded-lg font-medium"
+                  style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+                >
+                  Tentar Novamente
+                </button>
+              )}
+              <button
+                onClick={() => router.push(`/${componente}/trilhas`)}
+                className="px-6 py-3 rounded-lg font-medium"
+                style={{
+                  background: completouSemana ? accentColor : 'var(--bg-elevated)',
+                  color: completouSemana ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)'
+                }}
+              >
+                {completouSemana ? 'Ver Trilhas' : 'Voltar'}
+              </button>
+            </div>
+          )}
         </div>
         <BottomNav componente={componente} />
       </div>
