@@ -19,16 +19,19 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
 
+// Alternativas podem ter 4 (EF) ou 5 (EM) opções
+interface Alternativas {
+  A: string
+  B: string
+  C: string
+  D: string
+  E?: string  // Opcional - apenas para EM (5 alternativas)
+}
+
 interface Questao {
   id: string
   enunciado: string
-  alternativas: {
-    A: string
-    B: string
-    C: string
-    D: string
-    E: string
-  }
+  alternativas: Alternativas
   dica: string
   feedback: string
   resposta_correta: string
@@ -39,6 +42,13 @@ interface Questao {
   subtema: string
   respondida?: boolean
   resposta_usuario?: string
+}
+
+interface SerieInfo {
+  serie: string
+  nivel_ensino: 'EF' | 'EM'
+  componente: 'fisica' | 'matematica'
+  num_alternativas: 4 | 5
 }
 
 interface Progresso {
@@ -69,6 +79,7 @@ export default function TrilhasEstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [tempoInicio, setTempoInicio] = useState<number>(0)
   const [serie, setSerie] = useState<string>('')
+  const [serieInfo, setSerieInfo] = useState<SerieInfo | null>(null)
   const [mostrarConclusao, setMostrarConclusao] = useState(false)
   const [resultadoSemana, setResultadoSemana] = useState<{
     avancou: boolean
@@ -87,6 +98,10 @@ export default function TrilhasEstudarPage() {
         setQuestoes(data.questoes)
         setTempoInicio(Date.now())
         setGerando(false)
+        // Capturar informações da série (EF vs EM, número de alternativas)
+        if (data.serie_info) {
+          setSerieInfo(data.serie_info)
+        }
         return true
       } else if (data.gerando) {
         // Questões estão sendo geradas, aguardar e tentar novamente
@@ -130,7 +145,10 @@ export default function TrilhasEstudarPage() {
           return
         }
 
-        const userSerie = `${userData.usuario.ano}EM`
+        // Determinar série baseado no nível de ensino do usuário
+        const nivelUsuario = userData.usuario.nivel // 'EF' ou 'EM'
+        const anoUsuario = userData.usuario.ano
+        const userSerie = nivelUsuario === 'EF' ? `${anoUsuario}EF` : `${anoUsuario}EM`
         setSerie(userSerie)
 
         // Carregar questões
@@ -326,21 +344,21 @@ export default function TrilhasEstudarPage() {
     >
       <NavigationRail componente={componente} />
 
-      {/* Header */}
-      <header className="page-header">
+      {/* Header - Compacto para Chromebook */}
+      <header className="header-chromebook lg:py-2">
         <div className="max-w-2xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-1.5 lg:mb-1">
             <button
               onClick={() => router.push(`/${componente}/trilhas`)}
-              className="w-11 h-11 flex items-center justify-center rounded-xl transition-colors hover:bg-[var(--bg-surface-hover)]"
+              className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--bg-surface-hover)]"
               style={{ border: '1px solid var(--border-default)' }}
               aria-label="Voltar para trilhas"
             >
-              <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
+              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
             </button>
 
             {progresso && (
-              <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+              <div className="flex items-center gap-1.5 text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
                 <span>Semana {progresso.semana_atual}</span>
                 <span>•</span>
                 <span>{progresso.questoes_respondidas}/{progresso.questoes_semana}</span>
@@ -348,9 +366,9 @@ export default function TrilhasEstudarPage() {
             )}
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar - mais fino */}
           <div
-            className="h-2 rounded-full overflow-hidden"
+            className="h-1.5 lg:h-1 rounded-full overflow-hidden"
             style={{ background: 'var(--bg-elevated)' }}
           >
             <div
@@ -362,34 +380,34 @@ export default function TrilhasEstudarPage() {
             />
           </div>
 
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+          <div className="flex items-center justify-between mt-1 lg:mt-0.5">
+            <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
               Questão {questaoAtual + 1} de {questoes.length}
             </span>
-            <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+            <span className="text-2xs truncate max-w-[120px]" style={{ color: 'var(--text-muted)' }}>
               {questao.tema}
             </span>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-4">
-        {/* Enunciado */}
+      {/* Content - Layout compacto */}
+      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
+        {/* Enunciado - Compacto */}
         <div
-          className="p-4 rounded-xl mb-4"
+          className="p-3 lg:p-2.5 rounded-lg lg:rounded-md mb-2 lg:mb-1.5"
           style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
         >
-          <div className="flex items-start gap-2 mb-3">
+          <div className="flex items-start gap-1.5 mb-1.5 lg:mb-1">
             <span
-              className="px-2 py-1 rounded text-xs font-medium"
+              className="badge-chromebook"
               style={{ background: `${accentColor}20`, color: accentColor }}
             >
               {questao.tipo_questao}
             </span>
             {questao.contexto && (
               <span
-                className="px-2 py-1 rounded text-xs"
+                className="badge-chromebook"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
               >
                 {questao.contexto}
@@ -397,38 +415,40 @@ export default function TrilhasEstudarPage() {
             )}
           </div>
 
-          <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+          <p className="text-sm lg:enunciado-chromebook leading-snug" style={{ color: 'var(--text-primary)' }}>
             {questao.enunciado}
           </p>
         </div>
 
-        {/* Dica */}
+        {/* Dica - Compacta */}
         {!mostrarResultado && (
           <button
             onClick={toggleDica}
-            className="flex items-center gap-2 mb-4 text-sm"
+            className="flex items-center gap-1.5 mb-2 lg:mb-1.5 text-xs"
             style={{ color: 'var(--color-warning)' }}
           >
-            <Lightbulb className="w-4 h-4" />
+            <Lightbulb className="w-3.5 h-3.5" />
             {mostrarDica ? 'Esconder dica' : 'Ver dica'}
           </button>
         )}
 
         {mostrarDica && !mostrarResultado && (
           <div
-            className="p-3 rounded-lg mb-4 flex items-start gap-2"
+            className="p-2 lg:p-1.5 rounded-lg lg:rounded-md mb-2 lg:mb-1.5 flex items-start gap-1.5"
             style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid var(--color-warning)' }}
           >
-            <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-warning)' }} />
-            <p className="text-sm" style={{ color: 'var(--text-primary)' }}>
+            <Lightbulb className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-warning)' }} />
+            <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-primary)' }}>
               {questao.dica}
             </p>
           </div>
         )}
 
-        {/* Alternativas */}
-        <div className="space-y-3">
-          {Object.entries(questao.alternativas).map(([letra, texto]) => {
+        {/* Alternativas - Compactas (4 para EF, 5 para EM) */}
+        <div className="space-y-2 lg:space-y-1.5">
+          {Object.entries(questao.alternativas)
+            .filter(([_, texto]) => texto !== undefined && texto !== null && texto !== '')
+            .map(([letra, texto]) => {
             const isSelected = respostaSelecionada === letra
             const isCorrect = letra === questao.resposta_correta
             const showResult = mostrarResultado
@@ -455,29 +475,30 @@ export default function TrilhasEstudarPage() {
                 key={letra}
                 onClick={() => !mostrarResultado && !respondendo && responderQuestao(letra)}
                 disabled={mostrarResultado || respondendo}
-                className="w-full p-4 rounded-xl text-left transition-all flex items-start gap-3"
+                className="w-full px-3 py-2 lg:px-2.5 lg:py-1.5 rounded-lg lg:rounded-md text-left transition-all flex items-center gap-2"
                 style={{
                   background: bgColor,
-                  border: `2px solid ${borderColor}`,
+                  border: `1.5px solid ${borderColor}`,
                   opacity: respondendo ? 0.7 : 1,
+                  minHeight: '40px',
                 }}
               >
                 <span
-                  className="w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0"
+                  className="alternativa-letra-compact"
                   style={{
                     background: showResult && isCorrect ? 'var(--color-success)' : `${accentColor}20`,
                     color: showResult && isCorrect ? '#fff' : accentColor,
                   }}
                 >
                   {showResult && isCorrect ? (
-                    <CheckCircle className="w-5 h-5" />
+                    <CheckCircle className="w-3.5 h-3.5" />
                   ) : showResult && isSelected && !isCorrect ? (
-                    <XCircle className="w-5 h-5" style={{ color: 'var(--color-error)' }} />
+                    <XCircle className="w-3.5 h-3.5" style={{ color: 'var(--color-error)' }} />
                   ) : (
                     letra
                   )}
                 </span>
-                <span className="flex-1" style={{ color: textColor }}>
+                <span className="flex-1 text-xs lg:texto-alternativa-chromebook" style={{ color: textColor }}>
                   {texto}
                 </span>
               </button>
@@ -485,48 +506,48 @@ export default function TrilhasEstudarPage() {
           })}
         </div>
 
-        {/* Feedback */}
+        {/* Feedback - Compacto */}
         {mostrarResultado && (
-          <div className="mt-6">
+          <div className="mt-3 lg:mt-2">
             <div
-              className="p-4 rounded-xl mb-4"
+              className="feedback-chromebook mb-2 lg:mb-1.5"
               style={{
                 background: acertou ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
                 border: `1px solid ${acertou ? 'var(--color-success)' : 'var(--color-error)'}`,
               }}
             >
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-1.5 mb-1">
                 {acertou ? (
-                  <CheckCircle className="w-5 h-5" style={{ color: 'var(--color-success)' }} />
+                  <CheckCircle className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--color-success)' }} />
                 ) : (
-                  <XCircle className="w-5 h-5" style={{ color: 'var(--color-error)' }} />
+                  <XCircle className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--color-error)' }} />
                 )}
                 <span
-                  className="font-bold"
+                  className="font-bold text-xs"
                   style={{ color: acertou ? 'var(--color-success)' : 'var(--color-error)' }}
                 >
                   {acertou ? 'Correto!' : 'Incorreto'}
                 </span>
               </div>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <p className="text-2xs lg:text-2xs leading-snug" style={{ color: 'var(--text-secondary)' }}>
                 {questao.feedback}
               </p>
             </div>
 
             <button
               onClick={proximaQuestao}
-              className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[56px] transition-all active:scale-[0.98]"
+              className="w-full py-2.5 lg:py-2 rounded-lg font-semibold flex items-center justify-center gap-2 btn-chromebook transition-all active:scale-[0.98]"
               style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
             >
               {questaoAtual < questoes.length - 1 ? (
                 <>
-                  Próxima Questão
-                  <ChevronRight className="w-5 h-5" />
+                  <span className="text-sm lg:text-xs">Próxima</span>
+                  <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
                 </>
               ) : (
                 <>
-                  Finalizar
-                  <Trophy className="w-5 h-5" />
+                  <span className="text-sm lg:text-xs">Finalizar</span>
+                  <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
                 </>
               )}
             </button>
@@ -536,21 +557,21 @@ export default function TrilhasEstudarPage() {
 
       <BottomNav componente={componente} />
 
-      {/* Modal de Conclusão da Semana */}
+      {/* Modal de Conclusão da Semana - Compacto */}
       {mostrarConclusao && resultadoSemana && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3"
           style={{ background: 'var(--overlay-modal)' }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="conclusion-title"
         >
           <div
-            className="w-full max-w-sm rounded-2xl p-6 text-center"
+            className="w-full max-w-xs rounded-xl p-4 text-center"
             style={{ background: 'var(--bg-surface)' }}
           >
             <div
-              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+              className="w-14 h-14 lg:w-12 lg:h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
               style={{
                 background: resultadoSemana.avancou
                   ? 'rgba(34, 197, 94, 0.2)'
@@ -558,42 +579,42 @@ export default function TrilhasEstudarPage() {
               }}
             >
               {resultadoSemana.avancou ? (
-                <Trophy className="w-10 h-10" style={{ color: 'var(--color-success)' }} />
+                <Trophy className="w-7 h-7 lg:w-6 lg:h-6" style={{ color: 'var(--color-success)' }} />
               ) : (
-                <Target className="w-10 h-10" style={{ color: 'var(--color-warning)' }} />
+                <Target className="w-7 h-7 lg:w-6 lg:h-6" style={{ color: 'var(--color-warning)' }} />
               )}
             </div>
 
-            <h2 id="conclusion-title" className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h2 id="conclusion-title" className="text-lg font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>
               {resultadoSemana.avancou ? 'Semana Concluída!' : 'Quase lá!'}
             </h2>
 
-            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
               {resultadoSemana.semanaResetada
-                ? `Você acertou ${resultadoSemana.taxaAcerto}% das questões. Precisa de 60% para avançar. Tente novamente!`
+                ? `Acertou ${resultadoSemana.taxaAcerto}% (mínimo: 60%)`
                 : resultadoSemana.mensagem}
             </p>
 
             <div
-              className="p-4 rounded-xl mb-4"
+              className="p-3 rounded-lg mb-3"
               style={{ background: 'var(--bg-elevated)' }}
             >
-              <p className="text-3xl font-bold mb-1" style={{ color: accentColor }}>
+              <p className="text-2xl font-bold" style={{ color: accentColor }}>
                 {resultadoSemana.taxaAcerto}%
               </p>
-              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Taxa de acerto {!resultadoSemana.avancou && '(mínimo: 60%)'}
+              <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                Taxa de acerto
               </p>
             </div>
 
             {resultadoSemana.avancou && resultadoSemana.novaSemana && (
-              <p className="text-sm mb-4" style={{ color: 'var(--color-success)' }}>
-                Você está agora na semana {resultadoSemana.novaSemana}!
+              <p className="text-xs mb-3" style={{ color: 'var(--color-success)' }}>
+                Agora na semana {resultadoSemana.novaSemana}!
               </p>
             )}
 
             {resultadoSemana.semanaResetada ? (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-2">
                 <button
                   onClick={() => {
                     setMostrarConclusao(false)
@@ -606,27 +627,27 @@ export default function TrilhasEstudarPage() {
                     setLoading(true)
                     carregarQuestoes(serie).finally(() => setLoading(false))
                   }}
-                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98]"
+                  className="w-full py-2.5 rounded-lg font-semibold flex items-center justify-center gap-2 btn-chromebook transition-all active:scale-[0.98]"
                   style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
                 >
-                  <RefreshCw className="w-5 h-5" />
-                  Tentar Novamente
+                  <RefreshCw className="w-4 h-4" />
+                  <span className="text-sm">Tentar Novamente</span>
                 </button>
                 <button
                   onClick={() => router.push(`/${componente}/trilhas`)}
-                  className="w-full py-3 rounded-xl font-medium min-h-[48px] transition-all active:scale-[0.98]"
+                  className="w-full py-2.5 rounded-lg font-medium btn-chromebook transition-all active:scale-[0.98]"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
                 >
-                  Ver Trilhas
+                  <span className="text-sm">Ver Trilhas</span>
                 </button>
               </div>
             ) : (
               <button
                 onClick={() => router.push(`/${componente}/trilhas`)}
-                className="w-full py-3 rounded-xl font-semibold min-h-[48px] transition-all active:scale-[0.98]"
+                className="w-full py-2.5 rounded-lg font-semibold btn-chromebook transition-all active:scale-[0.98]"
                 style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
               >
-                {resultadoSemana.avancou ? 'Continuar Jornada' : 'Ver Trilhas'}
+                <span className="text-sm">{resultadoSemana.avancou ? 'Continuar' : 'Ver Trilhas'}</span>
               </button>
             )}
           </div>

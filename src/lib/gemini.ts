@@ -577,12 +577,243 @@ export const CURRICULO_FISICA: Record<string, Record<number, { tema: string; sub
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+// CURRÍCULO DE MATEMÁTICA - ENSINO FUNDAMENTAL (6º ao 9º ano)
+// Baseado na BNCC e currículos estaduais brasileiros
+// 4 alternativas (A, B, C, D) - diferente do EM que tem 5
+// ═══════════════════════════════════════════════════════════
+export const CURRICULO_MATEMATICA: Record<string, Record<number, { tema: string; subtema: string; bimestre: number }>> = {
+  // ═══════════════════════════════════════════════════════════
+  // 6º ANO DO ENSINO FUNDAMENTAL
+  // ═══════════════════════════════════════════════════════════
+  "6EF": {
+    // 1º BIMESTRE - Números e Operações
+    1: { tema: "Números Naturais", subtema: "Sistema de numeração decimal: leitura, escrita e comparação", bimestre: 1 },
+    2: { tema: "Números Naturais", subtema: "Operações fundamentais: adição e subtração", bimestre: 1 },
+    3: { tema: "Números Naturais", subtema: "Operações fundamentais: multiplicação e divisão", bimestre: 1 },
+    4: { tema: "Números Naturais", subtema: "Propriedades das operações (comutativa, associativa, distributiva)", bimestre: 1 },
+    5: { tema: "Números Naturais", subtema: "Múltiplos e divisores de um número natural", bimestre: 1 },
+    6: { tema: "Números Naturais", subtema: "Critérios de divisibilidade por 2, 3, 4, 5, 6, 9 e 10", bimestre: 1 },
+    7: { tema: "Números Naturais", subtema: "Números primos e compostos", bimestre: 1 },
+    8: { tema: "Números Naturais", subtema: "Decomposição em fatores primos", bimestre: 1 },
+    9: { tema: "Números Naturais", subtema: "Máximo Divisor Comum (MDC)", bimestre: 1 },
+    10: { tema: "Números Naturais", subtema: "Mínimo Múltiplo Comum (MMC)", bimestre: 1 },
+
+    // 2º BIMESTRE - Frações e Decimais
+    11: { tema: "Frações", subtema: "Conceito de fração como parte de um todo", bimestre: 2 },
+    12: { tema: "Frações", subtema: "Frações próprias, impróprias e números mistos", bimestre: 2 },
+    13: { tema: "Frações", subtema: "Frações equivalentes e simplificação", bimestre: 2 },
+    14: { tema: "Frações", subtema: "Comparação e ordenação de frações", bimestre: 2 },
+    15: { tema: "Frações", subtema: "Adição e subtração de frações com mesmo denominador", bimestre: 2 },
+    16: { tema: "Frações", subtema: "Adição e subtração de frações com denominadores diferentes", bimestre: 2 },
+    17: { tema: "Frações", subtema: "Multiplicação de frações", bimestre: 2 },
+    18: { tema: "Frações", subtema: "Divisão de frações", bimestre: 2 },
+    19: { tema: "Números Decimais", subtema: "Representação e leitura de números decimais", bimestre: 2 },
+    20: { tema: "Números Decimais", subtema: "Operações com números decimais", bimestre: 2 },
+
+    // 3º BIMESTRE - Geometria e Medidas
+    21: { tema: "Geometria Plana", subtema: "Ponto, reta e plano - conceitos básicos", bimestre: 3 },
+    22: { tema: "Geometria Plana", subtema: "Posições relativas de retas (paralelas e concorrentes)", bimestre: 3 },
+    23: { tema: "Geometria Plana", subtema: "Ângulos: conceito, classificação e medida", bimestre: 3 },
+    24: { tema: "Geometria Plana", subtema: "Polígonos: conceito e classificação", bimestre: 3 },
+    25: { tema: "Geometria Plana", subtema: "Triângulos: classificação quanto aos lados e ângulos", bimestre: 3 },
+    26: { tema: "Geometria Plana", subtema: "Quadriláteros: paralelogramos, retângulos, quadrados", bimestre: 3 },
+    27: { tema: "Grandezas e Medidas", subtema: "Perímetro de polígonos", bimestre: 3 },
+    28: { tema: "Grandezas e Medidas", subtema: "Área de retângulos e quadrados", bimestre: 3 },
+    29: { tema: "Grandezas e Medidas", subtema: "Área de triângulos", bimestre: 3 },
+    30: { tema: "Grandezas e Medidas", subtema: "Unidades de medida de comprimento e conversões", bimestre: 3 },
+
+    // 4º BIMESTRE - Álgebra e Estatística
+    31: { tema: "Grandezas e Medidas", subtema: "Unidades de medida de área e volume", bimestre: 4 },
+    32: { tema: "Grandezas e Medidas", subtema: "Unidades de medida de massa e capacidade", bimestre: 4 },
+    33: { tema: "Álgebra", subtema: "Expressões numéricas com números naturais", bimestre: 4 },
+    34: { tema: "Álgebra", subtema: "Potenciação de números naturais", bimestre: 4 },
+    35: { tema: "Álgebra", subtema: "Raiz quadrada de números naturais", bimestre: 4 },
+    36: { tema: "Álgebra", subtema: "Sequências numéricas e padrões", bimestre: 4 },
+    37: { tema: "Estatística", subtema: "Leitura e interpretação de tabelas", bimestre: 4 },
+    38: { tema: "Estatística", subtema: "Leitura e interpretação de gráficos de barras e colunas", bimestre: 4 },
+    39: { tema: "Estatística", subtema: "Média aritmética simples", bimestre: 4 },
+    40: { tema: "Estatística", subtema: "Moda e mediana - conceitos básicos", bimestre: 4 },
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 7º ANO DO ENSINO FUNDAMENTAL
+  // ═══════════════════════════════════════════════════════════
+  "7EF": {
+    // 1º BIMESTRE - Números Inteiros
+    1: { tema: "Números Inteiros", subtema: "Conjunto dos números inteiros (Z) e representação na reta", bimestre: 1 },
+    2: { tema: "Números Inteiros", subtema: "Comparação e ordenação de números inteiros", bimestre: 1 },
+    3: { tema: "Números Inteiros", subtema: "Módulo ou valor absoluto de um número inteiro", bimestre: 1 },
+    4: { tema: "Números Inteiros", subtema: "Adição de números inteiros", bimestre: 1 },
+    5: { tema: "Números Inteiros", subtema: "Subtração de números inteiros", bimestre: 1 },
+    6: { tema: "Números Inteiros", subtema: "Multiplicação de números inteiros (regra de sinais)", bimestre: 1 },
+    7: { tema: "Números Inteiros", subtema: "Divisão de números inteiros", bimestre: 1 },
+    8: { tema: "Números Inteiros", subtema: "Potenciação com base inteira", bimestre: 1 },
+    9: { tema: "Números Inteiros", subtema: "Expressões numéricas com números inteiros", bimestre: 1 },
+    10: { tema: "Números Racionais", subtema: "Conjunto dos números racionais (Q) e representações", bimestre: 1 },
+
+    // 2º BIMESTRE - Números Racionais e Proporção
+    11: { tema: "Números Racionais", subtema: "Operações com números racionais na forma fracionária", bimestre: 2 },
+    12: { tema: "Números Racionais", subtema: "Operações com números racionais na forma decimal", bimestre: 2 },
+    13: { tema: "Números Racionais", subtema: "Potenciação com expoentes inteiros", bimestre: 2 },
+    14: { tema: "Razão e Proporção", subtema: "Razão entre duas grandezas", bimestre: 2 },
+    15: { tema: "Razão e Proporção", subtema: "Proporção e propriedade fundamental", bimestre: 2 },
+    16: { tema: "Razão e Proporção", subtema: "Grandezas diretamente proporcionais", bimestre: 2 },
+    17: { tema: "Razão e Proporção", subtema: "Grandezas inversamente proporcionais", bimestre: 2 },
+    18: { tema: "Razão e Proporção", subtema: "Regra de três simples direta", bimestre: 2 },
+    19: { tema: "Razão e Proporção", subtema: "Regra de três simples inversa", bimestre: 2 },
+    20: { tema: "Porcentagem", subtema: "Conceito de porcentagem e cálculos básicos", bimestre: 2 },
+
+    // 3º BIMESTRE - Álgebra e Geometria
+    21: { tema: "Porcentagem", subtema: "Acréscimos e descontos percentuais", bimestre: 3 },
+    22: { tema: "Álgebra", subtema: "Linguagem algébrica: variáveis e expressões", bimestre: 3 },
+    23: { tema: "Álgebra", subtema: "Valor numérico de uma expressão algébrica", bimestre: 3 },
+    24: { tema: "Álgebra", subtema: "Monômios: conceito e operações", bimestre: 3 },
+    25: { tema: "Equações", subtema: "Equação do 1º grau: conceito e resolução", bimestre: 3 },
+    26: { tema: "Equações", subtema: "Resolução de problemas com equações do 1º grau", bimestre: 3 },
+    27: { tema: "Geometria Plana", subtema: "Ângulos: complementares, suplementares e opostos pelo vértice", bimestre: 3 },
+    28: { tema: "Geometria Plana", subtema: "Soma dos ângulos internos de um triângulo", bimestre: 3 },
+    29: { tema: "Geometria Plana", subtema: "Construções geométricas básicas com régua e compasso", bimestre: 3 },
+    30: { tema: "Geometria Plana", subtema: "Polígonos regulares e soma dos ângulos internos", bimestre: 3 },
+
+    // 4º BIMESTRE - Geometria e Estatística
+    31: { tema: "Geometria Plana", subtema: "Área de paralelogramos e trapézios", bimestre: 4 },
+    32: { tema: "Geometria Plana", subtema: "Área de losango", bimestre: 4 },
+    33: { tema: "Geometria Plana", subtema: "Circunferência e círculo: conceitos básicos", bimestre: 4 },
+    34: { tema: "Geometria Plana", subtema: "Comprimento da circunferência", bimestre: 4 },
+    35: { tema: "Geometria Plana", subtema: "Área do círculo", bimestre: 4 },
+    36: { tema: "Estatística", subtema: "Pesquisa estatística: população e amostra", bimestre: 4 },
+    37: { tema: "Estatística", subtema: "Gráficos de setores (pizza)", bimestre: 4 },
+    38: { tema: "Estatística", subtema: "Média aritmética ponderada", bimestre: 4 },
+    39: { tema: "Probabilidade", subtema: "Experimentos aleatórios e espaço amostral", bimestre: 4 },
+    40: { tema: "Probabilidade", subtema: "Cálculo de probabilidades simples", bimestre: 4 },
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 8º ANO DO ENSINO FUNDAMENTAL
+  // ═══════════════════════════════════════════════════════════
+  "8EF": {
+    // 1º BIMESTRE - Conjuntos Numéricos e Álgebra
+    1: { tema: "Conjuntos Numéricos", subtema: "Revisão: naturais, inteiros e racionais", bimestre: 1 },
+    2: { tema: "Conjuntos Numéricos", subtema: "Números irracionais e raízes não exatas", bimestre: 1 },
+    3: { tema: "Conjuntos Numéricos", subtema: "Conjunto dos números reais (R)", bimestre: 1 },
+    4: { tema: "Conjuntos Numéricos", subtema: "Representação de reais na reta numérica", bimestre: 1 },
+    5: { tema: "Potenciação", subtema: "Propriedades da potenciação", bimestre: 1 },
+    6: { tema: "Potenciação", subtema: "Notação científica", bimestre: 1 },
+    7: { tema: "Radicais", subtema: "Raiz quadrada e raiz cúbica", bimestre: 1 },
+    8: { tema: "Radicais", subtema: "Simplificação de radicais", bimestre: 1 },
+    9: { tema: "Radicais", subtema: "Operações com radicais: adição e subtração", bimestre: 1 },
+    10: { tema: "Radicais", subtema: "Operações com radicais: multiplicação e divisão", bimestre: 1 },
+
+    // 2º BIMESTRE - Álgebra
+    11: { tema: "Polinômios", subtema: "Expressões algébricas e polinômios", bimestre: 2 },
+    12: { tema: "Polinômios", subtema: "Adição e subtração de polinômios", bimestre: 2 },
+    13: { tema: "Polinômios", subtema: "Multiplicação de polinômios", bimestre: 2 },
+    14: { tema: "Produtos Notáveis", subtema: "Quadrado da soma e da diferença", bimestre: 2 },
+    15: { tema: "Produtos Notáveis", subtema: "Produto da soma pela diferença", bimestre: 2 },
+    16: { tema: "Fatoração", subtema: "Fator comum em evidência", bimestre: 2 },
+    17: { tema: "Fatoração", subtema: "Fatoração por agrupamento", bimestre: 2 },
+    18: { tema: "Fatoração", subtema: "Fatoração de trinômio quadrado perfeito", bimestre: 2 },
+    19: { tema: "Fatoração", subtema: "Fatoração da diferença de dois quadrados", bimestre: 2 },
+    20: { tema: "Frações Algébricas", subtema: "Simplificação de frações algébricas", bimestre: 2 },
+
+    // 3º BIMESTRE - Equações e Sistemas
+    21: { tema: "Equações do 1º Grau", subtema: "Equações do 1º grau com uma incógnita", bimestre: 3 },
+    22: { tema: "Equações do 1º Grau", subtema: "Problemas envolvendo equações do 1º grau", bimestre: 3 },
+    23: { tema: "Inequações", subtema: "Inequações do 1º grau", bimestre: 3 },
+    24: { tema: "Sistemas de Equações", subtema: "Sistema de equações do 1º grau: conceito", bimestre: 3 },
+    25: { tema: "Sistemas de Equações", subtema: "Resolução por substituição", bimestre: 3 },
+    26: { tema: "Sistemas de Equações", subtema: "Resolução por adição (eliminação)", bimestre: 3 },
+    27: { tema: "Sistemas de Equações", subtema: "Resolução gráfica de sistemas", bimestre: 3 },
+    28: { tema: "Sistemas de Equações", subtema: "Problemas envolvendo sistemas de equações", bimestre: 3 },
+    29: { tema: "Geometria Plana", subtema: "Teorema de Tales", bimestre: 3 },
+    30: { tema: "Geometria Plana", subtema: "Aplicações do Teorema de Tales", bimestre: 3 },
+
+    // 4º BIMESTRE - Geometria e Estatística
+    31: { tema: "Geometria Plana", subtema: "Semelhança de triângulos: conceito", bimestre: 4 },
+    32: { tema: "Geometria Plana", subtema: "Casos de semelhança de triângulos", bimestre: 4 },
+    33: { tema: "Geometria Plana", subtema: "Relações métricas no triângulo retângulo", bimestre: 4 },
+    34: { tema: "Geometria Plana", subtema: "Teorema de Pitágoras", bimestre: 4 },
+    35: { tema: "Geometria Plana", subtema: "Aplicações do Teorema de Pitágoras", bimestre: 4 },
+    36: { tema: "Geometria Espacial", subtema: "Prismas: conceito e elementos", bimestre: 4 },
+    37: { tema: "Geometria Espacial", subtema: "Volume de prismas", bimestre: 4 },
+    38: { tema: "Geometria Espacial", subtema: "Cilindros: conceito e volume", bimestre: 4 },
+    39: { tema: "Estatística", subtema: "Medidas de tendência central: média, moda e mediana", bimestre: 4 },
+    40: { tema: "Estatística", subtema: "Análise de gráficos e infográficos", bimestre: 4 },
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 9º ANO DO ENSINO FUNDAMENTAL
+  // ═══════════════════════════════════════════════════════════
+  "9EF": {
+    // 1º BIMESTRE - Potências e Radicais
+    1: { tema: "Potenciação", subtema: "Revisão de potenciação e propriedades", bimestre: 1 },
+    2: { tema: "Potenciação", subtema: "Potências com expoentes negativos", bimestre: 1 },
+    3: { tema: "Potenciação", subtema: "Notação científica e ordens de grandeza", bimestre: 1 },
+    4: { tema: "Radiciação", subtema: "Propriedades dos radicais", bimestre: 1 },
+    5: { tema: "Radiciação", subtema: "Racionalização de denominadores", bimestre: 1 },
+    6: { tema: "Conjuntos Numéricos", subtema: "Intervalos reais e representação gráfica", bimestre: 1 },
+    7: { tema: "Funções", subtema: "Conceito de função: domínio, contradomínio e imagem", bimestre: 1 },
+    8: { tema: "Funções", subtema: "Representação de funções: tabelas e gráficos", bimestre: 1 },
+    9: { tema: "Funções", subtema: "Função afim: conceito e gráfico", bimestre: 1 },
+    10: { tema: "Funções", subtema: "Coeficiente angular e linear da função afim", bimestre: 1 },
+
+    // 2º BIMESTRE - Funções e Equações
+    11: { tema: "Funções", subtema: "Zero da função afim", bimestre: 2 },
+    12: { tema: "Funções", subtema: "Função afim crescente e decrescente", bimestre: 2 },
+    13: { tema: "Funções", subtema: "Problemas envolvendo função afim", bimestre: 2 },
+    14: { tema: "Equação do 2º Grau", subtema: "Equação do 2º grau: conceito e forma geral", bimestre: 2 },
+    15: { tema: "Equação do 2º Grau", subtema: "Equações do 2º grau incompletas", bimestre: 2 },
+    16: { tema: "Equação do 2º Grau", subtema: "Fórmula de Bhaskara", bimestre: 2 },
+    17: { tema: "Equação do 2º Grau", subtema: "Discriminante e natureza das raízes", bimestre: 2 },
+    18: { tema: "Equação do 2º Grau", subtema: "Relações de Girard (soma e produto das raízes)", bimestre: 2 },
+    19: { tema: "Equação do 2º Grau", subtema: "Problemas envolvendo equações do 2º grau", bimestre: 2 },
+    20: { tema: "Função Quadrática", subtema: "Função quadrática: conceito e gráfico (parábola)", bimestre: 2 },
+
+    // 3º BIMESTRE - Função Quadrática e Trigonometria
+    21: { tema: "Função Quadrática", subtema: "Vértice da parábola", bimestre: 3 },
+    22: { tema: "Função Quadrática", subtema: "Zeros da função quadrática", bimestre: 3 },
+    23: { tema: "Função Quadrática", subtema: "Estudo do sinal da função quadrática", bimestre: 3 },
+    24: { tema: "Função Quadrática", subtema: "Problemas de máximo e mínimo", bimestre: 3 },
+    25: { tema: "Trigonometria", subtema: "Razões trigonométricas no triângulo retângulo", bimestre: 3 },
+    26: { tema: "Trigonometria", subtema: "Seno de um ângulo agudo", bimestre: 3 },
+    27: { tema: "Trigonometria", subtema: "Cosseno de um ângulo agudo", bimestre: 3 },
+    28: { tema: "Trigonometria", subtema: "Tangente de um ângulo agudo", bimestre: 3 },
+    29: { tema: "Trigonometria", subtema: "Ângulos notáveis (30°, 45°, 60°)", bimestre: 3 },
+    30: { tema: "Trigonometria", subtema: "Aplicações da trigonometria em problemas", bimestre: 3 },
+
+    // 4º BIMESTRE - Geometria e Estatística
+    31: { tema: "Geometria Espacial", subtema: "Pirâmides: conceito e elementos", bimestre: 4 },
+    32: { tema: "Geometria Espacial", subtema: "Volume de pirâmides", bimestre: 4 },
+    33: { tema: "Geometria Espacial", subtema: "Cones: conceito e volume", bimestre: 4 },
+    34: { tema: "Geometria Espacial", subtema: "Esferas: conceito e volume", bimestre: 4 },
+    35: { tema: "Geometria Espacial", subtema: "Área da superfície de sólidos", bimestre: 4 },
+    36: { tema: "Estatística", subtema: "Variáveis quantitativas e qualitativas", bimestre: 4 },
+    37: { tema: "Estatística", subtema: "Amplitude e desvio médio", bimestre: 4 },
+    38: { tema: "Probabilidade", subtema: "Probabilidade de eventos independentes", bimestre: 4 },
+    39: { tema: "Probabilidade", subtema: "Probabilidade condicional (introdução)", bimestre: 4 },
+    40: { tema: "Probabilidade", subtema: "Aplicações de probabilidade em situações-problema", bimestre: 4 },
+  }
+}
+
+// Interface para questões geradas (5 alternativas - Ensino Médio)
 export interface QuestaoGerada {
   tipo_questao: string
   contexto: string
   enunciado: string
   alternativas: { A: string; B: string; C: string; D: string; E: string }
   resposta_correta: string
+  dica: string
+  feedback: string
+}
+
+// Interface para questões EF (4 alternativas - Ensino Fundamental)
+export interface QuestaoGeradaEF {
+  tipo_questao: string
+  contexto: string
+  enunciado: string
+  alternativas: { A: string; B: string; C: string; D: string }
+  resposta_correta: 'A' | 'B' | 'C' | 'D'
   dica: string
   feedback: string
 }
@@ -738,6 +969,177 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
   throw new Error('Falha ao gerar questões com todos os modelos tentados')
 }
 
+// Interface para resposta do Gemini - Matemática EF (4 alternativas)
+interface RespostaGeminiQuestoesEF {
+  questoes: QuestaoGeradaEF[]
+}
+
+/**
+ * Gera questões de Matemática do Ensino Fundamental usando a API do Gemini
+ * Sistema sob demanda com 4 alternativas (A, B, C, D) - diferente do EM que tem 5
+ */
+export async function gerarQuestoesMatematicaEF(
+  serie: string,
+  semana: number,
+  quantidade: number = 5
+): Promise<QuestaoGeradaEF[]> {
+  const apiKey = process.env.GEMINI_API_KEY
+
+  if (!apiKey) {
+    console.error('[Gemini] GEMINI_API_KEY não configurada')
+    throw new Error('API do Gemini não configurada')
+  }
+
+  // Buscar conteúdo do currículo para a série específica
+  const curriculoSerie = CURRICULO_MATEMATICA[serie]
+  if (!curriculoSerie) {
+    throw new Error(`Série ${serie} não encontrada no currículo de Matemática`)
+  }
+
+  let conteudo = curriculoSerie[semana]
+  if (!conteudo) {
+    // Se a semana não existe, usa a última semana disponível
+    const semanaFallback = Math.min(semana, 40)
+    conteudo = curriculoSerie[semanaFallback] || curriculoSerie[1]
+    console.log(`[Gemini] Semana ${semana} não encontrada para ${serie}, usando semana ${semanaFallback}`)
+  }
+
+  const { tema, subtema, bimestre } = conteudo
+  const serieNumero = serie[0] // "6", "7", "8" ou "9"
+
+  const promptQuestoes = `Você é um professor de Matemática especialista em criar questões para estudantes do Ensino Fundamental II de escolas públicas brasileiras.
+
+INFORMAÇÕES DA SÉRIE E PERÍODO:
+- Série: ${serieNumero}º ano do Ensino Fundamental (${serie})
+- Bimestre: ${bimestre}º bimestre
+- Semana: ${semana} de 40
+- Tema principal: ${tema}
+- Subtema específico: ${subtema}
+
+IMPORTANTE - ADEQUAÇÃO AO NÍVEL:
+${serieNumero === '6' ? `
+- Alunos do 6º ano estão iniciando o Ensino Fundamental II
+- Foque em conceitos básicos e concretos
+- Use linguagem simples e acessível
+- Evite abstrações excessivas
+- Temas típicos: Números naturais, frações, geometria básica, medidas` : ''}
+${serieNumero === '7' ? `
+- Alunos do 7º ano estão consolidando bases matemáticas
+- Introduza números negativos de forma gradual
+- Conecte álgebra com situações práticas
+- Temas típicos: Números inteiros, razão, proporção, equações do 1º grau` : ''}
+${serieNumero === '8' ? `
+- Alunos do 8º ano já trabalham com álgebra
+- Pode exigir mais raciocínio abstrato
+- Conecte com geometria e medidas
+- Temas típicos: Polinômios, fatoração, sistemas de equações, Teorema de Pitágoras` : ''}
+${serieNumero === '9' ? `
+- Alunos do 9º ano estão se preparando para o Ensino Médio
+- Introduza funções de forma gradual
+- Trabalhe equação do 2º grau e trigonometria básica
+- Temas típicos: Funções, equação do 2º grau, trigonometria, geometria espacial` : ''}
+
+Crie ${quantidade} questões de Matemática sobre "${tema}" - "${subtema}".
+
+REGRAS OBRIGATÓRIAS:
+1. As questões devem ser EXCLUSIVAMENTE sobre o conteúdo do ${serieNumero}º ano
+2. NÃO use conteúdos de outras séries
+3. Use contextos do cotidiano de estudantes brasileiros de escola pública
+4. IMPORTANTE: Cada questão deve ter APENAS 4 alternativas (A, B, C, D) - NÃO inclua a letra E
+5. As alternativas erradas devem ser PLAUSÍVEIS (baseadas em erros comuns de alunos)
+6. Inclua uma DICA que ajude sem revelar a resposta
+7. Inclua um FEEDBACK explicativo completo
+8. Use linguagem adequada para a faixa etária (11-14 anos)
+
+TIPOS DE QUESTÃO (varie entre eles):
+- conceitual: Compreensão sem cálculos
+- calculo_direto: Aplicação direta de operação ou fórmula
+- situacao_problema: Problema contextualizado do dia a dia
+- analise_fenomeno: Entender um padrão ou propriedade matemática
+- comparacao: Comparar valores, grandezas ou expressões
+
+Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
+{
+  "questoes": [
+    {
+      "tipo_questao": "conceitual",
+      "contexto": "Cotidiano - Escola",
+      "enunciado": "Na merenda da escola...",
+      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
+      "resposta_correta": "A",
+      "dica": "Lembre-se que...",
+      "feedback": "A resposta correta é A porque..."
+    }
+  ]
+}`
+
+  // Tentar diferentes modelos
+  const modelosQuestoes = [
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+  ]
+
+  for (const modelo of modelosQuestoes) {
+    try {
+      console.log(`[Gemini] Gerando questões de Matemática EF com ${modelo}...`)
+
+      const genAI = getGenAI()
+      const model = genAI.getGenerativeModel({ model: modelo })
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.8,
+          topP: 0.95,
+          maxOutputTokens: 8192
+        }
+      })
+
+      let text = result.response.text()
+
+      if (!text) {
+        console.error(`[Gemini] Resposta vazia de ${modelo}`)
+        continue
+      }
+
+      // Limpar markdown se presente
+      if (text.startsWith('```')) {
+        const parts = text.split('```')
+        text = parts[1] || parts[0]
+        if (text.startsWith('json')) {
+          text = text.substring(4)
+        }
+      }
+
+      const dados: RespostaGeminiQuestoesEF = JSON.parse(text.trim())
+
+      if (dados.questoes && dados.questoes.length > 0) {
+        // Validar que as questões têm apenas 4 alternativas
+        const questoesValidadas = dados.questoes.map(q => {
+          // Remover alternativa E se existir (caso a IA tenha ignorado a instrução)
+          const { A, B, C, D } = q.alternativas as any
+          return {
+            ...q,
+            alternativas: { A, B, C, D },
+            resposta_correta: (['A', 'B', 'C', 'D'].includes(q.resposta_correta)
+              ? q.resposta_correta
+              : 'A') as 'A' | 'B' | 'C' | 'D'
+          }
+        })
+
+        console.log(`[Gemini] ${questoesValidadas.length} questões de Matemática EF geradas com ${modelo}`)
+        return questoesValidadas
+      }
+    } catch (error) {
+      console.error(`[Gemini] Erro com ${modelo}:`, error)
+      continue
+    }
+  }
+
+  throw new Error('Falha ao gerar questões de Matemática EF com todos os modelos tentados')
+}
+
 /**
  * Verifica se há questões em cache (no banco) para a série/semana
  * Questões são organizadas por serie/semana/ano_letivo, não por trilha_id
@@ -846,4 +1248,123 @@ export async function salvarQuestoesNoCache(
   }
 
   return salvas
+}
+
+/**
+ * Salva questões de Matemática EF no banco de dados (cache)
+ * Inclui campos novos: componente, nivel_ensino, num_alternativas
+ */
+export async function salvarQuestoesMatematicaEFNoCache(
+  supabase: any,
+  questoes: QuestaoGeradaEF[],
+  serie: string,
+  semana: number
+): Promise<number> {
+  const conteudo = CURRICULO_MATEMATICA[serie]?.[semana] || CURRICULO_MATEMATICA[serie]?.[1]
+  const anoLetivo = new Date().getFullYear()
+  let salvas = 0
+
+  for (let i = 0; i < questoes.length; i++) {
+    const q = questoes[i]
+
+    // Preparar dados conforme schema do banco (com campos EF)
+    const dados = {
+      serie: serie,
+      semana: semana,
+      ano_letivo: anoLetivo,
+      ordem: i + 1,
+      tema: conteudo?.tema || 'Matemática',
+      subtema: conteudo?.subtema || '',
+      tipo_questao: mapearTipoQuestao(q.tipo_questao),
+      contexto_cotidiano: mapearContextoCotidiano(q.contexto),
+      enunciado: q.enunciado,
+      alternativas: q.alternativas,  // Apenas A, B, C, D
+      resposta_correta: q.resposta_correta,
+      dica: q.dica,
+      feedback: {
+        explicacao_correta: q.feedback,
+        erros_comuns: {},
+        conexao_cotidiano: '',
+        curiosidade: ''
+      },
+      dificuldade: 'medio',
+      ativa: true,
+      // Novos campos para EF
+      componente: 'matematica',
+      nivel_ensino: 'EF',
+      num_alternativas: 4
+    }
+
+    const { error } = await supabase
+      .from('questoes_trilha')
+      .insert(dados)
+
+    if (error) {
+      console.error(`[Cache] Erro ao salvar questão de Matemática EF ${i + 1}:`, error.message || error)
+    } else {
+      salvas++
+      console.log(`[Cache] Questão de Matemática EF ${i + 1} salva para ${serie} semana ${semana}`)
+    }
+  }
+
+  return salvas
+}
+
+/**
+ * Verifica se a série é do Ensino Fundamental
+ */
+export function isSerieEF(serie: string): boolean {
+  return ['6EF', '7EF', '8EF', '9EF'].includes(serie)
+}
+
+/**
+ * Verifica se a série é do Ensino Médio
+ */
+export function isSerieEM(serie: string): boolean {
+  return ['1EM', '2EM', '3EM'].includes(serie)
+}
+
+/**
+ * Retorna o componente correto baseado na série
+ * EF: matematica, EM: fisica
+ */
+export function getComponentePorSerie(serie: string): 'fisica' | 'matematica' {
+  return isSerieEF(serie) ? 'matematica' : 'fisica'
+}
+
+/**
+ * Retorna o número de alternativas baseado na série
+ * EF: 4 alternativas, EM: 5 alternativas
+ */
+export function getNumAlternativasPorSerie(serie: string): 4 | 5 {
+  return isSerieEF(serie) ? 4 : 5
+}
+
+/**
+ * Função unificada para gerar questões (detecta automaticamente EF ou EM)
+ */
+export async function gerarQuestoes(
+  serie: string,
+  semana: number,
+  quantidade: number = 5
+): Promise<QuestaoGerada[] | QuestaoGeradaEF[]> {
+  if (isSerieEF(serie)) {
+    return gerarQuestoesMatematicaEF(serie, semana, quantidade)
+  }
+  return gerarQuestoesComGemini(serie, semana, quantidade)
+}
+
+/**
+ * Função unificada para salvar questões no cache (detecta automaticamente EF ou EM)
+ */
+export async function salvarQuestoes(
+  supabase: any,
+  questoes: QuestaoGerada[] | QuestaoGeradaEF[],
+  serie: string,
+  semana: number
+): Promise<number> {
+  if (isSerieEF(serie)) {
+    return salvarQuestoesMatematicaEFNoCache(supabase, questoes as QuestaoGeradaEF[], serie, semana)
+  }
+  return salvarQuestoesNoCache(supabase, questoes as QuestaoGerada[], serie, semana)
 }
