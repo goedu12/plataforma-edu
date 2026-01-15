@@ -11,8 +11,8 @@ import {
   Clock,
   Target,
   Trophy,
-  HelpCircle,
   Zap,
+  RefreshCw,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
@@ -75,6 +75,7 @@ export default function TrilhasEstudarPage() {
     taxaAcerto: number
     novaSemana?: number
     mensagem: string
+    semanaResetada?: boolean
   } | null>(null)
 
   const carregarQuestoes = useCallback(async (userSerie: string, tentativa: number = 1): Promise<boolean> => {
@@ -213,7 +214,8 @@ export default function TrilhasEstudarPage() {
             avancou: data.progresso.avancou || false,
             taxaAcerto: data.progresso.taxa_acerto || 0,
             novaSemana: data.progresso.semana_atual,
-            mensagem: data.mensagem
+            mensagem: data.mensagem,
+            semanaResetada: data.progresso.semana_resetada || false
           })
           setMostrarConclusao(true)
         } else {
@@ -559,11 +561,13 @@ export default function TrilhasEstudarPage() {
             </div>
 
             <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-              {resultadoSemana.avancou ? 'Semana Concluída!' : 'Continue Praticando!'}
+              {resultadoSemana.avancou ? 'Semana Concluída!' : 'Quase lá!'}
             </h2>
 
             <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-              {resultadoSemana.mensagem}
+              {resultadoSemana.semanaResetada
+                ? `Você acertou ${resultadoSemana.taxaAcerto}% das questões. Precisa de 60% para avançar. Tente novamente!`
+                : resultadoSemana.mensagem}
             </p>
 
             <div
@@ -574,7 +578,7 @@ export default function TrilhasEstudarPage() {
                 {resultadoSemana.taxaAcerto}%
               </p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Taxa de acerto
+                Taxa de acerto {!resultadoSemana.avancou && '(mínimo: 60%)'}
               </p>
             </div>
 
@@ -584,13 +588,43 @@ export default function TrilhasEstudarPage() {
               </p>
             )}
 
-            <button
-              onClick={() => router.push(`/${componente}/trilhas`)}
-              className="w-full py-3 rounded-xl font-medium"
-              style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
-            >
-              {resultadoSemana.avancou ? 'Continuar Jornada' : 'Ver Trilhas'}
-            </button>
+            {resultadoSemana.semanaResetada ? (
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => {
+                    setMostrarConclusao(false)
+                    setResultadoSemana(null)
+                    setQuestaoAtual(0)
+                    setRespostaSelecionada(null)
+                    setMostrarResultado(false)
+                    setMostrarDica(false)
+                    setUsouDica(false)
+                    setLoading(true)
+                    carregarQuestoes(serie).finally(() => setLoading(false))
+                  }}
+                  className="w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+                  style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+                >
+                  <RefreshCw className="w-5 h-5" />
+                  Tentar Novamente
+                </button>
+                <button
+                  onClick={() => router.push(`/${componente}/trilhas`)}
+                  className="w-full py-3 rounded-xl font-medium"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                >
+                  Ver Trilhas
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push(`/${componente}/trilhas`)}
+                className="w-full py-3 rounded-xl font-medium"
+                style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+              >
+                {resultadoSemana.avancou ? 'Continuar Jornada' : 'Ver Trilhas'}
+              </button>
+            )}
           </div>
         </div>
       )}
