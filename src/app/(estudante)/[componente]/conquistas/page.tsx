@@ -86,40 +86,41 @@ export default function ConquistasPage() {
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header */}
-      <header className="compact-mobile-x pt-3 pb-4" style={{ background: corPrimaria }}>
+      {/* Header - Compacto */}
+      <header className="header-chromebook lg:py-2" style={{ background: corPrimaria, borderColor: 'transparent' }}>
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2 lg:mb-1.5">
             <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="text-center">
-              <div className="flex items-center justify-center gap-2">
-                <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+              <div className="flex items-center justify-center gap-1.5">
+                <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: isFisica ? '#000' : '#fff' }} />
                 <span
-                  className="font-display text-lg font-bold"
+                  className="font-display text-base lg:text-sm font-bold"
                   style={{ color: isFisica ? '#000' : '#fff' }}
                 >
                   Conquistas
                 </span>
               </div>
-              <p className="text-xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
-                {stats.desbloqueadas} de {stats.total} desbloqueadas
+              <p className="text-2xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
+                {stats.desbloqueadas}/{stats.total} desbloqueadas
               </p>
             </div>
 
             <button
               onClick={buscarConquistas}
-              className="w-10 h-10 flex items-center justify-center rounded-xl"
+              className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-black/20"
               style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
+              aria-label="Atualizar conquistas"
             >
-              <RefreshCw className="w-5 h-5" />
+              <RefreshCw className="w-4 h-4" />
             </button>
           </div>
 
-          {/* Progress Bar */}
-          <div className="flex items-center gap-3">
+          {/* Progress Bar - Compacto */}
+          <div className="flex items-center gap-2">
             <div
-              className="flex-1 h-3 rounded-full overflow-hidden"
+              className="flex-1 h-2 lg:h-1.5 rounded-full overflow-hidden"
               style={{ background: 'rgba(0,0,0,0.2)' }}
             >
               <div
@@ -128,7 +129,7 @@ export default function ConquistasPage() {
               />
             </div>
             <span
-              className="text-lg font-bold tabular-nums"
+              className="text-sm lg:text-xs font-bold tabular-nums"
               style={{ color: isFisica ? '#000' : '#fff' }}
             >
               {porcentagem}%
@@ -137,27 +138,27 @@ export default function ConquistasPage() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-4">
+      {/* Content - Compacto */}
+      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-3 lg:py-2">
         {erro ? (
-          <div className="card-standard text-center py-8">
-            <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--error)' }} />
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
-            <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarConquistas}>
+          <div className="card-chromebook text-center py-6">
+            <WifiOff className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
+            <Button variant={isFisica ? 'fisica' : 'matematica'} onClick={buscarConquistas} className="btn-chromebook">
               Tentar Novamente
             </Button>
           </div>
         ) : conquistas.length === 0 ? (
-          <div className="card-standard text-center py-8">
-            <Medal className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--text-muted)' }} />
-            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-              Nenhuma conquista disponível para {nomeComponente}.
+          <div className="card-chromebook text-center py-6">
+            <Medal className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
+            <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+              Nenhuma conquista para {nomeComponente}.
             </p>
           </div>
         ) : (
           <>
-            {/* Grid 2 Colunas */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Grid 2 Colunas - Compacto */}
+            <div className="grid grid-cols-2 gap-2 lg:gap-1.5">
               {conquistas.map((conquista, index) => {
                 const dificuldadeConfig = config(conquista.dificuldade)
                 const isDesbloqueada = conquista.desbloqueada
@@ -165,53 +166,53 @@ export default function ConquistasPage() {
                 return (
                   <div
                     key={conquista.id}
-                    className="rounded-xl p-4 text-center animate-fade-in-up"
+                    className="rounded-lg p-3 lg:p-2.5 text-center animate-fade-in-up"
                     style={{
                       background: 'var(--bg-surface)',
                       border: isDesbloqueada
-                        ? `2px solid ${dificuldadeConfig.cor}`
+                        ? `1.5px solid ${dificuldadeConfig.cor}`
                         : '1px solid var(--border-default)',
                       opacity: isDesbloqueada ? 1 : 0.6,
-                      animationDelay: `${index * 40}ms`,
+                      animationDelay: `${index * 30}ms`,
                     }}
                   >
-                    {/* Ícone Grande */}
+                    {/* Ícone */}
                     <div
-                      className="w-14 h-14 rounded-xl mx-auto mb-3 flex items-center justify-center text-2xl"
+                      className="w-10 h-10 lg:w-9 lg:h-9 rounded-lg mx-auto mb-2 flex items-center justify-center text-lg lg:text-base"
                       style={{
                         background: isDesbloqueada ? dificuldadeConfig.bg : 'var(--bg-elevated)',
-                        border: isDesbloqueada ? 'none' : '2px dashed var(--border-default)',
+                        border: isDesbloqueada ? 'none' : '1.5px dashed var(--border-default)',
                       }}
                     >
                       {isDesbloqueada ? (
                         conquista.icone
                       ) : (
-                        <Lock className="w-6 h-6" style={{ color: 'var(--text-muted)' }} />
+                        <Lock className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--text-muted)' }} />
                       )}
                     </div>
 
                     {/* Badge Nível */}
                     <span
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-bold mb-2"
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-2xs font-bold mb-1.5"
                       style={{ background: dificuldadeConfig.bg, color: dificuldadeConfig.cor }}
                     >
-                      {isDesbloqueada && <CheckCircle2 className="w-3 h-3" />}
+                      {isDesbloqueada && <CheckCircle2 className="w-2.5 h-2.5" />}
                       {conquista.ordem}º • {dificuldadeConfig.label}
                     </span>
 
                     {/* Nome */}
                     <h3
-                      className="font-semibold text-sm mb-2 line-clamp-1"
+                      className="font-semibold text-xs lg:text-2xs mb-1.5 line-clamp-1"
                       style={{ color: isDesbloqueada ? 'var(--text-primary)' : 'var(--text-secondary)' }}
                     >
                       {conquista.nome}
                     </h3>
 
                     {/* Requisitos */}
-                    <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <div className="flex items-center justify-center gap-1.5 flex-wrap">
                       {conquista.req_pontos && (
                         <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
-                          <Star className="w-3 h-3" style={{ color: '#eab308' }} />
+                          <Star className="w-2.5 h-2.5" style={{ color: '#eab308' }} />
                           {conquista.req_pontos >= 1000
                             ? `${(conquista.req_pontos / 1000).toFixed(conquista.req_pontos % 1000 === 0 ? 0 : 1)}k`
                             : conquista.req_pontos}
@@ -219,21 +220,21 @@ export default function ConquistasPage() {
                       )}
                       {conquista.req_questoes_corretas && (
                         <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
-                          <Target className="w-3 h-3" style={{ color: corPrimaria }} />
+                          <Target className="w-2.5 h-2.5" style={{ color: corPrimaria }} />
                           {conquista.req_questoes_corretas}
                         </span>
                       )}
                       {conquista.req_sequencia_dias && (
                         <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
-                          <Flame className="w-3 h-3" style={{ color: 'var(--color-streak)' }} />
+                          <Flame className="w-2.5 h-2.5" style={{ color: 'var(--color-streak)' }} />
                           {conquista.req_sequencia_dias}d
                         </span>
                       )}
                       {conquista.requisito_tipo !== 'combinado' && conquista.requisito_valor && (
                         <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
-                          {conquista.requisito_tipo === 'pontos' && `${conquista.requisito_valor} pts`}
-                          {conquista.requisito_tipo === 'questoes' && `${conquista.requisito_valor} questões`}
-                          {conquista.requisito_tipo === 'sequencia' && `${conquista.requisito_valor} dias`}
+                          {conquista.requisito_tipo === 'pontos' && `${conquista.requisito_valor}pts`}
+                          {conquista.requisito_tipo === 'questoes' && `${conquista.requisito_valor}q`}
+                          {conquista.requisito_tipo === 'sequencia' && `${conquista.requisito_valor}d`}
                         </span>
                       )}
                     </div>
@@ -242,16 +243,16 @@ export default function ConquistasPage() {
               })}
             </div>
 
-            {/* Legenda */}
-            <div className="flex items-center justify-center gap-5 py-4 mt-2">
-              <span className="text-2xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                <Star className="w-3.5 h-3.5" style={{ color: '#eab308' }} /> Pontos
+            {/* Legenda - Compacta */}
+            <div className="flex items-center justify-center gap-4 py-2 mt-1.5">
+              <span className="text-2xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                <Star className="w-3 h-3" style={{ color: '#eab308' }} /> Pontos
               </span>
-              <span className="text-2xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                <Target className="w-3.5 h-3.5" style={{ color: corPrimaria }} /> Acertos
+              <span className="text-2xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                <Target className="w-3 h-3" style={{ color: corPrimaria }} /> Acertos
               </span>
-              <span className="text-2xs flex items-center gap-1.5" style={{ color: 'var(--text-muted)' }}>
-                <Flame className="w-3.5 h-3.5" style={{ color: 'var(--color-streak)' }} /> Sequência
+              <span className="text-2xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                <Flame className="w-3 h-3" style={{ color: 'var(--color-streak)' }} /> Sequência
               </span>
             </div>
           </>

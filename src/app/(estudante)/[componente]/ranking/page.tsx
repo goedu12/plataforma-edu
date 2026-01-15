@@ -84,23 +84,23 @@ export default function RankingPage() {
     <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header com cor */}
-      <header className="compact-mobile-x pt-3 pb-4" style={{ background: corPrimaria }}>
+      {/* Header com cor - Compacto */}
+      <header className="header-chromebook lg:py-2" style={{ background: corPrimaria, borderColor: 'transparent' }}>
         <div className="max-w-lg mx-auto">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-2 lg:mb-1.5">
             <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="text-center">
-              <h1 className="flex items-center justify-center gap-2">
-                <Trophy className="w-5 h-5" style={{ color: isFisica ? '#000' : '#fff' }} aria-hidden="true" />
+              <h1 className="flex items-center justify-center gap-1.5">
+                <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: isFisica ? '#000' : '#fff' }} aria-hidden="true" />
                 <span
-                  className="font-display text-lg font-bold"
+                  className="font-display text-base lg:text-sm font-bold"
                   style={{ color: isFisica ? '#000' : '#fff' }}
                 >
                   Ranking
                 </span>
               </h1>
-              <p className="text-xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
+              <p className="text-2xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
                 Turma {usuario.turma} • {ranking.length} estudantes
               </p>
             </div>
@@ -108,24 +108,24 @@ export default function RankingPage() {
             <button
               onClick={() => buscarDados(true)}
               disabled={atualizando}
-              className="w-10 h-10 flex items-center justify-center rounded-xl"
+              className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-black/20"
               style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
               aria-label={atualizando ? 'Atualizando ranking...' : 'Atualizar ranking'}
             >
-              <RefreshCw className={`w-5 h-5 ${atualizando ? 'animate-spin' : ''}`} aria-hidden="true" />
+              <RefreshCw className={`w-4 h-4 ${atualizando ? 'animate-spin' : ''}`} aria-hidden="true" />
             </button>
           </div>
 
-          {/* Card Posição do Usuário */}
+          {/* Card Posição do Usuário - Compacto */}
           {posicaoUsuario > 0 && (
             <div
-              className="rounded-xl p-4 flex items-center justify-between"
+              className="rounded-lg p-3 lg:p-2.5 flex items-center justify-between"
               style={{ background: 'rgba(0,0,0,0.15)' }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 {posicaoUsuario <= 3 ? (
                   <Crown
-                    className="w-8 h-8"
+                    className="w-6 h-6 lg:w-5 lg:h-5"
                     style={{
                       color: posicaoUsuario === 1 ? '#FFD700'
                         : posicaoUsuario === 2 ? '#E8E8E8'
@@ -133,22 +133,22 @@ export default function RankingPage() {
                     }}
                   />
                 ) : (
-                  <Medal className="w-8 h-8" style={{ color: isFisica ? '#000' : '#fff' }} />
+                  <Medal className="w-6 h-6 lg:w-5 lg:h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
                 )}
                 <div>
                   <p className="text-2xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
-                    Sua Posição
+                    Posição
                   </p>
-                  <p className="font-display text-3xl font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
+                  <p className="font-display text-xl lg:text-lg font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
                     {posicaoUsuario}º
                   </p>
                 </div>
               </div>
               <div className="text-right">
                 <p className="text-2xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
-                  Seus Pontos
+                  Pontos
                 </p>
-                <p className="font-display text-2xl font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
+                <p className="font-display text-lg lg:text-base font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
                   {pontosUsuario}
                 </p>
               </div>
@@ -157,15 +157,16 @@ export default function RankingPage() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-lg mx-auto px-4 py-4">
+      {/* Content - Compacto */}
+      <main className="max-w-lg mx-auto px-3 lg:px-4 py-3 lg:py-2">
         {erro ? (
-          <div className="card-standard text-center py-8">
-            <WifiOff className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--error)' }} />
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
+          <div className="card-chromebook text-center py-6">
+            <WifiOff className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+            <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>{erro}</p>
             <Button
               variant={isFisica ? 'fisica' : 'matematica'}
               onClick={() => buscarDados()}
+              className="btn-chromebook"
             >
               Tentar Novamente
             </Button>
