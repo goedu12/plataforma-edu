@@ -69,6 +69,13 @@ export default function TrilhasEstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [tempoInicio, setTempoInicio] = useState<number>(0)
   const [serie, setSerie] = useState<string>('')
+  const [mostrarConclusao, setMostrarConclusao] = useState(false)
+  const [resultadoSemana, setResultadoSemana] = useState<{
+    avancou: boolean
+    taxaAcerto: number
+    novaSemana?: number
+    mensagem: string
+  } | null>(null)
 
   const carregarQuestoes = useCallback(async (userSerie: string, tentativa: number = 1): Promise<boolean> => {
     try {
@@ -183,7 +190,7 @@ export default function TrilhasEstudarPage() {
     }
   }
 
-  const proximaQuestao = () => {
+  const proximaQuestao = async () => {
     if (questaoAtual < questoes.length - 1) {
       setQuestaoAtual(questaoAtual + 1)
       setRespostaSelecionada(null)
@@ -192,8 +199,30 @@ export default function TrilhasEstudarPage() {
       setUsouDica(false)
       setTempoInicio(Date.now())
     } else {
-      // Todas as questões da semana respondidas
-      router.push(`/${componente}/trilhas`)
+      // Todas as questões da semana respondidas - tentar avançar
+      try {
+        const res = await fetch('/api/trilhas/avancar-semana', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serie })
+        })
+        const data = await res.json()
+
+        if (data.sucesso && data.progresso) {
+          setResultadoSemana({
+            avancou: data.progresso.avancou || false,
+            taxaAcerto: data.progresso.taxa_acerto || 0,
+            novaSemana: data.progresso.semana_atual,
+            mensagem: data.mensagem
+          })
+          setMostrarConclusao(true)
+        } else {
+          router.push(`/${componente}/trilhas`)
+        }
+      } catch (error) {
+        console.error('Erro ao avançar semana:', error)
+        router.push(`/${componente}/trilhas`)
+      }
     }
   }
 
@@ -503,6 +532,68 @@ export default function TrilhasEstudarPage() {
       </main>
 
       <BottomNav componente={componente} />
+
+      {/* Modal de Conclusão da Semana */}
+      {mostrarConclusao && resultadoSemana && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)' }}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 text-center"
+            style={{ background: 'var(--bg-surface)' }}
+          >
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background: resultadoSemana.avancou
+                  ? 'rgba(34, 197, 94, 0.2)'
+                  : 'rgba(245, 158, 11, 0.2)'
+              }}
+            >
+              {resultadoSemana.avancou ? (
+                <Trophy className="w-10 h-10" style={{ color: 'var(--color-success)' }} />
+              ) : (
+                <Target className="w-10 h-10" style={{ color: 'var(--color-warning)' }} />
+              )}
+            </div>
+
+            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+              {resultadoSemana.avancou ? 'Semana Concluída!' : 'Continue Praticando!'}
+            </h2>
+
+            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+              {resultadoSemana.mensagem}
+            </p>
+
+            <div
+              className="p-4 rounded-xl mb-4"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <p className="text-3xl font-bold mb-1" style={{ color: accentColor }}>
+                {resultadoSemana.taxaAcerto}%
+              </p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Taxa de acerto
+              </p>
+            </div>
+
+            {resultadoSemana.avancou && resultadoSemana.novaSemana && (
+              <p className="text-sm mb-4" style={{ color: 'var(--color-success)' }}>
+                Você está agora na semana {resultadoSemana.novaSemana}!
+              </p>
+            )}
+
+            <button
+              onClick={() => router.push(`/${componente}/trilhas`)}
+              className="w-full py-3 rounded-xl font-medium"
+              style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+            >
+              {resultadoSemana.avancou ? 'Continuar Jornada' : 'Ver Trilhas'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

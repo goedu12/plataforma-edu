@@ -4,12 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
-  GraduationCap,
-  Trophy,
-  Wrench,
-  Rocket,
-  Microscope,
-  Zap,
   ChevronRight,
   Play,
   Pause,
@@ -72,24 +66,6 @@ function transformarTrilha(t: TrilhaAPI): Trilha {
     pontos: t.usuario_pontos || 0,
     iniciada: t.usuario_semana !== null && t.usuario_semana !== undefined,
   }
-}
-
-const iconMap: Record<string, typeof GraduationCap> = {
-  'passar_ano': GraduationCap,
-  'enem': Trophy,
-  'recuperacao': Wrench,
-  'desafio': Rocket,
-  'curiosidade': Microscope,
-  'pressa': Zap,
-}
-
-const emojiToIcon: Record<string, string> = {
-  '🎓': 'passar_ano',
-  '🏆': 'enem',
-  '🔧': 'recuperacao',
-  '🚀': 'desafio',
-  '🔬': 'curiosidade',
-  '⚡': 'pressa',
 }
 
 export default function TrilhasPage() {
@@ -230,11 +206,6 @@ export default function TrilhasPage() {
 
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-
-  const getIconComponent = (trilha: Trilha) => {
-    const iconKey = emojiToIcon[trilha.icone] || trilha.id
-    return iconMap[iconKey] || GraduationCap
-  }
 
   return (
     <div
