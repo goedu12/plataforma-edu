@@ -19,6 +19,7 @@ import {
   Map,
   FileText,
   Sparkles,
+  Route,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
@@ -112,6 +113,7 @@ export default function MenuComponentePage() {
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
     { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Quiz rápido', isNew: true },
+    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', isNew: true },
   ]
 
   // Simulado ENEM apenas para 3ª série do Ensino Médio
