@@ -1,10 +1,125 @@
 /**
  * Utilitários para limpeza e formatação de texto das questões ENEM
- * Versão 3.0 - Limpeza completa de markdown e filtros de qualidade
+ * Versão 3.1 - Limpeza completa de markdown, filtros de qualidade e sanitização XSS
  */
 
 // Valores que devem ser tratados como vazio
 const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
+
+// Tags HTML permitidas (sanitização XSS)
+const TAGS_PERMITIDAS = new Set([
+  'p', 'br', 'em', 'strong', 'span', 'div', 'img',
+  'b', 'i', 'u', 'sub', 'sup', 'ul', 'ol', 'li'
+])
+
+// Atributos permitidos por tag
+const ATRIBUTOS_PERMITIDOS: Record<string, Set<string>> = {
+  'img': new Set(['src', 'alt', 'class', 'loading', 'width', 'height']),
+  'span': new Set(['class', 'style']),
+  'div': new Set(['class', 'style']),
+  'p': new Set(['class', 'style']),
+}
+
+/**
+ * Sanitiza HTML removendo tags e atributos perigosos (proteção XSS)
+ * Permite apenas tags seguras e remove event handlers
+ */
+export function sanitizarHTML(html: string): string {
+  if (!html || typeof html !== 'string') return ''
+
+  let sanitizado = html
+
+  // 1. Remover scripts completamente
+  sanitizado = sanitizado.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+  sanitizado = sanitizado.replace(/<script[^>]*>/gi, '')
+  sanitizado = sanitizado.replace(/<\/script>/gi, '')
+
+  // 2. Remover styles inline perigosos
+  sanitizado = sanitizado.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+
+  // 3. Remover event handlers (onclick, onerror, onload, etc.)
+  sanitizado = sanitizado.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '')
+  sanitizado = sanitizado.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, '')
+
+  // 4. Remover javascript: URLs
+  sanitizado = sanitizado.replace(/javascript\s*:/gi, '')
+  sanitizado = sanitizado.replace(/vbscript\s*:/gi, '')
+  sanitizado = sanitizado.replace(/data\s*:\s*text\/html/gi, '')
+
+  // 5. Remover tags não permitidas mas manter conteúdo
+  sanitizado = sanitizado.replace(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, (match, tag) => {
+    const tagLower = tag.toLowerCase()
+    if (TAGS_PERMITIDAS.has(tagLower)) {
+      // Tag permitida - sanitizar atributos
+      return sanitizarAtributos(match, tagLower)
+    }
+    // Tag não permitida - remover completamente
+    return ''
+  })
+
+  // 6. Remover comentários HTML
+  sanitizado = sanitizado.replace(/<!--[\s\S]*?-->/g, '')
+
+  // 7. Remover CDATA
+  sanitizado = sanitizado.replace(/<!\[CDATA\[[\s\S]*?\]\]>/g, '')
+
+  return sanitizado
+}
+
+/**
+ * Sanitiza atributos de uma tag HTML
+ */
+function sanitizarAtributos(tagCompleta: string, tagName: string): string {
+  const atributosPermitidos = ATRIBUTOS_PERMITIDOS[tagName] || new Set(['class'])
+
+  // Extrair nome da tag e verificar se é auto-fechada
+  const isAutoClose = tagCompleta.endsWith('/>')
+  const isFechamento = tagCompleta.startsWith('</')
+
+  if (isFechamento) {
+    return `</${tagName}>`
+  }
+
+  // Extrair atributos
+  const atributoRegex = /([a-z][a-z0-9-]*)\s*=\s*["']([^"']*)["']/gi
+  const atributosLimpos: string[] = []
+  let match
+
+  while ((match = atributoRegex.exec(tagCompleta)) !== null) {
+    const [, attrName, attrValue] = match
+    const attrNameLower = attrName.toLowerCase()
+
+    // Só incluir atributos permitidos
+    if (atributosPermitidos.has(attrNameLower)) {
+      // Sanitizar valor do atributo
+      let valorLimpo = attrValue
+        .replace(/javascript\s*:/gi, '')
+        .replace(/vbscript\s*:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+
+      // Para src de imagens, validar URL
+      if (attrNameLower === 'src') {
+        if (!valorLimpo.startsWith('http') && !valorLimpo.startsWith('data:image')) {
+          continue // Pular src inválido
+        }
+      }
+
+      // Para style, remover expressions e urls perigosas
+      if (attrNameLower === 'style') {
+        valorLimpo = valorLimpo
+          .replace(/expression\s*\(/gi, '')
+          .replace(/url\s*\([^)]*javascript/gi, '')
+          .replace(/behavior\s*:/gi, '')
+      }
+
+      atributosLimpos.push(`${attrNameLower}="${valorLimpo}"`)
+    }
+  }
+
+  // Reconstruir tag
+  const atributosStr = atributosLimpos.length > 0 ? ' ' + atributosLimpos.join(' ') : ''
+  return `<${tagName}${atributosStr}${isAutoClose ? ' /' : ''}>`
+}
 
 /**
  * Valida se é uma URL de imagem válida
@@ -386,6 +501,9 @@ export function processarContexto(
   processado = processado.replace(/<p>\s*<br>\s*<\/p>/g, '')
   processado = processado.replace(/\s{2,}/g, ' ')
   processado = processado.replace(/<br>\s*<br>/g, '<br>')
+
+  // SEGURANÇA: Sanitizar HTML final para prevenir XSS
+  processado = sanitizarHTML(processado)
 
   return processado.trim()
 }
