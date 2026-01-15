@@ -162,15 +162,52 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Não atingiu mínimo, precisa refazer
+      // Limpar respostas da semana para permitir nova tentativa
+      const { data: questoesSemana } = await supabase
+        .from('questoes_trilha')
+        .select('id')
+        .eq('serie', serie)
+        .eq('semana', semanaAtual)
+        .eq('ano_letivo', anoLetivo)
+        .eq('ativa', true)
+
+      if (questoesSemana && questoesSemana.length > 0) {
+        const questaoIds = questoesSemana.map(q => q.id)
+
+        // Deletar respostas anteriores para permitir refazer
+        await supabase
+          .from('respostas_trilha')
+          .delete()
+          .eq('usuario_id', sessao.userId)
+          .in('questao_id', questaoIds)
+
+        // Resetar progresso da semana
+        await supabase
+          .from('progresso_semanal')
+          .update({
+            questoes_respondidas: 0,
+            questoes_corretas: 0,
+            pontos_semana: 0,
+            status: 'disponivel',
+            updated_at: new Date().toISOString()
+          })
+          .eq('usuario_id', sessao.userId)
+          .eq('trilha_id', trilhaAtiva.trilha_id)
+          .eq('serie', serie)
+          .eq('semana', semanaAtual)
+          .eq('ano_letivo', anoLetivo)
+      }
+
       return NextResponse.json({
         sucesso: true,
-        mensagem: `Você acertou ${taxaAcerto}%. Precisa de ${minimoParaAvancar}% para avançar. Tente novamente!`,
+        mensagem: `Você acertou ${taxaAcerto}%. Precisa de ${minimoParaAvancar}% para avançar. A semana foi resetada para você tentar novamente!`,
         progresso: {
           semana_atual: semanaAtual,
           completou: true,
           avancou: false,
           taxa_acerto: taxaAcerto,
-          minimo_necessario: minimoParaAvancar
+          minimo_necessario: minimoParaAvancar,
+          semana_resetada: true
         }
       })
     }
