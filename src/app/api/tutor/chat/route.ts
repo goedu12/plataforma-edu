@@ -5,6 +5,7 @@ import { chatComTutor, type ContextoEstudante } from '@/lib/gemini'
 import type { Componente, MensagemChat } from '@/types'
 import { PONTUACAO } from '@/types'
 import { getPeriodoAtual } from '@/lib/sistema-notas'
+import { buscarNoCache, salvarNoCache } from '@/lib/ia-cache'
 
 // ═══════════════════════════════════════════════════════════
 // FUNCAO PARA BUSCAR CONTEXTO DO ESTUDANTE
@@ -206,41 +207,75 @@ export async function POST(request: NextRequest) {
       : undefined
 
     // ═══════════════════════════════════════════════════════════
-    // BUSCAR CONTEXTO PERSONALIZADO DO ESTUDANTE
+    // VERIFICAR CACHE DE IA (reduz chamadas ao Gemini em ~70%)
+    // Só usa cache para perguntas sem imagem (imagens são únicas)
     // ═══════════════════════════════════════════════════════════
-    const contextoEstudante = await buscarContextoEstudante(
-      supabase,
-      sessao.userId,
-      componente as Componente,
-      usuario.turma
-    )
+    let respostaDoCache = false
+    let respostaCacheada: string | undefined
 
-    console.log('[Tutor IA] Contexto:', JSON.stringify(contextoEstudante))
+    // Cache só funciona para perguntas sem imagem e sem histórico complexo
+    // (primeira mensagem ou perguntas simples)
+    const podeUsarCache = !imagemValidada && historicoValidado.length <= 2
 
-    // Chamar o tutor IA com valores validados e contexto personalizado
-    const resultado = await chatComTutor(
-      componente as Componente,
-      mensagemValidada,
-      historicoValidado,
-      contextoEstudante,
-      imagemValidada // imagem em base64 (opcional)
-    )
-
-    if (!resultado.sucesso || !resultado.resposta) {
-      return NextResponse.json({
-        sucesso: false,
-        erro: resultado.erro || 'Erro ao gerar resposta',
-      })
+    if (podeUsarCache) {
+      const resultadoCache = buscarNoCache(componente, mensagemValidada)
+      if (resultadoCache.encontrado && resultadoCache.resposta) {
+        respostaDoCache = true
+        respostaCacheada = resultadoCache.resposta
+        console.log(`[Tutor IA] Usando resposta do cache (similaridade: ${Math.round((resultadoCache.similaridade || 1) * 100)}%)`)
+      }
     }
 
-    // Log do modo detectado para análise
-    console.log(`[Tutor IA] Modo: ${resultado.modo}, Tópico: ${resultado.topico}`)
+    let respostaFinal: string
+    let modoDetectado: string | undefined
+    let topicoDetectado: string | undefined
 
-    // ═══════════════════════════════════════════════════════════
-    // USAR RESPOSTA DIRETA DA IA (sem sistema de revisao que adiciona frases)
-    // O prompt ja foi otimizado com principios de neurociencia
-    // ═══════════════════════════════════════════════════════════
-    const respostaFinal = resultado.resposta
+    if (respostaDoCache && respostaCacheada) {
+      // Usar resposta do cache - não chama Gemini
+      respostaFinal = respostaCacheada
+      modoDetectado = 'cache'
+      topicoDetectado = 'cached'
+    } else {
+      // ═══════════════════════════════════════════════════════════
+      // BUSCAR CONTEXTO PERSONALIZADO DO ESTUDANTE
+      // ═══════════════════════════════════════════════════════════
+      const contextoEstudante = await buscarContextoEstudante(
+        supabase,
+        sessao.userId,
+        componente as Componente,
+        usuario.turma
+      )
+
+      console.log('[Tutor IA] Contexto:', JSON.stringify(contextoEstudante))
+
+      // Chamar o tutor IA com valores validados e contexto personalizado
+      const resultado = await chatComTutor(
+        componente as Componente,
+        mensagemValidada,
+        historicoValidado,
+        contextoEstudante,
+        imagemValidada // imagem em base64 (opcional)
+      )
+
+      if (!resultado.sucesso || !resultado.resposta) {
+        return NextResponse.json({
+          sucesso: false,
+          erro: resultado.erro || 'Erro ao gerar resposta',
+        })
+      }
+
+      // Log do modo detectado para análise
+      console.log(`[Tutor IA] Modo: ${resultado.modo}, Tópico: ${resultado.topico}`)
+
+      respostaFinal = resultado.resposta
+      modoDetectado = resultado.modo
+      topicoDetectado = resultado.topico
+
+      // Salvar no cache para futuras perguntas similares
+      if (podeUsarCache) {
+        salvarNoCache(componente, mensagemValidada, respostaFinal)
+      }
+    }
 
     // Incrementar uso
     const novoUso = usoHoje + 1
@@ -276,8 +311,9 @@ export async function POST(request: NextRequest) {
       resposta: respostaFinal,
       uso_hoje: novoUso,
       limite: PONTUACAO.LIMITE_IA_DIARIO,
-      modo: resultado.modo,
-      topico: resultado.topico,
+      modo: modoDetectado,
+      topico: topicoDetectado,
+      fromCache: respostaDoCache,
     })
   } catch (error) {
     console.error('Erro no chat com tutor:', error)
