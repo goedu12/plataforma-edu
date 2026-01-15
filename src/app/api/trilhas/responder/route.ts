@@ -24,20 +24,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { questao_id, resposta, tempo_segundos = 0, usou_dica = false } = body
 
-    // Validações
-    if (!questao_id) {
+    // Validações de tipo e formato
+    if (!questao_id || typeof questao_id !== 'number' || questao_id <= 0) {
       return NextResponse.json(
-        { erro: 'questao_id é obrigatório' },
+        { erro: 'questao_id deve ser um número positivo' },
         { status: 400 }
       )
     }
 
-    if (!resposta || !['A', 'B', 'C', 'D', 'E'].includes(resposta.toUpperCase())) {
+    if (!resposta || typeof resposta !== 'string' || !['A', 'B', 'C', 'D', 'E'].includes(resposta.toUpperCase())) {
       return NextResponse.json(
         { erro: 'resposta deve ser A, B, C, D ou E' },
         { status: 400 }
       )
     }
+
+    // Validar tempo (máximo 1 hora = 3600 segundos por questão)
+    const tempoValidado = Math.max(0, Math.min(3600, Number(tempo_segundos) || 0))
 
     const supabase = getSupabaseAdmin()
 
@@ -46,8 +49,8 @@ export async function POST(request: NextRequest) {
       p_usuario_id: sessao.userId,
       p_questao_id: questao_id,
       p_resposta: resposta.toUpperCase(),
-      p_tempo_segundos: tempo_segundos,
-      p_usou_dica: usou_dica
+      p_tempo_segundos: tempoValidado,
+      p_usou_dica: Boolean(usou_dica)
     })
 
     if (error) {

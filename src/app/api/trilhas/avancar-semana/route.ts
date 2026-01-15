@@ -49,11 +49,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let semanaAtual = trilhaAtiva.semana_atual
+    const semanaAtual = trilhaAtiva.semana_atual
     const anoLetivo = new Date().getFullYear()
 
     // Buscar progresso da semana atual
-    let progressoSemana = await supabase
+    const progressoSemana = await supabase
       .from('progresso_semanal')
       .select('questoes_respondidas, questoes_total, questoes_corretas, status')
       .eq('usuario_id', sessao.userId)
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       .then(r => r.data)
 
     // Verificar quantas questões existem para esta semana
-    let questoesDisponiveis = await supabase
+    const questoesDisponiveis = await supabase
       .from('questoes_trilha')
       .select('*', { count: 'exact', head: true })
       .eq('serie', serie)
@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
       .eq('ativa', true)
       .then(r => r.count)
 
-    let totalQuestoes = questoesDisponiveis || 5
-    let respondidas = progressoSemana?.questoes_respondidas || 0
+    const totalQuestoes = questoesDisponiveis || 5
+    const respondidas = progressoSemana?.questoes_respondidas || 0
 
     // Se a semana atual não tem progresso, pode ser que o SQL já avançou automaticamente
     // Nesse caso, verificar se a semana ANTERIOR foi concluída recentemente
@@ -133,8 +133,10 @@ export async function POST(request: NextRequest) {
     const taxaAcerto = Math.round((corretas / totalQuestoes) * 100)
     const minimoParaAvancar = 60 // 60% de acerto mínimo
 
+    const TOTAL_SEMANAS = 40
+
     // Atualizar status da semana atual como completa
-    await supabase
+    const { error: updateStatusError } = await supabase
       .from('progresso_semanal')
       .update({
         status: taxaAcerto >= minimoParaAvancar ? 'completa' : 'reprovada',
@@ -146,12 +148,16 @@ export async function POST(request: NextRequest) {
       .eq('semana', semanaAtual)
       .eq('ano_letivo', anoLetivo)
 
+    if (updateStatusError) {
+      console.error('Erro ao atualizar status da semana:', updateStatusError)
+    }
+
     // Se atingiu o mínimo, avançar para próxima semana
     if (taxaAcerto >= minimoParaAvancar) {
       const novaSemana = semanaAtual + 1
 
-      // Verificar se não ultrapassou o limite (40 semanas)
-      if (novaSemana > 40) {
+      // Verificar se não ultrapassou o limite
+      if (novaSemana > TOTAL_SEMANAS) {
         return NextResponse.json({
           sucesso: true,
           mensagem: 'Parabéns! Você completou toda a trilha!',
@@ -165,7 +171,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Avançar semana na trilha do usuário
-      await supabase
+      const { error: updateTrilhaError } = await supabase
         .from('usuario_trilha')
         .update({
           semana_atual: novaSemana,
@@ -173,8 +179,16 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', trilhaAtiva.id)
 
+      if (updateTrilhaError) {
+        console.error('Erro ao avançar semana:', updateTrilhaError)
+        return NextResponse.json(
+          { erro: 'Erro ao avançar para próxima semana' },
+          { status: 500 }
+        )
+      }
+
       // Criar registro de progresso para nova semana
-      await supabase
+      const { error: upsertError } = await supabase
         .from('progresso_semanal')
         .upsert({
           usuario_id: sessao.userId,
@@ -187,6 +201,11 @@ export async function POST(request: NextRequest) {
         }, {
           onConflict: 'usuario_id,trilha_id,serie,semana,ano_letivo'
         })
+
+      if (upsertError) {
+        console.error('Erro ao criar progresso da nova semana:', upsertError)
+        // Não falha porque a semana já foi avançada
+      }
 
       return NextResponse.json({
         sucesso: true,
@@ -211,17 +230,21 @@ export async function POST(request: NextRequest) {
         .eq('ativa', true)
 
       if (questoesSemana && questoesSemana.length > 0) {
-        const questaoIds = questoesSemana.map(q => q.id)
+        const questaoIds = questoesSemana.map((q: { id: number }) => q.id)
 
         // Deletar respostas anteriores para permitir refazer
-        await supabase
+        const { error: deleteError } = await supabase
           .from('respostas_trilha')
           .delete()
           .eq('usuario_id', sessao.userId)
           .in('questao_id', questaoIds)
 
+        if (deleteError) {
+          console.error('Erro ao deletar respostas para reset:', deleteError)
+        }
+
         // Resetar progresso da semana
-        await supabase
+        const { error: resetError } = await supabase
           .from('progresso_semanal')
           .update({
             questoes_respondidas: 0,
@@ -235,6 +258,10 @@ export async function POST(request: NextRequest) {
           .eq('serie', serie)
           .eq('semana', semanaAtual)
           .eq('ano_letivo', anoLetivo)
+
+        if (resetError) {
+          console.error('Erro ao resetar progresso:', resetError)
+        }
       }
 
       return NextResponse.json({
