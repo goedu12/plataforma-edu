@@ -11,10 +11,11 @@ import {
   Microscope,
   Zap,
   ChevronRight,
-  Lock,
   Play,
-  CheckCircle,
+  Pause,
+  RotateCcw,
   Clock,
+  RefreshCw,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
@@ -50,7 +51,8 @@ interface Trilha {
   ordem: number
   ativa?: boolean
   semana_atual?: number
-  progresso?: number
+  pontos?: number
+  iniciada?: boolean // true se já iniciou antes (mesmo pausada)
 }
 
 // Transforma dados da API para o formato do frontend
@@ -67,6 +69,8 @@ function transformarTrilha(t: TrilhaAPI): Trilha {
     ordem: t.ordem,
     ativa: t.usuario_ativa || false,
     semana_atual: t.usuario_semana || 1,
+    pontos: t.usuario_pontos || 0,
+    iniciada: t.usuario_semana !== null && t.usuario_semana !== undefined,
   }
 }
 
@@ -97,6 +101,7 @@ export default function TrilhasPage() {
   const [trilhaAtiva, setTrilhaAtiva] = useState<Trilha | null>(null)
   const [loading, setLoading] = useState(true)
   const [iniciando, setIniciando] = useState(false)
+  const [pausando, setPausando] = useState(false)
   const [serie, setSerie] = useState<string>('')
   const [modalTrilha, setModalTrilha] = useState<Trilha | null>(null)
 
@@ -160,7 +165,19 @@ export default function TrilhasPage() {
       const data = await res.json()
 
       if (data.sucesso) {
-        setTrilhaAtiva({ ...trilha, ativa: true, semana_atual: 1 })
+        // Atualizar trilha anterior como inativa
+        if (trilhaAtiva) {
+          setTrilhas(prev => prev.map(t =>
+            t.id === trilhaAtiva.id ? { ...t, ativa: false } : t
+          ))
+        }
+        // Nova trilha ativa (mantém semana_atual se já tinha progresso)
+        setTrilhaAtiva({
+          ...trilha,
+          ativa: true,
+          semana_atual: trilha.iniciada ? trilha.semana_atual : 1,
+          iniciada: true
+        })
         setModalTrilha(null)
         // Ir para a página de questões da trilha
         router.push(`/${componente}/trilhas/estudar`)
@@ -172,6 +189,38 @@ export default function TrilhasPage() {
       alert('Erro ao iniciar trilha')
     } finally {
       setIniciando(false)
+    }
+  }
+
+  const pausarTrilha = async () => {
+    if (!trilhaAtiva) return
+    setPausando(true)
+    try {
+      const res = await fetch('/api/trilhas/pausar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trilha_id: trilhaAtiva.id,
+          serie: serie,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.sucesso) {
+        // Atualizar estado local
+        setTrilhas(prev => prev.map(t =>
+          t.id === trilhaAtiva.id ? { ...t, ativa: false, iniciada: true } : t
+        ))
+        setTrilhaAtiva(null)
+      } else {
+        alert(data.erro || 'Erro ao pausar trilha')
+      }
+    } catch (error) {
+      console.error('Erro:', error)
+      alert('Erro ao pausar trilha')
+    } finally {
+      setPausando(false)
     }
   }
 
@@ -225,9 +274,8 @@ export default function TrilhasPage() {
             <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
               Sua Trilha Atual
             </h2>
-            <button
-              onClick={() => router.push(`/${componente}/trilhas/estudar`)}
-              className="w-full p-4 rounded-xl text-left transition-all hover:scale-[1.02]"
+            <div
+              className="w-full p-4 rounded-xl"
               style={{
                 background: `linear-gradient(135deg, ${trilhaAtiva.cor_primaria}20, ${trilhaAtiva.cor_primaria}10)`,
                 border: `2px solid ${trilhaAtiva.cor_primaria}`,
@@ -254,6 +302,7 @@ export default function TrilhasPage() {
                   </div>
                   <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
                     Semana {trilhaAtiva.semana_atual || 1} de {trilhaAtiva.total_semanas}
+                    {trilhaAtiva.pontos ? ` • ${trilhaAtiva.pontos} pts` : ''}
                   </p>
                   <div className="flex items-center gap-2">
                     <div
@@ -268,11 +317,34 @@ export default function TrilhasPage() {
                         }}
                       />
                     </div>
-                    <Play className="w-5 h-5" style={{ color: accentColor }} />
                   </div>
                 </div>
               </div>
-            </button>
+              {/* Botões de ação */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => router.push(`/${componente}/trilhas/estudar`)}
+                  className="flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2"
+                  style={{ background: trilhaAtiva.cor_primaria, color: '#fff' }}
+                >
+                  <Play className="w-4 h-4" />
+                  Continuar
+                </button>
+                <button
+                  onClick={pausarTrilha}
+                  disabled={pausando}
+                  className="px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                >
+                  {pausando ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Pause className="w-4 h-4" />
+                  )}
+                  Pausar
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -286,19 +358,18 @@ export default function TrilhasPage() {
             .filter(t => !trilhaAtiva || t.id !== trilhaAtiva.id)
             .sort((a, b) => a.ordem - b.ordem)
             .map((trilha) => {
-              const IconComponent = getIconComponent(trilha)
-              const isLocked = !!(trilhaAtiva && trilhaAtiva.id !== trilha.id)
+              const hasPreviousProgress = trilha.iniciada && !trilha.ativa
 
               return (
                 <button
                   key={trilha.id}
-                  onClick={() => !isLocked && setModalTrilha(trilha)}
-                  disabled={isLocked}
-                  className="w-full p-4 rounded-xl text-left transition-all"
+                  onClick={() => setModalTrilha(trilha)}
+                  className="w-full p-4 rounded-xl text-left transition-all hover:scale-[1.01]"
                   style={{
                     background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                    opacity: isLocked ? 0.6 : 1,
+                    border: hasPreviousProgress
+                      ? `1px solid ${trilha.cor_primaria}50`
+                      : '1px solid var(--border-default)',
                   }}
                 >
                   <div className="flex items-center gap-4">
@@ -309,11 +380,24 @@ export default function TrilhasPage() {
                       {trilha.icone}
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                        {trilha.nome}
-                      </h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                          {trilha.nome}
+                        </h3>
+                        {hasPreviousProgress && (
+                          <span
+                            className="px-2 py-0.5 rounded-full text-xs"
+                            style={{ background: `${trilha.cor_primaria}20`, color: trilha.cor_primaria }}
+                          >
+                            Pausada
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                        {trilha.descricao_curta}
+                        {hasPreviousProgress
+                          ? `Semana ${trilha.semana_atual} • ${trilha.pontos || 0} pts`
+                          : trilha.descricao_curta
+                        }
                       </p>
                       <div className="flex items-center gap-3 mt-1">
                         <span className="text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
@@ -325,8 +409,8 @@ export default function TrilhasPage() {
                         </span>
                       </div>
                     </div>
-                    {isLocked ? (
-                      <Lock className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                    {hasPreviousProgress ? (
+                      <RotateCcw className="w-5 h-5" style={{ color: trilha.cor_primaria }} />
                     ) : (
                       <ChevronRight className="w-5 h-5" style={{ color: accentColor }} />
                     )}
@@ -336,13 +420,13 @@ export default function TrilhasPage() {
             })}
         </div>
 
-        {/* Aviso se tiver trilha ativa */}
+        {/* Dica de uso */}
         {trilhaAtiva && (
           <p className="text-center text-sm mt-4 p-3 rounded-lg" style={{
             background: 'var(--bg-elevated)',
             color: 'var(--text-muted)'
           }}>
-            Você já tem uma trilha ativa. Pause ela primeiro para iniciar outra.
+            Você pode trocar de trilha a qualquer momento. Seu progresso será salvo.
           </p>
         )}
       </main>
@@ -371,23 +455,40 @@ export default function TrilhasPage() {
             </h3>
 
             <p className="text-sm text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
-              {modalTrilha.descricao_completa}
+              {modalTrilha.iniciada
+                ? `Retomar da semana ${modalTrilha.semana_atual} com ${modalTrilha.pontos || 0} pontos acumulados.`
+                : modalTrilha.descricao_completa
+              }
             </p>
 
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="p-3 rounded-lg text-center" style={{ background: 'var(--bg-elevated)' }}>
                 <p className="text-lg font-bold" style={{ color: modalTrilha.cor_primaria }}>
-                  {modalTrilha.total_semanas}
+                  {modalTrilha.iniciada ? modalTrilha.semana_atual : modalTrilha.total_semanas}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>semanas</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {modalTrilha.iniciada ? 'semana atual' : 'semanas'}
+                </p>
               </div>
               <div className="p-3 rounded-lg text-center" style={{ background: 'var(--bg-elevated)' }}>
                 <p className="text-lg font-bold" style={{ color: modalTrilha.cor_primaria }}>
-                  {modalTrilha.questoes_por_semana}
+                  {modalTrilha.iniciada ? (modalTrilha.pontos || 0) : modalTrilha.questoes_por_semana}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>questões/semana</p>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {modalTrilha.iniciada ? 'pontos' : 'questões/semana'}
+                </p>
               </div>
             </div>
+
+            {/* Aviso de troca */}
+            {trilhaAtiva && (
+              <p className="text-xs text-center mb-4 p-2 rounded-lg" style={{
+                background: 'var(--bg-elevated)',
+                color: 'var(--text-muted)'
+              }}>
+                Seu progresso em &ldquo;{trilhaAtiva.nome}&rdquo; será salvo e você poderá voltar depois.
+              </p>
+            )}
 
             <div className="flex gap-3">
               <button
@@ -404,11 +505,16 @@ export default function TrilhasPage() {
                 style={{ background: modalTrilha.cor_primaria, color: '#fff' }}
               >
                 {iniciando ? (
-                  'Iniciando...'
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : modalTrilha.iniciada ? (
+                  <>
+                    <RotateCcw className="w-4 h-4" />
+                    Retomar
+                  </>
                 ) : (
                   <>
                     <Play className="w-4 h-4" />
-                    Iniciar
+                    {trilhaAtiva ? 'Trocar' : 'Iniciar'}
                   </>
                 )}
               </button>

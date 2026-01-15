@@ -586,70 +586,108 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
 
 /**
  * Verifica se há questões em cache (no banco) para a série/semana
+ * Questões são organizadas por serie/semana/ano_letivo, não por trilha_id
  */
 export async function verificarCacheQuestoes(
   supabase: any,
   serie: string,
   semana: number,
-  trilhaId: string = 'passar_ano'
+  _trilhaId: string = 'passar_ano' // Não usado - questões são por serie/semana
 ): Promise<number> {
+  const anoLetivo = new Date().getFullYear()
+
   const { count, error } = await supabase
     .from('questoes_trilha')
     .select('*', { count: 'exact', head: true })
-    .eq('trilha_id', trilhaId)
     .eq('serie', serie)
     .eq('semana', semana)
+    .eq('ano_letivo', anoLetivo)
+    .eq('ativa', true)
 
   if (error) {
-    console.error('[Cache] Erro ao verificar cache:', error)
+    console.error('[Cache] Erro ao verificar cache:', error.message || error)
     return 0
   }
 
   return count || 0
 }
 
+// Mapeia contexto do Gemini para valores válidos do banco
+function mapearContextoCotidiano(contexto: string): string {
+  const lower = contexto.toLowerCase()
+  if (lower.includes('transporte') || lower.includes('ônibus') || lower.includes('carro')) return 'transporte'
+  if (lower.includes('casa') || lower.includes('família') || lower.includes('lar')) return 'casa_familia'
+  if (lower.includes('escola') || lower.includes('sala') || lower.includes('aula')) return 'escola'
+  if (lower.includes('rua') || lower.includes('bairro') || lower.includes('cidade')) return 'rua_bairro'
+  if (lower.includes('corpo') || lower.includes('saúde') || lower.includes('saude')) return 'corpo_saude'
+  if (lower.includes('celular') || lower.includes('tecnologia') || lower.includes('lazer') || lower.includes('jogo')) return 'lazer_tecnologia'
+  if (lower.includes('trabalho') || lower.includes('profiss')) return 'trabalho_profissoes'
+  return 'todos'
+}
+
+// Mapeia tipo de questão para valores válidos do banco
+function mapearTipoQuestao(tipo: string): string {
+  const tiposValidos = ['conceitual', 'calculo_direto', 'interpretacao_grafico', 'situacao_problema', 'analise_fenomeno', 'comparacao', 'olimpiada']
+  const tipoLower = tipo.toLowerCase().replace(/_/g, '_')
+  if (tiposValidos.includes(tipoLower)) return tipoLower
+  if (tipo.includes('calculo') || tipo.includes('cálculo')) return 'calculo_direto'
+  if (tipo.includes('situacao') || tipo.includes('situação') || tipo.includes('problema')) return 'situacao_problema'
+  if (tipo.includes('analise') || tipo.includes('análise') || tipo.includes('fenomeno') || tipo.includes('fenômeno')) return 'analise_fenomeno'
+  if (tipo.includes('comparacao') || tipo.includes('comparação')) return 'comparacao'
+  return 'conceitual'
+}
+
 /**
  * Salva questões geradas no banco de dados (cache)
+ * Schema: id é BIGSERIAL (auto-gerado), usa contexto_cotidiano, ano_letivo é obrigatório
  */
 export async function salvarQuestoesNoCache(
   supabase: any,
   questoes: QuestaoGerada[],
   serie: string,
   semana: number,
-  trilhaId: string = 'passar_ano'
+  _trilhaId: string = 'passar_ano' // Não usado - questões são por serie/semana
 ): Promise<number> {
   const conteudo = CURRICULO_FISICA[serie]?.[semana] || CURRICULO_FISICA[serie]?.[1]
+  const anoLetivo = new Date().getFullYear()
   let salvas = 0
 
   for (let i = 0; i < questoes.length; i++) {
     const q = questoes[i]
-    const questaoId = `auto-${serie.toLowerCase()}-s${semana}-q${i + 1}-${Date.now()}-${Math.random().toString(36).substring(7)}`
+
+    // Preparar dados conforme schema do banco
+    const dados = {
+      serie: serie,
+      semana: semana,
+      ano_letivo: anoLetivo,
+      ordem: i + 1,
+      tema: conteudo?.tema || 'Física',
+      subtema: conteudo?.subtema || '',
+      tipo_questao: mapearTipoQuestao(q.tipo_questao),
+      contexto_cotidiano: mapearContextoCotidiano(q.contexto),
+      enunciado: q.enunciado,
+      alternativas: q.alternativas,
+      resposta_correta: q.resposta_correta,
+      dica: q.dica,
+      feedback: {
+        explicacao_correta: q.feedback,
+        erros_comuns: {},
+        conexao_cotidiano: '',
+        curiosidade: ''
+      },
+      dificuldade: 'medio',
+      ativa: true
+    }
 
     const { error } = await supabase
       .from('questoes_trilha')
-      .insert({
-        id: questaoId,
-        trilha_id: trilhaId,
-        serie: serie,
-        semana: semana,
-        ordem: i + 1,
-        tema: conteudo?.tema || 'Física',
-        subtema: conteudo?.subtema || '',
-        tipo_questao: q.tipo_questao,
-        dificuldade: 'medio',
-        contexto: q.contexto,
-        enunciado: q.enunciado,
-        alternativas: q.alternativas,
-        resposta_correta: q.resposta_correta,
-        dica: q.dica,
-        feedback: q.feedback
-      })
+      .insert(dados)
 
     if (error) {
-      console.error(`[Cache] Erro ao salvar questão ${i + 1}:`, error)
+      console.error(`[Cache] Erro ao salvar questão ${i + 1}:`, error.message || error)
     } else {
       salvas++
-      console.log(`[Cache] Questão ${i + 1} salva: ${questaoId}`)
+      console.log(`[Cache] Questão ${i + 1} salva para ${serie} semana ${semana}`)
     }
   }
 
