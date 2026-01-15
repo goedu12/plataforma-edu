@@ -278,14 +278,13 @@ export async function GET(request: NextRequest) {
     const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)] as QuestaoENEMDB
     const questaoFormatada = formatarQuestao(questaoRaw)
 
-    // Resposta correta (codificada em base64)
-    const respostaCorreta = questaoRaw.resposta_correta
+    // SEGURANÇA: Resposta correta NÃO é enviada ao cliente
+    // A validação acontece server-side em /api/enem/responder
 
     return NextResponse.json({
       sucesso: true,
       status: 'OK',
       questao: questaoFormatada,
-      _rc: Buffer.from(respostaCorreta).toString('base64'),
       anos_disponiveis: anosDisponiveis,
       areas_disponiveis: areasDisponiveis,
       subareas_disponiveis: subareasDisponiveis,

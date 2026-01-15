@@ -87,6 +87,198 @@
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   PROFESSOR THEME - Tema claro e profissional para o painel do professor
+   ───────────────────────────────────────────────────────────────────────────── */
+.professor-theme {
+  /* Backgrounds - tons claros e suaves */
+  --bg-base: #f8fafc;
+  --bg-elevated: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-overlay: #e2e8f0;
+
+  /* Text - tons escuros para boa legibilidade */
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --text-muted: #94a3b8;
+
+  /* Borders - sutis e elegantes */
+  --border-default: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --border-fisica: rgba(34, 197, 94, 0.3);
+  --border-matematica: rgba(139, 92, 246, 0.3);
+
+  /* Shadows - mais pronunciadas para destaque */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-nav: 0 -1px 3px rgba(0, 0, 0, 0.1);
+
+  /* States - mantém as cores vibrantes */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  /* Color scheme */
+  color-scheme: light;
+
+  /* Apply to entire tree */
+  background: var(--bg-base);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* Professor Theme - Component Styles */
+.professor-theme .select-koyeb {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  color: #1e293b;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+.professor-theme .select-koyeb:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.professor-theme .stat-card-2026 {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: all 0.2s;
+}
+.professor-theme .stat-card-2026:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+.professor-theme .stat-card-2026 .stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+.professor-theme .stat-card-2026 .stat-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+.professor-theme .stat-card-2026.stat-green {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+.professor-theme .stat-card-2026.stat-lilas {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.professor-theme .stat-card-2026.stat-cyan {
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.professor-theme .export-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.professor-theme .export-btn:hover:not(:disabled) {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.professor-theme .export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.professor-theme .export-btn.export-fisica {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+.professor-theme .export-btn.export-fisica:hover:not(:disabled) {
+  border-color: rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.05);
+}
+.professor-theme .export-btn.export-matematica {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+.professor-theme .export-btn.export-matematica:hover:not(:disabled) {
+  border-color: rgba(139, 92, 246, 0.5);
+  background: rgba(139, 92, 246, 0.05);
+}
+
+.professor-theme .icon-box-cyan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
+  border-radius: 0.75rem;
+}
+.professor-theme .icon-box-green {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border-radius: 0.75rem;
+}
+
+.professor-theme .table-koyeb {
+  width: 100%;
+  border-collapse: collapse;
+}
+.professor-theme .table-koyeb th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+.professor-theme .table-koyeb td {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+.professor-theme .table-koyeb tbody tr:hover {
+  background: #f8fafc;
+}
+
+.professor-theme .terminal-box.terminal-cyan .terminal-header {
+  border-top: 3px solid #0ea5e9;
+}
+.professor-theme .terminal-box.terminal-amber .terminal-header {
+  border-top: 3px solid #f59e0b;
+}
+.professor-theme .terminal-box .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.professor-theme .terminal-box .dot-red { background: #ff5f56; }
+.professor-theme .terminal-box .dot-yellow { background: #ffbd2e; }
+.professor-theme .terminal-box .dot-green { background: #27ca3f; }
+.professor-theme .terminal-box .title {
+  margin-left: 8px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #94a3b8;
+}
+.professor-theme .terminal-box .comment {
+  color: #64748b;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    BASE RESET
    ───────────────────────────────────────────────────────────────────────────── */
 *, *::before, *::after {

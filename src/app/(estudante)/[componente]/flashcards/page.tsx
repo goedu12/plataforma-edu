@@ -846,10 +846,17 @@ export default function FlashCardsPage() {
                     <input
                       type="text"
                       value={respostaUsuario?.toString() || ''}
-                      onChange={(e) => !mostrarResultado && setRespostaUsuario(e.target.value)}
+                      onChange={(e) => {
+                        if (mostrarResultado) return
+                        // Limitar tamanho e sanitizar entrada
+                        const valor = e.target.value.slice(0, 100)
+                        setRespostaUsuario(valor)
+                      }}
                       disabled={mostrarResultado}
                       placeholder="Digite sua resposta..."
                       autoFocus
+                      maxLength={100}
+                      autoComplete="off"
                       className="w-full p-3 lg:p-2.5 rounded-xl text-sm lg:text-[13px] font-medium transition-all"
                       style={{
                         background: 'var(--bg-elevated)',

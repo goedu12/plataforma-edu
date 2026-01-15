@@ -148,8 +148,58 @@ export async function GET(request: NextRequest) {
         })
       }
 
-      // Para cada estudante, calcular notas
-      const notasEstudantes = await Promise.all(estudantes.map(async (est) => {
+      // ═══════════════════════════════════════════════════════════════════
+      // OTIMIZAÇÃO: Buscar TODOS os dados em 2 queries bulk ao invés de N*C
+      // Antes: 400 queries para 100 alunos * 2 componentes
+      // Agora: 2 queries independente do número de alunos
+      // ═══════════════════════════════════════════════════════════════════
+
+      const estudanteIds = estudantes.map(e => e.id)
+
+      // Query 1: Todas as respostas de todos os estudantes no período
+      const { data: todasRespostas } = await supabase
+        .from('respostas')
+        .select('usuario_id, componente, correta')
+        .in('usuario_id', estudanteIds)
+        .eq('modo', 'estudo')
+        .gte('criado_em', dataInicio)
+        .lte('criado_em', dataFim + 'T23:59:59')
+
+      // Query 2: Todos os dias ativos de todos os estudantes no período
+      const { data: todosDiasAtivos } = await supabase
+        .from('dias_ativos')
+        .select('usuario_id, componente')
+        .in('usuario_id', estudanteIds)
+        .gte('data', dataInicio)
+        .lte('data', dataFim)
+
+      // Agrupar respostas por usuario_id e componente
+      const respostasPorUsuario = new Map<string, Map<string, { total: number; corretas: number }>>()
+      todasRespostas?.forEach(r => {
+        if (!respostasPorUsuario.has(r.usuario_id)) {
+          respostasPorUsuario.set(r.usuario_id, new Map())
+        }
+        const userMap = respostasPorUsuario.get(r.usuario_id)!
+        if (!userMap.has(r.componente)) {
+          userMap.set(r.componente, { total: 0, corretas: 0 })
+        }
+        const stats = userMap.get(r.componente)!
+        stats.total++
+        if (r.correta) stats.corretas++
+      })
+
+      // Agrupar dias ativos por usuario_id e componente
+      const diasPorUsuario = new Map<string, Map<string, number>>()
+      todosDiasAtivos?.forEach(d => {
+        if (!diasPorUsuario.has(d.usuario_id)) {
+          diasPorUsuario.set(d.usuario_id, new Map())
+        }
+        const userMap = diasPorUsuario.get(d.usuario_id)!
+        userMap.set(d.componente, (userMap.get(d.componente) || 0) + 1)
+      })
+
+      // Processar notas de cada estudante (sem queries adicionais)
+      const notasEstudantes = estudantes.map(est => {
         const notas: Record<string, {
           questoes_total: number
           questoes_corretas: number
@@ -162,28 +212,12 @@ export async function GET(request: NextRequest) {
         }> = {}
 
         for (const comp of est.componentes as Componente[]) {
-          // Buscar respostas
-          const { data: respostas } = await supabase
-            .from('respostas')
-            .select('correta')
-            .eq('usuario_id', est.id)
-            .eq('componente', comp)
-            .eq('modo', 'estudo')
-            .gte('criado_em', dataInicio)
-            .lte('criado_em', dataFim + 'T23:59:59')
+          // Buscar dados pré-carregados
+          const respostasUser = respostasPorUsuario.get(est.id)?.get(comp) || { total: 0, corretas: 0 }
+          const diasAtivosCount = diasPorUsuario.get(est.id)?.get(comp) || 0
 
-          // Buscar dias ativos
-          const { data: diasAtivos } = await supabase
-            .from('dias_ativos')
-            .select('id')
-            .eq('usuario_id', est.id)
-            .eq('componente', comp)
-            .gte('data', dataInicio)
-            .lte('data', dataFim)
-
-          const questoesTotal = respostas?.length || 0
-          const questoesCorretas = respostas?.filter(r => r.correta).length || 0
-          const diasAtivosCount = diasAtivos?.length || 0
+          const questoesTotal = respostasUser.total
+          const questoesCorretas = respostasUser.corretas
 
           // Calcular notas
           const taxaAcerto = questoesTotal > 0 ? questoesCorretas / questoesTotal : 0
@@ -230,7 +264,7 @@ export async function GET(request: NextRequest) {
           componentes: est.componentes,
           notas,
         }
-      }))
+      })
 
       // Ordenar por nome
       notasEstudantes.sort((a, b) => a.nome.localeCompare(b.nome))

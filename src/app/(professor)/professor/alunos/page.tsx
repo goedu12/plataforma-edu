@@ -159,8 +159,8 @@ export default function AlunosProfessorPage() {
         {/* Filtros */}
         <Card className="mb-4 animate-slide-up">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5 text-text-muted" />
-            <span className="font-semibold text-text-primary">Filtros</span>
+            <Filter className="w-5 h-5 text-slate-500" />
+            <span className="font-semibold text-slate-800">Filtros</span>
           </div>
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px]">
@@ -174,7 +174,7 @@ export default function AlunosProfessorPage() {
             <select
               value={turmaFiltro}
               onChange={e => setTurmaFiltro(e.target.value)}
-              className="px-4 py-3 border border-calm-border rounded-xl focus:ring-2 focus:ring-accent-orange focus:border-transparent bg-calm-surface text-text-primary"
+              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-accent-orange focus:border-transparent bg-white text-slate-800"
             >
               <option value="">Todas as turmas</option>
               {turmas.map(t => (
@@ -186,7 +186,7 @@ export default function AlunosProfessorPage() {
             <select
               value={componenteFiltro}
               onChange={e => setComponenteFiltro(e.target.value)}
-              className="px-4 py-3 border border-calm-border rounded-xl focus:ring-2 focus:ring-accent-orange focus:border-transparent bg-calm-surface text-text-primary"
+              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-accent-orange focus:border-transparent bg-white text-slate-800"
             >
               <option value="">Todos os componentes</option>
               <option value="fisica">Física</option>
@@ -212,12 +212,12 @@ export default function AlunosProfessorPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-text-primary truncate">{aluno.nome}</h3>
+                    <h3 className="font-semibold text-slate-800 truncate">{aluno.nome}</h3>
                     <Badge variant="default" size="sm">
                       {aluno.turma}
                     </Badge>
                   </div>
-                  <p className="text-sm text-text-muted truncate">{aluno.email}</p>
+                  <p className="text-sm text-slate-500 truncate">{aluno.email}</p>
                   <div className="flex items-center gap-4 mt-2">
                     {aluno.componentes.includes('fisica') && (
                       <div className="flex items-center gap-1.5 text-xs">
@@ -242,7 +242,7 @@ export default function AlunosProfessorPage() {
                 <button
                   onClick={() => handleResetSenha(aluno.id, aluno.nome)}
                   disabled={resetando === aluno.id}
-                  className="p-3 text-text-muted hover:text-accent-orange hover:bg-orange-50 rounded-xl transition-all disabled:opacity-50"
+                  className="p-3 text-slate-500 hover:text-accent-orange hover:bg-orange-50 rounded-xl transition-all disabled:opacity-50"
                   title="Gerar nova senha"
                   aria-label={`Gerar nova senha para ${aluno.nome}`}
                 >
@@ -258,13 +258,13 @@ export default function AlunosProfessorPage() {
 
           {alunosFiltrados.length === 0 && (
             <Card className="text-center py-10 animate-slide-up">
-              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-calm-elevated">
-                <Users className="w-8 h-8 text-text-muted" />
+              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-slate-100">
+                <Users className="w-8 h-8 text-slate-500" />
               </div>
-              <h2 className="text-xl font-bold text-text-primary mb-2">
+              <h2 className="text-xl font-bold text-slate-800 mb-2">
                 Nenhum aluno encontrado
               </h2>
-              <p className="text-text-secondary">
+              <p className="text-slate-600">
                 Ajuste os filtros ou importe novos alunos.
               </p>
             </Card>

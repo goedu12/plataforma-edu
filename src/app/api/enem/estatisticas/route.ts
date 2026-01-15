@@ -6,7 +6,7 @@ import type { EstatisticasENEM } from '@/types'
 // ═══════════════════════════════════════════════════════════════════════════
 // API ENEM - Estatísticas do usuário
 // GET /api/enem/estatisticas
-// Usa tabela enem_responses (mesma do /api/enem/responder)
+// Usa tabelas: respostas_enem, questoes_enem
 // ═══════════════════════════════════════════════════════════════════════════
 
 export async function GET() {
@@ -38,10 +38,10 @@ export async function GET() {
       }, { status: 403 })
     }
 
-    // Buscar todas as respostas do usuário (tabela enem_responses)
+    // Buscar todas as respostas do usuário
     const { data: respostas, error } = await supabase
-      .from('enem_responses')
-      .select('question_id, correta, tempo_segundos')
+      .from('respostas_enem')
+      .select('questao_id, correta, tempo_segundos')
       .eq('usuario_id', sessao.userId)
 
     if (error) {
@@ -54,8 +54,8 @@ export async function GET() {
 
     // Buscar total de questões disponíveis
     const { data: totalQuestoesData } = await supabase
-      .from('enem_questions')
-      .select('id_unico, ano, area')
+      .from('questoes_enem')
+      .select('id, ano_prova, area')
       .or('anulada.is.null,anulada.eq.false')
 
     const totalDisponivel = totalQuestoesData?.length || 0
@@ -65,8 +65,8 @@ export async function GET() {
     const questoesPorArea: Record<string, number> = {}
 
     totalQuestoesData?.forEach(q => {
-      if (q.ano) {
-        questoesPorAno[q.ano] = (questoesPorAno[q.ano] || 0) + 1
+      if (q.ano_prova) {
+        questoesPorAno[q.ano_prova] = (questoesPorAno[q.ano_prova] || 0) + 1
       }
       if (q.area) {
         questoesPorArea[q.area] = (questoesPorArea[q.area] || 0) + 1
@@ -100,17 +100,17 @@ export async function GET() {
     const tempoMedio = Math.round(tempoTotal / totalQuestoes)
 
     // Buscar dados das questões respondidas para estatísticas por ano
-    const questionIds = respostas.map(r => r.question_id).filter(Boolean)
+    const questionIds = respostas.map(r => r.questao_id).filter(Boolean)
 
     const { data: questoesRespondidas } = await supabase
-      .from('enem_questions')
-      .select('id_unico, ano, area')
-      .in('id_unico', questionIds)
+      .from('questoes_enem')
+      .select('id, ano_prova, area')
+      .in('id', questionIds)
 
-    // Mapear question_id -> dados da questão
+    // Mapear questao_id -> dados da questão
     const questaoMap = new Map<string, { ano: number; area: string }>()
     questoesRespondidas?.forEach(q => {
-      questaoMap.set(q.id_unico, { ano: q.ano, area: q.area || 'Geral' })
+      questaoMap.set(q.id, { ano: q.ano_prova, area: q.area || 'Geral' })
     })
 
     // Estatísticas por ano da prova
@@ -118,7 +118,7 @@ export async function GET() {
     const respostasPorAno = new Map<number, { total: number; corretas: number }>()
 
     respostas.forEach(r => {
-      const questao = questaoMap.get(r.question_id)
+      const questao = questaoMap.get(r.questao_id)
       if (questao?.ano) {
         const atual = respostasPorAno.get(questao.ano) || { total: 0, corretas: 0 }
         atual.total++
@@ -140,7 +140,7 @@ export async function GET() {
     const respostasPorArea = new Map<string, { total: number; corretas: number }>()
 
     respostas.forEach(r => {
-      const questao = questaoMap.get(r.question_id)
+      const questao = questaoMap.get(r.questao_id)
       if (questao?.area) {
         const atual = respostasPorArea.get(questao.area) || { total: 0, corretas: 0 }
         atual.total++
