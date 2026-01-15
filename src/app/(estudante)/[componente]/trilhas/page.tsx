@@ -21,6 +21,23 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
 
+interface TrilhaAPI {
+  trilha_id: string
+  nome: string
+  icone: string
+  descricao_curta: string
+  descricao: string
+  cor: string
+  config: {
+    questoes_por_semana?: number
+    total_semanas?: number
+  }
+  ordem: number
+  usuario_ativa?: boolean
+  usuario_semana?: number
+  usuario_pontos?: number
+}
+
 interface Trilha {
   id: string
   nome: string
@@ -34,6 +51,23 @@ interface Trilha {
   ativa?: boolean
   semana_atual?: number
   progresso?: number
+}
+
+// Transforma dados da API para o formato do frontend
+function transformarTrilha(t: TrilhaAPI): Trilha {
+  return {
+    id: t.trilha_id,
+    nome: t.nome,
+    icone: t.icone,
+    descricao_curta: t.descricao_curta || '',
+    descricao_completa: t.descricao || t.descricao_curta || '',
+    cor_primaria: t.cor || '#22c55e',
+    questoes_por_semana: t.config?.questoes_por_semana || 10,
+    total_semanas: t.config?.total_semanas || 40,
+    ordem: t.ordem,
+    ativa: t.usuario_ativa || false,
+    semana_atual: t.usuario_semana || 1,
+  }
 }
 
 const iconMap: Record<string, typeof GraduationCap> = {
@@ -91,10 +125,12 @@ export default function TrilhasPage() {
         const trilhasData = await trilhasRes.json()
 
         if (trilhasData.trilhas) {
-          setTrilhas(trilhasData.trilhas)
+          // Transformar dados da API para o formato do frontend
+          const trilhasTransformadas = trilhasData.trilhas.map((t: TrilhaAPI) => transformarTrilha(t))
+          setTrilhas(trilhasTransformadas)
 
           // Verificar se tem trilha ativa
-          const ativa = trilhasData.trilhas.find((t: Trilha) => t.ativa)
+          const ativa = trilhasTransformadas.find((t: Trilha) => t.ativa)
           if (ativa) {
             setTrilhaAtiva(ativa)
           }
