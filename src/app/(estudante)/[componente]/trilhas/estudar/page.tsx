@@ -196,25 +196,34 @@ export default function TrilhasEstudarPage() {
 
   // Se não tem questões
   if (questoes.length === 0) {
+    // Verifica se é porque completou ou porque não há questões no banco
+    const semQuestoes = !progresso || progresso.questoes_semana === 0
+
     return (
       <div
         className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex items-center justify-center"
         style={{ background: 'var(--bg-base)' }}
       >
         <NavigationRail componente={componente} />
-        <div className="text-center p-6">
+        <div className="text-center p-6 max-w-sm">
           <div
             className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
             style={{ background: 'var(--bg-elevated)' }}
           >
-            <Trophy className="w-10 h-10" style={{ color: accentColor }} />
+            {semQuestoes ? (
+              <Clock className="w-10 h-10" style={{ color: 'var(--color-warning)' }} />
+            ) : (
+              <Trophy className="w-10 h-10" style={{ color: accentColor }} />
+            )}
           </div>
           <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
-            Parabéns!
+            {semQuestoes ? 'Questões em Preparação' : 'Parabéns!'}
           </h2>
           <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
-            Você completou todas as questões desta semana!
-            Volte na próxima semana para mais questões.
+            {semQuestoes
+              ? 'As questões desta trilha ainda estão sendo preparadas. Em breve você poderá estudar por aqui!'
+              : 'Você completou todas as questões desta semana! Volte na próxima semana para mais questões.'
+            }
           </p>
           <button
             onClick={() => router.push(`/${componente}/trilhas`)}
