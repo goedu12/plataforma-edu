@@ -214,23 +214,23 @@ export default function TrilhasPage() {
     >
       <NavigationRail componente={componente} />
 
-      {/* Header */}
-      <header className="page-header">
+      {/* Header - Compacto para Chromebook */}
+      <header className="header-chromebook lg:py-2">
         <div className="max-w-2xl mx-auto w-full">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="w-11 h-11 flex items-center justify-center rounded-xl transition-colors hover:bg-[var(--bg-surface-hover)]"
+              className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--bg-surface-hover)]"
               style={{ border: '1px solid var(--border-default)' }}
               aria-label="Voltar ao menu"
             >
-              <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
+              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
             </button>
             <div>
-              <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Trilhas de Aprendizado
               </h1>
-              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
                 Escolha sua jornada de estudos
               </p>
             </div>
@@ -238,47 +238,47 @@ export default function TrilhasPage() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-4">
+      {/* Content - Compacto */}
+      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
         {/* Trilha Ativa */}
         {trilhaAtiva && (
-          <div className="mb-6">
-            <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
+          <div className="mb-4 lg:mb-3">
+            <h2 className="text-xs lg:text-2xs font-semibold mb-2 lg:mb-1.5" style={{ color: 'var(--text-secondary)' }}>
               Sua Trilha Atual
             </h2>
             <div
-              className="w-full p-4 rounded-xl"
+              className="w-full p-3 lg:p-2.5 rounded-lg"
               style={{
                 background: `linear-gradient(135deg, ${trilhaAtiva.cor_primaria}20, ${trilhaAtiva.cor_primaria}10)`,
-                border: `2px solid ${trilhaAtiva.cor_primaria}`,
+                border: `1.5px solid ${trilhaAtiva.cor_primaria}`,
               }}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 lg:gap-2">
                 <div
-                  className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+                  className="w-11 h-11 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center text-xl lg:text-lg"
                   style={{ background: `${trilhaAtiva.cor_primaria}30` }}
                 >
                   {trilhaAtiva.icone}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <h3 className="font-bold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>
                       {trilhaAtiva.nome}
                     </h3>
                     <span
-                      className="px-2 py-0.5 rounded-full text-xs font-medium"
+                      className="badge-chromebook"
                       style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
                     >
                       Ativa
                     </span>
                   </div>
-                  <p className="text-sm mb-2" style={{ color: 'var(--text-muted)' }}>
-                    Semana {trilhaAtiva.semana_atual || 1} de {trilhaAtiva.total_semanas}
-                    {trilhaAtiva.pontos ? ` • ${trilhaAtiva.pontos} pts` : ''}
+                  <p className="text-xs lg:text-2xs mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                    Semana {trilhaAtiva.semana_atual || 1}/{trilhaAtiva.total_semanas}
+                    {trilhaAtiva.pontos ? ` • ${trilhaAtiva.pontos}pts` : ''}
                   </p>
                   <div className="flex items-center gap-2">
                     <div
-                      className="flex-1 h-2 rounded-full overflow-hidden"
+                      className="flex-1 h-1.5 lg:h-1 rounded-full overflow-hidden"
                       style={{ background: 'var(--bg-elevated)' }}
                     >
                       <div
@@ -292,41 +292,41 @@ export default function TrilhasPage() {
                   </div>
                 </div>
               </div>
-              {/* Botões de ação */}
-              <div className="flex gap-2 mt-4">
+              {/* Botões de ação - Compactos */}
+              <div className="flex gap-2 mt-3 lg:mt-2">
                 <button
                   onClick={() => router.push(`/${componente}/trilhas/estudar`)}
-                  className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98]"
+                  className="flex-1 py-2 lg:py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 btn-chromebook transition-all active:scale-[0.98]"
                   style={{ background: trilhaAtiva.cor_primaria, color: isFisica ? '#000' : '#fff' }}
                 >
-                  <Play className="w-5 h-5" />
-                  Continuar
+                  <Play className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+                  <span className="text-sm lg:text-xs">Continuar</span>
                 </button>
                 <button
                   onClick={pausarTrilha}
                   disabled={pausando}
-                  className="px-5 py-3 rounded-xl font-medium flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98] disabled:opacity-50"
+                  className="px-4 lg:px-3 py-2 lg:py-1.5 rounded-lg font-medium flex items-center justify-center gap-1.5 btn-chromebook transition-all active:scale-[0.98] disabled:opacity-50"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
                   aria-label="Pausar trilha"
                 >
                   {pausando ? (
-                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    <RefreshCw className="w-4 h-4 lg:w-3.5 lg:h-3.5 animate-spin" />
                   ) : (
-                    <Pause className="w-5 h-5" />
+                    <Pause className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
                   )}
-                  Pausar
+                  <span className="text-sm lg:text-xs">Pausar</span>
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Lista de Trilhas */}
-        <h2 className="text-sm font-semibold mb-3" style={{ color: 'var(--text-secondary)' }}>
+        {/* Lista de Trilhas - Compacta */}
+        <h2 className="text-xs lg:text-2xs font-semibold mb-2 lg:mb-1.5" style={{ color: 'var(--text-secondary)' }}>
           {trilhaAtiva ? 'Outras Trilhas' : 'Escolha uma Trilha'}
         </h2>
 
-        <div className="space-y-3">
+        <div className="space-y-2 lg:space-y-1.5">
           {trilhas
             .filter(t => !trilhaAtiva || t.id !== trilhaAtiva.id)
             .sort((a, b) => a.ordem - b.ordem)
@@ -337,7 +337,7 @@ export default function TrilhasPage() {
                 <button
                   key={trilha.id}
                   onClick={() => setModalTrilha(trilha)}
-                  className="w-full p-4 rounded-xl text-left transition-all hover:scale-[1.01]"
+                  className="w-full p-3 lg:p-2.5 rounded-lg text-left transition-all hover:scale-[1.005]"
                   style={{
                     background: 'var(--bg-surface)',
                     border: hasPreviousProgress
@@ -345,47 +345,47 @@ export default function TrilhasPage() {
                       : '1px solid var(--border-default)',
                   }}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 lg:gap-2">
                     <div
-                      className="w-12 h-12 rounded-xl flex items-center justify-center text-xl"
+                      className="w-10 h-10 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center text-lg lg:text-base"
                       style={{ background: `${trilha.cor_primaria}20` }}
                     >
                       {trilha.icone}
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h3 className="font-semibold text-sm lg:text-xs truncate" style={{ color: 'var(--text-primary)' }}>
                           {trilha.nome}
                         </h3>
                         {hasPreviousProgress && (
                           <span
-                            className="px-2 py-0.5 rounded-full text-xs"
+                            className="badge-chromebook flex-shrink-0"
                             style={{ background: `${trilha.cor_primaria}20`, color: trilha.cor_primaria }}
                           >
                             Pausada
                           </span>
                         )}
                       </div>
-                      <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-xs lg:text-2xs truncate" style={{ color: 'var(--text-muted)' }}>
                         {hasPreviousProgress
-                          ? `Semana ${trilha.semana_atual} • ${trilha.pontos || 0} pts`
+                          ? `Semana ${trilha.semana_atual} • ${trilha.pontos || 0}pts`
                           : trilha.descricao_curta
                         }
                       </p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
-                          <Clock className="w-3 h-3" />
-                          {trilha.total_semanas} semanas
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-2xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
+                          <Clock className="w-2.5 h-2.5" />
+                          {trilha.total_semanas}sem
                         </span>
-                        <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                          {trilha.questoes_por_semana} questões/semana
+                        <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                          {trilha.questoes_por_semana}q/sem
                         </span>
                       </div>
                     </div>
                     {hasPreviousProgress ? (
-                      <RotateCcw className="w-5 h-5" style={{ color: trilha.cor_primaria }} />
+                      <RotateCcw className="w-4 h-4 lg:w-3.5 lg:h-3.5 flex-shrink-0" style={{ color: trilha.cor_primaria }} />
                     ) : (
-                      <ChevronRight className="w-5 h-5" style={{ color: accentColor }} />
+                      <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 flex-shrink-0" style={{ color: accentColor }} />
                     )}
                   </div>
                 </button>
@@ -393,21 +393,21 @@ export default function TrilhasPage() {
             })}
         </div>
 
-        {/* Dica de uso */}
+        {/* Dica de uso - Compacta */}
         {trilhaAtiva && (
-          <p className="text-center text-sm mt-4 p-3 rounded-lg" style={{
+          <p className="text-center text-2xs mt-3 lg:mt-2 p-2 rounded-md" style={{
             background: 'var(--bg-elevated)',
             color: 'var(--text-muted)'
           }}>
-            Você pode trocar de trilha a qualquer momento. Seu progresso será salvo.
+            Troque de trilha a qualquer momento. Progresso salvo.
           </p>
         )}
       </main>
 
-      {/* Modal de Confirmação */}
+      {/* Modal de Confirmação - Compacto */}
       {modalTrilha && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3"
           style={{ background: 'var(--overlay-modal)' }}
           onClick={() => setModalTrilha(null)}
           role="dialog"
@@ -415,82 +415,82 @@ export default function TrilhasPage() {
           aria-labelledby="modal-title"
         >
           <div
-            className="w-full max-w-sm rounded-2xl p-6"
+            className="w-full max-w-xs rounded-xl p-4"
             style={{ background: 'var(--bg-surface)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="w-16 h-16 rounded-xl mx-auto mb-4 flex items-center justify-center text-3xl"
+              className="w-12 h-12 lg:w-10 lg:h-10 rounded-lg mx-auto mb-3 flex items-center justify-center text-2xl lg:text-xl"
               style={{ background: `${modalTrilha.cor_primaria}20` }}
             >
               {modalTrilha.icone}
             </div>
 
-            <h3 id="modal-title" className="text-xl font-bold text-center mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 id="modal-title" className="text-lg lg:text-base font-bold text-center mb-1.5" style={{ color: 'var(--text-primary)' }}>
               {modalTrilha.nome}
             </h3>
 
-            <p className="text-sm text-center mb-4" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-xs lg:text-2xs text-center mb-3" style={{ color: 'var(--text-secondary)' }}>
               {modalTrilha.iniciada
-                ? `Retomar da semana ${modalTrilha.semana_atual} com ${modalTrilha.pontos || 0} pontos acumulados.`
+                ? `Retomar semana ${modalTrilha.semana_atual} • ${modalTrilha.pontos || 0}pts`
                 : modalTrilha.descricao_completa
               }
             </p>
 
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="p-3 rounded-lg text-center" style={{ background: 'var(--bg-elevated)' }}>
-                <p className="text-lg font-bold" style={{ color: modalTrilha.cor_primaria }}>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="p-2 rounded-md text-center" style={{ background: 'var(--bg-elevated)' }}>
+                <p className="text-base lg:text-sm font-bold" style={{ color: modalTrilha.cor_primaria }}>
                   {modalTrilha.iniciada ? modalTrilha.semana_atual : modalTrilha.total_semanas}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {modalTrilha.iniciada ? 'semana atual' : 'semanas'}
+                <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                  {modalTrilha.iniciada ? 'semana' : 'semanas'}
                 </p>
               </div>
-              <div className="p-3 rounded-lg text-center" style={{ background: 'var(--bg-elevated)' }}>
-                <p className="text-lg font-bold" style={{ color: modalTrilha.cor_primaria }}>
+              <div className="p-2 rounded-md text-center" style={{ background: 'var(--bg-elevated)' }}>
+                <p className="text-base lg:text-sm font-bold" style={{ color: modalTrilha.cor_primaria }}>
                   {modalTrilha.iniciada ? (modalTrilha.pontos || 0) : modalTrilha.questoes_por_semana}
                 </p>
-                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {modalTrilha.iniciada ? 'pontos' : 'questões/semana'}
+                <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                  {modalTrilha.iniciada ? 'pontos' : 'q/semana'}
                 </p>
               </div>
             </div>
 
             {/* Aviso de troca */}
             {trilhaAtiva && (
-              <p className="text-xs text-center mb-4 p-2 rounded-lg" style={{
+              <p className="text-2xs text-center mb-3 p-1.5 rounded-md" style={{
                 background: 'var(--bg-elevated)',
                 color: 'var(--text-muted)'
               }}>
-                Seu progresso em &ldquo;{trilhaAtiva.nome}&rdquo; será salvo e você poderá voltar depois.
+                Progresso em &ldquo;{trilhaAtiva.nome}&rdquo; será salvo.
               </p>
             )}
 
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 onClick={() => setModalTrilha(null)}
-                className="flex-1 py-3 rounded-xl font-medium min-h-[48px] transition-all active:scale-[0.98]"
+                className="flex-1 py-2 lg:py-1.5 rounded-lg font-medium btn-chromebook transition-all active:scale-[0.98]"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
               >
-                Cancelar
+                <span className="text-sm lg:text-xs">Cancelar</span>
               </button>
               <button
                 onClick={() => iniciarTrilha(modalTrilha)}
                 disabled={iniciando}
-                className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98] disabled:opacity-50"
+                className="flex-1 py-2 lg:py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 btn-chromebook transition-all active:scale-[0.98] disabled:opacity-50"
                 style={{ background: modalTrilha.cor_primaria, color: isFisica ? '#000' : '#fff' }}
               >
                 {iniciando ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <RefreshCw className="w-4 h-4 lg:w-3.5 lg:h-3.5 animate-spin" />
                 ) : modalTrilha.iniciada ? (
                   <>
-                    <RotateCcw className="w-5 h-5" />
-                    Retomar
+                    <RotateCcw className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+                    <span className="text-sm lg:text-xs">Retomar</span>
                   </>
                 ) : (
                   <>
-                    <Play className="w-5 h-5" />
-                    {trilhaAtiva ? 'Trocar' : 'Iniciar'}
+                    <Play className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+                    <span className="text-sm lg:text-xs">{trilhaAtiva ? 'Trocar' : 'Iniciar'}</span>
                   </>
                 )}
               </button>
