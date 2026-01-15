@@ -682,6 +682,17 @@ export type TrilhaId = 'passar_ano' | 'enem' | 'recuperacao' | 'desafio' | 'curi
 // Série do Ensino Médio (formato string)
 export type SerieEM_String = '1EM' | '2EM' | '3EM'
 
+// Série do Ensino Fundamental (formato string)
+export type SerieEF_String = '6EF' | '7EF' | '8EF' | '9EF'
+
+// Todas as séries suportadas
+export type SerieTrilha = SerieEM_String | SerieEF_String
+
+// Alternativas por nível
+export type AlternativaEM = 'A' | 'B' | 'C' | 'D' | 'E'  // 5 alternativas para EM
+export type AlternativaEF = 'A' | 'B' | 'C' | 'D'         // 4 alternativas para EF
+export type AlternativaTrilha = AlternativaEM | AlternativaEF
+
 // Tipos de questão
 export type TipoQuestaoTrilha =
   | 'conceitual'
@@ -743,9 +754,26 @@ export interface TrilhaConfig {
 // ═══════════════════════════════════════════════════════════
 // INTERFACE: Questão da Trilha
 // ═══════════════════════════════════════════════════════════
+// Alternativas para 5 opções (Ensino Médio)
+export interface AlternativasEM {
+  A: string
+  B: string
+  C: string
+  D: string
+  E: string
+}
+
+// Alternativas para 4 opções (Ensino Fundamental)
+export interface AlternativasEF {
+  A: string
+  B: string
+  C: string
+  D: string
+}
+
 export interface QuestaoTrilha {
   id: number
-  serie: SerieEM_String
+  serie: SerieTrilha
   semana: number
   ano_letivo: number
   ordem: number
@@ -755,20 +783,18 @@ export interface QuestaoTrilha {
   tipo_questao: TipoQuestaoTrilha
   contexto_cotidiano: ContextoCotidiano
   enunciado: string
-  alternativas: {
-    A: string
-    B: string
-    C: string
-    D: string
-    E: string
-  }
-  resposta_correta: 'A' | 'B' | 'C' | 'D' | 'E'
+  alternativas: AlternativasEM | AlternativasEF
+  resposta_correta: AlternativaTrilha
   dica: string
   feedback: QuestaoFeedback
   dificuldade: DificuldadeTrilha
   tags: string[]
   is_desafio: boolean
   ativa: boolean
+  // Novos campos para EF
+  componente?: Componente
+  nivel_ensino?: NivelEnsino
+  num_alternativas?: 4 | 5
 }
 
 export interface QuestaoFeedback {
@@ -778,7 +804,7 @@ export interface QuestaoFeedback {
     B?: string
     C?: string
     D?: string
-    E?: string
+    E?: string  // Opcional para EF (apenas A-D)
   }
   conexao_cotidiano: string
   curiosidade: string
@@ -788,7 +814,7 @@ export interface QuestaoFeedback {
 export interface QuestaoTrilhaComStatus extends Omit<QuestaoTrilha, 'resposta_correta'> {
   questao_id: number
   ja_respondida: boolean
-  resposta_usuario?: 'A' | 'B' | 'C' | 'D' | 'E'
+  resposta_usuario?: AlternativaTrilha
   acertou?: boolean
   tempo_resposta?: number
   usou_dica?: boolean
@@ -801,7 +827,8 @@ export interface UsuarioTrilha {
   id: number
   usuario_id: string
   trilha_id: TrilhaId
-  serie: SerieEM_String
+  serie: SerieTrilha
+  componente?: Componente
   ativa: boolean
   iniciada_em: string
   pausada_em?: string
@@ -828,7 +855,8 @@ export interface ProgressoSemanal {
   id: number
   usuario_id: string
   trilha_id: TrilhaId
-  serie: SerieEM_String
+  serie: SerieTrilha
+  componente?: Componente
   semana: number
   ano_letivo: number
   questoes_total: number
@@ -854,7 +882,7 @@ export interface RespostaTrilha {
   usuario_id: string
   questao_id: number
   trilha_id: TrilhaId
-  resposta_dada: 'A' | 'B' | 'C' | 'D' | 'E'
+  resposta_dada: AlternativaTrilha
   correta: boolean
   tempo_segundos: number
   usou_dica: boolean
@@ -871,7 +899,8 @@ export interface ProgressoTrilhaUsuario {
   trilha_nome: string
   trilha_icone: string
   trilha_cor: string
-  serie: SerieEM_String
+  serie: SerieTrilha
+  componente?: Componente
   semana_atual: number
   questoes_total: number
   questoes_corretas: number
@@ -889,8 +918,8 @@ export interface ProgressoTrilhaUsuario {
 export interface ResultadoResposta {
   sucesso: boolean
   correta: boolean
-  resposta_certa: 'A' | 'B' | 'C' | 'D' | 'E'
-  resposta_dada: 'A' | 'B' | 'C' | 'D' | 'E'
+  resposta_certa: AlternativaTrilha
+  resposta_dada: AlternativaTrilha
   pontos: number
   feedback: QuestaoFeedback
   progresso: {
@@ -970,4 +999,89 @@ export const CONTEXTOS_LABELS: Record<ContextoCotidiano, string> = {
   lazer_tecnologia: 'Lazer e Tecnologia',
   trabalho_profissoes: 'Trabalho e Profissões',
   todos: 'Diversos'
+}
+
+// ═══════════════════════════════════════════════════════════
+// SÉRIES DO ENSINO FUNDAMENTAL - Labels e Helpers
+// ═══════════════════════════════════════════════════════════
+
+export const SERIES_EF_LABELS: Record<SerieEF_String, string> = {
+  '6EF': '6º Ano',
+  '7EF': '7º Ano',
+  '8EF': '8º Ano',
+  '9EF': '9º Ano'
+}
+
+// Labels unificados para todas as séries
+export const SERIES_TRILHA_LABELS: Record<SerieTrilha, string> = {
+  ...SERIES_EF_LABELS,
+  ...SERIES_EM_LABELS
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS: Detecção de nível de ensino
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Verifica se a série é do Ensino Fundamental
+ */
+export function isSerieEF(serie: SerieTrilha): serie is SerieEF_String {
+  return ['6EF', '7EF', '8EF', '9EF'].includes(serie)
+}
+
+/**
+ * Verifica se a série é do Ensino Médio
+ */
+export function isSerieEM(serie: SerieTrilha): serie is SerieEM_String {
+  return ['1EM', '2EM', '3EM'].includes(serie)
+}
+
+/**
+ * Retorna o número de alternativas baseado na série
+ * EF: 4 alternativas (A, B, C, D)
+ * EM: 5 alternativas (A, B, C, D, E)
+ */
+export function getNumAlternativas(serie: SerieTrilha): 4 | 5 {
+  return isSerieEF(serie) ? 4 : 5
+}
+
+/**
+ * Retorna o nível de ensino baseado na série
+ */
+export function getNivelEnsinoPorSerie(serie: SerieTrilha): NivelEnsino {
+  return isSerieEF(serie) ? 'EF' : 'EM'
+}
+
+/**
+ * Retorna as alternativas válidas para uma série
+ */
+export function getAlternativasValidas(serie: SerieTrilha): AlternativaTrilha[] {
+  return isSerieEF(serie) ? ['A', 'B', 'C', 'D'] : ['A', 'B', 'C', 'D', 'E']
+}
+
+/**
+ * Valida se uma resposta é válida para uma série
+ */
+export function isRespostaValida(resposta: string, serie: SerieTrilha): resposta is AlternativaTrilha {
+  const validas = getAlternativasValidas(serie)
+  return validas.includes(resposta as AlternativaTrilha)
+}
+
+/**
+ * Converte número da turma para série de trilha
+ * Ex: '6A' -> '6EF', '1A' -> '1EM'
+ */
+export function turmaParaSerieTrilha(turma: string): SerieTrilha | null {
+  const match = turma.match(/^(\d+)/)
+  if (!match) return null
+
+  const ano = parseInt(match[1])
+
+  if (ano >= 6 && ano <= 9) {
+    return `${ano}EF` as SerieEF_String
+  } else if (ano >= 1 && ano <= 3) {
+    return `${ano}EM` as SerieEM_String
+  }
+
+  return null
 }

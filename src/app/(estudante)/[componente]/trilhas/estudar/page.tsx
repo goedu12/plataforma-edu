@@ -19,16 +19,19 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
 
+// Alternativas podem ter 4 (EF) ou 5 (EM) opções
+interface Alternativas {
+  A: string
+  B: string
+  C: string
+  D: string
+  E?: string  // Opcional - apenas para EM (5 alternativas)
+}
+
 interface Questao {
   id: string
   enunciado: string
-  alternativas: {
-    A: string
-    B: string
-    C: string
-    D: string
-    E: string
-  }
+  alternativas: Alternativas
   dica: string
   feedback: string
   resposta_correta: string
@@ -39,6 +42,13 @@ interface Questao {
   subtema: string
   respondida?: boolean
   resposta_usuario?: string
+}
+
+interface SerieInfo {
+  serie: string
+  nivel_ensino: 'EF' | 'EM'
+  componente: 'fisica' | 'matematica'
+  num_alternativas: 4 | 5
 }
 
 interface Progresso {
@@ -69,6 +79,7 @@ export default function TrilhasEstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [tempoInicio, setTempoInicio] = useState<number>(0)
   const [serie, setSerie] = useState<string>('')
+  const [serieInfo, setSerieInfo] = useState<SerieInfo | null>(null)
   const [mostrarConclusao, setMostrarConclusao] = useState(false)
   const [resultadoSemana, setResultadoSemana] = useState<{
     avancou: boolean
@@ -87,6 +98,10 @@ export default function TrilhasEstudarPage() {
         setQuestoes(data.questoes)
         setTempoInicio(Date.now())
         setGerando(false)
+        // Capturar informações da série (EF vs EM, número de alternativas)
+        if (data.serie_info) {
+          setSerieInfo(data.serie_info)
+        }
         return true
       } else if (data.gerando) {
         // Questões estão sendo geradas, aguardar e tentar novamente
@@ -130,7 +145,10 @@ export default function TrilhasEstudarPage() {
           return
         }
 
-        const userSerie = `${userData.usuario.ano}EM`
+        // Determinar série baseado no nível de ensino do usuário
+        const nivelUsuario = userData.usuario.nivel // 'EF' ou 'EM'
+        const anoUsuario = userData.usuario.ano
+        const userSerie = nivelUsuario === 'EF' ? `${anoUsuario}EF` : `${anoUsuario}EM`
         setSerie(userSerie)
 
         // Carregar questões
@@ -426,9 +444,11 @@ export default function TrilhasEstudarPage() {
           </div>
         )}
 
-        {/* Alternativas - Compactas */}
+        {/* Alternativas - Compactas (4 para EF, 5 para EM) */}
         <div className="space-y-2 lg:space-y-1.5">
-          {Object.entries(questao.alternativas).map(([letra, texto]) => {
+          {Object.entries(questao.alternativas)
+            .filter(([_, texto]) => texto !== undefined && texto !== null && texto !== '')
+            .map(([letra, texto]) => {
             const isSelected = respostaSelecionada === letra
             const isCorrect = letra === questao.resposta_correta
             const showResult = mostrarResultado

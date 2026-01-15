@@ -2,19 +2,29 @@
  * API de Questões da Trilha
  *
  * GET /api/trilhas/questoes?serie=1EM&semana=5
+ * GET /api/trilhas/questoes?serie=6EF&semana=5  (Matemática EF com 4 alternativas)
  *
  * Retorna as questões da semana atual da trilha do usuário
  * Sistema de geração sob demanda: gera automaticamente se não houver questões em cache
+ *
+ * Suporta:
+ * - Ensino Médio (1EM, 2EM, 3EM): Física com 5 alternativas
+ * - Ensino Fundamental (6EF, 7EF, 8EF, 9EF): Matemática com 4 alternativas
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
 import {
-  gerarQuestoesComGemini,
+  gerarQuestoes,
   verificarCacheQuestoes,
-  salvarQuestoesNoCache
+  salvarQuestoes,
+  isSerieEF,
+  getNumAlternativasPorSerie
 } from '@/lib/gemini'
+
+// Séries válidas (EF + EM)
+const SERIES_VALIDAS = ['6EF', '7EF', '8EF', '9EF', '1EM', '2EM', '3EM']
 
 // Controle para evitar múltiplas gerações simultâneas
 // NOTA: Em ambiente serverless, este Set é por instância.
@@ -56,12 +66,16 @@ export async function GET(request: NextRequest) {
     const serie = searchParams.get('serie')
     const semana = searchParams.get('semana')
 
-    if (!serie || !['1EM', '2EM', '3EM'].includes(serie)) {
+    if (!serie || !SERIES_VALIDAS.includes(serie)) {
       return NextResponse.json(
-        { erro: 'serie deve ser 1EM, 2EM ou 3EM' },
+        { erro: 'serie deve ser 6EF, 7EF, 8EF, 9EF, 1EM, 2EM ou 3EM' },
         { status: 400 }
       )
     }
+
+    // Detectar se é Ensino Fundamental
+    const ehEF = isSerieEF(serie)
+    const numAlternativas = getNumAlternativasPorSerie(serie)
 
     const supabase = getSupabaseAdmin()
 
@@ -98,19 +112,21 @@ export async function GET(request: NextRequest) {
         geracaoEmAndamento.add(chaveGeracao)
 
         try {
-          console.log(`[Questões] Gerando questões sob demanda para ${serie} semana ${semanaAtual}...`)
+          const tipoQuestao = ehEF ? 'Matemática EF (4 alternativas)' : 'Física EM (5 alternativas)'
+          console.log(`[Questões] Gerando questões de ${tipoQuestao} sob demanda para ${serie} semana ${semanaAtual}...`)
 
-          const questoesGeradas = await gerarQuestoesComGemini(serie, semanaAtual, 5)
+          // Usa função unificada que detecta EF vs EM automaticamente
+          const questoesGeradas = await gerarQuestoes(serie, semanaAtual, 5)
 
           if (questoesGeradas.length > 0) {
-            const salvas = await salvarQuestoesNoCache(
+            // Usa função unificada para salvar
+            const salvas = await salvarQuestoes(
               supabase,
               questoesGeradas,
               serie,
-              semanaAtual,
-              trilhaId
+              semanaAtual
             )
-            console.log(`[Questões] ${salvas} questões salvas no cache`)
+            console.log(`[Questões] ${salvas} questões de ${tipoQuestao} salvas no cache`)
           }
         } catch (error) {
           console.error('[Questões] Erro ao gerar questões:', error)
@@ -169,6 +185,13 @@ export async function GET(request: NextRequest) {
         total,
         percentual: total > 0 ? Math.round((corretas / total) * 100) : 0,
         pode_fazer_desafio: corretas >= 4
+      },
+      // Informações sobre o tipo de série
+      serie_info: {
+        serie,
+        nivel_ensino: ehEF ? 'EF' : 'EM',
+        componente: ehEF ? 'matematica' : 'fisica',
+        num_alternativas: numAlternativas
       }
     })
 
