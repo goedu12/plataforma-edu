@@ -49,31 +49,70 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const semanaAtual = trilhaAtiva.semana_atual
+    let semanaAtual = trilhaAtiva.semana_atual
     const anoLetivo = new Date().getFullYear()
 
     // Buscar progresso da semana atual
-    const { data: progressoSemana } = await supabase
+    let progressoSemana = await supabase
       .from('progresso_semanal')
-      .select('questoes_respondidas, questoes_total, questoes_corretas')
+      .select('questoes_respondidas, questoes_total, questoes_corretas, status')
       .eq('usuario_id', sessao.userId)
       .eq('trilha_id', trilhaAtiva.trilha_id)
       .eq('serie', serie)
       .eq('semana', semanaAtual)
       .eq('ano_letivo', anoLetivo)
       .single()
+      .then(r => r.data)
 
     // Verificar quantas questões existem para esta semana
-    const { count: questoesDisponiveis } = await supabase
+    let questoesDisponiveis = await supabase
       .from('questoes_trilha')
       .select('*', { count: 'exact', head: true })
       .eq('serie', serie)
       .eq('semana', semanaAtual)
       .eq('ano_letivo', anoLetivo)
       .eq('ativa', true)
+      .then(r => r.count)
 
-    const totalQuestoes = questoesDisponiveis || 5
-    const respondidas = progressoSemana?.questoes_respondidas || 0
+    let totalQuestoes = questoesDisponiveis || 5
+    let respondidas = progressoSemana?.questoes_respondidas || 0
+
+    // Se a semana atual não tem progresso, pode ser que o SQL já avançou automaticamente
+    // Nesse caso, verificar se a semana ANTERIOR foi concluída recentemente
+    if (respondidas === 0 && semanaAtual > 1) {
+      const semanaAnterior = semanaAtual - 1
+
+      const progressoAnterior = await supabase
+        .from('progresso_semanal')
+        .select('questoes_respondidas, questoes_total, questoes_corretas, status, concluida_em')
+        .eq('usuario_id', sessao.userId)
+        .eq('trilha_id', trilhaAtiva.trilha_id)
+        .eq('serie', serie)
+        .eq('semana', semanaAnterior)
+        .eq('ano_letivo', anoLetivo)
+        .single()
+        .then(r => r.data)
+
+      // Se a semana anterior foi concluída, usar ela como referência
+      if (progressoAnterior && progressoAnterior.status === 'concluida') {
+        const taxaAnterior = Math.round(
+          ((progressoAnterior.questoes_corretas || 0) / (progressoAnterior.questoes_respondidas || 1)) * 100
+        )
+
+        // Já foi avançado pelo SQL, retornar sucesso
+        return NextResponse.json({
+          sucesso: true,
+          mensagem: `Parabéns! Você avançou para a semana ${semanaAtual}!`,
+          progresso: {
+            semana_anterior: semanaAnterior,
+            semana_atual: semanaAtual,
+            completou: true,
+            avancou: true,
+            taxa_acerto: taxaAnterior
+          }
+        })
+      }
+    }
 
     // Verificar se completou a semana (respondeu todas as questões)
     if (respondidas < totalQuestoes) {
