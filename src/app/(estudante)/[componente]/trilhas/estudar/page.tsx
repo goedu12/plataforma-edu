@@ -11,8 +11,8 @@ import {
   Clock,
   Target,
   Trophy,
-  HelpCircle,
   Zap,
+  RefreshCw,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
@@ -69,6 +69,14 @@ export default function TrilhasEstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [tempoInicio, setTempoInicio] = useState<number>(0)
   const [serie, setSerie] = useState<string>('')
+  const [mostrarConclusao, setMostrarConclusao] = useState(false)
+  const [resultadoSemana, setResultadoSemana] = useState<{
+    avancou: boolean
+    taxaAcerto: number
+    novaSemana?: number
+    mensagem: string
+    semanaResetada?: boolean
+  } | null>(null)
 
   const carregarQuestoes = useCallback(async (userSerie: string, tentativa: number = 1): Promise<boolean> => {
     try {
@@ -183,7 +191,7 @@ export default function TrilhasEstudarPage() {
     }
   }
 
-  const proximaQuestao = () => {
+  const proximaQuestao = async () => {
     if (questaoAtual < questoes.length - 1) {
       setQuestaoAtual(questaoAtual + 1)
       setRespostaSelecionada(null)
@@ -192,8 +200,31 @@ export default function TrilhasEstudarPage() {
       setUsouDica(false)
       setTempoInicio(Date.now())
     } else {
-      // Todas as questões da semana respondidas
-      router.push(`/${componente}/trilhas`)
+      // Todas as questões da semana respondidas - tentar avançar
+      try {
+        const res = await fetch('/api/trilhas/avancar-semana', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ serie })
+        })
+        const data = await res.json()
+
+        if (data.sucesso && data.progresso) {
+          setResultadoSemana({
+            avancou: data.progresso.avancou || false,
+            taxaAcerto: data.progresso.taxa_acerto || 0,
+            novaSemana: data.progresso.semana_atual,
+            mensagem: data.mensagem,
+            semanaResetada: data.progresso.semana_resetada || false
+          })
+          setMostrarConclusao(true)
+        } else {
+          router.push(`/${componente}/trilhas`)
+        }
+      } catch (error) {
+        console.error('Erro ao avançar semana:', error)
+        router.push(`/${componente}/trilhas`)
+      }
     }
   }
 
@@ -301,8 +332,9 @@ export default function TrilhasEstudarPage() {
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => router.push(`/${componente}/trilhas`)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
+              className="w-11 h-11 flex items-center justify-center rounded-xl transition-colors hover:bg-[var(--bg-surface-hover)]"
               style={{ border: '1px solid var(--border-default)' }}
+              aria-label="Voltar para trilhas"
             >
               <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
             </button>
@@ -483,7 +515,7 @@ export default function TrilhasEstudarPage() {
 
             <button
               onClick={proximaQuestao}
-              className="w-full py-4 rounded-xl font-medium flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[56px] transition-all active:scale-[0.98]"
               style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
             >
               {questaoAtual < questoes.length - 1 ? (
@@ -503,6 +535,103 @@ export default function TrilhasEstudarPage() {
       </main>
 
       <BottomNav componente={componente} />
+
+      {/* Modal de Conclusão da Semana */}
+      {mostrarConclusao && resultadoSemana && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'var(--overlay-modal)' }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="conclusion-title"
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl p-6 text-center"
+            style={{ background: 'var(--bg-surface)' }}
+          >
+            <div
+              className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background: resultadoSemana.avancou
+                  ? 'rgba(34, 197, 94, 0.2)'
+                  : 'rgba(245, 158, 11, 0.2)'
+              }}
+            >
+              {resultadoSemana.avancou ? (
+                <Trophy className="w-10 h-10" style={{ color: 'var(--color-success)' }} />
+              ) : (
+                <Target className="w-10 h-10" style={{ color: 'var(--color-warning)' }} />
+              )}
+            </div>
+
+            <h2 id="conclusion-title" className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+              {resultadoSemana.avancou ? 'Semana Concluída!' : 'Quase lá!'}
+            </h2>
+
+            <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>
+              {resultadoSemana.semanaResetada
+                ? `Você acertou ${resultadoSemana.taxaAcerto}% das questões. Precisa de 60% para avançar. Tente novamente!`
+                : resultadoSemana.mensagem}
+            </p>
+
+            <div
+              className="p-4 rounded-xl mb-4"
+              style={{ background: 'var(--bg-elevated)' }}
+            >
+              <p className="text-3xl font-bold mb-1" style={{ color: accentColor }}>
+                {resultadoSemana.taxaAcerto}%
+              </p>
+              <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                Taxa de acerto {!resultadoSemana.avancou && '(mínimo: 60%)'}
+              </p>
+            </div>
+
+            {resultadoSemana.avancou && resultadoSemana.novaSemana && (
+              <p className="text-sm mb-4" style={{ color: 'var(--color-success)' }}>
+                Você está agora na semana {resultadoSemana.novaSemana}!
+              </p>
+            )}
+
+            {resultadoSemana.semanaResetada ? (
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setMostrarConclusao(false)
+                    setResultadoSemana(null)
+                    setQuestaoAtual(0)
+                    setRespostaSelecionada(null)
+                    setMostrarResultado(false)
+                    setMostrarDica(false)
+                    setUsouDica(false)
+                    setLoading(true)
+                    carregarQuestoes(serie).finally(() => setLoading(false))
+                  }}
+                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98]"
+                  style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+                >
+                  <RefreshCw className="w-5 h-5" />
+                  Tentar Novamente
+                </button>
+                <button
+                  onClick={() => router.push(`/${componente}/trilhas`)}
+                  className="w-full py-3 rounded-xl font-medium min-h-[48px] transition-all active:scale-[0.98]"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                >
+                  Ver Trilhas
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => router.push(`/${componente}/trilhas`)}
+                className="w-full py-3 rounded-xl font-semibold min-h-[48px] transition-all active:scale-[0.98]"
+                style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+              >
+                {resultadoSemana.avancou ? 'Continuar Jornada' : 'Ver Trilhas'}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

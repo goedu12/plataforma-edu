@@ -4,12 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   ArrowLeft,
-  GraduationCap,
-  Trophy,
-  Wrench,
-  Rocket,
-  Microscope,
-  Zap,
   ChevronRight,
   Play,
   Pause,
@@ -72,24 +66,6 @@ function transformarTrilha(t: TrilhaAPI): Trilha {
     pontos: t.usuario_pontos || 0,
     iniciada: t.usuario_semana !== null && t.usuario_semana !== undefined,
   }
-}
-
-const iconMap: Record<string, typeof GraduationCap> = {
-  'passar_ano': GraduationCap,
-  'enem': Trophy,
-  'recuperacao': Wrench,
-  'desafio': Rocket,
-  'curiosidade': Microscope,
-  'pressa': Zap,
-}
-
-const emojiToIcon: Record<string, string> = {
-  '🎓': 'passar_ano',
-  '🏆': 'enem',
-  '🔧': 'recuperacao',
-  '🚀': 'desafio',
-  '🔬': 'curiosidade',
-  '⚡': 'pressa',
 }
 
 export default function TrilhasPage() {
@@ -231,11 +207,6 @@ export default function TrilhasPage() {
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  const getIconComponent = (trilha: Trilha) => {
-    const iconKey = emojiToIcon[trilha.icone] || trilha.id
-    return iconMap[iconKey] || GraduationCap
-  }
-
   return (
     <div
       className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]"
@@ -249,8 +220,9 @@ export default function TrilhasPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push(`/${componente}/menu`)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
+              className="w-11 h-11 flex items-center justify-center rounded-xl transition-colors hover:bg-[var(--bg-surface-hover)]"
               style={{ border: '1px solid var(--border-default)' }}
+              aria-label="Voltar ao menu"
             >
               <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
             </button>
@@ -324,22 +296,23 @@ export default function TrilhasPage() {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => router.push(`/${componente}/trilhas/estudar`)}
-                  className="flex-1 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2"
-                  style={{ background: trilhaAtiva.cor_primaria, color: '#fff' }}
+                  className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98]"
+                  style={{ background: trilhaAtiva.cor_primaria, color: isFisica ? '#000' : '#fff' }}
                 >
-                  <Play className="w-4 h-4" />
+                  <Play className="w-5 h-5" />
                   Continuar
                 </button>
                 <button
                   onClick={pausarTrilha}
                   disabled={pausando}
-                  className="px-4 py-2.5 rounded-lg font-medium flex items-center justify-center gap-2"
+                  className="px-5 py-3 rounded-xl font-medium flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98] disabled:opacity-50"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+                  aria-label="Pausar trilha"
                 >
                   {pausando ? (
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-5 h-5 animate-spin" />
                   ) : (
-                    <Pause className="w-4 h-4" />
+                    <Pause className="w-5 h-5" />
                   )}
                   Pausar
                 </button>
@@ -435,8 +408,11 @@ export default function TrilhasPage() {
       {modalTrilha && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'var(--overlay-modal)' }}
           onClick={() => setModalTrilha(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
         >
           <div
             className="w-full max-w-sm rounded-2xl p-6"
@@ -450,7 +426,7 @@ export default function TrilhasPage() {
               {modalTrilha.icone}
             </div>
 
-            <h3 className="text-xl font-bold text-center mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 id="modal-title" className="text-xl font-bold text-center mb-2" style={{ color: 'var(--text-primary)' }}>
               {modalTrilha.nome}
             </h3>
 
@@ -493,7 +469,7 @@ export default function TrilhasPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setModalTrilha(null)}
-                className="flex-1 py-3 rounded-lg font-medium"
+                className="flex-1 py-3 rounded-xl font-medium min-h-[48px] transition-all active:scale-[0.98]"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
               >
                 Cancelar
@@ -501,19 +477,19 @@ export default function TrilhasPage() {
               <button
                 onClick={() => iniciarTrilha(modalTrilha)}
                 disabled={iniciando}
-                className="flex-1 py-3 rounded-lg font-medium flex items-center justify-center gap-2"
-                style={{ background: modalTrilha.cor_primaria, color: '#fff' }}
+                className="flex-1 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98] disabled:opacity-50"
+                style={{ background: modalTrilha.cor_primaria, color: isFisica ? '#000' : '#fff' }}
               >
                 {iniciando ? (
-                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <RefreshCw className="w-5 h-5 animate-spin" />
                 ) : modalTrilha.iniciada ? (
                   <>
-                    <RotateCcw className="w-4 h-4" />
+                    <RotateCcw className="w-5 h-5" />
                     Retomar
                   </>
                 ) : (
                   <>
-                    <Play className="w-4 h-4" />
+                    <Play className="w-5 h-5" />
                     {trilhaAtiva ? 'Trocar' : 'Iniciar'}
                   </>
                 )}

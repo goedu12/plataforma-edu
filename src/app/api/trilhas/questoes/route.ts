@@ -17,7 +17,29 @@ import {
 } from '@/lib/gemini'
 
 // Controle para evitar múltiplas gerações simultâneas
+// NOTA: Em ambiente serverless, este Set é por instância.
+// Para produção em escala, considerar usar Redis ou database lock.
 const geracaoEmAndamento: Set<string> = new Set()
+
+// Interface para questões retornadas pelo SQL
+interface QuestaoSQL {
+  questao_id: number
+  ordem: number
+  tipo_questao: string
+  enunciado: string
+  alternativas: Record<string, string>
+  dica: string | null
+  dificuldade: string
+  tema: string
+  subtema: string
+  contexto: string
+  is_desafio: boolean
+  ja_respondida: boolean
+  resposta_usuario: string | null
+  acertou: boolean | null
+  tempo_resposta: number | null
+  usou_dica: boolean
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -128,12 +150,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Separar questões normais e desafio
-    const questoesNormais = data.filter((q: any) => !q.is_desafio)
-    const desafio = data.find((q: any) => q.is_desafio)
+    const questoes = data as QuestaoSQL[]
+    const questoesNormais = questoes.filter((q) => !q.is_desafio)
+    const desafio = questoes.find((q) => q.is_desafio)
 
     // Calcular progresso
-    const respondidas = questoesNormais.filter((q: any) => q.ja_respondida).length
-    const corretas = questoesNormais.filter((q: any) => q.acertou).length
+    const respondidas = questoesNormais.filter((q) => q.ja_respondida).length
+    const corretas = questoesNormais.filter((q) => q.acertou === true).length
     const total = questoesNormais.length
 
     return NextResponse.json({
