@@ -98,7 +98,10 @@ export default function TrilhasPage() {
           return
         }
 
-        const userSerie = `${userData.usuario.ano}EM`
+        // Determinar série baseado no nível de ensino (EF ou EM)
+        const nivelUsuario = userData.usuario.nivel // 'EF' ou 'EM'
+        const anoUsuario = userData.usuario.ano
+        const userSerie = nivelUsuario === 'EF' ? `${anoUsuario}EF` : `${anoUsuario}EM`
         setSerie(userSerie)
 
         // Buscar trilhas disponíveis
