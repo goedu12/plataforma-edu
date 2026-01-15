@@ -56,6 +56,10 @@
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-nav: 0 -4px 20px rgba(0, 0, 0, 0.4);
 
+  /* Overlays */
+  --overlay-modal: rgba(0, 0, 0, 0.7);
+  --overlay-dropdown: rgba(0, 0, 0, 0.5);
+
   /* Color scheme */
   color-scheme: dark;
 }

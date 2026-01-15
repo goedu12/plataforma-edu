@@ -332,8 +332,9 @@ export default function TrilhasEstudarPage() {
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={() => router.push(`/${componente}/trilhas`)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg"
+              className="w-11 h-11 flex items-center justify-center rounded-xl transition-colors hover:bg-[var(--bg-surface-hover)]"
               style={{ border: '1px solid var(--border-default)' }}
+              aria-label="Voltar para trilhas"
             >
               <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
             </button>
@@ -514,7 +515,7 @@ export default function TrilhasEstudarPage() {
 
             <button
               onClick={proximaQuestao}
-              className="w-full py-4 rounded-xl font-medium flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[56px] transition-all active:scale-[0.98]"
               style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
             >
               {questaoAtual < questoes.length - 1 ? (
@@ -539,7 +540,10 @@ export default function TrilhasEstudarPage() {
       {mostrarConclusao && resultadoSemana && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.7)' }}
+          style={{ background: 'var(--overlay-modal)' }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="conclusion-title"
         >
           <div
             className="w-full max-w-sm rounded-2xl p-6 text-center"
@@ -560,7 +564,7 @@ export default function TrilhasEstudarPage() {
               )}
             </div>
 
-            <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h2 id="conclusion-title" className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
               {resultadoSemana.avancou ? 'Semana Concluída!' : 'Quase lá!'}
             </h2>
 
@@ -589,7 +593,7 @@ export default function TrilhasEstudarPage() {
             )}
 
             {resultadoSemana.semanaResetada ? (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 <button
                   onClick={() => {
                     setMostrarConclusao(false)
@@ -602,7 +606,7 @@ export default function TrilhasEstudarPage() {
                     setLoading(true)
                     carregarQuestoes(serie).finally(() => setLoading(false))
                   }}
-                  className="w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-all active:scale-[0.98]"
                   style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
                 >
                   <RefreshCw className="w-5 h-5" />
@@ -610,7 +614,7 @@ export default function TrilhasEstudarPage() {
                 </button>
                 <button
                   onClick={() => router.push(`/${componente}/trilhas`)}
-                  className="w-full py-3 rounded-xl font-medium"
+                  className="w-full py-3 rounded-xl font-medium min-h-[48px] transition-all active:scale-[0.98]"
                   style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
                 >
                   Ver Trilhas
@@ -619,7 +623,7 @@ export default function TrilhasEstudarPage() {
             ) : (
               <button
                 onClick={() => router.push(`/${componente}/trilhas`)}
-                className="w-full py-3 rounded-xl font-medium"
+                className="w-full py-3 rounded-xl font-semibold min-h-[48px] transition-all active:scale-[0.98]"
                 style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
               >
                 {resultadoSemana.avancou ? 'Continuar Jornada' : 'Ver Trilhas'}
