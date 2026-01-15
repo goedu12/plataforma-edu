@@ -408,3 +408,250 @@ export function obterModeloAtual(): string | null {
 export function listarModelosDisponiveis(): readonly string[] {
   return MODELOS_DISPONIVEIS
 }
+
+// ═══════════════════════════════════════════════════════════
+// GERAÇÃO DE QUESTÕES PARA TRILHAS
+// Sistema de geração sob demanda com cache no banco de dados
+// ═══════════════════════════════════════════════════════════
+
+// Currículo de Física organizado por série e semana
+export const CURRICULO_FISICA: Record<string, Record<number, { tema: string; subtema: string }>> = {
+  "1EM": {
+    1: { tema: "Cinemática", subtema: "Conceitos de movimento, referencial, velocidade média" },
+    2: { tema: "Cinemática", subtema: "MRU - Movimento Retilíneo Uniforme" },
+    3: { tema: "Cinemática", subtema: "MRUV - Movimento com aceleração" },
+    4: { tema: "Cinemática", subtema: "Queda livre e lançamento vertical" },
+    5: { tema: "Dinâmica", subtema: "Leis de Newton - Primeira Lei (Inércia)" },
+    6: { tema: "Dinâmica", subtema: "Leis de Newton - Segunda Lei (F=ma)" },
+    7: { tema: "Dinâmica", subtema: "Leis de Newton - Terceira Lei (Ação e Reação)" },
+    8: { tema: "Dinâmica", subtema: "Força de atrito" },
+    9: { tema: "Trabalho e Energia", subtema: "Trabalho de uma força" },
+    10: { tema: "Trabalho e Energia", subtema: "Energia cinética e potencial" },
+  },
+  "2EM": {
+    1: { tema: "Termologia", subtema: "Temperatura, escalas termométricas, equilíbrio térmico" },
+    2: { tema: "Termologia", subtema: "Calor sensível e latente" },
+    3: { tema: "Termologia", subtema: "Propagação de calor" },
+    4: { tema: "Termodinâmica", subtema: "Trabalho e energia em sistemas térmicos" },
+    5: { tema: "Óptica", subtema: "Reflexão da luz e espelhos planos" },
+    6: { tema: "Óptica", subtema: "Espelhos esféricos" },
+    7: { tema: "Óptica", subtema: "Refração da luz" },
+    8: { tema: "Ondas", subtema: "Características das ondas" },
+    9: { tema: "Ondas", subtema: "Ondas sonoras e acústica" },
+    10: { tema: "Hidrostática", subtema: "Pressão e densidade" },
+  },
+  "3EM": {
+    1: { tema: "Eletrostática", subtema: "Cargas elétricas, eletrização" },
+    2: { tema: "Eletrostática", subtema: "Lei de Coulomb, campo elétrico" },
+    3: { tema: "Eletrodinâmica", subtema: "Corrente elétrica, resistência" },
+    4: { tema: "Eletrodinâmica", subtema: "Circuitos elétricos simples" },
+    5: { tema: "Eletrodinâmica", subtema: "Potência elétrica e consumo" },
+    6: { tema: "Magnetismo", subtema: "Campo magnético e ímãs" },
+    7: { tema: "Eletromagnetismo", subtema: "Força magnética e corrente elétrica" },
+    8: { tema: "Eletromagnetismo", subtema: "Indução eletromagnética" },
+    9: { tema: "Física Moderna", subtema: "Introdução à física quântica" },
+    10: { tema: "Física Moderna", subtema: "Relatividade especial básica" },
+  }
+}
+
+export interface QuestaoGerada {
+  tipo_questao: string
+  contexto: string
+  enunciado: string
+  alternativas: { A: string; B: string; C: string; D: string; E: string }
+  resposta_correta: string
+  dica: string
+  feedback: string
+}
+
+interface RespostaGeminiQuestoes {
+  questoes: QuestaoGerada[]
+}
+
+/**
+ * Gera questões de física usando a API do Gemini
+ * Sistema sob demanda com fallback para múltiplos modelos
+ */
+export async function gerarQuestoesComGemini(
+  serie: string,
+  semana: number,
+  quantidade: number = 5
+): Promise<QuestaoGerada[]> {
+  const apiKey = process.env.GEMINI_API_KEY
+
+  if (!apiKey) {
+    console.error('[Gemini] GEMINI_API_KEY não configurada')
+    throw new Error('API do Gemini não configurada')
+  }
+
+  // Buscar conteúdo do currículo
+  let conteudo = CURRICULO_FISICA[serie]?.[semana]
+  if (!conteudo) {
+    // Se não tem conteúdo específico, usa semana 1
+    conteudo = CURRICULO_FISICA[serie]?.[1]
+    if (!conteudo) {
+      throw new Error(`Série ${serie} não encontrada no currículo`)
+    }
+    console.log(`[Gemini] Semana ${semana} não encontrada, usando conteúdo da semana 1`)
+  }
+
+  const { tema, subtema } = conteudo
+
+  const promptQuestoes = `Você é um professor de Física especialista em criar questões para estudantes do Ensino Médio de escolas públicas brasileiras.
+
+Crie ${quantidade} questões de Física sobre o tema "${tema}" - "${subtema}" para a ${serie[0]}ª série do Ensino Médio.
+
+REGRAS OBRIGATÓRIAS:
+1. Use contextos do cotidiano de estudantes brasileiros de escola pública (ônibus escolar, conta de luz, celular carregando, etc)
+2. Cada questão deve ter 5 alternativas (A, B, C, D, E)
+3. As alternativas erradas devem ser PLAUSÍVEIS (baseadas em erros comuns dos alunos)
+4. Inclua uma DICA que ajude sem revelar a resposta
+5. Inclua um FEEDBACK explicativo para quando o aluno responder
+
+TIPOS DE QUESTÃO (varie entre eles):
+- conceitual: Compreensão sem cálculos
+- calculo_direto: Aplicação de fórmula
+- situacao_problema: Problema contextualizado
+- analise_fenomeno: Explicar por que algo acontece
+- comparacao: Comparar situações ou grandezas
+
+Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
+{
+  "questoes": [
+    {
+      "tipo_questao": "conceitual",
+      "contexto": "Cotidiano - Transporte",
+      "enunciado": "Um ônibus escolar...",
+      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "...", "E": "..."},
+      "resposta_correta": "A",
+      "dica": "Lembre-se que...",
+      "feedback": "A resposta correta é A porque..."
+    }
+  ]
+}`
+
+  // Tentar diferentes modelos
+  const modelosQuestoes = [
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+  ]
+
+  for (const modelo of modelosQuestoes) {
+    try {
+      console.log(`[Gemini] Gerando questões com ${modelo}...`)
+
+      const genAI = getGenAI()
+      const model = genAI.getGenerativeModel({ model: modelo })
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.8,
+          topP: 0.95,
+          maxOutputTokens: 8192
+        }
+      })
+
+      let text = result.response.text()
+
+      if (!text) {
+        console.error(`[Gemini] Resposta vazia de ${modelo}`)
+        continue
+      }
+
+      // Limpar markdown se presente
+      if (text.startsWith('```')) {
+        const parts = text.split('```')
+        text = parts[1] || parts[0]
+        if (text.startsWith('json')) {
+          text = text.substring(4)
+        }
+      }
+
+      const dados: RespostaGeminiQuestoes = JSON.parse(text.trim())
+
+      if (dados.questoes && dados.questoes.length > 0) {
+        console.log(`[Gemini] ${dados.questoes.length} questões geradas com ${modelo}`)
+        return dados.questoes
+      }
+    } catch (error) {
+      console.error(`[Gemini] Erro com ${modelo}:`, error)
+      continue
+    }
+  }
+
+  throw new Error('Falha ao gerar questões com todos os modelos tentados')
+}
+
+/**
+ * Verifica se há questões em cache (no banco) para a série/semana
+ */
+export async function verificarCacheQuestoes(
+  supabase: any,
+  serie: string,
+  semana: number,
+  trilhaId: string = 'passar_ano'
+): Promise<number> {
+  const { count, error } = await supabase
+    .from('questoes_trilha')
+    .select('*', { count: 'exact', head: true })
+    .eq('trilha_id', trilhaId)
+    .eq('serie', serie)
+    .eq('semana', semana)
+
+  if (error) {
+    console.error('[Cache] Erro ao verificar cache:', error)
+    return 0
+  }
+
+  return count || 0
+}
+
+/**
+ * Salva questões geradas no banco de dados (cache)
+ */
+export async function salvarQuestoesNoCache(
+  supabase: any,
+  questoes: QuestaoGerada[],
+  serie: string,
+  semana: number,
+  trilhaId: string = 'passar_ano'
+): Promise<number> {
+  const conteudo = CURRICULO_FISICA[serie]?.[semana] || CURRICULO_FISICA[serie]?.[1]
+  let salvas = 0
+
+  for (let i = 0; i < questoes.length; i++) {
+    const q = questoes[i]
+    const questaoId = `auto-${serie.toLowerCase()}-s${semana}-q${i + 1}-${Date.now()}-${Math.random().toString(36).substring(7)}`
+
+    const { error } = await supabase
+      .from('questoes_trilha')
+      .insert({
+        id: questaoId,
+        trilha_id: trilhaId,
+        serie: serie,
+        semana: semana,
+        ordem: i + 1,
+        tema: conteudo?.tema || 'Física',
+        subtema: conteudo?.subtema || '',
+        tipo_questao: q.tipo_questao,
+        dificuldade: 'medio',
+        contexto: q.contexto,
+        enunciado: q.enunciado,
+        alternativas: q.alternativas,
+        resposta_correta: q.resposta_correta,
+        dica: q.dica,
+        feedback: q.feedback
+      })
+
+    if (error) {
+      console.error(`[Cache] Erro ao salvar questão ${i + 1}:`, error)
+    } else {
+      salvas++
+      console.log(`[Cache] Questão ${i + 1} salva: ${questaoId}`)
+    }
+  }
+
+  return salvas
+}

@@ -4,11 +4,20 @@
  * GET /api/trilhas/questoes?serie=1EM&semana=5
  *
  * Retorna as questões da semana atual da trilha do usuário
+ * Sistema de geração sob demanda: gera automaticamente se não houver questões em cache
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
+import {
+  gerarQuestoesComGemini,
+  verificarCacheQuestoes,
+  salvarQuestoesNoCache
+} from '@/lib/gemini'
+
+// Controle para evitar múltiplas gerações simultâneas
+const geracaoEmAndamento: Set<string> = new Set()
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,11 +43,69 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
+    // Primeiro, verificar se tem trilha ativa para pegar a semana
+    const { data: trilhaAtiva } = await supabase
+      .from('usuario_trilha')
+      .select('trilha_id, semana_atual')
+      .eq('usuario_id', sessao.userId)
+      .eq('serie', serie)
+      .eq('ativa', true)
+      .single()
+
+    if (!trilhaAtiva) {
+      return NextResponse.json({
+        sucesso: true,
+        questoes: [],
+        mensagem: 'Você não tem uma trilha ativa para esta série. Escolha uma trilha primeiro!'
+      })
+    }
+
+    const semanaAtual = semana ? parseInt(semana) : trilhaAtiva.semana_atual
+    const trilhaId = trilhaAtiva.trilha_id
+
+    // Verificar cache de questões
+    const questoesEmCache = await verificarCacheQuestoes(supabase, serie, semanaAtual, trilhaId)
+    console.log(`[Questões] Cache para ${serie} semana ${semanaAtual}: ${questoesEmCache} questões`)
+
+    // Se não tem questões suficientes em cache, gerar sob demanda
+    if (questoesEmCache < 5) {
+      const chaveGeracao = `${serie}-${semanaAtual}`
+
+      // Evitar gerações simultâneas para mesma série/semana
+      if (!geracaoEmAndamento.has(chaveGeracao)) {
+        geracaoEmAndamento.add(chaveGeracao)
+
+        try {
+          console.log(`[Questões] Gerando questões sob demanda para ${serie} semana ${semanaAtual}...`)
+
+          const questoesGeradas = await gerarQuestoesComGemini(serie, semanaAtual, 5)
+
+          if (questoesGeradas.length > 0) {
+            const salvas = await salvarQuestoesNoCache(
+              supabase,
+              questoesGeradas,
+              serie,
+              semanaAtual,
+              trilhaId
+            )
+            console.log(`[Questões] ${salvas} questões salvas no cache`)
+          }
+        } catch (error) {
+          console.error('[Questões] Erro ao gerar questões:', error)
+          // Não falha a requisição, apenas loga o erro
+        } finally {
+          geracaoEmAndamento.delete(chaveGeracao)
+        }
+      } else {
+        console.log(`[Questões] Geração já em andamento para ${chaveGeracao}, aguardando...`)
+      }
+    }
+
     // Buscar questões usando função SQL
     const { data, error } = await supabase.rpc('buscar_questoes_semana_trilha', {
       p_usuario_id: sessao.userId,
       p_serie: serie,
-      p_semana: semana ? parseInt(semana) : null
+      p_semana: semanaAtual
     })
 
     if (error) {
@@ -49,30 +116,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Se não retornou questões, pode ser que não tenha trilha ativa
+    // Se ainda não tem questões após tentativa de geração
     if (!data || data.length === 0) {
-      // Verificar se tem trilha ativa
-      const { data: trilhaAtiva } = await supabase
-        .from('usuario_trilha')
-        .select('trilha_id, semana_atual')
-        .eq('usuario_id', sessao.userId)
-        .eq('serie', serie)
-        .eq('ativa', true)
-        .single()
-
-      if (!trilhaAtiva) {
-        return NextResponse.json({
-          sucesso: true,
-          questoes: [],
-          mensagem: 'Você não tem uma trilha ativa para esta série. Escolha uma trilha primeiro!'
-        })
-      }
-
       return NextResponse.json({
         sucesso: true,
         questoes: [],
-        semana: trilhaAtiva.semana_atual,
-        mensagem: 'Não há questões disponíveis para esta semana ainda.'
+        semana: semanaAtual,
+        mensagem: 'As questões estão sendo preparadas. Tente novamente em alguns instantes.',
+        gerando: geracaoEmAndamento.has(`${serie}-${semanaAtual}`)
       })
     }
 
