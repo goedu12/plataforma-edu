@@ -153,23 +153,25 @@ export default function MenuComponentePage() {
                 {usuario.turma}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <ThemeIconToggle componente={componente} />
               {usuario.componentes.length > 1 && (
                 <button
                   onClick={() => router.push('/selecionar')}
-                  className="w-10 h-10 flex items-center justify-center rounded-lg"
+                  className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--bg-surface-hover)]"
                   style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
+                  aria-label="Trocar componente"
                 >
-                  <ArrowLeftRight className="w-5 h-5" />
+                  <ArrowLeftRight className="w-4 h-4" />
                 </button>
               )}
               <button
                 onClick={handleLogout}
-                className="w-10 h-10 flex items-center justify-center rounded-lg"
+                className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--bg-surface-hover)]"
                 style={{ border: '1px solid var(--border-default)', color: 'var(--text-secondary)' }}
+                aria-label="Sair"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -314,37 +316,35 @@ export default function MenuComponentePage() {
         </div>
       </main>
 
-      {/* Modal Em Breve */}
+      {/* Modal Em Breve - Compacto */}
       {mostrarEmBreve && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3"
+          style={{ background: 'var(--overlay-modal)' }}
           onClick={() => setMostrarEmBreve(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div
-            className="w-full max-w-sm rounded-2xl p-6 text-center"
+            className="w-full max-w-xs rounded-xl p-4 text-center"
             style={{ background: 'var(--bg-surface)' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+              className="w-12 h-12 lg:w-10 lg:h-10 rounded-full mx-auto mb-3 flex items-center justify-center"
               style={{ background: 'rgba(245, 158, 11, 0.1)' }}
             >
-              <FileText className="w-8 h-8" style={{ color: 'var(--warning)' }} />
+              <FileText className="w-6 h-6 lg:w-5 lg:h-5" style={{ color: 'var(--warning)' }} />
             </div>
-            <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+            <h3 className="text-lg lg:text-base font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>
               Simulado ENEM
             </h3>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              Estamos preparando questões do ENEM especialmente para você!
-              Este recurso estará disponível em breve.
-            </p>
-            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
-              🎯 Fique atento às novidades!
+            <p className="text-xs lg:text-2xs mb-3" style={{ color: 'var(--text-secondary)' }}>
+              Questões do ENEM em breve!
             </p>
             <button
               onClick={() => setMostrarEmBreve(false)}
-              className="w-full py-2.5 rounded-lg font-medium text-sm"
+              className="w-full py-2 lg:py-1.5 rounded-lg font-medium text-sm lg:text-xs btn-chromebook transition-all active:scale-[0.98]"
               style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
             >
               Entendi
