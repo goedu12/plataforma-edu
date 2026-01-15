@@ -670,3 +670,304 @@ export const BIMESTRES_LABELS: Record<Bimestre, string> = {
   3: '3º Bimestre',
   4: '4º Bimestre',
 }
+
+// ═══════════════════════════════════════════════════════════
+// SISTEMA DE TRILHAS DE APRENDIZADO
+// PONTO DE RESTAURAÇÃO: tag v1.0-pre-trilhas
+// ═══════════════════════════════════════════════════════════
+
+// Identificadores das trilhas
+export type TrilhaId = 'passar_ano' | 'enem' | 'recuperacao' | 'desafio' | 'curiosidade' | 'pressa'
+
+// Série do Ensino Médio (formato string)
+export type SerieEM_String = '1EM' | '2EM' | '3EM'
+
+// Tipos de questão
+export type TipoQuestaoTrilha =
+  | 'conceitual'
+  | 'calculo_direto'
+  | 'interpretacao_grafico'
+  | 'situacao_problema'
+  | 'analise_fenomeno'
+  | 'comparacao'
+  | 'olimpiada'
+
+// Contextos do cotidiano
+export type ContextoCotidiano =
+  | 'transporte'
+  | 'casa_familia'
+  | 'escola'
+  | 'rua_bairro'
+  | 'corpo_saude'
+  | 'lazer_tecnologia'
+  | 'trabalho_profissoes'
+  | 'todos'
+
+// Dificuldade extendida (inclui olimpíada)
+export type DificuldadeTrilha = 'facil' | 'medio' | 'dificil' | 'olimpiada'
+
+// Status do progresso semanal
+export type StatusSemana = 'bloqueada' | 'disponivel' | 'em_progresso' | 'concluida'
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Trilha
+// ═══════════════════════════════════════════════════════════
+export interface Trilha {
+  id: TrilhaId
+  nome: string
+  icone: string
+  cor: string
+  descricao: string
+  descricao_curta?: string
+  config: TrilhaConfig
+  ordem: number
+  ativa: boolean
+}
+
+export interface TrilhaConfig {
+  questoes_semana: number | null
+  dificuldade: Record<DificuldadeTrilha, number>
+  tipos: string[]
+  acerto_avancar?: number
+  segue_calendario?: boolean
+  usa_banco_enem?: boolean
+  simulados_mensais?: boolean
+  diagnostico_obrigatorio?: boolean
+  ranking?: boolean
+  competicoes?: boolean
+  sem_pressao?: boolean
+  temporario?: boolean
+  [key: string]: any  // Permite configs adicionais
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Questão da Trilha
+// ═══════════════════════════════════════════════════════════
+export interface QuestaoTrilha {
+  id: number
+  serie: SerieEM_String
+  semana: number
+  ano_letivo: number
+  ordem: number
+  tema: string
+  subtema: string
+  competencias_bncc: string[]
+  tipo_questao: TipoQuestaoTrilha
+  contexto_cotidiano: ContextoCotidiano
+  enunciado: string
+  alternativas: {
+    A: string
+    B: string
+    C: string
+    D: string
+    E: string
+  }
+  resposta_correta: 'A' | 'B' | 'C' | 'D' | 'E'
+  dica: string
+  feedback: QuestaoFeedback
+  dificuldade: DificuldadeTrilha
+  tags: string[]
+  is_desafio: boolean
+  ativa: boolean
+}
+
+export interface QuestaoFeedback {
+  explicacao_correta: string
+  erros_comuns: {
+    A?: string
+    B?: string
+    C?: string
+    D?: string
+    E?: string
+  }
+  conexao_cotidiano: string
+  curiosidade: string
+}
+
+// Questão retornada pela API (com status de resposta)
+export interface QuestaoTrilhaComStatus extends Omit<QuestaoTrilha, 'resposta_correta'> {
+  questao_id: number
+  ja_respondida: boolean
+  resposta_usuario?: 'A' | 'B' | 'C' | 'D' | 'E'
+  acertou?: boolean
+  tempo_resposta?: number
+  usou_dica?: boolean
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Usuário na Trilha
+// ═══════════════════════════════════════════════════════════
+export interface UsuarioTrilha {
+  id: number
+  usuario_id: string
+  trilha_id: TrilhaId
+  serie: SerieEM_String
+  ativa: boolean
+  iniciada_em: string
+  pausada_em?: string
+  concluida_em?: string
+  semana_atual: number
+  questoes_total: number
+  questoes_corretas: number
+  pontos_trilha: number
+  sequencia_dias: number
+  melhor_sequencia: number
+  ultimo_acesso: string
+  diagnostico_feito: boolean
+  diagnostico_resultado?: any
+  lacunas_identificadas?: string[]
+  data_prova?: string
+  temas_prova?: string[]
+  config_personalizada?: Partial<TrilhaConfig>
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Progresso Semanal
+// ═══════════════════════════════════════════════════════════
+export interface ProgressoSemanal {
+  id: number
+  usuario_id: string
+  trilha_id: TrilhaId
+  serie: SerieEM_String
+  semana: number
+  ano_letivo: number
+  questoes_total: number
+  questoes_respondidas: number
+  questoes_corretas: number
+  desafio_disponivel: boolean
+  desafio_respondido: boolean
+  desafio_acertou: boolean
+  status: StatusSemana
+  tempo_total_segundos: number
+  pontos_semana: number
+  bonus_100_porcento: boolean
+  desbloqueada_em?: string
+  iniciada_em?: string
+  concluida_em?: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Resposta na Trilha
+// ═══════════════════════════════════════════════════════════
+export interface RespostaTrilha {
+  id: number
+  usuario_id: string
+  questao_id: number
+  trilha_id: TrilhaId
+  resposta_dada: 'A' | 'B' | 'C' | 'D' | 'E'
+  correta: boolean
+  tempo_segundos: number
+  usou_dica: boolean
+  tentativa: number
+  pontos_ganhos: number
+  created_at: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Progresso do Usuário (retorno da API)
+// ═══════════════════════════════════════════════════════════
+export interface ProgressoTrilhaUsuario {
+  trilha_id: TrilhaId
+  trilha_nome: string
+  trilha_icone: string
+  trilha_cor: string
+  serie: SerieEM_String
+  semana_atual: number
+  questoes_total: number
+  questoes_corretas: number
+  percentual_acerto: number
+  pontos: number
+  sequencia_dias: number
+  status_semana: StatusSemana
+  iniciada_em: string
+  ultimo_acesso: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Resultado de Resposta (retorno da API)
+// ═══════════════════════════════════════════════════════════
+export interface ResultadoResposta {
+  sucesso: boolean
+  correta: boolean
+  resposta_certa: 'A' | 'B' | 'C' | 'D' | 'E'
+  resposta_dada: 'A' | 'B' | 'C' | 'D' | 'E'
+  pontos: number
+  feedback: QuestaoFeedback
+  progresso: {
+    corretas_semana: number
+    total_semana: number
+    percentual: number
+  }
+  pode_avancar: boolean
+  proxima_semana?: number
+  mensagem: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSTANTES: Labels das Trilhas
+// ═══════════════════════════════════════════════════════════
+export const TRILHAS_INFO: Record<TrilhaId, { nome: string; icone: string; cor: string; descricao_curta: string }> = {
+  passar_ano: {
+    nome: 'Passar de Ano',
+    icone: '🎓',
+    cor: '#4CAF50',
+    descricao_curta: 'Acompanhe a escola'
+  },
+  enem: {
+    nome: 'ENEM/Vestibular',
+    icone: '🏆',
+    cor: '#2196F3',
+    descricao_curta: 'Conquistar a vaga'
+  },
+  recuperacao: {
+    nome: 'Recuperação',
+    icone: '🔧',
+    cor: '#FF9800',
+    descricao_curta: 'Voltar do básico'
+  },
+  desafio: {
+    nome: 'Desafio Total',
+    icone: '🚀',
+    cor: '#9C27B0',
+    descricao_curta: 'Ir além da escola'
+  },
+  curiosidade: {
+    nome: 'Curiosidade',
+    icone: '🔬',
+    cor: '#00BCD4',
+    descricao_curta: 'Entender o mundo'
+  },
+  pressa: {
+    nome: 'Pressa',
+    icone: '⚡',
+    cor: '#F44336',
+    descricao_curta: 'Prova chegando!'
+  }
+}
+
+export const SERIES_EM_LABELS: Record<SerieEM_String, string> = {
+  '1EM': '1º Ano',
+  '2EM': '2º Ano',
+  '3EM': '3º Ano'
+}
+
+export const TIPOS_QUESTAO_LABELS: Record<TipoQuestaoTrilha, string> = {
+  conceitual: 'Conceitual',
+  calculo_direto: 'Cálculo Direto',
+  interpretacao_grafico: 'Interpretação de Gráfico',
+  situacao_problema: 'Situação-Problema',
+  analise_fenomeno: 'Análise de Fenômeno',
+  comparacao: 'Comparação',
+  olimpiada: 'Nível Olimpíada'
+}
+
+export const CONTEXTOS_LABELS: Record<ContextoCotidiano, string> = {
+  transporte: 'Transporte',
+  casa_familia: 'Casa e Família',
+  escola: 'Escola',
+  rua_bairro: 'Rua e Bairro',
+  corpo_saude: 'Corpo e Saúde',
+  lazer_tecnologia: 'Lazer e Tecnologia',
+  trabalho_profissoes: 'Trabalho e Profissões',
+  todos: 'Diversos'
+}
