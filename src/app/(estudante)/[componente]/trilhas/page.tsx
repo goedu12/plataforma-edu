@@ -486,7 +486,7 @@ export default function TrilhasPage() {
                 background: 'var(--bg-elevated)',
                 color: 'var(--text-muted)'
               }}>
-                Seu progresso em "{trilhaAtiva.nome}" será salvo e você poderá voltar depois.
+                Seu progresso em &ldquo;{trilhaAtiva.nome}&rdquo; será salvo e você poderá voltar depois.
               </p>
             )}
 
