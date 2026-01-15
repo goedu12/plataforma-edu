@@ -414,43 +414,166 @@ export function listarModelosDisponiveis(): readonly string[] {
 // Sistema de geração sob demanda com cache no banco de dados
 // ═══════════════════════════════════════════════════════════
 
-// Currículo de Física organizado por série e semana
-export const CURRICULO_FISICA: Record<string, Record<number, { tema: string; subtema: string }>> = {
+// Currículo de Física organizado por série e semana (40 semanas = 4 bimestres)
+// Baseado na BNCC e currículos estaduais brasileiros
+export const CURRICULO_FISICA: Record<string, Record<number, { tema: string; subtema: string; bimestre: number }>> = {
+  // ═══════════════════════════════════════════════════════════
+  // 1ª SÉRIE DO ENSINO MÉDIO
+  // ═══════════════════════════════════════════════════════════
   "1EM": {
-    1: { tema: "Cinemática", subtema: "Conceitos de movimento, referencial, velocidade média" },
-    2: { tema: "Cinemática", subtema: "MRU - Movimento Retilíneo Uniforme" },
-    3: { tema: "Cinemática", subtema: "MRUV - Movimento com aceleração" },
-    4: { tema: "Cinemática", subtema: "Queda livre e lançamento vertical" },
-    5: { tema: "Dinâmica", subtema: "Leis de Newton - Primeira Lei (Inércia)" },
-    6: { tema: "Dinâmica", subtema: "Leis de Newton - Segunda Lei (F=ma)" },
-    7: { tema: "Dinâmica", subtema: "Leis de Newton - Terceira Lei (Ação e Reação)" },
-    8: { tema: "Dinâmica", subtema: "Força de atrito" },
-    9: { tema: "Trabalho e Energia", subtema: "Trabalho de uma força" },
-    10: { tema: "Trabalho e Energia", subtema: "Energia cinética e potencial" },
+    // 1º BIMESTRE - Cinemática
+    1: { tema: "Cinemática", subtema: "Conceitos de movimento, referencial, posição e deslocamento", bimestre: 1 },
+    2: { tema: "Cinemática", subtema: "Velocidade média e instantânea", bimestre: 1 },
+    3: { tema: "Cinemática", subtema: "MRU - Movimento Retilíneo Uniforme, função horária", bimestre: 1 },
+    4: { tema: "Cinemática", subtema: "Gráficos do MRU (posição x tempo, velocidade x tempo)", bimestre: 1 },
+    5: { tema: "Cinemática", subtema: "Aceleração média e instantânea", bimestre: 1 },
+    6: { tema: "Cinemática", subtema: "MRUV - Movimento uniformemente variado", bimestre: 1 },
+    7: { tema: "Cinemática", subtema: "Funções horárias do MRUV", bimestre: 1 },
+    8: { tema: "Cinemática", subtema: "Gráficos do MRUV", bimestre: 1 },
+    9: { tema: "Cinemática", subtema: "Queda livre", bimestre: 1 },
+    10: { tema: "Cinemática", subtema: "Lançamento vertical para cima e para baixo", bimestre: 1 },
+
+    // 2º BIMESTRE - Vetores e Dinâmica
+    11: { tema: "Vetores", subtema: "Grandezas escalares e vetoriais", bimestre: 2 },
+    12: { tema: "Vetores", subtema: "Soma e subtração de vetores", bimestre: 2 },
+    13: { tema: "Cinemática Vetorial", subtema: "Lançamento horizontal", bimestre: 2 },
+    14: { tema: "Cinemática Vetorial", subtema: "Lançamento oblíquo", bimestre: 2 },
+    15: { tema: "Dinâmica", subtema: "Conceito de força, tipos de força", bimestre: 2 },
+    16: { tema: "Dinâmica", subtema: "Primeira Lei de Newton - Inércia", bimestre: 2 },
+    17: { tema: "Dinâmica", subtema: "Segunda Lei de Newton - F = m.a", bimestre: 2 },
+    18: { tema: "Dinâmica", subtema: "Terceira Lei de Newton - Ação e Reação", bimestre: 2 },
+    19: { tema: "Dinâmica", subtema: "Força Peso e Normal", bimestre: 2 },
+    20: { tema: "Dinâmica", subtema: "Força de Atrito estático e cinético", bimestre: 2 },
+
+    // 3º BIMESTRE - Trabalho e Energia
+    21: { tema: "Dinâmica", subtema: "Força elástica e Lei de Hooke", bimestre: 3 },
+    22: { tema: "Dinâmica", subtema: "Aplicações das Leis de Newton - Plano inclinado", bimestre: 3 },
+    23: { tema: "Dinâmica", subtema: "Força resultante e equilíbrio", bimestre: 3 },
+    24: { tema: "Trabalho", subtema: "Conceito de trabalho de uma força", bimestre: 3 },
+    25: { tema: "Trabalho", subtema: "Trabalho positivo, negativo e nulo", bimestre: 3 },
+    26: { tema: "Energia", subtema: "Energia cinética e Teorema da Energia Cinética", bimestre: 3 },
+    27: { tema: "Energia", subtema: "Energia potencial gravitacional", bimestre: 3 },
+    28: { tema: "Energia", subtema: "Energia potencial elástica", bimestre: 3 },
+    29: { tema: "Energia", subtema: "Conservação da energia mecânica", bimestre: 3 },
+    30: { tema: "Energia", subtema: "Potência e rendimento", bimestre: 3 },
+
+    // 4º BIMESTRE - Quantidade de Movimento e Gravitação
+    31: { tema: "Impulso e Quantidade de Movimento", subtema: "Impulso de uma força", bimestre: 4 },
+    32: { tema: "Impulso e Quantidade de Movimento", subtema: "Quantidade de movimento (momento linear)", bimestre: 4 },
+    33: { tema: "Impulso e Quantidade de Movimento", subtema: "Conservação da quantidade de movimento", bimestre: 4 },
+    34: { tema: "Colisões", subtema: "Colisões elásticas e inelásticas", bimestre: 4 },
+    35: { tema: "Gravitação", subtema: "Lei da Gravitação Universal", bimestre: 4 },
+    36: { tema: "Gravitação", subtema: "Campo gravitacional e aceleração da gravidade", bimestre: 4 },
+    37: { tema: "Gravitação", subtema: "Movimento de satélites", bimestre: 4 },
+    38: { tema: "Estática", subtema: "Equilíbrio de um ponto material", bimestre: 4 },
+    39: { tema: "Estática", subtema: "Momento de uma força (torque)", bimestre: 4 },
+    40: { tema: "Estática", subtema: "Equilíbrio de corpo extenso", bimestre: 4 },
   },
+
+  // ═══════════════════════════════════════════════════════════
+  // 2ª SÉRIE DO ENSINO MÉDIO
+  // ═══════════════════════════════════════════════════════════
   "2EM": {
-    1: { tema: "Termologia", subtema: "Temperatura, escalas termométricas, equilíbrio térmico" },
-    2: { tema: "Termologia", subtema: "Calor sensível e latente" },
-    3: { tema: "Termologia", subtema: "Propagação de calor" },
-    4: { tema: "Termodinâmica", subtema: "Trabalho e energia em sistemas térmicos" },
-    5: { tema: "Óptica", subtema: "Reflexão da luz e espelhos planos" },
-    6: { tema: "Óptica", subtema: "Espelhos esféricos" },
-    7: { tema: "Óptica", subtema: "Refração da luz" },
-    8: { tema: "Ondas", subtema: "Características das ondas" },
-    9: { tema: "Ondas", subtema: "Ondas sonoras e acústica" },
-    10: { tema: "Hidrostática", subtema: "Pressão e densidade" },
+    // 1º BIMESTRE - Termologia
+    1: { tema: "Termologia", subtema: "Temperatura e escalas termométricas (Celsius, Fahrenheit, Kelvin)", bimestre: 1 },
+    2: { tema: "Termologia", subtema: "Conversão entre escalas termométricas", bimestre: 1 },
+    3: { tema: "Termologia", subtema: "Dilatação térmica linear", bimestre: 1 },
+    4: { tema: "Termologia", subtema: "Dilatação térmica superficial e volumétrica", bimestre: 1 },
+    5: { tema: "Calorimetria", subtema: "Conceito de calor e equilíbrio térmico", bimestre: 1 },
+    6: { tema: "Calorimetria", subtema: "Calor sensível e capacidade térmica", bimestre: 1 },
+    7: { tema: "Calorimetria", subtema: "Calor específico e calorímetro", bimestre: 1 },
+    8: { tema: "Calorimetria", subtema: "Calor latente e mudanças de fase", bimestre: 1 },
+    9: { tema: "Calorimetria", subtema: "Diagrama de fases", bimestre: 1 },
+    10: { tema: "Propagação de Calor", subtema: "Condução, convecção e irradiação", bimestre: 1 },
+
+    // 2º BIMESTRE - Termodinâmica e Gases
+    11: { tema: "Gases", subtema: "Teoria cinética dos gases", bimestre: 2 },
+    12: { tema: "Gases", subtema: "Transformações isotérmicas", bimestre: 2 },
+    13: { tema: "Gases", subtema: "Transformações isobáricas", bimestre: 2 },
+    14: { tema: "Gases", subtema: "Transformações isocóricas (isovolumétricas)", bimestre: 2 },
+    15: { tema: "Gases", subtema: "Equação geral dos gases perfeitos", bimestre: 2 },
+    16: { tema: "Termodinâmica", subtema: "Energia interna de um gás", bimestre: 2 },
+    17: { tema: "Termodinâmica", subtema: "Trabalho em transformações gasosas", bimestre: 2 },
+    18: { tema: "Termodinâmica", subtema: "Primeira Lei da Termodinâmica", bimestre: 2 },
+    19: { tema: "Termodinâmica", subtema: "Segunda Lei da Termodinâmica", bimestre: 2 },
+    20: { tema: "Termodinâmica", subtema: "Máquinas térmicas e rendimento", bimestre: 2 },
+
+    // 3º BIMESTRE - Óptica
+    21: { tema: "Óptica Geométrica", subtema: "Luz: fontes, propagação retilínea, velocidade", bimestre: 3 },
+    22: { tema: "Óptica Geométrica", subtema: "Sombra, penumbra e eclipses", bimestre: 3 },
+    23: { tema: "Óptica Geométrica", subtema: "Reflexão da luz - Leis da reflexão", bimestre: 3 },
+    24: { tema: "Óptica Geométrica", subtema: "Espelhos planos e imagens", bimestre: 3 },
+    25: { tema: "Óptica Geométrica", subtema: "Espelhos esféricos côncavos e convexos", bimestre: 3 },
+    26: { tema: "Óptica Geométrica", subtema: "Equação dos espelhos esféricos", bimestre: 3 },
+    27: { tema: "Óptica Geométrica", subtema: "Refração da luz - Índice de refração", bimestre: 3 },
+    28: { tema: "Óptica Geométrica", subtema: "Leis de Snell-Descartes", bimestre: 3 },
+    29: { tema: "Óptica Geométrica", subtema: "Reflexão total e ângulo crítico", bimestre: 3 },
+    30: { tema: "Óptica Geométrica", subtema: "Lentes esféricas - Tipos e imagens", bimestre: 3 },
+
+    // 4º BIMESTRE - Ondas
+    31: { tema: "Óptica Geométrica", subtema: "Equação das lentes e vergência (dioptrias)", bimestre: 4 },
+    32: { tema: "Óptica Geométrica", subtema: "Instrumentos ópticos (lupa, microscópio, olho humano)", bimestre: 4 },
+    33: { tema: "Ondas", subtema: "Conceito de onda, tipos de ondas", bimestre: 4 },
+    34: { tema: "Ondas", subtema: "Grandezas das ondas (período, frequência, comprimento)", bimestre: 4 },
+    35: { tema: "Ondas", subtema: "Velocidade de propagação das ondas", bimestre: 4 },
+    36: { tema: "Ondas", subtema: "Fenômenos ondulatórios: reflexão e refração", bimestre: 4 },
+    37: { tema: "Ondas", subtema: "Fenômenos ondulatórios: difração e interferência", bimestre: 4 },
+    38: { tema: "Ondas Sonoras", subtema: "Som: produção, propagação e velocidade", bimestre: 4 },
+    39: { tema: "Ondas Sonoras", subtema: "Qualidades do som: altura, intensidade e timbre", bimestre: 4 },
+    40: { tema: "Ondas Sonoras", subtema: "Efeito Doppler e aplicações", bimestre: 4 },
   },
+
+  // ═══════════════════════════════════════════════════════════
+  // 3ª SÉRIE DO ENSINO MÉDIO
+  // ═══════════════════════════════════════════════════════════
   "3EM": {
-    1: { tema: "Eletrostática", subtema: "Cargas elétricas, eletrização" },
-    2: { tema: "Eletrostática", subtema: "Lei de Coulomb, campo elétrico" },
-    3: { tema: "Eletrodinâmica", subtema: "Corrente elétrica, resistência" },
-    4: { tema: "Eletrodinâmica", subtema: "Circuitos elétricos simples" },
-    5: { tema: "Eletrodinâmica", subtema: "Potência elétrica e consumo" },
-    6: { tema: "Magnetismo", subtema: "Campo magnético e ímãs" },
-    7: { tema: "Eletromagnetismo", subtema: "Força magnética e corrente elétrica" },
-    8: { tema: "Eletromagnetismo", subtema: "Indução eletromagnética" },
-    9: { tema: "Física Moderna", subtema: "Introdução à física quântica" },
-    10: { tema: "Física Moderna", subtema: "Relatividade especial básica" },
+    // 1º BIMESTRE - Eletrostática
+    1: { tema: "Eletrostática", subtema: "Carga elétrica e estrutura atômica", bimestre: 1 },
+    2: { tema: "Eletrostática", subtema: "Processos de eletrização (atrito, contato, indução)", bimestre: 1 },
+    3: { tema: "Eletrostática", subtema: "Condutores e isolantes elétricos", bimestre: 1 },
+    4: { tema: "Eletrostática", subtema: "Lei de Coulomb", bimestre: 1 },
+    5: { tema: "Eletrostática", subtema: "Campo elétrico - Conceito e linhas de força", bimestre: 1 },
+    6: { tema: "Eletrostática", subtema: "Campo elétrico de cargas pontuais", bimestre: 1 },
+    7: { tema: "Eletrostática", subtema: "Potencial elétrico", bimestre: 1 },
+    8: { tema: "Eletrostática", subtema: "Diferença de potencial (ddp) e trabalho elétrico", bimestre: 1 },
+    9: { tema: "Eletrostática", subtema: "Superfícies equipotenciais", bimestre: 1 },
+    10: { tema: "Eletrostática", subtema: "Capacitores e capacitância", bimestre: 1 },
+
+    // 2º BIMESTRE - Eletrodinâmica
+    11: { tema: "Eletrodinâmica", subtema: "Corrente elétrica e intensidade", bimestre: 2 },
+    12: { tema: "Eletrodinâmica", subtema: "Resistência elétrica e Lei de Ohm", bimestre: 2 },
+    13: { tema: "Eletrodinâmica", subtema: "Resistores: associação em série", bimestre: 2 },
+    14: { tema: "Eletrodinâmica", subtema: "Resistores: associação em paralelo", bimestre: 2 },
+    15: { tema: "Eletrodinâmica", subtema: "Associação mista de resistores", bimestre: 2 },
+    16: { tema: "Eletrodinâmica", subtema: "Potência elétrica", bimestre: 2 },
+    17: { tema: "Eletrodinâmica", subtema: "Energia elétrica e consumo (kWh)", bimestre: 2 },
+    18: { tema: "Eletrodinâmica", subtema: "Geradores elétricos e força eletromotriz", bimestre: 2 },
+    19: { tema: "Eletrodinâmica", subtema: "Receptores elétricos e força contraeletromotriz", bimestre: 2 },
+    20: { tema: "Eletrodinâmica", subtema: "Leis de Kirchhoff", bimestre: 2 },
+
+    // 3º BIMESTRE - Magnetismo e Eletromagnetismo
+    21: { tema: "Magnetismo", subtema: "Ímãs e campo magnético", bimestre: 3 },
+    22: { tema: "Magnetismo", subtema: "Campo magnético terrestre", bimestre: 3 },
+    23: { tema: "Eletromagnetismo", subtema: "Experiência de Oersted - corrente e campo magnético", bimestre: 3 },
+    24: { tema: "Eletromagnetismo", subtema: "Campo magnético de fios retilíneos", bimestre: 3 },
+    25: { tema: "Eletromagnetismo", subtema: "Campo magnético de espiras e solenoides", bimestre: 3 },
+    26: { tema: "Eletromagnetismo", subtema: "Força magnética sobre cargas em movimento", bimestre: 3 },
+    27: { tema: "Eletromagnetismo", subtema: "Força magnética sobre condutores", bimestre: 3 },
+    28: { tema: "Eletromagnetismo", subtema: "Indução eletromagnética - Lei de Faraday", bimestre: 3 },
+    29: { tema: "Eletromagnetismo", subtema: "Lei de Lenz", bimestre: 3 },
+    30: { tema: "Eletromagnetismo", subtema: "Transformadores e transmissão de energia", bimestre: 3 },
+
+    // 4º BIMESTRE - Física Moderna
+    31: { tema: "Ondas Eletromagnéticas", subtema: "Espectro eletromagnético", bimestre: 4 },
+    32: { tema: "Ondas Eletromagnéticas", subtema: "Ondas de rádio, micro-ondas e infravermelho", bimestre: 4 },
+    33: { tema: "Ondas Eletromagnéticas", subtema: "Luz visível, ultravioleta, raios X e gama", bimestre: 4 },
+    34: { tema: "Física Moderna", subtema: "Radiação de corpo negro e quantização", bimestre: 4 },
+    35: { tema: "Física Moderna", subtema: "Efeito fotoelétrico", bimestre: 4 },
+    36: { tema: "Física Moderna", subtema: "Modelo atômico de Bohr", bimestre: 4 },
+    37: { tema: "Física Moderna", subtema: "Dualidade onda-partícula", bimestre: 4 },
+    38: { tema: "Física Moderna", subtema: "Relatividade especial - dilatação temporal", bimestre: 4 },
+    39: { tema: "Física Moderna", subtema: "Relatividade especial - contração do espaço, E=mc²", bimestre: 4 },
+    40: { tema: "Física Nuclear", subtema: "Radioatividade e reações nucleares", bimestre: 4 },
   }
 }
 
@@ -484,29 +607,60 @@ export async function gerarQuestoesComGemini(
     throw new Error('API do Gemini não configurada')
   }
 
-  // Buscar conteúdo do currículo
-  let conteudo = CURRICULO_FISICA[serie]?.[semana]
-  if (!conteudo) {
-    // Se não tem conteúdo específico, usa semana 1
-    conteudo = CURRICULO_FISICA[serie]?.[1]
-    if (!conteudo) {
-      throw new Error(`Série ${serie} não encontrada no currículo`)
-    }
-    console.log(`[Gemini] Semana ${semana} não encontrada, usando conteúdo da semana 1`)
+  // Buscar conteúdo do currículo para a série específica
+  const curriculoSerie = CURRICULO_FISICA[serie]
+  if (!curriculoSerie) {
+    throw new Error(`Série ${serie} não encontrada no currículo`)
   }
 
-  const { tema, subtema } = conteudo
+  let conteudo = curriculoSerie[semana]
+  if (!conteudo) {
+    // Se a semana não existe, usa a última semana disponível
+    const semanaFallback = Math.min(semana, 40)
+    conteudo = curriculoSerie[semanaFallback] || curriculoSerie[1]
+    console.log(`[Gemini] Semana ${semana} não encontrada para ${serie}, usando semana ${semanaFallback}`)
+  }
+
+  const { tema, subtema, bimestre } = conteudo
+  const serieNumero = serie[0] // "1", "2" ou "3"
 
   const promptQuestoes = `Você é um professor de Física especialista em criar questões para estudantes do Ensino Médio de escolas públicas brasileiras.
 
-Crie ${quantidade} questões de Física sobre o tema "${tema}" - "${subtema}" para a ${serie[0]}ª série do Ensino Médio.
+INFORMAÇÕES DA SÉRIE E PERÍODO:
+- Série: ${serieNumero}ª série do Ensino Médio (${serie})
+- Bimestre: ${bimestre}º bimestre
+- Semana: ${semana} de 40
+- Tema principal: ${tema}
+- Subtema específico: ${subtema}
+
+IMPORTANTE - ADEQUAÇÃO AO NÍVEL:
+${serieNumero === '1' ? `
+- Alunos do 1º ano estão iniciando a Física do Ensino Médio
+- Foque em conceitos fundamentais e aplicações simples
+- Evite cálculos muito complexos
+- Use muitas analogias com o cotidiano
+- Temas típicos: Cinemática, Dinâmica (Leis de Newton), Trabalho e Energia` : ''}
+${serieNumero === '2' ? `
+- Alunos do 2º ano já têm base de mecânica
+- Pode exigir mais cálculos e análises
+- Conecte com fenômenos do dia a dia (calor, luz, som)
+- Temas típicos: Termologia, Calorimetria, Óptica, Ondas` : ''}
+${serieNumero === '3' ? `
+- Alunos do 3º ano estão se preparando para ENEM e vestibulares
+- Pode usar questões mais elaboradas
+- Conecte com tecnologia moderna (eletricidade, magnetismo)
+- Temas típicos: Eletrostática, Eletrodinâmica, Eletromagnetismo, Física Moderna` : ''}
+
+Crie ${quantidade} questões de Física sobre "${tema}" - "${subtema}".
 
 REGRAS OBRIGATÓRIAS:
-1. Use contextos do cotidiano de estudantes brasileiros de escola pública (ônibus escolar, conta de luz, celular carregando, etc)
-2. Cada questão deve ter 5 alternativas (A, B, C, D, E)
-3. As alternativas erradas devem ser PLAUSÍVEIS (baseadas em erros comuns dos alunos)
-4. Inclua uma DICA que ajude sem revelar a resposta
-5. Inclua um FEEDBACK explicativo para quando o aluno responder
+1. As questões devem ser EXCLUSIVAMENTE sobre o conteúdo do ${serieNumero}º ano
+2. NÃO use conteúdos de outras séries
+3. Use contextos do cotidiano de estudantes brasileiros de escola pública
+4. Cada questão deve ter 5 alternativas (A, B, C, D, E)
+5. As alternativas erradas devem ser PLAUSÍVEIS (baseadas em erros comuns)
+6. Inclua uma DICA que ajude sem revelar a resposta
+7. Inclua um FEEDBACK explicativo completo
 
 TIPOS DE QUESTÃO (varie entre eles):
 - conceitual: Compreensão sem cálculos
