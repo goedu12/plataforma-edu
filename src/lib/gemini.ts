@@ -1445,153 +1445,76 @@ async function gerarQuestoesFisicaEMUnicas(
   const { tema, subtema, bimestre } = conteudo
   const serieNumero = serie[0]
 
-  const promptQuestoes = `Você é um professor de Física experiente que cria questões completas e bem formuladas para o Ensino Médio.
+  const promptQuestoes = `Gere ${quantidade} questões de Física para ${serieNumero}º ano EM sobre "${tema} - ${subtema}".
 
-SEED ÚNICO: ${seed}
-Use este seed para criar questões COMPLETAMENTE DIFERENTES de outras gerações.
+SEED: ${seed}
 
-INFORMAÇÕES DA TURMA:
-- Série: ${serieNumero}ª série do Ensino Médio
-- Bimestre: ${bimestre}º
-- Tema: ${tema}
-- Subtema: ${subtema}
+REGRAS OBRIGATÓRIAS:
+1. Enunciado COMPLETO com TODOS os valores numéricos e unidades
+2. Incluir constantes quando necessário (g=10m/s², π=3,14)
+3. 5 alternativas (A-E), apenas UMA correta
+4. Fazer o CÁLCULO antes de definir resposta_correta
+5. Feedback mostrando a resolução
 
-${serieNumero === '1' ? 'CONTEÚDOS DO 1º ANO: Cinemática (MRU, MRUV, queda livre, lançamentos), Dinâmica (Leis de Newton, força, atrito), Trabalho e Energia' : ''}
-${serieNumero === '2' ? 'CONTEÚDOS DO 2º ANO: Termologia (temperatura, calor, dilatação), Calorimetria (calor sensível, latente), Termodinâmica, Óptica, Ondas' : ''}
-${serieNumero === '3' ? 'CONTEÚDOS DO 3º ANO: Eletrostática (carga, força elétrica, campo), Eletrodinâmica (corrente, resistência, circuitos), Eletromagnetismo' : ''}
+EXEMPLO:
+{"tipo_questao":"calculo_direto","contexto":"movimento","enunciado":"Um carro parte do repouso e acelera a 4 m/s² por 5s. Qual a velocidade final?","alternativas":{"A":"20 m/s","B":"9 m/s","C":"25 m/s","D":"1,25 m/s","E":"100 m/s"},"resposta_correta":"A","dica":"v = v₀ + at","feedback":"v = 0 + 4×5 = 20 m/s"}
 
-═══════════════════════════════════════════════════════════════
-REGRA CRÍTICA - ENUNCIADO COMPLETO:
-═══════════════════════════════════════════════════════════════
+Retorne JSON: {"questoes":[...]}`
 
-O ENUNCIADO DEVE CONTER OBRIGATORIAMENTE:
-1. TODOS os valores numéricos necessários para resolver a questão
-2. As unidades de medida de cada grandeza
-3. Constantes físicas quando necessário (sempre informar: g = 10 m/s², π = 3,14, etc.)
-4. O que está sendo pedido de forma clara
-
-NUNCA gere questões vagas como:
-❌ "Qual a velocidade final do objeto?"
-❌ "Calcule a energia cinética"
-❌ "Determine a aceleração"
-
-SEMPRE gere questões completas como:
-✅ "Um carro parte do repouso e acelera uniformemente a 2 m/s² durante 5 segundos. Qual sua velocidade final?"
-✅ "Um objeto de massa 4 kg move-se com velocidade de 6 m/s. Qual é sua energia cinética?"
-✅ "Uma força de 20 N é aplicada em um bloco de 5 kg sobre uma superfície sem atrito. Qual a aceleração do bloco?"
-
-═══════════════════════════════════════════════════════════════
-GABARITO 100% CORRETO:
-═══════════════════════════════════════════════════════════════
-
-ANTES de definir a resposta_correta:
-1. ESCREVA o cálculo completo
-2. CONFIRA o resultado
-3. VERIFIQUE se a alternativa correta contém exatamente esse valor
-
-EXEMPLOS DE QUESTÕES BEM FORMULADAS:
-
-EXEMPLO 1 - Cinemática:
-{
-  "tipo_questao": "calculo_direto",
-  "contexto": "Um estudante observa um carro em uma estrada reta.",
-  "enunciado": "Um carro parte do repouso (v₀ = 0) e acelera uniformemente com aceleração de 3 m/s² durante 8 segundos. Qual é a velocidade final do carro?",
-  "alternativas": {"A": "24 m/s", "B": "11 m/s", "C": "32 m/s", "D": "16 m/s", "E": "8 m/s"},
-  "resposta_correta": "A",
-  "dica": "Use a equação v = v₀ + a·t",
-  "feedback": "v = v₀ + a·t = 0 + 3·8 = 24 m/s. Resposta: A"
-}
-
-EXEMPLO 2 - Dinâmica:
-{
-  "tipo_questao": "calculo_direto",
-  "contexto": "Um bloco é puxado sobre uma mesa sem atrito.",
-  "enunciado": "Uma força horizontal de 15 N é aplicada em um bloco de massa 3 kg sobre uma superfície sem atrito. Qual é a aceleração do bloco?",
-  "alternativas": {"A": "5 m/s²", "B": "45 m/s²", "C": "12 m/s²", "D": "0,2 m/s²", "E": "18 m/s²"},
-  "resposta_correta": "A",
-  "dica": "Use a Segunda Lei de Newton: F = m·a",
-  "feedback": "F = m·a → a = F/m = 15/3 = 5 m/s². Resposta: A"
-}
-
-EXEMPLO 3 - Energia:
-{
-  "tipo_questao": "calculo_direto",
-  "contexto": "Uma bola é abandonada de certa altura.",
-  "enunciado": "Uma bola de massa 2 kg é abandonada do repouso de uma altura de 5 metros. Considerando g = 10 m/s² e desprezando a resistência do ar, qual é a velocidade da bola ao atingir o solo?",
-  "alternativas": {"A": "10 m/s", "B": "50 m/s", "C": "100 m/s", "D": "5 m/s", "E": "25 m/s"},
-  "resposta_correta": "A",
-  "dica": "Use conservação de energia: Ep = Ec, ou seja, mgh = mv²/2",
-  "feedback": "mgh = mv²/2 → gh = v²/2 → v² = 2gh = 2·10·5 = 100 → v = 10 m/s. Resposta: A"
-}
-
-═══════════════════════════════════════════════════════════════
-TAREFA:
-═══════════════════════════════════════════════════════════════
-
-Crie ${quantidade} questões sobre "${tema} - ${subtema}" seguindo RIGOROSAMENTE os padrões acima.
-
-CHECKLIST ANTES DE RETORNAR:
-☐ Cada enunciado contém TODOS os dados numéricos necessários?
-☐ As unidades estão corretas?
-☐ O cálculo foi feito e o gabarito está correto?
-☐ O feedback mostra o cálculo completo?
-
-Retorne APENAS JSON válido:
-{"questoes": [...]}`
-
-  // OTIMIZADO: modelo mais rápido primeiro
+  // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
   const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
 
-  for (const modelo of modelos) {
-    try {
-      console.log(`[Gemini] Física EM com ${modelo}...`)
-      const genAI = getGenAI()
-      const model = genAI.getGenerativeModel({ model: modelo })
+  const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
+    console.log(`[Gemini] Física EM iniciando ${modelo}...`)
+    const genAI = getGenAI()
+    const model = genAI.getGenerativeModel({ model: modelo })
 
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          maxOutputTokens: 8192 // Aumentado para questões completas
-        }
-      })
-
-      let text = result.response.text()
-      if (!text) continue
-
-      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const dados = JSON.parse(text)
-
-      if (dados.questoes?.length > 0) {
-        const questoesValidadas = dados.questoes
-          .filter((q: QuestaoGerada) =>
-            q.enunciado &&
-            q.enunciado.length >= 30 && // Enunciado mínimo de 30 caracteres
-            q.alternativas &&
-            q.resposta_correta &&
-            q.feedback &&
-            ['A', 'B', 'C', 'D', 'E'].includes(q.resposta_correta.toUpperCase())
-          )
-          .map((q: QuestaoGerada) => ({
-            ...q,
-            resposta_correta: q.resposta_correta.toUpperCase(),
-            tema: tema,
-            subtema: subtema
-          }))
-
-        if (questoesValidadas.length > 0) {
-          console.log(`[Gemini] ${questoesValidadas.length} questões Física geradas`)
-          return questoesValidadas
-        }
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        maxOutputTokens: 2048
       }
-    } catch (error) {
-      console.error(`[Gemini] Erro ${modelo}:`, error)
-      continue
-    }
+    })
+
+    let text = result.response.text()
+    if (!text) throw new Error('Resposta vazia')
+
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const dados = JSON.parse(text)
+
+    if (!dados.questoes?.length) throw new Error('Sem questões')
+
+    const questoesValidadas = dados.questoes
+      .filter((q: QuestaoGerada) =>
+        q.enunciado &&
+        q.enunciado.length >= 30 &&
+        q.alternativas &&
+        q.resposta_correta &&
+        q.feedback &&
+        ['A', 'B', 'C', 'D', 'E'].includes(q.resposta_correta.toUpperCase())
+      )
+      .map((q: QuestaoGerada) => ({
+        ...q,
+        resposta_correta: q.resposta_correta.toUpperCase(),
+        tema: tema,
+        subtema: subtema
+      }))
+
+    if (questoesValidadas.length === 0) throw new Error('Nenhuma válida')
+
+    console.log(`[Gemini] ${questoesValidadas.length} questões Física via ${modelo}`)
+    return questoesValidadas
   }
 
-  throw new Error('Falha ao gerar questões de Física')
+  try {
+    // Promise.any retorna o primeiro que resolver com sucesso
+    return await Promise.any(modelos.map(m => tentarComModelo(m)))
+  } catch (error) {
+    console.error('[Gemini] Todos os modelos falharam:', error)
+    throw new Error('Falha ao gerar questões de Física')
+  }
 }
 
 /**
@@ -1632,176 +1555,74 @@ async function gerarQuestoesMatematicaEFComTema(
 ): Promise<QuestaoGeradaEF[]> {
   const serieNumero = serie[0]
 
-  const promptQuestoes = `Você é um professor de Matemática experiente que cria questões completas e bem formuladas para o Ensino Fundamental II (${serieNumero}º ano).
+  const promptQuestoes = `Gere ${quantidade} questões de Matemática para ${serieNumero}º ano EF sobre "${tema} - ${subtema}".
 
-SEED ÚNICO: ${seed}
-Use este seed para criar questões COMPLETAMENTE DIFERENTES de outras gerações.
+SEED: ${seed}
 
-INFORMAÇÕES DA TURMA:
-- Série: ${serieNumero}º ano do Ensino Fundamental
-- Tema: ${tema}
-- Subtema: ${subtema}
+REGRAS OBRIGATÓRIAS:
+1. Enunciado COMPLETO com TODOS os valores numéricos
+2. Símbolos: × (mult), ÷ (div), ² ³ (potência), √ (raiz) - NUNCA use * / ^
+3. 4 alternativas (A-D), apenas UMA correta
+4. Fazer o CÁLCULO antes de definir resposta_correta
+5. Feedback mostrando a resolução passo a passo
 
-═══════════════════════════════════════════════════════════════
-SÍMBOLOS MATEMÁTICOS OBRIGATÓRIOS:
-═══════════════════════════════════════════════════════════════
-- Multiplicação: × ou · (NUNCA use *)
-- Divisão: ÷ (NUNCA use /)
-- Potência: ² ³ ⁴ ⁵ (NUNCA use ^)
-- Raiz quadrada: √
-- Comparação: ≠ ≤ ≥
-- Frações: use formato a/b (ex: 3/4, 2/5)
+EXEMPLO:
+{"tipo_questao":"calculo_direto","contexto":"potências","enunciado":"Qual é o resultado de 2⁴ × 2²?","alternativas":{"A":"64","B":"32","C":"16","D":"8"},"resposta_correta":"A","dica":"Some os expoentes","feedback":"2⁴ × 2² = 2⁶ = 64"}
 
-═══════════════════════════════════════════════════════════════
-REGRA CRÍTICA - ENUNCIADO COMPLETO:
-═══════════════════════════════════════════════════════════════
+Retorne JSON: {"questoes":[...]}`
 
-O ENUNCIADO DEVE CONTER OBRIGATORIAMENTE:
-1. TODOS os valores numéricos necessários para resolver
-2. O contexto claro da situação (se for problema)
-3. Exatamente o que está sendo pedido
+  // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
+  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
 
-NUNCA gere questões vagas como:
-❌ "Qual o resultado?"
-❌ "Calcule o valor de x"
-❌ "Resolva a equação"
+  const tentarComModelo = async (modelo: string): Promise<QuestaoGeradaEF[]> => {
+    console.log(`[Gemini] Matemática EF iniciando ${modelo}...`)
+    const genAI = getGenAI()
+    const model = genAI.getGenerativeModel({ model: modelo })
 
-SEMPRE gere questões completas como:
-✅ "Qual é o resultado de 5³ ÷ 5¹?"
-✅ "João tinha 48 figurinhas e deu 1/4 delas para seu irmão. Quantas figurinhas João deu?"
-✅ "Resolva: 3x + 7 = 22. Qual é o valor de x?"
-
-═══════════════════════════════════════════════════════════════
-GABARITO 100% CORRETO:
-═══════════════════════════════════════════════════════════════
-
-ANTES de definir a resposta_correta:
-1. FAÇA o cálculo completo passo a passo
-2. CONFIRA o resultado
-3. VERIFIQUE se a alternativa correta contém exatamente esse valor
-
-EXEMPLOS DE QUESTÕES BEM FORMULADAS:
-
-EXEMPLO 1 - Potenciação:
-{
-  "tipo_questao": "calculo_direto",
-  "contexto": "operações com potências",
-  "enunciado": "Qual é o resultado de 3² × 3³?",
-  "alternativas": {"A": "243", "B": "27", "C": "81", "D": "729"},
-  "resposta_correta": "A",
-  "dica": "Na multiplicação de potências de mesma base, some os expoentes",
-  "feedback": "3² × 3³ = 3²⁺³ = 3⁵ = 243. Resposta: A"
-}
-
-EXEMPLO 2 - Fração (problema):
-{
-  "tipo_questao": "situacao_problema",
-  "contexto": "distribuição de objetos",
-  "enunciado": "Maria tem 60 bombons e quer dar 2/5 deles para sua amiga. Quantos bombons Maria vai dar?",
-  "alternativas": {"A": "24", "B": "30", "C": "12", "D": "36"},
-  "resposta_correta": "A",
-  "dica": "Para calcular a fração de um número, multiplique o número pela fração",
-  "feedback": "2/5 de 60 = (2 × 60) ÷ 5 = 120 ÷ 5 = 24 bombons. Resposta: A"
-}
-
-EXEMPLO 3 - Equação:
-{
-  "tipo_questao": "calculo_direto",
-  "contexto": "equação do primeiro grau",
-  "enunciado": "Resolva a equação: 2x + 6 = 20. Qual é o valor de x?",
-  "alternativas": {"A": "7", "B": "13", "C": "8", "D": "10"},
-  "resposta_correta": "A",
-  "dica": "Isole o x: primeiro subtraia 6 dos dois lados, depois divida por 2",
-  "feedback": "2x + 6 = 20 → 2x = 20 - 6 → 2x = 14 → x = 14 ÷ 2 → x = 7. Resposta: A"
-}
-
-EXEMPLO 4 - Porcentagem:
-{
-  "tipo_questao": "situacao_problema",
-  "contexto": "desconto em compra",
-  "enunciado": "Um produto custa R$ 80,00 e está com 15% de desconto. Qual é o valor do desconto?",
-  "alternativas": {"A": "R$ 12,00", "B": "R$ 8,00", "C": "R$ 15,00", "D": "R$ 68,00"},
-  "resposta_correta": "A",
-  "dica": "Para calcular 15% de 80, multiplique 80 por 0,15 ou calcule (15 × 80) ÷ 100",
-  "feedback": "15% de 80 = (15 × 80) ÷ 100 = 1200 ÷ 100 = R$ 12,00. Resposta: A"
-}
-
-═══════════════════════════════════════════════════════════════
-TAREFA:
-═══════════════════════════════════════════════════════════════
-
-Crie ${quantidade} questões sobre "${tema} - ${subtema}" para alunos do ${serieNumero}º ano.
-
-Varie os tipos:
-- calculo_direto: aplicar operação/fórmula diretamente
-- situacao_problema: contexto do dia a dia (compras, distâncias, tempo)
-- conceitual: entendimento do conceito matemático
-
-CHECKLIST ANTES DE RETORNAR:
-☐ Cada enunciado contém TODOS os números necessários?
-☐ Os símbolos matemáticos estão corretos (×, ÷, ², √)?
-☐ O cálculo foi feito e o gabarito está correto?
-☐ O feedback mostra o cálculo passo a passo?
-
-Retorne APENAS JSON válido:
-{"questoes": [...]}`
-
-  // OTIMIZADO: modelo mais rápido primeiro (flash-lite é 2-3x mais rápido)
-  const modelosQuestoes = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
-
-  for (const modelo of modelosQuestoes) {
-    try {
-      console.log(`[Gemini] Matemática EF com ${modelo}...`)
-
-      const genAI = getGenAI()
-      const model = genAI.getGenerativeModel({ model: modelo })
-
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          maxOutputTokens: 8192 // Aumentado para questões completas
-        }
-      })
-
-      let text = result.response.text()
-
-      if (!text) continue
-
-      // Limpar markdown se presente
-      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-
-      const dados = JSON.parse(text)
-
-      if (dados.questoes && Array.isArray(dados.questoes) && dados.questoes.length > 0) {
-        // Validar e limpar questões
-        const questoesValidadas = dados.questoes
-          .filter((q: QuestaoGeradaEF) =>
-            q.enunciado &&
-            q.enunciado.length >= 20 && // Enunciado mínimo de 20 caracteres
-            q.alternativas &&
-            q.resposta_correta &&
-            q.feedback &&
-            ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
-          )
-          .map((q: QuestaoGeradaEF) => ({
-            ...q,
-            resposta_correta: q.resposta_correta.toUpperCase(),
-            tema: tema,
-            subtema: subtema
-          }))
-
-        if (questoesValidadas.length > 0) {
-          console.log(`[Gemini] ${questoesValidadas.length} questões Matemática geradas com ${modelo}`)
-          return questoesValidadas
-        }
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        maxOutputTokens: 2048
       }
-    } catch (error) {
-      console.error(`[Gemini] Erro com ${modelo}:`, error)
-      continue
-    }
+    })
+
+    let text = result.response.text()
+    if (!text) throw new Error('Resposta vazia')
+
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const dados = JSON.parse(text)
+
+    if (!dados.questoes?.length) throw new Error('Sem questões')
+
+    const questoesValidadas = dados.questoes
+      .filter((q: QuestaoGeradaEF) =>
+        q.enunciado &&
+        q.enunciado.length >= 20 &&
+        q.alternativas &&
+        q.resposta_correta &&
+        q.feedback &&
+        ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
+      )
+      .map((q: QuestaoGeradaEF) => ({
+        ...q,
+        resposta_correta: q.resposta_correta.toUpperCase(),
+        tema: tema,
+        subtema: subtema
+      }))
+
+    if (questoesValidadas.length === 0) throw new Error('Nenhuma válida')
+
+    console.log(`[Gemini] ${questoesValidadas.length} questões Matemática via ${modelo}`)
+    return questoesValidadas
   }
 
-  throw new Error('Falha ao gerar questões únicas')
+  try {
+    // Promise.any retorna o primeiro que resolver com sucesso
+    return await Promise.any(modelos.map(m => tentarComModelo(m)))
+  } catch (error) {
+    console.error('[Gemini] Todos os modelos falharam:', error)
+    throw new Error('Falha ao gerar questões de Matemática')
+  }
 }
