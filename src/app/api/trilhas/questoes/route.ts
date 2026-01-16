@@ -175,14 +175,44 @@ export async function GET(request: NextRequest) {
     const corretas = questoesNormais.filter((q) => q.acertou === true).length
     const total = questoesNormais.length
 
+    // Filtrar apenas questões NÃO respondidas para evitar repetição
+    const questoesNaoRespondidas = questoesNormais.filter((q) => !q.ja_respondida)
+
+    // Se todas foram respondidas, retornar com indicação de semana completa
+    if (questoesNaoRespondidas.length === 0 && total > 0) {
+      return NextResponse.json({
+        sucesso: true,
+        questoes: [],
+        desafio: desafio || null,
+        progresso: {
+          respondidas,
+          corretas,
+          total,
+          questoes_semana: total,
+          questoes_respondidas: respondidas,
+          percentual: total > 0 ? Math.round((corretas / total) * 100) : 0,
+          pode_fazer_desafio: corretas >= 4,
+          semana_completa: true
+        },
+        serie_info: {
+          serie,
+          nivel_ensino: ehEF ? 'EF' : 'EM',
+          componente: ehEF ? 'matematica' : 'fisica',
+          num_alternativas: numAlternativas
+        }
+      })
+    }
+
     return NextResponse.json({
       sucesso: true,
-      questoes: questoesNormais,
+      questoes: questoesNaoRespondidas,  // Retorna apenas as não respondidas
       desafio: desafio || null,
       progresso: {
         respondidas,
         corretas,
         total,
+        questoes_semana: total,
+        questoes_respondidas: respondidas,
         percentual: total > 0 ? Math.round((corretas / total) * 100) : 0,
         pode_fazer_desafio: corretas >= 4
       },

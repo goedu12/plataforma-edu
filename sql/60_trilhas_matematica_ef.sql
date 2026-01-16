@@ -11,9 +11,17 @@
 -- 1. ADICIONAR COLUNA COMPONENTE NA TABELA questoes_trilha
 -- ============================================================================
 
-ALTER TABLE questoes_trilha
-ADD COLUMN IF NOT EXISTS componente VARCHAR(20) DEFAULT 'fisica'
-CHECK (componente IN ('fisica', 'matematica'));
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'questoes_trilha' AND column_name = 'componente'
+    ) THEN
+        ALTER TABLE questoes_trilha ADD COLUMN componente VARCHAR(20) DEFAULT 'fisica';
+        ALTER TABLE questoes_trilha ADD CONSTRAINT questoes_trilha_componente_check
+            CHECK (componente IN ('fisica', 'matematica'));
+    END IF;
+END $$;
 
 COMMENT ON COLUMN questoes_trilha.componente IS 'Componente curricular: fisica ou matematica';
 
@@ -21,9 +29,17 @@ COMMENT ON COLUMN questoes_trilha.componente IS 'Componente curricular: fisica o
 -- 2. ADICIONAR COLUNA NIVEL_ENSINO
 -- ============================================================================
 
-ALTER TABLE questoes_trilha
-ADD COLUMN IF NOT EXISTS nivel_ensino VARCHAR(5) DEFAULT 'EM'
-CHECK (nivel_ensino IN ('EF', 'EM'));
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'questoes_trilha' AND column_name = 'nivel_ensino'
+    ) THEN
+        ALTER TABLE questoes_trilha ADD COLUMN nivel_ensino VARCHAR(5) DEFAULT 'EM';
+        ALTER TABLE questoes_trilha ADD CONSTRAINT questoes_trilha_nivel_ensino_check
+            CHECK (nivel_ensino IN ('EF', 'EM'));
+    END IF;
+END $$;
 
 COMMENT ON COLUMN questoes_trilha.nivel_ensino IS 'Nivel de ensino: EF (Fundamental) ou EM (Medio)';
 
@@ -31,9 +47,17 @@ COMMENT ON COLUMN questoes_trilha.nivel_ensino IS 'Nivel de ensino: EF (Fundamen
 -- 3. ADICIONAR COLUNA NUM_ALTERNATIVAS
 -- ============================================================================
 
-ALTER TABLE questoes_trilha
-ADD COLUMN IF NOT EXISTS num_alternativas INTEGER DEFAULT 5
-CHECK (num_alternativas IN (4, 5));
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'questoes_trilha' AND column_name = 'num_alternativas'
+    ) THEN
+        ALTER TABLE questoes_trilha ADD COLUMN num_alternativas INTEGER DEFAULT 5;
+        ALTER TABLE questoes_trilha ADD CONSTRAINT questoes_trilha_num_alternativas_check
+            CHECK (num_alternativas IN (4, 5));
+    END IF;
+END $$;
 
 COMMENT ON COLUMN questoes_trilha.num_alternativas IS 'Numero de alternativas: 4 (EF) ou 5 (EM)';
 
@@ -93,9 +117,11 @@ BEGIN
     IF NEW.serie IN ('6EF', '7EF', '8EF', '9EF') THEN
         NEW.nivel_ensino := 'EF';
         NEW.num_alternativas := 4;
+        NEW.componente := COALESCE(NEW.componente, 'matematica');
     ELSIF NEW.serie IN ('1EM', '2EM', '3EM') THEN
         NEW.nivel_ensino := 'EM';
         NEW.num_alternativas := 5;
+        NEW.componente := COALESCE(NEW.componente, 'fisica');
     END IF;
 
     RETURN NEW;
@@ -118,20 +144,34 @@ ADD CONSTRAINT usuario_trilha_serie_check
 CHECK (serie IN ('6EF', '7EF', '8EF', '9EF', '1EM', '2EM', '3EM'));
 
 -- Adicionar coluna componente se nao existir
-ALTER TABLE usuario_trilha
-ADD COLUMN IF NOT EXISTS componente VARCHAR(20) DEFAULT 'fisica'
-CHECK (componente IN ('fisica', 'matematica'));
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'usuario_trilha' AND column_name = 'componente'
+    ) THEN
+        ALTER TABLE usuario_trilha ADD COLUMN componente VARCHAR(20) DEFAULT 'fisica';
+        ALTER TABLE usuario_trilha ADD CONSTRAINT usuario_trilha_componente_check
+            CHECK (componente IN ('fisica', 'matematica'));
+    END IF;
+END $$;
 
 -- ============================================================================
--- 9. ATUALIZAR CONSTRAINT DE SERIE NA TABELA progresso_semanal
+-- 9. ATUALIZAR TABELA progresso_semanal
 -- ============================================================================
-
--- Nota: progresso_semanal nao tem constraint de serie definida, apenas column
 
 -- Adicionar coluna componente se nao existir
-ALTER TABLE progresso_semanal
-ADD COLUMN IF NOT EXISTS componente VARCHAR(20) DEFAULT 'fisica'
-CHECK (componente IN ('fisica', 'matematica'));
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'progresso_semanal' AND column_name = 'componente'
+    ) THEN
+        ALTER TABLE progresso_semanal ADD COLUMN componente VARCHAR(20) DEFAULT 'fisica';
+        ALTER TABLE progresso_semanal ADD CONSTRAINT progresso_semanal_componente_check
+            CHECK (componente IN ('fisica', 'matematica'));
+    END IF;
+END $$;
 
 -- ============================================================================
 -- 10. ATUALIZAR TABELA respostas_trilha PARA 4 ALTERNATIVAS
@@ -165,7 +205,7 @@ SET componente = 'fisica',
     nivel_ensino = 'EM',
     num_alternativas = 5
 WHERE serie IN ('1EM', '2EM', '3EM')
-  AND (componente IS NULL OR componente = 'fisica');
+  AND (componente IS NULL OR nivel_ensino IS NULL OR num_alternativas IS NULL);
 
 -- ============================================================================
 -- 13. FUNCAO RPC: BUSCAR QUESTOES POR COMPONENTE E SERIE

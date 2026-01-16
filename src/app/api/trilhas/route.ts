@@ -74,9 +74,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!serie || !['1EM', '2EM', '3EM'].includes(serie)) {
+    // Validar série (EF: 6EF-9EF, EM: 1EM-3EM)
+    const seriesValidas = ['6EF', '7EF', '8EF', '9EF', '1EM', '2EM', '3EM']
+    if (!serie || !seriesValidas.includes(serie)) {
       return NextResponse.json(
-        { erro: 'serie deve ser 1EM, 2EM ou 3EM' },
+        { erro: 'serie deve ser 6EF, 7EF, 8EF, 9EF, 1EM, 2EM ou 3EM' },
         { status: 400 }
       )
     }
