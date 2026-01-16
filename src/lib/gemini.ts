@@ -805,6 +805,8 @@ export interface QuestaoGerada {
   resposta_correta: string
   dica: string
   feedback: string
+  tema?: string
+  subtema?: string
 }
 
 // Interface para questões EF (4 alternativas - Ensino Fundamental)
@@ -816,6 +818,8 @@ export interface QuestaoGeradaEF {
   resposta_correta: 'A' | 'B' | 'C' | 'D'
   dica: string
   feedback: string
+  tema?: string
+  subtema?: string
 }
 
 interface RespostaGeminiQuestoes {
