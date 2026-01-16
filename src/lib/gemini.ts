@@ -1394,6 +1394,7 @@ export async function salvarQuestoes(
 /**
  * Gera questões únicas para um usuário específico (SEM CACHE)
  * Cada chamada gera novas questões diferentes
+ * OTIMIZADO: usa modelo rápido com temperatura baixa para precisão
  */
 export async function gerarQuestoesParaUsuario(
   serie: string,
@@ -1402,8 +1403,8 @@ export async function gerarQuestoesParaUsuario(
   usuarioId: string,
   trilhaId: string
 ): Promise<QuestaoGeradaEF[] | QuestaoGerada[]> {
-  // Usar timestamp + userId como seed para variação
-  const seed = `${usuarioId}-${trilhaId}-${Date.now()}`
+  // Usar timestamp + userId + random como seed para MÁXIMA variação
+  const seed = `${usuarioId}-${trilhaId}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
   console.log(`[Gemini] Gerando ${quantidade} questões únicas para usuário ${usuarioId.slice(0, 8)}...`)
 
@@ -1411,9 +1412,118 @@ export async function gerarQuestoesParaUsuario(
     // Matemática EF - 4 alternativas
     return gerarQuestoesMatematicaEFUnicas(serie, semana, quantidade, seed)
   } else {
-    // Física EM - 5 alternativas
-    return gerarQuestoesComGemini(serie, semana, quantidade)
+    // Física EM - 5 alternativas - AGORA USA SEED
+    return gerarQuestoesFisicaEMUnicas(serie, semana, quantidade, seed)
   }
+}
+
+/**
+ * Gera questões de Física EM únicas (sem cache, sempre novas)
+ * OTIMIZADO para velocidade
+ */
+async function gerarQuestoesFisicaEMUnicas(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGerada[]> {
+  const curriculoSerie = CURRICULO_FISICA[serie]
+  if (!curriculoSerie) {
+    throw new Error(`Série ${serie} não encontrada no currículo`)
+  }
+
+  let conteudo = curriculoSerie[semana]
+  if (!conteudo) {
+    const semanaFallback = Math.min(semana, 40)
+    conteudo = curriculoSerie[semanaFallback] || curriculoSerie[1]
+  }
+
+  const { tema, subtema, bimestre } = conteudo
+  const serieNumero = serie[0]
+
+  const promptQuestoes = `Você é um professor de Física que cria questões ÚNICAS para o Ensino Médio.
+
+SEED ÚNICO: ${seed}
+Use este seed para criar questões COMPLETAMENTE DIFERENTES de outras gerações.
+
+CRÍTICO - GABARITO 100% CORRETO:
+- FAÇA O CÁLCULO antes de definir resposta_correta
+- MOSTRE o cálculo no feedback
+
+INFORMAÇÕES:
+- Série: ${serieNumero}ª série (${serie})
+- Bimestre: ${bimestre}º
+- Tema: ${tema}
+- Subtema: ${subtema}
+
+${serieNumero === '1' ? 'FOCO: Cinemática, Dinâmica, Trabalho e Energia' : ''}
+${serieNumero === '2' ? 'FOCO: Termologia, Calorimetria, Óptica, Ondas' : ''}
+${serieNumero === '3' ? 'FOCO: Eletrostática, Eletrodinâmica, Eletromagnetismo' : ''}
+
+EXEMPLO:
+{
+  "enunciado": "Um carro acelera de 0 a 20 m/s em 4s. Qual a aceleração?",
+  "alternativas": {"A": "5 m/s²", "B": "4 m/s²", "C": "20 m/s²", "D": "80 m/s²", "E": "0,2 m/s²"},
+  "resposta_correta": "A",
+  "feedback": "a = Δv/Δt = 20/4 = 5 m/s². Resposta A."
+}
+
+REGRAS:
+1. ${quantidade} questões DIFERENTES sobre ${tema}
+2. 5 alternativas (A-E)
+3. VERIFIQUE o gabarito
+4. Feedback com cálculo
+
+Retorne JSON:
+{"questoes": [{"tipo_questao": "calculo_direto", "contexto": "...", "enunciado": "...", "alternativas": {"A":"...","B":"...","C":"...","D":"...","E":"..."}, "resposta_correta": "X", "dica": "...", "feedback": "..."}]}`
+
+  // OTIMIZADO: modelo mais rápido primeiro
+  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+
+  for (const modelo of modelos) {
+    try {
+      console.log(`[Gemini] Física EM com ${modelo}...`)
+      const genAI = getGenAI()
+      const model = genAI.getGenerativeModel({ model: modelo })
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.9,
+          maxOutputTokens: 4096 // Reduzido para velocidade
+        }
+      })
+
+      let text = result.response.text()
+      if (!text) continue
+
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      const dados = JSON.parse(text)
+
+      if (dados.questoes?.length > 0) {
+        const questoesValidadas = dados.questoes
+          .filter((q: QuestaoGerada) =>
+            q.enunciado && q.alternativas && q.resposta_correta &&
+            ['A', 'B', 'C', 'D', 'E'].includes(q.resposta_correta.toUpperCase())
+          )
+          .map((q: QuestaoGerada) => ({
+            ...q,
+            resposta_correta: q.resposta_correta.toUpperCase()
+          }))
+
+        if (questoesValidadas.length > 0) {
+          console.log(`[Gemini] ${questoesValidadas.length} questões Física geradas`)
+          return questoesValidadas
+        }
+      }
+    } catch (error) {
+      console.error(`[Gemini] Erro ${modelo}:`, error)
+      continue
+    }
+  }
+
+  throw new Error('Falha ao gerar questões de Física')
 }
 
 /**
@@ -1530,15 +1640,12 @@ Retorne APENAS JSON válido:
   ]
 }`
 
-  const modelosQuestoes = [
-    'gemini-1.5-pro',  // Modelo mais preciso primeiro para gabaritos corretos
-    'gemini-1.5-flash',
-    'gemini-2.0-flash-lite',
-  ]
+  // OTIMIZADO: modelo mais rápido primeiro (flash-lite é 2-3x mais rápido)
+  const modelosQuestoes = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
 
   for (const modelo of modelosQuestoes) {
     try {
-      console.log(`[Gemini] Tentando ${modelo} para questões únicas...`)
+      console.log(`[Gemini] Matemática EF com ${modelo}...`)
 
       const genAI = getGenAI()
       const model = genAI.getGenerativeModel({ model: modelo })
@@ -1546,9 +1653,9 @@ Retorne APENAS JSON válido:
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
         generationConfig: {
-          temperature: 0.7, // Menor para gabaritos mais precisos
+          temperature: 0.7,
           topP: 0.9,
-          maxOutputTokens: 8192
+          maxOutputTokens: 4096 // Reduzido para velocidade
         }
       })
 
