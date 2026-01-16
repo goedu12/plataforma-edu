@@ -855,71 +855,86 @@ export async function gerarQuestoesComGemini(
   const { tema, subtema, bimestre } = conteudo
   const serieNumero = serie[0] // "1", "2" ou "3"
 
-  const promptQuestoes = `Você é um professor de Física especialista em criar questões para estudantes do Ensino Médio de escolas públicas brasileiras.
+  const promptQuestoes = `Você é um professor de Física MUITO CUIDADOSO que cria questões para o Ensino Médio.
 
-INFORMAÇÕES DA SÉRIE E PERÍODO:
-- Série: ${serieNumero}ª série do Ensino Médio (${serie})
-- Bimestre: ${bimestre}º bimestre
-- Semana: ${semana} de 40
-- Tema principal: ${tema}
-- Subtema específico: ${subtema}
+ATENÇÃO CRÍTICA: O GABARITO DEVE ESTAR 100% CORRETO!
+- Antes de definir a resposta_correta, FAÇA O CÁLCULO COMPLETO
+- VERIFIQUE se a alternativa marcada como correta realmente corresponde ao resultado
+- Se usar fórmulas, MOSTRE A APLICAÇÃO no feedback
+- Confira as unidades de medida
 
-IMPORTANTE - ADEQUAÇÃO AO NÍVEL:
-${serieNumero === '1' ? `
-- Alunos do 1º ano estão iniciando a Física do Ensino Médio
-- Foque em conceitos fundamentais e aplicações simples
-- Evite cálculos muito complexos
-- Use muitas analogias com o cotidiano
-- Temas típicos: Cinemática, Dinâmica (Leis de Newton), Trabalho e Energia` : ''}
-${serieNumero === '2' ? `
-- Alunos do 2º ano já têm base de mecânica
-- Pode exigir mais cálculos e análises
-- Conecte com fenômenos do dia a dia (calor, luz, som)
-- Temas típicos: Termologia, Calorimetria, Óptica, Ondas` : ''}
-${serieNumero === '3' ? `
-- Alunos do 3º ano estão se preparando para ENEM e vestibulares
-- Pode usar questões mais elaboradas
-- Conecte com tecnologia moderna (eletricidade, magnetismo)
-- Temas típicos: Eletrostática, Eletrodinâmica, Eletromagnetismo, Física Moderna` : ''}
+INFORMAÇÕES:
+- Série: ${serieNumero}ª série (${serie})
+- Bimestre: ${bimestre}º
+- Tema: ${tema}
+- Subtema: ${subtema}
 
-Crie ${quantidade} questões de Física sobre "${tema}" - "${subtema}".
+ADEQUAÇÃO AO NÍVEL:
+${serieNumero === '1' ? `1º ano: Cinemática, Dinâmica (Leis de Newton), Trabalho e Energia. Conceitos fundamentais.` : ''}
+${serieNumero === '2' ? `2º ano: Termologia, Calorimetria, Óptica, Ondas. Fenômenos do dia a dia.` : ''}
+${serieNumero === '3' ? `3º ano: Eletrostática, Eletrodinâmica, Eletromagnetismo. Preparação ENEM.` : ''}
 
-REGRAS OBRIGATÓRIAS:
-1. As questões devem ser EXCLUSIVAMENTE sobre o conteúdo do ${serieNumero}º ano
-2. NÃO use conteúdos de outras séries
-3. Use contextos do cotidiano de estudantes brasileiros de escola pública
-4. Cada questão deve ter 5 alternativas (A, B, C, D, E)
-5. As alternativas erradas devem ser PLAUSÍVEIS (baseadas em erros comuns)
-6. Inclua uma DICA que ajude sem revelar a resposta
-7. Inclua um FEEDBACK explicativo completo
+EXEMPLO DE QUESTÃO CORRETA (cinemática):
+{
+  "enunciado": "Um carro parte do repouso e acelera a 2 m/s² durante 5 segundos. Qual a velocidade final?",
+  "alternativas": {
+    "A": "10 m/s",
+    "B": "7 m/s",
+    "C": "2,5 m/s",
+    "D": "25 m/s",
+    "E": "5 m/s"
+  },
+  "resposta_correta": "A",
+  "feedback": "Usando v = v₀ + at: v = 0 + 2 × 5 = 10 m/s. A resposta é A."
+}
 
-TIPOS DE QUESTÃO (varie entre eles):
-- conceitual: Compreensão sem cálculos
-- calculo_direto: Aplicação de fórmula
-- situacao_problema: Problema contextualizado
-- analise_fenomeno: Explicar por que algo acontece
-- comparacao: Comparar situações ou grandezas
+EXEMPLO DE QUESTÃO CORRETA (termologia):
+{
+  "enunciado": "Qual a quantidade de calor necessária para aquecer 500g de água de 20°C para 80°C? (c = 1 cal/g°C)",
+  "alternativas": {
+    "A": "30.000 cal",
+    "B": "40.000 cal",
+    "C": "50.000 cal",
+    "D": "60.000 cal",
+    "E": "10.000 cal"
+  },
+  "resposta_correta": "A",
+  "feedback": "Q = m × c × ΔT = 500 × 1 × (80-20) = 500 × 60 = 30.000 cal. Resposta A."
+}
 
-Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
+REGRAS:
+1. Crie ${quantidade} questões DIFERENTES sobre ${tema}
+2. 5 alternativas (A, B, C, D, E)
+3. VERIFIQUE O GABARITO - faça o cálculo antes de definir
+4. Feedback DEVE mostrar o cálculo/raciocínio completo
+5. Alternativas erradas = erros comuns de alunos
+
+TIPOS (varie):
+- conceitual: entendimento do fenômeno
+- calculo_direto: aplicar fórmula
+- situacao_problema: contexto real
+- analise_fenomeno: explicar o porquê
+
+Retorne APENAS JSON válido:
 {
   "questoes": [
     {
-      "tipo_questao": "conceitual",
-      "contexto": "Cotidiano - Transporte",
-      "enunciado": "Um ônibus escolar...",
+      "tipo_questao": "calculo_direto",
+      "contexto": "transporte",
+      "enunciado": "...",
       "alternativas": {"A": "...", "B": "...", "C": "...", "D": "...", "E": "..."},
-      "resposta_correta": "A",
-      "dica": "Lembre-se que...",
-      "feedback": "A resposta correta é A porque..."
+      "resposta_correta": "X",
+      "dica": "...",
+      "feedback": "CÁLCULO: ... Portanto a resposta é X."
     }
   ]
 }`
 
-  // Tentar diferentes modelos
+  // Tentar diferentes modelos - Pro primeiro para gabaritos corretos
   const modelosQuestoes = [
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
     'gemini-1.5-pro',
+    'gemini-1.5-flash',
+    'gemini-2.0-flash-lite',
   ]
 
   for (const modelo of modelosQuestoes) {
@@ -932,8 +947,8 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
         generationConfig: {
-          temperature: 0.8,
-          topP: 0.95,
+          temperature: 0.7, // Menor para gabaritos precisos
+          topP: 0.9,
           maxOutputTokens: 8192
         }
       })
@@ -1439,44 +1454,76 @@ async function gerarQuestoesMatematicaEFComTema(
 ): Promise<QuestaoGeradaEF[]> {
   const serieNumero = serie[0]
 
-  const promptQuestoes = `Você é um professor de Matemática especialista em criar questões ÚNICAS para estudantes do Ensino Fundamental II de escolas públicas brasileiras.
+  const promptQuestoes = `Você é um professor de Matemática MUITO CUIDADOSO que cria questões para o Ensino Fundamental II.
 
-SEED ÚNICO: ${seed}
-Use este seed para garantir que as questões sejam DIFERENTES de outras gerações.
+ATENÇÃO CRÍTICA: O GABARITO DEVE ESTAR 100% CORRETO!
+- Antes de definir a resposta_correta, FAÇA O CÁLCULO COMPLETO
+- VERIFIQUE se a alternativa marcada como correta realmente corresponde ao resultado
+- Se for uma questão de cálculo, MOSTRE A CONTA no feedback
+
+SEED: ${seed}
 
 INFORMAÇÕES:
-- Série: ${serieNumero}º ano do Ensino Fundamental (${serie})
+- Série: ${serieNumero}º ano (${serie})
 - Tema: ${tema}
 - Subtema: ${subtema}
 
-REGRAS OBRIGATÓRIAS:
-1. Crie ${quantidade} questões ÚNICAS e DIFERENTES entre si
-2. Cada questão deve ter APENAS 4 alternativas (A, B, C, D) - NÃO inclua a letra E
-3. Use contextos VARIADOS do cotidiano brasileiro
-4. As alternativas erradas devem ser PLAUSÍVEIS
-5. SÍMBOLOS MATEMÁTICOS - Use os símbolos tradicionais:
-   - Use × ou · para multiplicação (NUNCA use *)
-   - Use ÷ para divisão (NUNCA use /)
-   - Use ² ³ ⁴ etc para potências (NUNCA use ^)
-   - Use √ para raiz quadrada
-   - Use ≠ para diferente, ≤ para menor ou igual, ≥ para maior ou igual
+SÍMBOLOS OBRIGATÓRIOS:
+- Multiplicação: × ou · (NUNCA *)
+- Divisão: ÷ (NUNCA /)
+- Potência: ² ³ ⁴ ⁵ (NUNCA ^)
+- Raiz: √
+- Comparação: ≠ ≤ ≥
 
-TIPOS DE QUESTÃO (varie entre eles):
-- conceitual: Compreensão sem cálculos
-- calculo_direto: Aplicação direta de operação
-- situacao_problema: Problema do dia a dia
+EXEMPLO DE QUESTÃO CORRETA (potenciação):
+{
+  "enunciado": "Qual é o resultado de 2³ × 2²?",
+  "alternativas": {
+    "A": "32",
+    "B": "16",
+    "C": "64",
+    "D": "12"
+  },
+  "resposta_correta": "A",
+  "feedback": "2³ × 2² = 2³⁺² = 2⁵ = 32. Na multiplicação de potências de mesma base, somamos os expoentes."
+}
 
-Retorne APENAS um JSON válido:
+EXEMPLO DE QUESTÃO CORRETA (fração):
+{
+  "enunciado": "Quanto é 3/4 + 1/4?",
+  "alternativas": {
+    "A": "4/8",
+    "B": "1",
+    "C": "4/4",
+    "D": "2/4"
+  },
+  "resposta_correta": "B",
+  "feedback": "3/4 + 1/4 = 4/4 = 1. Como os denominadores são iguais, somamos os numeradores: 3+1=4, então 4/4=1."
+}
+
+REGRAS:
+1. Crie ${quantidade} questões DIFERENTES
+2. APENAS 4 alternativas (A, B, C, D)
+3. VERIFIQUE O GABARITO antes de finalizar
+4. O feedback DEVE mostrar o cálculo/raciocínio completo
+5. Alternativas erradas devem ser erros comuns de alunos
+
+TIPOS (varie):
+- conceitual: entendimento do conceito
+- calculo_direto: aplicar operação/fórmula
+- situacao_problema: contexto do dia a dia
+
+Retorne APENAS JSON válido:
 {
   "questoes": [
     {
-      "tipo_questao": "conceitual",
+      "tipo_questao": "calculo_direto",
       "contexto": "escola",
       "enunciado": "...",
       "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
-      "resposta_correta": "A",
+      "resposta_correta": "X",
       "dica": "...",
-      "feedback": "...",
+      "feedback": "CÁLCULO: ... Portanto a resposta é X.",
       "tema": "${tema}",
       "subtema": "${subtema}"
     }
@@ -1484,9 +1531,9 @@ Retorne APENAS um JSON válido:
 }`
 
   const modelosQuestoes = [
-    'gemini-2.0-flash-lite',
+    'gemini-1.5-pro',  // Modelo mais preciso primeiro para gabaritos corretos
     'gemini-1.5-flash',
-    'gemini-1.5-pro',
+    'gemini-2.0-flash-lite',
   ]
 
   for (const modelo of modelosQuestoes) {
@@ -1499,8 +1546,8 @@ Retorne APENAS um JSON válido:
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
         generationConfig: {
-          temperature: 0.95, // Alta para mais variação
-          topP: 0.98,
+          temperature: 0.7, // Menor para gabaritos mais precisos
+          topP: 0.9,
           maxOutputTokens: 8192
         }
       })
