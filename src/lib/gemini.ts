@@ -1539,7 +1539,7 @@ async function gerarQuestoesMatematicaEFUnicas(
   quantidade: number,
   seed: string
 ): Promise<QuestaoGeradaEF[]> {
-  const conteudo = CURRICULO_MATEMATICA_EF[serie as keyof typeof CURRICULO_MATEMATICA_EF]?.[semana]
+  const conteudo = CURRICULO_MATEMATICA[serie]?.[semana]
 
   if (!conteudo) {
     // Se não tem conteúdo específico, usar um tema genérico baseado na série
