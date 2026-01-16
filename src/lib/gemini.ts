@@ -1445,43 +1445,99 @@ async function gerarQuestoesFisicaEMUnicas(
   const { tema, subtema, bimestre } = conteudo
   const serieNumero = serie[0]
 
-  const promptQuestoes = `Você é um professor de Física que cria questões ÚNICAS para o Ensino Médio.
+  const promptQuestoes = `Você é um professor de Física experiente que cria questões completas e bem formuladas para o Ensino Médio.
 
 SEED ÚNICO: ${seed}
 Use este seed para criar questões COMPLETAMENTE DIFERENTES de outras gerações.
 
-CRÍTICO - GABARITO 100% CORRETO:
-- FAÇA O CÁLCULO antes de definir resposta_correta
-- MOSTRE o cálculo no feedback
-
-INFORMAÇÕES:
-- Série: ${serieNumero}ª série (${serie})
+INFORMAÇÕES DA TURMA:
+- Série: ${serieNumero}ª série do Ensino Médio
 - Bimestre: ${bimestre}º
 - Tema: ${tema}
 - Subtema: ${subtema}
 
-${serieNumero === '1' ? 'FOCO: Cinemática, Dinâmica, Trabalho e Energia' : ''}
-${serieNumero === '2' ? 'FOCO: Termologia, Calorimetria, Óptica, Ondas' : ''}
-${serieNumero === '3' ? 'FOCO: Eletrostática, Eletrodinâmica, Eletromagnetismo' : ''}
+${serieNumero === '1' ? 'CONTEÚDOS DO 1º ANO: Cinemática (MRU, MRUV, queda livre, lançamentos), Dinâmica (Leis de Newton, força, atrito), Trabalho e Energia' : ''}
+${serieNumero === '2' ? 'CONTEÚDOS DO 2º ANO: Termologia (temperatura, calor, dilatação), Calorimetria (calor sensível, latente), Termodinâmica, Óptica, Ondas' : ''}
+${serieNumero === '3' ? 'CONTEÚDOS DO 3º ANO: Eletrostática (carga, força elétrica, campo), Eletrodinâmica (corrente, resistência, circuitos), Eletromagnetismo' : ''}
 
-EXEMPLO:
+═══════════════════════════════════════════════════════════════
+REGRA CRÍTICA - ENUNCIADO COMPLETO:
+═══════════════════════════════════════════════════════════════
+
+O ENUNCIADO DEVE CONTER OBRIGATORIAMENTE:
+1. TODOS os valores numéricos necessários para resolver a questão
+2. As unidades de medida de cada grandeza
+3. Constantes físicas quando necessário (sempre informar: g = 10 m/s², π = 3,14, etc.)
+4. O que está sendo pedido de forma clara
+
+NUNCA gere questões vagas como:
+❌ "Qual a velocidade final do objeto?"
+❌ "Calcule a energia cinética"
+❌ "Determine a aceleração"
+
+SEMPRE gere questões completas como:
+✅ "Um carro parte do repouso e acelera uniformemente a 2 m/s² durante 5 segundos. Qual sua velocidade final?"
+✅ "Um objeto de massa 4 kg move-se com velocidade de 6 m/s. Qual é sua energia cinética?"
+✅ "Uma força de 20 N é aplicada em um bloco de 5 kg sobre uma superfície sem atrito. Qual a aceleração do bloco?"
+
+═══════════════════════════════════════════════════════════════
+GABARITO 100% CORRETO:
+═══════════════════════════════════════════════════════════════
+
+ANTES de definir a resposta_correta:
+1. ESCREVA o cálculo completo
+2. CONFIRA o resultado
+3. VERIFIQUE se a alternativa correta contém exatamente esse valor
+
+EXEMPLOS DE QUESTÕES BEM FORMULADAS:
+
+EXEMPLO 1 - Cinemática:
 {
-  "enunciado": "Um carro acelera de 0 a 20 m/s em 4s. Qual a aceleração?",
-  "alternativas": {"A": "5 m/s²", "B": "4 m/s²", "C": "20 m/s²", "D": "80 m/s²", "E": "0,2 m/s²"},
+  "tipo_questao": "calculo_direto",
+  "contexto": "Um estudante observa um carro em uma estrada reta.",
+  "enunciado": "Um carro parte do repouso (v₀ = 0) e acelera uniformemente com aceleração de 3 m/s² durante 8 segundos. Qual é a velocidade final do carro?",
+  "alternativas": {"A": "24 m/s", "B": "11 m/s", "C": "32 m/s", "D": "16 m/s", "E": "8 m/s"},
   "resposta_correta": "A",
-  "feedback": "a = Δv/Δt = 20/4 = 5 m/s². Resposta A.",
-  "tema": "${tema}",
-  "subtema": "${subtema}"
+  "dica": "Use a equação v = v₀ + a·t",
+  "feedback": "v = v₀ + a·t = 0 + 3·8 = 24 m/s. Resposta: A"
 }
 
-REGRAS:
-1. ${quantidade} questões DIFERENTES sobre ${tema}
-2. 5 alternativas (A-E)
-3. VERIFIQUE o gabarito
-4. Feedback com cálculo
+EXEMPLO 2 - Dinâmica:
+{
+  "tipo_questao": "calculo_direto",
+  "contexto": "Um bloco é puxado sobre uma mesa sem atrito.",
+  "enunciado": "Uma força horizontal de 15 N é aplicada em um bloco de massa 3 kg sobre uma superfície sem atrito. Qual é a aceleração do bloco?",
+  "alternativas": {"A": "5 m/s²", "B": "45 m/s²", "C": "12 m/s²", "D": "0,2 m/s²", "E": "18 m/s²"},
+  "resposta_correta": "A",
+  "dica": "Use a Segunda Lei de Newton: F = m·a",
+  "feedback": "F = m·a → a = F/m = 15/3 = 5 m/s². Resposta: A"
+}
 
-Retorne JSON:
-{"questoes": [{"tipo_questao": "calculo_direto", "contexto": "...", "enunciado": "...", "alternativas": {"A":"...","B":"...","C":"...","D":"...","E":"..."}, "resposta_correta": "X", "dica": "...", "feedback": "...", "tema": "${tema}", "subtema": "${subtema}"}]}`
+EXEMPLO 3 - Energia:
+{
+  "tipo_questao": "calculo_direto",
+  "contexto": "Uma bola é abandonada de certa altura.",
+  "enunciado": "Uma bola de massa 2 kg é abandonada do repouso de uma altura de 5 metros. Considerando g = 10 m/s² e desprezando a resistência do ar, qual é a velocidade da bola ao atingir o solo?",
+  "alternativas": {"A": "10 m/s", "B": "50 m/s", "C": "100 m/s", "D": "5 m/s", "E": "25 m/s"},
+  "resposta_correta": "A",
+  "dica": "Use conservação de energia: Ep = Ec, ou seja, mgh = mv²/2",
+  "feedback": "mgh = mv²/2 → gh = v²/2 → v² = 2gh = 2·10·5 = 100 → v = 10 m/s. Resposta: A"
+}
+
+═══════════════════════════════════════════════════════════════
+TAREFA:
+═══════════════════════════════════════════════════════════════
+
+Crie ${quantidade} questões sobre "${tema} - ${subtema}" seguindo RIGOROSAMENTE os padrões acima.
+
+CHECKLIST ANTES DE RETORNAR:
+☐ Cada enunciado contém TODOS os dados numéricos necessários?
+☐ As unidades estão corretas?
+☐ O cálculo foi feito e o gabarito está correto?
+☐ O feedback mostra o cálculo completo?
+
+Retorne APENAS JSON válido:
+{"questoes": [...]}`
 
   // OTIMIZADO: modelo mais rápido primeiro
   const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
@@ -1497,7 +1553,7 @@ Retorne JSON:
         generationConfig: {
           temperature: 0.7,
           topP: 0.9,
-          maxOutputTokens: 4096 // Reduzido para velocidade
+          maxOutputTokens: 8192 // Aumentado para questões completas
         }
       })
 
@@ -1510,7 +1566,11 @@ Retorne JSON:
       if (dados.questoes?.length > 0) {
         const questoesValidadas = dados.questoes
           .filter((q: QuestaoGerada) =>
-            q.enunciado && q.alternativas && q.resposta_correta &&
+            q.enunciado &&
+            q.enunciado.length >= 30 && // Enunciado mínimo de 30 caracteres
+            q.alternativas &&
+            q.resposta_correta &&
+            q.feedback &&
             ['A', 'B', 'C', 'D', 'E'].includes(q.resposta_correta.toUpperCase())
           )
           .map((q: QuestaoGerada) => ({
@@ -1572,81 +1632,119 @@ async function gerarQuestoesMatematicaEFComTema(
 ): Promise<QuestaoGeradaEF[]> {
   const serieNumero = serie[0]
 
-  const promptQuestoes = `Você é um professor de Matemática MUITO CUIDADOSO que cria questões para o Ensino Fundamental II.
+  const promptQuestoes = `Você é um professor de Matemática experiente que cria questões completas e bem formuladas para o Ensino Fundamental II (${serieNumero}º ano).
 
-ATENÇÃO CRÍTICA: O GABARITO DEVE ESTAR 100% CORRETO!
-- Antes de definir a resposta_correta, FAÇA O CÁLCULO COMPLETO
-- VERIFIQUE se a alternativa marcada como correta realmente corresponde ao resultado
-- Se for uma questão de cálculo, MOSTRE A CONTA no feedback
+SEED ÚNICO: ${seed}
+Use este seed para criar questões COMPLETAMENTE DIFERENTES de outras gerações.
 
-SEED: ${seed}
-
-INFORMAÇÕES:
-- Série: ${serieNumero}º ano (${serie})
+INFORMAÇÕES DA TURMA:
+- Série: ${serieNumero}º ano do Ensino Fundamental
 - Tema: ${tema}
 - Subtema: ${subtema}
 
-SÍMBOLOS OBRIGATÓRIOS:
-- Multiplicação: × ou · (NUNCA *)
-- Divisão: ÷ (NUNCA /)
-- Potência: ² ³ ⁴ ⁵ (NUNCA ^)
-- Raiz: √
+═══════════════════════════════════════════════════════════════
+SÍMBOLOS MATEMÁTICOS OBRIGATÓRIOS:
+═══════════════════════════════════════════════════════════════
+- Multiplicação: × ou · (NUNCA use *)
+- Divisão: ÷ (NUNCA use /)
+- Potência: ² ³ ⁴ ⁵ (NUNCA use ^)
+- Raiz quadrada: √
 - Comparação: ≠ ≤ ≥
+- Frações: use formato a/b (ex: 3/4, 2/5)
 
-EXEMPLO DE QUESTÃO CORRETA (potenciação):
+═══════════════════════════════════════════════════════════════
+REGRA CRÍTICA - ENUNCIADO COMPLETO:
+═══════════════════════════════════════════════════════════════
+
+O ENUNCIADO DEVE CONTER OBRIGATORIAMENTE:
+1. TODOS os valores numéricos necessários para resolver
+2. O contexto claro da situação (se for problema)
+3. Exatamente o que está sendo pedido
+
+NUNCA gere questões vagas como:
+❌ "Qual o resultado?"
+❌ "Calcule o valor de x"
+❌ "Resolva a equação"
+
+SEMPRE gere questões completas como:
+✅ "Qual é o resultado de 5³ ÷ 5¹?"
+✅ "João tinha 48 figurinhas e deu 1/4 delas para seu irmão. Quantas figurinhas João deu?"
+✅ "Resolva: 3x + 7 = 22. Qual é o valor de x?"
+
+═══════════════════════════════════════════════════════════════
+GABARITO 100% CORRETO:
+═══════════════════════════════════════════════════════════════
+
+ANTES de definir a resposta_correta:
+1. FAÇA o cálculo completo passo a passo
+2. CONFIRA o resultado
+3. VERIFIQUE se a alternativa correta contém exatamente esse valor
+
+EXEMPLOS DE QUESTÕES BEM FORMULADAS:
+
+EXEMPLO 1 - Potenciação:
 {
-  "enunciado": "Qual é o resultado de 2³ × 2²?",
-  "alternativas": {
-    "A": "32",
-    "B": "16",
-    "C": "64",
-    "D": "12"
-  },
+  "tipo_questao": "calculo_direto",
+  "contexto": "operações com potências",
+  "enunciado": "Qual é o resultado de 3² × 3³?",
+  "alternativas": {"A": "243", "B": "27", "C": "81", "D": "729"},
   "resposta_correta": "A",
-  "feedback": "2³ × 2² = 2³⁺² = 2⁵ = 32. Na multiplicação de potências de mesma base, somamos os expoentes."
+  "dica": "Na multiplicação de potências de mesma base, some os expoentes",
+  "feedback": "3² × 3³ = 3²⁺³ = 3⁵ = 243. Resposta: A"
 }
 
-EXEMPLO DE QUESTÃO CORRETA (fração):
+EXEMPLO 2 - Fração (problema):
 {
-  "enunciado": "Quanto é 3/4 + 1/4?",
-  "alternativas": {
-    "A": "4/8",
-    "B": "1",
-    "C": "4/4",
-    "D": "2/4"
-  },
-  "resposta_correta": "B",
-  "feedback": "3/4 + 1/4 = 4/4 = 1. Como os denominadores são iguais, somamos os numeradores: 3+1=4, então 4/4=1."
+  "tipo_questao": "situacao_problema",
+  "contexto": "distribuição de objetos",
+  "enunciado": "Maria tem 60 bombons e quer dar 2/5 deles para sua amiga. Quantos bombons Maria vai dar?",
+  "alternativas": {"A": "24", "B": "30", "C": "12", "D": "36"},
+  "resposta_correta": "A",
+  "dica": "Para calcular a fração de um número, multiplique o número pela fração",
+  "feedback": "2/5 de 60 = (2 × 60) ÷ 5 = 120 ÷ 5 = 24 bombons. Resposta: A"
 }
 
-REGRAS:
-1. Crie ${quantidade} questões DIFERENTES
-2. APENAS 4 alternativas (A, B, C, D)
-3. VERIFIQUE O GABARITO antes de finalizar
-4. O feedback DEVE mostrar o cálculo/raciocínio completo
-5. Alternativas erradas devem ser erros comuns de alunos
+EXEMPLO 3 - Equação:
+{
+  "tipo_questao": "calculo_direto",
+  "contexto": "equação do primeiro grau",
+  "enunciado": "Resolva a equação: 2x + 6 = 20. Qual é o valor de x?",
+  "alternativas": {"A": "7", "B": "13", "C": "8", "D": "10"},
+  "resposta_correta": "A",
+  "dica": "Isole o x: primeiro subtraia 6 dos dois lados, depois divida por 2",
+  "feedback": "2x + 6 = 20 → 2x = 20 - 6 → 2x = 14 → x = 14 ÷ 2 → x = 7. Resposta: A"
+}
 
-TIPOS (varie):
-- conceitual: entendimento do conceito
-- calculo_direto: aplicar operação/fórmula
-- situacao_problema: contexto do dia a dia
+EXEMPLO 4 - Porcentagem:
+{
+  "tipo_questao": "situacao_problema",
+  "contexto": "desconto em compra",
+  "enunciado": "Um produto custa R$ 80,00 e está com 15% de desconto. Qual é o valor do desconto?",
+  "alternativas": {"A": "R$ 12,00", "B": "R$ 8,00", "C": "R$ 15,00", "D": "R$ 68,00"},
+  "resposta_correta": "A",
+  "dica": "Para calcular 15% de 80, multiplique 80 por 0,15 ou calcule (15 × 80) ÷ 100",
+  "feedback": "15% de 80 = (15 × 80) ÷ 100 = 1200 ÷ 100 = R$ 12,00. Resposta: A"
+}
+
+═══════════════════════════════════════════════════════════════
+TAREFA:
+═══════════════════════════════════════════════════════════════
+
+Crie ${quantidade} questões sobre "${tema} - ${subtema}" para alunos do ${serieNumero}º ano.
+
+Varie os tipos:
+- calculo_direto: aplicar operação/fórmula diretamente
+- situacao_problema: contexto do dia a dia (compras, distâncias, tempo)
+- conceitual: entendimento do conceito matemático
+
+CHECKLIST ANTES DE RETORNAR:
+☐ Cada enunciado contém TODOS os números necessários?
+☐ Os símbolos matemáticos estão corretos (×, ÷, ², √)?
+☐ O cálculo foi feito e o gabarito está correto?
+☐ O feedback mostra o cálculo passo a passo?
 
 Retorne APENAS JSON válido:
-{
-  "questoes": [
-    {
-      "tipo_questao": "calculo_direto",
-      "contexto": "escola",
-      "enunciado": "...",
-      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
-      "resposta_correta": "X",
-      "dica": "...",
-      "feedback": "CÁLCULO: ... Portanto a resposta é X.",
-      "tema": "${tema}",
-      "subtema": "${subtema}"
-    }
-  ]
-}`
+{"questoes": [...]}`
 
   // OTIMIZADO: modelo mais rápido primeiro (flash-lite é 2-3x mais rápido)
   const modelosQuestoes = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
@@ -1663,7 +1761,7 @@ Retorne APENAS JSON válido:
         generationConfig: {
           temperature: 0.7,
           topP: 0.9,
-          maxOutputTokens: 4096 // Reduzido para velocidade
+          maxOutputTokens: 8192 // Aumentado para questões completas
         }
       })
 
@@ -1681,8 +1779,10 @@ Retorne APENAS JSON válido:
         const questoesValidadas = dados.questoes
           .filter((q: QuestaoGeradaEF) =>
             q.enunciado &&
+            q.enunciado.length >= 20 && // Enunciado mínimo de 20 caracteres
             q.alternativas &&
             q.resposta_correta &&
+            q.feedback &&
             ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
           )
           .map((q: QuestaoGeradaEF) => ({
@@ -1693,7 +1793,7 @@ Retorne APENAS JSON válido:
           }))
 
         if (questoesValidadas.length > 0) {
-          console.log(`[Gemini] ${questoesValidadas.length} questões únicas geradas com ${modelo}`)
+          console.log(`[Gemini] ${questoesValidadas.length} questões Matemática geradas com ${modelo}`)
           return questoesValidadas
         }
       }
