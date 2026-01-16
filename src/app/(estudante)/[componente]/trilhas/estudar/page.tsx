@@ -52,14 +52,19 @@ interface SerieInfo {
 }
 
 interface Progresso {
-  trilha_id: string
-  trilha_nome: string
-  semana_atual: number
-  total_semanas: number
+  trilha_id?: string
+  trilha_nome?: string
+  semana_atual?: number
+  total_semanas?: number
   questoes_semana: number
   questoes_respondidas: number
-  acertos_semana: number
-  pontos_semana: number
+  acertos_semana?: number
+  pontos_semana?: number
+  respondidas?: number
+  corretas?: number
+  total?: number
+  percentual?: number
+  semana_completa?: boolean
 }
 
 export default function TrilhasEstudarPage() {
@@ -146,8 +151,16 @@ export default function TrilhasEstudarPage() {
         }
 
         // Determinar série baseado no nível de ensino do usuário
-        const nivelUsuario = userData.usuario.nivel // 'EF' ou 'EM'
+        // Fallback: se nivel não existir, detectar pelo ano da turma
         const anoUsuario = userData.usuario.ano
+        let nivelUsuario = userData.usuario.nivel
+
+        // Fallback para detectar nível pelo ano
+        if (!nivelUsuario) {
+          // Anos 6-9 = EF (Ensino Fundamental), Anos 1-3 = EM (Ensino Médio)
+          nivelUsuario = anoUsuario >= 6 && anoUsuario <= 9 ? 'EF' : 'EM'
+        }
+
         const userSerie = nivelUsuario === 'EF' ? `${anoUsuario}EF` : `${anoUsuario}EM`
         setSerie(userSerie)
 
@@ -263,7 +276,10 @@ export default function TrilhasEstudarPage() {
   // Se não tem questões
   if (questoes.length === 0) {
     // Verifica se está gerando, completou ou não há questões
-    const completouSemana = progresso && progresso.questoes_semana > 0 && progresso.questoes_respondidas >= progresso.questoes_semana
+    const completouSemana = progresso && (
+      progresso.semana_completa ||
+      (progresso.questoes_semana > 0 && progresso.questoes_respondidas >= progresso.questoes_semana)
+    )
 
     return (
       <div

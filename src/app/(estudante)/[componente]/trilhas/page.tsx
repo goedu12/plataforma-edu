@@ -79,6 +79,7 @@ export default function TrilhasPage() {
   const [iniciando, setIniciando] = useState(false)
   const [pausando, setPausando] = useState(false)
   const [serie, setSerie] = useState<string>('')
+  const [nivelEnsino, setNivelEnsino] = useState<'EF' | 'EM'>('EM')
   const [modalTrilha, setModalTrilha] = useState<Trilha | null>(null)
 
   useEffect(() => {
@@ -99,10 +100,19 @@ export default function TrilhasPage() {
         }
 
         // Determinar série baseado no nível de ensino (EF ou EM)
-        const nivelUsuario = userData.usuario.nivel // 'EF' ou 'EM'
+        // Fallback: se nivel não existir, detectar pelo ano da turma
         const anoUsuario = userData.usuario.ano
+        let nivelUsuario = userData.usuario.nivel
+
+        // Fallback para detectar nível pelo ano
+        if (!nivelUsuario) {
+          // Anos 6-9 = EF (Ensino Fundamental), Anos 1-3 = EM (Ensino Médio)
+          nivelUsuario = anoUsuario >= 6 && anoUsuario <= 9 ? 'EF' : 'EM'
+        }
+
         const userSerie = nivelUsuario === 'EF' ? `${anoUsuario}EF` : `${anoUsuario}EM`
         setSerie(userSerie)
+        setNivelEnsino(nivelUsuario as 'EF' | 'EM')
 
         // Buscar trilhas disponíveis
         const trilhasRes = await fetch(`/api/trilhas?serie=${userSerie}`)
@@ -110,7 +120,15 @@ export default function TrilhasPage() {
 
         if (trilhasData.trilhas) {
           // Transformar dados da API para o formato do frontend
-          const trilhasTransformadas = trilhasData.trilhas.map((t: TrilhaAPI) => transformarTrilha(t))
+          let trilhasTransformadas = trilhasData.trilhas.map((t: TrilhaAPI) => transformarTrilha(t))
+
+          // Filtrar trilhas: ENEM/Vestibular não aparece para Ensino Fundamental
+          if (nivelUsuario === 'EF') {
+            trilhasTransformadas = trilhasTransformadas.filter((t: Trilha) =>
+              t.id !== 'enem' && !t.nome.toLowerCase().includes('enem') && !t.nome.toLowerCase().includes('vestibular')
+            )
+          }
+
           setTrilhas(trilhasTransformadas)
 
           // Verificar se tem trilha ativa
