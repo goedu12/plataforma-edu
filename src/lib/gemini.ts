@@ -1375,3 +1375,171 @@ export async function salvarQuestoes(
   }
   return salvarQuestoesNoCache(supabase, questoes as QuestaoGerada[], serie, semana)
 }
+
+/**
+ * Gera questões únicas para um usuário específico (SEM CACHE)
+ * Cada chamada gera novas questões diferentes
+ */
+export async function gerarQuestoesParaUsuario(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  usuarioId: string,
+  trilhaId: string
+): Promise<QuestaoGeradaEF[] | QuestaoGerada[]> {
+  // Usar timestamp + userId como seed para variação
+  const seed = `${usuarioId}-${trilhaId}-${Date.now()}`
+
+  console.log(`[Gemini] Gerando ${quantidade} questões únicas para usuário ${usuarioId.slice(0, 8)}...`)
+
+  if (isSerieEF(serie)) {
+    // Matemática EF - 4 alternativas
+    return gerarQuestoesMatematicaEFUnicas(serie, semana, quantidade, seed)
+  } else {
+    // Física EM - 5 alternativas
+    return gerarQuestoesComGemini(serie, semana, quantidade)
+  }
+}
+
+/**
+ * Gera questões de Matemática EF únicas (sem cache, sempre novas)
+ */
+async function gerarQuestoesMatematicaEFUnicas(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGeradaEF[]> {
+  const conteudo = CURRICULO_MATEMATICA_EF[serie as keyof typeof CURRICULO_MATEMATICA_EF]?.[semana]
+
+  if (!conteudo) {
+    // Se não tem conteúdo específico, usar um tema genérico baseado na série
+    const temasGenericos: Record<string, { tema: string; subtema: string }> = {
+      '6EF': { tema: 'Números e Operações', subtema: 'Operações com números naturais' },
+      '7EF': { tema: 'Álgebra', subtema: 'Expressões algébricas' },
+      '8EF': { tema: 'Geometria', subtema: 'Figuras geométricas' },
+      '9EF': { tema: 'Funções', subtema: 'Introdução às funções' }
+    }
+    const temaGenerico = temasGenericos[serie] || temasGenericos['6EF']
+    return gerarQuestoesMatematicaEFComTema(serie, temaGenerico.tema, temaGenerico.subtema, quantidade, seed)
+  }
+
+  return gerarQuestoesMatematicaEFComTema(serie, conteudo.tema, conteudo.subtema, quantidade, seed)
+}
+
+/**
+ * Gera questões de Matemática EF com tema específico
+ */
+async function gerarQuestoesMatematicaEFComTema(
+  serie: string,
+  tema: string,
+  subtema: string,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGeradaEF[]> {
+  const serieNumero = serie[0]
+
+  const promptQuestoes = `Você é um professor de Matemática especialista em criar questões ÚNICAS para estudantes do Ensino Fundamental II de escolas públicas brasileiras.
+
+SEED ÚNICO: ${seed}
+Use este seed para garantir que as questões sejam DIFERENTES de outras gerações.
+
+INFORMAÇÕES:
+- Série: ${serieNumero}º ano do Ensino Fundamental (${serie})
+- Tema: ${tema}
+- Subtema: ${subtema}
+
+REGRAS OBRIGATÓRIAS:
+1. Crie ${quantidade} questões ÚNICAS e DIFERENTES entre si
+2. Cada questão deve ter APENAS 4 alternativas (A, B, C, D) - NÃO inclua a letra E
+3. Use contextos VARIADOS do cotidiano brasileiro
+4. As alternativas erradas devem ser PLAUSÍVEIS
+5. SÍMBOLOS MATEMÁTICOS - Use os símbolos tradicionais:
+   - Use × ou · para multiplicação (NUNCA use *)
+   - Use ÷ para divisão (NUNCA use /)
+   - Use ² ³ ⁴ etc para potências (NUNCA use ^)
+   - Use √ para raiz quadrada
+   - Use ≠ para diferente, ≤ para menor ou igual, ≥ para maior ou igual
+
+TIPOS DE QUESTÃO (varie entre eles):
+- conceitual: Compreensão sem cálculos
+- calculo_direto: Aplicação direta de operação
+- situacao_problema: Problema do dia a dia
+
+Retorne APENAS um JSON válido:
+{
+  "questoes": [
+    {
+      "tipo_questao": "conceitual",
+      "contexto": "escola",
+      "enunciado": "...",
+      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
+      "resposta_correta": "A",
+      "dica": "...",
+      "feedback": "...",
+      "tema": "${tema}",
+      "subtema": "${subtema}"
+    }
+  ]
+}`
+
+  const modelosQuestoes = [
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro',
+  ]
+
+  for (const modelo of modelosQuestoes) {
+    try {
+      console.log(`[Gemini] Tentando ${modelo} para questões únicas...`)
+
+      const genAI = getGenAI()
+      const model = genAI.getGenerativeModel({ model: modelo })
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.95, // Alta para mais variação
+          topP: 0.98,
+          maxOutputTokens: 8192
+        }
+      })
+
+      let text = result.response.text()
+
+      if (!text) continue
+
+      // Limpar markdown se presente
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+
+      const dados = JSON.parse(text)
+
+      if (dados.questoes && Array.isArray(dados.questoes) && dados.questoes.length > 0) {
+        // Validar e limpar questões
+        const questoesValidadas = dados.questoes
+          .filter((q: QuestaoGeradaEF) =>
+            q.enunciado &&
+            q.alternativas &&
+            q.resposta_correta &&
+            ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
+          )
+          .map((q: QuestaoGeradaEF) => ({
+            ...q,
+            resposta_correta: q.resposta_correta.toUpperCase(),
+            tema: tema,
+            subtema: subtema
+          }))
+
+        if (questoesValidadas.length > 0) {
+          console.log(`[Gemini] ${questoesValidadas.length} questões únicas geradas com ${modelo}`)
+          return questoesValidadas
+        }
+      }
+    } catch (error) {
+      console.error(`[Gemini] Erro com ${modelo}:`, error)
+      continue
+    }
+  }
+
+  throw new Error('Falha ao gerar questões únicas')
+}

@@ -4,8 +4,8 @@
  * GET /api/trilhas/questoes?serie=1EM&semana=5
  * GET /api/trilhas/questoes?serie=6EF&semana=5  (Matemática EF com 4 alternativas)
  *
- * Retorna as questões da semana atual da trilha do usuário
- * Sistema de geração sob demanda: gera automaticamente se não houver questões em cache
+ * Gera questões únicas para cada usuário/trilha/semana
+ * SEM CACHE - cada usuário recebe questões diferentes
  *
  * Suporta:
  * - Ensino Médio (1EM, 2EM, 3EM): Física com 5 alternativas
@@ -16,9 +16,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
 import {
-  gerarQuestoes,
-  verificarCacheQuestoes,
-  salvarQuestoes,
+  gerarQuestoesParaUsuario,
   isSerieEF,
   getNumAlternativasPorSerie
 } from '@/lib/gemini'
@@ -26,29 +24,22 @@ import {
 // Séries válidas (EF + EM)
 const SERIES_VALIDAS = ['6EF', '7EF', '8EF', '9EF', '1EM', '2EM', '3EM']
 
-// Controle para evitar múltiplas gerações simultâneas
-// NOTA: Em ambiente serverless, este Set é por instância.
-// Para produção em escala, considerar usar Redis ou database lock.
+// Controle para evitar múltiplas gerações simultâneas por usuário
 const geracaoEmAndamento: Set<string> = new Set()
 
-// Interface para questões retornadas pelo SQL
-interface QuestaoSQL {
-  questao_id: number
+// Interface para questão gerada
+interface QuestaoGerada {
+  id: string
   ordem: number
   tipo_questao: string
   enunciado: string
   alternativas: Record<string, string>
-  dica: string | null
-  dificuldade: string
+  dica: string
+  resposta_correta: string
+  feedback: string
   tema: string
   subtema: string
   contexto: string
-  is_desafio: boolean
-  ja_respondida: boolean
-  resposta_usuario: string | null
-  acertou: boolean | null
-  tempo_resposta: number | null
-  usou_dica: boolean
 }
 
 export async function GET(request: NextRequest) {
@@ -79,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     const supabase = getSupabaseAdmin()
 
-    // Primeiro, verificar se tem trilha ativa para pegar a semana
+    // Verificar se tem trilha ativa
     const { data: trilhaAtiva } = await supabase
       .from('usuario_trilha')
       .select('trilha_id, semana_atual')
@@ -99,99 +90,38 @@ export async function GET(request: NextRequest) {
     const semanaAtual = semana ? parseInt(semana) : trilhaAtiva.semana_atual
     const trilhaId = trilhaAtiva.trilha_id
 
-    // Verificar cache de questões
-    const questoesEmCache = await verificarCacheQuestoes(supabase, serie, semanaAtual, trilhaId)
-    console.log(`[Questões] Cache para ${serie} semana ${semanaAtual}: ${questoesEmCache} questões`)
+    // Buscar questões já respondidas pelo usuário nesta trilha/série/semana
+    const { data: respostasExistentes } = await supabase
+      .from('respostas_trilha')
+      .select('questao_id')
+      .eq('usuario_id', sessao.userId)
+      .eq('trilha_id', trilhaId)
 
-    // Se não tem questões suficientes em cache, gerar sob demanda
-    if (questoesEmCache < 5) {
-      const chaveGeracao = `${serie}-${semanaAtual}`
+    const questoesRespondidas = respostasExistentes?.map(r => r.questao_id) || []
 
-      // Evitar gerações simultâneas para mesma série/semana
-      if (!geracaoEmAndamento.has(chaveGeracao)) {
-        geracaoEmAndamento.add(chaveGeracao)
+    // Buscar progresso semanal
+    const { data: progressoSemanal } = await supabase
+      .from('progresso_semanal')
+      .select('*')
+      .eq('usuario_id', sessao.userId)
+      .eq('trilha_id', trilhaId)
+      .eq('serie', serie)
+      .eq('semana', semanaAtual)
+      .single()
 
-        try {
-          const tipoQuestao = ehEF ? 'Matemática EF (4 alternativas)' : 'Física EM (5 alternativas)'
-          console.log(`[Questões] Gerando questões de ${tipoQuestao} sob demanda para ${serie} semana ${semanaAtual}...`)
-
-          // Usa função unificada que detecta EF vs EM automaticamente
-          const questoesGeradas = await gerarQuestoes(serie, semanaAtual, 5)
-
-          if (questoesGeradas.length > 0) {
-            // Usa função unificada para salvar
-            const salvas = await salvarQuestoes(
-              supabase,
-              questoesGeradas,
-              serie,
-              semanaAtual
-            )
-            console.log(`[Questões] ${salvas} questões de ${tipoQuestao} salvas no cache`)
-          }
-        } catch (error) {
-          console.error('[Questões] Erro ao gerar questões:', error)
-          // Não falha a requisição, apenas loga o erro
-        } finally {
-          geracaoEmAndamento.delete(chaveGeracao)
-        }
-      } else {
-        console.log(`[Questões] Geração já em andamento para ${chaveGeracao}, aguardando...`)
-      }
-    }
-
-    // Buscar questões usando função SQL
-    const { data, error } = await supabase.rpc('buscar_questoes_semana_trilha', {
-      p_usuario_id: sessao.userId,
-      p_serie: serie,
-      p_semana: semanaAtual
-    })
-
-    if (error) {
-      console.error('Erro ao buscar questões:', error)
-      return NextResponse.json(
-        { erro: 'Erro ao buscar questões' },
-        { status: 500 }
-      )
-    }
-
-    // Se ainda não tem questões após tentativa de geração
-    if (!data || data.length === 0) {
+    // Se já completou todas as questões da semana
+    if (progressoSemanal && progressoSemanal.questoes_respondidas >= 5) {
       return NextResponse.json({
         sucesso: true,
         questoes: [],
-        semana: semanaAtual,
-        mensagem: 'As questões estão sendo preparadas. Tente novamente em alguns instantes.',
-        gerando: geracaoEmAndamento.has(`${serie}-${semanaAtual}`)
-      })
-    }
-
-    // Separar questões normais e desafio
-    const questoes = data as QuestaoSQL[]
-    const questoesNormais = questoes.filter((q) => !q.is_desafio)
-    const desafio = questoes.find((q) => q.is_desafio)
-
-    // Calcular progresso
-    const respondidas = questoesNormais.filter((q) => q.ja_respondida).length
-    const corretas = questoesNormais.filter((q) => q.acertou === true).length
-    const total = questoesNormais.length
-
-    // Filtrar apenas questões NÃO respondidas para evitar repetição
-    const questoesNaoRespondidas = questoesNormais.filter((q) => !q.ja_respondida)
-
-    // Se todas foram respondidas, retornar com indicação de semana completa
-    if (questoesNaoRespondidas.length === 0 && total > 0) {
-      return NextResponse.json({
-        sucesso: true,
-        questoes: [],
-        desafio: desafio || null,
         progresso: {
-          respondidas,
-          corretas,
-          total,
-          questoes_semana: total,
-          questoes_respondidas: respondidas,
-          percentual: total > 0 ? Math.round((corretas / total) * 100) : 0,
-          pode_fazer_desafio: corretas >= 4,
+          respondidas: progressoSemanal.questoes_respondidas,
+          corretas: progressoSemanal.questoes_corretas,
+          total: 5,
+          questoes_semana: 5,
+          questoes_respondidas: progressoSemanal.questoes_respondidas,
+          percentual: Math.round((progressoSemanal.questoes_corretas / 5) * 100),
+          pode_fazer_desafio: progressoSemanal.questoes_corretas >= 4,
           semana_completa: true
         },
         serie_info: {
@@ -203,27 +133,113 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    return NextResponse.json({
-      sucesso: true,
-      questoes: questoesNaoRespondidas,  // Retorna apenas as não respondidas
-      desafio: desafio || null,
-      progresso: {
-        respondidas,
-        corretas,
-        total,
-        questoes_semana: total,
-        questoes_respondidas: respondidas,
-        percentual: total > 0 ? Math.round((corretas / total) * 100) : 0,
-        pode_fazer_desafio: corretas >= 4
-      },
-      // Informações sobre o tipo de série
-      serie_info: {
-        serie,
-        nivel_ensino: ehEF ? 'EF' : 'EM',
-        componente: ehEF ? 'matematica' : 'fisica',
-        num_alternativas: numAlternativas
+    // Chave única para evitar gerações simultâneas
+    const chaveGeracao = `${sessao.userId}-${trilhaId}-${serie}-${semanaAtual}`
+
+    // Se já está gerando para este usuário, aguardar
+    if (geracaoEmAndamento.has(chaveGeracao)) {
+      return NextResponse.json({
+        sucesso: true,
+        questoes: [],
+        mensagem: 'Questões sendo geradas, aguarde...',
+        gerando: true
+      })
+    }
+
+    // Gerar questões únicas para este usuário
+    geracaoEmAndamento.add(chaveGeracao)
+
+    try {
+      const tipoQuestao = ehEF ? 'Matemática EF' : 'Física EM'
+      console.log(`[Questões] Gerando ${tipoQuestao} para usuário ${sessao.userId}, trilha ${trilhaId}, semana ${semanaAtual}...`)
+
+      // Calcular quantas questões ainda faltam
+      const questoesRespondidas_count = progressoSemanal?.questoes_respondidas || 0
+      const questoesFaltando = 5 - questoesRespondidas_count
+
+      if (questoesFaltando <= 0) {
+        return NextResponse.json({
+          sucesso: true,
+          questoes: [],
+          progresso: {
+            respondidas: 5,
+            corretas: progressoSemanal?.questoes_corretas || 0,
+            total: 5,
+            questoes_semana: 5,
+            questoes_respondidas: 5,
+            percentual: Math.round(((progressoSemanal?.questoes_corretas || 0) / 5) * 100),
+            semana_completa: true
+          },
+          serie_info: {
+            serie,
+            nivel_ensino: ehEF ? 'EF' : 'EM',
+            componente: ehEF ? 'matematica' : 'fisica',
+            num_alternativas: numAlternativas
+          }
+        })
       }
-    })
+
+      // Gerar questões únicas para o usuário
+      const questoesGeradas = await gerarQuestoesParaUsuario(
+        serie,
+        semanaAtual,
+        questoesFaltando,
+        sessao.userId,
+        trilhaId
+      )
+
+      if (!questoesGeradas || questoesGeradas.length === 0) {
+        return NextResponse.json({
+          sucesso: false,
+          questoes: [],
+          erro: 'Não foi possível gerar questões. Tente novamente.'
+        })
+      }
+
+      // Formatar questões para resposta
+      const questoesFormatadas = questoesGeradas.map((q, index) => ({
+        id: `${sessao.userId}-${trilhaId}-${semanaAtual}-${Date.now()}-${index}`,
+        ordem: questoesRespondidas_count + index + 1,
+        tipo_questao: q.tipo_questao,
+        enunciado: q.enunciado,
+        alternativas: q.alternativas,
+        dica: q.dica,
+        resposta_correta: q.resposta_correta,
+        feedback: q.feedback,
+        tema: q.tema || '',
+        subtema: q.subtema || '',
+        contexto: q.contexto || ''
+      }))
+
+      return NextResponse.json({
+        sucesso: true,
+        questoes: questoesFormatadas,
+        progresso: {
+          respondidas: questoesRespondidas_count,
+          corretas: progressoSemanal?.questoes_corretas || 0,
+          total: 5,
+          questoes_semana: 5,
+          questoes_respondidas: questoesRespondidas_count,
+          percentual: Math.round(((progressoSemanal?.questoes_corretas || 0) / 5) * 100)
+        },
+        serie_info: {
+          serie,
+          nivel_ensino: ehEF ? 'EF' : 'EM',
+          componente: ehEF ? 'matematica' : 'fisica',
+          num_alternativas: numAlternativas
+        }
+      })
+
+    } catch (error) {
+      console.error('[Questões] Erro ao gerar questões:', error)
+      return NextResponse.json({
+        sucesso: false,
+        questoes: [],
+        erro: 'Erro ao gerar questões. Tente novamente.'
+      })
+    } finally {
+      geracaoEmAndamento.delete(chaveGeracao)
+    }
 
   } catch (error) {
     console.error('Erro na API de questões:', error)

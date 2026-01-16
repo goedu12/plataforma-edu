@@ -186,14 +186,18 @@ export default function TrilhasEstudarPage() {
     const tempoSegundos = Math.floor((Date.now() - tempoInicio) / 1000)
 
     try {
+      const questaoAtualData = questoes[questaoAtual]
       const res = await fetch('/api/trilhas/responder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          questao_id: questoes[questaoAtual].id,
+          questao_id: questaoAtualData.id,
           resposta: resposta,
+          resposta_correta: questaoAtualData.resposta_correta,
           tempo_segundos: tempoSegundos,
           usou_dica: usouDica,
+          serie: serie,
+          feedback: questaoAtualData.feedback,
         }),
       })
 
