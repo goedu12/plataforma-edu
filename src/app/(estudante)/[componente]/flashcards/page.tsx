@@ -359,11 +359,12 @@ export default function FlashCardsPage() {
           HEADER - Mobile-First + Chromebook Compact
           ═══════════════════════════════════════════════════════════════════ */}
       <header
-        className={`mobile-header flex-shrink-0 ${tela === 'jogando' ? 'header-chromebook' : ''}`}
+        className={`flex-shrink-0 px-4 ${tela === 'selecao' ? 'py-2' : 'mobile-header'} ${tela === 'jogando' ? 'header-chromebook' : ''}`}
         style={{
           background: tela === 'selecao'
-            ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.15) 0%, var(--bg-surface) 100%)`
+            ? 'var(--bg-surface)'
             : 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-default)',
         }}
       >
         <div className="max-w-2xl mx-auto">
@@ -374,22 +375,10 @@ export default function FlashCardsPage() {
             />
 
             <div className="flex items-center gap-2">
-              <div
-                className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: `rgba(${corPrimariaRgb}, 0.15)` }}
-              >
-                <Sparkles className="w-4 h-4" style={{ color: corPrimaria }} />
-              </div>
-              <div>
-                <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
-                  FlashCards
-                </span>
-                {anoDoUsuario && tela === 'selecao' && (
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    {LABELS_ANO[anoDoUsuario]} • {nomeComponente}
-                  </p>
-                )}
-              </div>
+              <Sparkles className="w-5 h-5" style={{ color: corPrimaria }} />
+              <span className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>
+                FlashCards
+              </span>
             </div>
 
             {tela === 'jogando' && sessao && (
@@ -441,107 +430,86 @@ export default function FlashCardsPage() {
       {/* ═══════════════════════════════════════════════════════════════════
           CONTEÚDO
           ═══════════════════════════════════════════════════════════════════ */}
-      <main className={`flex-1 max-w-2xl mx-auto w-full ${tela === 'jogando' ? 'px-3 py-2 lg:px-4 lg:py-1.5' : 'px-4 py-5'}`}>
+      <main className={`flex-1 max-w-2xl mx-auto w-full ${tela === 'jogando' ? 'px-3 py-2 lg:px-4 lg:py-1.5' : 'px-4 py-3'}`}>
         {/* ═══════════════════════════════════════════════════════════════════
             TELA DE SELEÇÃO
             ═══════════════════════════════════════════════════════════════════ */}
         {tela === 'selecao' && (
-          <div className="space-y-5 animate-fade-in">
-            {/* Hero Card */}
+          <div className="space-y-3 animate-fade-in">
+            {/* Hero Card - Compacto */}
             <div
-              className="relative overflow-hidden rounded-3xl p-6 text-center"
+              className="relative overflow-hidden rounded-2xl p-4 flex items-center gap-4"
               style={{
                 background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
                 border: `2px solid rgba(${corPrimariaRgb}, 0.3)`,
               }}
             >
-              {/* Decorative elements */}
               <div
-                className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20"
-                style={{ background: corPrimaria }}
-              />
-              <div
-                className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full opacity-10"
-                style={{ background: corPrimaria }}
-              />
+                className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                }}
+              >
+                <Brain className="w-7 h-7" style={{ color: isFisica ? '#000' : '#fff' }} />
+              </div>
 
-              <div className="relative">
-                <div
-                  className="w-20 h-20 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg"
-                  style={{
-                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
-                  }}
-                >
-                  <Brain className="w-10 h-10" style={{ color: isFisica ? '#000' : '#fff' }} />
-                </div>
-
-                <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                   FlashCards de {nomeComponente}
                 </h1>
-
-                {anoDoUsuario && (
-                  <div
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-3"
-                    style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-                  >
-                    <BookOpen className="w-4 h-4" style={{ color: corPrimaria }} />
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      {LABELS_ANO[anoDoUsuario]} do Ensino Médio
+                <div className="flex items-center gap-2 flex-wrap">
+                  {anoDoUsuario && (
+                    <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                      {LABELS_ANO[anoDoUsuario]} •
                     </span>
-                  </div>
-                )}
-
-                <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  {totalQuestoesDisponiveis} questões disponíveis para você
-                </p>
+                  )}
+                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                    {totalQuestoesDisponiveis} questões disponíveis
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Estatísticas rápidas */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Estatísticas rápidas - Inline compacto */}
+            <div className="grid grid-cols-3 gap-2">
               {[
-                { icon: Target, label: 'Tipos', value: '3', sublabel: 'Quiz, V/F, Complete' },
-                { icon: Zap, label: 'Temas', value: String(temas.length), sublabel: 'Disponíveis' },
-                { icon: Award, label: 'Pontos', value: '+10', sublabel: 'Por acerto' },
+                { icon: Target, value: '3', sublabel: 'Tipos' },
+                { icon: Zap, value: String(temas.length), sublabel: 'Temas' },
+                { icon: Award, value: '+10', sublabel: 'Por acerto' },
               ].map((stat) => (
                 <div
-                  key={stat.label}
-                  className="p-4 rounded-2xl text-center"
+                  key={stat.sublabel}
+                  className="p-2.5 rounded-xl text-center"
                   style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
                 >
-                  <stat.icon className="w-5 h-5 mx-auto mb-2" style={{ color: corPrimaria }} />
-                  <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</p>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.sublabel}</p>
+                  <div className="flex items-center justify-center gap-1.5">
+                    <stat.icon className="w-4 h-4" style={{ color: corPrimaria }} />
+                    <span className="text-base font-bold" style={{ color: 'var(--text-primary)' }}>{stat.value}</span>
+                  </div>
+                  <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>{stat.sublabel}</p>
                 </div>
               ))}
             </div>
 
-            {/* Seleção de Tema */}
+            {/* Seleção de Tema - Compacto */}
             <div
-              className="p-5 rounded-2xl"
+              className="p-3 rounded-xl"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: `rgba(${corPrimariaRgb}, 0.15)` }}
-                >
-                  <Target className="w-4 h-4" style={{ color: corPrimaria }} />
-                </div>
-                <div>
-                  <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    Escolha um Tema
-                  </span>
-                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Ou pratique todos de uma vez
-                  </p>
-                </div>
+              <div className="flex items-center gap-2 mb-2.5">
+                <Target className="w-4 h-4" style={{ color: corPrimaria }} />
+                <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  Tema
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  (opcional)
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <button
                   onClick={() => setTemaSelecionado(null)}
-                  className="p-4 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="p-2.5 rounded-lg text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     background: !temaSelecionado
                       ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.1) 100%)`
@@ -549,27 +517,27 @@ export default function FlashCardsPage() {
                     border: !temaSelecionado ? `2px solid ${corPrimaria}` : '1px solid var(--border-default)',
                   }}
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">🎯</span>
-                    <div>
-                      <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">🎯</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-xs truncate" style={{ color: 'var(--text-primary)' }}>
                         Todos os Temas
                       </p>
-                      <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                         {totalQuestoesDisponiveis} questões
                       </p>
                     </div>
+                    {!temaSelecionado && (
+                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
+                    )}
                   </div>
-                  {!temaSelecionado && (
-                    <CheckCircle2 className="w-5 h-5 mt-2" style={{ color: corPrimaria }} />
-                  )}
                 </button>
 
                 {temas.map((tema) => (
                   <button
                     key={tema.id}
                     onClick={() => setTemaSelecionado(tema.nome)}
-                    className="p-4 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                    className="p-2.5 rounded-lg text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       background: temaSelecionado === tema.nome
                         ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.1) 100%)`
@@ -577,85 +545,81 @@ export default function FlashCardsPage() {
                       border: temaSelecionado === tema.nome ? `2px solid ${corPrimaria}` : '1px solid var(--border-default)',
                     }}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{tema.icone}</span>
-                      <div>
-                        <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{tema.icone}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-xs truncate" style={{ color: 'var(--text-primary)' }}>
                           {tema.nome}
                         </p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                           {tema.totalQuestoes} questões
                         </p>
                       </div>
+                      {temaSelecionado === tema.nome && (
+                        <CheckCircle2 className="w-4 h-4 flex-shrink-0" style={{ color: corPrimaria }} />
+                      )}
                     </div>
-                    {temaSelecionado === tema.nome && (
-                      <CheckCircle2 className="w-5 h-5 mt-2" style={{ color: corPrimaria }} />
-                    )}
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Quantidade de Questões */}
+            {/* Quantidade de Questões - Compacto inline */}
             <div
-              className="p-5 rounded-2xl"
+              className="p-3 rounded-xl"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 mb-4">
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ background: `rgba(${corPrimariaRgb}, 0.15)` }}
-                >
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4" style={{ color: corPrimaria }} />
+                  <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                    Questões:
+                  </span>
                 </div>
-                <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Quantas questões?
-                </span>
-              </div>
-
-              <div className="flex gap-2">
-                {[5, 10, 15, 20].map((qtd) => (
-                  <button
-                    key={qtd}
-                    onClick={() => setQuantidadeQuestoes(qtd)}
-                    className="flex-1 py-3 px-4 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
-                    style={{
-                      background: quantidadeQuestoes === qtd
-                        ? `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`
-                        : 'var(--bg-elevated)',
-                      color: quantidadeQuestoes === qtd ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
-                      border: quantidadeQuestoes === qtd ? 'none' : '1px solid var(--border-default)',
-                    }}
-                  >
-                    {qtd}
-                  </button>
-                ))}
+                <div className="flex gap-1.5 flex-1">
+                  {[5, 10, 15, 20].map((qtd) => (
+                    <button
+                      key={qtd}
+                      onClick={() => setQuantidadeQuestoes(qtd)}
+                      className="flex-1 py-2 px-2 rounded-lg font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      style={{
+                        background: quantidadeQuestoes === qtd
+                          ? `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`
+                          : 'var(--bg-elevated)',
+                        color: quantidadeQuestoes === qtd ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                        border: quantidadeQuestoes === qtd ? 'none' : '1px solid var(--border-default)',
+                      }}
+                    >
+                      {qtd}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Erro */}
             {erro && (
               <div
-                className="p-4 rounded-2xl flex items-center gap-3"
+                className="p-3 rounded-xl flex items-center gap-2"
                 style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
               >
-                <XCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />
-                <p className="text-sm" style={{ color: 'var(--error)' }}>{erro}</p>
+                <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />
+                <p className="text-xs" style={{ color: 'var(--error)' }}>{erro}</p>
               </div>
             )}
 
-            {/* Botão Iniciar */}
+            {/* Botão Iniciar - Compacto */}
             <button
               onClick={iniciarSessao}
               disabled={loading}
-              className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
+              className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               style={{
                 background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
                 color: isFisica ? '#000' : '#fff',
-                boxShadow: `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`,
+                boxShadow: `0 6px 24px rgba(${corPrimariaRgb}, 0.3)`,
               }}
             >
-              <Play className="w-6 h-6" />
+              <Play className="w-5 h-5" />
               <span>Começar Agora!</span>
             </button>
           </div>
