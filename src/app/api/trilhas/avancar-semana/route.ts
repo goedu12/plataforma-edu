@@ -52,9 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     const semanaAtual = trilhaAtiva.semana_atual
-    const anoLetivo = new Date().getFullYear()
 
-    // Buscar progresso da semana atual
+    // Buscar progresso da semana atual (sistema sem cache - 5 questões por semana)
     const progressoSemana = await supabase
       .from('progresso_semanal')
       .select('questoes_respondidas, questoes_total, questoes_corretas, status')
@@ -62,21 +61,11 @@ export async function POST(request: NextRequest) {
       .eq('trilha_id', trilhaAtiva.trilha_id)
       .eq('serie', serie)
       .eq('semana', semanaAtual)
-      .eq('ano_letivo', anoLetivo)
       .single()
       .then(r => r.data)
 
-    // Verificar quantas questões existem para esta semana
-    const questoesDisponiveis = await supabase
-      .from('questoes_trilha')
-      .select('*', { count: 'exact', head: true })
-      .eq('serie', serie)
-      .eq('semana', semanaAtual)
-      .eq('ano_letivo', anoLetivo)
-      .eq('ativa', true)
-      .then(r => r.count)
-
-    const totalQuestoes = questoesDisponiveis || 5
+    // Sistema sem cache: sempre 5 questões por semana
+    const totalQuestoes = 5
     const respondidas = progressoSemana?.questoes_respondidas || 0
 
     // Se a semana atual não tem progresso, pode ser que o SQL já avançou automaticamente
@@ -91,7 +80,6 @@ export async function POST(request: NextRequest) {
         .eq('trilha_id', trilhaAtiva.trilha_id)
         .eq('serie', serie)
         .eq('semana', semanaAnterior)
-        .eq('ano_letivo', anoLetivo)
         .single()
         .then(r => r.data)
 
@@ -148,7 +136,6 @@ export async function POST(request: NextRequest) {
       .eq('trilha_id', trilhaAtiva.trilha_id)
       .eq('serie', serie)
       .eq('semana', semanaAtual)
-      .eq('ano_letivo', anoLetivo)
 
     if (updateStatusError) {
       console.error('Erro ao atualizar status da semana:', updateStatusError)
@@ -197,11 +184,10 @@ export async function POST(request: NextRequest) {
           trilha_id: trilhaAtiva.trilha_id,
           serie: serie,
           semana: novaSemana,
-          ano_letivo: anoLetivo,
           status: 'disponivel',
           desbloqueada_em: new Date().toISOString()
         }, {
-          onConflict: 'usuario_id,trilha_id,serie,semana,ano_letivo'
+          onConflict: 'usuario_id,trilha_id,serie,semana'
         })
 
       if (upsertError) {
@@ -222,48 +208,26 @@ export async function POST(request: NextRequest) {
       })
     } else {
       // Não atingiu mínimo, precisa refazer
-      // Limpar respostas da semana para permitir nova tentativa
-      const { data: questoesSemana } = await supabase
-        .from('questoes_trilha')
-        .select('id')
+      // Sistema sem cache: apenas resetar progresso_semanal
+      // Novas questões serão geradas automaticamente na próxima tentativa
+
+      const { error: resetError } = await supabase
+        .from('progresso_semanal')
+        .update({
+          questoes_respondidas: 0,
+          questoes_corretas: 0,
+          pontos_semana: 0,
+          tempo_total_segundos: 0,
+          status: 'disponivel',
+          updated_at: new Date().toISOString()
+        })
+        .eq('usuario_id', sessao.userId)
+        .eq('trilha_id', trilhaAtiva.trilha_id)
         .eq('serie', serie)
         .eq('semana', semanaAtual)
-        .eq('ano_letivo', anoLetivo)
-        .eq('ativa', true)
 
-      if (questoesSemana && questoesSemana.length > 0) {
-        const questaoIds = questoesSemana.map((q: { id: number }) => q.id)
-
-        // Deletar respostas anteriores para permitir refazer
-        const { error: deleteError } = await supabase
-          .from('respostas_trilha')
-          .delete()
-          .eq('usuario_id', sessao.userId)
-          .in('questao_id', questaoIds)
-
-        if (deleteError) {
-          console.error('Erro ao deletar respostas para reset:', deleteError)
-        }
-
-        // Resetar progresso da semana
-        const { error: resetError } = await supabase
-          .from('progresso_semanal')
-          .update({
-            questoes_respondidas: 0,
-            questoes_corretas: 0,
-            pontos_semana: 0,
-            status: 'disponivel',
-            updated_at: new Date().toISOString()
-          })
-          .eq('usuario_id', sessao.userId)
-          .eq('trilha_id', trilhaAtiva.trilha_id)
-          .eq('serie', serie)
-          .eq('semana', semanaAtual)
-          .eq('ano_letivo', anoLetivo)
-
-        if (resetError) {
-          console.error('Erro ao resetar progresso:', resetError)
-        }
+      if (resetError) {
+        console.error('Erro ao resetar progresso:', resetError)
       }
 
       return NextResponse.json({

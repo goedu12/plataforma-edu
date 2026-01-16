@@ -805,6 +805,8 @@ export interface QuestaoGerada {
   resposta_correta: string
   dica: string
   feedback: string
+  tema?: string
+  subtema?: string
 }
 
 // Interface para questões EF (4 alternativas - Ensino Fundamental)
@@ -816,6 +818,8 @@ export interface QuestaoGeradaEF {
   resposta_correta: 'A' | 'B' | 'C' | 'D'
   dica: string
   feedback: string
+  tema?: string
+  subtema?: string
 }
 
 interface RespostaGeminiQuestoes {
@@ -1394,6 +1398,7 @@ export async function salvarQuestoes(
 /**
  * Gera questões únicas para um usuário específico (SEM CACHE)
  * Cada chamada gera novas questões diferentes
+ * OTIMIZADO: usa modelo rápido com temperatura baixa para precisão
  */
 export async function gerarQuestoesParaUsuario(
   serie: string,
@@ -1402,8 +1407,8 @@ export async function gerarQuestoesParaUsuario(
   usuarioId: string,
   trilhaId: string
 ): Promise<QuestaoGeradaEF[] | QuestaoGerada[]> {
-  // Usar timestamp + userId como seed para variação
-  const seed = `${usuarioId}-${trilhaId}-${Date.now()}`
+  // Usar timestamp + userId + random como seed para MÁXIMA variação
+  const seed = `${usuarioId}-${trilhaId}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
   console.log(`[Gemini] Gerando ${quantidade} questões únicas para usuário ${usuarioId.slice(0, 8)}...`)
 
@@ -1411,8 +1416,104 @@ export async function gerarQuestoesParaUsuario(
     // Matemática EF - 4 alternativas
     return gerarQuestoesMatematicaEFUnicas(serie, semana, quantidade, seed)
   } else {
-    // Física EM - 5 alternativas
-    return gerarQuestoesComGemini(serie, semana, quantidade)
+    // Física EM - 5 alternativas - AGORA USA SEED
+    return gerarQuestoesFisicaEMUnicas(serie, semana, quantidade, seed)
+  }
+}
+
+/**
+ * Gera questões de Física EM únicas (sem cache, sempre novas)
+ * OTIMIZADO para velocidade
+ */
+async function gerarQuestoesFisicaEMUnicas(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGerada[]> {
+  const curriculoSerie = CURRICULO_FISICA[serie]
+  if (!curriculoSerie) {
+    throw new Error(`Série ${serie} não encontrada no currículo`)
+  }
+
+  let conteudo = curriculoSerie[semana]
+  if (!conteudo) {
+    const semanaFallback = Math.min(semana, 40)
+    conteudo = curriculoSerie[semanaFallback] || curriculoSerie[1]
+  }
+
+  const { tema, subtema, bimestre } = conteudo
+  const serieNumero = serie[0]
+
+  const promptQuestoes = `Gere ${quantidade} questões de Física para ${serieNumero}º ano EM sobre "${tema} - ${subtema}".
+
+SEED: ${seed}
+
+REGRAS OBRIGATÓRIAS:
+1. Enunciado COMPLETO com TODOS os valores numéricos e unidades
+2. Incluir constantes quando necessário (g=10m/s², π=3,14)
+3. 5 alternativas (A-E), apenas UMA correta
+4. Fazer o CÁLCULO antes de definir resposta_correta
+5. Feedback mostrando a resolução
+
+EXEMPLO:
+{"tipo_questao":"calculo_direto","contexto":"movimento","enunciado":"Um carro parte do repouso e acelera a 4 m/s² por 5s. Qual a velocidade final?","alternativas":{"A":"20 m/s","B":"9 m/s","C":"25 m/s","D":"1,25 m/s","E":"100 m/s"},"resposta_correta":"A","dica":"v = v₀ + at","feedback":"v = 0 + 4×5 = 20 m/s"}
+
+Retorne JSON: {"questoes":[...]}`
+
+  // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
+  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+
+  const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
+    console.log(`[Gemini] Física EM iniciando ${modelo}...`)
+    const genAI = getGenAI()
+    const model = genAI.getGenerativeModel({ model: modelo })
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        maxOutputTokens: 2048
+      }
+    })
+
+    let text = result.response.text()
+    if (!text) throw new Error('Resposta vazia')
+
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const dados = JSON.parse(text)
+
+    if (!dados.questoes?.length) throw new Error('Sem questões')
+
+    const questoesValidadas = dados.questoes
+      .filter((q: QuestaoGerada) =>
+        q.enunciado &&
+        q.enunciado.length >= 30 &&
+        q.alternativas &&
+        q.resposta_correta &&
+        q.feedback &&
+        ['A', 'B', 'C', 'D', 'E'].includes(q.resposta_correta.toUpperCase())
+      )
+      .map((q: QuestaoGerada) => ({
+        ...q,
+        resposta_correta: q.resposta_correta.toUpperCase(),
+        tema: tema,
+        subtema: subtema
+      }))
+
+    if (questoesValidadas.length === 0) throw new Error('Nenhuma válida')
+
+    console.log(`[Gemini] ${questoesValidadas.length} questões Física via ${modelo}`)
+    return questoesValidadas
+  }
+
+  try {
+    // Promise.any retorna o primeiro que resolver com sucesso
+    return await Promise.any(modelos.map(m => tentarComModelo(m)))
+  } catch (error) {
+    console.error('[Gemini] Todos os modelos falharam:', error)
+    throw new Error('Falha ao gerar questões de Física')
   }
 }
 
@@ -1425,7 +1526,7 @@ async function gerarQuestoesMatematicaEFUnicas(
   quantidade: number,
   seed: string
 ): Promise<QuestaoGeradaEF[]> {
-  const conteudo = CURRICULO_MATEMATICA_EF[serie as keyof typeof CURRICULO_MATEMATICA_EF]?.[semana]
+  const conteudo = CURRICULO_MATEMATICA[serie]?.[semana]
 
   if (!conteudo) {
     // Se não tem conteúdo específico, usar um tema genérico baseado na série
@@ -1454,139 +1555,74 @@ async function gerarQuestoesMatematicaEFComTema(
 ): Promise<QuestaoGeradaEF[]> {
   const serieNumero = serie[0]
 
-  const promptQuestoes = `Você é um professor de Matemática MUITO CUIDADOSO que cria questões para o Ensino Fundamental II.
-
-ATENÇÃO CRÍTICA: O GABARITO DEVE ESTAR 100% CORRETO!
-- Antes de definir a resposta_correta, FAÇA O CÁLCULO COMPLETO
-- VERIFIQUE se a alternativa marcada como correta realmente corresponde ao resultado
-- Se for uma questão de cálculo, MOSTRE A CONTA no feedback
+  const promptQuestoes = `Gere ${quantidade} questões de Matemática para ${serieNumero}º ano EF sobre "${tema} - ${subtema}".
 
 SEED: ${seed}
 
-INFORMAÇÕES:
-- Série: ${serieNumero}º ano (${serie})
-- Tema: ${tema}
-- Subtema: ${subtema}
+REGRAS OBRIGATÓRIAS:
+1. Enunciado COMPLETO com TODOS os valores numéricos
+2. Símbolos: × (mult), ÷ (div), ² ³ (potência), √ (raiz) - NUNCA use * / ^
+3. 4 alternativas (A-D), apenas UMA correta
+4. Fazer o CÁLCULO antes de definir resposta_correta
+5. Feedback mostrando a resolução passo a passo
 
-SÍMBOLOS OBRIGATÓRIOS:
-- Multiplicação: × ou · (NUNCA *)
-- Divisão: ÷ (NUNCA /)
-- Potência: ² ³ ⁴ ⁵ (NUNCA ^)
-- Raiz: √
-- Comparação: ≠ ≤ ≥
+EXEMPLO:
+{"tipo_questao":"calculo_direto","contexto":"potências","enunciado":"Qual é o resultado de 2⁴ × 2²?","alternativas":{"A":"64","B":"32","C":"16","D":"8"},"resposta_correta":"A","dica":"Some os expoentes","feedback":"2⁴ × 2² = 2⁶ = 64"}
 
-EXEMPLO DE QUESTÃO CORRETA (potenciação):
-{
-  "enunciado": "Qual é o resultado de 2³ × 2²?",
-  "alternativas": {
-    "A": "32",
-    "B": "16",
-    "C": "64",
-    "D": "12"
-  },
-  "resposta_correta": "A",
-  "feedback": "2³ × 2² = 2³⁺² = 2⁵ = 32. Na multiplicação de potências de mesma base, somamos os expoentes."
-}
+Retorne JSON: {"questoes":[...]}`
 
-EXEMPLO DE QUESTÃO CORRETA (fração):
-{
-  "enunciado": "Quanto é 3/4 + 1/4?",
-  "alternativas": {
-    "A": "4/8",
-    "B": "1",
-    "C": "4/4",
-    "D": "2/4"
-  },
-  "resposta_correta": "B",
-  "feedback": "3/4 + 1/4 = 4/4 = 1. Como os denominadores são iguais, somamos os numeradores: 3+1=4, então 4/4=1."
-}
+  // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
+  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
 
-REGRAS:
-1. Crie ${quantidade} questões DIFERENTES
-2. APENAS 4 alternativas (A, B, C, D)
-3. VERIFIQUE O GABARITO antes de finalizar
-4. O feedback DEVE mostrar o cálculo/raciocínio completo
-5. Alternativas erradas devem ser erros comuns de alunos
+  const tentarComModelo = async (modelo: string): Promise<QuestaoGeradaEF[]> => {
+    console.log(`[Gemini] Matemática EF iniciando ${modelo}...`)
+    const genAI = getGenAI()
+    const model = genAI.getGenerativeModel({ model: modelo })
 
-TIPOS (varie):
-- conceitual: entendimento do conceito
-- calculo_direto: aplicar operação/fórmula
-- situacao_problema: contexto do dia a dia
-
-Retorne APENAS JSON válido:
-{
-  "questoes": [
-    {
-      "tipo_questao": "calculo_direto",
-      "contexto": "escola",
-      "enunciado": "...",
-      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
-      "resposta_correta": "X",
-      "dica": "...",
-      "feedback": "CÁLCULO: ... Portanto a resposta é X.",
-      "tema": "${tema}",
-      "subtema": "${subtema}"
-    }
-  ]
-}`
-
-  const modelosQuestoes = [
-    'gemini-1.5-pro',  // Modelo mais preciso primeiro para gabaritos corretos
-    'gemini-1.5-flash',
-    'gemini-2.0-flash-lite',
-  ]
-
-  for (const modelo of modelosQuestoes) {
-    try {
-      console.log(`[Gemini] Tentando ${modelo} para questões únicas...`)
-
-      const genAI = getGenAI()
-      const model = genAI.getGenerativeModel({ model: modelo })
-
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-        generationConfig: {
-          temperature: 0.7, // Menor para gabaritos mais precisos
-          topP: 0.9,
-          maxOutputTokens: 8192
-        }
-      })
-
-      let text = result.response.text()
-
-      if (!text) continue
-
-      // Limpar markdown se presente
-      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-
-      const dados = JSON.parse(text)
-
-      if (dados.questoes && Array.isArray(dados.questoes) && dados.questoes.length > 0) {
-        // Validar e limpar questões
-        const questoesValidadas = dados.questoes
-          .filter((q: QuestaoGeradaEF) =>
-            q.enunciado &&
-            q.alternativas &&
-            q.resposta_correta &&
-            ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
-          )
-          .map((q: QuestaoGeradaEF) => ({
-            ...q,
-            resposta_correta: q.resposta_correta.toUpperCase(),
-            tema: tema,
-            subtema: subtema
-          }))
-
-        if (questoesValidadas.length > 0) {
-          console.log(`[Gemini] ${questoesValidadas.length} questões únicas geradas com ${modelo}`)
-          return questoesValidadas
-        }
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        maxOutputTokens: 2048
       }
-    } catch (error) {
-      console.error(`[Gemini] Erro com ${modelo}:`, error)
-      continue
-    }
+    })
+
+    let text = result.response.text()
+    if (!text) throw new Error('Resposta vazia')
+
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const dados = JSON.parse(text)
+
+    if (!dados.questoes?.length) throw new Error('Sem questões')
+
+    const questoesValidadas = dados.questoes
+      .filter((q: QuestaoGeradaEF) =>
+        q.enunciado &&
+        q.enunciado.length >= 20 &&
+        q.alternativas &&
+        q.resposta_correta &&
+        q.feedback &&
+        ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
+      )
+      .map((q: QuestaoGeradaEF) => ({
+        ...q,
+        resposta_correta: q.resposta_correta.toUpperCase(),
+        tema: tema,
+        subtema: subtema
+      }))
+
+    if (questoesValidadas.length === 0) throw new Error('Nenhuma válida')
+
+    console.log(`[Gemini] ${questoesValidadas.length} questões Matemática via ${modelo}`)
+    return questoesValidadas
   }
 
-  throw new Error('Falha ao gerar questões únicas')
+  try {
+    // Promise.any retorna o primeiro que resolver com sucesso
+    return await Promise.any(modelos.map(m => tentarComModelo(m)))
+  } catch (error) {
+    console.error('[Gemini] Todos os modelos falharam:', error)
+    throw new Error('Falha ao gerar questões de Matemática')
+  }
 }
