@@ -1469,7 +1469,9 @@ EXEMPLO:
   "enunciado": "Um carro acelera de 0 a 20 m/s em 4s. Qual a aceleração?",
   "alternativas": {"A": "5 m/s²", "B": "4 m/s²", "C": "20 m/s²", "D": "80 m/s²", "E": "0,2 m/s²"},
   "resposta_correta": "A",
-  "feedback": "a = Δv/Δt = 20/4 = 5 m/s². Resposta A."
+  "feedback": "a = Δv/Δt = 20/4 = 5 m/s². Resposta A.",
+  "tema": "${tema}",
+  "subtema": "${subtema}"
 }
 
 REGRAS:
@@ -1479,7 +1481,7 @@ REGRAS:
 4. Feedback com cálculo
 
 Retorne JSON:
-{"questoes": [{"tipo_questao": "calculo_direto", "contexto": "...", "enunciado": "...", "alternativas": {"A":"...","B":"...","C":"...","D":"...","E":"..."}, "resposta_correta": "X", "dica": "...", "feedback": "..."}]}`
+{"questoes": [{"tipo_questao": "calculo_direto", "contexto": "...", "enunciado": "...", "alternativas": {"A":"...","B":"...","C":"...","D":"...","E":"..."}, "resposta_correta": "X", "dica": "...", "feedback": "...", "tema": "${tema}", "subtema": "${subtema}"}]}`
 
   // OTIMIZADO: modelo mais rápido primeiro
   const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
@@ -1513,7 +1515,9 @@ Retorne JSON:
           )
           .map((q: QuestaoGerada) => ({
             ...q,
-            resposta_correta: q.resposta_correta.toUpperCase()
+            resposta_correta: q.resposta_correta.toUpperCase(),
+            tema: tema,
+            subtema: subtema
           }))
 
         if (questoesValidadas.length > 0) {
