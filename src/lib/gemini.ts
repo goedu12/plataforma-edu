@@ -855,71 +855,86 @@ export async function gerarQuestoesComGemini(
   const { tema, subtema, bimestre } = conteudo
   const serieNumero = serie[0] // "1", "2" ou "3"
 
-  const promptQuestoes = `Você é um professor de Física especialista em criar questões para estudantes do Ensino Médio de escolas públicas brasileiras.
+  const promptQuestoes = `Você é um professor de Física MUITO CUIDADOSO que cria questões para o Ensino Médio.
 
-INFORMAÇÕES DA SÉRIE E PERÍODO:
-- Série: ${serieNumero}ª série do Ensino Médio (${serie})
-- Bimestre: ${bimestre}º bimestre
-- Semana: ${semana} de 40
-- Tema principal: ${tema}
-- Subtema específico: ${subtema}
+ATENÇÃO CRÍTICA: O GABARITO DEVE ESTAR 100% CORRETO!
+- Antes de definir a resposta_correta, FAÇA O CÁLCULO COMPLETO
+- VERIFIQUE se a alternativa marcada como correta realmente corresponde ao resultado
+- Se usar fórmulas, MOSTRE A APLICAÇÃO no feedback
+- Confira as unidades de medida
 
-IMPORTANTE - ADEQUAÇÃO AO NÍVEL:
-${serieNumero === '1' ? `
-- Alunos do 1º ano estão iniciando a Física do Ensino Médio
-- Foque em conceitos fundamentais e aplicações simples
-- Evite cálculos muito complexos
-- Use muitas analogias com o cotidiano
-- Temas típicos: Cinemática, Dinâmica (Leis de Newton), Trabalho e Energia` : ''}
-${serieNumero === '2' ? `
-- Alunos do 2º ano já têm base de mecânica
-- Pode exigir mais cálculos e análises
-- Conecte com fenômenos do dia a dia (calor, luz, som)
-- Temas típicos: Termologia, Calorimetria, Óptica, Ondas` : ''}
-${serieNumero === '3' ? `
-- Alunos do 3º ano estão se preparando para ENEM e vestibulares
-- Pode usar questões mais elaboradas
-- Conecte com tecnologia moderna (eletricidade, magnetismo)
-- Temas típicos: Eletrostática, Eletrodinâmica, Eletromagnetismo, Física Moderna` : ''}
+INFORMAÇÕES:
+- Série: ${serieNumero}ª série (${serie})
+- Bimestre: ${bimestre}º
+- Tema: ${tema}
+- Subtema: ${subtema}
 
-Crie ${quantidade} questões de Física sobre "${tema}" - "${subtema}".
+ADEQUAÇÃO AO NÍVEL:
+${serieNumero === '1' ? `1º ano: Cinemática, Dinâmica (Leis de Newton), Trabalho e Energia. Conceitos fundamentais.` : ''}
+${serieNumero === '2' ? `2º ano: Termologia, Calorimetria, Óptica, Ondas. Fenômenos do dia a dia.` : ''}
+${serieNumero === '3' ? `3º ano: Eletrostática, Eletrodinâmica, Eletromagnetismo. Preparação ENEM.` : ''}
 
-REGRAS OBRIGATÓRIAS:
-1. As questões devem ser EXCLUSIVAMENTE sobre o conteúdo do ${serieNumero}º ano
-2. NÃO use conteúdos de outras séries
-3. Use contextos do cotidiano de estudantes brasileiros de escola pública
-4. Cada questão deve ter 5 alternativas (A, B, C, D, E)
-5. As alternativas erradas devem ser PLAUSÍVEIS (baseadas em erros comuns)
-6. Inclua uma DICA que ajude sem revelar a resposta
-7. Inclua um FEEDBACK explicativo completo
+EXEMPLO DE QUESTÃO CORRETA (cinemática):
+{
+  "enunciado": "Um carro parte do repouso e acelera a 2 m/s² durante 5 segundos. Qual a velocidade final?",
+  "alternativas": {
+    "A": "10 m/s",
+    "B": "7 m/s",
+    "C": "2,5 m/s",
+    "D": "25 m/s",
+    "E": "5 m/s"
+  },
+  "resposta_correta": "A",
+  "feedback": "Usando v = v₀ + at: v = 0 + 2 × 5 = 10 m/s. A resposta é A."
+}
 
-TIPOS DE QUESTÃO (varie entre eles):
-- conceitual: Compreensão sem cálculos
-- calculo_direto: Aplicação de fórmula
-- situacao_problema: Problema contextualizado
-- analise_fenomeno: Explicar por que algo acontece
-- comparacao: Comparar situações ou grandezas
+EXEMPLO DE QUESTÃO CORRETA (termologia):
+{
+  "enunciado": "Qual a quantidade de calor necessária para aquecer 500g de água de 20°C para 80°C? (c = 1 cal/g°C)",
+  "alternativas": {
+    "A": "30.000 cal",
+    "B": "40.000 cal",
+    "C": "50.000 cal",
+    "D": "60.000 cal",
+    "E": "10.000 cal"
+  },
+  "resposta_correta": "A",
+  "feedback": "Q = m × c × ΔT = 500 × 1 × (80-20) = 500 × 60 = 30.000 cal. Resposta A."
+}
 
-Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
+REGRAS:
+1. Crie ${quantidade} questões DIFERENTES sobre ${tema}
+2. 5 alternativas (A, B, C, D, E)
+3. VERIFIQUE O GABARITO - faça o cálculo antes de definir
+4. Feedback DEVE mostrar o cálculo/raciocínio completo
+5. Alternativas erradas = erros comuns de alunos
+
+TIPOS (varie):
+- conceitual: entendimento do fenômeno
+- calculo_direto: aplicar fórmula
+- situacao_problema: contexto real
+- analise_fenomeno: explicar o porquê
+
+Retorne APENAS JSON válido:
 {
   "questoes": [
     {
-      "tipo_questao": "conceitual",
-      "contexto": "Cotidiano - Transporte",
-      "enunciado": "Um ônibus escolar...",
+      "tipo_questao": "calculo_direto",
+      "contexto": "transporte",
+      "enunciado": "...",
       "alternativas": {"A": "...", "B": "...", "C": "...", "D": "...", "E": "..."},
-      "resposta_correta": "A",
-      "dica": "Lembre-se que...",
-      "feedback": "A resposta correta é A porque..."
+      "resposta_correta": "X",
+      "dica": "...",
+      "feedback": "CÁLCULO: ... Portanto a resposta é X."
     }
   ]
 }`
 
-  // Tentar diferentes modelos
+  // Tentar diferentes modelos - Pro primeiro para gabaritos corretos
   const modelosQuestoes = [
-    'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
     'gemini-1.5-pro',
+    'gemini-1.5-flash',
+    'gemini-2.0-flash-lite',
   ]
 
   for (const modelo of modelosQuestoes) {
@@ -932,8 +947,8 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
       const result = await model.generateContent({
         contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
         generationConfig: {
-          temperature: 0.8,
-          topP: 0.95,
+          temperature: 0.7, // Menor para gabaritos precisos
+          topP: 0.9,
           maxOutputTokens: 8192
         }
       })
@@ -1374,4 +1389,204 @@ export async function salvarQuestoes(
     return salvarQuestoesMatematicaEFNoCache(supabase, questoes as QuestaoGeradaEF[], serie, semana)
   }
   return salvarQuestoesNoCache(supabase, questoes as QuestaoGerada[], serie, semana)
+}
+
+/**
+ * Gera questões únicas para um usuário específico (SEM CACHE)
+ * Cada chamada gera novas questões diferentes
+ */
+export async function gerarQuestoesParaUsuario(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  usuarioId: string,
+  trilhaId: string
+): Promise<QuestaoGeradaEF[] | QuestaoGerada[]> {
+  // Usar timestamp + userId como seed para variação
+  const seed = `${usuarioId}-${trilhaId}-${Date.now()}`
+
+  console.log(`[Gemini] Gerando ${quantidade} questões únicas para usuário ${usuarioId.slice(0, 8)}...`)
+
+  if (isSerieEF(serie)) {
+    // Matemática EF - 4 alternativas
+    return gerarQuestoesMatematicaEFUnicas(serie, semana, quantidade, seed)
+  } else {
+    // Física EM - 5 alternativas
+    return gerarQuestoesComGemini(serie, semana, quantidade)
+  }
+}
+
+/**
+ * Gera questões de Matemática EF únicas (sem cache, sempre novas)
+ */
+async function gerarQuestoesMatematicaEFUnicas(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGeradaEF[]> {
+  const conteudo = CURRICULO_MATEMATICA_EF[serie as keyof typeof CURRICULO_MATEMATICA_EF]?.[semana]
+
+  if (!conteudo) {
+    // Se não tem conteúdo específico, usar um tema genérico baseado na série
+    const temasGenericos: Record<string, { tema: string; subtema: string }> = {
+      '6EF': { tema: 'Números e Operações', subtema: 'Operações com números naturais' },
+      '7EF': { tema: 'Álgebra', subtema: 'Expressões algébricas' },
+      '8EF': { tema: 'Geometria', subtema: 'Figuras geométricas' },
+      '9EF': { tema: 'Funções', subtema: 'Introdução às funções' }
+    }
+    const temaGenerico = temasGenericos[serie] || temasGenericos['6EF']
+    return gerarQuestoesMatematicaEFComTema(serie, temaGenerico.tema, temaGenerico.subtema, quantidade, seed)
+  }
+
+  return gerarQuestoesMatematicaEFComTema(serie, conteudo.tema, conteudo.subtema, quantidade, seed)
+}
+
+/**
+ * Gera questões de Matemática EF com tema específico
+ */
+async function gerarQuestoesMatematicaEFComTema(
+  serie: string,
+  tema: string,
+  subtema: string,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGeradaEF[]> {
+  const serieNumero = serie[0]
+
+  const promptQuestoes = `Você é um professor de Matemática MUITO CUIDADOSO que cria questões para o Ensino Fundamental II.
+
+ATENÇÃO CRÍTICA: O GABARITO DEVE ESTAR 100% CORRETO!
+- Antes de definir a resposta_correta, FAÇA O CÁLCULO COMPLETO
+- VERIFIQUE se a alternativa marcada como correta realmente corresponde ao resultado
+- Se for uma questão de cálculo, MOSTRE A CONTA no feedback
+
+SEED: ${seed}
+
+INFORMAÇÕES:
+- Série: ${serieNumero}º ano (${serie})
+- Tema: ${tema}
+- Subtema: ${subtema}
+
+SÍMBOLOS OBRIGATÓRIOS:
+- Multiplicação: × ou · (NUNCA *)
+- Divisão: ÷ (NUNCA /)
+- Potência: ² ³ ⁴ ⁵ (NUNCA ^)
+- Raiz: √
+- Comparação: ≠ ≤ ≥
+
+EXEMPLO DE QUESTÃO CORRETA (potenciação):
+{
+  "enunciado": "Qual é o resultado de 2³ × 2²?",
+  "alternativas": {
+    "A": "32",
+    "B": "16",
+    "C": "64",
+    "D": "12"
+  },
+  "resposta_correta": "A",
+  "feedback": "2³ × 2² = 2³⁺² = 2⁵ = 32. Na multiplicação de potências de mesma base, somamos os expoentes."
+}
+
+EXEMPLO DE QUESTÃO CORRETA (fração):
+{
+  "enunciado": "Quanto é 3/4 + 1/4?",
+  "alternativas": {
+    "A": "4/8",
+    "B": "1",
+    "C": "4/4",
+    "D": "2/4"
+  },
+  "resposta_correta": "B",
+  "feedback": "3/4 + 1/4 = 4/4 = 1. Como os denominadores são iguais, somamos os numeradores: 3+1=4, então 4/4=1."
+}
+
+REGRAS:
+1. Crie ${quantidade} questões DIFERENTES
+2. APENAS 4 alternativas (A, B, C, D)
+3. VERIFIQUE O GABARITO antes de finalizar
+4. O feedback DEVE mostrar o cálculo/raciocínio completo
+5. Alternativas erradas devem ser erros comuns de alunos
+
+TIPOS (varie):
+- conceitual: entendimento do conceito
+- calculo_direto: aplicar operação/fórmula
+- situacao_problema: contexto do dia a dia
+
+Retorne APENAS JSON válido:
+{
+  "questoes": [
+    {
+      "tipo_questao": "calculo_direto",
+      "contexto": "escola",
+      "enunciado": "...",
+      "alternativas": {"A": "...", "B": "...", "C": "...", "D": "..."},
+      "resposta_correta": "X",
+      "dica": "...",
+      "feedback": "CÁLCULO: ... Portanto a resposta é X.",
+      "tema": "${tema}",
+      "subtema": "${subtema}"
+    }
+  ]
+}`
+
+  const modelosQuestoes = [
+    'gemini-1.5-pro',  // Modelo mais preciso primeiro para gabaritos corretos
+    'gemini-1.5-flash',
+    'gemini-2.0-flash-lite',
+  ]
+
+  for (const modelo of modelosQuestoes) {
+    try {
+      console.log(`[Gemini] Tentando ${modelo} para questões únicas...`)
+
+      const genAI = getGenAI()
+      const model = genAI.getGenerativeModel({ model: modelo })
+
+      const result = await model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.7, // Menor para gabaritos mais precisos
+          topP: 0.9,
+          maxOutputTokens: 8192
+        }
+      })
+
+      let text = result.response.text()
+
+      if (!text) continue
+
+      // Limpar markdown se presente
+      text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+
+      const dados = JSON.parse(text)
+
+      if (dados.questoes && Array.isArray(dados.questoes) && dados.questoes.length > 0) {
+        // Validar e limpar questões
+        const questoesValidadas = dados.questoes
+          .filter((q: QuestaoGeradaEF) =>
+            q.enunciado &&
+            q.alternativas &&
+            q.resposta_correta &&
+            ['A', 'B', 'C', 'D'].includes(q.resposta_correta.toUpperCase())
+          )
+          .map((q: QuestaoGeradaEF) => ({
+            ...q,
+            resposta_correta: q.resposta_correta.toUpperCase(),
+            tema: tema,
+            subtema: subtema
+          }))
+
+        if (questoesValidadas.length > 0) {
+          console.log(`[Gemini] ${questoesValidadas.length} questões únicas geradas com ${modelo}`)
+          return questoesValidadas
+        }
+      }
+    } catch (error) {
+      console.error(`[Gemini] Erro com ${modelo}:`, error)
+      continue
+    }
+  }
+
+  throw new Error('Falha ao gerar questões únicas')
 }
