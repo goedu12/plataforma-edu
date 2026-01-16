@@ -1050,6 +1050,13 @@ REGRAS OBRIGATÓRIAS:
 6. Inclua uma DICA que ajude sem revelar a resposta
 7. Inclua um FEEDBACK explicativo completo
 8. Use linguagem adequada para a faixa etária (11-14 anos)
+9. SÍMBOLOS MATEMÁTICOS - Use os símbolos tradicionais que os alunos conhecem:
+   - Use × ou · para multiplicação (NUNCA use *)
+   - Use ÷ para divisão (NUNCA use /)
+   - Use ² ³ ⁴ etc para potências (NUNCA use ^)
+   - Use √ para raiz quadrada
+   - Use ≠ para diferente, ≤ para menor ou igual, ≥ para maior ou igual
+   - Frações podem ser escritas como ½, ⅓, ¼ ou como "1/2", "1/3" etc
 
 TIPOS DE QUESTÃO (varie entre eles):
 - conceitual: Compreensão sem cálculos
