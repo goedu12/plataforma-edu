@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import type { Componente, SerieEM, Bimestre } from '@/types'
+import type { Componente, SerieMapa, Bimestre } from '@/types'
 
 // ═══════════════════════════════════════════════════════════
 // API: Mapas Mentais
 // GET - Listar mapas com filtros (série, bimestre)
 // Estudantes só veem mapas da sua série/ano
+// Suporta EM (1, 2, 3) e EF (6, 7, 8, 9)
 // ═══════════════════════════════════════════════════════════
+
+// Séries válidas para cada nível
+const SERIES_VALIDAS = [1, 2, 3, 6, 7, 8, 9]
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,15 +39,17 @@ export async function GET(request: NextRequest) {
 
     // Buscar dados do usuário para filtrar por série (estudantes)
     let serieEstudante: number | null = null
+    let nivelEstudante: string | null = null
     if (sessao.tipo === 'estudante') {
       const { data: usuario } = await supabase
         .from('usuarios')
-        .select('ano')
+        .select('ano, nivel')
         .eq('id', sessao.userId)
         .single()
 
       if (usuario?.ano) {
         serieEstudante = usuario.ano
+        nivelEstudante = usuario.nivel
       }
     }
 
@@ -63,8 +69,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('serie', serieEstudante)
     } else if (serie) {
       // Filtro manual (professor ou fallback)
-      const serieNum = parseInt(serie) as SerieEM
-      if ([1, 2, 3].includes(serieNum)) {
+      const serieNum = parseInt(serie) as SerieMapa
+      if (SERIES_VALIDAS.includes(serieNum)) {
         query = query.eq('serie', serieNum)
       }
     }

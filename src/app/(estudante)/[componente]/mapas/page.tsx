@@ -21,8 +21,8 @@ import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
-import type { Componente, MapaMentalComStatus, SerieEM, Bimestre } from '@/types'
-import { SERIES_LABELS, BIMESTRES_LABELS } from '@/types'
+import type { Componente, MapaMentalComStatus, SerieMapa, Bimestre, NivelEnsino } from '@/types'
+import { SERIES_MAPA_LABELS, BIMESTRES_LABELS } from '@/types'
 
 export default function MapasMentaisPage() {
   const router = useRouter()
@@ -33,8 +33,11 @@ export default function MapasMentaisPage() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
 
+  // Dados do usuário
+  const [nivelUsuario, setNivelUsuario] = useState<NivelEnsino | null>(null)
+
   // Filtros
-  const [serieFiltro, setSerieFiltro] = useState<SerieEM | null>(null)
+  const [serieFiltro, setSerieFiltro] = useState<SerieMapa | null>(null)
   const [bimestreFiltro, setBimestreFiltro] = useState<Bimestre | null>(null)
   const [showFiltros, setShowFiltros] = useState(false)
 
@@ -67,6 +70,19 @@ export default function MapasMentaisPage() {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Buscar dados do usuário (nível de ensino)
+  const buscarUsuario = async () => {
+    try {
+      const response = await fetch('/api/usuario')
+      const data = await response.json()
+      if (data.sucesso && data.usuario) {
+        setNivelUsuario(data.usuario.nivel as NivelEnsino)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar usuário:', error)
+    }
+  }
+
   // Buscar mapas
   const buscarMapas = async () => {
     setLoading(true)
@@ -98,6 +114,7 @@ export default function MapasMentaisPage() {
       router.push('/selecionar')
       return
     }
+    buscarUsuario()
     buscarMapas()
   }, [componente, serieFiltro, bimestreFiltro])
 
@@ -219,7 +236,7 @@ export default function MapasMentaisPage() {
 
     const texto = `📚 *${mapa.titulo}*
 
-${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LABELS[mapa.serie]} - ${BIMESTRES_LABELS[mapa.bimestre]}
+${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MAPA_LABELS[mapa.serie]} - ${BIMESTRES_LABELS[mapa.bimestre]}
 
 🔗 ${linkMapa}`
 
@@ -310,14 +327,23 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
                   <div className="relative">
                     <select
                       value={serieFiltro || ''}
-                      onChange={(e) => setSerieFiltro(e.target.value ? parseInt(e.target.value) as SerieEM : null)}
+                      onChange={(e) => setSerieFiltro(e.target.value ? parseInt(e.target.value) as SerieMapa : null)}
                       className="w-full p-2 pr-8 rounded-lg text-sm appearance-none"
                       style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', color: 'var(--text-primary)' }}
                     >
                       <option value="">Todas</option>
-                      <option value="1">1ª Série</option>
-                      <option value="2">2ª Série</option>
-                      <option value="3">3ª Série</option>
+                      {/* Matemática mostra EF e EM, Física só mostra EM */}
+                      {componente === 'matematica' && (
+                        <>
+                          <option value="6">6º Ano (EF)</option>
+                          <option value="7">7º Ano (EF)</option>
+                          <option value="8">8º Ano (EF)</option>
+                          <option value="9">9º Ano (EF)</option>
+                        </>
+                      )}
+                      <option value="1">1ª Série (EM)</option>
+                      <option value="2">2ª Série (EM)</option>
+                      <option value="3">3ª Série (EM)</option>
                     </select>
                     <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" style={{ color: 'var(--text-muted)' }} />
                   </div>
@@ -457,7 +483,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
               <div>
                 <h2 className="font-semibold text-white text-lg">{mapaAtual.titulo}</h2>
                 <p className="text-sm text-white/60">
-                  {SERIES_LABELS[mapaAtual.serie]} • {BIMESTRES_LABELS[mapaAtual.bimestre]}
+                  {SERIES_MAPA_LABELS[mapaAtual.serie]} • {BIMESTRES_LABELS[mapaAtual.bimestre]}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -601,7 +627,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LA
               <div className="min-w-0">
                 <h2 className="font-semibold text-white text-sm truncate">{mapaAtual.titulo}</h2>
                 <p className="text-xs text-white/60">
-                  {SERIES_LABELS[mapaAtual.serie]} • {BIMESTRES_LABELS[mapaAtual.bimestre]}
+                  {SERIES_MAPA_LABELS[mapaAtual.serie]} • {BIMESTRES_LABELS[mapaAtual.bimestre]}
                 </p>
               </div>
             </div>

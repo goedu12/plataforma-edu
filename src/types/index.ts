@@ -625,12 +625,19 @@ export const ENEM_CONFIG = {
 // Sistema de resumos visuais por série e bimestre
 // ═══════════════════════════════════════════════════════════
 
+// Séries do Ensino Médio
 export type SerieEM = 1 | 2 | 3
+
+// Séries do Ensino Fundamental (Anos Finais)
+export type SerieEF = 6 | 7 | 8 | 9
+
+// Todas as séries suportadas para Mapas Mentais
+export type SerieMapa = SerieEM | SerieEF
 
 export interface MapaMental {
   id: string
   componente: Componente
-  serie: SerieEM
+  serie: SerieMapa
   bimestre: Bimestre
   titulo: string
   descricao?: string
@@ -657,11 +664,30 @@ export interface MapaCurtida {
   criado_em: string
 }
 
-// Labels para exibição
+// Labels para exibição - Ensino Médio
 export const SERIES_LABELS: Record<SerieEM, string> = {
   1: '1ª Série',
   2: '2ª Série',
   3: '3ª Série',
+}
+
+// Labels para exibição - Ensino Fundamental
+export const SERIES_EF_NUMERICO_LABELS: Record<SerieEF, string> = {
+  6: '6º Ano',
+  7: '7º Ano',
+  8: '8º Ano',
+  9: '9º Ano',
+}
+
+// Labels unificados para todos os mapas
+export const SERIES_MAPA_LABELS: Record<SerieMapa, string> = {
+  1: '1ª Série',
+  2: '2ª Série',
+  3: '3ª Série',
+  6: '6º Ano',
+  7: '7º Ano',
+  8: '8º Ano',
+  9: '9º Ano',
 }
 
 export const BIMESTRES_LABELS: Record<Bimestre, string> = {
