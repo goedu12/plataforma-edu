@@ -625,8 +625,14 @@ export const ENEM_CONFIG = {
 // Sistema de resumos visuais por série e bimestre
 // ═══════════════════════════════════════════════════════════
 
+// Séries do Ensino Médio
 export type SerieEM = 1 | 2 | 3
-export type SerieMapa = 6 | 7 | 8 | 9 | 1 | 2 | 3 // EF (6-9) + EM (1-3)
+
+// Séries do Ensino Fundamental (Anos Finais)
+export type SerieEF = 6 | 7 | 8 | 9
+
+// Todas as séries suportadas para Mapas Mentais
+export type SerieMapa = SerieEM | SerieEF
 
 export interface MapaMental {
   id: string
@@ -658,15 +664,30 @@ export interface MapaCurtida {
   criado_em: string
 }
 
-// Labels para exibição
-export const SERIES_LABELS: Record<SerieMapa, string> = {
+// Labels para exibição - Ensino Médio
+export const SERIES_LABELS: Record<SerieEM, string> = {
+  1: '1ª Série',
+  2: '2ª Série',
+  3: '3ª Série',
+}
+
+// Labels para exibição - Ensino Fundamental
+export const SERIES_EF_NUMERICO_LABELS: Record<SerieEF, string> = {
   6: '6º Ano',
   7: '7º Ano',
   8: '8º Ano',
   9: '9º Ano',
+}
+
+// Labels unificados para todos os mapas
+export const SERIES_MAPA_LABELS: Record<SerieMapa, string> = {
   1: '1ª Série',
   2: '2ª Série',
   3: '3ª Série',
+  6: '6º Ano',
+  7: '7º Ano',
+  8: '8º Ano',
+  9: '9º Ano',
 }
 
 export const BIMESTRES_LABELS: Record<Bimestre, string> = {
@@ -674,4 +695,419 @@ export const BIMESTRES_LABELS: Record<Bimestre, string> = {
   2: '2º Bimestre',
   3: '3º Bimestre',
   4: '4º Bimestre',
+}
+
+// ═══════════════════════════════════════════════════════════
+// SISTEMA DE TRILHAS DE APRENDIZADO
+// PONTO DE RESTAURAÇÃO: tag v1.0-pre-trilhas
+// ═══════════════════════════════════════════════════════════
+
+// Identificadores das trilhas
+export type TrilhaId = 'passar_ano' | 'enem' | 'recuperacao' | 'desafio' | 'curiosidade' | 'pressa'
+
+// Série do Ensino Médio (formato string)
+export type SerieEM_String = '1EM' | '2EM' | '3EM'
+
+// Série do Ensino Fundamental (formato string)
+export type SerieEF_String = '6EF' | '7EF' | '8EF' | '9EF'
+
+// Todas as séries suportadas
+export type SerieTrilha = SerieEM_String | SerieEF_String
+
+// Alternativas por nível
+export type AlternativaEM = 'A' | 'B' | 'C' | 'D' | 'E'  // 5 alternativas para EM
+export type AlternativaEF = 'A' | 'B' | 'C' | 'D'         // 4 alternativas para EF
+export type AlternativaTrilha = AlternativaEM | AlternativaEF
+
+// Tipos de questão
+export type TipoQuestaoTrilha =
+  | 'conceitual'
+  | 'calculo_direto'
+  | 'interpretacao_grafico'
+  | 'situacao_problema'
+  | 'analise_fenomeno'
+  | 'comparacao'
+  | 'olimpiada'
+
+// Contextos do cotidiano
+export type ContextoCotidiano =
+  | 'transporte'
+  | 'casa_familia'
+  | 'escola'
+  | 'rua_bairro'
+  | 'corpo_saude'
+  | 'lazer_tecnologia'
+  | 'trabalho_profissoes'
+  | 'todos'
+
+// Dificuldade extendida (inclui olimpíada)
+export type DificuldadeTrilha = 'facil' | 'medio' | 'dificil' | 'olimpiada'
+
+// Status do progresso semanal
+export type StatusSemana = 'bloqueada' | 'disponivel' | 'em_progresso' | 'concluida'
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Trilha
+// ═══════════════════════════════════════════════════════════
+export interface Trilha {
+  id: TrilhaId
+  nome: string
+  icone: string
+  cor: string
+  descricao: string
+  descricao_curta?: string
+  config: TrilhaConfig
+  ordem: number
+  ativa: boolean
+}
+
+export interface TrilhaConfig {
+  questoes_semana: number | null
+  dificuldade: Record<DificuldadeTrilha, number>
+  tipos: string[]
+  acerto_avancar?: number
+  segue_calendario?: boolean
+  usa_banco_enem?: boolean
+  simulados_mensais?: boolean
+  diagnostico_obrigatorio?: boolean
+  ranking?: boolean
+  competicoes?: boolean
+  sem_pressao?: boolean
+  temporario?: boolean
+  [key: string]: any  // Permite configs adicionais
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Questão da Trilha
+// ═══════════════════════════════════════════════════════════
+// Alternativas para 5 opções (Ensino Médio)
+export interface AlternativasEM {
+  A: string
+  B: string
+  C: string
+  D: string
+  E: string
+}
+
+// Alternativas para 4 opções (Ensino Fundamental)
+export interface AlternativasEF {
+  A: string
+  B: string
+  C: string
+  D: string
+}
+
+export interface QuestaoTrilha {
+  id: number
+  serie: SerieTrilha
+  semana: number
+  ano_letivo: number
+  ordem: number
+  tema: string
+  subtema: string
+  competencias_bncc: string[]
+  tipo_questao: TipoQuestaoTrilha
+  contexto_cotidiano: ContextoCotidiano
+  enunciado: string
+  alternativas: AlternativasEM | AlternativasEF
+  resposta_correta: AlternativaTrilha
+  dica: string
+  feedback: QuestaoFeedback
+  dificuldade: DificuldadeTrilha
+  tags: string[]
+  is_desafio: boolean
+  ativa: boolean
+  // Novos campos para EF
+  componente?: Componente
+  nivel_ensino?: NivelEnsino
+  num_alternativas?: 4 | 5
+}
+
+export interface QuestaoFeedback {
+  explicacao_correta: string
+  erros_comuns: {
+    A?: string
+    B?: string
+    C?: string
+    D?: string
+    E?: string  // Opcional para EF (apenas A-D)
+  }
+  conexao_cotidiano: string
+  curiosidade: string
+}
+
+// Questão retornada pela API (com status de resposta)
+export interface QuestaoTrilhaComStatus extends Omit<QuestaoTrilha, 'resposta_correta'> {
+  questao_id: number
+  ja_respondida: boolean
+  resposta_usuario?: AlternativaTrilha
+  acertou?: boolean
+  tempo_resposta?: number
+  usou_dica?: boolean
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Usuário na Trilha
+// ═══════════════════════════════════════════════════════════
+export interface UsuarioTrilha {
+  id: number
+  usuario_id: string
+  trilha_id: TrilhaId
+  serie: SerieTrilha
+  componente?: Componente
+  ativa: boolean
+  iniciada_em: string
+  pausada_em?: string
+  concluida_em?: string
+  semana_atual: number
+  questoes_total: number
+  questoes_corretas: number
+  pontos_trilha: number
+  sequencia_dias: number
+  melhor_sequencia: number
+  ultimo_acesso: string
+  diagnostico_feito: boolean
+  diagnostico_resultado?: any
+  lacunas_identificadas?: string[]
+  data_prova?: string
+  temas_prova?: string[]
+  config_personalizada?: Partial<TrilhaConfig>
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Progresso Semanal
+// ═══════════════════════════════════════════════════════════
+export interface ProgressoSemanal {
+  id: number
+  usuario_id: string
+  trilha_id: TrilhaId
+  serie: SerieTrilha
+  componente?: Componente
+  semana: number
+  ano_letivo: number
+  questoes_total: number
+  questoes_respondidas: number
+  questoes_corretas: number
+  desafio_disponivel: boolean
+  desafio_respondido: boolean
+  desafio_acertou: boolean
+  status: StatusSemana
+  tempo_total_segundos: number
+  pontos_semana: number
+  bonus_100_porcento: boolean
+  desbloqueada_em?: string
+  iniciada_em?: string
+  concluida_em?: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Resposta na Trilha
+// ═══════════════════════════════════════════════════════════
+export interface RespostaTrilha {
+  id: number
+  usuario_id: string
+  questao_id: number
+  trilha_id: TrilhaId
+  resposta_dada: AlternativaTrilha
+  correta: boolean
+  tempo_segundos: number
+  usou_dica: boolean
+  tentativa: number
+  pontos_ganhos: number
+  created_at: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Progresso do Usuário (retorno da API)
+// ═══════════════════════════════════════════════════════════
+export interface ProgressoTrilhaUsuario {
+  trilha_id: TrilhaId
+  trilha_nome: string
+  trilha_icone: string
+  trilha_cor: string
+  serie: SerieTrilha
+  componente?: Componente
+  semana_atual: number
+  questoes_total: number
+  questoes_corretas: number
+  percentual_acerto: number
+  pontos: number
+  sequencia_dias: number
+  status_semana: StatusSemana
+  iniciada_em: string
+  ultimo_acesso: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERFACE: Resultado de Resposta (retorno da API)
+// ═══════════════════════════════════════════════════════════
+export interface ResultadoResposta {
+  sucesso: boolean
+  correta: boolean
+  resposta_certa: AlternativaTrilha
+  resposta_dada: AlternativaTrilha
+  pontos: number
+  feedback: QuestaoFeedback
+  progresso: {
+    corretas_semana: number
+    total_semana: number
+    percentual: number
+  }
+  pode_avancar: boolean
+  proxima_semana?: number
+  mensagem: string
+}
+
+// ═══════════════════════════════════════════════════════════
+// CONSTANTES: Labels das Trilhas
+// ═══════════════════════════════════════════════════════════
+export const TRILHAS_INFO: Record<TrilhaId, { nome: string; icone: string; cor: string; descricao_curta: string }> = {
+  passar_ano: {
+    nome: 'Passar de Ano',
+    icone: '🎓',
+    cor: '#4CAF50',
+    descricao_curta: 'Acompanhe a escola'
+  },
+  enem: {
+    nome: 'ENEM/Vestibular',
+    icone: '🏆',
+    cor: '#2196F3',
+    descricao_curta: 'Conquistar a vaga'
+  },
+  recuperacao: {
+    nome: 'Recuperação',
+    icone: '🔧',
+    cor: '#FF9800',
+    descricao_curta: 'Voltar do básico'
+  },
+  desafio: {
+    nome: 'Desafio Total',
+    icone: '🚀',
+    cor: '#9C27B0',
+    descricao_curta: 'Ir além da escola'
+  },
+  curiosidade: {
+    nome: 'Curiosidade',
+    icone: '🔬',
+    cor: '#00BCD4',
+    descricao_curta: 'Entender o mundo'
+  },
+  pressa: {
+    nome: 'Pressa',
+    icone: '⚡',
+    cor: '#F44336',
+    descricao_curta: 'Prova chegando!'
+  }
+}
+
+export const SERIES_EM_LABELS: Record<SerieEM_String, string> = {
+  '1EM': '1º Ano',
+  '2EM': '2º Ano',
+  '3EM': '3º Ano'
+}
+
+export const TIPOS_QUESTAO_LABELS: Record<TipoQuestaoTrilha, string> = {
+  conceitual: 'Conceitual',
+  calculo_direto: 'Cálculo Direto',
+  interpretacao_grafico: 'Interpretação de Gráfico',
+  situacao_problema: 'Situação-Problema',
+  analise_fenomeno: 'Análise de Fenômeno',
+  comparacao: 'Comparação',
+  olimpiada: 'Nível Olimpíada'
+}
+
+export const CONTEXTOS_LABELS: Record<ContextoCotidiano, string> = {
+  transporte: 'Transporte',
+  casa_familia: 'Casa e Família',
+  escola: 'Escola',
+  rua_bairro: 'Rua e Bairro',
+  corpo_saude: 'Corpo e Saúde',
+  lazer_tecnologia: 'Lazer e Tecnologia',
+  trabalho_profissoes: 'Trabalho e Profissões',
+  todos: 'Diversos'
+}
+
+// ═══════════════════════════════════════════════════════════
+// SÉRIES DO ENSINO FUNDAMENTAL - Labels e Helpers
+// ═══════════════════════════════════════════════════════════
+
+export const SERIES_EF_LABELS: Record<SerieEF_String, string> = {
+  '6EF': '6º Ano',
+  '7EF': '7º Ano',
+  '8EF': '8º Ano',
+  '9EF': '9º Ano'
+}
+
+// Labels unificados para todas as séries
+export const SERIES_TRILHA_LABELS: Record<SerieTrilha, string> = {
+  ...SERIES_EF_LABELS,
+  ...SERIES_EM_LABELS
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS: Detecção de nível de ensino
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Verifica se a série é do Ensino Fundamental
+ */
+export function isSerieEF(serie: SerieTrilha): serie is SerieEF_String {
+  return ['6EF', '7EF', '8EF', '9EF'].includes(serie)
+}
+
+/**
+ * Verifica se a série é do Ensino Médio
+ */
+export function isSerieEM(serie: SerieTrilha): serie is SerieEM_String {
+  return ['1EM', '2EM', '3EM'].includes(serie)
+}
+
+/**
+ * Retorna o número de alternativas baseado na série
+ * EF: 4 alternativas (A, B, C, D)
+ * EM: 5 alternativas (A, B, C, D, E)
+ */
+export function getNumAlternativas(serie: SerieTrilha): 4 | 5 {
+  return isSerieEF(serie) ? 4 : 5
+}
+
+/**
+ * Retorna o nível de ensino baseado na série
+ */
+export function getNivelEnsinoPorSerie(serie: SerieTrilha): NivelEnsino {
+  return isSerieEF(serie) ? 'EF' : 'EM'
+}
+
+/**
+ * Retorna as alternativas válidas para uma série
+ */
+export function getAlternativasValidas(serie: SerieTrilha): AlternativaTrilha[] {
+  return isSerieEF(serie) ? ['A', 'B', 'C', 'D'] : ['A', 'B', 'C', 'D', 'E']
+}
+
+/**
+ * Valida se uma resposta é válida para uma série
+ */
+export function isRespostaValida(resposta: string, serie: SerieTrilha): resposta is AlternativaTrilha {
+  const validas = getAlternativasValidas(serie)
+  return validas.includes(resposta as AlternativaTrilha)
+}
+
+/**
+ * Converte número da turma para série de trilha
+ * Ex: '6A' -> '6EF', '1A' -> '1EM'
+ */
+export function turmaParaSerieTrilha(turma: string): SerieTrilha | null {
+  const match = turma.match(/^(\d+)/)
+  if (!match) return null
+
+  const ano = parseInt(match[1])
+
+  if (ano >= 6 && ano <= 9) {
+    return `${ano}EF` as SerieEF_String
+  } else if (ano >= 1 && ano <= 3) {
+    return `${ano}EM` as SerieEM_String
+  }
+
+  return null
 }
