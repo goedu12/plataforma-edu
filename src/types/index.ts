@@ -626,11 +626,12 @@ export const ENEM_CONFIG = {
 // ═══════════════════════════════════════════════════════════
 
 export type SerieEM = 1 | 2 | 3
+export type SerieMapa = 6 | 7 | 8 | 9 | 1 | 2 | 3 // EF (6-9) + EM (1-3)
 
 export interface MapaMental {
   id: string
   componente: Componente
-  serie: SerieEM
+  serie: SerieMapa
   bimestre: Bimestre
   titulo: string
   descricao?: string
@@ -658,7 +659,11 @@ export interface MapaCurtida {
 }
 
 // Labels para exibição
-export const SERIES_LABELS: Record<SerieEM, string> = {
+export const SERIES_LABELS: Record<SerieMapa, string> = {
+  6: '6º Ano',
+  7: '7º Ano',
+  8: '8º Ano',
+  9: '9º Ano',
   1: '1ª Série',
   2: '2ª Série',
   3: '3ª Série',
