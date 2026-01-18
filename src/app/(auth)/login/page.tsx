@@ -208,7 +208,7 @@ export default function LoginPage() {
             className="text-sm mb-1"
             style={{ color: 'var(--text-secondary)' }}
           >
-            <span style={{ color: 'var(--color-fisica)' }}>Login:</span> seunomecompleto@turma
+            <span style={{ color: 'var(--color-fisica)' }}>Login:</span> primeironome.ultimonome@turma
           </p>
           <p
             className="text-sm mb-2"
