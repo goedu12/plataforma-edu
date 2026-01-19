@@ -365,33 +365,52 @@ export default function TrilhasEstudarPage() {
   const progressoTotal = progresso?.questoes_semana ?? questoes.length
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header - Compacto como modo estudar */}
+      {/* Header - Ultra compacto */}
       <header className="header-chromebook flex-shrink-0">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 lg:gap-3">
             <button
               onClick={() => router.push(`/${componente}/trilhas`)}
-              className="w-8 h-8 flex items-center justify-center rounded-lg transition-all active:scale-95 lg:hidden"
+              className="w-7 h-7 lg:w-6 lg:h-6 flex items-center justify-center rounded-lg transition-all active:scale-95 lg:hidden"
               style={{ background: 'var(--bg-elevated)' }}
             >
-              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
+              <ArrowLeft className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--text-secondary)' }} />
             </button>
 
             <div className="flex items-center gap-1.5 flex-1">
-              <Target className="w-4 h-4" style={{ color: accentColor }} />
-              <span className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>Trilha</span>
+              <Target className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: accentColor }} />
+              <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>Trilha</span>
             </div>
 
-            <span className="text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+            {/* Progresso inline - Desktop */}
+            <div className="hidden lg:flex items-center gap-1.5">
+              <div className="flex gap-0.5">
+                {Array.from({ length: questoes.length }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-1.5 h-3 rounded-sm"
+                    style={{
+                      background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                {questaoAtual + 1}/{questoes.length}
+              </span>
+            </div>
+
+            {/* Contador mobile */}
+            <span className="lg:hidden text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
               {questaoAtual + 1}/{questoes.length}
             </span>
           </div>
 
-          {/* Barra de progresso compacta */}
-          <div className="flex items-center gap-2 mt-1.5">
+          {/* Barra de progresso mobile */}
+          <div className="flex lg:hidden items-center gap-2 mt-1.5">
             <div className="flex gap-0.5 flex-1">
               {Array.from({ length: questoes.length }).map((_, index) => (
                 <div
@@ -407,155 +426,160 @@ export default function TrilhasEstudarPage() {
         </div>
       </header>
 
-      {/* Conteúdo - Compacto */}
-      <main
-        className={`flex-1 max-w-2xl mx-auto w-full px-3 py-2 lg:px-4 transition-opacity duration-150 ${animandoProxima ? 'opacity-0' : 'opacity-100'}`}
-      >
-        {/* Enunciado - Estilo compacto como modo estudar */}
-        <div className="card-chromebook mb-3" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-          {questao.tema && (
-            <span className="badge-chromebook mb-2 inline-block" style={{ background: `${accentColor}15`, color: accentColor }}>
-              {questao.tema}
-            </span>
-          )}
-          <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-            {formatarFormula(questao.enunciado)}
-          </p>
-        </div>
+      {/* Conteúdo - Flex com scroll interno */}
+      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+        <div className={`flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 transition-opacity duration-150 ${animandoProxima ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="space-chromebook">
+            {/* Tag tema - inline no mobile */}
+            {questao.tema && (
+              <span className="badge-chromebook inline-block mb-1" style={{ background: `${accentColor}15`, color: accentColor }}>
+                {questao.tema}
+              </span>
+            )}
 
-        {/* Dica - Compacta */}
-        {!mostrarResultado && questao.dica && (
-          <div className="mb-2">
-            {mostrarDica ? (
-              <div className="feedback-chromebook" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px dashed var(--color-warning)' }}>
-                <div className="flex items-center gap-1 mb-0.5">
-                  <Lightbulb className="w-3.5 h-3.5" style={{ color: 'var(--color-warning)' }} />
-                  <span className="text-[10px] font-medium" style={{ color: 'var(--color-warning)' }}>Dica</span>
-                </div>
-                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
+            {/* Enunciado */}
+            <div className="card-chromebook">
+              <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
+                {formatarFormula(questao.enunciado)}
+              </p>
+            </div>
+
+            {/* Dica */}
+            {!mostrarResultado && questao.dica && (
+              <div>
+                {mostrarDica ? (
+                  <div className="feedback-chromebook" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px dashed var(--color-warning)' }}>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <Lightbulb className="w-3 h-3 lg:w-2.5 lg:h-2.5" style={{ color: 'var(--color-warning)' }} />
+                      <span className="text-[10px] font-medium" style={{ color: 'var(--color-warning)' }}>Dica</span>
+                    </div>
+                    <p className="text-xs lg:text-[11px]" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={toggleDica}
+                    className="w-full py-1 lg:py-0.5 px-2 rounded-lg flex items-center justify-center gap-1 text-xs lg:text-[11px]"
+                    style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
+                  >
+                    <Lightbulb className="w-3 h-3" />
+                    <span>Precisa de uma dica?</span>
+                  </button>
+                )}
               </div>
-            ) : (
-              <button
-                onClick={toggleDica}
-                className="w-full py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs"
-                style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
+            )}
+
+            {/* Alternativas */}
+            <div className="space-chromebook">
+              {Object.entries(questao.alternativas)
+                .filter(([, texto]) => texto)
+                .map(([letra, texto]) => {
+                  const isSelected = respostaSelecionada === letra
+                  const isCorrect = letra === questao.resposta_correta
+                  const showResult = mostrarResultado
+
+                  let style: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }
+
+                  if (showResult) {
+                    if (isCorrect) {
+                      style = { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
+                    } else if (isSelected) {
+                      style = { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
+                    } else {
+                      style = { ...style, opacity: 0.5 }
+                    }
+                  } else if (isSelected) {
+                    style = {
+                      background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                      border: `2px solid ${accentColor}`
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={letra}
+                      onClick={() => !mostrarResultado && !respondendo && responderQuestao(letra)}
+                      disabled={mostrarResultado || respondendo}
+                      className="alternativa-chromebook"
+                      style={style}
+                    >
+                      <span
+                        className="alternativa-letra-compact"
+                        style={{
+                          background: showResult && isCorrect
+                            ? 'var(--success)'
+                            : showResult && isSelected
+                              ? 'var(--error)'
+                              : isSelected
+                                ? accentColor
+                                : 'var(--bg-elevated)',
+                          color: (showResult && (isCorrect || isSelected)) || isSelected
+                            ? isFisica ? '#000' : '#fff'
+                            : 'var(--text-muted)',
+                        }}
+                      >
+                        {showResult && isCorrect ? (
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        ) : showResult && isSelected ? (
+                          <XCircle className="w-3.5 h-3.5" />
+                        ) : (
+                          letra
+                        )}
+                      </span>
+                      <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
+                        {formatarFormula(texto as string)}
+                      </span>
+                      {respondendo && isSelected && (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" style={{ color: accentColor }} />
+                      )}
+                    </button>
+                  )
+                })}
+            </div>
+
+            {/* Feedback */}
+            {mostrarResultado && (
+              <div
+                className="feedback-chromebook flex items-center gap-2"
+                style={{
+                  background: acertou ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  border: `1px solid ${acertou ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                }}
               >
-                <Lightbulb className="w-3.5 h-3.5" />
-                <span>Precisa de uma dica?</span>
+                <div
+                  className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
+                  style={{ background: acertou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                >
+                  {acertou ? <CheckCircle className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-sm lg:text-xs" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
+                    {acertou ? 'Correto!' : 'Incorreto'}
+                  </span>
+                  {questao.feedback && (
+                    <p className="text-xs lg:text-[11px] mt-0.5 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                      {formatarFormula(questao.feedback)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Botão próxima/finalizar */}
+            {mostrarResultado && (
+              <button
+                onClick={proximaQuestao}
+                className="w-full btn-chromebook py-2.5 lg:py-2 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                style={{ background: accentColor, color: textOnAccent }}
+              >
+                {questaoAtual < questoes.length - 1 ? (
+                  <>Próxima <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5" /></>
+                ) : (
+                  <>Finalizar <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" /></>
+                )}
               </button>
             )}
           </div>
-        )}
-
-        {/* Alternativas - Estilo compacto como modo estudar */}
-        <div className="space-y-2">
-          {Object.entries(questao.alternativas)
-            .filter(([, texto]) => texto)
-            .map(([letra, texto]) => {
-              const isSelected = respostaSelecionada === letra
-              const isCorrect = letra === questao.resposta_correta
-              const showResult = mostrarResultado
-
-              let style: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }
-
-              if (showResult) {
-                if (isCorrect) {
-                  style = { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
-                } else if (isSelected) {
-                  style = { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
-                } else {
-                  style = { ...style, opacity: 0.5 }
-                }
-              } else if (isSelected) {
-                style = {
-                  background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                  border: `2px solid ${accentColor}`
-                }
-              }
-
-              return (
-                <button
-                  key={letra}
-                  onClick={() => !mostrarResultado && !respondendo && responderQuestao(letra)}
-                  disabled={mostrarResultado || respondendo}
-                  className="alternativa-chromebook"
-                  style={style}
-                >
-                  <span
-                    className="alternativa-letra-compact"
-                    style={{
-                      background: showResult && isCorrect
-                        ? 'var(--success)'
-                        : showResult && isSelected
-                          ? 'var(--error)'
-                          : isSelected
-                            ? accentColor
-                            : 'var(--bg-elevated)',
-                      color: (showResult && (isCorrect || isSelected)) || isSelected
-                        ? isFisica ? '#000' : '#fff'
-                        : 'var(--text-muted)',
-                    }}
-                  >
-                    {showResult && isCorrect ? (
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    ) : showResult && isSelected ? (
-                      <XCircle className="w-3.5 h-3.5" />
-                    ) : (
-                      letra
-                    )}
-                  </span>
-                  <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
-                    {formatarFormula(texto as string)}
-                  </span>
-                  {respondendo && isSelected && (
-                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" style={{ color: accentColor }} />
-                  )}
-                </button>
-              )
-            })}
         </div>
-
-        {/* Feedback - Compacto como modo estudar */}
-        {mostrarResultado && (
-          <div className="mt-3 space-y-2">
-            <div
-              className="feedback-chromebook flex items-center gap-2"
-              style={{
-                background: acertou ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                border: `1px solid ${acertou ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
-              }}
-            >
-              <div
-                className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
-                style={{ background: acertou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
-              >
-                {acertou ? <CheckCircle className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="font-semibold text-sm" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
-                  {acertou ? 'Correto!' : 'Incorreto'}
-                </span>
-                {questao.feedback && (
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-                    {formatarFormula(questao.feedback)}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={proximaQuestao}
-              className="w-full btn-chromebook py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-              style={{ background: accentColor, color: textOnAccent }}
-            >
-              {questaoAtual < questoes.length - 1 ? (
-                <>Próxima <ChevronRight className="w-4 h-4" /></>
-              ) : (
-                <>Finalizar <Trophy className="w-4 h-4" /></>
-              )}
-            </button>
-          </div>
-        )}
       </main>
 
       <BottomNav componente={componente} />
