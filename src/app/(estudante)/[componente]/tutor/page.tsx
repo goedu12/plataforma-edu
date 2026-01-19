@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ArrowLeft, Bot, Zap } from 'lucide-react'
+import { Bot, Zap } from 'lucide-react'
 import TutorChat from '@/components/TutorChat'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Usuario } from '@/types'
 import { PONTUACAO } from '@/types'
@@ -92,14 +93,7 @@ export default function TutorPage() {
         <div className="max-w-2xl mx-auto">
           {/* Linha 1: Navegação + Título + Indicador */}
           <div className="flex items-center justify-between gap-2">
-            <button
-              onClick={handleVoltar}
-              className="p-2 -ml-2 rounded-lg lg:hidden"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="Voltar"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
+            <BackButton href={`/${componente}/menu`} mobileOnly />
 
             <div className="flex items-center gap-2">
               <Bot className="w-4 h-4" style={{ color: corPrimaria }} />

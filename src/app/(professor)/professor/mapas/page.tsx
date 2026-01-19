@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ArrowLeft,
   Upload,
   Image as ImageIcon,
   Check,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import BackButton from '@/components/ui/BackButton'
 import Loading from '@/components/ui/Loading'
 import type { Componente, SerieEM, Bimestre, MapaMental } from '@/types'
 
@@ -153,12 +153,7 @@ export default function MapasMentaisUploadPage() {
       {/* Header */}
       <header className="px-4 py-4 border-b" style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-default)' }}>
         <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <button
-            onClick={() => router.push('/professor/dashboard')}
-            className="p-2 rounded-lg hover:bg-slate-100 transition-colors text-slate-600"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton href="/professor/dashboard" />
           <div>
             <h1 className="font-display text-lg font-bold text-slate-800">Mapas Mentais</h1>
             <p className="text-slate-500 text-sm">Upload e gerenciamento</p>

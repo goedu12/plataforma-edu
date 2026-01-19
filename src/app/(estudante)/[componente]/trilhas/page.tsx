@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   ChevronRight,
   Play,
   Pause,
@@ -12,6 +11,7 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
@@ -239,14 +239,7 @@ export default function TrilhasPage() {
       <header className="header-chromebook lg:py-2">
         <div className="max-w-2xl mx-auto w-full">
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => router.push(`/${componente}/menu`)}
-              className="w-9 h-9 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[var(--bg-surface-hover)]"
-              style={{ border: '1px solid var(--border-default)' }}
-              aria-label="Voltar ao menu"
-            >
-              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
-            </button>
+            <BackButton href={`/${componente}/menu`} compactOnDesktop />
             <div>
               <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Trilhas de Aprendizado
