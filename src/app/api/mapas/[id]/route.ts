@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { logger } from '@/lib/logger'
 
 // ═══════════════════════════════════════════════════════════
 // API: Mapa Mental Individual
@@ -48,23 +49,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       .eq('usuario_id', sessao.userId)
       .single()
 
-    // Incrementar visualizações
-    await supabase
-      .from('mapas_mentais')
-      .update({ visualizacoes: (mapa.visualizacoes || 0) + 1 })
-      .eq('id', id)
+    // Incrementar visualizações (atômico via RPC)
+    const { data: novasVisualizacoes } = await supabase
+      .rpc('incrementar_visualizacao_mapa', { mapa_id: id })
 
     return NextResponse.json({
       sucesso: true,
       mapa: {
         ...mapa,
         curtido: !!curtida,
-        visualizacoes: (mapa.visualizacoes || 0) + 1
+        visualizacoes: novasVisualizacoes ?? (mapa.visualizacoes || 0) + 1
       }
     })
 
   } catch (error) {
-    console.error('Erro ao buscar mapa:', error)
+    logger.error('Erro ao buscar mapa:', error)
     return NextResponse.json(
       { sucesso: false, erro: 'Erro interno do servidor' },
       { status: 500 }
@@ -122,15 +121,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           .delete()
           .eq('id', curtidaExistente.id)
 
-        await supabase
-          .from('mapas_mentais')
-          .update({ curtidas: Math.max((mapa.curtidas || 0) - 1, 0) })
-          .eq('id', id)
+        // Decrementar contador (atômico via RPC)
+        const { data: novasCurtidas } = await supabase
+          .rpc('decrementar_curtida_mapa', { mapa_id: id })
 
         return NextResponse.json({
           sucesso: true,
           curtido: false,
-          curtidas: Math.max((mapa.curtidas || 0) - 1, 0),
+          curtidas: novasCurtidas ?? Math.max((mapa.curtidas || 0) - 1, 0),
           mensagem: 'Curtida removida'
         })
       } else {
@@ -142,15 +140,14 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
             usuario_id: sessao.userId
           })
 
-        await supabase
-          .from('mapas_mentais')
-          .update({ curtidas: (mapa.curtidas || 0) + 1 })
-          .eq('id', id)
+        // Incrementar contador (atômico via RPC)
+        const { data: novasCurtidas } = await supabase
+          .rpc('incrementar_curtida_mapa', { mapa_id: id })
 
         return NextResponse.json({
           sucesso: true,
           curtido: true,
-          curtidas: (mapa.curtidas || 0) + 1,
+          curtidas: novasCurtidas ?? (mapa.curtidas || 0) + 1,
           mensagem: 'Mapa curtido!'
         })
       }
@@ -168,15 +165,13 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
           usuario_id: sessao.userId
         })
 
-      // Incrementar contador
-      await supabase
-        .from('mapas_mentais')
-        .update({ downloads: (mapa.downloads || 0) + 1 })
-        .eq('id', id)
+      // Incrementar contador (atômico via RPC)
+      const { data: novosDownloads } = await supabase
+        .rpc('incrementar_download_mapa', { mapa_id: id })
 
       return NextResponse.json({
         sucesso: true,
-        downloads: (mapa.downloads || 0) + 1,
+        downloads: novosDownloads ?? (mapa.downloads || 0) + 1,
         mensagem: 'Download registrado'
       })
     }
@@ -187,7 +182,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     )
 
   } catch (error) {
-    console.error('Erro na ação do mapa:', error)
+    logger.error('Erro na ação do mapa:', error)
     return NextResponse.json(
       { sucesso: false, erro: 'Erro interno do servidor' },
       { status: 500 }
@@ -242,7 +237,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     })
 
   } catch (error) {
-    console.error('Erro ao remover mapa:', error)
+    logger.error('Erro ao remover mapa:', error)
     return NextResponse.json(
       { sucesso: false, erro: 'Erro interno do servidor' },
       { status: 500 }
