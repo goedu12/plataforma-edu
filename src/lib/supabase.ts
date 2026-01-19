@@ -138,7 +138,8 @@ export type Database = {
           alternativa_b: string
           alternativa_c: string
           alternativa_d: string
-          resposta_correta: 'A' | 'B' | 'C' | 'D'
+          alternativa_e?: string | null
+          resposta_correta: 'A' | 'B' | 'C' | 'D' | 'E'
           explicacao: string
           dica: string | null
           status: 'ativa' | 'inativa'
@@ -153,11 +154,12 @@ export type Database = {
           usuario_id: string
           questao_id: string
           componente: 'fisica' | 'matematica'
-          resposta_dada: 'A' | 'B' | 'C' | 'D'
+          resposta_dada: 'A' | 'B' | 'C' | 'D' | 'E'
           correta: boolean
           tempo_segundos: number
           usou_dica: boolean
           pontos_ganhos: number
+          modo: 'estudo' | 'desafio' | 'revisao'
           criado_em: string
         }
         Insert: Omit<Database['public']['Tables']['respostas']['Row'], 'id' | 'criado_em'>
@@ -171,8 +173,12 @@ export type Database = {
           descricao: string
           icone: string
           componente: 'fisica' | 'matematica' | null
-          requisito_tipo: 'pontos' | 'questoes' | 'sequencia' | 'acertos'
+          requisito_tipo: 'pontos' | 'questoes' | 'sequencia' | 'acertos' | 'combinado'
           requisito_valor: number
+          req_pontos: number | null
+          req_questoes_corretas: number | null
+          req_sequencia_dias: number | null
+          ordem: number
         }
         Insert: Omit<Database['public']['Tables']['conquistas']['Row'], 'id'>
         Update: Partial<Database['public']['Tables']['conquistas']['Insert']>
