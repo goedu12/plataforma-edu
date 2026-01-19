@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import type { MapaMental, Componente } from '@/types'
-import { SERIES_LABELS, BIMESTRES_LABELS } from '@/types'
+import { SERIES_MAPA_LABELS, BIMESTRES_LABELS } from '@/types'
 
 // Página pública para visualização de mapa mental via link compartilhado
 export default function MapaPublicoPage() {
@@ -80,7 +80,7 @@ export default function MapaPublicoPage() {
 
     const texto = `📚 *${mapa.titulo}*
 
-${mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_LABELS[mapa.serie]} - ${BIMESTRES_LABELS[mapa.bimestre]}
+${mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MAPA_LABELS[mapa.serie]} - ${BIMESTRES_LABELS[mapa.bimestre]}
 
 🔗 ${linkMapa}`
 
@@ -137,7 +137,7 @@ ${mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERI
           <div className="min-w-0">
             <h1 className="font-semibold text-white truncate">{mapa.titulo}</h1>
             <p className="text-sm text-gray-400">
-              {mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} • {SERIES_LABELS[mapa.serie]} • {BIMESTRES_LABELS[mapa.bimestre]}
+              {mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} • {SERIES_MAPA_LABELS[mapa.serie]} • {BIMESTRES_LABELS[mapa.bimestre]}
             </p>
           </div>
         </div>
