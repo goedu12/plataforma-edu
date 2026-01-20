@@ -1,0 +1,1181 @@
+import { FlashCard } from '@/types/flashcards'
+
+export const flashcardsMatematica3anoEM: FlashCard[] = [
+  // ==================== ANÁLISE COMBINATÓRIA ====================
+  {
+    id: 'mat-3em-comb-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Princípio Fundamental da Contagem',
+    dificuldade: 'facil',
+    pergunta: 'Se uma pessoa pode escolher entre 3 camisas e 4 calças, de quantas formas diferentes ela pode se vestir?',
+    opcoes: [
+      '7 formas',
+      '12 formas',
+      '1 forma',
+      '24 formas'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Pelo Princípio Fundamental da Contagem, multiplicamos as possibilidades: 3 × 4 = 12 formas diferentes.'
+  },
+  {
+    id: 'mat-3em-comb-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Fatorial',
+    dificuldade: 'facil',
+    pergunta: 'O valor de 0! (zero fatorial) é igual a 1.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Por convenção, 0! = 1. Essa definição é necessária para que várias fórmulas combinatórias funcionem corretamente.'
+  },
+  {
+    id: 'mat-3em-comb-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Fatorial',
+    dificuldade: 'facil',
+    pergunta: 'Qual é o valor de 5!?',
+    opcoes: [
+      '5',
+      '25',
+      '120',
+      '720'
+    ],
+    respostaCorreta: 2,
+    explicacao: '5! = 5 × 4 × 3 × 2 × 1 = 120. O fatorial de n é o produto de todos os inteiros de 1 até n.'
+  },
+  {
+    id: 'mat-3em-comb-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Permutação',
+    dificuldade: 'medio',
+    pergunta: 'Uma permutação simples de n elementos é dada por Pₙ = ___.',
+    respostaCorreta: 'n!',
+    explicacao: 'A permutação simples de n elementos é o número de formas de ordenar esses n elementos, dado por Pₙ = n!.'
+  },
+  {
+    id: 'mat-3em-comb-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Permutação',
+    dificuldade: 'medio',
+    pergunta: 'De quantas formas diferentes 4 pessoas podem se sentar em 4 cadeiras em fila?',
+    opcoes: [
+      '4',
+      '16',
+      '24',
+      '256'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'É uma permutação de 4 elementos: P₄ = 4! = 4 × 3 × 2 × 1 = 24 formas diferentes.'
+  },
+  {
+    id: 'mat-3em-comb-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Arranjo e Combinação',
+    dificuldade: 'medio',
+    pergunta: 'Na combinação, a ordem dos elementos importa.',
+    respostaCorreta: false,
+    explicacao: 'Falso. Na combinação a ordem NÃO importa. No arranjo a ordem importa. Por isso, para um mesmo n e p, temos mais arranjos que combinações.'
+  },
+  {
+    id: 'mat-3em-comb-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Arranjo',
+    dificuldade: 'medio',
+    pergunta: 'A fórmula do arranjo de n elementos tomados p a p é:',
+    opcoes: [
+      'Aₙ,ₚ = n! / (n-p)!',
+      'Aₙ,ₚ = n! / p!',
+      'Aₙ,ₚ = n! / (n-p)! · p!',
+      'Aₙ,ₚ = (n-p)! / n!'
+    ],
+    respostaCorreta: 0,
+    explicacao: 'O arranjo de n elementos tomados p a p é Aₙ,ₚ = n!/(n-p)!. A ordem importa e não há repetição.'
+  },
+  {
+    id: 'mat-3em-comb-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Combinação',
+    dificuldade: 'medio',
+    pergunta: 'A fórmula da combinação de n elementos tomados p a p é:',
+    opcoes: [
+      'Cₙ,ₚ = n! / (n-p)!',
+      'Cₙ,ₚ = n! / p!',
+      'Cₙ,ₚ = n! / [(n-p)! · p!]',
+      'Cₙ,ₚ = p! / n!'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A combinação é Cₙ,ₚ = n!/[(n-p)!·p!]. A ordem não importa. É o arranjo dividido por p! (formas de ordenar os p elementos).'
+  },
+  {
+    id: 'mat-3em-comb-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Combinação',
+    dificuldade: 'medio',
+    pergunta: 'O valor de C₅,₂ (combinação de 5 elementos tomados 2 a 2) é igual a ___.',
+    respostaCorreta: '10',
+    explicacao: 'C₅,₂ = 5!/(3!·2!) = (5×4)/(2×1) = 20/2 = 10. Existem 10 formas de escolher 2 elementos de um conjunto de 5.'
+  },
+  {
+    id: 'mat-3em-comb-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Permutação com Repetição',
+    dificuldade: 'dificil',
+    pergunta: 'Quantos anagramas tem a palavra "ARARA"?',
+    opcoes: [
+      '120',
+      '60',
+      '20',
+      '10'
+    ],
+    respostaCorreta: 3,
+    explicacao: 'ARARA tem 5 letras, com A repetido 3 vezes e R repetido 2 vezes. Permutação com repetição: 5!/(3!·2!) = 120/(6·2) = 10.'
+  },
+  {
+    id: 'mat-3em-comb-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Propriedades',
+    dificuldade: 'medio',
+    pergunta: 'A combinação Cₙ,ₚ é igual a Cₙ,ₙ₋ₚ.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Por exemplo, C₁₀,₃ = C₁₀,₇ = 120. Escolher 3 elementos é complementar a escolher os 7 que ficam.'
+  },
+  {
+    id: 'mat-3em-comb-q07',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Permutação Circular',
+    dificuldade: 'dificil',
+    pergunta: 'De quantas formas 5 pessoas podem se sentar em uma mesa redonda?',
+    opcoes: [
+      '120',
+      '24',
+      '60',
+      '5'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Em permutação circular, fixamos um elemento e permutamos os demais. PCₙ = (n-1)!. Assim, PC₅ = 4! = 24.'
+  },
+
+  // ==================== PROBABILIDADE ====================
+  {
+    id: 'mat-3em-prob-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Conceito Básico',
+    dificuldade: 'facil',
+    pergunta: 'A probabilidade de um evento é um número que varia entre:',
+    opcoes: [
+      '-1 e 1',
+      '0 e 100',
+      '0 e 1',
+      '-∞ e +∞'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A probabilidade de qualquer evento é um número entre 0 e 1 (ou 0% e 100%). P = 0 significa evento impossível, P = 1 significa evento certo.'
+  },
+  {
+    id: 'mat-3em-prob-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Definição Clássica',
+    dificuldade: 'facil',
+    pergunta: 'A probabilidade de um evento A é P(A) = número de casos favoráveis / número de casos ___.',
+    respostaCorreta: 'possíveis',
+    explicacao: 'A definição clássica de probabilidade (Laplace) é P(A) = n(A)/n(Ω), onde n(A) é o número de casos favoráveis e n(Ω) é o total de casos possíveis.'
+  },
+  {
+    id: 'mat-3em-prob-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Lançamento de Dado',
+    dificuldade: 'facil',
+    pergunta: 'Qual a probabilidade de obter um número par no lançamento de um dado honesto?',
+    opcoes: [
+      '1/6',
+      '1/3',
+      '1/2',
+      '2/3'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Números pares em um dado: {2, 4, 6} = 3 casos favoráveis. Total: 6 faces. P = 3/6 = 1/2.'
+  },
+  {
+    id: 'mat-3em-prob-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Evento Complementar',
+    dificuldade: 'medio',
+    pergunta: 'A soma das probabilidades de um evento e seu complementar é sempre igual a 1.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. P(A) + P(Ā) = 1, onde Ā é o complementar de A. Se P(A) = 0,3, então P(Ā) = 0,7.'
+  },
+  {
+    id: 'mat-3em-prob-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'União de Eventos',
+    dificuldade: 'medio',
+    pergunta: 'A probabilidade da união de dois eventos A e B é dada por:',
+    opcoes: [
+      'P(A∪B) = P(A) + P(B)',
+      'P(A∪B) = P(A) · P(B)',
+      'P(A∪B) = P(A) + P(B) - P(A∩B)',
+      'P(A∪B) = P(A) - P(B)'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'P(A∪B) = P(A) + P(B) - P(A∩B). Subtraímos a interseção para não contar duas vezes os casos que estão em ambos.'
+  },
+  {
+    id: 'mat-3em-prob-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Eventos Independentes',
+    dificuldade: 'medio',
+    pergunta: 'Se A e B são eventos independentes, então P(A∩B) =',
+    opcoes: [
+      'P(A) + P(B)',
+      'P(A) · P(B)',
+      'P(A) / P(B)',
+      'P(A) - P(B)'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Eventos independentes são aqueles onde a ocorrência de um não afeta a probabilidade do outro. Nesse caso, P(A∩B) = P(A) · P(B).'
+  },
+  {
+    id: 'mat-3em-prob-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Eventos Mutuamente Exclusivos',
+    dificuldade: 'medio',
+    pergunta: 'Dois eventos são mutuamente exclusivos quando sua interseção é o conjunto ___.',
+    respostaCorreta: 'vazio',
+    explicacao: 'Eventos mutuamente exclusivos não podem ocorrer simultaneamente: A ∩ B = ∅. Nesse caso, P(A∪B) = P(A) + P(B).'
+  },
+  {
+    id: 'mat-3em-prob-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Probabilidade Condicional',
+    dificuldade: 'dificil',
+    pergunta: 'A probabilidade condicional P(A|B) é igual a:',
+    opcoes: [
+      'P(A) · P(B)',
+      'P(A∩B) / P(A)',
+      'P(A∩B) / P(B)',
+      'P(A) + P(B)'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'P(A|B) = P(A∩B)/P(B) representa a probabilidade de A ocorrer dado que B já ocorreu. B se torna o novo espaço amostral.'
+  },
+  {
+    id: 'mat-3em-prob-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Eventos Independentes',
+    dificuldade: 'dificil',
+    pergunta: 'Se dois eventos são independentes, então P(A|B) = P(A).',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Se A e B são independentes, saber que B ocorreu não altera a probabilidade de A. P(A|B) = P(A∩B)/P(B) = P(A)·P(B)/P(B) = P(A).'
+  },
+  {
+    id: 'mat-3em-prob-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Binomial',
+    dificuldade: 'dificil',
+    pergunta: 'Em uma distribuição binomial com n tentativas e probabilidade p de sucesso, a probabilidade de exatamente k sucessos usa:',
+    opcoes: [
+      'Apenas fatorial',
+      'Arranjo',
+      'Combinação e potências',
+      'Permutação circular'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'P(X=k) = Cₙ,ₖ · pᵏ · (1-p)ⁿ⁻ᵏ. Usa-se combinação para escolher quais das n tentativas serão os k sucessos, multiplicado pelas probabilidades.'
+  },
+  {
+    id: 'mat-3em-prob-q07',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Cartas',
+    dificuldade: 'medio',
+    pergunta: 'Qual a probabilidade de retirar uma carta de copas de um baralho padrão de 52 cartas?',
+    opcoes: [
+      '1/52',
+      '1/13',
+      '1/4',
+      '1/2'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Um baralho tem 4 naipes, cada um com 13 cartas. Copas tem 13 cartas. P = 13/52 = 1/4.'
+  },
+
+  // ==================== ESTATÍSTICA ====================
+  {
+    id: 'mat-3em-est-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Medidas de Tendência Central',
+    dificuldade: 'facil',
+    pergunta: 'A média aritmética do conjunto {2, 4, 6, 8, 10} é:',
+    opcoes: [
+      '5',
+      '6',
+      '7',
+      '8'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Média = (2 + 4 + 6 + 8 + 10) / 5 = 30 / 5 = 6.'
+  },
+  {
+    id: 'mat-3em-est-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Mediana',
+    dificuldade: 'facil',
+    pergunta: 'A mediana é o valor que ocupa a posição ___ de um conjunto ordenado.',
+    respostaCorreta: 'central',
+    explicacao: 'A mediana divide o conjunto ordenado em duas partes iguais. Se há número ímpar de elementos, é o elemento central; se par, é a média dos dois centrais.'
+  },
+  {
+    id: 'mat-3em-est-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Moda',
+    dificuldade: 'facil',
+    pergunta: 'No conjunto {3, 5, 5, 7, 8, 5, 9}, a moda é:',
+    opcoes: [
+      '3',
+      '5',
+      '7',
+      '6'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A moda é o valor que mais se repete. O número 5 aparece 3 vezes, mais que qualquer outro. Logo, a moda é 5.'
+  },
+  {
+    id: 'mat-3em-est-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Medidas de Dispersão',
+    dificuldade: 'medio',
+    pergunta: 'A variância mede o quanto os dados estão dispersos em relação à média.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. A variância é a média dos quadrados das diferenças entre cada valor e a média. Quanto maior a variância, mais dispersos estão os dados.'
+  },
+  {
+    id: 'mat-3em-est-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Desvio Padrão',
+    dificuldade: 'medio',
+    pergunta: 'O desvio padrão é:',
+    opcoes: [
+      'A média dos desvios',
+      'A raiz quadrada da variância',
+      'A variância ao quadrado',
+      'A soma dos desvios'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O desvio padrão é a raiz quadrada da variância: σ = √Var. Ele tem a mesma unidade dos dados originais, facilitando a interpretação.'
+  },
+  {
+    id: 'mat-3em-est-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Amplitude',
+    dificuldade: 'facil',
+    pergunta: 'A amplitude de um conjunto de dados é a diferença entre o maior e o ___ valor.',
+    respostaCorreta: 'menor',
+    explicacao: 'A amplitude é a medida mais simples de dispersão: Amplitude = valor máximo - valor mínimo.'
+  },
+  {
+    id: 'mat-3em-est-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Quartis',
+    dificuldade: 'medio',
+    pergunta: 'O segundo quartil (Q₂) de um conjunto de dados é igual:',
+    opcoes: [
+      'À média',
+      'À mediana',
+      'À moda',
+      'Ao desvio padrão'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O segundo quartil Q₂ divide os dados ao meio, sendo igual à mediana. Q₁ separa os 25% menores e Q₃ separa os 75% menores.'
+  },
+  {
+    id: 'mat-3em-est-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Distribuição Normal',
+    dificuldade: 'dificil',
+    pergunta: 'Na distribuição normal, aproximadamente 68% dos dados estão a menos de um desvio padrão da média.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Na curva normal: ~68% estão em μ±σ, ~95% em μ±2σ, e ~99,7% em μ±3σ. Isso é a regra empírica (68-95-99,7).'
+  },
+  {
+    id: 'mat-3em-est-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Média Ponderada',
+    dificuldade: 'medio',
+    pergunta: 'Na média ponderada, os valores são multiplicados por:',
+    opcoes: [
+      'Suas raízes quadradas',
+      'Seus quadrados',
+      'Seus pesos',
+      'O número de elementos'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Na média ponderada, cada valor é multiplicado por seu peso (importância relativa), e depois divide-se pela soma dos pesos.'
+  },
+  {
+    id: 'mat-3em-est-c03',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Gráficos',
+    dificuldade: 'facil',
+    pergunta: 'O gráfico de ___ é usado para representar a distribuição de frequências de dados contínuos agrupados em classes.',
+    respostaCorreta: 'histograma',
+    explicacao: 'O histograma usa retângulos adjacentes (sem espaço entre eles) para mostrar frequências de dados agrupados em intervalos de classe.'
+  },
+
+  // ==================== POLINÔMIOS ====================
+  {
+    id: 'mat-3em-poli-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Grau do Polinômio',
+    dificuldade: 'facil',
+    pergunta: 'Qual é o grau do polinômio P(x) = 3x⁴ - 2x² + x - 5?',
+    opcoes: [
+      '1',
+      '2',
+      '4',
+      '5'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'O grau de um polinômio é o maior expoente da variável. Como o maior expoente é 4 (em 3x⁴), o grau é 4.'
+  },
+  {
+    id: 'mat-3em-poli-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Polinômio Nulo',
+    dificuldade: 'medio',
+    pergunta: 'O polinômio nulo tem todos os coeficientes iguais a zero e não possui grau definido.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. O polinômio nulo P(x) = 0 tem todos os coeficientes iguais a zero. Por convenção, seu grau não é definido (alguns autores dizem -∞).'
+  },
+  {
+    id: 'mat-3em-poli-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Raízes',
+    dificuldade: 'medio',
+    pergunta: 'As raízes de um polinômio P(x) são os valores de x para os quais P(x) = ___.',
+    respostaCorreta: '0',
+    explicacao: 'As raízes (ou zeros) de P(x) são as soluções de P(x) = 0. Um polinômio de grau n tem no máximo n raízes reais.'
+  },
+  {
+    id: 'mat-3em-poli-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Teorema do Resto',
+    dificuldade: 'medio',
+    pergunta: 'Segundo o Teorema do Resto, o resto da divisão de P(x) por (x - a) é:',
+    opcoes: [
+      'P(0)',
+      'P(a)',
+      'P(-a)',
+      'a'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O Teorema do Resto afirma que o resto da divisão de P(x) por (x - a) é igual a P(a). Se P(a) = 0, então (x - a) divide P(x).'
+  },
+  {
+    id: 'mat-3em-poli-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Teorema de D\'Alembert',
+    dificuldade: 'medio',
+    pergunta: 'Pelo Teorema de D\'Alembert, se "a" é raiz de P(x), então P(x) é divisível por:',
+    opcoes: [
+      'x + a',
+      'x - a',
+      'a - x',
+      'x · a'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O Teorema de D\'Alembert (ou Teorema do Fator) diz que "a" é raiz de P(x) se e somente se (x - a) é fator de P(x).'
+  },
+  {
+    id: 'mat-3em-poli-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Identidade de Polinômios',
+    dificuldade: 'dificil',
+    pergunta: 'Dois polinômios são idênticos quando têm os mesmos coeficientes para potências correspondentes.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Dois polinômios são idênticos (iguais como funções) se e somente se os coeficientes de cada potência de x são iguais.'
+  },
+  {
+    id: 'mat-3em-poli-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Relações de Girard',
+    dificuldade: 'dificil',
+    pergunta: 'Para o polinômio P(x) = ax² + bx + c com raízes r e s, a soma r + s é igual a:',
+    opcoes: [
+      'b/a',
+      '-b/a',
+      'c/a',
+      '-c/a'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Pelas Relações de Girard (ou Viète), em ax² + bx + c: r + s = -b/a (soma das raízes) e r·s = c/a (produto das raízes).'
+  },
+  {
+    id: 'mat-3em-poli-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Relações de Girard',
+    dificuldade: 'dificil',
+    pergunta: 'Para ax² + bx + c com raízes r e s, o produto r·s é igual a ___.',
+    respostaCorreta: 'c/a',
+    explicacao: 'Pela Relação de Girard, o produto das raízes de ax² + bx + c é c/a. Isso vale para qualquer equação quadrática.'
+  },
+  {
+    id: 'mat-3em-poli-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Divisão de Polinômios',
+    dificuldade: 'medio',
+    pergunta: 'No algoritmo da divisão de polinômios, se D(x) divide P(x), então:',
+    opcoes: [
+      'P(x) = D(x) · Q(x)',
+      'P(x) = D(x) + Q(x)',
+      'P(x) = D(x) - Q(x)',
+      'P(x) = D(x) / Q(x)'
+    ],
+    respostaCorreta: 0,
+    explicacao: 'Se D(x) divide P(x) exatamente (resto zero), então P(x) = D(x) · Q(x), onde Q(x) é o quociente.'
+  },
+
+  // ==================== NÚMEROS COMPLEXOS (AVANÇADO) ====================
+  {
+    id: 'mat-3em-comp-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Forma Trigonométrica',
+    dificuldade: 'medio',
+    pergunta: 'A forma trigonométrica de um número complexo z com módulo ρ e argumento θ é:',
+    opcoes: [
+      'z = ρ + θi',
+      'z = ρ(sen θ + i·cos θ)',
+      'z = ρ(cos θ + i·sen θ)',
+      'z = ρ · θ'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A forma trigonométrica é z = ρ(cos θ + i·sen θ), onde ρ = |z| é o módulo e θ é o argumento (ângulo com o eixo real positivo).'
+  },
+  {
+    id: 'mat-3em-comp-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Argumento',
+    dificuldade: 'medio',
+    pergunta: 'O argumento de um número complexo é o ângulo formado com o semieixo real ___.',
+    respostaCorreta: 'positivo',
+    explicacao: 'O argumento (ou ângulo) de z é medido no sentido anti-horário a partir do semieixo real positivo. É denotado por arg(z) ou θ.'
+  },
+  {
+    id: 'mat-3em-comp-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Multiplicação na Forma Trigonométrica',
+    dificuldade: 'dificil',
+    pergunta: 'Para multiplicar dois complexos na forma trigonométrica:',
+    opcoes: [
+      'Multiplicam-se os módulos e os argumentos',
+      'Multiplicam-se os módulos e somam-se os argumentos',
+      'Somam-se os módulos e multiplicam-se os argumentos',
+      'Somam-se os módulos e os argumentos'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'z₁ · z₂ = ρ₁·ρ₂ [cos(θ₁+θ₂) + i·sen(θ₁+θ₂)]. Multiplica-se os módulos e soma-se os argumentos.'
+  },
+  {
+    id: 'mat-3em-comp-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Divisão na Forma Trigonométrica',
+    dificuldade: 'dificil',
+    pergunta: 'Na divisão de complexos na forma trigonométrica, dividem-se os módulos e subtraem-se os argumentos.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. z₁/z₂ = (ρ₁/ρ₂)[cos(θ₁-θ₂) + i·sen(θ₁-θ₂)]. É o inverso da multiplicação.'
+  },
+  {
+    id: 'mat-3em-comp-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Fórmula de De Moivre',
+    dificuldade: 'dificil',
+    pergunta: 'Pela Fórmula de De Moivre, [ρ(cos θ + i·sen θ)]ⁿ =',
+    opcoes: [
+      'ρⁿ(cos θ + i·sen θ)',
+      'ρⁿ(cos nθ + i·sen nθ)',
+      'nρ(cos nθ + i·sen nθ)',
+      'ρ(cos θⁿ + i·sen θⁿ)'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A Fórmula de De Moivre afirma que zⁿ = ρⁿ(cos nθ + i·sen nθ). O módulo é elevado a n e o argumento é multiplicado por n.'
+  },
+  {
+    id: 'mat-3em-comp-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Raízes da Unidade',
+    dificuldade: 'dificil',
+    pergunta: 'Quantas raízes cúbicas da unidade (z³ = 1) existem?',
+    opcoes: [
+      '1',
+      '2',
+      '3',
+      '4'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Existem exatamente 3 raízes cúbicas da unidade: 1, ω = (-1 + i√3)/2, e ω² = (-1 - i√3)/2. Em geral, existem n raízes n-ésimas da unidade.'
+  },
+  {
+    id: 'mat-3em-comp-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Forma Exponencial',
+    dificuldade: 'dificil',
+    pergunta: 'A forma exponencial de um número complexo é z = ρ · e^(i___), onde e é a base do logaritmo natural.',
+    respostaCorreta: 'θ',
+    explicacao: 'A forma exponencial é z = ρ·e^(iθ), relacionada à forma trigonométrica pela Fórmula de Euler: e^(iθ) = cos θ + i·sen θ.'
+  },
+  {
+    id: 'mat-3em-comp-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Identidade de Euler',
+    dificuldade: 'dificil',
+    pergunta: 'A Identidade de Euler afirma que e^(iπ) + 1 = 0.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. A Identidade de Euler, e^(iπ) + 1 = 0, é considerada uma das mais belas da matemática, relacionando e, i, π, 1 e 0.'
+  },
+
+  // ==================== GEOMETRIA ANALÍTICA AVANÇADA ====================
+  {
+    id: 'mat-3em-gean-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Vetores',
+    dificuldade: 'medio',
+    pergunta: 'O vetor v = (3, 4) tem módulo igual a:',
+    opcoes: [
+      '7',
+      '5',
+      '12',
+      '25'
+    ],
+    respostaCorreta: 1,
+    explicacao: '|v| = √(3² + 4²) = √(9 + 16) = √25 = 5. O módulo de um vetor (a, b) é √(a² + b²).'
+  },
+  {
+    id: 'mat-3em-gean-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Produto Escalar',
+    dificuldade: 'medio',
+    pergunta: 'O produto escalar de dois vetores u = (a, b) e v = (c, d) é u·v = ac + ___.',
+    respostaCorreta: 'bd',
+    explicacao: 'O produto escalar (ou produto interno) de u = (a, b) e v = (c, d) é u·v = ac + bd. É um número real, não um vetor.'
+  },
+  {
+    id: 'mat-3em-gean-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Vetores Ortogonais',
+    dificuldade: 'medio',
+    pergunta: 'Dois vetores são ortogonais (perpendiculares) quando seu produto escalar é:',
+    opcoes: [
+      '1',
+      '-1',
+      '0',
+      'Indefinido'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Dois vetores são ortogonais se e somente se seu produto escalar é zero: u·v = 0 ⟺ u ⟂ v.'
+  },
+  {
+    id: 'mat-3em-gean-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Produto Vetorial',
+    dificuldade: 'dificil',
+    pergunta: 'O produto vetorial de dois vetores resulta em um vetor perpendicular a ambos.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. O produto vetorial u × v resulta em um vetor perpendicular tanto a u quanto a v. A direção segue a regra da mão direita.'
+  },
+  {
+    id: 'mat-3em-gean-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Equação do Plano',
+    dificuldade: 'dificil',
+    pergunta: 'A equação geral do plano no espaço é:',
+    opcoes: [
+      'ax + by = c',
+      'ax + by + cz + d = 0',
+      'x² + y² + z² = r²',
+      'ax² + by² = cz'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A equação geral do plano é ax + by + cz + d = 0, onde (a, b, c) é um vetor normal ao plano (perpendicular a ele).'
+  },
+  {
+    id: 'mat-3em-gean-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Reta no Espaço',
+    dificuldade: 'dificil',
+    pergunta: 'Uma reta no espaço pode ser expressa por equações ___, cada uma relacionando duas coordenadas.',
+    respostaCorreta: 'simétricas',
+    explicacao: 'As equações simétricas da reta são (x-x₀)/a = (y-y₀)/b = (z-z₀)/c, onde (a,b,c) é o vetor diretor e (x₀,y₀,z₀) é um ponto da reta.'
+  },
+  {
+    id: 'mat-3em-gean-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Distância entre Pontos no Espaço',
+    dificuldade: 'medio',
+    pergunta: 'A distância entre P₁(x₁, y₁, z₁) e P₂(x₂, y₂, z₂) no espaço é:',
+    opcoes: [
+      'd = √[(x₂-x₁)² + (y₂-y₁)²]',
+      'd = (x₂-x₁)² + (y₂-y₁)² + (z₂-z₁)²',
+      'd = √[(x₂-x₁)² + (y₂-y₁)² + (z₂-z₁)²]',
+      'd = |x₂-x₁| + |y₂-y₁| + |z₂-z₁|'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A fórmula da distância no espaço 3D generaliza a do plano: d = √[(x₂-x₁)² + (y₂-y₁)² + (z₂-z₁)²].'
+  },
+
+  // ==================== QUESTÕES VARIADAS ADICIONAIS ====================
+  {
+    id: 'mat-3em-comb-q08',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Triângulo de Pascal',
+    dificuldade: 'medio',
+    pergunta: 'No Triângulo de Pascal, cada elemento (exceto os extremos) é a soma:',
+    opcoes: [
+      'Dos elementos da linha anterior',
+      'Dos dois elementos superiores adjacentes',
+      'De todos os elementos anteriores',
+      'Dos elementos da diagonal'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'No Triângulo de Pascal, cada número é a soma dos dois números imediatamente acima dele. Isso expressa a relação Cₙ,ₖ = Cₙ₋₁,ₖ₋₁ + Cₙ₋₁,ₖ.'
+  },
+  {
+    id: 'mat-3em-comb-vf04',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Binômio de Newton',
+    dificuldade: 'dificil',
+    pergunta: 'O Binômio de Newton expressa (a + b)ⁿ como uma soma de termos envolvendo combinações.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. (a+b)ⁿ = Σₖ₌₀ⁿ Cₙ,ₖ · aⁿ⁻ᵏ · bᵏ. Os coeficientes são as combinações, que aparecem no Triângulo de Pascal.'
+  },
+  {
+    id: 'mat-3em-prob-q08',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Esperança Matemática',
+    dificuldade: 'dificil',
+    pergunta: 'A esperança matemática (ou valor esperado) de uma variável aleatória X é:',
+    opcoes: [
+      'A moda de X',
+      'A mediana de X',
+      'A média ponderada dos valores de X pelas suas probabilidades',
+      'O desvio padrão de X'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'E(X) = Σ xᵢ · P(X = xᵢ). A esperança é a média ponderada dos valores possíveis, onde os pesos são as probabilidades.'
+  },
+  {
+    id: 'mat-3em-est-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Coeficiente de Variação',
+    dificuldade: 'dificil',
+    pergunta: 'O coeficiente de variação é dado por:',
+    opcoes: [
+      'CV = média / desvio padrão',
+      'CV = desvio padrão / média',
+      'CV = variância / média',
+      'CV = média × desvio padrão'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'CV = σ/μ (ou CV% = 100·σ/μ). O coeficiente de variação é uma medida relativa de dispersão, útil para comparar conjuntos com médias diferentes.'
+  },
+  {
+    id: 'mat-3em-est-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Correlação',
+    dificuldade: 'dificil',
+    pergunta: 'O coeficiente de correlação linear de Pearson varia entre -1 e 1.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. O coeficiente r varia de -1 (correlação negativa perfeita) a 1 (correlação positiva perfeita). r = 0 indica ausência de correlação linear.'
+  },
+  {
+    id: 'mat-3em-poli-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Teorema Fundamental da Álgebra',
+    dificuldade: 'dificil',
+    pergunta: 'Segundo o Teorema Fundamental da Álgebra, todo polinômio de grau n ≥ 1 possui:',
+    opcoes: [
+      'Apenas raízes reais',
+      'Exatamente n raízes reais',
+      'Ao menos uma raiz complexa',
+      'Nenhuma raiz'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'O Teorema Fundamental da Álgebra garante que todo polinômio não constante (grau ≥ 1) possui ao menos uma raiz no conjunto dos números complexos.'
+  },
+  {
+    id: 'mat-3em-poli-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Polinômios',
+    subtema: 'Raízes Complexas',
+    dificuldade: 'dificil',
+    pergunta: 'Se um polinômio com coeficientes reais tem uma raiz complexa z, então o conjugado z̄ também é raiz.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Para polinômios com coeficientes reais, as raízes complexas não reais sempre aparecem em pares conjugados.'
+  },
+  {
+    id: 'mat-3em-gesp-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Prismas',
+    dificuldade: 'medio',
+    pergunta: 'A área total de um prisma reto é:',
+    opcoes: [
+      'Área lateral apenas',
+      '2 × área da base',
+      'Área lateral + 2 × área da base',
+      'Área lateral × altura'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A área total de um prisma é Aₜ = Aₗ + 2Aᵦ, onde Aₗ é a área lateral e Aᵦ é a área da base.'
+  },
+  {
+    id: 'mat-3em-gesp-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Cone',
+    dificuldade: 'medio',
+    pergunta: 'A área lateral de um cone de revolução de raio r e geratriz g é Aₗ = π · r · ___.',
+    respostaCorreta: 'g',
+    explicacao: 'A área lateral do cone é Aₗ = πrg, onde r é o raio da base e g é a geratriz (distância do vértice à borda da base).'
+  },
+  {
+    id: 'mat-3em-gesp-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Esfera',
+    dificuldade: 'medio',
+    pergunta: 'A área da superfície esférica de raio r é:',
+    opcoes: [
+      'πr²',
+      '2πr²',
+      '4πr²',
+      '(4/3)πr³'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A área da superfície esférica é S = 4πr². O volume é V = (4/3)πr³. Note: área = 4πr², volume = (4/3)πr³.'
+  },
+  {
+    id: 'mat-3em-gesp-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Seções de Sólidos',
+    dificuldade: 'dificil',
+    pergunta: 'A seção de uma esfera por um plano que passa pelo centro é chamada de círculo máximo.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Quando o plano passa pelo centro da esfera, a seção é um círculo máximo, com raio igual ao raio da esfera. Qualquer outra seção produz círculos menores.'
+  },
+  {
+    id: 'mat-3em-comb-c03',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Combinação com Repetição',
+    dificuldade: 'dificil',
+    pergunta: 'O número de combinações com repetição de n elementos tomados p a p é dado por C(n+p-1, ___).',
+    respostaCorreta: 'p',
+    explicacao: 'A combinação com repetição é CR(n,p) = C(n+p-1, p). Diferente da combinação simples, permite escolher o mesmo elemento mais de uma vez.'
+  },
+  {
+    id: 'mat-3em-prob-c03',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Teorema de Bayes',
+    dificuldade: 'dificil',
+    pergunta: 'O Teorema de Bayes permite calcular a probabilidade ___ P(A|B) conhecendo P(B|A).',
+    respostaCorreta: 'condicional',
+    explicacao: 'O Teorema de Bayes "inverte" probabilidades condicionais: P(A|B) = P(B|A)·P(A)/P(B). É fundamental em estatística e aprendizado de máquina.'
+  },
+  {
+    id: 'mat-3em-est-q07',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Estatística',
+    subtema: 'Regressão Linear',
+    dificuldade: 'dificil',
+    pergunta: 'Na regressão linear simples y = a + bx, o coeficiente b representa:',
+    opcoes: [
+      'O ponto onde a reta cruza o eixo y',
+      'A inclinação da reta (taxa de variação)',
+      'O coeficiente de correlação',
+      'A variância dos dados'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Em y = a + bx, b é o coeficiente angular (inclinação), indicando quanto y varia para cada unidade de variação em x. O coeficiente a é o intercepto (valor de y quando x = 0).'
+  },
+  {
+    id: 'mat-3em-gean-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Cônicas',
+    dificuldade: 'dificil',
+    pergunta: 'A equação x²/a² + y²/b² = 1 com a > b representa:',
+    opcoes: [
+      'Uma circunferência',
+      'Uma elipse com eixo maior horizontal',
+      'Uma elipse com eixo maior vertical',
+      'Uma hipérbole'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'x²/a² + y²/b² = 1 é uma elipse. Como a > b, o eixo maior (2a) está na horizontal. Se b > a, o eixo maior seria vertical.'
+  },
+  {
+    id: 'mat-3em-gean-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Cônicas',
+    dificuldade: 'dificil',
+    pergunta: 'A equação x²/a² - y²/b² = 1 representa uma hipérbole com focos no eixo x.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Na hipérbole x²/a² - y²/b² = 1, o termo positivo (x²) indica que os focos e o eixo real estão no eixo x (horizontal).'
+  },
+  {
+    id: 'mat-3em-comp-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Números Complexos',
+    subtema: 'Operações Geométricas',
+    dificuldade: 'dificil',
+    pergunta: 'Multiplicar um número complexo por i corresponde geometricamente a:',
+    opcoes: [
+      'Dobrar o módulo',
+      'Inverter o sinal',
+      'Rotacionar 90° no sentido anti-horário',
+      'Rotacionar 180°'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Multiplicar por i adiciona 90° (π/2) ao argumento. É uma rotação de 90° no sentido anti-horário no plano de Argand-Gauss.'
+  },
+  {
+    id: 'mat-3em-prob-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Probabilidade',
+    subtema: 'Variância',
+    dificuldade: 'dificil',
+    pergunta: 'A variância de uma variável aleatória pode ser negativa.',
+    respostaCorreta: false,
+    explicacao: 'Falso. A variância é sempre não negativa (≥ 0), pois é a média dos quadrados dos desvios. Var(X) = E[(X - μ)²] ≥ 0.'
+  },
+  {
+    id: 'mat-3em-comb-q09',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '3ano',
+    tema: 'Análise Combinatória',
+    subtema: 'Princípio da Casa dos Pombos',
+    dificuldade: 'dificil',
+    pergunta: 'Se 13 cartas são retiradas de um baralho, pelo Princípio da Casa dos Pombos:',
+    opcoes: [
+      'Todas serão do mesmo naipe',
+      'Pelo menos duas terão o mesmo valor',
+      'Exatamente 4 serão de copas',
+      'Nenhuma será ás'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Com 13 cartas e 13 valores possíveis (A, 2, 3, ..., K), se tivermos 13 cartas, pelo princípio da casa dos pombos, necessariamente pelo menos duas terão o mesmo valor.'
+  }
+]

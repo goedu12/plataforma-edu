@@ -8,8 +8,14 @@ import type { Componente } from './index'
 // Tipos de questões suportados
 export type TipoFlashCard = 'quiz' | 'complete' | 'vf'
 
-// Anos do ensino médio
-export type AnoEscolar = '1ano' | '2ano' | '3ano'
+// Anos do Ensino Fundamental (Anos Finais)
+export type AnoEscolarEF = '6ano' | '7ano' | '8ano' | '9ano'
+
+// Anos do Ensino Médio
+export type AnoEscolarEM = '1ano' | '2ano' | '3ano'
+
+// Todos os anos suportados
+export type AnoEscolar = AnoEscolarEF | AnoEscolarEM
 
 // Dificuldade da questão
 export type DificuldadeFlashCard = 'facil' | 'medio' | 'dificil'
@@ -171,9 +177,15 @@ export const PONTUACAO_PADRAO: PontuacaoFlashCard = {
 
 // Labels para exibição
 export const LABELS_ANO: Record<AnoEscolar, string> = {
-  '1ano': '1º Ano',
-  '2ano': '2º Ano',
-  '3ano': '3º Ano',
+  // Ensino Fundamental
+  '6ano': '6º Ano',
+  '7ano': '7º Ano',
+  '8ano': '8º Ano',
+  '9ano': '9º Ano',
+  // Ensino Médio
+  '1ano': '1ª Série',
+  '2ano': '2ª Série',
+  '3ano': '3ª Série',
 }
 
 export const LABELS_TIPO: Record<TipoFlashCard, string> = {
