@@ -793,6 +793,165 @@ export const CURRICULO_MATEMATICA: Record<string, Record<number, { tema: string;
     38: { tema: "Probabilidade", subtema: "Probabilidade de eventos independentes", bimestre: 4 },
     39: { tema: "Probabilidade", subtema: "Probabilidade condicional (introdução)", bimestre: 4 },
     40: { tema: "Probabilidade", subtema: "Aplicações de probabilidade em situações-problema", bimestre: 4 },
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 1ª SÉRIE DO ENSINO MÉDIO - MATEMÁTICA
+  // ═══════════════════════════════════════════════════════════
+  "1EM": {
+    // 1º BIMESTRE - Conjuntos e Funções
+    1: { tema: "Conjuntos", subtema: "Noção de conjunto, pertinência e inclusão", bimestre: 1 },
+    2: { tema: "Conjuntos", subtema: "Operações com conjuntos: união, interseção e diferença", bimestre: 1 },
+    3: { tema: "Conjuntos", subtema: "Conjuntos numéricos: N, Z, Q, I e R", bimestre: 1 },
+    4: { tema: "Conjuntos", subtema: "Intervalos reais e representação na reta", bimestre: 1 },
+    5: { tema: "Funções", subtema: "Conceito de função, domínio, contradomínio e imagem", bimestre: 1 },
+    6: { tema: "Funções", subtema: "Representação de funções: diagrama, tabela e gráfico", bimestre: 1 },
+    7: { tema: "Funções", subtema: "Função par, ímpar e periódica", bimestre: 1 },
+    8: { tema: "Funções", subtema: "Função composta", bimestre: 1 },
+    9: { tema: "Funções", subtema: "Função inversa", bimestre: 1 },
+    10: { tema: "Função Afim", subtema: "Definição e gráfico da função afim", bimestre: 1 },
+
+    // 2º BIMESTRE - Função Afim e Quadrática
+    11: { tema: "Função Afim", subtema: "Coeficiente angular e linear", bimestre: 2 },
+    12: { tema: "Função Afim", subtema: "Zero da função afim e interpretação gráfica", bimestre: 2 },
+    13: { tema: "Função Afim", subtema: "Inequações do 1º grau", bimestre: 2 },
+    14: { tema: "Função Afim", subtema: "Problemas envolvendo função afim", bimestre: 2 },
+    15: { tema: "Função Quadrática", subtema: "Definição e forma geral f(x) = ax² + bx + c", bimestre: 2 },
+    16: { tema: "Função Quadrática", subtema: "Gráfico da função quadrática (parábola)", bimestre: 2 },
+    17: { tema: "Função Quadrática", subtema: "Vértice e eixo de simetria da parábola", bimestre: 2 },
+    18: { tema: "Função Quadrática", subtema: "Zeros da função quadrática", bimestre: 2 },
+    19: { tema: "Função Quadrática", subtema: "Estudo do sinal da função quadrática", bimestre: 2 },
+    20: { tema: "Função Quadrática", subtema: "Problemas de máximo e mínimo", bimestre: 2 },
+
+    // 3º BIMESTRE - Função Exponencial e Logarítmica
+    21: { tema: "Função Exponencial", subtema: "Potências com expoentes reais", bimestre: 3 },
+    22: { tema: "Função Exponencial", subtema: "Definição e gráfico da função exponencial", bimestre: 3 },
+    23: { tema: "Função Exponencial", subtema: "Crescimento e decrescimento exponencial", bimestre: 3 },
+    24: { tema: "Função Exponencial", subtema: "Equações exponenciais", bimestre: 3 },
+    25: { tema: "Função Exponencial", subtema: "Aplicações: juros compostos e crescimento populacional", bimestre: 3 },
+    26: { tema: "Logaritmos", subtema: "Definição de logaritmo e propriedades básicas", bimestre: 3 },
+    27: { tema: "Logaritmos", subtema: "Propriedades operatórias dos logaritmos", bimestre: 3 },
+    28: { tema: "Logaritmos", subtema: "Mudança de base", bimestre: 3 },
+    29: { tema: "Função Logarítmica", subtema: "Definição e gráfico da função logarítmica", bimestre: 3 },
+    30: { tema: "Função Logarítmica", subtema: "Equações logarítmicas", bimestre: 3 },
+
+    // 4º BIMESTRE - Sequências e Progressões
+    31: { tema: "Sequências", subtema: "Conceito de sequência numérica e lei de formação", bimestre: 4 },
+    32: { tema: "Progressão Aritmética", subtema: "Definição e termo geral da PA", bimestre: 4 },
+    33: { tema: "Progressão Aritmética", subtema: "Soma dos termos de uma PA", bimestre: 4 },
+    34: { tema: "Progressão Aritmética", subtema: "Interpolação aritmética", bimestre: 4 },
+    35: { tema: "Progressão Geométrica", subtema: "Definição e termo geral da PG", bimestre: 4 },
+    36: { tema: "Progressão Geométrica", subtema: "Soma dos termos de uma PG finita", bimestre: 4 },
+    37: { tema: "Progressão Geométrica", subtema: "Soma dos termos de uma PG infinita", bimestre: 4 },
+    38: { tema: "Progressão Geométrica", subtema: "Interpolação geométrica", bimestre: 4 },
+    39: { tema: "Matemática Financeira", subtema: "Juros simples e compostos", bimestre: 4 },
+    40: { tema: "Matemática Financeira", subtema: "Aplicações de PA e PG em problemas financeiros", bimestre: 4 },
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 2ª SÉRIE DO ENSINO MÉDIO - MATEMÁTICA
+  // ═══════════════════════════════════════════════════════════
+  "2EM": {
+    // 1º BIMESTRE - Trigonometria
+    1: { tema: "Trigonometria", subtema: "Arcos e ângulos: unidades de medida (grau e radiano)", bimestre: 1 },
+    2: { tema: "Trigonometria", subtema: "Circunferência trigonométrica", bimestre: 1 },
+    3: { tema: "Trigonometria", subtema: "Seno e cosseno na circunferência trigonométrica", bimestre: 1 },
+    4: { tema: "Trigonometria", subtema: "Tangente na circunferência trigonométrica", bimestre: 1 },
+    5: { tema: "Trigonometria", subtema: "Relações trigonométricas fundamentais", bimestre: 1 },
+    6: { tema: "Trigonometria", subtema: "Redução ao primeiro quadrante", bimestre: 1 },
+    7: { tema: "Trigonometria", subtema: "Função seno: gráfico e propriedades", bimestre: 1 },
+    8: { tema: "Trigonometria", subtema: "Função cosseno: gráfico e propriedades", bimestre: 1 },
+    9: { tema: "Trigonometria", subtema: "Função tangente: gráfico e propriedades", bimestre: 1 },
+    10: { tema: "Trigonometria", subtema: "Equações trigonométricas básicas", bimestre: 1 },
+
+    // 2º BIMESTRE - Trigonometria e Matrizes
+    11: { tema: "Trigonometria", subtema: "Adição e subtração de arcos", bimestre: 2 },
+    12: { tema: "Trigonometria", subtema: "Arco duplo e arco metade", bimestre: 2 },
+    13: { tema: "Trigonometria", subtema: "Transformações trigonométricas", bimestre: 2 },
+    14: { tema: "Trigonometria", subtema: "Lei dos senos", bimestre: 2 },
+    15: { tema: "Trigonometria", subtema: "Lei dos cossenos", bimestre: 2 },
+    16: { tema: "Matrizes", subtema: "Definição e tipos de matrizes", bimestre: 2 },
+    17: { tema: "Matrizes", subtema: "Operações com matrizes: soma e multiplicação por escalar", bimestre: 2 },
+    18: { tema: "Matrizes", subtema: "Multiplicação de matrizes", bimestre: 2 },
+    19: { tema: "Matrizes", subtema: "Matriz transposta e matriz inversa", bimestre: 2 },
+    20: { tema: "Determinantes", subtema: "Determinante de ordem 2 e 3", bimestre: 2 },
+
+    // 3º BIMESTRE - Sistemas Lineares e Geometria Analítica
+    21: { tema: "Determinantes", subtema: "Propriedades dos determinantes", bimestre: 3 },
+    22: { tema: "Sistemas Lineares", subtema: "Sistemas lineares 2x2 e 3x3", bimestre: 3 },
+    23: { tema: "Sistemas Lineares", subtema: "Regra de Cramer", bimestre: 3 },
+    24: { tema: "Sistemas Lineares", subtema: "Discussão de sistemas lineares", bimestre: 3 },
+    25: { tema: "Geometria Analítica", subtema: "Ponto e distância entre pontos", bimestre: 3 },
+    26: { tema: "Geometria Analítica", subtema: "Ponto médio de um segmento", bimestre: 3 },
+    27: { tema: "Geometria Analítica", subtema: "Condição de alinhamento de três pontos", bimestre: 3 },
+    28: { tema: "Geometria Analítica", subtema: "Equação geral da reta", bimestre: 3 },
+    29: { tema: "Geometria Analítica", subtema: "Equação reduzida da reta", bimestre: 3 },
+    30: { tema: "Geometria Analítica", subtema: "Coeficiente angular e inclinação da reta", bimestre: 3 },
+
+    // 4º BIMESTRE - Geometria Analítica
+    31: { tema: "Geometria Analítica", subtema: "Posições relativas de duas retas", bimestre: 4 },
+    32: { tema: "Geometria Analítica", subtema: "Distância de ponto a reta", bimestre: 4 },
+    33: { tema: "Geometria Analítica", subtema: "Área de triângulo por coordenadas", bimestre: 4 },
+    34: { tema: "Circunferência", subtema: "Equação da circunferência", bimestre: 4 },
+    35: { tema: "Circunferência", subtema: "Posições relativas ponto-circunferência", bimestre: 4 },
+    36: { tema: "Circunferência", subtema: "Posições relativas reta-circunferência", bimestre: 4 },
+    37: { tema: "Cônicas", subtema: "Elipse: definição e equação", bimestre: 4 },
+    38: { tema: "Cônicas", subtema: "Hipérbole: definição e equação", bimestre: 4 },
+    39: { tema: "Cônicas", subtema: "Parábola: definição e equação", bimestre: 4 },
+    40: { tema: "Cônicas", subtema: "Aplicações das cônicas", bimestre: 4 },
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // 3ª SÉRIE DO ENSINO MÉDIO - MATEMÁTICA
+  // ═══════════════════════════════════════════════════════════
+  "3EM": {
+    // 1º BIMESTRE - Análise Combinatória
+    1: { tema: "Análise Combinatória", subtema: "Princípio fundamental da contagem", bimestre: 1 },
+    2: { tema: "Análise Combinatória", subtema: "Fatorial de um número", bimestre: 1 },
+    3: { tema: "Análise Combinatória", subtema: "Arranjos simples", bimestre: 1 },
+    4: { tema: "Análise Combinatória", subtema: "Permutações simples", bimestre: 1 },
+    5: { tema: "Análise Combinatória", subtema: "Permutações com repetição", bimestre: 1 },
+    6: { tema: "Análise Combinatória", subtema: "Combinações simples", bimestre: 1 },
+    7: { tema: "Análise Combinatória", subtema: "Propriedades das combinações", bimestre: 1 },
+    8: { tema: "Probabilidade", subtema: "Espaço amostral e eventos", bimestre: 1 },
+    9: { tema: "Probabilidade", subtema: "Probabilidade de um evento", bimestre: 1 },
+    10: { tema: "Probabilidade", subtema: "Probabilidade da união e interseção de eventos", bimestre: 1 },
+
+    // 2º BIMESTRE - Probabilidade e Estatística
+    11: { tema: "Probabilidade", subtema: "Probabilidade condicional", bimestre: 2 },
+    12: { tema: "Probabilidade", subtema: "Eventos independentes", bimestre: 2 },
+    13: { tema: "Probabilidade", subtema: "Binômio de Newton e triângulo de Pascal", bimestre: 2 },
+    14: { tema: "Probabilidade", subtema: "Distribuição binomial (introdução)", bimestre: 2 },
+    15: { tema: "Estatística", subtema: "Conceitos básicos: população, amostra, variáveis", bimestre: 2 },
+    16: { tema: "Estatística", subtema: "Tabelas de frequências", bimestre: 2 },
+    17: { tema: "Estatística", subtema: "Gráficos estatísticos", bimestre: 2 },
+    18: { tema: "Estatística", subtema: "Medidas de tendência central: média, moda e mediana", bimestre: 2 },
+    19: { tema: "Estatística", subtema: "Medidas de dispersão: variância e desvio padrão", bimestre: 2 },
+    20: { tema: "Estatística", subtema: "Análise e interpretação de dados", bimestre: 2 },
+
+    // 3º BIMESTRE - Geometria Espacial
+    21: { tema: "Geometria Espacial", subtema: "Posições relativas de retas e planos", bimestre: 3 },
+    22: { tema: "Geometria Espacial", subtema: "Poliedros: conceito e classificação", bimestre: 3 },
+    23: { tema: "Geometria Espacial", subtema: "Prismas: área e volume", bimestre: 3 },
+    24: { tema: "Geometria Espacial", subtema: "Pirâmides: área e volume", bimestre: 3 },
+    25: { tema: "Geometria Espacial", subtema: "Cilindros: área e volume", bimestre: 3 },
+    26: { tema: "Geometria Espacial", subtema: "Cones: área e volume", bimestre: 3 },
+    27: { tema: "Geometria Espacial", subtema: "Esferas: área e volume", bimestre: 3 },
+    28: { tema: "Geometria Espacial", subtema: "Troncos de pirâmide e cone", bimestre: 3 },
+    29: { tema: "Geometria Espacial", subtema: "Inscrição e circunscrição de sólidos", bimestre: 3 },
+    30: { tema: "Geometria Espacial", subtema: "Problemas envolvendo sólidos geométricos", bimestre: 3 },
+
+    // 4º BIMESTRE - Revisão ENEM e Números Complexos
+    31: { tema: "Números Complexos", subtema: "Número imaginário e unidade imaginária", bimestre: 4 },
+    32: { tema: "Números Complexos", subtema: "Forma algébrica dos números complexos", bimestre: 4 },
+    33: { tema: "Números Complexos", subtema: "Operações com números complexos", bimestre: 4 },
+    34: { tema: "Números Complexos", subtema: "Conjugado e módulo de um número complexo", bimestre: 4 },
+    35: { tema: "Números Complexos", subtema: "Forma trigonométrica dos números complexos", bimestre: 4 },
+    36: { tema: "Polinômios", subtema: "Definição e operações com polinômios", bimestre: 4 },
+    37: { tema: "Polinômios", subtema: "Divisão de polinômios e Teorema do Resto", bimestre: 4 },
+    38: { tema: "Equações Polinomiais", subtema: "Raízes de equações polinomiais", bimestre: 4 },
+    39: { tema: "Equações Polinomiais", subtema: "Relações de Girard", bimestre: 4 },
+    40: { tema: "Revisão ENEM", subtema: "Integração de conteúdos e resolução de problemas", bimestre: 4 },
   }
 }
 
@@ -1399,25 +1558,38 @@ export async function salvarQuestoes(
  * Gera questões únicas para um usuário específico (SEM CACHE)
  * Cada chamada gera novas questões diferentes
  * OTIMIZADO: usa modelo rápido com temperatura baixa para precisão
+ *
+ * @param componente - Opcional: 'matematica' ou 'fisica'. Se não informado, usa a lógica padrão (EF=mat, EM=fis)
  */
 export async function gerarQuestoesParaUsuario(
   serie: string,
   semana: number,
   quantidade: number,
   usuarioId: string,
-  trilhaId: string
+  trilhaId: string,
+  componente?: 'matematica' | 'fisica'
 ): Promise<QuestaoGeradaEF[] | QuestaoGerada[]> {
   // Usar timestamp + userId + random como seed para MÁXIMA variação
   const seed = `${usuarioId}-${trilhaId}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-  console.log(`[Gemini] Gerando ${quantidade} questões únicas para usuário ${usuarioId.slice(0, 8)}...`)
+  // Determinar o componente a usar
+  // Se não foi especificado, usar lógica padrão: EF = matemática, EM = física
+  const componenteEfetivo = componente || getComponentePorSerie(serie)
+
+  console.log(`[Gemini] Gerando ${quantidade} questões de ${componenteEfetivo} para usuário ${usuarioId.slice(0, 8)}...`)
 
   if (isSerieEF(serie)) {
-    // Matemática EF - 4 alternativas
+    // Ensino Fundamental - sempre 4 alternativas
+    // EF só tem Matemática disponível
     return gerarQuestoesMatematicaEFUnicas(serie, semana, quantidade, seed)
   } else {
-    // Física EM - 5 alternativas - AGORA USA SEED
-    return gerarQuestoesFisicaEMUnicas(serie, semana, quantidade, seed)
+    // Ensino Médio - 5 alternativas
+    // Pode ser Matemática OU Física dependendo do componente
+    if (componenteEfetivo === 'matematica') {
+      return gerarQuestoesMatematicaEMUnicas(serie, semana, quantidade, seed)
+    } else {
+      return gerarQuestoesFisicaEMUnicas(serie, semana, quantidade, seed)
+    }
   }
 }
 
@@ -1514,6 +1686,108 @@ Retorne JSON: {"questoes":[...]}`
   } catch (error) {
     console.error('[Gemini] Todos os modelos falharam:', error)
     throw new Error('Falha ao gerar questões de Física')
+  }
+}
+
+/**
+ * Gera questões de Matemática EM únicas (sem cache, sempre novas)
+ * OTIMIZADO para velocidade - 5 alternativas como Física
+ */
+async function gerarQuestoesMatematicaEMUnicas(
+  serie: string,
+  semana: number,
+  quantidade: number,
+  seed: string
+): Promise<QuestaoGerada[]> {
+  const curriculoSerie = CURRICULO_MATEMATICA[serie]
+  if (!curriculoSerie) {
+    throw new Error(`Série ${serie} não encontrada no currículo de Matemática`)
+  }
+
+  let conteudo = curriculoSerie[semana]
+  if (!conteudo) {
+    const semanaFallback = Math.min(semana, 40)
+    conteudo = curriculoSerie[semanaFallback] || curriculoSerie[1]
+  }
+
+  const { tema, subtema, bimestre } = conteudo
+  const serieNumero = serie[0]
+
+  const promptQuestoes = `Gere ${quantidade} questões de Matemática para ${serieNumero}º ano do Ensino Médio sobre "${tema} - ${subtema}".
+
+SEED: ${seed}
+
+REGRAS OBRIGATÓRIAS:
+1. Enunciado COMPLETO com TODOS os valores numéricos necessários
+2. Símbolos: × (mult), ÷ (div), ² ³ ⁴ (potência), √ (raiz), π, log, sen, cos, tg - NUNCA use * / ^
+3. 5 alternativas (A-E), apenas UMA correta
+4. Fazer o CÁLCULO COMPLETO antes de definir resposta_correta
+5. Feedback mostrando a resolução passo a passo
+6. Nível adequado ao ${serieNumero}º ano EM
+
+CONTEXTO DO CONTEÚDO:
+${serieNumero === '1' ? '1º ano EM: Funções (afim, quadrática, exponencial, logarítmica), Sequências, PA e PG' : ''}
+${serieNumero === '2' ? '2º ano EM: Trigonometria, Matrizes, Determinantes, Sistemas Lineares, Geometria Analítica' : ''}
+${serieNumero === '3' ? '3º ano EM: Análise Combinatória, Probabilidade, Estatística, Geometria Espacial, Números Complexos' : ''}
+
+EXEMPLO:
+{"tipo_questao":"calculo_direto","contexto":"funções","enunciado":"Dada a função f(x) = 2x² - 8x + 6, qual é o valor mínimo dessa função?","alternativas":{"A":"-2","B":"2","C":"-6","D":"6","E":"0"},"resposta_correta":"A","dica":"O valor mínimo de uma parábola com a > 0 ocorre no vértice","feedback":"yᵥ = -Δ/4a = -(64-48)/8 = -16/8 = -2"}
+
+Retorne JSON: {"questoes":[...]}`
+
+  // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
+  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+
+  const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
+    console.log(`[Gemini] Matemática EM iniciando ${modelo}...`)
+    const genAI = getGenAI()
+    const model = genAI.getGenerativeModel({ model: modelo })
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topP: 0.9,
+        maxOutputTokens: 2048
+      }
+    })
+
+    let text = result.response.text()
+    if (!text) throw new Error('Resposta vazia')
+
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+    const dados = JSON.parse(text)
+
+    if (!dados.questoes?.length) throw new Error('Sem questões')
+
+    const questoesValidadas = dados.questoes
+      .filter((q: QuestaoGerada) =>
+        q.enunciado &&
+        q.enunciado.length >= 30 &&
+        q.alternativas &&
+        q.resposta_correta &&
+        q.feedback &&
+        ['A', 'B', 'C', 'D', 'E'].includes(q.resposta_correta.toUpperCase())
+      )
+      .map((q: QuestaoGerada) => ({
+        ...q,
+        resposta_correta: q.resposta_correta.toUpperCase(),
+        tema: tema,
+        subtema: subtema
+      }))
+
+    if (questoesValidadas.length === 0) throw new Error('Nenhuma válida')
+
+    console.log(`[Gemini] ${questoesValidadas.length} questões Matemática EM via ${modelo}`)
+    return questoesValidadas
+  }
+
+  try {
+    // Promise.any retorna o primeiro que resolver com sucesso
+    return await Promise.any(modelos.map(m => tentarComModelo(m)))
+  } catch (error) {
+    console.error('[Gemini] Todos os modelos falharam:', error)
+    throw new Error('Falha ao gerar questões de Matemática EM')
   }
 }
 
