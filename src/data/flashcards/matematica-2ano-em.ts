@@ -1,0 +1,1279 @@
+import { FlashCard } from '@/types/flashcards'
+
+export const flashcardsMatematica2anoEM: FlashCard[] = [
+  // ==================== TRIGONOMETRIA ====================
+  {
+    id: 'mat-2em-trig-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Ciclo Trigonométrico',
+    dificuldade: 'medio',
+    pergunta: 'Em qual quadrante do ciclo trigonométrico o seno é positivo e o cosseno é negativo?',
+    opcoes: [
+      'Primeiro quadrante',
+      'Segundo quadrante',
+      'Terceiro quadrante',
+      'Quarto quadrante'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'No segundo quadrante, os ângulos estão entre 90° e 180°. Nessa região, o seno (coordenada y) é positivo e o cosseno (coordenada x) é negativo.'
+  },
+  {
+    id: 'mat-2em-trig-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Relação Fundamental',
+    dificuldade: 'facil',
+    pergunta: 'Qual é a relação fundamental da trigonometria?',
+    opcoes: [
+      'sen²x + cos²x = 1',
+      'sen²x - cos²x = 1',
+      'senx + cosx = 1',
+      'senx × cosx = 1'
+    ],
+    respostaCorreta: 0,
+    explicacao: 'A relação fundamental da trigonometria é sen²x + cos²x = 1, válida para qualquer valor de x. Essa identidade deriva do Teorema de Pitágoras aplicado ao círculo unitário.'
+  },
+  {
+    id: 'mat-2em-trig-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Radianos',
+    dificuldade: 'medio',
+    pergunta: 'Um ângulo de 180° corresponde a π radianos.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. A conversão entre graus e radianos segue a proporção: 180° = π rad. Portanto, 180° corresponde exatamente a π radianos.'
+  },
+  {
+    id: 'mat-2em-trig-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Valores Notáveis',
+    dificuldade: 'medio',
+    pergunta: 'Qual é o valor de sen(30°)?',
+    opcoes: [
+      '√3/2',
+      '1/2',
+      '√2/2',
+      '1'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O seno de 30° (ou π/6 rad) é igual a 1/2. Este é um dos valores notáveis que devem ser memorizados, junto com sen(45°) = √2/2 e sen(60°) = √3/2.'
+  },
+  {
+    id: 'mat-2em-trig-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Valores Notáveis',
+    dificuldade: 'medio',
+    pergunta: 'O cosseno de 60° é igual a ___.',
+    respostaCorreta: '1/2',
+    explicacao: 'O cosseno de 60° (ou π/3 rad) é igual a 1/2. Note que cos(60°) = sen(30°), pois são ângulos complementares.'
+  },
+  {
+    id: 'mat-2em-trig-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Tangente',
+    dificuldade: 'facil',
+    pergunta: 'A tangente de um ângulo é definida como:',
+    opcoes: [
+      'Cosseno dividido pelo seno',
+      'Seno dividido pelo cosseno',
+      'Seno multiplicado pelo cosseno',
+      '1 dividido pelo cosseno'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A tangente é definida como tg(x) = sen(x)/cos(x). Por isso, a tangente não está definida quando cos(x) = 0 (ângulos de 90°, 270°, etc.).'
+  },
+  {
+    id: 'mat-2em-trig-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Ciclo Trigonométrico',
+    dificuldade: 'medio',
+    pergunta: 'A tangente é positiva no primeiro e no terceiro quadrantes.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. No 1º quadrante, seno e cosseno são positivos, logo a tangente é positiva. No 3º quadrante, ambos são negativos, e negativo/negativo = positivo.'
+  },
+  {
+    id: 'mat-2em-trig-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Arcos',
+    dificuldade: 'medio',
+    pergunta: 'Quantos radianos correspondem a 90°?',
+    opcoes: [
+      'π/4',
+      'π/3',
+      'π/2',
+      'π'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Como 180° = π rad, então 90° = π/2 rad. A conversão é feita pela proporção: graus/180 = radianos/π.'
+  },
+  {
+    id: 'mat-2em-trig-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Função Seno',
+    dificuldade: 'medio',
+    pergunta: 'Qual é o período da função f(x) = sen(x)?',
+    opcoes: [
+      'π',
+      '2π',
+      'π/2',
+      '4π'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O período da função seno é 2π. Isso significa que sen(x + 2π) = sen(x) para qualquer valor de x. A função completa um ciclo a cada 2π radianos.'
+  },
+  {
+    id: 'mat-2em-trig-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Função Cosseno',
+    dificuldade: 'facil',
+    pergunta: 'A imagem da função cosseno é o intervalo ___ .',
+    respostaCorreta: '[-1, 1]',
+    explicacao: 'A função cosseno assume valores entre -1 e 1, inclusive. O valor máximo (1) ocorre em 0°, 360°, etc., e o mínimo (-1) em 180°, 540°, etc.'
+  },
+  {
+    id: 'mat-2em-trig-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Função Tangente',
+    dificuldade: 'medio',
+    pergunta: 'O período da função tangente é 2π.',
+    respostaCorreta: false,
+    explicacao: 'Falso. O período da função tangente é π, não 2π. Isso ocorre porque tg(x + π) = tg(x) para todo x onde a tangente está definida.'
+  },
+  {
+    id: 'mat-2em-trig-q07',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Equações',
+    dificuldade: 'dificil',
+    pergunta: 'Qual é a solução geral da equação sen(x) = 0?',
+    opcoes: [
+      'x = π/2 + kπ, k ∈ ℤ',
+      'x = kπ, k ∈ ℤ',
+      'x = 2kπ, k ∈ ℤ',
+      'x = π/4 + kπ, k ∈ ℤ'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O seno é zero quando x = 0, π, 2π, 3π, etc. A solução geral é x = kπ, onde k é qualquer número inteiro.'
+  },
+
+  // ==================== MATRIZES ====================
+  {
+    id: 'mat-2em-matr-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Conceitos Básicos',
+    dificuldade: 'facil',
+    pergunta: 'Uma matriz com 3 linhas e 2 colunas é chamada de matriz:',
+    opcoes: [
+      '2 × 3',
+      '3 × 2',
+      '3 + 2',
+      '6 × 1'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A ordem de uma matriz é dada por m × n, onde m é o número de linhas e n é o número de colunas. Portanto, uma matriz com 3 linhas e 2 colunas é 3 × 2.'
+  },
+  {
+    id: 'mat-2em-matr-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Quadrada',
+    dificuldade: 'facil',
+    pergunta: 'Uma matriz quadrada é aquela que tem o mesmo número de linhas e colunas.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Uma matriz quadrada de ordem n tem exatamente n linhas e n colunas. Exemplos: 2×2, 3×3, 4×4.'
+  },
+  {
+    id: 'mat-2em-matr-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Identidade',
+    dificuldade: 'medio',
+    pergunta: 'Qual é a característica da matriz identidade?',
+    opcoes: [
+      'Todos os elementos são 1',
+      'Todos os elementos são 0',
+      'Diagonal principal com 1 e demais elementos 0',
+      'Diagonal principal com 0 e demais elementos 1'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A matriz identidade tem 1 em todos os elementos da diagonal principal e 0 em todas as outras posições. Ela é o elemento neutro da multiplicação de matrizes.'
+  },
+  {
+    id: 'mat-2em-matr-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Operações',
+    dificuldade: 'facil',
+    pergunta: 'Para somar duas matrizes, elas devem ter a mesma ___.',
+    respostaCorreta: 'ordem',
+    explicacao: 'Só é possível somar matrizes que tenham a mesma ordem (mesmo número de linhas e mesmo número de colunas). A soma é feita elemento a elemento.'
+  },
+  {
+    id: 'mat-2em-matr-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Multiplicação',
+    dificuldade: 'medio',
+    pergunta: 'Para multiplicar uma matriz A (m×n) por uma matriz B, qual deve ser a ordem de B?',
+    opcoes: [
+      'm × p',
+      'n × p',
+      'p × m',
+      'p × n'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Na multiplicação A·B, o número de colunas de A deve ser igual ao número de linhas de B. Se A é m×n, então B deve ser n×p, e o resultado será m×p.'
+  },
+  {
+    id: 'mat-2em-matr-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Multiplicação',
+    dificuldade: 'medio',
+    pergunta: 'A multiplicação de matrizes é comutativa, ou seja, A·B = B·A.',
+    respostaCorreta: false,
+    explicacao: 'Falso. A multiplicação de matrizes NÃO é comutativa. Em geral, A·B ≠ B·A. Em alguns casos, uma das multiplicações pode nem estar definida.'
+  },
+  {
+    id: 'mat-2em-matr-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Transposta',
+    dificuldade: 'medio',
+    pergunta: 'Se A é uma matriz 3×4, qual é a ordem de sua transposta Aᵀ?',
+    opcoes: [
+      '3 × 4',
+      '4 × 3',
+      '4 × 4',
+      '3 × 3'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A transposta de uma matriz troca linhas por colunas. Se A é m×n, então Aᵀ é n×m. Portanto, se A é 3×4, Aᵀ é 4×3.'
+  },
+  {
+    id: 'mat-2em-matr-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Nula',
+    dificuldade: 'facil',
+    pergunta: 'Uma matriz cujos elementos são todos iguais a zero é chamada de matriz ___.',
+    respostaCorreta: 'nula',
+    explicacao: 'A matriz nula é aquela em que todos os elementos são iguais a zero. Ela é o elemento neutro da adição de matrizes.'
+  },
+  {
+    id: 'mat-2em-matr-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Oposta',
+    dificuldade: 'facil',
+    pergunta: 'A matriz oposta de A é obtida:',
+    opcoes: [
+      'Trocando linhas por colunas',
+      'Multiplicando todos os elementos por -1',
+      'Invertendo a ordem dos elementos',
+      'Elevando todos os elementos ao quadrado'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A matriz oposta (-A) é obtida multiplicando cada elemento de A por -1. A soma de A com sua oposta resulta na matriz nula.'
+  },
+  {
+    id: 'mat-2em-matr-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Simétrica',
+    dificuldade: 'dificil',
+    pergunta: 'Uma matriz é simétrica quando é igual à sua transposta.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Uma matriz A é simétrica se A = Aᵀ. Isso significa que aᵢⱼ = aⱼᵢ para todos os índices i e j. Matrizes simétricas são necessariamente quadradas.'
+  },
+
+  // ==================== DETERMINANTES ====================
+  {
+    id: 'mat-2em-det-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Matriz 2×2',
+    dificuldade: 'facil',
+    pergunta: 'O determinante de uma matriz 2×2 [[a,b],[c,d]] é:',
+    opcoes: [
+      'a + d - b - c',
+      'ad + bc',
+      'ad - bc',
+      'ab - cd'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'O determinante de uma matriz 2×2 é calculado como ad - bc, ou seja, produto da diagonal principal menos produto da diagonal secundária.'
+  },
+  {
+    id: 'mat-2em-det-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Propriedades',
+    dificuldade: 'medio',
+    pergunta: 'Se uma matriz tem uma linha (ou coluna) de zeros, seu determinante é igual a ___.',
+    respostaCorreta: 'zero',
+    explicacao: 'Uma propriedade fundamental dos determinantes é que se uma linha ou coluna é toda de zeros, o determinante é zero.'
+  },
+  {
+    id: 'mat-2em-det-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Propriedades',
+    dificuldade: 'medio',
+    pergunta: 'Se duas linhas de uma matriz são iguais, seu determinante é zero.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Se uma matriz tem duas linhas (ou colunas) iguais, seu determinante é zero. Isso também vale para linhas proporcionais.'
+  },
+  {
+    id: 'mat-2em-det-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Regra de Sarrus',
+    dificuldade: 'medio',
+    pergunta: 'A Regra de Sarrus é usada para calcular determinantes de matrizes de ordem:',
+    opcoes: [
+      '2',
+      '3',
+      '4',
+      'Qualquer ordem'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A Regra de Sarrus é um método prático para calcular determinantes de matrizes 3×3. Para matrizes maiores, usa-se o Teorema de Laplace.'
+  },
+  {
+    id: 'mat-2em-det-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Propriedades',
+    dificuldade: 'dificil',
+    pergunta: 'Se multiplicarmos uma linha de uma matriz por um número k, o determinante:',
+    opcoes: [
+      'Permanece igual',
+      'Fica multiplicado por k',
+      'Fica multiplicado por k²',
+      'Fica dividido por k'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Quando multiplicamos uma linha (ou coluna) por k, o determinante fica multiplicado por k. Se multiplicarmos toda a matriz n×n por k, o determinante fica multiplicado por kⁿ.'
+  },
+  {
+    id: 'mat-2em-det-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Matriz Inversa',
+    dificuldade: 'medio',
+    pergunta: 'Uma matriz só possui inversa se seu determinante for diferente de zero.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Uma matriz quadrada A é inversível (possui matriz inversa A⁻¹) se e somente se det(A) ≠ 0. Matrizes com determinante zero são chamadas singulares.'
+  },
+  {
+    id: 'mat-2em-det-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Teorema de Laplace',
+    dificuldade: 'dificil',
+    pergunta: 'O Teorema de Laplace permite calcular o determinante de uma matriz através de:',
+    opcoes: [
+      'Soma dos elementos da diagonal',
+      'Produto dos elementos da diagonal',
+      'Expansão em cofatores',
+      'Subtração das diagonais'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'O Teorema de Laplace calcula o determinante através da expansão em cofatores ao longo de uma linha ou coluna escolhida, sendo útil para matrizes de qualquer ordem.'
+  },
+  {
+    id: 'mat-2em-det-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Propriedades',
+    dificuldade: 'medio',
+    pergunta: 'O determinante do produto de duas matrizes é igual ao ___ dos seus determinantes.',
+    respostaCorreta: 'produto',
+    explicacao: 'Propriedade fundamental: det(A·B) = det(A)·det(B). O determinante do produto é o produto dos determinantes.'
+  },
+
+  // ==================== SISTEMAS LINEARES ====================
+  {
+    id: 'mat-2em-sist-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Classificação',
+    dificuldade: 'facil',
+    pergunta: 'Um sistema linear que possui uma única solução é classificado como:',
+    opcoes: [
+      'Sistema Possível Determinado (SPD)',
+      'Sistema Possível Indeterminado (SPI)',
+      'Sistema Impossível (SI)',
+      'Sistema Homogêneo'
+    ],
+    respostaCorreta: 0,
+    explicacao: 'Um Sistema Possível Determinado (SPD) possui exatamente uma solução. O SPI tem infinitas soluções e o SI não tem solução.'
+  },
+  {
+    id: 'mat-2em-sist-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Sistema Homogêneo',
+    dificuldade: 'medio',
+    pergunta: 'Um sistema linear homogêneo sempre admite pelo menos uma solução: a solução trivial.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Um sistema homogêneo (todos os termos independentes são zero) sempre tem a solução trivial (todas as incógnitas iguais a zero), então nunca é impossível.'
+  },
+  {
+    id: 'mat-2em-sist-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Regra de Cramer',
+    dificuldade: 'medio',
+    pergunta: 'A Regra de Cramer pode ser aplicada quando:',
+    opcoes: [
+      'O sistema tem mais equações que incógnitas',
+      'O determinante da matriz dos coeficientes é zero',
+      'O determinante da matriz dos coeficientes é diferente de zero',
+      'O sistema é homogêneo'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A Regra de Cramer só pode ser aplicada quando o sistema é quadrado (mesmo número de equações e incógnitas) e o determinante da matriz dos coeficientes é diferente de zero.'
+  },
+  {
+    id: 'mat-2em-sist-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Escalonamento',
+    dificuldade: 'medio',
+    pergunta: 'O método de ___ consiste em transformar o sistema em um equivalente de forma triangular.',
+    respostaCorreta: 'escalonamento',
+    explicacao: 'O escalonamento (ou eliminação de Gauss) transforma o sistema em um equivalente com forma triangular, facilitando a resolução por substituição regressiva.'
+  },
+  {
+    id: 'mat-2em-sist-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Classificação',
+    dificuldade: 'medio',
+    pergunta: 'Se o determinante da matriz dos coeficientes é zero e o sistema não é homogêneo, o sistema pode ser:',
+    opcoes: [
+      'Apenas SPD',
+      'Apenas SI',
+      'SPI ou SI',
+      'Apenas SPI'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Quando det = 0, o sistema pode ser SPI (infinitas soluções) ou SI (sem solução), dependendo dos termos independentes. Nunca será SPD.'
+  },
+  {
+    id: 'mat-2em-sist-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Representação Matricial',
+    dificuldade: 'facil',
+    pergunta: 'Todo sistema linear pode ser representado na forma matricial A·X = B.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Qualquer sistema linear pode ser escrito como A·X = B, onde A é a matriz dos coeficientes, X é a matriz coluna das incógnitas e B é a matriz dos termos independentes.'
+  },
+  {
+    id: 'mat-2em-sist-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Regra de Cramer',
+    dificuldade: 'dificil',
+    pergunta: 'Na Regra de Cramer, o valor da incógnita x é dado por:',
+    opcoes: [
+      'Dₓ + D',
+      'Dₓ - D',
+      'D / Dₓ',
+      'Dₓ / D'
+    ],
+    respostaCorreta: 3,
+    explicacao: 'Na Regra de Cramer, cada incógnita é calculada dividindo o determinante modificado (Dₓ, Dy, etc.) pelo determinante principal D. Assim, x = Dₓ/D.'
+  },
+  {
+    id: 'mat-2em-sist-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Discussão',
+    dificuldade: 'medio',
+    pergunta: 'Discutir um sistema linear significa analisar as condições para que ele seja SPD, SPI ou ___.',
+    respostaCorreta: 'SI',
+    explicacao: 'Discutir um sistema é determinar para quais valores dos parâmetros (se houver) o sistema é SPD (uma solução), SPI (infinitas soluções) ou SI (impossível).'
+  },
+
+  // ==================== GEOMETRIA ANALÍTICA ====================
+  {
+    id: 'mat-2em-gean-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Distância entre Pontos',
+    dificuldade: 'facil',
+    pergunta: 'A fórmula da distância entre dois pontos A(x₁, y₁) e B(x₂, y₂) é:',
+    opcoes: [
+      'd = |x₂ - x₁| + |y₂ - y₁|',
+      'd = √[(x₂ - x₁)² + (y₂ - y₁)²]',
+      'd = (x₂ - x₁)² + (y₂ - y₁)²',
+      'd = √[(x₂ + x₁)² + (y₂ + y₁)²]'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A distância entre dois pontos é dada pela fórmula d = √[(x₂ - x₁)² + (y₂ - y₁)²], que deriva do Teorema de Pitágoras.'
+  },
+  {
+    id: 'mat-2em-gean-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Ponto Médio',
+    dificuldade: 'facil',
+    pergunta: 'O ponto médio de um segmento é calculado pela ___ das coordenadas dos extremos.',
+    respostaCorreta: 'média aritmética',
+    explicacao: 'O ponto médio M entre A(x₁, y₁) e B(x₂, y₂) tem coordenadas M = ((x₁+x₂)/2, (y₁+y₂)/2), ou seja, a média aritmética das coordenadas.'
+  },
+  {
+    id: 'mat-2em-gean-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Equação da Reta',
+    dificuldade: 'medio',
+    pergunta: 'Na equação reduzida da reta y = mx + n, o coeficiente m representa:',
+    opcoes: [
+      'O coeficiente linear',
+      'A interseção com o eixo y',
+      'O coeficiente angular (inclinação)',
+      'A distância à origem'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Na equação y = mx + n, m é o coeficiente angular (que determina a inclinação da reta) e n é o coeficiente linear (interseção com o eixo y).'
+  },
+  {
+    id: 'mat-2em-gean-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Retas Paralelas',
+    dificuldade: 'medio',
+    pergunta: 'Duas retas são paralelas se e somente se têm o mesmo coeficiente angular.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Duas retas distintas são paralelas quando têm o mesmo coeficiente angular (mesma inclinação). Se r: y = m₁x + n₁ e s: y = m₂x + n₂, então r || s ⟺ m₁ = m₂.'
+  },
+  {
+    id: 'mat-2em-gean-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Retas Perpendiculares',
+    dificuldade: 'medio',
+    pergunta: 'Se duas retas são perpendiculares e seus coeficientes angulares são m₁ e m₂, então:',
+    opcoes: [
+      'm₁ = m₂',
+      'm₁ + m₂ = 0',
+      'm₁ · m₂ = -1',
+      'm₁ · m₂ = 1'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Duas retas são perpendiculares quando o produto de seus coeficientes angulares é -1. Se m₁ · m₂ = -1, as retas formam um ângulo de 90°.'
+  },
+  {
+    id: 'mat-2em-gean-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Equação da Reta',
+    dificuldade: 'medio',
+    pergunta: 'A equação geral da reta tem a forma ax + by + c = 0, onde a e b não são ___ nulos.',
+    respostaCorreta: 'simultaneamente',
+    explicacao: 'Na equação geral ax + by + c = 0, os coeficientes a e b não podem ser ambos zero ao mesmo tempo, pois isso não representaria uma reta.'
+  },
+  {
+    id: 'mat-2em-gean-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Distância Ponto-Reta',
+    dificuldade: 'dificil',
+    pergunta: 'A fórmula da distância de um ponto P(x₀, y₀) à reta ax + by + c = 0 é:',
+    opcoes: [
+      'd = |ax₀ + by₀ + c|',
+      'd = |ax₀ + by₀ + c| / (a² + b²)',
+      'd = |ax₀ + by₀ + c| / √(a² + b²)',
+      'd = √(ax₀ + by₀ + c)'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A distância de um ponto P(x₀, y₀) à reta ax + by + c = 0 é d = |ax₀ + by₀ + c| / √(a² + b²). O módulo garante que a distância seja sempre positiva.'
+  },
+  {
+    id: 'mat-2em-gean-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Posições Relativas',
+    dificuldade: 'facil',
+    pergunta: 'Duas retas no plano podem ser paralelas, concorrentes ou coincidentes.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. No plano, duas retas podem ser: paralelas (não se interceptam), concorrentes (se interceptam em um ponto) ou coincidentes (são a mesma reta).'
+  },
+  {
+    id: 'mat-2em-gean-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Circunferência',
+    dificuldade: 'medio',
+    pergunta: 'A equação reduzida da circunferência com centro C(a, b) e raio r é:',
+    opcoes: [
+      '(x - a)² + (y - b)² = r',
+      '(x + a)² + (y + b)² = r²',
+      '(x - a)² + (y - b)² = r²',
+      'x² + y² = r²'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A equação reduzida da circunferência é (x - a)² + (y - b)² = r², onde (a, b) é o centro e r é o raio. Se o centro é a origem, simplifica para x² + y² = r².'
+  },
+  {
+    id: 'mat-2em-gean-c03',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Cônicas',
+    dificuldade: 'medio',
+    pergunta: 'As cônicas são curvas obtidas pela interseção de um plano com um cone: circunferência, elipse, ___ e hipérbole.',
+    respostaCorreta: 'parábola',
+    explicacao: 'As quatro cônicas principais são: circunferência, elipse, parábola e hipérbole. Cada uma é obtida por diferentes ângulos de corte do cone.'
+  },
+  {
+    id: 'mat-2em-gean-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Circunferência',
+    dificuldade: 'medio',
+    pergunta: 'Uma reta que toca a circunferência em exatamente um ponto é chamada de secante.',
+    respostaCorreta: false,
+    explicacao: 'Falso. Uma reta que toca a circunferência em exatamente um ponto é chamada de tangente. A reta secante intercepta a circunferência em dois pontos.'
+  },
+
+  // ==================== GEOMETRIA ESPACIAL ====================
+  {
+    id: 'mat-2em-gesp-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Posições Relativas',
+    dificuldade: 'facil',
+    pergunta: 'Duas retas no espaço que não se interceptam e não são paralelas são chamadas de:',
+    opcoes: [
+      'Concorrentes',
+      'Paralelas',
+      'Reversas',
+      'Coincidentes'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Retas reversas são retas no espaço que não se interceptam e não são paralelas. Elas não pertencem ao mesmo plano.'
+  },
+  {
+    id: 'mat-2em-gesp-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Planos',
+    dificuldade: 'medio',
+    pergunta: 'Três pontos não colineares determinam um único plano.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Três pontos não colineares (que não estão na mesma reta) determinam um único plano. Este é um postulado fundamental da geometria espacial.'
+  },
+  {
+    id: 'mat-2em-gesp-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Posições Relativas',
+    dificuldade: 'medio',
+    pergunta: 'A interseção de dois planos distintos não paralelos é:',
+    opcoes: [
+      'Um ponto',
+      'Uma reta',
+      'Vazio',
+      'Um plano'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Dois planos distintos não paralelos sempre se interceptam em uma reta. Se fossem paralelos, a interseção seria vazia.'
+  },
+  {
+    id: 'mat-2em-gesp-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Perpendicularidade',
+    dificuldade: 'medio',
+    pergunta: 'Uma reta é perpendicular a um plano se é perpendicular a ___ reta do plano que passa pelo pé da perpendicular.',
+    respostaCorreta: 'toda',
+    explicacao: 'Uma reta é perpendicular a um plano quando forma ângulo de 90° com qualquer reta do plano que passe pelo ponto de interseção (pé da perpendicular).'
+  },
+  {
+    id: 'mat-2em-gesp-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Poliedros',
+    dificuldade: 'facil',
+    pergunta: 'Segundo a relação de Euler para poliedros convexos, V - A + F = :',
+    opcoes: [
+      '0',
+      '1',
+      '2',
+      '3'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A relação de Euler afirma que V - A + F = 2, onde V é o número de vértices, A é o número de arestas e F é o número de faces.'
+  },
+  {
+    id: 'mat-2em-gesp-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Prismas',
+    dificuldade: 'medio',
+    pergunta: 'O volume de um prisma é calculado multiplicando a área da base pela altura.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. V = Ab · h, onde Ab é a área da base e h é a altura (distância entre as bases). Isso vale para qualquer prisma, reto ou oblíquo.'
+  },
+  {
+    id: 'mat-2em-gesp-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Pirâmides',
+    dificuldade: 'medio',
+    pergunta: 'O volume de uma pirâmide em relação a um prisma de mesma base e altura é:',
+    opcoes: [
+      'Igual',
+      'O dobro',
+      'A metade',
+      'Um terço'
+    ],
+    respostaCorreta: 3,
+    explicacao: 'O volume da pirâmide é 1/3 do volume do prisma de mesma base e altura. V = (1/3) · Ab · h.'
+  },
+  {
+    id: 'mat-2em-gesp-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Cilindro',
+    dificuldade: 'medio',
+    pergunta: 'O volume de um cilindro de raio r e altura h é V = ___ · h.',
+    respostaCorreta: 'πr²',
+    explicacao: 'O volume do cilindro é V = πr²h, onde πr² é a área da base circular e h é a altura. Equivale a um prisma com base circular.'
+  },
+  {
+    id: 'mat-2em-gesp-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Cone',
+    dificuldade: 'medio',
+    pergunta: 'O volume de um cone é:',
+    opcoes: [
+      'V = πr²h',
+      'V = (1/2)πr²h',
+      'V = (1/3)πr²h',
+      'V = (2/3)πr²h'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'O volume do cone é V = (1/3)πr²h, analogamente à pirâmide, é 1/3 do volume do cilindro correspondente (mesma base e altura).'
+  },
+  {
+    id: 'mat-2em-gesp-vf03',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Esfera',
+    dificuldade: 'dificil',
+    pergunta: 'O volume da esfera de raio r é V = (4/3)πr³.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. O volume da esfera é V = (4/3)πr³. A área da superfície esférica é S = 4πr².'
+  },
+  {
+    id: 'mat-2em-gesp-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Sólidos de Revolução',
+    dificuldade: 'medio',
+    pergunta: 'Qual sólido é gerado pela rotação de um retângulo em torno de um de seus lados?',
+    opcoes: [
+      'Cone',
+      'Esfera',
+      'Cilindro',
+      'Pirâmide'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Quando um retângulo gira em torno de um de seus lados, gera um cilindro. Um triângulo retângulo girando em torno de um cateto gera um cone.'
+  },
+  {
+    id: 'mat-2em-gesp-c03',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Área Lateral',
+    dificuldade: 'dificil',
+    pergunta: 'A área lateral de um cilindro reto de raio r e altura h é igual a ___.',
+    respostaCorreta: '2πrh',
+    explicacao: 'A área lateral do cilindro é AL = 2πrh. Quando "planificada", a lateral forma um retângulo de base 2πr (perímetro da base) e altura h.'
+  },
+
+  // ==================== NÚMEROS COMPLEXOS (INTRODUÇÃO) ====================
+  {
+    id: 'mat-2em-comp-q01',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Unidade Imaginária',
+    dificuldade: 'facil',
+    pergunta: 'A unidade imaginária i é definida como:',
+    opcoes: [
+      'i = √2',
+      'i = √-1',
+      'i = -1',
+      'i = π'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A unidade imaginária i é definida como i = √-1, ou equivalentemente, i² = -1. Isso permite trabalhar com raízes de números negativos.'
+  },
+  {
+    id: 'mat-2em-comp-vf01',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Potências de i',
+    dificuldade: 'medio',
+    pergunta: 'O valor de i⁴ é igual a 1.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. As potências de i seguem um ciclo: i¹ = i, i² = -1, i³ = -i, i⁴ = 1, i⁵ = i, e assim por diante. O ciclo se repete a cada 4 potências.'
+  },
+  {
+    id: 'mat-2em-comp-q02',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Forma Algébrica',
+    dificuldade: 'facil',
+    pergunta: 'Na forma algébrica z = a + bi, a parte imaginária é:',
+    opcoes: [
+      'a',
+      'b',
+      'bi',
+      'a + b'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Em z = a + bi, "a" é a parte real e "b" é a parte imaginária. Note que a parte imaginária é apenas o coeficiente b, não bi.'
+  },
+  {
+    id: 'mat-2em-comp-c01',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Conjugado',
+    dificuldade: 'medio',
+    pergunta: 'O conjugado do número complexo z = a + bi é z̄ = a ___ bi.',
+    respostaCorreta: '-',
+    explicacao: 'O conjugado de z = a + bi é z̄ = a - bi. Troca-se o sinal da parte imaginária. O produto z · z̄ = a² + b² é sempre real e não negativo.'
+  },
+  {
+    id: 'mat-2em-comp-q03',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Módulo',
+    dificuldade: 'medio',
+    pergunta: 'O módulo do número complexo z = 3 + 4i é:',
+    opcoes: [
+      '7',
+      '5',
+      '25',
+      '1'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'O módulo de z = a + bi é |z| = √(a² + b²). Para z = 3 + 4i: |z| = √(9 + 16) = √25 = 5.'
+  },
+  {
+    id: 'mat-2em-comp-vf02',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Plano de Argand-Gauss',
+    dificuldade: 'medio',
+    pergunta: 'No plano de Argand-Gauss, o eixo horizontal representa a parte imaginária.',
+    respostaCorreta: false,
+    explicacao: 'Falso. No plano de Argand-Gauss, o eixo horizontal representa a parte real e o eixo vertical representa a parte imaginária.'
+  },
+  {
+    id: 'mat-2em-comp-q04',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Operações',
+    dificuldade: 'medio',
+    pergunta: 'O resultado de (2 + 3i) + (4 - i) é:',
+    opcoes: [
+      '6 + 4i',
+      '6 + 2i',
+      '6 - 2i',
+      '8 + 2i'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Na adição de complexos, somamos as partes reais e as partes imaginárias separadamente: (2 + 4) + (3 - 1)i = 6 + 2i.'
+  },
+  {
+    id: 'mat-2em-comp-c02',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Igualdade',
+    dificuldade: 'facil',
+    pergunta: 'Dois números complexos são iguais quando têm a mesma parte real e a mesma parte ___.',
+    respostaCorreta: 'imaginária',
+    explicacao: 'Para z₁ = a + bi e z₂ = c + di serem iguais, devemos ter a = c (partes reais iguais) e b = d (partes imaginárias iguais).'
+  },
+
+  // ==================== QUESTÕES ADICIONAIS VARIADAS ====================
+  {
+    id: 'mat-2em-trig-q08',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Funções Inversas',
+    dificuldade: 'dificil',
+    pergunta: 'O domínio principal da função arco seno é:',
+    opcoes: [
+      '[-π/2, π/2]',
+      '[0, π]',
+      '[-1, 1]',
+      '(-∞, +∞)'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'O arco seno (arcsen ou sen⁻¹) tem domínio [-1, 1] e imagem [-π/2, π/2]. O domínio corresponde aos valores possíveis do seno.'
+  },
+  {
+    id: 'mat-2em-trig-vf04',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Lei dos Senos',
+    dificuldade: 'medio',
+    pergunta: 'A Lei dos Senos relaciona os lados de um triângulo com os senos dos ângulos opostos.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. A Lei dos Senos afirma que a/sen(A) = b/sen(B) = c/sen(C) = 2R, onde R é o raio da circunferência circunscrita.'
+  },
+  {
+    id: 'mat-2em-trig-q09',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Lei dos Cossenos',
+    dificuldade: 'dificil',
+    pergunta: 'A Lei dos Cossenos afirma que a² =',
+    opcoes: [
+      'b² + c²',
+      'b² + c² - bc·cos(A)',
+      'b² + c² - 2bc·cos(A)',
+      'b² + c² + 2bc·cos(A)'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'A Lei dos Cossenos generaliza o Teorema de Pitágoras: a² = b² + c² - 2bc·cos(A). Quando A = 90°, cos(A) = 0 e recaímos no Teorema de Pitágoras.'
+  },
+  {
+    id: 'mat-2em-matr-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Diagonal',
+    dificuldade: 'medio',
+    pergunta: 'Uma matriz diagonal é aquela em que:',
+    opcoes: [
+      'Todos os elementos são iguais',
+      'Apenas os elementos da diagonal principal são não nulos',
+      'A diagonal principal tem todos elementos iguais a 1',
+      'Todos os elementos são positivos'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'Uma matriz diagonal tem todos os elementos fora da diagonal principal iguais a zero. Os elementos da diagonal podem ser quaisquer valores.'
+  },
+  {
+    id: 'mat-2em-det-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Determinantes',
+    subtema: 'Propriedades',
+    dificuldade: 'dificil',
+    pergunta: 'Se trocarmos duas linhas de uma matriz entre si, o determinante:',
+    opcoes: [
+      'Permanece igual',
+      'Fica dobrado',
+      'Troca de sinal',
+      'Fica nulo'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Ao trocar duas linhas (ou colunas) de uma matriz, o determinante troca de sinal. Essa é uma propriedade fundamental dos determinantes.'
+  },
+  {
+    id: 'mat-2em-gean-q06',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Elipse',
+    dificuldade: 'medio',
+    pergunta: 'A elipse é o lugar geométrico dos pontos cuja:',
+    opcoes: [
+      'Distância a um ponto fixo é constante',
+      'Soma das distâncias a dois pontos fixos é constante',
+      'Diferença das distâncias a dois pontos fixos é constante',
+      'Razão das distâncias a um ponto e uma reta é constante'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A elipse é definida como o lugar geométrico dos pontos P tais que d(P, F₁) + d(P, F₂) = 2a (constante), onde F₁ e F₂ são os focos.'
+  },
+  {
+    id: 'mat-2em-gean-q07',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Hipérbole',
+    dificuldade: 'dificil',
+    pergunta: 'A hipérbole é definida pela propriedade:',
+    opcoes: [
+      'Soma das distâncias aos focos é constante',
+      'Diferença das distâncias aos focos é constante',
+      'Produto das distâncias aos focos é constante',
+      'Distância a um foco é constante'
+    ],
+    respostaCorreta: 1,
+    explicacao: 'A hipérbole é o lugar geométrico dos pontos P tais que |d(P, F₁) - d(P, F₂)| = 2a (constante), diferente da elipse que usa soma.'
+  },
+  {
+    id: 'mat-2em-gean-vf04',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Analítica',
+    subtema: 'Parábola',
+    dificuldade: 'medio',
+    pergunta: 'A parábola é o lugar geométrico dos pontos equidistantes de um ponto fixo (foco) e uma reta fixa (diretriz).',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. Para qualquer ponto P da parábola, a distância ao foco F é igual à distância à diretriz d. Isso define a parábola geometricamente.'
+  },
+  {
+    id: 'mat-2em-gesp-q07',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Poliedros Regulares',
+    dificuldade: 'medio',
+    pergunta: 'Quantos poliedros regulares convexos (sólidos de Platão) existem?',
+    opcoes: [
+      '3',
+      '4',
+      '5',
+      '6'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Existem exatamente 5 poliedros regulares convexos: tetraedro, cubo (hexaedro), octaedro, dodecaedro e icosaedro. São os únicos possíveis.'
+  },
+  {
+    id: 'mat-2em-gesp-vf04',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Geometria Espacial',
+    subtema: 'Troncos',
+    dificuldade: 'dificil',
+    pergunta: 'O tronco de uma pirâmide é obtido cortando a pirâmide por um plano paralelo à base.',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. O tronco de pirâmide (ou cone) é a parte entre a base e a seção feita por um plano paralelo à base. Tem duas bases paralelas de tamanhos diferentes.'
+  },
+  {
+    id: 'mat-2em-sist-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Sistemas Lineares',
+    subtema: 'Sistemas Equivalentes',
+    dificuldade: 'medio',
+    pergunta: 'Dois sistemas lineares são equivalentes quando:',
+    opcoes: [
+      'Têm o mesmo número de equações',
+      'Têm as mesmas incógnitas',
+      'Têm o mesmo conjunto solução',
+      'Têm os mesmos coeficientes'
+    ],
+    respostaCorreta: 2,
+    explicacao: 'Sistemas equivalentes são aqueles que possuem exatamente o mesmo conjunto solução. O escalonamento transforma o sistema em um equivalente.'
+  },
+  {
+    id: 'mat-2em-comp-q05',
+    tipo: 'quiz',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Números Complexos',
+    subtema: 'Multiplicação',
+    dificuldade: 'dificil',
+    pergunta: 'O resultado de (2 + i)(3 - 2i) é:',
+    opcoes: [
+      '8 - i',
+      '4 + i',
+      '6 - i',
+      '8 + i'
+    ],
+    respostaCorreta: 0,
+    explicacao: '(2 + i)(3 - 2i) = 6 - 4i + 3i - 2i² = 6 - i - 2(-1) = 6 - i + 2 = 8 - i. Lembrando que i² = -1.'
+  },
+  {
+    id: 'mat-2em-trig-c03',
+    tipo: 'complete',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Trigonometria',
+    subtema: 'Adição de Arcos',
+    dificuldade: 'dificil',
+    pergunta: 'A fórmula sen(a + b) = sen(a)·cos(b) + cos(a)·___.',
+    respostaCorreta: 'sen(b)',
+    explicacao: 'A fórmula de adição do seno é sen(a + b) = sen(a)·cos(b) + cos(a)·sen(b). É uma das identidades trigonométricas fundamentais.'
+  },
+  {
+    id: 'mat-2em-matr-vf04',
+    tipo: 'vf',
+    componente: 'matematica',
+    ano: '2ano',
+    tema: 'Matrizes',
+    subtema: 'Matriz Inversa',
+    dificuldade: 'dificil',
+    pergunta: 'A matriz inversa de A, se existir, satisfaz A · A⁻¹ = I (matriz identidade).',
+    respostaCorreta: true,
+    explicacao: 'Verdadeiro. A matriz inversa A⁻¹ satisfaz A · A⁻¹ = A⁻¹ · A = I. Ela só existe para matrizes quadradas com determinante não nulo.'
+  }
+]

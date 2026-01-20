@@ -61,6 +61,12 @@ function mapearAnoUsuario(ano: number, nivel: string): AnoEscolar | null {
     if (ano === 2) return '2ano'
     if (ano === 3) return '3ano'
   }
+  if (nivel === 'EF') {
+    if (ano === 6) return '6ano'
+    if (ano === 7) return '7ano'
+    if (ano === 8) return '8ano'
+    if (ano === 9) return '9ano'
+  }
   return null
 }
 
