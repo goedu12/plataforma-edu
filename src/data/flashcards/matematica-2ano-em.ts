@@ -1,3 +1,9 @@
+/**
+ * FlashCards de Matemática - 2ª Série do Ensino Médio
+ * Temas: Trigonometria, Matrizes, Determinantes, Sistemas Lineares, Geometria Analítica, Geometria Espacial, Números Complexos
+ * Total: 83 questões
+ */
+
 import { FlashCard } from '@/types/flashcards'
 
 export const flashcardsMatematica2anoEM: FlashCard[] = [
@@ -18,7 +24,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Quarto quadrante'
     ],
     respostaCorreta: 1,
-    explicacao: 'No segundo quadrante, os ângulos estão entre 90° e 180°. Nessa região, o seno (coordenada y) é positivo e o cosseno (coordenada x) é negativo.'
+    dica: 'Lembre-se: seno é a coordenada y, cosseno é a coordenada x.',
+    explicacao: 'No segundo quadrante, os ângulos estão entre 90° e 180°. Nessa região, o seno (coordenada y) é positivo e o cosseno (coordenada x) é negativo.',
+    tags: ['ciclo trigonométrico', 'quadrantes', 'seno', 'cosseno']
   },
   {
     id: 'mat-2em-trig-q02',
@@ -36,7 +44,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'senx × cosx = 1'
     ],
     respostaCorreta: 0,
-    explicacao: 'A relação fundamental da trigonometria é sen²x + cos²x = 1, válida para qualquer valor de x. Essa identidade deriva do Teorema de Pitágoras aplicado ao círculo unitário.'
+    dica: 'Deriva do Teorema de Pitágoras no círculo unitário.',
+    explicacao: 'A relação fundamental da trigonometria é sen²x + cos²x = 1, válida para qualquer valor de x. Essa identidade deriva do Teorema de Pitágoras aplicado ao círculo unitário.',
+    tags: ['relação fundamental', 'identidade trigonométrica']
   },
   {
     id: 'mat-2em-trig-vf01',
@@ -48,7 +58,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Um ângulo de 180° corresponde a π radianos.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. A conversão entre graus e radianos segue a proporção: 180° = π rad. Portanto, 180° corresponde exatamente a π radianos.'
+    dica: 'A meia-volta completa equivale a π radianos.',
+    explicacao: 'Verdadeiro. A conversão entre graus e radianos segue a proporção: 180° = π rad. Portanto, 180° corresponde exatamente a π radianos.',
+    tags: ['radianos', 'conversão', 'graus']
   },
   {
     id: 'mat-2em-trig-q03',
@@ -66,7 +78,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '1'
     ],
     respostaCorreta: 1,
-    explicacao: 'O seno de 30° (ou π/6 rad) é igual a 1/2. Este é um dos valores notáveis que devem ser memorizados, junto com sen(45°) = √2/2 e sen(60°) = √3/2.'
+    dica: 'É o menor valor notável do seno.',
+    explicacao: 'O seno de 30° (ou π/6 rad) é igual a 1/2. Este é um dos valores notáveis que devem ser memorizados, junto com sen(45°) = √2/2 e sen(60°) = √3/2.',
+    tags: ['valores notáveis', 'seno', '30 graus']
   },
   {
     id: 'mat-2em-trig-c01',
@@ -78,7 +92,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O cosseno de 60° é igual a ___.',
     respostaCorreta: '1/2',
-    explicacao: 'O cosseno de 60° (ou π/3 rad) é igual a 1/2. Note que cos(60°) = sen(30°), pois são ângulos complementares.'
+    dica: 'cos(60°) = sen(30°) - são ângulos complementares.',
+    explicacao: 'O cosseno de 60° (ou π/3 rad) é igual a 1/2. Note que cos(60°) = sen(30°), pois são ângulos complementares.',
+    tags: ['valores notáveis', 'cosseno', '60 graus']
   },
   {
     id: 'mat-2em-trig-q04',
@@ -96,7 +112,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '1 dividido pelo cosseno'
     ],
     respostaCorreta: 1,
-    explicacao: 'A tangente é definida como tg(x) = sen(x)/cos(x). Por isso, a tangente não está definida quando cos(x) = 0 (ângulos de 90°, 270°, etc.).'
+    dica: 'tg = sen/cos.',
+    explicacao: 'A tangente é definida como tg(x) = sen(x)/cos(x). Por isso, a tangente não está definida quando cos(x) = 0 (ângulos de 90°, 270°, etc.).',
+    tags: ['tangente', 'definição']
   },
   {
     id: 'mat-2em-trig-vf02',
@@ -108,7 +126,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A tangente é positiva no primeiro e no terceiro quadrantes.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. No 1º quadrante, seno e cosseno são positivos, logo a tangente é positiva. No 3º quadrante, ambos são negativos, e negativo/negativo = positivo.'
+    dica: 'Analise os sinais de seno e cosseno em cada quadrante.',
+    explicacao: 'Verdadeiro. No 1º quadrante, seno e cosseno são positivos, logo a tangente é positiva. No 3º quadrante, ambos são negativos, e negativo/negativo = positivo.',
+    tags: ['tangente', 'quadrantes', 'sinais']
   },
   {
     id: 'mat-2em-trig-q05',
@@ -126,7 +146,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'π'
     ],
     respostaCorreta: 2,
-    explicacao: 'Como 180° = π rad, então 90° = π/2 rad. A conversão é feita pela proporção: graus/180 = radianos/π.'
+    dica: '90° é a metade de 180°.',
+    explicacao: 'Como 180° = π rad, então 90° = π/2 rad. A conversão é feita pela proporção: graus/180 = radianos/π.',
+    tags: ['radianos', 'conversão', '90 graus']
   },
   {
     id: 'mat-2em-trig-q06',
@@ -144,7 +166,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '4π'
     ],
     respostaCorreta: 1,
-    explicacao: 'O período da função seno é 2π. Isso significa que sen(x + 2π) = sen(x) para qualquer valor de x. A função completa um ciclo a cada 2π radianos.'
+    dica: 'O período é o intervalo para completar um ciclo.',
+    explicacao: 'O período da função seno é 2π. Isso significa que sen(x + 2π) = sen(x) para qualquer valor de x. A função completa um ciclo a cada 2π radianos.',
+    tags: ['função seno', 'período']
   },
   {
     id: 'mat-2em-trig-c02',
@@ -156,7 +180,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'A imagem da função cosseno é o intervalo ___ .',
     respostaCorreta: '[-1, 1]',
-    explicacao: 'A função cosseno assume valores entre -1 e 1, inclusive. O valor máximo (1) ocorre em 0°, 360°, etc., e o mínimo (-1) em 180°, 540°, etc.'
+    dica: 'Os valores variam entre o mínimo -1 e o máximo 1.',
+    explicacao: 'A função cosseno assume valores entre -1 e 1, inclusive. O valor máximo (1) ocorre em 0°, 360°, etc., e o mínimo (-1) em 180°, 540°, etc.',
+    tags: ['função cosseno', 'imagem', 'intervalo']
   },
   {
     id: 'mat-2em-trig-vf03',
@@ -168,7 +194,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O período da função tangente é 2π.',
     respostaCorreta: false,
-    explicacao: 'Falso. O período da função tangente é π, não 2π. Isso ocorre porque tg(x + π) = tg(x) para todo x onde a tangente está definida.'
+    dica: 'A tangente se repete mais rapidamente que seno e cosseno.',
+    explicacao: 'Falso. O período da função tangente é π, não 2π. Isso ocorre porque tg(x + π) = tg(x) para todo x onde a tangente está definida.',
+    tags: ['função tangente', 'período']
   },
   {
     id: 'mat-2em-trig-q07',
@@ -186,7 +214,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'x = π/4 + kπ, k ∈ ℤ'
     ],
     respostaCorreta: 1,
-    explicacao: 'O seno é zero quando x = 0, π, 2π, 3π, etc. A solução geral é x = kπ, onde k é qualquer número inteiro.'
+    dica: 'O seno é zero nos múltiplos de π.',
+    explicacao: 'O seno é zero quando x = 0, π, 2π, 3π, etc. A solução geral é x = kπ, onde k é qualquer número inteiro.',
+    tags: ['equação trigonométrica', 'seno', 'solução geral']
   },
 
   // ==================== MATRIZES ====================
@@ -206,7 +236,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '6 × 1'
     ],
     respostaCorreta: 1,
-    explicacao: 'A ordem de uma matriz é dada por m × n, onde m é o número de linhas e n é o número de colunas. Portanto, uma matriz com 3 linhas e 2 colunas é 3 × 2.'
+    dica: 'Ordem = linhas × colunas.',
+    explicacao: 'A ordem de uma matriz é dada por m × n, onde m é o número de linhas e n é o número de colunas. Portanto, uma matriz com 3 linhas e 2 colunas é 3 × 2.',
+    tags: ['matriz', 'ordem', 'dimensão']
   },
   {
     id: 'mat-2em-matr-vf01',
@@ -218,7 +250,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'Uma matriz quadrada é aquela que tem o mesmo número de linhas e colunas.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Uma matriz quadrada de ordem n tem exatamente n linhas e n colunas. Exemplos: 2×2, 3×3, 4×4.'
+    dica: 'Quadrada = mesma dimensão em linhas e colunas.',
+    explicacao: 'Verdadeiro. Uma matriz quadrada de ordem n tem exatamente n linhas e n colunas. Exemplos: 2×2, 3×3, 4×4.',
+    tags: ['matriz quadrada', 'definição']
   },
   {
     id: 'mat-2em-matr-q02',
@@ -236,7 +270,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Diagonal principal com 0 e demais elementos 1'
     ],
     respostaCorreta: 2,
-    explicacao: 'A matriz identidade tem 1 em todos os elementos da diagonal principal e 0 em todas as outras posições. Ela é o elemento neutro da multiplicação de matrizes.'
+    dica: 'É o elemento neutro da multiplicação.',
+    explicacao: 'A matriz identidade tem 1 em todos os elementos da diagonal principal e 0 em todas as outras posições. Ela é o elemento neutro da multiplicação de matrizes.',
+    tags: ['matriz identidade', 'diagonal principal']
   },
   {
     id: 'mat-2em-matr-c01',
@@ -248,7 +284,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'Para somar duas matrizes, elas devem ter a mesma ___.',
     respostaCorreta: 'ordem',
-    explicacao: 'Só é possível somar matrizes que tenham a mesma ordem (mesmo número de linhas e mesmo número de colunas). A soma é feita elemento a elemento.'
+    dica: 'Precisam ter as mesmas dimensões.',
+    explicacao: 'Só é possível somar matrizes que tenham a mesma ordem (mesmo número de linhas e mesmo número de colunas). A soma é feita elemento a elemento.',
+    tags: ['soma de matrizes', 'operações']
   },
   {
     id: 'mat-2em-matr-q03',
@@ -266,7 +304,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'p × n'
     ],
     respostaCorreta: 1,
-    explicacao: 'Na multiplicação A·B, o número de colunas de A deve ser igual ao número de linhas de B. Se A é m×n, então B deve ser n×p, e o resultado será m×p.'
+    dica: 'Colunas de A = Linhas de B.',
+    explicacao: 'Na multiplicação A·B, o número de colunas de A deve ser igual ao número de linhas de B. Se A é m×n, então B deve ser n×p, e o resultado será m×p.',
+    tags: ['multiplicação de matrizes', 'ordem']
   },
   {
     id: 'mat-2em-matr-vf02',
@@ -278,7 +318,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A multiplicação de matrizes é comutativa, ou seja, A·B = B·A.',
     respostaCorreta: false,
-    explicacao: 'Falso. A multiplicação de matrizes NÃO é comutativa. Em geral, A·B ≠ B·A. Em alguns casos, uma das multiplicações pode nem estar definida.'
+    dica: 'A ordem dos fatores altera o produto em matrizes.',
+    explicacao: 'Falso. A multiplicação de matrizes NÃO é comutativa. Em geral, A·B ≠ B·A. Em alguns casos, uma das multiplicações pode nem estar definida.',
+    tags: ['multiplicação de matrizes', 'comutatividade']
   },
   {
     id: 'mat-2em-matr-q04',
@@ -296,7 +338,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '3 × 3'
     ],
     respostaCorreta: 1,
-    explicacao: 'A transposta de uma matriz troca linhas por colunas. Se A é m×n, então Aᵀ é n×m. Portanto, se A é 3×4, Aᵀ é 4×3.'
+    dica: 'Linhas viram colunas e vice-versa.',
+    explicacao: 'A transposta de uma matriz troca linhas por colunas. Se A é m×n, então Aᵀ é n×m. Portanto, se A é 3×4, Aᵀ é 4×3.',
+    tags: ['matriz transposta', 'ordem']
   },
   {
     id: 'mat-2em-matr-c02',
@@ -308,7 +352,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'Uma matriz cujos elementos são todos iguais a zero é chamada de matriz ___.',
     respostaCorreta: 'nula',
-    explicacao: 'A matriz nula é aquela em que todos os elementos são iguais a zero. Ela é o elemento neutro da adição de matrizes.'
+    dica: 'É o elemento neutro da adição.',
+    explicacao: 'A matriz nula é aquela em que todos os elementos são iguais a zero. Ela é o elemento neutro da adição de matrizes.',
+    tags: ['matriz nula', 'elemento neutro']
   },
   {
     id: 'mat-2em-matr-q05',
@@ -326,7 +372,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Elevando todos os elementos ao quadrado'
     ],
     respostaCorreta: 1,
-    explicacao: 'A matriz oposta (-A) é obtida multiplicando cada elemento de A por -1. A soma de A com sua oposta resulta na matriz nula.'
+    dica: 'Oposto = sinal contrário.',
+    explicacao: 'A matriz oposta (-A) é obtida multiplicando cada elemento de A por -1. A soma de A com sua oposta resulta na matriz nula.',
+    tags: ['matriz oposta', 'operações']
   },
   {
     id: 'mat-2em-matr-vf03',
@@ -338,7 +386,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Uma matriz é simétrica quando é igual à sua transposta.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Uma matriz A é simétrica se A = Aᵀ. Isso significa que aᵢⱼ = aⱼᵢ para todos os índices i e j. Matrizes simétricas são necessariamente quadradas.'
+    dica: 'A = Aᵀ caracteriza simetria.',
+    explicacao: 'Verdadeiro. Uma matriz A é simétrica se A = Aᵀ. Isso significa que aᵢⱼ = aⱼᵢ para todos os índices i e j. Matrizes simétricas são necessariamente quadradas.',
+    tags: ['matriz simétrica', 'transposta']
   },
 
   // ==================== DETERMINANTES ====================
@@ -358,7 +408,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'ab - cd'
     ],
     respostaCorreta: 2,
-    explicacao: 'O determinante de uma matriz 2×2 é calculado como ad - bc, ou seja, produto da diagonal principal menos produto da diagonal secundária.'
+    dica: 'Diagonal principal menos diagonal secundária.',
+    explicacao: 'O determinante de uma matriz 2×2 é calculado como ad - bc, ou seja, produto da diagonal principal menos produto da diagonal secundária.',
+    tags: ['determinante', 'matriz 2x2']
   },
   {
     id: 'mat-2em-det-c01',
@@ -370,7 +422,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Se uma matriz tem uma linha (ou coluna) de zeros, seu determinante é igual a ___.',
     respostaCorreta: 'zero',
-    explicacao: 'Uma propriedade fundamental dos determinantes é que se uma linha ou coluna é toda de zeros, o determinante é zero.'
+    dica: 'Linha de zeros anula o determinante.',
+    explicacao: 'Uma propriedade fundamental dos determinantes é que se uma linha ou coluna é toda de zeros, o determinante é zero.',
+    tags: ['determinante', 'propriedades', 'zero']
   },
   {
     id: 'mat-2em-det-vf01',
@@ -382,7 +436,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Se duas linhas de uma matriz são iguais, seu determinante é zero.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Se uma matriz tem duas linhas (ou colunas) iguais, seu determinante é zero. Isso também vale para linhas proporcionais.'
+    dica: 'Linhas iguais ou proporcionais zeram o determinante.',
+    explicacao: 'Verdadeiro. Se uma matriz tem duas linhas (ou colunas) iguais, seu determinante é zero. Isso também vale para linhas proporcionais.',
+    tags: ['determinante', 'propriedades', 'linhas iguais']
   },
   {
     id: 'mat-2em-det-q02',
@@ -400,7 +456,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Qualquer ordem'
     ],
     respostaCorreta: 1,
-    explicacao: 'A Regra de Sarrus é um método prático para calcular determinantes de matrizes 3×3. Para matrizes maiores, usa-se o Teorema de Laplace.'
+    dica: 'Só funciona para matrizes 3×3.',
+    explicacao: 'A Regra de Sarrus é um método prático para calcular determinantes de matrizes 3×3. Para matrizes maiores, usa-se o Teorema de Laplace.',
+    tags: ['regra de Sarrus', 'determinante', 'matriz 3x3']
   },
   {
     id: 'mat-2em-det-q03',
@@ -418,7 +476,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Fica dividido por k'
     ],
     respostaCorreta: 1,
-    explicacao: 'Quando multiplicamos uma linha (ou coluna) por k, o determinante fica multiplicado por k. Se multiplicarmos toda a matriz n×n por k, o determinante fica multiplicado por kⁿ.'
+    dica: 'Uma linha × k = determinante × k.',
+    explicacao: 'Quando multiplicamos uma linha (ou coluna) por k, o determinante fica multiplicado por k. Se multiplicarmos toda a matriz n×n por k, o determinante fica multiplicado por kⁿ.',
+    tags: ['determinante', 'propriedades', 'escalar']
   },
   {
     id: 'mat-2em-det-vf02',
@@ -430,7 +490,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Uma matriz só possui inversa se seu determinante for diferente de zero.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Uma matriz quadrada A é inversível (possui matriz inversa A⁻¹) se e somente se det(A) ≠ 0. Matrizes com determinante zero são chamadas singulares.'
+    dica: 'det ≠ 0 → matriz inversível.',
+    explicacao: 'Verdadeiro. Uma matriz quadrada A é inversível (possui matriz inversa A⁻¹) se e somente se det(A) ≠ 0. Matrizes com determinante zero são chamadas singulares.',
+    tags: ['matriz inversa', 'determinante', 'inversibilidade']
   },
   {
     id: 'mat-2em-det-q04',
@@ -448,7 +510,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Subtração das diagonais'
     ],
     respostaCorreta: 2,
-    explicacao: 'O Teorema de Laplace calcula o determinante através da expansão em cofatores ao longo de uma linha ou coluna escolhida, sendo útil para matrizes de qualquer ordem.'
+    dica: 'Usa cofatores ao longo de uma linha ou coluna.',
+    explicacao: 'O Teorema de Laplace calcula o determinante através da expansão em cofatores ao longo de uma linha ou coluna escolhida, sendo útil para matrizes de qualquer ordem.',
+    tags: ['teorema de Laplace', 'cofatores', 'determinante']
   },
   {
     id: 'mat-2em-det-c02',
@@ -460,7 +524,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O determinante do produto de duas matrizes é igual ao ___ dos seus determinantes.',
     respostaCorreta: 'produto',
-    explicacao: 'Propriedade fundamental: det(A·B) = det(A)·det(B). O determinante do produto é o produto dos determinantes.'
+    dica: 'det(A·B) = det(A) · det(B).',
+    explicacao: 'Propriedade fundamental: det(A·B) = det(A)·det(B). O determinante do produto é o produto dos determinantes.',
+    tags: ['determinante', 'produto de matrizes', 'propriedades']
   },
 
   // ==================== SISTEMAS LINEARES ====================
@@ -480,7 +546,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Sistema Homogêneo'
     ],
     respostaCorreta: 0,
-    explicacao: 'Um Sistema Possível Determinado (SPD) possui exatamente uma solução. O SPI tem infinitas soluções e o SI não tem solução.'
+    dica: 'Determinado = uma única solução.',
+    explicacao: 'Um Sistema Possível Determinado (SPD) possui exatamente uma solução. O SPI tem infinitas soluções e o SI não tem solução.',
+    tags: ['sistemas lineares', 'classificação', 'SPD']
   },
   {
     id: 'mat-2em-sist-vf01',
@@ -492,7 +560,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Um sistema linear homogêneo sempre admite pelo menos uma solução: a solução trivial.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Um sistema homogêneo (todos os termos independentes são zero) sempre tem a solução trivial (todas as incógnitas iguais a zero), então nunca é impossível.'
+    dica: 'Todas as variáveis = 0 sempre resolve um sistema homogêneo.',
+    explicacao: 'Verdadeiro. Um sistema homogêneo (todos os termos independentes são zero) sempre tem a solução trivial (todas as incógnitas iguais a zero), então nunca é impossível.',
+    tags: ['sistema homogêneo', 'solução trivial']
   },
   {
     id: 'mat-2em-sist-q02',
@@ -510,7 +580,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'O sistema é homogêneo'
     ],
     respostaCorreta: 2,
-    explicacao: 'A Regra de Cramer só pode ser aplicada quando o sistema é quadrado (mesmo número de equações e incógnitas) e o determinante da matriz dos coeficientes é diferente de zero.'
+    dica: 'Cramer exige det ≠ 0.',
+    explicacao: 'A Regra de Cramer só pode ser aplicada quando o sistema é quadrado (mesmo número de equações e incógnitas) e o determinante da matriz dos coeficientes é diferente de zero.',
+    tags: ['regra de Cramer', 'determinante', 'sistemas lineares']
   },
   {
     id: 'mat-2em-sist-c01',
@@ -522,7 +594,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O método de ___ consiste em transformar o sistema em um equivalente de forma triangular.',
     respostaCorreta: 'escalonamento',
-    explicacao: 'O escalonamento (ou eliminação de Gauss) transforma o sistema em um equivalente com forma triangular, facilitando a resolução por substituição regressiva.'
+    dica: 'Também conhecido como eliminação de Gauss.',
+    explicacao: 'O escalonamento (ou eliminação de Gauss) transforma o sistema em um equivalente com forma triangular, facilitando a resolução por substituição regressiva.',
+    tags: ['escalonamento', 'Gauss', 'sistemas lineares']
   },
   {
     id: 'mat-2em-sist-q03',
@@ -540,7 +614,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Apenas SPI'
     ],
     respostaCorreta: 2,
-    explicacao: 'Quando det = 0, o sistema pode ser SPI (infinitas soluções) ou SI (sem solução), dependendo dos termos independentes. Nunca será SPD.'
+    dica: 'det = 0 elimina a possibilidade de SPD.',
+    explicacao: 'Quando det = 0, o sistema pode ser SPI (infinitas soluções) ou SI (sem solução), dependendo dos termos independentes. Nunca será SPD.',
+    tags: ['classificação', 'determinante zero', 'sistemas lineares']
   },
   {
     id: 'mat-2em-sist-vf02',
@@ -552,7 +628,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'Todo sistema linear pode ser representado na forma matricial A·X = B.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Qualquer sistema linear pode ser escrito como A·X = B, onde A é a matriz dos coeficientes, X é a matriz coluna das incógnitas e B é a matriz dos termos independentes.'
+    dica: 'Matriz × vetor de incógnitas = vetor de termos independentes.',
+    explicacao: 'Verdadeiro. Qualquer sistema linear pode ser escrito como A·X = B, onde A é a matriz dos coeficientes, X é a matriz coluna das incógnitas e B é a matriz dos termos independentes.',
+    tags: ['forma matricial', 'representação', 'sistemas lineares']
   },
   {
     id: 'mat-2em-sist-q04',
@@ -570,7 +648,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Dₓ / D'
     ],
     respostaCorreta: 3,
-    explicacao: 'Na Regra de Cramer, cada incógnita é calculada dividindo o determinante modificado (Dₓ, Dy, etc.) pelo determinante principal D. Assim, x = Dₓ/D.'
+    dica: 'x = Dₓ dividido pelo determinante principal.',
+    explicacao: 'Na Regra de Cramer, cada incógnita é calculada dividindo o determinante modificado (Dₓ, Dy, etc.) pelo determinante principal D. Assim, x = Dₓ/D.',
+    tags: ['regra de Cramer', 'fórmula', 'sistemas lineares']
   },
   {
     id: 'mat-2em-sist-c02',
@@ -582,7 +662,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Discutir um sistema linear significa analisar as condições para que ele seja SPD, SPI ou ___.',
     respostaCorreta: 'SI',
-    explicacao: 'Discutir um sistema é determinar para quais valores dos parâmetros (se houver) o sistema é SPD (uma solução), SPI (infinitas soluções) ou SI (impossível).'
+    dica: 'A terceira classificação é Sistema Impossível.',
+    explicacao: 'Discutir um sistema é determinar para quais valores dos parâmetros (se houver) o sistema é SPD (uma solução), SPI (infinitas soluções) ou SI (impossível).',
+    tags: ['discussão de sistemas', 'classificação', 'SI']
   },
 
   // ==================== GEOMETRIA ANALÍTICA ====================
@@ -602,7 +684,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'd = √[(x₂ + x₁)² + (y₂ + y₁)²]'
     ],
     respostaCorreta: 1,
-    explicacao: 'A distância entre dois pontos é dada pela fórmula d = √[(x₂ - x₁)² + (y₂ - y₁)²], que deriva do Teorema de Pitágoras.'
+    dica: 'Deriva do Teorema de Pitágoras.',
+    explicacao: 'A distância entre dois pontos é dada pela fórmula d = √[(x₂ - x₁)² + (y₂ - y₁)²], que deriva do Teorema de Pitágoras.',
+    tags: ['distância', 'pontos', 'fórmula']
   },
   {
     id: 'mat-2em-gean-c01',
@@ -614,7 +698,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'O ponto médio de um segmento é calculado pela ___ das coordenadas dos extremos.',
     respostaCorreta: 'média aritmética',
-    explicacao: 'O ponto médio M entre A(x₁, y₁) e B(x₂, y₂) tem coordenadas M = ((x₁+x₂)/2, (y₁+y₂)/2), ou seja, a média aritmética das coordenadas.'
+    dica: 'Soma e divide por 2 cada coordenada.',
+    explicacao: 'O ponto médio M entre A(x₁, y₁) e B(x₂, y₂) tem coordenadas M = ((x₁+x₂)/2, (y₁+y₂)/2), ou seja, a média aritmética das coordenadas.',
+    tags: ['ponto médio', 'média', 'coordenadas']
   },
   {
     id: 'mat-2em-gean-q02',
@@ -632,7 +718,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'A distância à origem'
     ],
     respostaCorreta: 2,
-    explicacao: 'Na equação y = mx + n, m é o coeficiente angular (que determina a inclinação da reta) e n é o coeficiente linear (interseção com o eixo y).'
+    dica: 'm = inclinação, n = onde corta o eixo y.',
+    explicacao: 'Na equação y = mx + n, m é o coeficiente angular (que determina a inclinação da reta) e n é o coeficiente linear (interseção com o eixo y).',
+    tags: ['equação da reta', 'coeficiente angular', 'inclinação']
   },
   {
     id: 'mat-2em-gean-vf01',
@@ -644,7 +732,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Duas retas são paralelas se e somente se têm o mesmo coeficiente angular.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Duas retas distintas são paralelas quando têm o mesmo coeficiente angular (mesma inclinação). Se r: y = m₁x + n₁ e s: y = m₂x + n₂, então r || s ⟺ m₁ = m₂.'
+    dica: 'Mesma inclinação = paralelas.',
+    explicacao: 'Verdadeiro. Duas retas distintas são paralelas quando têm o mesmo coeficiente angular (mesma inclinação). Se r: y = m₁x + n₁ e s: y = m₂x + n₂, então r || s ⟺ m₁ = m₂.',
+    tags: ['retas paralelas', 'coeficiente angular']
   },
   {
     id: 'mat-2em-gean-q03',
@@ -662,7 +752,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'm₁ · m₂ = 1'
     ],
     respostaCorreta: 2,
-    explicacao: 'Duas retas são perpendiculares quando o produto de seus coeficientes angulares é -1. Se m₁ · m₂ = -1, as retas formam um ângulo de 90°.'
+    dica: 'O produto dos coeficientes é -1.',
+    explicacao: 'Duas retas são perpendiculares quando o produto de seus coeficientes angulares é -1. Se m₁ · m₂ = -1, as retas formam um ângulo de 90°.',
+    tags: ['retas perpendiculares', 'coeficiente angular', 'produto']
   },
   {
     id: 'mat-2em-gean-c02',
@@ -674,7 +766,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A equação geral da reta tem a forma ax + by + c = 0, onde a e b não são ___ nulos.',
     respostaCorreta: 'simultaneamente',
-    explicacao: 'Na equação geral ax + by + c = 0, os coeficientes a e b não podem ser ambos zero ao mesmo tempo, pois isso não representaria uma reta.'
+    dica: 'Pelo menos um dos dois deve ser diferente de zero.',
+    explicacao: 'Na equação geral ax + by + c = 0, os coeficientes a e b não podem ser ambos zero ao mesmo tempo, pois isso não representaria uma reta.',
+    tags: ['equação geral da reta', 'coeficientes']
   },
   {
     id: 'mat-2em-gean-q04',
@@ -692,7 +786,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'd = √(ax₀ + by₀ + c)'
     ],
     respostaCorreta: 2,
-    explicacao: 'A distância de um ponto P(x₀, y₀) à reta ax + by + c = 0 é d = |ax₀ + by₀ + c| / √(a² + b²). O módulo garante que a distância seja sempre positiva.'
+    dica: 'Módulo no numerador, raiz no denominador.',
+    explicacao: 'A distância de um ponto P(x₀, y₀) à reta ax + by + c = 0 é d = |ax₀ + by₀ + c| / √(a² + b²). O módulo garante que a distância seja sempre positiva.',
+    tags: ['distância ponto-reta', 'fórmula']
   },
   {
     id: 'mat-2em-gean-vf02',
@@ -704,7 +800,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'Duas retas no plano podem ser paralelas, concorrentes ou coincidentes.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. No plano, duas retas podem ser: paralelas (não se interceptam), concorrentes (se interceptam em um ponto) ou coincidentes (são a mesma reta).'
+    dica: 'São as três possibilidades de posição relativa.',
+    explicacao: 'Verdadeiro. No plano, duas retas podem ser: paralelas (não se interceptam), concorrentes (se interceptam em um ponto) ou coincidentes (são a mesma reta).',
+    tags: ['posições relativas', 'retas no plano']
   },
   {
     id: 'mat-2em-gean-q05',
@@ -722,7 +820,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'x² + y² = r²'
     ],
     respostaCorreta: 2,
-    explicacao: 'A equação reduzida da circunferência é (x - a)² + (y - b)² = r², onde (a, b) é o centro e r é o raio. Se o centro é a origem, simplifica para x² + y² = r².'
+    dica: 'Subtrai as coordenadas do centro e eleva o raio ao quadrado.',
+    explicacao: 'A equação reduzida da circunferência é (x - a)² + (y - b)² = r², onde (a, b) é o centro e r é o raio. Se o centro é a origem, simplifica para x² + y² = r².',
+    tags: ['circunferência', 'equação reduzida', 'centro e raio']
   },
   {
     id: 'mat-2em-gean-c03',
@@ -734,7 +834,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'As cônicas são curvas obtidas pela interseção de um plano com um cone: circunferência, elipse, ___ e hipérbole.',
     respostaCorreta: 'parábola',
-    explicacao: 'As quatro cônicas principais são: circunferência, elipse, parábola e hipérbole. Cada uma é obtida por diferentes ângulos de corte do cone.'
+    dica: 'É a curva que representa y = x².',
+    explicacao: 'As quatro cônicas principais são: circunferência, elipse, parábola e hipérbole. Cada uma é obtida por diferentes ângulos de corte do cone.',
+    tags: ['cônicas', 'parábola', 'seção cônica']
   },
   {
     id: 'mat-2em-gean-vf03',
@@ -746,7 +848,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Uma reta que toca a circunferência em exatamente um ponto é chamada de secante.',
     respostaCorreta: false,
-    explicacao: 'Falso. Uma reta que toca a circunferência em exatamente um ponto é chamada de tangente. A reta secante intercepta a circunferência em dois pontos.'
+    dica: 'Secante cruza em dois pontos; tangente em um.',
+    explicacao: 'Falso. Uma reta que toca a circunferência em exatamente um ponto é chamada de tangente. A reta secante intercepta a circunferência em dois pontos.',
+    tags: ['tangente', 'secante', 'circunferência']
   },
 
   // ==================== GEOMETRIA ESPACIAL ====================
@@ -766,7 +870,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Coincidentes'
     ],
     respostaCorreta: 2,
-    explicacao: 'Retas reversas são retas no espaço que não se interceptam e não são paralelas. Elas não pertencem ao mesmo plano.'
+    dica: 'Só existem no espaço 3D, não no plano.',
+    explicacao: 'Retas reversas são retas no espaço que não se interceptam e não são paralelas. Elas não pertencem ao mesmo plano.',
+    tags: ['retas reversas', 'geometria espacial', 'posições relativas']
   },
   {
     id: 'mat-2em-gesp-vf01',
@@ -778,7 +884,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Três pontos não colineares determinam um único plano.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Três pontos não colineares (que não estão na mesma reta) determinam um único plano. Este é um postulado fundamental da geometria espacial.'
+    dica: 'É um postulado fundamental da geometria.',
+    explicacao: 'Verdadeiro. Três pontos não colineares (que não estão na mesma reta) determinam um único plano. Este é um postulado fundamental da geometria espacial.',
+    tags: ['plano', 'pontos não colineares', 'postulado']
   },
   {
     id: 'mat-2em-gesp-q02',
@@ -796,7 +904,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Um plano'
     ],
     respostaCorreta: 1,
-    explicacao: 'Dois planos distintos não paralelos sempre se interceptam em uma reta. Se fossem paralelos, a interseção seria vazia.'
+    dica: 'Dois planos se encontram ao longo de uma linha.',
+    explicacao: 'Dois planos distintos não paralelos sempre se interceptam em uma reta. Se fossem paralelos, a interseção seria vazia.',
+    tags: ['interseção de planos', 'reta', 'geometria espacial']
   },
   {
     id: 'mat-2em-gesp-c01',
@@ -808,7 +918,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Uma reta é perpendicular a um plano se é perpendicular a ___ reta do plano que passa pelo pé da perpendicular.',
     respostaCorreta: 'toda',
-    explicacao: 'Uma reta é perpendicular a um plano quando forma ângulo de 90° com qualquer reta do plano que passe pelo ponto de interseção (pé da perpendicular).'
+    dica: 'Precisa ser perpendicular a todas as retas do plano naquele ponto.',
+    explicacao: 'Uma reta é perpendicular a um plano quando forma ângulo de 90° com qualquer reta do plano que passe pelo ponto de interseção (pé da perpendicular).',
+    tags: ['reta perpendicular', 'plano', 'perpendicularidade']
   },
   {
     id: 'mat-2em-gesp-q03',
@@ -826,7 +938,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '3'
     ],
     respostaCorreta: 2,
-    explicacao: 'A relação de Euler afirma que V - A + F = 2, onde V é o número de vértices, A é o número de arestas e F é o número de faces.'
+    dica: 'V - A + F = constante para poliedros convexos.',
+    explicacao: 'A relação de Euler afirma que V - A + F = 2, onde V é o número de vértices, A é o número de arestas e F é o número de faces.',
+    tags: ['relação de Euler', 'poliedros', 'vértices', 'arestas', 'faces']
   },
   {
     id: 'mat-2em-gesp-vf02',
@@ -838,7 +952,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O volume de um prisma é calculado multiplicando a área da base pela altura.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. V = Ab · h, onde Ab é a área da base e h é a altura (distância entre as bases). Isso vale para qualquer prisma, reto ou oblíquo.'
+    dica: 'V = Ab × h.',
+    explicacao: 'Verdadeiro. V = Ab · h, onde Ab é a área da base e h é a altura (distância entre as bases). Isso vale para qualquer prisma, reto ou oblíquo.',
+    tags: ['volume', 'prisma', 'fórmula']
   },
   {
     id: 'mat-2em-gesp-q04',
@@ -856,7 +972,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Um terço'
     ],
     respostaCorreta: 3,
-    explicacao: 'O volume da pirâmide é 1/3 do volume do prisma de mesma base e altura. V = (1/3) · Ab · h.'
+    dica: 'V pirâmide = (1/3) V prisma.',
+    explicacao: 'O volume da pirâmide é 1/3 do volume do prisma de mesma base e altura. V = (1/3) · Ab · h.',
+    tags: ['volume', 'pirâmide', 'prisma', 'relação']
   },
   {
     id: 'mat-2em-gesp-c02',
@@ -868,7 +986,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O volume de um cilindro de raio r e altura h é V = ___ · h.',
     respostaCorreta: 'πr²',
-    explicacao: 'O volume do cilindro é V = πr²h, onde πr² é a área da base circular e h é a altura. Equivale a um prisma com base circular.'
+    dica: 'Área da base circular × altura.',
+    explicacao: 'O volume do cilindro é V = πr²h, onde πr² é a área da base circular e h é a altura. Equivale a um prisma com base circular.',
+    tags: ['volume', 'cilindro', 'fórmula']
   },
   {
     id: 'mat-2em-gesp-q05',
@@ -886,7 +1006,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'V = (2/3)πr²h'
     ],
     respostaCorreta: 2,
-    explicacao: 'O volume do cone é V = (1/3)πr²h, analogamente à pirâmide, é 1/3 do volume do cilindro correspondente (mesma base e altura).'
+    dica: 'Como a pirâmide, é 1/3 do cilindro correspondente.',
+    explicacao: 'O volume do cone é V = (1/3)πr²h, analogamente à pirâmide, é 1/3 do volume do cilindro correspondente (mesma base e altura).',
+    tags: ['volume', 'cone', 'fórmula']
   },
   {
     id: 'mat-2em-gesp-vf03',
@@ -898,7 +1020,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O volume da esfera de raio r é V = (4/3)πr³.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. O volume da esfera é V = (4/3)πr³. A área da superfície esférica é S = 4πr².'
+    dica: 'Memorize: quatro terços pi r ao cubo.',
+    explicacao: 'Verdadeiro. O volume da esfera é V = (4/3)πr³. A área da superfície esférica é S = 4πr².',
+    tags: ['volume', 'esfera', 'fórmula']
   },
   {
     id: 'mat-2em-gesp-q06',
@@ -916,7 +1040,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Pirâmide'
     ],
     respostaCorreta: 2,
-    explicacao: 'Quando um retângulo gira em torno de um de seus lados, gera um cilindro. Um triângulo retângulo girando em torno de um cateto gera um cone.'
+    dica: 'Retângulo girando gera superfície lateral curva.',
+    explicacao: 'Quando um retângulo gira em torno de um de seus lados, gera um cilindro. Um triângulo retângulo girando em torno de um cateto gera um cone.',
+    tags: ['sólido de revolução', 'cilindro', 'rotação']
   },
   {
     id: 'mat-2em-gesp-c03',
@@ -928,10 +1054,12 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A área lateral de um cilindro reto de raio r e altura h é igual a ___.',
     respostaCorreta: '2πrh',
-    explicacao: 'A área lateral do cilindro é AL = 2πrh. Quando "planificada", a lateral forma um retângulo de base 2πr (perímetro da base) e altura h.'
+    dica: 'Perímetro da base × altura.',
+    explicacao: 'A área lateral do cilindro é AL = 2πrh. Quando "planificada", a lateral forma um retângulo de base 2πr (perímetro da base) e altura h.',
+    tags: ['área lateral', 'cilindro', 'fórmula']
   },
 
-  // ==================== NÚMEROS COMPLEXOS (INTRODUÇÃO) ====================
+  // ==================== NÚMEROS COMPLEXOS ====================
   {
     id: 'mat-2em-comp-q01',
     tipo: 'quiz',
@@ -948,7 +1076,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'i = π'
     ],
     respostaCorreta: 1,
-    explicacao: 'A unidade imaginária i é definida como i = √-1, ou equivalentemente, i² = -1. Isso permite trabalhar com raízes de números negativos.'
+    dica: 'i² = -1.',
+    explicacao: 'A unidade imaginária i é definida como i = √-1, ou equivalentemente, i² = -1. Isso permite trabalhar com raízes de números negativos.',
+    tags: ['unidade imaginária', 'i', 'definição']
   },
   {
     id: 'mat-2em-comp-vf01',
@@ -960,7 +1090,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O valor de i⁴ é igual a 1.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. As potências de i seguem um ciclo: i¹ = i, i² = -1, i³ = -i, i⁴ = 1, i⁵ = i, e assim por diante. O ciclo se repete a cada 4 potências.'
+    dica: 'As potências de i formam um ciclo de 4.',
+    explicacao: 'Verdadeiro. As potências de i seguem um ciclo: i¹ = i, i² = -1, i³ = -i, i⁴ = 1, i⁵ = i, e assim por diante. O ciclo se repete a cada 4 potências.',
+    tags: ['potências de i', 'ciclo', 'números complexos']
   },
   {
     id: 'mat-2em-comp-q02',
@@ -978,7 +1110,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'a + b'
     ],
     respostaCorreta: 1,
-    explicacao: 'Em z = a + bi, "a" é a parte real e "b" é a parte imaginária. Note que a parte imaginária é apenas o coeficiente b, não bi.'
+    dica: 'Parte imaginária é o coeficiente de i, sem o i.',
+    explicacao: 'Em z = a + bi, "a" é a parte real e "b" é a parte imaginária. Note que a parte imaginária é apenas o coeficiente b, não bi.',
+    tags: ['forma algébrica', 'parte imaginária', 'parte real']
   },
   {
     id: 'mat-2em-comp-c01',
@@ -990,7 +1124,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O conjugado do número complexo z = a + bi é z̄ = a ___ bi.',
     respostaCorreta: '-',
-    explicacao: 'O conjugado de z = a + bi é z̄ = a - bi. Troca-se o sinal da parte imaginária. O produto z · z̄ = a² + b² é sempre real e não negativo.'
+    dica: 'Troca o sinal da parte imaginária.',
+    explicacao: 'O conjugado de z = a + bi é z̄ = a - bi. Troca-se o sinal da parte imaginária. O produto z · z̄ = a² + b² é sempre real e não negativo.',
+    tags: ['conjugado', 'números complexos']
   },
   {
     id: 'mat-2em-comp-q03',
@@ -1008,7 +1144,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '1'
     ],
     respostaCorreta: 1,
-    explicacao: 'O módulo de z = a + bi é |z| = √(a² + b²). Para z = 3 + 4i: |z| = √(9 + 16) = √25 = 5.'
+    dica: '|z| = √(a² + b²). Lembre do triângulo 3-4-5.',
+    explicacao: 'O módulo de z = a + bi é |z| = √(a² + b²). Para z = 3 + 4i: |z| = √(9 + 16) = √25 = 5.',
+    tags: ['módulo', 'números complexos', 'pitágoras']
   },
   {
     id: 'mat-2em-comp-vf02',
@@ -1020,7 +1158,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'No plano de Argand-Gauss, o eixo horizontal representa a parte imaginária.',
     respostaCorreta: false,
-    explicacao: 'Falso. No plano de Argand-Gauss, o eixo horizontal representa a parte real e o eixo vertical representa a parte imaginária.'
+    dica: 'Horizontal = real, vertical = imaginário.',
+    explicacao: 'Falso. No plano de Argand-Gauss, o eixo horizontal representa a parte real e o eixo vertical representa a parte imaginária.',
+    tags: ['plano de Argand-Gauss', 'eixos', 'representação']
   },
   {
     id: 'mat-2em-comp-q04',
@@ -1038,7 +1178,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '8 + 2i'
     ],
     respostaCorreta: 1,
-    explicacao: 'Na adição de complexos, somamos as partes reais e as partes imaginárias separadamente: (2 + 4) + (3 - 1)i = 6 + 2i.'
+    dica: 'Some as partes reais e imaginárias separadamente.',
+    explicacao: 'Na adição de complexos, somamos as partes reais e as partes imaginárias separadamente: (2 + 4) + (3 - 1)i = 6 + 2i.',
+    tags: ['adição', 'números complexos', 'operações']
   },
   {
     id: 'mat-2em-comp-c02',
@@ -1050,10 +1192,12 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'Dois números complexos são iguais quando têm a mesma parte real e a mesma parte ___.',
     respostaCorreta: 'imaginária',
-    explicacao: 'Para z₁ = a + bi e z₂ = c + di serem iguais, devemos ter a = c (partes reais iguais) e b = d (partes imaginárias iguais).'
+    dica: 'Ambas as partes devem coincidir.',
+    explicacao: 'Para z₁ = a + bi e z₂ = c + di serem iguais, devemos ter a = c (partes reais iguais) e b = d (partes imaginárias iguais).',
+    tags: ['igualdade', 'números complexos']
   },
 
-  // ==================== QUESTÕES ADICIONAIS VARIADAS ====================
+  // ==================== QUESTÕES ADICIONAIS ====================
   {
     id: 'mat-2em-trig-q08',
     tipo: 'quiz',
@@ -1070,7 +1214,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '(-∞, +∞)'
     ],
     respostaCorreta: 2,
-    explicacao: 'O arco seno (arcsen ou sen⁻¹) tem domínio [-1, 1] e imagem [-π/2, π/2]. O domínio corresponde aos valores possíveis do seno.'
+    dica: 'Domínio do arcsen = imagem do sen.',
+    explicacao: 'O arco seno (arcsen ou sen⁻¹) tem domínio [-1, 1] e imagem [-π/2, π/2]. O domínio corresponde aos valores possíveis do seno.',
+    tags: ['arco seno', 'função inversa', 'domínio']
   },
   {
     id: 'mat-2em-trig-vf04',
@@ -1082,7 +1228,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A Lei dos Senos relaciona os lados de um triângulo com os senos dos ângulos opostos.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. A Lei dos Senos afirma que a/sen(A) = b/sen(B) = c/sen(C) = 2R, onde R é o raio da circunferência circunscrita.'
+    dica: 'a/sen(A) = b/sen(B) = c/sen(C).',
+    explicacao: 'Verdadeiro. A Lei dos Senos afirma que a/sen(A) = b/sen(B) = c/sen(C) = 2R, onde R é o raio da circunferência circunscrita.',
+    tags: ['lei dos senos', 'triângulo']
   },
   {
     id: 'mat-2em-trig-q09',
@@ -1100,7 +1248,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'b² + c² + 2bc·cos(A)'
     ],
     respostaCorreta: 2,
-    explicacao: 'A Lei dos Cossenos generaliza o Teorema de Pitágoras: a² = b² + c² - 2bc·cos(A). Quando A = 90°, cos(A) = 0 e recaímos no Teorema de Pitágoras.'
+    dica: 'Generaliza Pitágoras para qualquer triângulo.',
+    explicacao: 'A Lei dos Cossenos generaliza o Teorema de Pitágoras: a² = b² + c² - 2bc·cos(A). Quando A = 90°, cos(A) = 0 e recaímos no Teorema de Pitágoras.',
+    tags: ['lei dos cossenos', 'triângulo', 'pitágoras generalizado']
   },
   {
     id: 'mat-2em-matr-q06',
@@ -1118,7 +1268,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Todos os elementos são positivos'
     ],
     respostaCorreta: 1,
-    explicacao: 'Uma matriz diagonal tem todos os elementos fora da diagonal principal iguais a zero. Os elementos da diagonal podem ser quaisquer valores.'
+    dica: 'Fora da diagonal principal, tudo é zero.',
+    explicacao: 'Uma matriz diagonal tem todos os elementos fora da diagonal principal iguais a zero. Os elementos da diagonal podem ser quaisquer valores.',
+    tags: ['matriz diagonal', 'diagonal principal']
   },
   {
     id: 'mat-2em-det-q05',
@@ -1136,7 +1288,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Fica nulo'
     ],
     respostaCorreta: 2,
-    explicacao: 'Ao trocar duas linhas (ou colunas) de uma matriz, o determinante troca de sinal. Essa é uma propriedade fundamental dos determinantes.'
+    dica: 'Cada troca de linhas inverte o sinal.',
+    explicacao: 'Ao trocar duas linhas (ou colunas) de uma matriz, o determinante troca de sinal. Essa é uma propriedade fundamental dos determinantes.',
+    tags: ['determinante', 'troca de linhas', 'sinal']
   },
   {
     id: 'mat-2em-gean-q06',
@@ -1154,7 +1308,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Razão das distâncias a um ponto e uma reta é constante'
     ],
     respostaCorreta: 1,
-    explicacao: 'A elipse é definida como o lugar geométrico dos pontos P tais que d(P, F₁) + d(P, F₂) = 2a (constante), onde F₁ e F₂ são os focos.'
+    dica: 'Elipse: SOMA das distâncias aos focos.',
+    explicacao: 'A elipse é definida como o lugar geométrico dos pontos P tais que d(P, F₁) + d(P, F₂) = 2a (constante), onde F₁ e F₂ são os focos.',
+    tags: ['elipse', 'definição', 'focos']
   },
   {
     id: 'mat-2em-gean-q07',
@@ -1172,7 +1328,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Distância a um foco é constante'
     ],
     respostaCorreta: 1,
-    explicacao: 'A hipérbole é o lugar geométrico dos pontos P tais que |d(P, F₁) - d(P, F₂)| = 2a (constante), diferente da elipse que usa soma.'
+    dica: 'Hipérbole: DIFERENÇA das distâncias aos focos.',
+    explicacao: 'A hipérbole é o lugar geométrico dos pontos P tais que |d(P, F₁) - d(P, F₂)| = 2a (constante), diferente da elipse que usa soma.',
+    tags: ['hipérbole', 'definição', 'focos']
   },
   {
     id: 'mat-2em-gean-vf04',
@@ -1184,7 +1342,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A parábola é o lugar geométrico dos pontos equidistantes de um ponto fixo (foco) e uma reta fixa (diretriz).',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Para qualquer ponto P da parábola, a distância ao foco F é igual à distância à diretriz d. Isso define a parábola geometricamente.'
+    dica: 'Distância ao foco = distância à diretriz.',
+    explicacao: 'Verdadeiro. Para qualquer ponto P da parábola, a distância ao foco F é igual à distância à diretriz d. Isso define a parábola geometricamente.',
+    tags: ['parábola', 'foco', 'diretriz']
   },
   {
     id: 'mat-2em-gesp-q07',
@@ -1202,7 +1362,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '6'
     ],
     respostaCorreta: 2,
-    explicacao: 'Existem exatamente 5 poliedros regulares convexos: tetraedro, cubo (hexaedro), octaedro, dodecaedro e icosaedro. São os únicos possíveis.'
+    dica: 'Tetraedro, cubo, octaedro, dodecaedro, icosaedro.',
+    explicacao: 'Existem exatamente 5 poliedros regulares convexos: tetraedro, cubo (hexaedro), octaedro, dodecaedro e icosaedro. São os únicos possíveis.',
+    tags: ['sólidos de Platão', 'poliedros regulares']
   },
   {
     id: 'mat-2em-gesp-vf04',
@@ -1214,7 +1376,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O tronco de uma pirâmide é obtido cortando a pirâmide por um plano paralelo à base.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. O tronco de pirâmide (ou cone) é a parte entre a base e a seção feita por um plano paralelo à base. Tem duas bases paralelas de tamanhos diferentes.'
+    dica: 'Corte paralelo à base gera o tronco.',
+    explicacao: 'Verdadeiro. O tronco de pirâmide (ou cone) é a parte entre a base e a seção feita por um plano paralelo à base. Tem duas bases paralelas de tamanhos diferentes.',
+    tags: ['tronco de pirâmide', 'seção', 'plano paralelo']
   },
   {
     id: 'mat-2em-sist-q05',
@@ -1232,7 +1396,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       'Têm os mesmos coeficientes'
     ],
     respostaCorreta: 2,
-    explicacao: 'Sistemas equivalentes são aqueles que possuem exatamente o mesmo conjunto solução. O escalonamento transforma o sistema em um equivalente.'
+    dica: 'Equivalentes = mesmas soluções.',
+    explicacao: 'Sistemas equivalentes são aqueles que possuem exatamente o mesmo conjunto solução. O escalonamento transforma o sistema em um equivalente.',
+    tags: ['sistemas equivalentes', 'conjunto solução']
   },
   {
     id: 'mat-2em-comp-q05',
@@ -1250,7 +1416,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
       '8 + i'
     ],
     respostaCorreta: 0,
-    explicacao: '(2 + i)(3 - 2i) = 6 - 4i + 3i - 2i² = 6 - i - 2(-1) = 6 - i + 2 = 8 - i. Lembrando que i² = -1.'
+    dica: 'Use a distributiva e lembre que i² = -1.',
+    explicacao: '(2 + i)(3 - 2i) = 6 - 4i + 3i - 2i² = 6 - i - 2(-1) = 6 - i + 2 = 8 - i. Lembrando que i² = -1.',
+    tags: ['multiplicação', 'números complexos', 'distributiva']
   },
   {
     id: 'mat-2em-trig-c03',
@@ -1262,7 +1430,9 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A fórmula sen(a + b) = sen(a)·cos(b) + cos(a)·___.',
     respostaCorreta: 'sen(b)',
-    explicacao: 'A fórmula de adição do seno é sen(a + b) = sen(a)·cos(b) + cos(a)·sen(b). É uma das identidades trigonométricas fundamentais.'
+    dica: 'sen(a+b) = sen(a)cos(b) + cos(a)sen(b).',
+    explicacao: 'A fórmula de adição do seno é sen(a + b) = sen(a)·cos(b) + cos(a)·sen(b). É uma das identidades trigonométricas fundamentais.',
+    tags: ['adição de arcos', 'fórmula', 'seno']
   },
   {
     id: 'mat-2em-matr-vf04',
@@ -1274,6 +1444,8 @@ export const flashcardsMatematica2anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A matriz inversa de A, se existir, satisfaz A · A⁻¹ = I (matriz identidade).',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. A matriz inversa A⁻¹ satisfaz A · A⁻¹ = A⁻¹ · A = I. Ela só existe para matrizes quadradas com determinante não nulo.'
+    dica: 'Inversa × original = identidade.',
+    explicacao: 'Verdadeiro. A matriz inversa A⁻¹ satisfaz A · A⁻¹ = A⁻¹ · A = I. Ela só existe para matrizes quadradas com determinante não nulo.',
+    tags: ['matriz inversa', 'identidade', 'propriedade']
   }
 ]
