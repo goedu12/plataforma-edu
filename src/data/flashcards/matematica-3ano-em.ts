@@ -18,7 +18,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '24 formas'
     ],
     respostaCorreta: 1,
-    explicacao: 'Pelo Princípio Fundamental da Contagem, multiplicamos as possibilidades: 3 × 4 = 12 formas diferentes.'
+    dica: 'No princípio multiplicativo, multiplique as opções de cada escolha.',
+    explicacao: 'Pelo Princípio Fundamental da Contagem, multiplicamos as possibilidades: 3 × 4 = 12 formas diferentes.',
+    tags: ['princípio multiplicativo', 'contagem', 'combinatória básica']
   },
   {
     id: 'mat-3em-comb-vf01',
@@ -30,7 +32,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'O valor de 0! (zero fatorial) é igual a 1.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Por convenção, 0! = 1. Essa definição é necessária para que várias fórmulas combinatórias funcionem corretamente.'
+    dica: 'Esta é uma definição por convenção matemática.',
+    explicacao: 'Verdadeiro. Por convenção, 0! = 1. Essa definição é necessária para que várias fórmulas combinatórias funcionem corretamente.',
+    tags: ['fatorial', 'definição', 'convenção']
   },
   {
     id: 'mat-3em-comb-q02',
@@ -48,7 +52,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '720'
     ],
     respostaCorreta: 2,
-    explicacao: '5! = 5 × 4 × 3 × 2 × 1 = 120. O fatorial de n é o produto de todos os inteiros de 1 até n.'
+    dica: 'Fatorial é o produto de todos os inteiros de 1 até n.',
+    explicacao: '5! = 5 × 4 × 3 × 2 × 1 = 120. O fatorial de n é o produto de todos os inteiros de 1 até n.',
+    tags: ['fatorial', 'cálculo', 'multiplicação']
   },
   {
     id: 'mat-3em-comb-c01',
@@ -60,7 +66,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Uma permutação simples de n elementos é dada por Pₙ = ___.',
     respostaCorreta: 'n!',
-    explicacao: 'A permutação simples de n elementos é o número de formas de ordenar esses n elementos, dado por Pₙ = n!.'
+    dica: 'Quantas formas de ordenar n elementos distintos?',
+    explicacao: 'A permutação simples de n elementos é o número de formas de ordenar esses n elementos, dado por Pₙ = n!.',
+    tags: ['permutação', 'fórmula', 'fatorial']
   },
   {
     id: 'mat-3em-comb-q03',
@@ -78,7 +86,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '256'
     ],
     respostaCorreta: 2,
-    explicacao: 'É uma permutação de 4 elementos: P₄ = 4! = 4 × 3 × 2 × 1 = 24 formas diferentes.'
+    dica: 'É uma permutação simples de 4 elementos.',
+    explicacao: 'É uma permutação de 4 elementos: P₄ = 4! = 4 × 3 × 2 × 1 = 24 formas diferentes.',
+    tags: ['permutação simples', 'fila', 'ordenação']
   },
   {
     id: 'mat-3em-comb-vf02',
@@ -90,7 +100,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Na combinação, a ordem dos elementos importa.',
     respostaCorreta: false,
-    explicacao: 'Falso. Na combinação a ordem NÃO importa. No arranjo a ordem importa. Por isso, para um mesmo n e p, temos mais arranjos que combinações.'
+    dica: 'Compare: escolher {A,B} é igual a escolher {B,A}?',
+    explicacao: 'Falso. Na combinação a ordem NÃO importa. No arranjo a ordem importa. Por isso, para um mesmo n e p, temos mais arranjos que combinações.',
+    tags: ['combinação', 'arranjo', 'diferença', 'ordem']
   },
   {
     id: 'mat-3em-comb-q04',
@@ -108,7 +120,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Aₙ,ₚ = (n-p)! / n!'
     ],
     respostaCorreta: 0,
-    explicacao: 'O arranjo de n elementos tomados p a p é Aₙ,ₚ = n!/(n-p)!. A ordem importa e não há repetição.'
+    dica: 'No arranjo a ordem importa, então não divide por p!.',
+    explicacao: 'O arranjo de n elementos tomados p a p é Aₙ,ₚ = n!/(n-p)!. A ordem importa e não há repetição.',
+    tags: ['arranjo', 'fórmula', 'ordem importa']
   },
   {
     id: 'mat-3em-comb-q05',
@@ -126,7 +140,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Cₙ,ₚ = p! / n!'
     ],
     respostaCorreta: 2,
-    explicacao: 'A combinação é Cₙ,ₚ = n!/[(n-p)!·p!]. A ordem não importa. É o arranjo dividido por p! (formas de ordenar os p elementos).'
+    dica: 'Na combinação, divide-se também por p! para eliminar as ordenações.',
+    explicacao: 'A combinação é Cₙ,ₚ = n!/[(n-p)!·p!]. A ordem não importa. É o arranjo dividido por p! (formas de ordenar os p elementos).',
+    tags: ['combinação', 'fórmula', 'ordem não importa']
   },
   {
     id: 'mat-3em-comb-c02',
@@ -138,7 +154,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O valor de C₅,₂ (combinação de 5 elementos tomados 2 a 2) é igual a ___.',
     respostaCorreta: '10',
-    explicacao: 'C₅,₂ = 5!/(3!·2!) = (5×4)/(2×1) = 20/2 = 10. Existem 10 formas de escolher 2 elementos de um conjunto de 5.'
+    dica: 'Use a fórmula C₅,₂ = 5!/(3!·2!).',
+    explicacao: 'C₅,₂ = 5!/(3!·2!) = (5×4)/(2×1) = 20/2 = 10. Existem 10 formas de escolher 2 elementos de um conjunto de 5.',
+    tags: ['combinação', 'cálculo', 'escolha']
   },
   {
     id: 'mat-3em-comb-q06',
@@ -156,7 +174,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '10'
     ],
     respostaCorreta: 3,
-    explicacao: 'ARARA tem 5 letras, com A repetido 3 vezes e R repetido 2 vezes. Permutação com repetição: 5!/(3!·2!) = 120/(6·2) = 10.'
+    dica: 'Divida n! pelo fatorial das letras repetidas.',
+    explicacao: 'ARARA tem 5 letras, com A repetido 3 vezes e R repetido 2 vezes. Permutação com repetição: 5!/(3!·2!) = 120/(6·2) = 10.',
+    tags: ['permutação com repetição', 'anagramas', 'letras repetidas']
   },
   {
     id: 'mat-3em-comb-vf03',
@@ -168,7 +188,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A combinação Cₙ,ₚ é igual a Cₙ,ₙ₋ₚ.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Por exemplo, C₁₀,₃ = C₁₀,₇ = 120. Escolher 3 elementos é complementar a escolher os 7 que ficam.'
+    dica: 'Escolher p elementos é complementar a escolher n-p elementos.',
+    explicacao: 'Verdadeiro. Por exemplo, C₁₀,₃ = C₁₀,₇ = 120. Escolher 3 elementos é complementar a escolher os 7 que ficam.',
+    tags: ['combinação', 'propriedade', 'simetria']
   },
   {
     id: 'mat-3em-comb-q07',
@@ -186,7 +208,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '5'
     ],
     respostaCorreta: 1,
-    explicacao: 'Em permutação circular, fixamos um elemento e permutamos os demais. PCₙ = (n-1)!. Assim, PC₅ = 4! = 24.'
+    dica: 'Na permutação circular, fixa-se um elemento e permuta os demais.',
+    explicacao: 'Em permutação circular, fixamos um elemento e permutamos os demais. PCₙ = (n-1)!. Assim, PC₅ = 4! = 24.',
+    tags: ['permutação circular', 'mesa redonda', 'ciclo']
   },
 
   // ==================== PROBABILIDADE ====================
@@ -206,7 +230,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '-∞ e +∞'
     ],
     respostaCorreta: 2,
-    explicacao: 'A probabilidade de qualquer evento é um número entre 0 e 1 (ou 0% e 100%). P = 0 significa evento impossível, P = 1 significa evento certo.'
+    dica: 'Probabilidade impossível é 0 e certa é 1.',
+    explicacao: 'A probabilidade de qualquer evento é um número entre 0 e 1 (ou 0% e 100%). P = 0 significa evento impossível, P = 1 significa evento certo.',
+    tags: ['probabilidade', 'conceito', 'intervalo']
   },
   {
     id: 'mat-3em-prob-c01',
@@ -218,7 +244,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'A probabilidade de um evento A é P(A) = número de casos favoráveis / número de casos ___.',
     respostaCorreta: 'possíveis',
-    explicacao: 'A definição clássica de probabilidade (Laplace) é P(A) = n(A)/n(Ω), onde n(A) é o número de casos favoráveis e n(Ω) é o total de casos possíveis.'
+    dica: 'É a definição de Laplace.',
+    explicacao: 'A definição clássica de probabilidade (Laplace) é P(A) = n(A)/n(Ω), onde n(A) é o número de casos favoráveis e n(Ω) é o total de casos possíveis.',
+    tags: ['probabilidade', 'definição clássica', 'Laplace']
   },
   {
     id: 'mat-3em-prob-q02',
@@ -236,7 +264,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '2/3'
     ],
     respostaCorreta: 2,
-    explicacao: 'Números pares em um dado: {2, 4, 6} = 3 casos favoráveis. Total: 6 faces. P = 3/6 = 1/2.'
+    dica: 'Quantos números pares existem em um dado?',
+    explicacao: 'Números pares em um dado: {2, 4, 6} = 3 casos favoráveis. Total: 6 faces. P = 3/6 = 1/2.',
+    tags: ['probabilidade', 'dado', 'números pares']
   },
   {
     id: 'mat-3em-prob-vf01',
@@ -248,7 +278,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A soma das probabilidades de um evento e seu complementar é sempre igual a 1.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. P(A) + P(Ā) = 1, onde Ā é o complementar de A. Se P(A) = 0,3, então P(Ā) = 0,7.'
+    dica: 'Um evento ou ocorre ou não ocorre.',
+    explicacao: 'Verdadeiro. P(A) + P(Ā) = 1, onde Ā é o complementar de A. Se P(A) = 0,3, então P(Ā) = 0,7.',
+    tags: ['probabilidade', 'evento complementar', 'soma']
   },
   {
     id: 'mat-3em-prob-q03',
@@ -266,7 +298,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'P(A∪B) = P(A) - P(B)'
     ],
     respostaCorreta: 2,
-    explicacao: 'P(A∪B) = P(A) + P(B) - P(A∩B). Subtraímos a interseção para não contar duas vezes os casos que estão em ambos.'
+    dica: 'Cuidado para não contar a interseção duas vezes.',
+    explicacao: 'P(A∪B) = P(A) + P(B) - P(A∩B). Subtraímos a interseção para não contar duas vezes os casos que estão em ambos.',
+    tags: ['probabilidade', 'união', 'interseção']
   },
   {
     id: 'mat-3em-prob-q04',
@@ -284,7 +318,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'P(A) - P(B)'
     ],
     respostaCorreta: 1,
-    explicacao: 'Eventos independentes são aqueles onde a ocorrência de um não afeta a probabilidade do outro. Nesse caso, P(A∩B) = P(A) · P(B).'
+    dica: 'Eventos independentes não se afetam mutuamente.',
+    explicacao: 'Eventos independentes são aqueles onde a ocorrência de um não afeta a probabilidade do outro. Nesse caso, P(A∩B) = P(A) · P(B).',
+    tags: ['probabilidade', 'eventos independentes', 'multiplicação']
   },
   {
     id: 'mat-3em-prob-c02',
@@ -296,7 +332,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'Dois eventos são mutuamente exclusivos quando sua interseção é o conjunto ___.',
     respostaCorreta: 'vazio',
-    explicacao: 'Eventos mutuamente exclusivos não podem ocorrer simultaneamente: A ∩ B = ∅. Nesse caso, P(A∪B) = P(A) + P(B).'
+    dica: 'Eles não podem ocorrer ao mesmo tempo.',
+    explicacao: 'Eventos mutuamente exclusivos não podem ocorrer simultaneamente: A ∩ B = ∅. Nesse caso, P(A∪B) = P(A) + P(B).',
+    tags: ['probabilidade', 'eventos mutuamente exclusivos', 'disjuntos']
   },
   {
     id: 'mat-3em-prob-q05',
@@ -314,7 +352,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'P(A) + P(B)'
     ],
     respostaCorreta: 2,
-    explicacao: 'P(A|B) = P(A∩B)/P(B) representa a probabilidade de A ocorrer dado que B já ocorreu. B se torna o novo espaço amostral.'
+    dica: 'Dividimos pela probabilidade do evento que já sabemos ter ocorrido.',
+    explicacao: 'P(A|B) = P(A∩B)/P(B) representa a probabilidade de A ocorrer dado que B já ocorreu. B se torna o novo espaço amostral.',
+    tags: ['probabilidade condicional', 'dado que', 'dependência']
   },
   {
     id: 'mat-3em-prob-vf02',
@@ -326,7 +366,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Se dois eventos são independentes, então P(A|B) = P(A).',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Se A e B são independentes, saber que B ocorreu não altera a probabilidade de A. P(A|B) = P(A∩B)/P(B) = P(A)·P(B)/P(B) = P(A).'
+    dica: 'Saber que B ocorreu não muda a probabilidade de A.',
+    explicacao: 'Verdadeiro. Se A e B são independentes, saber que B ocorreu não altera a probabilidade de A. P(A|B) = P(A∩B)/P(B) = P(A)·P(B)/P(B) = P(A).',
+    tags: ['probabilidade', 'independência', 'condicional']
   },
   {
     id: 'mat-3em-prob-q06',
@@ -344,7 +386,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Permutação circular'
     ],
     respostaCorreta: 2,
-    explicacao: 'P(X=k) = Cₙ,ₖ · pᵏ · (1-p)ⁿ⁻ᵏ. Usa-se combinação para escolher quais das n tentativas serão os k sucessos, multiplicado pelas probabilidades.'
+    dica: 'Escolhemos quais tentativas serão sucessos e multiplicamos pelas probabilidades.',
+    explicacao: 'P(X=k) = Cₙ,ₖ · pᵏ · (1-p)ⁿ⁻ᵏ. Usa-se combinação para escolher quais das n tentativas serão os k sucessos, multiplicado pelas probabilidades.',
+    tags: ['distribuição binomial', 'combinação', 'probabilidade']
   },
   {
     id: 'mat-3em-prob-q07',
@@ -362,7 +406,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '1/2'
     ],
     respostaCorreta: 2,
-    explicacao: 'Um baralho tem 4 naipes, cada um com 13 cartas. Copas tem 13 cartas. P = 13/52 = 1/4.'
+    dica: 'Um baralho tem 4 naipes iguais.',
+    explicacao: 'Um baralho tem 4 naipes, cada um com 13 cartas. Copas tem 13 cartas. P = 13/52 = 1/4.',
+    tags: ['probabilidade', 'baralho', 'naipes']
   },
 
   // ==================== ESTATÍSTICA ====================
@@ -382,7 +428,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '8'
     ],
     respostaCorreta: 1,
-    explicacao: 'Média = (2 + 4 + 6 + 8 + 10) / 5 = 30 / 5 = 6.'
+    dica: 'Some todos os valores e divida pela quantidade.',
+    explicacao: 'Média = (2 + 4 + 6 + 8 + 10) / 5 = 30 / 5 = 6.',
+    tags: ['média aritmética', 'medida central', 'cálculo']
   },
   {
     id: 'mat-3em-est-c01',
@@ -394,7 +442,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'A mediana é o valor que ocupa a posição ___ de um conjunto ordenado.',
     respostaCorreta: 'central',
-    explicacao: 'A mediana divide o conjunto ordenado em duas partes iguais. Se há número ímpar de elementos, é o elemento central; se par, é a média dos dois centrais.'
+    dica: 'Divida o conjunto em duas partes iguais.',
+    explicacao: 'A mediana divide o conjunto ordenado em duas partes iguais. Se há número ímpar de elementos, é o elemento central; se par, é a média dos dois centrais.',
+    tags: ['mediana', 'medida central', 'ordenação']
   },
   {
     id: 'mat-3em-est-q02',
@@ -412,7 +462,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '6'
     ],
     respostaCorreta: 1,
-    explicacao: 'A moda é o valor que mais se repete. O número 5 aparece 3 vezes, mais que qualquer outro. Logo, a moda é 5.'
+    dica: 'Qual valor aparece mais vezes?',
+    explicacao: 'A moda é o valor que mais se repete. O número 5 aparece 3 vezes, mais que qualquer outro. Logo, a moda é 5.',
+    tags: ['moda', 'frequência', 'medida central']
   },
   {
     id: 'mat-3em-est-vf01',
@@ -424,7 +476,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A variância mede o quanto os dados estão dispersos em relação à média.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. A variância é a média dos quadrados das diferenças entre cada valor e a média. Quanto maior a variância, mais dispersos estão os dados.'
+    dica: 'É a média dos quadrados dos desvios.',
+    explicacao: 'Verdadeiro. A variância é a média dos quadrados das diferenças entre cada valor e a média. Quanto maior a variância, mais dispersos estão os dados.',
+    tags: ['variância', 'dispersão', 'média']
   },
   {
     id: 'mat-3em-est-q03',
@@ -442,7 +496,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'A soma dos desvios'
     ],
     respostaCorreta: 1,
-    explicacao: 'O desvio padrão é a raiz quadrada da variância: σ = √Var. Ele tem a mesma unidade dos dados originais, facilitando a interpretação.'
+    dica: 'O desvio padrão tem a mesma unidade dos dados originais.',
+    explicacao: 'O desvio padrão é a raiz quadrada da variância: σ = √Var. Ele tem a mesma unidade dos dados originais, facilitando a interpretação.',
+    tags: ['desvio padrão', 'variância', 'raiz quadrada']
   },
   {
     id: 'mat-3em-est-c02',
@@ -454,7 +510,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'A amplitude de um conjunto de dados é a diferença entre o maior e o ___ valor.',
     respostaCorreta: 'menor',
-    explicacao: 'A amplitude é a medida mais simples de dispersão: Amplitude = valor máximo - valor mínimo.'
+    dica: 'É a medida de dispersão mais simples.',
+    explicacao: 'A amplitude é a medida mais simples de dispersão: Amplitude = valor máximo - valor mínimo.',
+    tags: ['amplitude', 'dispersão', 'máximo', 'mínimo']
   },
   {
     id: 'mat-3em-est-q04',
@@ -472,7 +530,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Ao desvio padrão'
     ],
     respostaCorreta: 1,
-    explicacao: 'O segundo quartil Q₂ divide os dados ao meio, sendo igual à mediana. Q₁ separa os 25% menores e Q₃ separa os 75% menores.'
+    dica: 'Q₂ divide os dados ao meio.',
+    explicacao: 'O segundo quartil Q₂ divide os dados ao meio, sendo igual à mediana. Q₁ separa os 25% menores e Q₃ separa os 75% menores.',
+    tags: ['quartis', 'mediana', 'Q2']
   },
   {
     id: 'mat-3em-est-vf02',
@@ -484,7 +544,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Na distribuição normal, aproximadamente 68% dos dados estão a menos de um desvio padrão da média.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Na curva normal: ~68% estão em μ±σ, ~95% em μ±2σ, e ~99,7% em μ±3σ. Isso é a regra empírica (68-95-99,7).'
+    dica: 'Lembre-se da regra empírica 68-95-99,7.',
+    explicacao: 'Verdadeiro. Na curva normal: ~68% estão em μ±σ, ~95% em μ±2σ, e ~99,7% em μ±3σ. Isso é a regra empírica (68-95-99,7).',
+    tags: ['distribuição normal', 'regra empírica', 'desvio padrão']
   },
   {
     id: 'mat-3em-est-q05',
@@ -502,7 +564,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'O número de elementos'
     ],
     respostaCorreta: 2,
-    explicacao: 'Na média ponderada, cada valor é multiplicado por seu peso (importância relativa), e depois divide-se pela soma dos pesos.'
+    dica: 'Alguns valores têm mais importância que outros.',
+    explicacao: 'Na média ponderada, cada valor é multiplicado por seu peso (importância relativa), e depois divide-se pela soma dos pesos.',
+    tags: ['média ponderada', 'pesos', 'importância']
   },
   {
     id: 'mat-3em-est-c03',
@@ -514,7 +578,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'facil',
     pergunta: 'O gráfico de ___ é usado para representar a distribuição de frequências de dados contínuos agrupados em classes.',
     respostaCorreta: 'histograma',
-    explicacao: 'O histograma usa retângulos adjacentes (sem espaço entre eles) para mostrar frequências de dados agrupados em intervalos de classe.'
+    dica: 'Os retângulos são adjacentes, sem espaço entre eles.',
+    explicacao: 'O histograma usa retângulos adjacentes (sem espaço entre eles) para mostrar frequências de dados agrupados em intervalos de classe.',
+    tags: ['histograma', 'gráfico', 'frequência', 'classes']
   },
 
   // ==================== POLINÔMIOS ====================
@@ -534,7 +600,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '5'
     ],
     respostaCorreta: 2,
-    explicacao: 'O grau de um polinômio é o maior expoente da variável. Como o maior expoente é 4 (em 3x⁴), o grau é 4.'
+    dica: 'O grau é o maior expoente da variável.',
+    explicacao: 'O grau de um polinômio é o maior expoente da variável. Como o maior expoente é 4 (em 3x⁴), o grau é 4.',
+    tags: ['polinômio', 'grau', 'expoente']
   },
   {
     id: 'mat-3em-poli-vf01',
@@ -546,7 +614,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O polinômio nulo tem todos os coeficientes iguais a zero e não possui grau definido.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. O polinômio nulo P(x) = 0 tem todos os coeficientes iguais a zero. Por convenção, seu grau não é definido (alguns autores dizem -∞).'
+    dica: 'O grau do polinômio nulo é uma exceção.',
+    explicacao: 'Verdadeiro. O polinômio nulo P(x) = 0 tem todos os coeficientes iguais a zero. Por convenção, seu grau não é definido (alguns autores dizem -∞).',
+    tags: ['polinômio nulo', 'grau indefinido', 'exceção']
   },
   {
     id: 'mat-3em-poli-c01',
@@ -558,7 +628,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'As raízes de um polinômio P(x) são os valores de x para os quais P(x) = ___.',
     respostaCorreta: '0',
-    explicacao: 'As raízes (ou zeros) de P(x) são as soluções de P(x) = 0. Um polinômio de grau n tem no máximo n raízes reais.'
+    dica: 'Raízes também são chamadas de zeros do polinômio.',
+    explicacao: 'As raízes (ou zeros) de P(x) são as soluções de P(x) = 0. Um polinômio de grau n tem no máximo n raízes reais.',
+    tags: ['raízes', 'zeros', 'polinômio']
   },
   {
     id: 'mat-3em-poli-q02',
@@ -576,7 +648,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'a'
     ],
     respostaCorreta: 1,
-    explicacao: 'O Teorema do Resto afirma que o resto da divisão de P(x) por (x - a) é igual a P(a). Se P(a) = 0, então (x - a) divide P(x).'
+    dica: 'Substitua x pelo valor que anula o divisor.',
+    explicacao: 'O Teorema do Resto afirma que o resto da divisão de P(x) por (x - a) é igual a P(a). Se P(a) = 0, então (x - a) divide P(x).',
+    tags: ['teorema do resto', 'divisão', 'polinômio']
   },
   {
     id: 'mat-3em-poli-q03',
@@ -594,7 +668,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'x · a'
     ],
     respostaCorreta: 1,
-    explicacao: 'O Teorema de D\'Alembert (ou Teorema do Fator) diz que "a" é raiz de P(x) se e somente se (x - a) é fator de P(x).'
+    dica: 'Se a é raiz, qual binômio se anula quando x = a?',
+    explicacao: 'O Teorema de D\'Alembert (ou Teorema do Fator) diz que "a" é raiz de P(x) se e somente se (x - a) é fator de P(x).',
+    tags: ['teorema de D\'Alembert', 'fator', 'raiz']
   },
   {
     id: 'mat-3em-poli-vf02',
@@ -606,7 +682,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Dois polinômios são idênticos quando têm os mesmos coeficientes para potências correspondentes.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Dois polinômios são idênticos (iguais como funções) se e somente se os coeficientes de cada potência de x são iguais.'
+    dica: 'Compare termo a termo.',
+    explicacao: 'Verdadeiro. Dois polinômios são idênticos (iguais como funções) se e somente se os coeficientes de cada potência de x são iguais.',
+    tags: ['identidade', 'polinômios', 'coeficientes']
   },
   {
     id: 'mat-3em-poli-q04',
@@ -624,7 +702,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '-c/a'
     ],
     respostaCorreta: 1,
-    explicacao: 'Pelas Relações de Girard (ou Viète), em ax² + bx + c: r + s = -b/a (soma das raízes) e r·s = c/a (produto das raízes).'
+    dica: 'A soma das raízes tem sinal oposto ao coeficiente de x.',
+    explicacao: 'Pelas Relações de Girard (ou Viète), em ax² + bx + c: r + s = -b/a (soma das raízes) e r·s = c/a (produto das raízes).',
+    tags: ['relações de Girard', 'Viète', 'soma das raízes']
   },
   {
     id: 'mat-3em-poli-c02',
@@ -636,7 +716,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Para ax² + bx + c com raízes r e s, o produto r·s é igual a ___.',
     respostaCorreta: 'c/a',
-    explicacao: 'Pela Relação de Girard, o produto das raízes de ax² + bx + c é c/a. Isso vale para qualquer equação quadrática.'
+    dica: 'O produto das raízes está relacionado ao termo independente.',
+    explicacao: 'Pela Relação de Girard, o produto das raízes de ax² + bx + c é c/a. Isso vale para qualquer equação quadrática.',
+    tags: ['relações de Girard', 'produto das raízes', 'Viète']
   },
   {
     id: 'mat-3em-poli-q05',
@@ -654,7 +736,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'P(x) = D(x) / Q(x)'
     ],
     respostaCorreta: 0,
-    explicacao: 'Se D(x) divide P(x) exatamente (resto zero), então P(x) = D(x) · Q(x), onde Q(x) é o quociente.'
+    dica: 'Se divide exatamente, o resto é zero.',
+    explicacao: 'Se D(x) divide P(x) exatamente (resto zero), então P(x) = D(x) · Q(x), onde Q(x) é o quociente.',
+    tags: ['divisão', 'polinômios', 'quociente']
   },
 
   // ==================== NÚMEROS COMPLEXOS (AVANÇADO) ====================
@@ -674,7 +758,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'z = ρ · θ'
     ],
     respostaCorreta: 2,
-    explicacao: 'A forma trigonométrica é z = ρ(cos θ + i·sen θ), onde ρ = |z| é o módulo e θ é o argumento (ângulo com o eixo real positivo).'
+    dica: 'Cosseno vem antes do seno na forma trigonométrica.',
+    explicacao: 'A forma trigonométrica é z = ρ(cos θ + i·sen θ), onde ρ = |z| é o módulo e θ é o argumento (ângulo com o eixo real positivo).',
+    tags: ['forma trigonométrica', 'módulo', 'argumento']
   },
   {
     id: 'mat-3em-comp-c01',
@@ -686,7 +772,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O argumento de um número complexo é o ângulo formado com o semieixo real ___.',
     respostaCorreta: 'positivo',
-    explicacao: 'O argumento (ou ângulo) de z é medido no sentido anti-horário a partir do semieixo real positivo. É denotado por arg(z) ou θ.'
+    dica: 'Medido no sentido anti-horário.',
+    explicacao: 'O argumento (ou ângulo) de z é medido no sentido anti-horário a partir do semieixo real positivo. É denotado por arg(z) ou θ.',
+    tags: ['argumento', 'ângulo', 'plano complexo']
   },
   {
     id: 'mat-3em-comp-q02',
@@ -704,7 +792,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Somam-se os módulos e os argumentos'
     ],
     respostaCorreta: 1,
-    explicacao: 'z₁ · z₂ = ρ₁·ρ₂ [cos(θ₁+θ₂) + i·sen(θ₁+θ₂)]. Multiplica-se os módulos e soma-se os argumentos.'
+    dica: 'Módulos multiplicam, argumentos somam.',
+    explicacao: 'z₁ · z₂ = ρ₁·ρ₂ [cos(θ₁+θ₂) + i·sen(θ₁+θ₂)]. Multiplica-se os módulos e soma-se os argumentos.',
+    tags: ['multiplicação', 'forma trigonométrica', 'módulo', 'argumento']
   },
   {
     id: 'mat-3em-comp-vf01',
@@ -716,7 +806,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Na divisão de complexos na forma trigonométrica, dividem-se os módulos e subtraem-se os argumentos.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. z₁/z₂ = (ρ₁/ρ₂)[cos(θ₁-θ₂) + i·sen(θ₁-θ₂)]. É o inverso da multiplicação.'
+    dica: 'É o inverso da multiplicação.',
+    explicacao: 'Verdadeiro. z₁/z₂ = (ρ₁/ρ₂)[cos(θ₁-θ₂) + i·sen(θ₁-θ₂)]. É o inverso da multiplicação.',
+    tags: ['divisão', 'forma trigonométrica', 'módulo', 'argumento']
   },
   {
     id: 'mat-3em-comp-q03',
@@ -734,7 +826,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'ρ(cos θⁿ + i·sen θⁿ)'
     ],
     respostaCorreta: 1,
-    explicacao: 'A Fórmula de De Moivre afirma que zⁿ = ρⁿ(cos nθ + i·sen nθ). O módulo é elevado a n e o argumento é multiplicado por n.'
+    dica: 'O módulo é elevado a n e o argumento é multiplicado por n.',
+    explicacao: 'A Fórmula de De Moivre afirma que zⁿ = ρⁿ(cos nθ + i·sen nθ). O módulo é elevado a n e o argumento é multiplicado por n.',
+    tags: ['De Moivre', 'potenciação', 'forma trigonométrica']
   },
   {
     id: 'mat-3em-comp-q04',
@@ -752,7 +846,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '4'
     ],
     respostaCorreta: 2,
-    explicacao: 'Existem exatamente 3 raízes cúbicas da unidade: 1, ω = (-1 + i√3)/2, e ω² = (-1 - i√3)/2. Em geral, existem n raízes n-ésimas da unidade.'
+    dica: 'Existem n raízes n-ésimas da unidade.',
+    explicacao: 'Existem exatamente 3 raízes cúbicas da unidade: 1, ω = (-1 + i√3)/2, e ω² = (-1 - i√3)/2. Em geral, existem n raízes n-ésimas da unidade.',
+    tags: ['raízes da unidade', 'raízes cúbicas', 'complexos']
   },
   {
     id: 'mat-3em-comp-c02',
@@ -764,7 +860,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A forma exponencial de um número complexo é z = ρ · e^(i___), onde e é a base do logaritmo natural.',
     respostaCorreta: 'θ',
-    explicacao: 'A forma exponencial é z = ρ·e^(iθ), relacionada à forma trigonométrica pela Fórmula de Euler: e^(iθ) = cos θ + i·sen θ.'
+    dica: 'É baseada na fórmula de Euler.',
+    explicacao: 'A forma exponencial é z = ρ·e^(iθ), relacionada à forma trigonométrica pela Fórmula de Euler: e^(iθ) = cos θ + i·sen θ.',
+    tags: ['forma exponencial', 'Euler', 'complexos']
   },
   {
     id: 'mat-3em-comp-vf02',
@@ -776,7 +874,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A Identidade de Euler afirma que e^(iπ) + 1 = 0.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. A Identidade de Euler, e^(iπ) + 1 = 0, é considerada uma das mais belas da matemática, relacionando e, i, π, 1 e 0.'
+    dica: 'Relaciona cinco constantes matemáticas fundamentais.',
+    explicacao: 'Verdadeiro. A Identidade de Euler, e^(iπ) + 1 = 0, é considerada uma das mais belas da matemática, relacionando e, i, π, 1 e 0.',
+    tags: ['identidade de Euler', 'constantes', 'beleza matemática']
   },
 
   // ==================== GEOMETRIA ANALÍTICA AVANÇADA ====================
@@ -796,7 +896,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '25'
     ],
     respostaCorreta: 1,
-    explicacao: '|v| = √(3² + 4²) = √(9 + 16) = √25 = 5. O módulo de um vetor (a, b) é √(a² + b²).'
+    dica: 'Use o teorema de Pitágoras: |v| = √(a² + b²).',
+    explicacao: '|v| = √(3² + 4²) = √(9 + 16) = √25 = 5. O módulo de um vetor (a, b) é √(a² + b²).',
+    tags: ['vetor', 'módulo', 'Pitágoras']
   },
   {
     id: 'mat-3em-gean-c01',
@@ -808,7 +910,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'O produto escalar de dois vetores u = (a, b) e v = (c, d) é u·v = ac + ___.',
     respostaCorreta: 'bd',
-    explicacao: 'O produto escalar (ou produto interno) de u = (a, b) e v = (c, d) é u·v = ac + bd. É um número real, não um vetor.'
+    dica: 'Multiplique as coordenadas correspondentes e some.',
+    explicacao: 'O produto escalar (ou produto interno) de u = (a, b) e v = (c, d) é u·v = ac + bd. É um número real, não um vetor.',
+    tags: ['produto escalar', 'vetores', 'coordenadas']
   },
   {
     id: 'mat-3em-gean-q02',
@@ -826,7 +930,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Indefinido'
     ],
     respostaCorreta: 2,
-    explicacao: 'Dois vetores são ortogonais se e somente se seu produto escalar é zero: u·v = 0 ⟺ u ⟂ v.'
+    dica: 'Perpendiculares formam 90° entre si.',
+    explicacao: 'Dois vetores são ortogonais se e somente se seu produto escalar é zero: u·v = 0 ⟺ u ⟂ v.',
+    tags: ['vetores ortogonais', 'perpendiculares', 'produto escalar']
   },
   {
     id: 'mat-3em-gean-vf01',
@@ -838,7 +944,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O produto vetorial de dois vetores resulta em um vetor perpendicular a ambos.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. O produto vetorial u × v resulta em um vetor perpendicular tanto a u quanto a v. A direção segue a regra da mão direita.'
+    dica: 'Use a regra da mão direita.',
+    explicacao: 'Verdadeiro. O produto vetorial u × v resulta em um vetor perpendicular tanto a u quanto a v. A direção segue a regra da mão direita.',
+    tags: ['produto vetorial', 'perpendicular', 'regra da mão direita']
   },
   {
     id: 'mat-3em-gean-q03',
@@ -856,7 +964,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'ax² + by² = cz'
     ],
     respostaCorreta: 1,
-    explicacao: 'A equação geral do plano é ax + by + cz + d = 0, onde (a, b, c) é um vetor normal ao plano (perpendicular a ele).'
+    dica: 'É uma equação linear em três variáveis.',
+    explicacao: 'A equação geral do plano é ax + by + cz + d = 0, onde (a, b, c) é um vetor normal ao plano (perpendicular a ele).',
+    tags: ['equação do plano', 'vetor normal', 'espaço']
   },
   {
     id: 'mat-3em-gean-c02',
@@ -868,7 +978,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Uma reta no espaço pode ser expressa por equações ___, cada uma relacionando duas coordenadas.',
     respostaCorreta: 'simétricas',
-    explicacao: 'As equações simétricas da reta são (x-x₀)/a = (y-y₀)/b = (z-z₀)/c, onde (a,b,c) é o vetor diretor e (x₀,y₀,z₀) é um ponto da reta.'
+    dica: 'Usam um ponto e o vetor diretor.',
+    explicacao: 'As equações simétricas da reta são (x-x₀)/a = (y-y₀)/b = (z-z₀)/c, onde (a,b,c) é o vetor diretor e (x₀,y₀,z₀) é um ponto da reta.',
+    tags: ['equações simétricas', 'reta', 'vetor diretor']
   },
   {
     id: 'mat-3em-gean-q04',
@@ -886,7 +998,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'd = |x₂-x₁| + |y₂-y₁| + |z₂-z₁|'
     ],
     respostaCorreta: 2,
-    explicacao: 'A fórmula da distância no espaço 3D generaliza a do plano: d = √[(x₂-x₁)² + (y₂-y₁)² + (z₂-z₁)²].'
+    dica: 'Generalize a fórmula do plano para 3D.',
+    explicacao: 'A fórmula da distância no espaço 3D generaliza a do plano: d = √[(x₂-x₁)² + (y₂-y₁)² + (z₂-z₁)²].',
+    tags: ['distância', 'espaço 3D', 'coordenadas']
   },
 
   // ==================== QUESTÕES VARIADAS ADICIONAIS ====================
@@ -906,7 +1020,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Dos elementos da diagonal'
     ],
     respostaCorreta: 1,
-    explicacao: 'No Triângulo de Pascal, cada número é a soma dos dois números imediatamente acima dele. Isso expressa a relação Cₙ,ₖ = Cₙ₋₁,ₖ₋₁ + Cₙ₋₁,ₖ.'
+    dica: 'Olhe para os dois números acima do elemento.',
+    explicacao: 'No Triângulo de Pascal, cada número é a soma dos dois números imediatamente acima dele. Isso expressa a relação Cₙ,ₖ = Cₙ₋₁,ₖ₋₁ + Cₙ₋₁,ₖ.',
+    tags: ['triângulo de Pascal', 'combinação', 'propriedade']
   },
   {
     id: 'mat-3em-comb-vf04',
@@ -918,7 +1034,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O Binômio de Newton expressa (a + b)ⁿ como uma soma de termos envolvendo combinações.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. (a+b)ⁿ = Σₖ₌₀ⁿ Cₙ,ₖ · aⁿ⁻ᵏ · bᵏ. Os coeficientes são as combinações, que aparecem no Triângulo de Pascal.'
+    dica: 'Os coeficientes são os números do triângulo de Pascal.',
+    explicacao: 'Verdadeiro. (a+b)ⁿ = Σₖ₌₀ⁿ Cₙ,ₖ · aⁿ⁻ᵏ · bᵏ. Os coeficientes são as combinações, que aparecem no Triângulo de Pascal.',
+    tags: ['binômio de Newton', 'expansão', 'combinação']
   },
   {
     id: 'mat-3em-prob-q08',
@@ -936,7 +1054,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'O desvio padrão de X'
     ],
     respostaCorreta: 2,
-    explicacao: 'E(X) = Σ xᵢ · P(X = xᵢ). A esperança é a média ponderada dos valores possíveis, onde os pesos são as probabilidades.'
+    dica: 'Cada valor é multiplicado pela sua probabilidade.',
+    explicacao: 'E(X) = Σ xᵢ · P(X = xᵢ). A esperança é a média ponderada dos valores possíveis, onde os pesos são as probabilidades.',
+    tags: ['esperança matemática', 'valor esperado', 'probabilidade']
   },
   {
     id: 'mat-3em-est-q06',
@@ -954,7 +1074,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'CV = média × desvio padrão'
     ],
     respostaCorreta: 1,
-    explicacao: 'CV = σ/μ (ou CV% = 100·σ/μ). O coeficiente de variação é uma medida relativa de dispersão, útil para comparar conjuntos com médias diferentes.'
+    dica: 'É uma medida relativa de dispersão.',
+    explicacao: 'CV = σ/μ (ou CV% = 100·σ/μ). O coeficiente de variação é uma medida relativa de dispersão, útil para comparar conjuntos com médias diferentes.',
+    tags: ['coeficiente de variação', 'dispersão relativa', 'comparação']
   },
   {
     id: 'mat-3em-est-vf03',
@@ -966,7 +1088,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O coeficiente de correlação linear de Pearson varia entre -1 e 1.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. O coeficiente r varia de -1 (correlação negativa perfeita) a 1 (correlação positiva perfeita). r = 0 indica ausência de correlação linear.'
+    dica: '-1 é correlação negativa perfeita, +1 é positiva perfeita.',
+    explicacao: 'Verdadeiro. O coeficiente r varia de -1 (correlação negativa perfeita) a 1 (correlação positiva perfeita). r = 0 indica ausência de correlação linear.',
+    tags: ['correlação de Pearson', 'coeficiente', 'intervalo']
   },
   {
     id: 'mat-3em-poli-q06',
@@ -984,7 +1108,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Nenhuma raiz'
     ],
     respostaCorreta: 2,
-    explicacao: 'O Teorema Fundamental da Álgebra garante que todo polinômio não constante (grau ≥ 1) possui ao menos uma raiz no conjunto dos números complexos.'
+    dica: 'Inclui raízes reais e complexas.',
+    explicacao: 'O Teorema Fundamental da Álgebra garante que todo polinômio não constante (grau ≥ 1) possui ao menos uma raiz no conjunto dos números complexos.',
+    tags: ['teorema fundamental', 'álgebra', 'raízes complexas']
   },
   {
     id: 'mat-3em-poli-vf03',
@@ -996,7 +1122,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'Se um polinômio com coeficientes reais tem uma raiz complexa z, então o conjugado z̄ também é raiz.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Para polinômios com coeficientes reais, as raízes complexas não reais sempre aparecem em pares conjugados.'
+    dica: 'Raízes complexas aparecem em pares conjugados.',
+    explicacao: 'Verdadeiro. Para polinômios com coeficientes reais, as raízes complexas não reais sempre aparecem em pares conjugados.',
+    tags: ['raízes complexas', 'conjugado', 'coeficientes reais']
   },
   {
     id: 'mat-3em-gesp-q01',
@@ -1014,7 +1142,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Área lateral × altura'
     ],
     respostaCorreta: 2,
-    explicacao: 'A área total de um prisma é Aₜ = Aₗ + 2Aᵦ, onde Aₗ é a área lateral e Aᵦ é a área da base.'
+    dica: 'Inclui as duas bases e a superfície lateral.',
+    explicacao: 'A área total de um prisma é Aₜ = Aₗ + 2Aᵦ, onde Aₗ é a área lateral e Aᵦ é a área da base.',
+    tags: ['prisma', 'área total', 'área lateral']
   },
   {
     id: 'mat-3em-gesp-c01',
@@ -1026,7 +1156,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'medio',
     pergunta: 'A área lateral de um cone de revolução de raio r e geratriz g é Aₗ = π · r · ___.',
     respostaCorreta: 'g',
-    explicacao: 'A área lateral do cone é Aₗ = πrg, onde r é o raio da base e g é a geratriz (distância do vértice à borda da base).'
+    dica: 'A geratriz é a distância do vértice à borda da base.',
+    explicacao: 'A área lateral do cone é Aₗ = πrg, onde r é o raio da base e g é a geratriz (distância do vértice à borda da base).',
+    tags: ['cone', 'área lateral', 'geratriz']
   },
   {
     id: 'mat-3em-gesp-q02',
@@ -1044,7 +1176,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       '(4/3)πr³'
     ],
     respostaCorreta: 2,
-    explicacao: 'A área da superfície esférica é S = 4πr². O volume é V = (4/3)πr³. Note: área = 4πr², volume = (4/3)πr³.'
+    dica: 'É quatro vezes a área de um círculo de mesmo raio.',
+    explicacao: 'A área da superfície esférica é S = 4πr². O volume é V = (4/3)πr³. Note: área = 4πr², volume = (4/3)πr³.',
+    tags: ['esfera', 'área', 'superfície']
   },
   {
     id: 'mat-3em-gesp-vf01',
@@ -1056,7 +1190,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A seção de uma esfera por um plano que passa pelo centro é chamada de círculo máximo.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Quando o plano passa pelo centro da esfera, a seção é um círculo máximo, com raio igual ao raio da esfera. Qualquer outra seção produz círculos menores.'
+    dica: 'É a maior seção circular possível.',
+    explicacao: 'Verdadeiro. Quando o plano passa pelo centro da esfera, a seção é um círculo máximo, com raio igual ao raio da esfera. Qualquer outra seção produz círculos menores.',
+    tags: ['círculo máximo', 'seção', 'esfera']
   },
   {
     id: 'mat-3em-comb-c03',
@@ -1068,7 +1204,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O número de combinações com repetição de n elementos tomados p a p é dado por C(n+p-1, ___).',
     respostaCorreta: 'p',
-    explicacao: 'A combinação com repetição é CR(n,p) = C(n+p-1, p). Diferente da combinação simples, permite escolher o mesmo elemento mais de uma vez.'
+    dica: 'É diferente da combinação simples.',
+    explicacao: 'A combinação com repetição é CR(n,p) = C(n+p-1, p). Diferente da combinação simples, permite escolher o mesmo elemento mais de uma vez.',
+    tags: ['combinação com repetição', 'fórmula', 'repetição']
   },
   {
     id: 'mat-3em-prob-c03',
@@ -1080,7 +1218,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'O Teorema de Bayes permite calcular a probabilidade ___ P(A|B) conhecendo P(B|A).',
     respostaCorreta: 'condicional',
-    explicacao: 'O Teorema de Bayes "inverte" probabilidades condicionais: P(A|B) = P(B|A)·P(A)/P(B). É fundamental em estatística e aprendizado de máquina.'
+    dica: 'Inverte a ordem da condição.',
+    explicacao: 'O Teorema de Bayes "inverte" probabilidades condicionais: P(A|B) = P(B|A)·P(A)/P(B). É fundamental em estatística e aprendizado de máquina.',
+    tags: ['teorema de Bayes', 'probabilidade condicional', 'inversão']
   },
   {
     id: 'mat-3em-est-q07',
@@ -1098,7 +1238,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'A variância dos dados'
     ],
     respostaCorreta: 1,
-    explicacao: 'Em y = a + bx, b é o coeficiente angular (inclinação), indicando quanto y varia para cada unidade de variação em x. O coeficiente a é o intercepto (valor de y quando x = 0).'
+    dica: 'É o quanto y muda para cada unidade de x.',
+    explicacao: 'Em y = a + bx, b é o coeficiente angular (inclinação), indicando quanto y varia para cada unidade de variação em x. O coeficiente a é o intercepto (valor de y quando x = 0).',
+    tags: ['regressão linear', 'coeficiente angular', 'inclinação']
   },
   {
     id: 'mat-3em-gean-q05',
@@ -1116,7 +1258,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Uma hipérbole'
     ],
     respostaCorreta: 1,
-    explicacao: 'x²/a² + y²/b² = 1 é uma elipse. Como a > b, o eixo maior (2a) está na horizontal. Se b > a, o eixo maior seria vertical.'
+    dica: 'O maior denominador indica o eixo maior.',
+    explicacao: 'x²/a² + y²/b² = 1 é uma elipse. Como a > b, o eixo maior (2a) está na horizontal. Se b > a, o eixo maior seria vertical.',
+    tags: ['elipse', 'eixo maior', 'cônicas']
   },
   {
     id: 'mat-3em-gean-vf02',
@@ -1128,7 +1272,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A equação x²/a² - y²/b² = 1 representa uma hipérbole com focos no eixo x.',
     respostaCorreta: true,
-    explicacao: 'Verdadeiro. Na hipérbole x²/a² - y²/b² = 1, o termo positivo (x²) indica que os focos e o eixo real estão no eixo x (horizontal).'
+    dica: 'O termo positivo indica o eixo dos focos.',
+    explicacao: 'Verdadeiro. Na hipérbole x²/a² - y²/b² = 1, o termo positivo (x²) indica que os focos e o eixo real estão no eixo x (horizontal).',
+    tags: ['hipérbole', 'focos', 'cônicas']
   },
   {
     id: 'mat-3em-comp-q05',
@@ -1146,7 +1292,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Rotacionar 180°'
     ],
     respostaCorreta: 2,
-    explicacao: 'Multiplicar por i adiciona 90° (π/2) ao argumento. É uma rotação de 90° no sentido anti-horário no plano de Argand-Gauss.'
+    dica: 'i tem argumento de 90°.',
+    explicacao: 'Multiplicar por i adiciona 90° (π/2) ao argumento. É uma rotação de 90° no sentido anti-horário no plano de Argand-Gauss.',
+    tags: ['multiplicação por i', 'rotação', 'geometria']
   },
   {
     id: 'mat-3em-prob-vf03',
@@ -1158,7 +1306,9 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
     dificuldade: 'dificil',
     pergunta: 'A variância de uma variável aleatória pode ser negativa.',
     respostaCorreta: false,
-    explicacao: 'Falso. A variância é sempre não negativa (≥ 0), pois é a média dos quadrados dos desvios. Var(X) = E[(X - μ)²] ≥ 0.'
+    dica: 'É a média de quadrados.',
+    explicacao: 'Falso. A variância é sempre não negativa (≥ 0), pois é a média dos quadrados dos desvios. Var(X) = E[(X - μ)²] ≥ 0.',
+    tags: ['variância', 'não negativa', 'propriedade']
   },
   {
     id: 'mat-3em-comb-q09',
@@ -1176,6 +1326,8 @@ export const flashcardsMatematica3anoEM: FlashCard[] = [
       'Nenhuma será ás'
     ],
     respostaCorreta: 1,
-    explicacao: 'Com 13 cartas e 13 valores possíveis (A, 2, 3, ..., K), se tivermos 13 cartas, pelo princípio da casa dos pombos, necessariamente pelo menos duas terão o mesmo valor.'
+    dica: 'Há 13 valores possíveis (A, 2, 3, ..., K).',
+    explicacao: 'Com 13 cartas e 13 valores possíveis (A, 2, 3, ..., K), se tivermos 13 cartas, pelo princípio da casa dos pombos, necessariamente pelo menos duas terão o mesmo valor.',
+    tags: ['princípio da casa dos pombos', 'baralho', 'pigeonhole']
   }
 ]
