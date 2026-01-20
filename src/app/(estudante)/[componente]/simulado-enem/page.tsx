@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   Clock,
   Calendar,
   ChevronDown,
@@ -23,6 +22,7 @@ import {
   Globe,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import { processarContexto, processarTexto, isValidImageUrl } from '@/lib/limpezaTexto'
@@ -411,9 +411,7 @@ export default function SimuladoENEMPage() {
       {/* Header */}
       <header className="px-3 py-2.5 sticky top-0 z-10 flex items-center justify-between gap-2" style={{ background: 'var(--bg-surface)', borderBottom: '1px solid var(--border-default)' }}>
         <div className="flex items-center gap-2">
-          <button onClick={() => router.push(`/${componente}/menu`)} className="p-1.5 -ml-1 rounded-lg lg:hidden" style={{ color: 'var(--text-muted)' }}>
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+          <BackButton href={`/${componente}/menu`} mobileOnly />
           <Target className="w-5 h-5" style={{ color: corPrimaria }} />
           <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Simulado ENEM</span>
           {estatisticas && (

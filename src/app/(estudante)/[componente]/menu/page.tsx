@@ -112,13 +112,13 @@ export default function MenuComponentePage() {
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
-    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Quiz rápido', isNew: true },
-    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', isNew: true },
+    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'teste na 3' },
+    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'teste na 3' },
   ]
 
-  // Simulado ENEM apenas para 3ª série do Ensino Médio
+  // Simulado Enem apenas para 3ª série do Ensino Médio
   const menuENEM: MenuItem[] = (usuario.nivel === 'EM' && usuario.ano === 3)
-    ? [{ icon: FileText, label: 'ENEM', href: `/${componente}/simulado-enem`, description: 'Simulado' }]
+    ? [{ icon: FileText, label: 'Enem', href: `/${componente}/simulado-enem`, description: 'teste na 3' }]
     : []
 
   const menuItemsFim: MenuItem[] = [

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
-  ArrowLeft,
   Heart,
   Download,
   Share2,
@@ -11,6 +10,7 @@ import {
   Map,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
+import BackButton from '@/components/ui/BackButton'
 import type { MapaMental, Componente } from '@/types'
 import { SERIES_MAPA_LABELS, BIMESTRES_LABELS } from '@/types'
 
@@ -128,12 +128,7 @@ ${mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERI
       {/* Header */}
       <header className="flex-shrink-0 p-4 flex items-center justify-between border-b border-gray-800">
         <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={irParaApp}
-            className="p-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-white" />
-          </button>
+          <BackButton onClick={irParaApp} />
           <div className="min-w-0">
             <h1 className="font-semibold text-white truncate">{mapa.titulo}</h1>
             <p className="text-sm text-gray-400">

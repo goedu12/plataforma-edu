@@ -89,26 +89,26 @@ export default function LoginPage() {
       style={{ background: 'var(--bg-base)' }}
     >
       {/* Header com Logo */}
-      <div className="text-center mb-10 animate-fade-in">
+      <div className="text-center mb-4 animate-fade-in">
         <div className="mx-auto flex items-center justify-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={LOGO_URL}
             alt={config.nome_plataforma}
-            className="h-auto max-h-[100px] w-auto"
+            className="h-auto max-h-[80px] w-auto"
           />
         </div>
       </div>
 
       {/* Login Card */}
       <div
-        className="w-full max-w-md p-8 rounded-2xl animate-slide-up"
+        className="w-full max-w-md p-6 rounded-2xl animate-slide-up"
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-default)',
         }}
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               className="text-label block mb-2"
@@ -192,41 +192,41 @@ export default function LoginPage() {
 
         {/* Help Box */}
         <div
-          className="mt-8 p-5 rounded-xl text-center"
+          className="mt-5 p-4 rounded-xl text-center"
           style={{
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border-default)',
           }}
         >
           <p
-            className="text-sm font-medium mb-2"
+            className="text-sm font-medium mb-1"
             style={{ color: 'var(--text-primary)' }}
           >
             Primeiro acesso?
           </p>
           <p
-            className="text-sm mb-1"
+            className="text-xs"
             style={{ color: 'var(--text-secondary)' }}
           >
             <span style={{ color: 'var(--color-fisica)' }}>Login:</span> primeironome.ultimonome@turma
           </p>
           <p
-            className="text-sm mb-2"
+            className="text-xs"
             style={{ color: 'var(--text-secondary)' }}
           >
             <span style={{ color: 'var(--color-fisica)' }}>Senha:</span> fornecida pelo professor
           </p>
           <p
-            className="text-xs"
+            className="text-xs mt-1"
             style={{ color: 'var(--text-muted)' }}
           >
-            Exemplo: maria.silva@1a
+            Ex: maria.silva@1a
           </p>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="mt-10 text-center animate-fade-in">
+      <div className="mt-4 text-center animate-fade-in">
         <p
           className="text-sm font-medium"
           style={{ color: 'var(--text-tertiary)' }}
