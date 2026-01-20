@@ -3,12 +3,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   Lightbulb,
   CheckCircle,
   XCircle,
-  ChevronRight,
-  Clock,
   Target,
   Trophy,
   Zap,
@@ -16,9 +13,12 @@ import {
   Loader2,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
+import Button from '@/components/ui/Button'
+import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
+import { formatarFormula } from '@/lib/formatacao'
 
 interface Alternativas {
   A: string
@@ -65,6 +65,7 @@ export default function TrilhasEstudarPage() {
   const [loading, setLoading] = useState(true)
   const [gerando, setGerando] = useState(false)
   const [respondendo, setRespondendo] = useState(false)
+  const [selecionada, setSelecionada] = useState<string | null>(null)
   const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(null)
   const [mostrarResultado, setMostrarResultado] = useState(false)
   const [mostrarDica, setMostrarDica] = useState(false)
@@ -169,11 +170,11 @@ export default function TrilhasEstudarPage() {
     inicializar()
   }, [router, componente, carregarQuestoes])
 
-  // Responder questão
-  const responderQuestao = async (resposta: string) => {
-    if (respondendo || mostrarResultado) return
+  // Confirmar resposta
+  const handleConfirmar = async () => {
+    if (!selecionada || respondendo || mostrarResultado) return
 
-    setRespostaSelecionada(resposta)
+    setRespostaSelecionada(selecionada)
     setRespondendo(true)
 
     const tempoSegundos = Math.floor((Date.now() - tempoInicio) / 1000)
@@ -185,7 +186,7 @@ export default function TrilhasEstudarPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           questao_id: questaoData.id,
-          resposta: resposta.toUpperCase(),
+          resposta: selecionada.toUpperCase(),
           resposta_correta: questaoData.resposta_correta,
           tempo_segundos: tempoSegundos,
           usou_dica: usouDica,
@@ -216,6 +217,7 @@ export default function TrilhasEstudarPage() {
       await new Promise(r => setTimeout(r, 150))
 
       setQuestaoAtual(prev => prev + 1)
+      setSelecionada(null)
       setRespostaSelecionada(null)
       setMostrarResultado(false)
       setMostrarDica(false)
@@ -263,6 +265,7 @@ export default function TrilhasEstudarPage() {
     setMostrarConclusao(false)
     setResultadoSemana(null)
     setQuestaoAtual(0)
+    setSelecionada(null)
     setRespostaSelecionada(null)
     setMostrarResultado(false)
     setMostrarDica(false)
@@ -330,24 +333,19 @@ export default function TrilhasEstudarPage() {
           ) : (
             <div className="flex gap-3 justify-center">
               {!completou && (
-                <button
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
                   onClick={() => carregarQuestoes(serie)}
-                  className="px-6 py-3 rounded-xl font-semibold transition-transform active:scale-95"
-                  style={{ background: accentColor, color: textOnAccent }}
                 >
                   Começar
-                </button>
+                </Button>
               )}
-              <button
+              <Button
+                variant={completou ? (isFisica ? 'fisica' : 'matematica') : 'secondary'}
                 onClick={() => router.push(`/${componente}/trilhas`)}
-                className="px-6 py-3 rounded-xl font-medium transition-transform active:scale-95"
-                style={{
-                  background: completou ? accentColor : 'var(--bg-elevated)',
-                  color: completou ? textOnAccent : 'var(--text-secondary)'
-                }}
               >
                 {completou ? 'Ver Trilhas' : 'Voltar'}
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -364,164 +362,227 @@ export default function TrilhasEstudarPage() {
   const progressoTotal = progresso?.questoes_semana ?? questoes.length
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      {/* Header */}
-      <header className="sticky top-0 z-10 px-4 py-3 lg:py-2" style={{ background: 'var(--bg-base)' }}>
+      {/* Header - Ultra compacto */}
+      <header className="header-chromebook flex-shrink-0">
         <div className="max-w-2xl mx-auto">
-          <div className="flex items-center justify-between mb-2">
-            <button
-              onClick={() => router.push(`/${componente}/trilhas`)}
-              className="w-9 h-9 flex items-center justify-center rounded-lg transition-all active:scale-95"
-              style={{ background: 'var(--bg-elevated)' }}
-            >
-              <ArrowLeft className="w-5 h-5" style={{ color: 'var(--text-secondary)' }} />
-            </button>
+          <div className="flex items-center gap-2 lg:gap-3">
+            <BackButton href={`/${componente}/trilhas`} mobileOnly />
 
-            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-muted)' }}>
-              <span className="font-medium">{questaoAtual + 1}/{questoes.length}</span>
+            <div className="flex items-center gap-1.5 flex-1 lg:flex-none">
+              <Target className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: accentColor }} />
+              <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>Trilha</span>
             </div>
+
+            {/* Progresso inline - Desktop */}
+            <div className="hidden lg:flex items-center gap-1.5">
+              <div className="flex gap-0.5">
+                {Array.from({ length: questoes.length }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-1.5 h-3 rounded-sm"
+                    style={{
+                      background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                    }}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                {questaoAtual + 1}/{questoes.length}
+              </span>
+            </div>
+
+            {/* Contador mobile */}
+            <span className="lg:hidden text-xs font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
+              {questaoAtual + 1}/{questoes.length}
+            </span>
           </div>
 
-          {/* Barra de progresso */}
-          <div className="h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
-            <div
-              className="h-full rounded-full transition-all duration-500 ease-out"
-              style={{
-                width: `${((questaoAtual + (mostrarResultado ? 1 : 0)) / questoes.length) * 100}%`,
-                background: accentColor,
-              }}
-            />
+          {/* Barra de progresso mobile */}
+          <div className="flex lg:hidden items-center gap-2 mt-1.5">
+            <div className="flex gap-0.5 flex-1">
+              {Array.from({ length: questoes.length }).map((_, index) => (
+                <div
+                  key={index}
+                  className="flex-1 h-1 rounded-full"
+                  style={{
+                    background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Conteúdo */}
-      <main
-        className={`max-w-2xl mx-auto px-4 py-4 transition-opacity duration-150 ${animandoProxima ? 'opacity-0' : 'opacity-100'}`}
-      >
-        {/* Enunciado */}
-        <div className="p-4 rounded-xl mb-4" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}>
-          {questao.tema && (
-            <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-1 rounded-md text-xs font-medium" style={{ background: `${accentColor}20`, color: accentColor }}>
+      {/* Conteúdo - Flex com scroll interno */}
+      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+        <div className={`flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5 transition-opacity duration-150 ${animandoProxima ? 'opacity-0' : 'opacity-100'}`}>
+          <div className="space-chromebook">
+            {/* Tag tema - inline no mobile */}
+            {questao.tema && (
+              <span className="badge-chromebook inline-block mb-1" style={{ background: `${accentColor}15`, color: accentColor }}>
                 {questao.tema}
               </span>
-            </div>
-          )}
-          <p className="text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
-            {questao.enunciado}
-          </p>
-        </div>
-
-        {/* Dica */}
-        {!mostrarResultado && questao.dica && (
-          <>
-            <button onClick={toggleDica} className="flex items-center gap-2 mb-3 text-sm font-medium" style={{ color: 'var(--color-warning)' }}>
-              <Lightbulb className="w-4 h-4" />
-              {mostrarDica ? 'Esconder dica' : 'Precisa de uma dica?'}
-            </button>
-
-            {mostrarDica && (
-              <div className="p-3 rounded-xl mb-4 flex items-start gap-2" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid var(--color-warning)' }}>
-                <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: 'var(--color-warning)' }} />
-                <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{questao.dica}</p>
-              </div>
             )}
-          </>
-        )}
 
-        {/* Alternativas */}
-        <div className="space-y-3">
-          {Object.entries(questao.alternativas)
-            .filter(([, texto]) => texto)
-            .map(([letra, texto]) => {
-              const isSelected = respostaSelecionada === letra
-              const isCorrect = letra === questao.resposta_correta
-              const showResult = mostrarResultado
-
-              let bgColor = 'var(--bg-surface)'
-              let borderColor = 'var(--border-default)'
-
-              if (showResult) {
-                if (isCorrect) {
-                  bgColor = 'rgba(34, 197, 94, 0.15)'
-                  borderColor = 'var(--color-success)'
-                } else if (isSelected) {
-                  bgColor = 'rgba(239, 68, 68, 0.15)'
-                  borderColor = 'var(--color-error)'
-                }
-              } else if (isSelected) {
-                bgColor = `${accentColor}15`
-                borderColor = accentColor
-              }
-
-              return (
-                <button
-                  key={letra}
-                  onClick={() => !mostrarResultado && !respondendo && responderQuestao(letra)}
-                  disabled={mostrarResultado || respondendo}
-                  className="w-full p-4 rounded-xl text-left transition-all duration-200 flex items-start gap-3 active:scale-[0.98]"
-                  style={{ background: bgColor, border: `2px solid ${borderColor}` }}
-                >
-                  <span
-                    className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0"
-                    style={{
-                      background: showResult && isCorrect ? 'var(--color-success)' : showResult && isSelected ? 'var(--color-error)' : `${accentColor}20`,
-                      color: showResult && (isCorrect || isSelected) ? '#fff' : accentColor,
-                    }}
-                  >
-                    {showResult && isCorrect ? <CheckCircle className="w-5 h-5" /> :
-                     showResult && isSelected ? <XCircle className="w-5 h-5" /> : letra}
-                  </span>
-                  <span className="flex-1 text-sm pt-1" style={{ color: 'var(--text-primary)' }}>{texto}</span>
-                  {respondendo && isSelected && (
-                    <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" style={{ color: accentColor }} />
-                  )}
-                </button>
-              )
-            })}
-        </div>
-
-        {/* Feedback */}
-        {mostrarResultado && (
-          <div className="mt-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div
-              className="p-4 rounded-xl"
-              style={{
-                background: acertou ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                border: `1px solid ${acertou ? 'var(--color-success)' : 'var(--color-error)'}`,
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                {acertou ? (
-                  <CheckCircle className="w-5 h-5" style={{ color: 'var(--color-success)' }} />
-                ) : (
-                  <XCircle className="w-5 h-5" style={{ color: 'var(--color-error)' }} />
-                )}
-                <span className="font-bold" style={{ color: acertou ? 'var(--color-success)' : 'var(--color-error)' }}>
-                  {acertou ? 'Muito bem!' : 'Não foi dessa vez'}
-                </span>
-              </div>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                {questao.feedback}
+            {/* Enunciado */}
+            <div className="card-chromebook">
+              <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
+                {formatarFormula(questao.enunciado)}
               </p>
             </div>
 
-            <button
-              onClick={proximaQuestao}
-              className="w-full py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-              style={{ background: accentColor, color: textOnAccent }}
-            >
-              {questaoAtual < questoes.length - 1 ? (
-                <>Próxima <ChevronRight className="w-5 h-5" /></>
+            {/* Dica */}
+            {!mostrarResultado && questao.dica && (
+              <div>
+                {mostrarDica ? (
+                  <div className="feedback-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)', border: '1px dashed var(--border-default)' }}>
+                    <div className="flex items-center gap-1 mb-0.5">
+                      <Lightbulb className="icon-chromebook" style={{ color: accentColor }} />
+                      <span className="text-[10px] font-medium" style={{ color: accentColor }}>Dica</span>
+                    </div>
+                    <p style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
+                  </div>
+                ) : (
+                  <button
+                    onClick={toggleDica}
+                    className="w-full py-1.5 lg:py-1 px-2 rounded-lg flex items-center justify-center gap-1.5 text-xs lg:text-[11px]"
+                    style={{ background: 'var(--bg-surface)', border: '1px dashed var(--border-default)', color: 'var(--text-muted)' }}
+                  >
+                    <Lightbulb className="w-3.5 h-3.5 lg:w-3 lg:h-3" />
+                    <span>Ver dica (-5 pts)</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Alternativas */}
+            <div className="space-chromebook">
+              {Object.entries(questao.alternativas)
+                .filter(([, texto]) => texto)
+                .map(([letra, texto]) => {
+                  const isCurrentSelection = selecionada === letra
+                  const isSubmitted = respostaSelecionada === letra
+                  const isCorrect = letra === questao.resposta_correta
+                  const showResult = mostrarResultado
+
+                  let style: React.CSSProperties = { background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }
+
+                  if (showResult) {
+                    if (isCorrect) {
+                      style = { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
+                    } else if (isSubmitted) {
+                      style = { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
+                    } else {
+                      style = { ...style, opacity: 0.5 }
+                    }
+                  } else if (isCurrentSelection) {
+                    style = {
+                      background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                      border: `2px solid ${accentColor}`
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={letra}
+                      onClick={() => !mostrarResultado && !respondendo && setSelecionada(letra)}
+                      disabled={mostrarResultado || respondendo}
+                      className="alternativa-chromebook"
+                      style={style}
+                    >
+                      <span
+                        className="alternativa-letra-compact"
+                        style={{
+                          background: showResult && isCorrect
+                            ? 'var(--success)'
+                            : showResult && isSubmitted
+                              ? 'var(--error)'
+                              : isCurrentSelection
+                                ? accentColor
+                                : 'var(--bg-elevated)',
+                          color: (showResult && (isCorrect || isSubmitted)) || isCurrentSelection
+                            ? isFisica ? '#000' : '#fff'
+                            : 'var(--text-muted)',
+                        }}
+                      >
+                        {showResult && isCorrect ? (
+                          <CheckCircle className="w-3.5 h-3.5" />
+                        ) : showResult && isSubmitted ? (
+                          <XCircle className="w-3.5 h-3.5" />
+                        ) : (
+                          letra
+                        )}
+                      </span>
+                      <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
+                        {formatarFormula(texto as string)}
+                      </span>
+                    </button>
+                  )
+                })}
+            </div>
+
+            {/* Feedback */}
+            {mostrarResultado && (
+              <div
+                className="feedback-chromebook flex items-center gap-2"
+                style={{
+                  background: acertou ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  border: `1px solid ${acertou ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                }}
+              >
+                <div
+                  className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
+                  style={{ background: acertou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                >
+                  {acertou ? <CheckCircle className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="font-semibold text-sm lg:text-xs" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>
+                    {acertou ? 'Correto!' : 'Incorreto'}
+                  </span>
+                  {questao.feedback && (
+                    <p className="text-xs lg:text-[11px] mt-0.5 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                      {formatarFormula(questao.feedback)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Botões de ação */}
+            <div className="flex gap-2 mt-2 lg:mt-1.5">
+              {mostrarResultado ? (
+                <>
+                  <Button variant="secondary" onClick={() => router.push(`/${componente}/trilhas`)} className="flex-1 btn-chromebook">
+                    Menu
+                  </Button>
+                  <Button
+                    variant={isFisica ? 'fisica' : 'matematica'}
+                    onClick={proximaQuestao}
+                    className="flex-1 btn-chromebook"
+                    rightIcon={questaoAtual < questoes.length - 1 ? undefined : <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}
+                  >
+                    {questaoAtual < questoes.length - 1 ? 'Próxima' : 'Finalizar'}
+                  </Button>
+                </>
               ) : (
-                <>Finalizar <Trophy className="w-5 h-5" /></>
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
+                  onClick={handleConfirmar}
+                  disabled={!selecionada || respondendo}
+                  loading={respondendo}
+                  className="w-full btn-chromebook"
+                >
+                  {selecionada ? 'Confirmar' : 'Selecione'}
+                </Button>
               )}
-            </button>
+            </div>
           </div>
-        )}
+        </div>
       </main>
 
       <BottomNav componente={componente} />
@@ -562,24 +623,22 @@ export default function TrilhasEstudarPage() {
 
             <div className="space-y-2">
               {resultadoSemana.semanaResetada && (
-                <button
+                <Button
+                  variant={isFisica ? 'fisica' : 'matematica'}
                   onClick={reiniciarSemana}
-                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                  style={{ background: accentColor, color: textOnAccent }}
+                  className="w-full"
+                  leftIcon={<RefreshCw className="w-4 h-4" />}
                 >
-                  <RefreshCw className="w-4 h-4" /> Tentar Novamente
-                </button>
+                  Tentar Novamente
+                </Button>
               )}
-              <button
+              <Button
+                variant={resultadoSemana.semanaResetada ? 'secondary' : (isFisica ? 'fisica' : 'matematica')}
                 onClick={() => router.push(`/${componente}/trilhas`)}
-                className="w-full py-3 rounded-xl font-semibold transition-all active:scale-[0.98]"
-                style={{
-                  background: resultadoSemana.semanaResetada ? 'var(--bg-elevated)' : accentColor,
-                  color: resultadoSemana.semanaResetada ? 'var(--text-secondary)' : textOnAccent
-                }}
+                className="w-full"
               >
                 {resultadoSemana.avancou ? 'Continuar' : 'Ver Trilhas'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  ArrowLeft,
   Map,
   Heart,
   Download,
@@ -18,6 +17,7 @@ import {
   ZoomOut,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import BackButton from '@/components/ui/BackButton'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
@@ -264,13 +264,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push(`/${componente}/menu`)}
-                className="p-2 rounded-lg"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
+              <BackButton href={`/${componente}/menu`} />
               <div>
                 <h1 className="font-display font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                   <Map className="w-5 h-5" style={{ color: corPrimaria }} />

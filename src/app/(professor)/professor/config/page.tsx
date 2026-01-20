@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  ArrowLeft,
   Settings,
   Key,
   Shield,
@@ -17,6 +16,7 @@ import {
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import BackButton from '@/components/ui/BackButton'
 import Loading from '@/components/ui/Loading'
 import { PONTUACAO } from '@/types'
 
@@ -117,13 +117,9 @@ export default function ConfigProfessorPage() {
       {/* Header */}
       <header className="bg-white border-b border-border px-4 py-6">
         <div className="max-w-4xl mx-auto">
-          <button
-            onClick={() => router.push('/professor/dashboard')}
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors mb-4"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span className="text-body">Voltar ao Dashboard</span>
-          </button>
+          <div className="mb-4">
+            <BackButton href="/professor/dashboard" showLabel label="Voltar ao Dashboard" />
+          </div>
           <div className="flex items-center gap-3">
             <div className="icon-box-cyan w-12 h-12">
               <Settings className="w-6 h-6" />
