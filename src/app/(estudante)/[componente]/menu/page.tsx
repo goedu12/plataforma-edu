@@ -38,6 +38,7 @@ interface MenuItem {
   description: string
   isNew?: boolean
   isComingSoon?: boolean
+  badgeText?: string
 }
 
 export default function MenuComponentePage() {
@@ -112,13 +113,13 @@ export default function MenuComponentePage() {
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
-    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Teste' },
-    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Teste' },
+    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Quiz rápido', badgeText: 'TESTE' },
+    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', badgeText: 'TESTE' },
   ]
 
   // Simulado Enem apenas para 3ª série do Ensino Médio
   const menuENEM: MenuItem[] = (usuario.nivel === 'EM' && usuario.ano === 3)
-    ? [{ icon: FileText, label: 'Enem', href: `/${componente}/simulado-enem`, description: 'Teste' }]
+    ? [{ icon: FileText, label: 'Enem', href: `/${componente}/simulado-enem`, description: 'Simulado', badgeText: 'TESTE' }]
     : []
 
   const menuItemsFim: MenuItem[] = [
@@ -280,6 +281,15 @@ export default function MenuComponentePage() {
                   style={{ background: 'var(--color-accent)', color: '#fff' }}
                 >
                   NOVO
+                </span>
+              )}
+              {/* Badge personalizado */}
+              {item.badgeText && (
+                <span
+                  className="absolute -top-1.5 -right-1.5 px-2 py-0.5 text-2xs font-bold rounded-full"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}
+                >
+                  {item.badgeText}
                 </span>
               )}
               {/* Badge EM BREVE */}
