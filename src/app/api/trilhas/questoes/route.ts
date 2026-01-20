@@ -66,10 +66,10 @@ export async function GET(request: NextRequest) {
     const numAlternativas = getNumAlternativasPorSerie(serie)
     const supabase = getSupabaseAdmin()
 
-    // Verificar trilha ativa
+    // Verificar trilha ativa - incluindo o campo componente
     const { data: trilhaAtiva } = await supabase
       .from('usuario_trilha')
-      .select('trilha_id, semana_atual')
+      .select('trilha_id, semana_atual, componente')
       .eq('usuario_id', sessao.userId)
       .eq('serie', serie)
       .eq('ativa', true)
@@ -85,6 +85,8 @@ export async function GET(request: NextRequest) {
 
     const semanaAtual = semana ? parseInt(semana) : trilhaAtiva.semana_atual
     const trilhaId = trilhaAtiva.trilha_id
+    // Usar o componente da trilha do usuário (se definido) ou inferir da série
+    const componenteTrilha: 'matematica' | 'fisica' = (trilhaAtiva.componente as 'matematica' | 'fisica') || (ehEF ? 'matematica' : 'fisica')
 
     // Buscar progresso semanal
     const { data: progressoSemanal } = await supabase
@@ -110,7 +112,7 @@ export async function GET(request: NextRequest) {
           percentual: Math.round((progressoSemanal.questoes_corretas / 5) * 100),
           semana_completa: true
         },
-        serie_info: { serie, nivel_ensino: ehEF ? 'EF' : 'EM', componente: ehEF ? 'matematica' : 'fisica', num_alternativas: numAlternativas }
+        serie_info: { serie, nivel_ensino: ehEF ? 'EF' : 'EM', componente: componenteTrilha, num_alternativas: numAlternativas }
       })
     }
 
@@ -122,7 +124,7 @@ export async function GET(request: NextRequest) {
         sucesso: true,
         questoes: [],
         progresso: { respondidas: 5, corretas: progressoSemanal?.questoes_corretas || 0, total: 5, questoes_semana: 5, questoes_respondidas: 5, percentual: Math.round(((progressoSemanal?.questoes_corretas || 0) / 5) * 100), semana_completa: true },
-        serie_info: { serie, nivel_ensino: ehEF ? 'EF' : 'EM', componente: ehEF ? 'matematica' : 'fisica', num_alternativas: numAlternativas }
+        serie_info: { serie, nivel_ensino: ehEF ? 'EF' : 'EM', componente: componenteTrilha, num_alternativas: numAlternativas }
       })
     }
 
@@ -186,14 +188,15 @@ export async function GET(request: NextRequest) {
       geracaoEmAndamento.add(chaveGeracao)
 
       try {
-        console.log(`[Gemini] Gerando ${questoesFaltando} questões para ${serie} semana ${semanaAtual}...`)
+        console.log(`[Gemini] Gerando ${questoesFaltando} questões de ${componenteTrilha} para ${serie} semana ${semanaAtual}...`)
 
         const questoesGeradas = await gerarQuestoesParaUsuario(
           serie,
           semanaAtual,
           questoesFaltando,
           sessao.userId,
-          trilhaId
+          trilhaId,
+          componenteTrilha
         )
 
         if (questoesGeradas && questoesGeradas.length > 0) {
@@ -250,7 +253,7 @@ export async function GET(request: NextRequest) {
       serie_info: {
         serie,
         nivel_ensino: ehEF ? 'EF' : 'EM',
-        componente: ehEF ? 'matematica' : 'fisica',
+        componente: componenteTrilha,
         num_alternativas: numAlternativas
       },
       fonte: questoesParaUsar.length === questoesFaltando ? 'pool' : 'gerado'
