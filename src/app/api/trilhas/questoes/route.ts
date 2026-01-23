@@ -85,8 +85,13 @@ export async function GET(request: NextRequest) {
 
     const semanaAtual = semana ? parseInt(semana) : trilhaAtiva.semana_atual
     const trilhaId = trilhaAtiva.trilha_id
-    // Usar o componente da trilha do usuário (se definido) ou inferir da série
-    const componenteTrilha: 'matematica' | 'fisica' = (trilhaAtiva.componente as 'matematica' | 'fisica') || (ehEF ? 'matematica' : 'fisica')
+    // Usar o componente da trilha do usuário (se definido) ou usar o componente matriculado do usuário
+    // Prioridade: 1) componente da trilha, 2) componente do usuário, 3) fallback por nível
+    const componenteTrilha: 'matematica' | 'fisica' =
+      (trilhaAtiva.componente as 'matematica' | 'fisica') ||
+      (sessao.componentes.includes('matematica') ? 'matematica' :
+       sessao.componentes.includes('fisica') ? 'fisica' :
+       (ehEF ? 'matematica' : 'fisica'))
 
     // Buscar progresso semanal
     const { data: progressoSemanal } = await supabase
