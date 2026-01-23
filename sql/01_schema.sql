@@ -79,6 +79,7 @@ CREATE TABLE questoes (
     -- Classificação
     componente VARCHAR(15) NOT NULL CHECK (componente IN ('fisica', 'matematica')),
     ano INTEGER NOT NULL CHECK (ano BETWEEN 1 AND 9),
+    bimestre INTEGER CHECK (bimestre IS NULL OR bimestre BETWEEN 1 AND 4),
     tema VARCHAR(100) NOT NULL,
     subtema VARCHAR(100),
     dificuldade VARCHAR(10) DEFAULT 'medio' CHECK (dificuldade IN ('facil', 'medio', 'dificil')),
@@ -89,7 +90,8 @@ CREATE TABLE questoes (
     alternativa_b TEXT NOT NULL,
     alternativa_c TEXT NOT NULL,
     alternativa_d TEXT NOT NULL,
-    resposta_correta CHAR(1) NOT NULL CHECK (resposta_correta IN ('A', 'B', 'C', 'D')),
+    alternativa_e TEXT,
+    resposta_correta CHAR(1) NOT NULL CHECK (resposta_correta IN ('A', 'B', 'C', 'D', 'E')),
     explicacao TEXT NOT NULL,
     dica TEXT,
 
@@ -101,9 +103,11 @@ CREATE TABLE questoes (
 -- Índices para performance
 CREATE INDEX idx_questoes_componente ON questoes(componente);
 CREATE INDEX idx_questoes_ano ON questoes(ano);
+CREATE INDEX idx_questoes_bimestre ON questoes(bimestre);
 CREATE INDEX idx_questoes_tema ON questoes(tema);
 CREATE INDEX idx_questoes_status ON questoes(status);
 CREATE INDEX idx_questoes_dificuldade ON questoes(dificuldade);
+CREATE INDEX idx_questoes_componente_ano_bimestre ON questoes(componente, ano, bimestre) WHERE status = 'ativa';
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- TABELA: respostas
@@ -114,7 +118,7 @@ CREATE TABLE respostas (
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     questao_id UUID NOT NULL REFERENCES questoes(id) ON DELETE CASCADE,
     componente VARCHAR(15) NOT NULL CHECK (componente IN ('fisica', 'matematica')),
-    resposta_dada CHAR(1) NOT NULL CHECK (resposta_dada IN ('A', 'B', 'C', 'D')),
+    resposta_dada CHAR(1) NOT NULL CHECK (resposta_dada IN ('A', 'B', 'C', 'D', 'E')),
     correta BOOLEAN NOT NULL,
     tempo_segundos INTEGER NOT NULL DEFAULT 0,
     usou_dica BOOLEAN DEFAULT FALSE,
