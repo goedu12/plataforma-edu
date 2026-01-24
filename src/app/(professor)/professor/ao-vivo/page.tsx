@@ -10,25 +10,22 @@ import {
   Clock,
   Zap,
   BookOpen,
-  MessageCircle,
   Target,
   TrendingUp,
+  TrendingDown,
   RefreshCw,
-  Filter,
-  Atom,
-  Calculator,
   Radio,
-  Eye,
   Award,
   UserX,
-  Percent,
   Timer,
   AlertTriangle,
-  ChevronDown,
   Layers,
   Brain,
   PlayCircle,
   PauseCircle,
+  HelpCircle,
+  Eye,
+  Sparkles,
 } from 'lucide-react'
 import type { Componente } from '@/types'
 
@@ -131,7 +128,6 @@ export default function DashboardAoVivoPage() {
   // Filtros
   const [turmaFiltro, setTurmaFiltro] = useState<string>('')
   const [componenteFiltro, setComponenteFiltro] = useState<Componente | ''>('')
-  const [showFiltros, setShowFiltros] = useState(false)
   const [periodoMinutos, setPeriodoMinutos] = useState(60)
 
   // Auto-refresh
@@ -209,16 +205,14 @@ export default function DashboardAoVivoPage() {
     return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
-  // Cor do status do aluno
-  const getStatusColor = (tipo: string) => {
-    switch (tipo) {
-      case 'estudo': return '#22c55e'
-      case 'desafio': return '#f59e0b'
-      case 'tutor': return '#3b82f6'
-      case 'revisao':
-      case 'flashcard': return '#a855f7'
-      default: return '#6b7280'
-    }
+  // Configuração de cores por tipo de atividade
+  const atividadeConfig: Record<string, { cor: string; label: string; icon: React.ReactNode }> = {
+    estudo: { cor: '#22c55e', label: 'Estudando', icon: <BookOpen className="w-3 h-3" /> },
+    desafio: { cor: '#f59e0b', label: 'Desafio', icon: <Zap className="w-3 h-3" /> },
+    tutor: { cor: '#3b82f6', label: 'Tutor IA', icon: <Brain className="w-3 h-3" /> },
+    revisao: { cor: '#a855f7', label: 'Revisao', icon: <Layers className="w-3 h-3" /> },
+    flashcard: { cor: '#a855f7', label: 'Flashcard', icon: <Layers className="w-3 h-3" /> },
+    mapa: { cor: '#06b6d4', label: 'Mapa', icon: <Eye className="w-3 h-3" /> },
   }
 
   // Cor de fundo do avatar baseada no componente
@@ -226,10 +220,35 @@ export default function DashboardAoVivoPage() {
     return componente === 'fisica' ? '#22c55e' : '#8b5cf6'
   }
 
+  // Iniciais do nome
+  const getIniciais = (nome: string) => {
+    return nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  }
+
   if (loading) {
     return (
-      <div className="w-[1280px] h-[720px] mx-auto flex items-center justify-center" style={{ background: '#1e3a5f' }}>
-        <div className="text-white text-xl">Carregando dashboard...</div>
+      <div className="w-[1280px] h-[720px] mx-auto flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #1e3a5f 0%, #2d4a6f 100%)' }}>
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-4" />
+          <p className="text-white text-xl">Carregando dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (erro) {
+    return (
+      <div className="w-[1280px] h-[720px] mx-auto flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #1e3a5f 0%, #2d4a6f 100%)' }}>
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+          <p className="text-white text-xl mb-4">{erro}</p>
+          <button
+            onClick={buscarDados}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+          >
+            Tentar novamente
+          </button>
+        </div>
       </div>
     )
   }
@@ -240,10 +259,13 @@ export default function DashboardAoVivoPage() {
   const atividades = dados?.atividades || []
   const temasComDificuldade = stats?.temas_com_dificuldade || []
 
-  // Alunos com problemas (erros seguidos)
+  // Alunos precisando de ajuda (taxa < 40% com 5+ questoes)
+  const alunosPrecisandoAjuda = alunosAtivos.filter(a => a.questoes_sessao >= 5 && a.taxa_acerto < 40)
+
+  // Alertas recentes (erros)
   const alertas = atividades
     .filter(a => a.tipo === 'resposta' && !a.detalhes.correta)
-    .slice(0, 5)
+    .slice(0, 6)
 
   return (
     <div
@@ -256,279 +278,336 @@ export default function DashboardAoVivoPage() {
       {/* ═══════════════════════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════════════════════ */}
-      <header className="h-[60px] px-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.2)' }}>
+      <header className="h-[56px] px-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.3)' }}>
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-white flex items-center gap-2">
-            <Radio className="w-5 h-5 text-green-400 animate-pulse" />
-            Painel da Turma
-            {turmaFiltro && <span className="text-green-400">- {turmaFiltro}</span>}
-          </h1>
-          <span className="text-white/60 text-sm">
-            {componenteFiltro === 'fisica' ? 'Física' : componenteFiltro === 'matematica' ? 'Matemática' : 'Todos os Componentes'}
-            {' | '}
-            {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Radio className="w-6 h-6 text-green-400" />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping" />
+            </div>
+            <h1 className="text-lg font-bold text-white">
+              Monitoramento em Tempo Real
+            </h1>
+          </div>
+          {turmaFiltro && (
+            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-sm font-medium">
+              Turma: {turmaFiltro}
+            </span>
+          )}
+          <span className="text-white/50 text-sm">
+            {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
           {/* Filtro de Turma */}
-          <select
-            value={turmaFiltro}
-            onChange={(e) => setTurmaFiltro(e.target.value)}
-            className="px-3 py-1.5 rounded text-sm bg-white/10 text-white border border-white/20"
-          >
-            <option value="">Todas as Turmas</option>
-            {dados?.turmas_disponiveis.map(t => (
-              <option key={t} value={t}>{t}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              value={turmaFiltro}
+              onChange={(e) => setTurmaFiltro(e.target.value)}
+              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-white/10 text-white border border-white/20 cursor-pointer hover:bg-white/20 transition"
+              style={{ WebkitAppearance: 'none' }}
+            >
+              <option value="" className="bg-gray-800 text-white">Todas as Turmas</option>
+              {dados?.turmas_disponiveis.map(t => (
+                <option key={t} value={t} className="bg-gray-800 text-white">{t}</option>
+              ))}
+            </select>
+            <Users className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+          </div>
 
           {/* Filtro de Componente */}
-          <select
-            value={componenteFiltro}
-            onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
-            className="px-3 py-1.5 rounded text-sm bg-white/10 text-white border border-white/20"
-          >
-            <option value="">Todos</option>
-            <option value="fisica">Física</option>
-            <option value="matematica">Matemática</option>
-          </select>
+          <div className="relative">
+            <select
+              value={componenteFiltro}
+              onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
+              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-white/10 text-white border border-white/20 cursor-pointer hover:bg-white/20 transition"
+              style={{ WebkitAppearance: 'none' }}
+            >
+              <option value="" className="bg-gray-800 text-white">Todos</option>
+              <option value="fisica" className="bg-gray-800 text-white">Fisica</option>
+              <option value="matematica" className="bg-gray-800 text-white">Matematica</option>
+            </select>
+            <BookOpen className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+          </div>
 
           {/* Auto Refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`p-2 rounded ${autoRefresh ? 'bg-green-500/30 text-green-400' : 'bg-white/10 text-white/60'}`}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded transition ${autoRefresh ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/10 text-white/60 border border-white/20'}`}
+            title={autoRefresh ? 'Pausar atualizacao' : 'Retomar atualizacao'}
           >
-            {autoRefresh ? <PlayCircle className="w-5 h-5" /> : <PauseCircle className="w-5 h-5" />}
+            {autoRefresh ? <PlayCircle className="w-4 h-4" /> : <PauseCircle className="w-4 h-4" />}
+            <span className="text-sm">{autoRefresh ? 'AO VIVO' : 'PAUSADO'}</span>
           </button>
 
           {/* Contador de refresh */}
           {autoRefresh && (
-            <div className="w-8 h-8 rounded-full border-2 border-green-400 flex items-center justify-center">
-              <span className="text-xs text-green-400 font-bold">{intervalo - contadorRefresh}</span>
+            <div
+              className="w-10 h-10 rounded-full border-2 border-green-400 flex items-center justify-center relative"
+              style={{
+                background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)`
+              }}
+            >
+              <div className="w-8 h-8 rounded-full bg-[#1e3a5f] flex items-center justify-center">
+                <span className="text-xs text-green-400 font-bold">{intervalo - contadorRefresh}</span>
+              </div>
             </div>
           )}
+
+          {/* Refresh Manual */}
+          <button
+            onClick={buscarDados}
+            className="p-2 rounded bg-white/10 text-white/70 hover:bg-white/20 hover:text-white transition"
+            title="Atualizar agora"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
       </header>
 
       {/* ═══════════════════════════════════════════════════════════════════
-          STATS BAR
+          STATS BAR - 6 Metricas Principais
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="h-[80px] px-4 py-2 grid grid-cols-7 gap-2">
+      <div className="h-[72px] px-4 py-2 grid grid-cols-6 gap-2">
         <StatBox
-          label="Online Agora"
+          label="Participacao"
           value={`${stats?.alunos_ativos_agora || 0}/${stats?.total_alunos_turma || 0}`}
+          sublabel={`${stats?.taxa_participacao || 0}%`}
           color="#22c55e"
           icon={<Users className="w-5 h-5" />}
         />
         <StatBox
-          label="Ativos Agora"
-          value={stats?.alunos_ativos_agora || 0}
-          color="#22c55e"
-          trend="up"
-          icon={<Activity className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Ociosos"
-          value={stats?.alunos_inativos || 0}
-          color={stats?.alunos_inativos && stats.alunos_inativos > 0 ? '#ef4444' : '#22c55e'}
-          icon={<Clock className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Progresso Médio"
-          value={`${stats?.taxa_participacao || 0}%`}
-          color="#3b82f6"
-          icon={<Target className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Questões Respondidas"
+          label="Questoes Respondidas"
           value={stats?.questoes_periodo_total || 0}
+          sublabel={`${stats?.questoes_ultimos_5min || 0} nos ultimos 5min`}
           color="#8b5cf6"
-          trend="up"
           icon={<BookOpen className="w-5 h-5" />}
         />
         <StatBox
-          label="Acurácia da Turma"
+          label="Taxa de Acerto"
           value={`${stats?.taxa_acerto_tempo_real || 0}%`}
           color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'}
-          trend={stats?.tendencia_acerto === 'subindo' ? 'up' : stats?.tendencia_acerto === 'descendo' ? 'down' : undefined}
-          icon={<CheckCircle className="w-5 h-5" />}
+          trend={stats?.tendencia_acerto}
+          icon={<Target className="w-5 h-5" />}
         />
         <StatBox
-          label="Tempo Médio"
+          label="Tempo Medio"
           value={stats?.tempo_medio_segundos ? `${stats.tempo_medio_segundos}s` : '-'}
           color="#06b6d4"
           icon={<Timer className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Usando Tutor IA"
+          value={stats?.usando_tutor || 0}
+          color="#3b82f6"
+          icon={<Brain className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Precisam Ajuda"
+          value={stats?.alunos_precisando_ajuda || 0}
+          color={stats?.alunos_precisando_ajuda && stats.alunos_precisando_ajuda > 0 ? '#ef4444' : '#22c55e'}
+          icon={<HelpCircle className="w-5 h-5" />}
+          alert={stats?.alunos_precisando_ajuda ? stats.alunos_precisando_ajuda > 0 : false}
         />
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════
           MAIN CONTENT
           ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 px-4 pb-4 grid grid-cols-4 gap-3 overflow-hidden">
+      <div className="flex-1 px-4 pb-3 grid grid-cols-4 gap-3 overflow-hidden">
 
-        {/* COLUNA 1-3: Conteúdo Principal */}
+        {/* COLUNA 1-3: Conteudo Principal */}
         <div className="col-span-3 flex flex-col gap-3 overflow-hidden">
 
           {/* Status dos Alunos - Grid de Avatares */}
-          <div className="bg-white/5 rounded-xl p-3 flex-1 overflow-hidden">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-white/5 rounded-xl p-3 flex-1 overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between mb-2">
               <h2 className="text-white font-semibold flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-400" />
-                Status dos Alunos
+                <Activity className="w-4 h-4 text-blue-400" />
+                Alunos Ativos
+                <span className="text-white/50 font-normal text-sm">({alunosAtivos.length})</span>
               </h2>
-              <span className="text-white/50 text-xs">
-                {alunosAtivos.length} ativos | {alunosInativos.length} inativos
-              </span>
+              {/* Legenda */}
+              <div className="flex items-center gap-3 text-[10px]">
+                {Object.entries(atividadeConfig).slice(0, 4).map(([key, cfg]) => (
+                  <div key={key} className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full" style={{ background: cfg.cor }} />
+                    <span className="text-white/50">{cfg.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-10 gap-2 overflow-y-auto max-h-[180px]">
-              {alunosAtivos.map((aluno) => (
-                <div
-                  key={aluno.id}
-                  className="flex flex-col items-center group cursor-pointer"
-                  title={`${aluno.nome}\n${aluno.turma} | ${aluno.questoes_sessao}q | ${aluno.taxa_acerto}%`}
-                >
-                  <div className="relative">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                      style={{ background: getAvatarBg(aluno.componente) }}
-                    >
-                      {aluno.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                    </div>
-                    {/* Status indicator */}
-                    <div
-                      className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#1e3a5f] flex items-center justify-center"
-                      style={{ background: getStatusColor(aluno.tipo_atividade) }}
-                    >
-                      {aluno.tipo_atividade === 'estudo' && <CheckCircle className="w-2.5 h-2.5 text-white" />}
-                      {aluno.tipo_atividade === 'desafio' && <Zap className="w-2.5 h-2.5 text-white" />}
-                      {aluno.tipo_atividade === 'tutor' && <MessageCircle className="w-2.5 h-2.5 text-white" />}
-                      {(aluno.tipo_atividade === 'revisao' || aluno.tipo_atividade === 'flashcard') && <Layers className="w-2.5 h-2.5 text-white" />}
-                    </div>
-                    {/* Taxa de acerto badge */}
-                    <div
-                      className="absolute -top-1 -right-1 px-1 rounded text-[9px] font-bold"
-                      style={{
-                        background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444',
-                        color: 'white'
-                      }}
-                    >
-                      {aluno.taxa_acerto}%
-                    </div>
-                  </div>
-                  <span className="text-white/70 text-[10px] mt-1 truncate w-full text-center">
-                    {aluno.nome.split(' ')[0]}
-                  </span>
+            <div className="flex-1 overflow-y-auto">
+              {alunosAtivos.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-white/50">
+                  <UserX className="w-12 h-12 mb-2 opacity-50" />
+                  <p>Nenhum aluno ativo no momento</p>
+                  <p className="text-sm">Selecione uma turma ou aguarde atividade</p>
                 </div>
-              ))}
+              ) : (
+                <div className="grid grid-cols-12 gap-2">
+                  {alunosAtivos.map((aluno) => {
+                    const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
+                    const precisaAjuda = aluno.questoes_sessao >= 5 && aluno.taxa_acerto < 40
 
-              {/* Alunos inativos */}
-              {alunosInativos.slice(0, 10).map((aluno) => (
-                <div
-                  key={aluno.id}
-                  className="flex flex-col items-center opacity-40"
-                  title={`${aluno.nome} - INATIVO`}
-                >
-                  <div className="relative">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gray-600"
-                    >
-                      {aluno.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#1e3a5f] bg-gray-500 flex items-center justify-center">
-                      <UserX className="w-2.5 h-2.5 text-white" />
-                    </div>
-                  </div>
-                  <span className="text-white/40 text-[10px] mt-1 truncate w-full text-center">
-                    {aluno.nome.split(' ')[0]}
-                  </span>
+                    return (
+                      <div
+                        key={aluno.id}
+                        className={`flex flex-col items-center group cursor-pointer transition-transform hover:scale-105 ${precisaAjuda ? 'animate-pulse' : ''}`}
+                        title={`${aluno.nome}\nTurma: ${aluno.turma}\nQuestoes: ${aluno.questoes_sessao}\nAcertos: ${aluno.taxa_acerto}%\nAtividade: ${config.label}`}
+                      >
+                        <div className="relative">
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg"
+                            style={{
+                              background: getAvatarBg(aluno.componente),
+                              boxShadow: precisaAjuda ? '0 0 0 2px #ef4444' : 'none'
+                            }}
+                          >
+                            {getIniciais(aluno.nome)}
+                          </div>
+                          {/* Status indicator */}
+                          <div
+                            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#1e3a5f] flex items-center justify-center"
+                            style={{ background: config.cor }}
+                          >
+                            {config.icon}
+                          </div>
+                          {/* Taxa de acerto badge */}
+                          <div
+                            className="absolute -top-1 -left-1 px-1 rounded text-[8px] font-bold"
+                            style={{
+                              background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444',
+                              color: 'white'
+                            }}
+                          >
+                            {aluno.taxa_acerto}%
+                          </div>
+                        </div>
+                        <span className="text-white/70 text-[9px] mt-1 truncate w-full text-center leading-tight">
+                          {aluno.nome.split(' ')[0]}
+                        </span>
+                      </div>
+                    )
+                  })}
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
-          {/* Linha inferior: Questões com Dificuldade + Feed de Atividades */}
-          <div className="grid grid-cols-2 gap-3 h-[220px]">
-            {/* Questões com Dificuldade */}
-            <div className="bg-white/5 rounded-xl p-3 overflow-hidden">
-              <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
-                Temas com Dificuldade
+          {/* Linha inferior: Desempenho + Temas com Dificuldade */}
+          <div className="grid grid-cols-2 gap-3 h-[200px]">
+            {/* Tabela de Desempenho */}
+            <div className="bg-white/5 rounded-xl p-3 overflow-hidden flex flex-col">
+              <h2 className="text-white font-semibold flex items-center gap-2 mb-2">
+                <Award className="w-4 h-4 text-yellow-400" />
+                Desempenho na Sessao
               </h2>
-              <div className="space-y-2 overflow-y-auto max-h-[160px]">
-                {temasComDificuldade.length === 0 ? (
-                  <div className="text-center py-4">
-                    <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                    <p className="text-green-400 text-sm">Nenhum tema com dificuldade!</p>
+              <div className="flex-1 overflow-y-auto">
+                {alunosAtivos.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-white/30 text-sm">
+                    Sem dados de desempenho
                   </div>
                 ) : (
-                  temasComDificuldade.map((tema, i) => (
-                    <div key={tema.tema} className="bg-red-500/10 rounded-lg p-2 border border-red-500/30">
-                      <div className="flex items-center justify-between">
-                        <span className="text-white text-sm font-medium">{tema.tema}</span>
-                        <span className="text-red-400 text-sm font-bold">{tema.taxa_erro}% erro</span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex-1 h-1.5 bg-red-900/50 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-red-500 rounded-full"
-                            style={{ width: `${tema.taxa_erro}%` }}
-                          />
-                        </div>
-                        <span className="text-white/50 text-xs">{tema.quantidade}q</span>
-                      </div>
-                    </div>
-                  ))
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-[#2d4a6f]">
+                      <tr className="text-white/50">
+                        <th className="text-left pb-2 pl-1">Aluno</th>
+                        <th className="text-center pb-2">Atividade</th>
+                        <th className="text-center pb-2">Q</th>
+                        <th className="text-center pb-2">Acerto</th>
+                        <th className="text-right pb-2 pr-1">Tempo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {alunosAtivos.slice(0, 10).map((aluno) => {
+                        const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
+                        return (
+                          <tr key={aluno.id} className="border-t border-white/5 hover:bg-white/5">
+                            <td className="py-1 pl-1">
+                              <div className="flex items-center gap-1">
+                                <div
+                                  className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
+                                  style={{ background: getAvatarBg(aluno.componente) }}
+                                >
+                                  {getIniciais(aluno.nome)}
+                                </div>
+                                <span className="text-white truncate max-w-[80px]">
+                                  {aluno.nome.split(' ').slice(0, 2).join(' ')}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-1 text-center">
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium"
+                                style={{
+                                  background: `${config.cor}20`,
+                                  color: config.cor
+                                }}
+                              >
+                                {config.icon}
+                                {config.label}
+                              </span>
+                            </td>
+                            <td className="py-1 text-center text-white/70">{aluno.questoes_sessao}</td>
+                            <td className="py-1 text-center">
+                              <span
+                                className="font-medium"
+                                style={{
+                                  color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444'
+                                }}
+                              >
+                                {aluno.acertos_sessao}/{aluno.questoes_sessao}
+                              </span>
+                            </td>
+                            <td className="py-1 text-right text-white/50 pr-1">
+                              {formatarTempoRelativo(aluno.ultima_atividade)}
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
                 )}
               </div>
             </div>
 
-            {/* Desempenho por Turma */}
-            <div className="bg-white/5 rounded-xl p-3 overflow-hidden">
-              <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-green-400" />
-                Desempenho dos Alunos
+            {/* Temas com Dificuldade */}
+            <div className="bg-white/5 rounded-xl p-3 overflow-hidden flex flex-col">
+              <h2 className="text-white font-semibold flex items-center gap-2 mb-2">
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+                Temas com Dificuldade
               </h2>
-              <div className="overflow-y-auto max-h-[160px]">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="text-white/50">
-                      <th className="text-left pb-2">Aluno</th>
-                      <th className="text-center pb-2">Status</th>
-                      <th className="text-center pb-2">Questões</th>
-                      <th className="text-center pb-2">Acertos</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {alunosAtivos.slice(0, 8).map((aluno) => (
-                      <tr key={aluno.id} className="border-t border-white/10">
-                        <td className="py-1.5 text-white">{aluno.nome.split(' ').slice(0, 2).join(' ')}</td>
-                        <td className="py-1.5 text-center">
-                          <span
-                            className="px-1.5 py-0.5 rounded text-[10px] font-medium"
-                            style={{
-                              background: `${getStatusColor(aluno.tipo_atividade)}20`,
-                              color: getStatusColor(aluno.tipo_atividade)
-                            }}
-                          >
-                            {aluno.tipo_atividade === 'estudo' ? 'Estudando' :
-                             aluno.tipo_atividade === 'desafio' ? 'Desafio' :
-                             aluno.tipo_atividade === 'tutor' ? 'Tutor IA' : 'Revisão'}
-                          </span>
-                        </td>
-                        <td className="py-1.5 text-center text-white/70">{aluno.questoes_sessao}</td>
-                        <td className="py-1.5 text-center">
-                          <span style={{
-                            color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444'
-                          }}>
-                            {aluno.acertos_sessao}/{aluno.questoes_sessao}
-                          </span>
-                        </td>
-                      </tr>
+              <div className="flex-1 overflow-y-auto">
+                {temasComDificuldade.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <CheckCircle className="w-10 h-10 text-green-400 mb-2" />
+                    <p className="text-green-400 text-sm font-medium">Nenhum tema com dificuldade!</p>
+                    <p className="text-white/40 text-xs">Alunos estao indo bem</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {temasComDificuldade.map((tema) => (
+                      <div key={tema.tema} className="bg-red-500/10 rounded-lg p-2 border border-red-500/20">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-white text-sm font-medium truncate flex-1 mr-2">{tema.tema}</span>
+                          <span className="text-red-400 text-sm font-bold whitespace-nowrap">{tema.taxa_erro}% erro</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-red-900/30 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full transition-all"
+                              style={{ width: `${tema.taxa_erro}%` }}
+                            />
+                          </div>
+                          <span className="text-white/40 text-xs">{tema.quantidade} questoes</span>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -537,85 +616,129 @@ export default function DashboardAoVivoPage() {
         {/* COLUNA 4: Alertas e Feed */}
         <div className="col-span-1 flex flex-col gap-3 overflow-hidden">
 
-          {/* Alertas em Tempo Real */}
-          <div className="bg-white/5 rounded-xl p-3 flex-1 overflow-hidden">
-            <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
-              <AlertTriangle className="w-4 h-4 text-yellow-400" />
-              Alertas em Tempo Real
+          {/* Alunos Precisando de Ajuda */}
+          {alunosPrecisandoAjuda.length > 0 && (
+            <div className="bg-red-500/10 rounded-xl p-3 border border-red-500/30">
+              <h2 className="text-red-400 font-semibold flex items-center gap-2 mb-2 text-sm">
+                <AlertTriangle className="w-4 h-4" />
+                Precisam de Ajuda ({alunosPrecisandoAjuda.length})
+              </h2>
+              <div className="space-y-1.5 max-h-[100px] overflow-y-auto">
+                {alunosPrecisandoAjuda.slice(0, 4).map((aluno) => (
+                  <div key={aluno.id} className="flex items-center gap-2 p-1.5 bg-red-500/10 rounded">
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+                      style={{ background: getAvatarBg(aluno.componente) }}
+                    >
+                      {getIniciais(aluno.nome)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-xs font-medium truncate">{aluno.nome.split(' ')[0]}</p>
+                      <p className="text-red-400 text-[10px]">{aluno.taxa_acerto}% em {aluno.questoes_sessao} questoes</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Breakdown de Atividades */}
+          <div className="bg-white/5 rounded-xl p-3">
+            <h2 className="text-white font-semibold flex items-center gap-2 mb-2 text-sm">
+              <Sparkles className="w-4 h-4 text-purple-400" />
+              Atividades Agora
             </h2>
-            <div className="space-y-2 overflow-y-auto max-h-[180px]">
-              {alertas.length === 0 ? (
-                <div className="text-center py-4">
-                  <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                  <p className="text-green-400/70 text-xs">Sem alertas</p>
+            <div className="grid grid-cols-2 gap-2">
+              <MiniStat label="Estudando" value={alunosAtivos.filter(a => a.tipo_atividade === 'estudo').length} color="#22c55e" />
+              <MiniStat label="Desafio" value={stats?.fazendo_desafio || 0} color="#f59e0b" />
+              <MiniStat label="Tutor IA" value={stats?.usando_tutor || 0} color="#3b82f6" />
+              <MiniStat label="Revisao" value={stats?.fazendo_revisao || 0} color="#a855f7" />
+            </div>
+          </div>
+
+          {/* Feed de Atividades Recentes */}
+          <div className="bg-white/5 rounded-xl p-3 flex-1 overflow-hidden flex flex-col">
+            <h2 className="text-white font-semibold flex items-center gap-2 mb-2 text-sm">
+              <Activity className="w-4 h-4 text-blue-400" />
+              Feed em Tempo Real
+            </h2>
+            <div className="flex-1 overflow-y-auto space-y-1">
+              {atividades.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-white/30">
+                  <Clock className="w-8 h-8 mb-2 opacity-50" />
+                  <p className="text-xs">Aguardando atividades...</p>
                 </div>
               ) : (
-                alertas.map((alerta) => (
+                atividades.slice(0, 15).map((ativ) => (
                   <div
-                    key={alerta.id}
-                    className="bg-yellow-500/10 rounded-lg p-2 border border-yellow-500/30"
+                    key={ativ.id}
+                    className="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-white/5 transition"
                   >
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                        style={{ background: getAvatarBg(alerta.componente) }}
-                      >
-                        {alerta.usuario_nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white text-xs font-medium truncate">{alerta.usuario_nome.split(' ')[0]}</p>
-                        <p className="text-white/50 text-[10px]">Errou: {alerta.detalhes.tema}</p>
-                      </div>
-                      <span className="text-yellow-400 text-[10px]">{formatarTempoRelativo(alerta.timestamp)}</span>
+                    {ativ.tipo === 'resposta' || ativ.tipo === 'revisao' ? (
+                      ativ.detalhes.correta ? (
+                        <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0" />
+                      ) : (
+                        <XCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
+                      )
+                    ) : ativ.tipo === 'desafio_completo' ? (
+                      <Award className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                    ) : ativ.tipo === 'desafio_iniciado' ? (
+                      <Zap className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                    ) : ativ.tipo === 'tutor' ? (
+                      <Brain className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                    ) : (
+                      <Activity className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <span className="text-white text-[10px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
+                      <span className="text-white/50 text-[10px]">
+                        {' - '}
+                        {ativ.tipo === 'resposta' || ativ.tipo === 'revisao'
+                          ? (ativ.detalhes.correta ? 'acertou' : 'errou')
+                          : ativ.tipo === 'desafio_completo'
+                          ? `completou desafio (${ativ.detalhes.acertos}/${ativ.detalhes.total})`
+                          : ativ.tipo === 'desafio_iniciado'
+                          ? 'iniciou desafio'
+                          : ativ.tipo === 'tutor'
+                          ? 'perguntou ao tutor'
+                          : 'atividade'
+                        }
+                      </span>
                     </div>
+                    <span className="text-white/30 text-[9px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
                   </div>
                 ))
               )}
             </div>
           </div>
 
-          {/* Feed de Atividades Recentes */}
-          <div className="bg-white/5 rounded-xl p-3 h-[220px] overflow-hidden">
-            <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
-              <Activity className="w-4 h-4 text-blue-400" />
-              Atividades Recentes
-            </h2>
-            <div className="space-y-1.5 overflow-y-auto max-h-[170px]">
-              {atividades.slice(0, 10).map((ativ) => (
-                <div
-                  key={ativ.id}
-                  className="flex items-center gap-2 py-1 border-b border-white/5"
-                >
-                  {ativ.tipo === 'resposta' ? (
-                    ativ.detalhes.correta ? (
-                      <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
-                    ) : (
-                      <XCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
-                    )
-                  ) : ativ.tipo === 'desafio_completo' ? (
-                    <Award className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
-                  ) : ativ.tipo === 'tutor' ? (
-                    <Brain className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
-                  ) : (
-                    <Activity className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+          {/* Alunos Inativos (colapsado) */}
+          {alunosInativos.length > 0 && (
+            <div className="bg-white/5 rounded-xl p-2">
+              <div className="flex items-center justify-between">
+                <span className="text-white/50 text-xs flex items-center gap-1">
+                  <UserX className="w-3 h-3" />
+                  Inativos: {alunosInativos.length}
+                </span>
+                <div className="flex -space-x-1">
+                  {alunosInativos.slice(0, 5).map((aluno) => (
+                    <div
+                      key={aluno.id}
+                      className="w-5 h-5 rounded-full bg-gray-600 flex items-center justify-center text-white text-[7px] font-bold border border-[#2d4a6f]"
+                      title={aluno.nome}
+                    >
+                      {getIniciais(aluno.nome)}
+                    </div>
+                  ))}
+                  {alunosInativos.length > 5 && (
+                    <div className="w-5 h-5 rounded-full bg-gray-700 flex items-center justify-center text-white text-[8px] border border-[#2d4a6f]">
+                      +{alunosInativos.length - 5}
+                    </div>
                   )}
-                  <span className="text-white/70 text-[10px] truncate flex-1">
-                    <span className="text-white font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
-                    {' - '}
-                    {ativ.tipo === 'resposta'
-                      ? (ativ.detalhes.correta ? 'acertou' : 'errou')
-                      : ativ.tipo === 'desafio_completo'
-                      ? 'completou desafio'
-                      : ativ.tipo === 'tutor'
-                      ? 'usando tutor'
-                      : 'atividade'
-                    }
-                  </span>
-                  <span className="text-white/30 text-[9px]">{formatarTempoRelativo(ativ.timestamp)}</span>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
@@ -629,29 +752,47 @@ export default function DashboardAoVivoPage() {
 interface StatBoxProps {
   label: string
   value: string | number
+  sublabel?: string
   color: string
   icon: React.ReactNode
-  trend?: 'up' | 'down'
+  trend?: 'subindo' | 'estavel' | 'descendo'
+  alert?: boolean
 }
 
-function StatBox({ label, value, color, icon, trend }: StatBoxProps) {
+function StatBox({ label, value, sublabel, color, icon, trend, alert }: StatBoxProps) {
   return (
     <div
-      className="rounded-lg p-2 flex flex-col justify-center"
+      className={`rounded-lg p-2 flex flex-col justify-center relative overflow-hidden ${alert ? 'animate-pulse' : ''}`}
       style={{
-        background: 'rgba(255,255,255,0.05)',
+        background: alert ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)',
         borderLeft: `3px solid ${color}`
       }}
     >
       <div className="flex items-center gap-2">
-        <div style={{ color }}>{icon}</div>
-        <div className="flex items-center gap-1">
-          <span className="text-2xl font-bold text-white">{value}</span>
-          {trend === 'up' && <TrendingUp className="w-4 h-4 text-green-400" />}
-          {trend === 'down' && <TrendingUp className="w-4 h-4 text-red-400 rotate-180" />}
+        <div style={{ color }} className="flex-shrink-0">{icon}</div>
+        <div className="flex items-center gap-1 flex-1 min-w-0">
+          <span className="text-xl font-bold text-white truncate">{value}</span>
+          {trend === 'subindo' && <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />}
+          {trend === 'descendo' && <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />}
         </div>
       </div>
-      <span className="text-white/50 text-xs mt-0.5">{label}</span>
+      <span className="text-white/50 text-[10px] truncate">{label}</span>
+      {sublabel && <span className="text-white/30 text-[9px] truncate">{sublabel}</span>}
+    </div>
+  )
+}
+
+interface MiniStatProps {
+  label: string
+  value: number
+  color: string
+}
+
+function MiniStat({ label, value, color }: MiniStatProps) {
+  return (
+    <div className="bg-white/5 rounded p-1.5 text-center">
+      <div className="text-lg font-bold" style={{ color }}>{value}</div>
+      <div className="text-white/50 text-[9px]">{label}</div>
     </div>
   )
 }
