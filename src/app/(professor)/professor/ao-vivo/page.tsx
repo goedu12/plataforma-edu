@@ -229,10 +229,10 @@ export default function DashboardAoVivoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #1e3a5f 0%, #2d4a6f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
         <div className="text-center">
           <RefreshCw className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-4" />
-          <p className="text-white text-xl">Carregando dashboard...</p>
+          <p className="text-white text-xl font-medium">Carregando dashboard...</p>
         </div>
       </div>
     )
@@ -240,13 +240,13 @@ export default function DashboardAoVivoPage() {
 
   if (erro) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #1e3a5f 0%, #2d4a6f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
         <div className="text-center">
           <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <p className="text-white text-xl mb-4">{erro}</p>
+          <p className="text-white text-xl mb-4 font-medium">{erro}</p>
           <button
             onClick={buscarDados}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
           >
             Tentar novamente
           </button>
@@ -271,14 +271,14 @@ export default function DashboardAoVivoPage() {
     <div
       className="min-h-screen flex flex-col"
       style={{
-        background: 'linear-gradient(180deg, #1e3a5f 0%, #2d4a6f 100%)',
+        background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}
     >
       {/* ═══════════════════════════════════════════════════════════════════
           HEADER
           ═══════════════════════════════════════════════════════════════════ */}
-      <header className="px-4 py-3 flex flex-wrap items-center justify-between gap-3" style={{ background: 'rgba(0,0,0,0.3)' }}>
+      <header className="px-4 py-3 flex flex-wrap items-center justify-between gap-3" style={{ background: 'rgba(0,0,0,0.5)' }}>
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="relative">
@@ -293,23 +293,23 @@ export default function DashboardAoVivoPage() {
           {/* Info dos Filtros Ativos */}
           <div className="flex items-center gap-2 text-sm">
             {colegioFiltro && (
-              <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded font-medium">
+              <span className="px-2 py-1 bg-purple-600 text-white rounded font-medium shadow">
                 {colegioFiltro}
               </span>
             )}
             {turmaFiltro && (
-              <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded font-medium">
+              <span className="px-2 py-1 bg-green-600 text-white rounded font-medium shadow">
                 {turmaFiltro}
               </span>
             )}
             {componenteFiltro && (
-              <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded font-medium capitalize">
+              <span className="px-2 py-1 bg-blue-600 text-white rounded font-medium capitalize shadow">
                 {componenteFiltro}
               </span>
             )}
           </div>
 
-          <span className="text-white/50 text-sm">
+          <span className="text-white/80 text-sm font-medium">
             {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
           </span>
         </div>
@@ -324,15 +324,15 @@ export default function DashboardAoVivoPage() {
                   setColegioFiltro(e.target.value)
                   setTurmaFiltro('') // Reset turma quando muda colegio
                 }}
-                className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-white/10 text-white border border-white/20 cursor-pointer hover:bg-white/20 transition min-w-[160px]"
+                className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-slate-700 text-white border border-slate-500 cursor-pointer hover:bg-slate-600 transition min-w-[160px] font-medium"
                 style={{ WebkitAppearance: 'none' }}
               >
-                <option value="" className="bg-gray-800 text-white">Todos os Colegios</option>
+                <option value="" className="bg-slate-700 text-white">Todos os Colegios</option>
                 {dados.colegios_disponiveis.map(c => (
-                  <option key={c} value={c} className="bg-gray-800 text-white">{c}</option>
+                  <option key={c} value={c} className="bg-slate-700 text-white">{c}</option>
                 ))}
               </select>
-              <Building2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+              <Building2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
             </div>
           )}
 
@@ -341,15 +341,15 @@ export default function DashboardAoVivoPage() {
             <select
               value={turmaFiltro}
               onChange={(e) => setTurmaFiltro(e.target.value)}
-              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-white/10 text-white border border-white/20 cursor-pointer hover:bg-white/20 transition min-w-[140px]"
+              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-slate-700 text-white border border-slate-500 cursor-pointer hover:bg-slate-600 transition min-w-[140px] font-medium"
               style={{ WebkitAppearance: 'none' }}
             >
-              <option value="" className="bg-gray-800 text-white">Todas as Turmas</option>
+              <option value="" className="bg-slate-700 text-white">Todas as Turmas</option>
               {turmasVisiveis.map(t => (
-                <option key={t} value={t} className="bg-gray-800 text-white">{t}</option>
+                <option key={t} value={t} className="bg-slate-700 text-white">{t}</option>
               ))}
             </select>
-            <Users className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+            <Users className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
           </div>
 
           {/* Filtro de Componente */}
@@ -357,14 +357,14 @@ export default function DashboardAoVivoPage() {
             <select
               value={componenteFiltro}
               onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
-              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-white/10 text-white border border-white/20 cursor-pointer hover:bg-white/20 transition"
+              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-slate-700 text-white border border-slate-500 cursor-pointer hover:bg-slate-600 transition font-medium"
               style={{ WebkitAppearance: 'none' }}
             >
-              <option value="" className="bg-gray-800 text-white">Todos</option>
-              <option value="fisica" className="bg-gray-800 text-white">Fisica</option>
-              <option value="matematica" className="bg-gray-800 text-white">Matematica</option>
+              <option value="" className="bg-slate-700 text-white">Todos</option>
+              <option value="fisica" className="bg-slate-700 text-white">Fisica</option>
+              <option value="matematica" className="bg-slate-700 text-white">Matematica</option>
             </select>
-            <BookOpen className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/50 pointer-events-none" />
+            <BookOpen className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
           </div>
 
           {/* Auto Refresh Toggle */}
@@ -384,7 +384,7 @@ export default function DashboardAoVivoPage() {
                 background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)`
               }}
             >
-              <div className="w-6 h-6 rounded-full bg-[#1e3a5f] flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center">
                 <span className="text-[10px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
               </div>
             </div>
@@ -451,12 +451,12 @@ export default function DashboardAoVivoPage() {
         <div className="lg:col-span-3 flex flex-col gap-4 overflow-hidden">
 
           {/* Status dos Alunos - Grid de Avatares */}
-          <div className="bg-white/5 rounded-xl p-4 flex-1 overflow-hidden flex flex-col min-h-[200px]">
+          <div className="bg-slate-800/80 rounded-xl p-4 flex-1 overflow-hidden flex flex-col min-h-[200px] border border-slate-700">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-white font-semibold flex items-center gap-2">
                 <Users className="w-4 h-4 text-blue-400" />
                 Status dos Alunos
-                <span className="text-white/50 font-normal text-sm">
+                <span className="text-slate-300 font-normal text-sm">
                   ({stats?.alunos_ativos_agora || 0} ativos | {stats?.alunos_inativos || 0} inativos)
                 </span>
               </h2>
@@ -465,7 +465,7 @@ export default function DashboardAoVivoPage() {
                 {Object.entries(atividadeConfig).slice(0, 4).map(([key, cfg]) => (
                   <div key={key} className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded-full" style={{ background: cfg.cor }} />
-                    <span className="text-white/50">{cfg.label}</span>
+                    <span className="text-slate-300">{cfg.label}</span>
                   </div>
                 ))}
               </div>
@@ -473,10 +473,10 @@ export default function DashboardAoVivoPage() {
 
             <div className="flex-1 overflow-y-auto">
               {alunosAtivos.length === 0 && alunosInativos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-white/50">
-                  <UserX className="w-12 h-12 mb-2 opacity-50" />
-                  <p>Nenhum aluno encontrado</p>
-                  <p className="text-sm">Selecione uma turma ou colegio</p>
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <UserX className="w-12 h-12 mb-2 opacity-70" />
+                  <p className="font-medium">Nenhum aluno encontrado</p>
+                  <p className="text-sm text-slate-500">Selecione uma turma ou colegio</p>
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-3">
@@ -503,7 +503,7 @@ export default function DashboardAoVivoPage() {
                           </div>
                           {/* Status indicator */}
                           <div
-                            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#1e3a5f] flex items-center justify-center"
+                            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-slate-800 flex items-center justify-center"
                             style={{ background: config.cor }}
                           >
                             {config.icon}
@@ -521,7 +521,7 @@ export default function DashboardAoVivoPage() {
                             </div>
                           )}
                         </div>
-                        <span className="text-white/70 text-[9px] mt-1 truncate max-w-[50px] text-center">
+                        <span className="text-slate-200 text-[9px] mt-1 truncate max-w-[50px] text-center font-medium">
                           {aluno.nome.split(' ')[0]}
                         </span>
                       </div>
@@ -532,23 +532,23 @@ export default function DashboardAoVivoPage() {
                   {alunosInativos.slice(0, 20).map((aluno) => (
                     <div
                       key={aluno.id}
-                      className="flex flex-col items-center opacity-50"
+                      className="flex flex-col items-center opacity-60"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nInativo`}
                     >
-                      <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white font-bold text-xs">
+                      <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-slate-300 font-bold text-xs">
                         {getIniciais(aluno.nome)}
                       </div>
-                      <span className="text-white/40 text-[9px] mt-1 truncate max-w-[50px] text-center">
+                      <span className="text-slate-400 text-[9px] mt-1 truncate max-w-[50px] text-center">
                         {aluno.nome.split(' ')[0]}
                       </span>
                     </div>
                   ))}
                   {alunosInativos.length > 20 && (
-                    <div className="flex flex-col items-center opacity-50">
-                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
+                    <div className="flex flex-col items-center opacity-60">
+                      <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-slate-300 font-bold text-xs">
                         +{alunosInativos.length - 20}
                       </div>
-                      <span className="text-white/40 text-[9px] mt-1">mais</span>
+                      <span className="text-slate-400 text-[9px] mt-1">mais</span>
                     </div>
                   )}
                 </div>
@@ -559,7 +559,7 @@ export default function DashboardAoVivoPage() {
           {/* Linha inferior: Temas com Dificuldade + Desempenho */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[250px]">
             {/* Temas com Dificuldade */}
-            <div className="bg-white/5 rounded-xl p-4 overflow-hidden flex flex-col">
+            <div className="bg-slate-800/80 rounded-xl p-4 overflow-hidden flex flex-col border border-slate-700">
               <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-4 h-4 text-red-400" />
                 Temas com Dificuldade
@@ -573,19 +573,19 @@ export default function DashboardAoVivoPage() {
                 ) : (
                   <div className="space-y-2">
                     {temasComDificuldade.map((tema) => (
-                      <div key={tema.tema} className="bg-red-500/10 rounded-lg p-2 border border-red-500/20">
+                      <div key={tema.tema} className="bg-red-900/40 rounded-lg p-2 border border-red-500/40">
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-white text-sm font-medium truncate flex-1 mr-2">{tema.tema}</span>
-                          <span className="text-red-400 text-sm font-bold whitespace-nowrap">{tema.taxa_erro}% erro</span>
+                          <span className="text-red-300 text-sm font-bold whitespace-nowrap">{tema.taxa_erro}% erro</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-red-900/30 rounded-full overflow-hidden">
+                          <div className="flex-1 h-1.5 bg-red-900/50 rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full"
                               style={{ width: `${tema.taxa_erro}%` }}
                             />
                           </div>
-                          <span className="text-white/40 text-xs">{tema.quantidade}q</span>
+                          <span className="text-slate-400 text-xs">{tema.quantidade}q</span>
                         </div>
                       </div>
                     ))}
@@ -595,31 +595,31 @@ export default function DashboardAoVivoPage() {
             </div>
 
             {/* Tabela de Desempenho dos Alunos */}
-            <div className="bg-white/5 rounded-xl p-4 overflow-hidden flex flex-col">
+            <div className="bg-slate-800/80 rounded-xl p-4 overflow-hidden flex flex-col border border-slate-700">
               <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-green-400" />
                 Desempenho dos Alunos
               </h2>
               <div className="flex-1 overflow-y-auto">
                 {alunosAtivos.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-white/30 text-sm">
+                  <div className="flex items-center justify-center h-full text-slate-400 text-sm">
                     Sem dados de desempenho
                   </div>
                 ) : (
                   <table className="w-full text-xs">
-                    <thead className="sticky top-0 bg-[#2d4a6f]">
-                      <tr className="text-white/50">
-                        <th className="text-left pb-2 pl-1">Aluno</th>
-                        <th className="text-center pb-2">Status</th>
-                        <th className="text-center pb-2">Questoes</th>
-                        <th className="text-center pb-2">Acertos</th>
+                    <thead className="sticky top-0 bg-slate-800">
+                      <tr className="text-slate-300">
+                        <th className="text-left pb-2 pl-1 font-semibold">Aluno</th>
+                        <th className="text-center pb-2 font-semibold">Status</th>
+                        <th className="text-center pb-2 font-semibold">Questoes</th>
+                        <th className="text-center pb-2 font-semibold">Acertos</th>
                       </tr>
                     </thead>
                     <tbody>
                       {alunosAtivos.slice(0, 10).map((aluno) => {
                         const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
                         return (
-                          <tr key={aluno.id} className="border-t border-white/5 hover:bg-white/5">
+                          <tr key={aluno.id} className="border-t border-slate-700 hover:bg-slate-700/50">
                             <td className="py-1.5 pl-1">
                               <div className="flex items-center gap-2">
                                 <div
@@ -628,23 +628,23 @@ export default function DashboardAoVivoPage() {
                                 >
                                   {getIniciais(aluno.nome)}
                                 </div>
-                                <span className="text-white truncate max-w-[100px]">
+                                <span className="text-slate-100 truncate max-w-[100px]">
                                   {aluno.nome.split(' ').slice(0, 2).join(' ')}
                                 </span>
                               </div>
                             </td>
                             <td className="py-1.5 text-center">
                               <span
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium"
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold"
                                 style={{
-                                  background: `${config.cor}20`,
+                                  background: `${config.cor}30`,
                                   color: config.cor
                                 }}
                               >
                                 {config.label}
                               </span>
                             </td>
-                            <td className="py-1.5 text-center text-white/70">{aluno.questoes_sessao}</td>
+                            <td className="py-1.5 text-center text-slate-200">{aluno.questoes_sessao}</td>
                             <td className="py-1.5 text-center">
                               <span
                                 className="font-medium"
@@ -670,7 +670,7 @@ export default function DashboardAoVivoPage() {
         <div className="lg:col-span-1 flex flex-col gap-4 overflow-hidden">
 
           {/* Alertas em Tempo Real */}
-          <div className="bg-white/5 rounded-xl p-4 flex-shrink-0">
+          <div className="bg-slate-800/80 rounded-xl p-4 flex-shrink-0 border border-slate-700">
             <h2 className="text-white font-semibold flex items-center gap-2 mb-3 text-sm">
               <AlertTriangle className="w-4 h-4 text-yellow-400" />
               Alertas em Tempo Real
@@ -678,12 +678,12 @@ export default function DashboardAoVivoPage() {
             {alunosPrecisandoAjuda.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-4 text-green-400">
                 <CheckCircle className="w-8 h-8 mb-2" />
-                <p className="text-sm">Sem alertas</p>
+                <p className="text-sm font-medium">Sem alertas</p>
               </div>
             ) : (
               <div className="space-y-2 max-h-[150px] overflow-y-auto">
                 {alunosPrecisandoAjuda.slice(0, 5).map((aluno) => (
-                  <div key={aluno.id} className="flex items-center gap-2 p-2 bg-red-500/10 rounded border border-red-500/20">
+                  <div key={aluno.id} className="flex items-center gap-2 p-2 bg-red-900/40 rounded border border-red-500/40">
                     <div
                       className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
                       style={{ background: getAvatarBg(aluno.componente) }}
@@ -692,7 +692,7 @@ export default function DashboardAoVivoPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-white text-xs font-medium truncate">{aluno.nome.split(' ')[0]}</p>
-                      <p className="text-red-400 text-[10px]">{aluno.taxa_acerto}% em {aluno.questoes_sessao} questoes</p>
+                      <p className="text-red-300 text-[10px] font-medium">{aluno.taxa_acerto}% em {aluno.questoes_sessao} questoes</p>
                     </div>
                   </div>
                 ))}
@@ -701,22 +701,22 @@ export default function DashboardAoVivoPage() {
           </div>
 
           {/* Atividades Recentes */}
-          <div className="bg-white/5 rounded-xl p-4 flex-1 overflow-hidden flex flex-col min-h-[200px]">
+          <div className="bg-slate-800/80 rounded-xl p-4 flex-1 overflow-hidden flex flex-col min-h-[200px] border border-slate-700">
             <h2 className="text-white font-semibold flex items-center gap-2 mb-3 text-sm">
               <Activity className="w-4 h-4 text-blue-400" />
               Atividades Recentes
             </h2>
             <div className="flex-1 overflow-y-auto space-y-1">
               {atividades.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-white/30">
-                  <Clock className="w-8 h-8 mb-2 opacity-50" />
+                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                  <Clock className="w-8 h-8 mb-2 opacity-70" />
                   <p className="text-xs">Aguardando atividades...</p>
                 </div>
               ) : (
                 atividades.slice(0, 20).map((ativ) => (
                   <div
                     key={ativ.id}
-                    className="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-white/5 transition"
+                    className="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-slate-700/50 transition"
                   >
                     {ativ.tipo === 'resposta' || ativ.tipo === 'revisao' ? (
                       ativ.detalhes.correta ? (
@@ -734,8 +734,8 @@ export default function DashboardAoVivoPage() {
                       <Activity className="w-3 h-3 text-purple-400 flex-shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <span className="text-white text-[10px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
-                      <span className="text-white/50 text-[10px]">
+                      <span className="text-slate-100 text-[10px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
+                      <span className="text-slate-300 text-[10px]">
                         {' - '}
                         {ativ.tipo === 'resposta' || ativ.tipo === 'revisao'
                           ? (ativ.detalhes.correta ? 'acertou' : 'errou')
@@ -749,7 +749,7 @@ export default function DashboardAoVivoPage() {
                         }
                       </span>
                     </div>
-                    <span className="text-white/30 text-[9px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
+                    <span className="text-slate-400 text-[9px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
                   </div>
                 ))
               )}
@@ -776,10 +776,10 @@ interface StatBoxProps {
 function StatBox({ label, value, color, icon, trend }: StatBoxProps) {
   return (
     <div
-      className="rounded-lg p-2 sm:p-3 flex flex-col justify-center relative overflow-hidden"
+      className="rounded-lg p-2 sm:p-3 flex flex-col justify-center relative overflow-hidden border border-slate-600"
       style={{
-        background: 'rgba(255,255,255,0.05)',
-        borderLeft: `3px solid ${color}`
+        background: 'rgba(30, 41, 59, 0.9)',
+        borderLeft: `4px solid ${color}`
       }}
     >
       <div className="flex items-center gap-2">
@@ -790,7 +790,7 @@ function StatBox({ label, value, color, icon, trend }: StatBoxProps) {
           {trend === 'descendo' && <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />}
         </div>
       </div>
-      <span className="text-white/50 text-[10px] truncate">{label}</span>
+      <span className="text-slate-300 text-[10px] truncate font-medium">{label}</span>
     </div>
   )
 }
