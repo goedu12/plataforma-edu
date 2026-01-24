@@ -25,6 +25,7 @@ import {
   PauseCircle,
   Eye,
   Building2,
+  ArrowLeft,
 } from 'lucide-react'
 import type { Componente } from '@/types'
 
@@ -389,6 +390,16 @@ export default function DashboardAoVivoPage() {
               </div>
             </div>
           )}
+
+          {/* Botao Voltar */}
+          <button
+            onClick={() => router.push('/professor/dashboard')}
+            className="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-700 text-white border border-slate-500 hover:bg-slate-600 transition font-medium"
+            title="Voltar ao Dashboard"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline text-sm">Voltar</span>
+          </button>
         </div>
       </header>
 
