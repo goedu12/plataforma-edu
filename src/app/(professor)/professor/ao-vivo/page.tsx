@@ -13,32 +13,23 @@ import {
   MessageCircle,
   Target,
   TrendingUp,
-  TrendingDown,
-  Minus,
   RefreshCw,
   Filter,
   Atom,
   Calculator,
-  ChevronDown,
   Radio,
   Eye,
   Award,
   UserX,
   Percent,
   Timer,
-  Heart,
-  Download,
-  Map,
-  Trophy,
-  Star,
-  Layers,
   AlertTriangle,
-  Hourglass,
+  ChevronDown,
+  Layers,
+  Brain,
+  PlayCircle,
+  PauseCircle,
 } from 'lucide-react'
-import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
-import Loading from '@/components/ui/Loading'
-import BackButton from '@/components/ui/BackButton'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -78,7 +69,6 @@ interface AlunoAtivo {
   posicao_ranking?: number
 }
 
-// NOVO: Aluno inativo
 interface AlunoInativo {
   id: string
   nome: string
@@ -102,7 +92,6 @@ interface EstatisticasTempoReal {
   mapas_curtidos: number
   mapas_baixados: number
   media_nota_ativos: number
-  // Métricas avançadas
   tempo_medio_segundos: number
   temas_com_dificuldade: { tema: string; taxa_erro: number; quantidade: number }[]
   tendencia_acerto: 'subindo' | 'estavel' | 'descendo'
@@ -130,7 +119,7 @@ interface DadosTempoReal {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// COMPONENTE PRINCIPAL
+// COMPONENTE PRINCIPAL - DASHBOARD 1280x720
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function DashboardAoVivoPage() {
@@ -143,20 +132,22 @@ export default function DashboardAoVivoPage() {
   const [turmaFiltro, setTurmaFiltro] = useState<string>('')
   const [componenteFiltro, setComponenteFiltro] = useState<Componente | ''>('')
   const [showFiltros, setShowFiltros] = useState(false)
-
-  // Período de monitoramento (em minutos)
-  const [periodoMinutos, setPeriodoMinutos] = useState(60) // 60 min padrão para 1 aula
-
-  // Aba ativa na sidebar (ativos/inativos)
-  const [abaAlunos, setAbaAlunos] = useState<'ativos' | 'inativos'>('ativos')
+  const [periodoMinutos, setPeriodoMinutos] = useState(60)
 
   // Auto-refresh
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const [intervalo, setIntervalo] = useState(5) // segundos
-  const [ultimaAtualizacao, setUltimaAtualizacao] = useState<Date | null>(null)
+  const [intervalo] = useState(5)
   const [contadorRefresh, setContadorRefresh] = useState(0)
-
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Hora atual
+  const [horaAtual, setHoraAtual] = useState(new Date())
+
+  // Atualizar hora
+  useEffect(() => {
+    const timer = setInterval(() => setHoraAtual(new Date()), 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Buscar dados
   const buscarDados = useCallback(async () => {
@@ -172,7 +163,6 @@ export default function DashboardAoVivoPage() {
 
       if (data.sucesso) {
         setDados(data)
-        setUltimaAtualizacao(new Date())
         setErro(null)
       } else if (response.status === 403) {
         router.push('/login')
@@ -186,12 +176,10 @@ export default function DashboardAoVivoPage() {
     }
   }, [turmaFiltro, componenteFiltro, periodoMinutos, router])
 
-  // Efeito inicial e quando filtros mudam
   useEffect(() => {
     buscarDados()
   }, [buscarDados])
 
-  // Auto-refresh
   useEffect(() => {
     if (autoRefresh) {
       intervalRef.current = setInterval(() => {
@@ -204,11 +192,8 @@ export default function DashboardAoVivoPage() {
         })
       }, 1000)
     }
-
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current)
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current)
     }
   }, [autoRefresh, intervalo, buscarDados])
 
@@ -219,817 +204,454 @@ export default function DashboardAoVivoPage() {
     const diffMs = agora.getTime() - data.getTime()
     const diffSeg = Math.floor(diffMs / 1000)
     const diffMin = Math.floor(diffSeg / 60)
-
-    if (diffSeg < 60) return `${diffSeg}s atrás`
-    if (diffMin < 60) return `${diffMin}min atrás`
+    if (diffSeg < 60) return `${diffSeg}s`
+    if (diffMin < 60) return `${diffMin}min`
     return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
-  // Ícone por tipo de atividade
-  const getIconeAtividade = (tipo: AtividadeTempoReal['tipo'], correta?: boolean) => {
+  // Cor do status do aluno
+  const getStatusColor = (tipo: string) => {
     switch (tipo) {
-      case 'resposta':
-        return correta ? (
-          <CheckCircle className="w-4 h-4 text-success" />
-        ) : (
-          <XCircle className="w-4 h-4 text-error" />
-        )
-      case 'desafio_iniciado':
-        return <Zap className="w-4 h-4 text-warning" />
-      case 'desafio_completo':
-        return <Award className="w-4 h-4 text-success" />
-      case 'tutor':
-        return <MessageCircle className="w-4 h-4 text-info" />
+      case 'estudo': return '#22c55e'
+      case 'desafio': return '#f59e0b'
+      case 'tutor': return '#3b82f6'
       case 'revisao':
-      case 'flashcard':
-        return <Layers className="w-4 h-4 text-purple-500" />
-      case 'mapa_curtido':
-        return <Heart className="w-4 h-4 text-pink-500" />
-      case 'mapa_baixado':
-        return <Download className="w-4 h-4 text-cyan-500" />
-      default:
-        return <Activity className="w-4 h-4" />
+      case 'flashcard': return '#a855f7'
+      default: return '#6b7280'
     }
   }
 
-  // Descrição da atividade
-  const getDescricaoAtividade = (atividade: AtividadeTempoReal) => {
-    switch (atividade.tipo) {
-      case 'resposta':
-        return atividade.detalhes.correta
-          ? `Acertou uma questão de ${atividade.detalhes.tema || 'N/A'}`
-          : `Errou uma questão de ${atividade.detalhes.tema || 'N/A'}`
-      case 'desafio_iniciado':
-        return 'Iniciou um desafio'
-      case 'desafio_completo':
-        return `Completou desafio: ${atividade.detalhes.acertos}/${atividade.detalhes.total} acertos`
-      case 'tutor':
-        return 'Usando o tutor IA'
-      case 'revisao':
-      case 'flashcard':
-        return 'Fazendo revisão com FlashCards'
-      case 'mapa_curtido':
-        return `Curtiu mapa: ${atividade.detalhes.mapa_titulo || 'Mapa mental'}`
-      case 'mapa_baixado':
-        return `Baixou mapa: ${atividade.detalhes.mapa_titulo || 'Mapa mental'}`
-      default:
-        return 'Atividade'
-    }
+  // Cor de fundo do avatar baseada no componente
+  const getAvatarBg = (componente: Componente) => {
+    return componente === 'fisica' ? '#22c55e' : '#8b5cf6'
   }
 
   if (loading) {
-    return <Loading fullScreen />
+    return (
+      <div className="w-[1280px] h-[720px] mx-auto flex items-center justify-center" style={{ background: '#1e3a5f' }}>
+        <div className="text-white text-xl">Carregando dashboard...</div>
+      </div>
+    )
   }
 
+  const stats = dados?.estatisticas
+  const alunosAtivos = dados?.alunos_ativos || []
+  const alunosInativos = dados?.alunos_inativos || []
+  const atividades = dados?.atividades || []
+  const temasComDificuldade = stats?.temas_com_dificuldade || []
+
+  // Alunos com problemas (erros seguidos)
+  const alertas = atividades
+    .filter(a => a.tipo === 'resposta' && !a.detalhes.correta)
+    .slice(0, 5)
+
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
-      {/* Header */}
-      <header className="mobile-header">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <BackButton href="/professor/dashboard" />
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Radio className="w-5 h-5" style={{ color: 'var(--success)' }} />
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success rounded-full animate-pulse" />
-                </div>
-                <div>
-                  <h1 className="font-display text-base sm:text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
-                    Ao Vivo
-                  </h1>
-                  <p className="text-xs hidden sm:block" style={{ color: 'var(--text-muted)' }}>
-                    Atualização: {autoRefresh ? `a cada ${intervalo}s` : 'pausada'}
-                    {ultimaAtualizacao && (
-                      <span className="ml-2">
-                        (última: {ultimaAtualizacao.toLocaleTimeString('pt-BR')})
-                      </span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
+    <div
+      className="w-[1280px] h-[720px] mx-auto overflow-hidden flex flex-col"
+      style={{
+        background: 'linear-gradient(180deg, #1e3a5f 0%, #2d4a6f 100%)',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      }}
+    >
+      {/* ═══════════════════════════════════════════════════════════════════
+          HEADER
+          ═══════════════════════════════════════════════════════════════════ */}
+      <header className="h-[60px] px-4 flex items-center justify-between" style={{ background: 'rgba(0,0,0,0.2)' }}>
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <Radio className="w-5 h-5 text-green-400 animate-pulse" />
+            Painel da Turma
+            {turmaFiltro && <span className="text-green-400">- {turmaFiltro}</span>}
+          </h1>
+          <span className="text-white/60 text-sm">
+            {componenteFiltro === 'fisica' ? 'Física' : componenteFiltro === 'matematica' ? 'Matemática' : 'Todos os Componentes'}
+            {' | '}
+            {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </div>
 
-            <div className="flex items-center gap-2">
-              {/* Controles de refresh */}
-              <div className="flex items-center gap-2 mr-2">
-                <button
-                  onClick={() => setAutoRefresh(!autoRefresh)}
-                  className={`p-2 rounded-lg transition-all ${
-                    autoRefresh ? 'bg-success/20 text-success' : 'bg-[var(--bg-elevated)]'
-                  }`}
-                  title={autoRefresh ? 'Pausar auto-atualização' : 'Ativar auto-atualização'}
-                >
-                  <RefreshCw className={`w-4 h-4 ${autoRefresh ? 'animate-spin' : ''}`} />
-                </button>
-                {autoRefresh && (
-                  <div className="w-8 h-8 relative flex items-center justify-center">
-                    <svg className="w-8 h-8 transform -rotate-90">
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="12"
-                        stroke="var(--border-default)"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <circle
-                        cx="16"
-                        cy="16"
-                        r="12"
-                        stroke="var(--success)"
-                        strokeWidth="2"
-                        fill="none"
-                        strokeDasharray={`${(contadorRefresh / intervalo) * 75.4} 75.4`}
-                        className="transition-all duration-1000"
-                      />
-                    </svg>
-                    <span
-                      className="absolute text-xs font-bold"
-                      style={{ color: 'var(--text-muted)' }}
-                    >
-                      {intervalo - contadorRefresh}
-                    </span>
-                  </div>
-                )}
-              </div>
+        <div className="flex items-center gap-3">
+          {/* Filtro de Turma */}
+          <select
+            value={turmaFiltro}
+            onChange={(e) => setTurmaFiltro(e.target.value)}
+            className="px-3 py-1.5 rounded text-sm bg-white/10 text-white border border-white/20"
+          >
+            <option value="">Todas as Turmas</option>
+            {dados?.turmas_disponiveis.map(t => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
 
-              {/* Botão de filtros */}
-              <button
-                onClick={() => setShowFiltros(!showFiltros)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                  showFiltros || turmaFiltro || componenteFiltro
-                    ? 'bg-info/20 text-info'
-                    : 'bg-[var(--bg-elevated)]'
-                }`}
-                style={{ color: turmaFiltro || componenteFiltro ? 'var(--info)' : 'var(--text-secondary)' }}
-              >
-                <Filter className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm">Filtros</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showFiltros ? 'rotate-180' : ''}`} />
-              </button>
+          {/* Filtro de Componente */}
+          <select
+            value={componenteFiltro}
+            onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
+            className="px-3 py-1.5 rounded text-sm bg-white/10 text-white border border-white/20"
+          >
+            <option value="">Todos</option>
+            <option value="fisica">Física</option>
+            <option value="matematica">Matemática</option>
+          </select>
 
-              {/* Refresh manual */}
-              <button
-                onClick={() => {
-                  setContadorRefresh(0)
-                  buscarDados()
-                }}
-                className="p-2 rounded-lg bg-[var(--bg-elevated)] transition-colors hover:bg-[var(--bg-surface)]"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          {/* Auto Refresh Toggle */}
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`p-2 rounded ${autoRefresh ? 'bg-green-500/30 text-green-400' : 'bg-white/10 text-white/60'}`}
+          >
+            {autoRefresh ? <PlayCircle className="w-5 h-5" /> : <PauseCircle className="w-5 h-5" />}
+          </button>
 
-          {/* Painel de filtros */}
-          {showFiltros && (
-            <div
-              className="flex flex-wrap gap-3 p-3 rounded-xl mb-4"
-              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
-            >
-              <div className="flex-1 min-w-[150px]">
-                <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
-                  Turma
-                </label>
-                <select
-                  value={turmaFiltro}
-                  onChange={(e) => setTurmaFiltro(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value="">Todas as turmas</option>
-                  {dados?.turmas_disponiveis.map((turma) => (
-                    <option key={turma} value={turma}>
-                      {turma}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex-1 min-w-[150px]">
-                <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
-                  Componente
-                </label>
-                <select
-                  value={componenteFiltro}
-                  onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
-                  className="w-full px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value="">Todos</option>
-                  <option value="fisica">Física</option>
-                  <option value="matematica">Matemática</option>
-                </select>
-              </div>
-
-              <div className="flex-1 min-w-[150px]">
-                <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
-                  Periodo de monitoramento
-                </label>
-                <select
-                  value={periodoMinutos}
-                  onChange={(e) => setPeriodoMinutos(Number(e.target.value))}
-                  className="w-full px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value={15}>15 minutos</option>
-                  <option value={30}>30 minutos</option>
-                  <option value={45}>45 minutos (1 aula)</option>
-                  <option value={60}>60 minutos</option>
-                  <option value={90}>90 minutos (2 aulas)</option>
-                  <option value={120}>120 minutos</option>
-                </select>
-              </div>
-
-              <div className="flex-1 min-w-[150px]">
-                <label className="text-xs font-medium mb-1 block" style={{ color: 'var(--text-muted)' }}>
-                  Intervalo de atualização
-                </label>
-                <select
-                  value={intervalo}
-                  onChange={(e) => {
-                    setIntervalo(Number(e.target.value))
-                    setContadorRefresh(0)
-                  }}
-                  className="w-full px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value={3}>3 segundos</option>
-                  <option value={5}>5 segundos</option>
-                  <option value={10}>10 segundos</option>
-                  <option value={30}>30 segundos</option>
-                </select>
-              </div>
-
-              {(turmaFiltro || componenteFiltro) && (
-                <div className="flex items-end">
-                  <button
-                    onClick={() => {
-                      setTurmaFiltro('')
-                      setComponenteFiltro('')
-                    }}
-                    className="px-3 py-2 text-sm rounded-lg bg-error/20 text-error"
-                  >
-                    Limpar filtros
-                  </button>
-                </div>
-              )}
+          {/* Contador de refresh */}
+          {autoRefresh && (
+            <div className="w-8 h-8 rounded-full border-2 border-green-400 flex items-center justify-center">
+              <span className="text-xs text-green-400 font-bold">{intervalo - contadorRefresh}</span>
             </div>
           )}
         </div>
       </header>
 
-      {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {erro ? (
-          <Card className="text-center py-8">
-            <XCircle className="w-12 h-12 text-error mx-auto mb-3" />
-            <p className="text-error font-medium">{erro}</p>
-            <button
-              onClick={buscarDados}
-              className="mt-4 px-4 py-2 rounded-lg bg-info text-white"
-            >
-              Tentar novamente
-            </button>
-          </Card>
-        ) : dados ? (
-          <>
-            {/* Cards de estatísticas - Linha 1: Participação e Performance */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
-              <StatCard
-                icon={<Percent className="w-5 h-5" />}
-                label="Participação"
-                value={`${dados.estatisticas.taxa_participacao}%`}
-                color="var(--success)"
-                pulse
-              />
-              <StatCard
-                icon={<Users className="w-5 h-5" />}
-                label="Ativos"
-                value={`${dados.estatisticas.alunos_ativos_agora}/${dados.estatisticas.total_alunos_turma}`}
-                color="var(--success)"
-              />
-              <StatCard
-                icon={<Target className="w-5 h-5" />}
-                label="Taxa Acerto"
-                value={`${dados.estatisticas.taxa_acerto_tempo_real}%`}
-                color={dados.estatisticas.taxa_acerto_tempo_real >= 60 ? "var(--success)" : dados.estatisticas.taxa_acerto_tempo_real >= 40 ? "var(--warning)" : "var(--error)"}
-              />
-              <StatCard
-                icon={
-                  dados.estatisticas.tendencia_acerto === 'subindo' ? <TrendingUp className="w-5 h-5" /> :
-                  dados.estatisticas.tendencia_acerto === 'descendo' ? <TrendingDown className="w-5 h-5" /> :
-                  <Minus className="w-5 h-5" />
-                }
-                label="Tendência"
-                value={dados.estatisticas.tendencia_acerto === 'subindo' ? '↑' : dados.estatisticas.tendencia_acerto === 'descendo' ? '↓' : '→'}
-                color={dados.estatisticas.tendencia_acerto === 'subindo' ? "var(--success)" : dados.estatisticas.tendencia_acerto === 'descendo' ? "var(--error)" : "var(--text-muted)"}
-              />
-              <StatCard
-                icon={<AlertTriangle className="w-5 h-5" />}
-                label="Precisam Ajuda"
-                value={dados.estatisticas.alunos_precisando_ajuda}
-                color={dados.estatisticas.alunos_precisando_ajuda > 0 ? "var(--error)" : "var(--success)"}
-                pulse={dados.estatisticas.alunos_precisando_ajuda > 0}
-              />
-              <StatCard
-                icon={<Hourglass className="w-5 h-5" />}
-                label="Tempo Médio"
-                value={dados.estatisticas.tempo_medio_segundos > 0 ? `${dados.estatisticas.tempo_medio_segundos}s` : '-'}
-                color="var(--info)"
-              />
+      {/* ═══════════════════════════════════════════════════════════════════
+          STATS BAR
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="h-[80px] px-4 py-2 grid grid-cols-7 gap-2">
+        <StatBox
+          label="Online Agora"
+          value={`${stats?.alunos_ativos_agora || 0}/${stats?.total_alunos_turma || 0}`}
+          color="#22c55e"
+          icon={<Users className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Ativos Agora"
+          value={stats?.alunos_ativos_agora || 0}
+          color="#22c55e"
+          trend="up"
+          icon={<Activity className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Ociosos"
+          value={stats?.alunos_inativos || 0}
+          color={stats?.alunos_inativos && stats.alunos_inativos > 0 ? '#ef4444' : '#22c55e'}
+          icon={<Clock className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Progresso Médio"
+          value={`${stats?.taxa_participacao || 0}%`}
+          color="#3b82f6"
+          icon={<Target className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Questões Respondidas"
+          value={stats?.questoes_periodo_total || 0}
+          color="#8b5cf6"
+          trend="up"
+          icon={<BookOpen className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Acurácia da Turma"
+          value={`${stats?.taxa_acerto_tempo_real || 0}%`}
+          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'}
+          trend={stats?.tendencia_acerto === 'subindo' ? 'up' : stats?.tendencia_acerto === 'descendo' ? 'down' : undefined}
+          icon={<CheckCircle className="w-5 h-5" />}
+        />
+        <StatBox
+          label="Tempo Médio"
+          value={stats?.tempo_medio_segundos ? `${stats.tempo_medio_segundos}s` : '-'}
+          color="#06b6d4"
+          icon={<Timer className="w-5 h-5" />}
+        />
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          MAIN CONTENT
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="flex-1 px-4 pb-4 grid grid-cols-4 gap-3 overflow-hidden">
+
+        {/* COLUNA 1-3: Conteúdo Principal */}
+        <div className="col-span-3 flex flex-col gap-3 overflow-hidden">
+
+          {/* Status dos Alunos - Grid de Avatares */}
+          <div className="bg-white/5 rounded-xl p-3 flex-1 overflow-hidden">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-white font-semibold flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-400" />
+                Status dos Alunos
+              </h2>
+              <span className="text-white/50 text-xs">
+                {alunosAtivos.length} ativos | {alunosInativos.length} inativos
+              </span>
             </div>
 
-            {/* Cards de estatísticas - Linha 2: Atividades e Recursos */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-3">
-              <StatCard
-                icon={<Activity className="w-5 h-5" />}
-                label="Questões (5min)"
-                value={dados.estatisticas.questoes_ultimos_5min}
-                color="var(--info)"
-              />
-              <StatCard
-                icon={<Zap className="w-5 h-5" />}
-                label="Em Desafio"
-                value={dados.estatisticas.fazendo_desafio}
-                color="var(--color-matematica)"
-              />
-              <StatCard
-                icon={<MessageCircle className="w-5 h-5" />}
-                label="Usando Tutor"
-                value={dados.estatisticas.usando_tutor}
-                color="var(--color-fisica)"
-              />
-              <StatCard
-                icon={<Layers className="w-5 h-5" />}
-                label="Revisão"
-                value={dados.estatisticas.fazendo_revisao}
-                color="var(--purple-500)"
-              />
-              <StatCard
-                icon={<Star className="w-5 h-5" />}
-                label="Média Notas"
-                value={dados.estatisticas.media_nota_ativos > 0 ? dados.estatisticas.media_nota_ativos.toFixed(1) : '-'}
-                color="var(--warning)"
-              />
-              <StatCard
-                icon={<Map className="w-5 h-5" />}
-                label="Mapas"
-                value={dados.estatisticas.mapas_baixados + dados.estatisticas.mapas_curtidos}
-                color="var(--cyan-500)"
-              />
-            </div>
-
-            {/* Alertas de Temas com Dificuldade */}
-            {dados.estatisticas.temas_com_dificuldade.length > 0 && (
-              <div
-                className="p-3 rounded-xl mb-6 flex items-start gap-3"
-                style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                }}
-              >
-                <AlertTriangle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-error mb-1">Temas com Dificuldade</p>
-                  <div className="flex flex-wrap gap-2">
-                    {dados.estatisticas.temas_com_dificuldade.map((tema) => (
-                      <span
-                        key={tema.tema}
-                        className="px-2 py-1 rounded-lg text-xs font-medium"
-                        style={{ background: 'rgba(239, 68, 68, 0.2)', color: 'var(--error)' }}
-                      >
-                        {tema.tema}: {tema.taxa_erro}% erro ({tema.quantidade}q)
-                      </span>
-                    ))}
+            <div className="grid grid-cols-10 gap-2 overflow-y-auto max-h-[180px]">
+              {alunosAtivos.map((aluno) => (
+                <div
+                  key={aluno.id}
+                  className="flex flex-col items-center group cursor-pointer"
+                  title={`${aluno.nome}\n${aluno.turma} | ${aluno.questoes_sessao}q | ${aluno.taxa_acerto}%`}
+                >
+                  <div className="relative">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                      style={{ background: getAvatarBg(aluno.componente) }}
+                    >
+                      {aluno.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                    </div>
+                    {/* Status indicator */}
+                    <div
+                      className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#1e3a5f] flex items-center justify-center"
+                      style={{ background: getStatusColor(aluno.tipo_atividade) }}
+                    >
+                      {aluno.tipo_atividade === 'estudo' && <CheckCircle className="w-2.5 h-2.5 text-white" />}
+                      {aluno.tipo_atividade === 'desafio' && <Zap className="w-2.5 h-2.5 text-white" />}
+                      {aluno.tipo_atividade === 'tutor' && <MessageCircle className="w-2.5 h-2.5 text-white" />}
+                      {(aluno.tipo_atividade === 'revisao' || aluno.tipo_atividade === 'flashcard') && <Layers className="w-2.5 h-2.5 text-white" />}
+                    </div>
+                    {/* Taxa de acerto badge */}
+                    <div
+                      className="absolute -top-1 -right-1 px-1 rounded text-[9px] font-bold"
+                      style={{
+                        background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444',
+                        color: 'white'
+                      }}
+                    >
+                      {aluno.taxa_acerto}%
+                    </div>
                   </div>
+                  <span className="text-white/70 text-[10px] mt-1 truncate w-full text-center">
+                    {aluno.nome.split(' ')[0]}
+                  </span>
                 </div>
-              </div>
-            )}
+              ))}
 
-            {/* Grid principal: Feed + Alunos ativos */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Feed de atividades */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-semibold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                      <Activity className="w-5 h-5 text-info" />
-                      Feed de Atividades
-                    </h2>
-                    <Badge variant="info" size="sm">
-                      {dados.atividades.length} recentes
-                    </Badge>
+              {/* Alunos inativos */}
+              {alunosInativos.slice(0, 10).map((aluno) => (
+                <div
+                  key={aluno.id}
+                  className="flex flex-col items-center opacity-40"
+                  title={`${aluno.nome} - INATIVO`}
+                >
+                  <div className="relative">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm bg-gray-600"
+                    >
+                      {aluno.nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-[#1e3a5f] bg-gray-500 flex items-center justify-center">
+                      <UserX className="w-2.5 h-2.5 text-white" />
+                    </div>
                   </div>
+                  <span className="text-white/40 text-[10px] mt-1 truncate w-full text-center">
+                    {aluno.nome.split(' ')[0]}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-                    {dados.atividades.length === 0 ? (
-                      <div className="text-center py-8" style={{ color: 'var(--text-muted)' }}>
-                        <Clock className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                        <p>Nenhuma atividade nos últimos 15 minutos</p>
-                        <p className="text-sm">Aguardando alunos...</p>
+          {/* Linha inferior: Questões com Dificuldade + Feed de Atividades */}
+          <div className="grid grid-cols-2 gap-3 h-[220px]">
+            {/* Questões com Dificuldade */}
+            <div className="bg-white/5 rounded-xl p-3 overflow-hidden">
+              <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+                Temas com Dificuldade
+              </h2>
+              <div className="space-y-2 overflow-y-auto max-h-[160px]">
+                {temasComDificuldade.length === 0 ? (
+                  <div className="text-center py-4">
+                    <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                    <p className="text-green-400 text-sm">Nenhum tema com dificuldade!</p>
+                  </div>
+                ) : (
+                  temasComDificuldade.map((tema, i) => (
+                    <div key={tema.tema} className="bg-red-500/10 rounded-lg p-2 border border-red-500/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-white text-sm font-medium">{tema.tema}</span>
+                        <span className="text-red-400 text-sm font-bold">{tema.taxa_erro}% erro</span>
                       </div>
-                    ) : (
-                      dados.atividades.map((atividade, index) => (
-                        <div
-                          key={atividade.id}
-                          className="flex items-center gap-3 p-3 rounded-xl transition-all"
-                          style={{
-                            background: index === 0 ? 'var(--bg-elevated)' : 'transparent',
-                            animation: index === 0 ? 'pulse 2s ease-in-out' : undefined,
-                          }}
-                        >
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="flex-1 h-1.5 bg-red-900/50 rounded-full overflow-hidden">
                           <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center"
+                            className="h-full bg-red-500 rounded-full"
+                            style={{ width: `${tema.taxa_erro}%` }}
+                          />
+                        </div>
+                        <span className="text-white/50 text-xs">{tema.quantidade}q</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Desempenho por Turma */}
+            <div className="bg-white/5 rounded-xl p-3 overflow-hidden">
+              <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
+                <TrendingUp className="w-4 h-4 text-green-400" />
+                Desempenho dos Alunos
+              </h2>
+              <div className="overflow-y-auto max-h-[160px]">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-white/50">
+                      <th className="text-left pb-2">Aluno</th>
+                      <th className="text-center pb-2">Status</th>
+                      <th className="text-center pb-2">Questões</th>
+                      <th className="text-center pb-2">Acertos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {alunosAtivos.slice(0, 8).map((aluno) => (
+                      <tr key={aluno.id} className="border-t border-white/10">
+                        <td className="py-1.5 text-white">{aluno.nome.split(' ').slice(0, 2).join(' ')}</td>
+                        <td className="py-1.5 text-center">
+                          <span
+                            className="px-1.5 py-0.5 rounded text-[10px] font-medium"
                             style={{
-                              background:
-                                atividade.componente === 'fisica'
-                                  ? 'var(--color-fisica)'
-                                  : 'var(--color-matematica)',
+                              background: `${getStatusColor(aluno.tipo_atividade)}20`,
+                              color: getStatusColor(aluno.tipo_atividade)
                             }}
                           >
-                            {atividade.componente === 'fisica' ? (
-                              <Atom className="w-4 h-4 text-white" />
-                            ) : (
-                              <Calculator className="w-4 h-4 text-white" />
-                            )}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                                {atividade.usuario_nome}
-                              </span>
-                              <Badge size="sm">{atividade.turma}</Badge>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                              {getIconeAtividade(atividade.tipo, atividade.detalhes.correta)}
-                              <span className="truncate">{getDescricaoAtividade(atividade)}</span>
-                            </div>
-                          </div>
-
-                          <div className="text-right">
-                            <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                              {formatarTempoRelativo(atividade.timestamp)}
-                            </p>
-                            {atividade.detalhes.pontos !== undefined && atividade.detalhes.pontos > 0 && (
-                              <p className="text-xs font-medium text-success">
-                                +{atividade.detalhes.pontos} pts
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </Card>
-              </div>
-
-              {/* Sidebar: Alunos ativos/inativos + Por turma */}
-              <div className="space-y-6">
-                {/* Card de alunos com abas */}
-                <Card>
-                  {/* Abas de navegação */}
-                  <div className="flex border-b mb-4" style={{ borderColor: 'var(--border-default)' }}>
-                    <button
-                      onClick={() => setAbaAlunos('ativos')}
-                      className={`flex-1 pb-2 text-sm font-medium flex items-center justify-center gap-2 border-b-2 transition-colors ${
-                        abaAlunos === 'ativos' ? 'border-success' : 'border-transparent'
-                      }`}
-                      style={{
-                        color: abaAlunos === 'ativos' ? 'var(--success)' : 'var(--text-muted)',
-                      }}
-                    >
-                      <Eye className="w-4 h-4" />
-                      Ativos ({dados.alunos_ativos.length})
-                    </button>
-                    <button
-                      onClick={() => setAbaAlunos('inativos')}
-                      className={`flex-1 pb-2 text-sm font-medium flex items-center justify-center gap-2 border-b-2 transition-colors ${
-                        abaAlunos === 'inativos' ? 'border-error' : 'border-transparent'
-                      }`}
-                      style={{
-                        color: abaAlunos === 'inativos' ? 'var(--error)' : 'var(--text-muted)',
-                      }}
-                    >
-                      <UserX className="w-4 h-4" />
-                      Inativos ({dados.alunos_inativos.length})
-                    </button>
-                  </div>
-
-                  {/* Conteúdo da aba Ativos */}
-                  {abaAlunos === 'ativos' && (
-                    <div className="space-y-2 max-h-[350px] overflow-y-auto">
-                      {dados.alunos_ativos.length === 0 ? (
-                        <div className="text-center py-6" style={{ color: 'var(--text-muted)' }}>
-                          <Users className="w-10 h-10 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">Nenhum aluno ativo</p>
-                        </div>
-                      ) : (
-                        dados.alunos_ativos.map((aluno) => (
-                          <div
-                            key={`${aluno.id}-${aluno.componente}`}
-                            className="flex items-center gap-3 p-2 rounded-lg"
-                            style={{ background: 'var(--bg-elevated)' }}
-                          >
-                            <div className="relative">
-                              <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                                style={{
-                                  background:
-                                    aluno.componente === 'fisica'
-                                      ? 'var(--color-fisica)'
-                                      : 'var(--color-matematica)',
-                                }}
-                              >
-                                {aluno.nome.charAt(0).toUpperCase()}
-                              </div>
-                              <span
-                                className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2"
-                                style={{
-                                  borderColor: 'var(--bg-elevated)',
-                                  background:
-                                    aluno.tipo_atividade === 'desafio'
-                                      ? 'var(--warning)'
-                                      : aluno.tipo_atividade === 'tutor'
-                                      ? 'var(--info)'
-                                      : aluno.tipo_atividade === 'mapa'
-                                      ? 'var(--pink-500)'
-                                      : aluno.tipo_atividade === 'flashcard' || aluno.tipo_atividade === 'revisao'
-                                      ? 'var(--purple-500)'
-                                      : 'var(--success)',
-                                }}
-                              />
-                            </div>
-
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                                {aluno.nome}
-                              </p>
-                              <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--text-muted)' }}>
-                                <span>{aluno.turma}</span>
-                                <span>•</span>
-                                <span>{aluno.questoes_sessao}q</span>
-                                <span>•</span>
-                                <span>{aluno.taxa_acerto}%</span>
-                                {aluno.nota_atual !== undefined && aluno.nota_atual !== null && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="font-medium" style={{ color: aluno.nota_atual >= 6 ? 'var(--success)' : aluno.nota_atual >= 4 ? 'var(--warning)' : 'var(--error)' }}>
-                                      {aluno.nota_atual.toFixed(1)}
-                                    </span>
-                                  </>
-                                )}
-                                {aluno.posicao_ranking && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="flex items-center gap-0.5">
-                                      <Trophy className="w-3 h-3" style={{ color: aluno.posicao_ranking <= 3 ? 'var(--warning)' : 'var(--text-muted)' }} />
-                                      {aluno.posicao_ranking}º
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="text-right">
-                              <Badge
-                                variant={aluno.componente === 'fisica' ? 'fisica' : 'matematica'}
-                                size="sm"
-                              >
-                                {aluno.componente === 'fisica' ? 'Fís' : 'Mat'}
-                              </Badge>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-
-                  {/* Conteúdo da aba Inativos */}
-                  {abaAlunos === 'inativos' && (
-                    <div className="space-y-2 max-h-[350px] overflow-y-auto">
-                      {dados.alunos_inativos.length === 0 ? (
-                        <div className="text-center py-6" style={{ color: 'var(--success)' }}>
-                          <CheckCircle className="w-10 h-10 mx-auto mb-2" />
-                          <p className="text-sm font-medium">Todos participando!</p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            Nenhum aluno inativo no período
-                          </p>
-                        </div>
-                      ) : (
-                        <>
-                          <p className="text-xs mb-2 px-2" style={{ color: 'var(--text-muted)' }}>
-                            Alunos sem atividade nos últimos {periodoMinutos} minutos:
-                          </p>
-                          {dados.alunos_inativos.map((aluno) => (
-                            <div
-                              key={aluno.id}
-                              className="flex items-center gap-3 p-2 rounded-lg"
-                              style={{ background: 'var(--bg-elevated)' }}
-                            >
-                              <div
-                                className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                                style={{
-                                  background: 'var(--error)',
-                                  color: 'white',
-                                  opacity: 0.7,
-                                }}
-                              >
-                                {aluno.nome.charAt(0).toUpperCase()}
-                              </div>
-
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                                  {aluno.nome}
-                                </p>
-                                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                                  {aluno.turma}
-                                  {aluno.ultimo_acesso && (
-                                    <> • Último acesso: {new Date(aluno.ultimo_acesso).toLocaleDateString('pt-BR')}</>
-                                  )}
-                                </p>
-                              </div>
-
-                              <div className="flex gap-1">
-                                {aluno.componentes.map((comp) => (
-                                  <Badge
-                                    key={comp}
-                                    variant={comp === 'fisica' ? 'fisica' : 'matematica'}
-                                    size="sm"
-                                  >
-                                    {comp === 'fisica' ? 'Fís' : 'Mat'}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </Card>
-
-                {/* Por turma */}
-                <Card>
-                  <h2 className="font-semibold flex items-center gap-2 mb-4" style={{ color: 'var(--text-primary)' }}>
-                    <TrendingUp className="w-5 h-5 text-warning" />
-                    Atividade por Turma
-                  </h2>
-
-                  <div className="space-y-3">
-                    {dados.estatisticas.por_turma.length === 0 ? (
-                      <p className="text-center py-4 text-sm" style={{ color: 'var(--text-muted)' }}>
-                        Nenhuma atividade registrada
-                      </p>
-                    ) : (
-                      dados.estatisticas.por_turma.map((turma) => (
-                        <div
-                          key={turma.turma}
-                          className="p-3 rounded-lg"
-                          style={{ background: 'var(--bg-elevated)' }}
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                              {turma.turma}
-                            </span>
-                            <span
-                              className="text-sm font-bold"
-                              style={{
-                                color: turma.taxa_participacao >= 80
-                                  ? 'var(--success)'
-                                  : turma.taxa_participacao >= 50
-                                  ? 'var(--warning)'
-                                  : 'var(--error)',
-                              }}
-                            >
-                              {turma.taxa_participacao}% participação
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-3">
-                              <span
-                                className="flex items-center gap-1"
-                                style={{ color: 'var(--success)' }}
-                              >
-                                <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                                {turma.ativos} ativos
-                              </span>
-                              {turma.inativos > 0 && (
-                                <span
-                                  className="flex items-center gap-1"
-                                  style={{ color: 'var(--error)' }}
-                                >
-                                  <span className="w-1.5 h-1.5 rounded-full bg-error" />
-                                  {turma.inativos} inativos
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span style={{ color: 'var(--text-muted)' }}>
-                                {turma.questoes}q
-                              </span>
-                              <span
-                                className="font-medium"
-                                style={{
-                                  color: turma.taxa_acerto >= 70
-                                    ? 'var(--success)'
-                                    : turma.taxa_acerto >= 50
-                                    ? 'var(--warning)'
-                                    : 'var(--error)',
-                                }}
-                              >
-                                {turma.taxa_acerto}%
-                              </span>
-                            </div>
-                          </div>
-                          {/* Barra de progresso de participação */}
-                          <div
-                            className="h-1 rounded-full mt-2 overflow-hidden"
-                            style={{ background: 'var(--bg-surface)' }}
-                          >
-                            <div
-                              className="h-full rounded-full transition-all"
-                              style={{
-                                width: `${turma.taxa_participacao}%`,
-                                background: turma.taxa_participacao >= 80
-                                  ? 'var(--success)'
-                                  : turma.taxa_participacao >= 50
-                                  ? 'var(--warning)'
-                                  : 'var(--error)',
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </Card>
+                            {aluno.tipo_atividade === 'estudo' ? 'Estudando' :
+                             aluno.tipo_atividade === 'desafio' ? 'Desafio' :
+                             aluno.tipo_atividade === 'tutor' ? 'Tutor IA' : 'Revisão'}
+                          </span>
+                        </td>
+                        <td className="py-1.5 text-center text-white/70">{aluno.questoes_sessao}</td>
+                        <td className="py-1.5 text-center">
+                          <span style={{
+                            color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444'
+                          }}>
+                            {aluno.acertos_sessao}/{aluno.questoes_sessao}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </>
-        ) : null}
-      </main>
+          </div>
+        </div>
+
+        {/* COLUNA 4: Alertas e Feed */}
+        <div className="col-span-1 flex flex-col gap-3 overflow-hidden">
+
+          {/* Alertas em Tempo Real */}
+          <div className="bg-white/5 rounded-xl p-3 flex-1 overflow-hidden">
+            <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-4 h-4 text-yellow-400" />
+              Alertas em Tempo Real
+            </h2>
+            <div className="space-y-2 overflow-y-auto max-h-[180px]">
+              {alertas.length === 0 ? (
+                <div className="text-center py-4">
+                  <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-2" />
+                  <p className="text-green-400/70 text-xs">Sem alertas</p>
+                </div>
+              ) : (
+                alertas.map((alerta) => (
+                  <div
+                    key={alerta.id}
+                    className="bg-yellow-500/10 rounded-lg p-2 border border-yellow-500/30"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                        style={{ background: getAvatarBg(alerta.componente) }}
+                      >
+                        {alerta.usuario_nome.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white text-xs font-medium truncate">{alerta.usuario_nome.split(' ')[0]}</p>
+                        <p className="text-white/50 text-[10px]">Errou: {alerta.detalhes.tema}</p>
+                      </div>
+                      <span className="text-yellow-400 text-[10px]">{formatarTempoRelativo(alerta.timestamp)}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Feed de Atividades Recentes */}
+          <div className="bg-white/5 rounded-xl p-3 h-[220px] overflow-hidden">
+            <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
+              <Activity className="w-4 h-4 text-blue-400" />
+              Atividades Recentes
+            </h2>
+            <div className="space-y-1.5 overflow-y-auto max-h-[170px]">
+              {atividades.slice(0, 10).map((ativ) => (
+                <div
+                  key={ativ.id}
+                  className="flex items-center gap-2 py-1 border-b border-white/5"
+                >
+                  {ativ.tipo === 'resposta' ? (
+                    ativ.detalhes.correta ? (
+                      <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                    )
+                  ) : ativ.tipo === 'desafio_completo' ? (
+                    <Award className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
+                  ) : ativ.tipo === 'tutor' ? (
+                    <Brain className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                  ) : (
+                    <Activity className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                  )}
+                  <span className="text-white/70 text-[10px] truncate flex-1">
+                    <span className="text-white font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
+                    {' - '}
+                    {ativ.tipo === 'resposta'
+                      ? (ativ.detalhes.correta ? 'acertou' : 'errou')
+                      : ativ.tipo === 'desafio_completo'
+                      ? 'completou desafio'
+                      : ativ.tipo === 'tutor'
+                      ? 'usando tutor'
+                      : 'atividade'
+                    }
+                  </span>
+                  <span className="text-white/30 text-[9px]">{formatarTempoRelativo(ativ.timestamp)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// COMPONENTE: Card de Estatística
+// COMPONENTES AUXILIARES
 // ═══════════════════════════════════════════════════════════════════════════
 
-interface StatCardProps {
-  icon: React.ReactNode
+interface StatBoxProps {
   label: string
-  value: number | string
+  value: string | number
   color: string
-  pulse?: boolean
+  icon: React.ReactNode
+  trend?: 'up' | 'down'
 }
 
-function StatCard({ icon, label, value, color, pulse }: StatCardProps) {
+function StatBox({ label, value, color, icon, trend }: StatBoxProps) {
   return (
     <div
-      className="rounded-xl p-3 text-center relative overflow-hidden"
+      className="rounded-lg p-2 flex flex-col justify-center"
       style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-default)',
+        background: 'rgba(255,255,255,0.05)',
+        borderLeft: `3px solid ${color}`
       }}
     >
-      {pulse && (
-        <div
-          className="absolute inset-0 animate-pulse"
-          style={{ background: `${color}10` }}
-        />
-      )}
-      <div className="relative">
-        <div className="mx-auto mb-1" style={{ color }}>
-          {icon}
+      <div className="flex items-center gap-2">
+        <div style={{ color }}>{icon}</div>
+        <div className="flex items-center gap-1">
+          <span className="text-2xl font-bold text-white">{value}</span>
+          {trend === 'up' && <TrendingUp className="w-4 h-4 text-green-400" />}
+          {trend === 'down' && <TrendingUp className="w-4 h-4 text-red-400 rotate-180" />}
         </div>
-        <p className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          {value}
-        </p>
-        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-          {label}
-        </p>
       </div>
+      <span className="text-white/50 text-xs mt-0.5">{label}</span>
     </div>
   )
 }
