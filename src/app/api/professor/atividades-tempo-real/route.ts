@@ -93,6 +93,7 @@ export interface RespostaAtividadesTempoReal {
   alunos_inativos: AlunoInativo[]
   estatisticas: EstatisticasTempoReal
   turmas_disponiveis: string[]
+  colegios_disponiveis: string[]
   periodo_minutos: number
   ultima_atualizacao: string
 }
@@ -102,8 +103,8 @@ const PERIODO_PADRAO = 60 // 60 minutos padrão (suficiente para 1 aula)
 const PERIODO_MAXIMO = 120 // máximo 2 horas
 const MAX_ATIVIDADES = 500 // aumentado para turmas grandes
 
-// Cache simples para turmas (atualiza a cada 5 minutos)
-let turmasCache: { data: string[]; timestamp: number } | null = null
+// Cache simples para turmas e colégios (atualiza a cada 5 minutos)
+let turmasColegiosCache: { turmas: string[]; colegios: string[]; timestamp: number } | null = null
 const TURMAS_CACHE_TTL = 5 * 60 * 1000
 
 // Função auxiliar para obter o bimestre atual baseado na data
@@ -146,6 +147,7 @@ export async function GET(request: NextRequest) {
     // 2. Parâmetros
     const searchParams = request.nextUrl.searchParams
     const turmaFiltro = searchParams.get('turma') || null
+    const colegioFiltro = searchParams.get('colegio') || null
     const componenteParam = searchParams.get('componente')
     // Validar componente para evitar valores inválidos
     const componenteFiltro: Componente | null =
@@ -230,14 +232,14 @@ export async function GET(request: NextRequest) {
         .order('criado_em', { ascending: false })
         .limit(200),
 
-      // Query 4: Turmas disponíveis (com cache)
-      getTurmasDisponiveis(supabase),
+      // Query 4: Turmas e colégios disponíveis (com cache)
+      getTurmasEColegiosDisponiveis(supabase),
 
       // Query 5: NOVO - Todos os alunos ativos (para identificar inativos)
-      // Inclui pontos para calcular ranking
+      // Inclui pontos para calcular ranking e colegio para filtro
       supabase
         .from('usuarios')
-        .select('id, nome, turma, componentes, ultimo_acesso, fis_pontos, mat_pontos')
+        .select('id, nome, turma, colegio, componentes, ultimo_acesso, fis_pontos, mat_pontos')
         .eq('tipo', 'estudante')
         .eq('ativo', true)
         .order('nome'),
@@ -296,11 +298,16 @@ export async function GET(request: NextRequest) {
     const respostasRecentes = respostasResult.data || []
     const desafiosRecentes = desafiosResult.data || []
     const chatRecente = chatResult.data || []
-    const turmasDisponiveis = turmasResult
-    const todosAlunos = todosAlunosResult.data || []
+    const { turmas: turmasDisponiveis, colegios: colegiosDisponiveis } = turmasResult
+    const todosAlunosRaw = todosAlunosResult.data || []
     const mapasCurtidas = mapasCurtidasResult.data || []
     const mapasDownloads = mapasDownloadsResult.data || []
     const notasAlunos = notasResult.data || []
+
+    // Filtrar alunos por colégio se especificado
+    const todosAlunos = colegioFiltro
+      ? todosAlunosRaw.filter(a => a.colegio === colegioFiltro)
+      : todosAlunosRaw
 
     // Criar mapa de notas por aluno e componente
     const notasPorAluno = new Map<string, { fisica?: number; matematica?: number }>()
@@ -345,6 +352,11 @@ export async function GET(request: NextRequest) {
       return usuario.tipo === 'estudante' && usuario.ativo === true
     }
 
+    // Criar Set de IDs de usuários do colégio filtrado (para filtrar atividades)
+    const usuariosDoColegioSet = colegioFiltro
+      ? new Set(todosAlunos.map(a => a.id))
+      : null
+
     // Processar respostas (filtrando apenas estudantes ativos)
     const respostasMapeadas = (respostasRecentes || [])
       .map(r => ({
@@ -358,6 +370,7 @@ export async function GET(request: NextRequest) {
         if (!isEstudanteAtivo(r.usuarios)) return false
         if (turmaFiltro && r.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && r.componente !== componenteFiltro) return false
+        if (usuariosDoColegioSet && !usuariosDoColegioSet.has(r.usuario_id)) return false
         return true
       })
 
@@ -371,6 +384,7 @@ export async function GET(request: NextRequest) {
         if (!isEstudanteAtivo(d.usuarios)) return false
         if (turmaFiltro && d.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && d.componente !== componenteFiltro) return false
+        if (usuariosDoColegioSet && !usuariosDoColegioSet.has(d.usuario_id)) return false
         return true
       })
 
@@ -384,6 +398,7 @@ export async function GET(request: NextRequest) {
         if (!isEstudanteAtivo(c.usuarios)) return false
         if (turmaFiltro && c.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && c.componente !== componenteFiltro) return false
+        if (usuariosDoColegioSet && !usuariosDoColegioSet.has(c.usuario_id)) return false
         return true
       })
 
@@ -398,6 +413,7 @@ export async function GET(request: NextRequest) {
         if (!isEstudanteAtivo(c.usuarios)) return false
         if (turmaFiltro && c.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && c.mapas_mentais?.componente !== componenteFiltro) return false
+        if (usuariosDoColegioSet && !usuariosDoColegioSet.has(c.usuario_id)) return false
         return true
       })
 
@@ -412,6 +428,7 @@ export async function GET(request: NextRequest) {
         if (!isEstudanteAtivo(d.usuarios)) return false
         if (turmaFiltro && d.usuarios!.turma !== turmaFiltro) return false
         if (componenteFiltro && d.mapas_mentais?.componente !== componenteFiltro) return false
+        if (usuariosDoColegioSet && !usuariosDoColegioSet.has(d.usuario_id)) return false
         return true
       })
 
@@ -890,6 +907,7 @@ export async function GET(request: NextRequest) {
       alunos_inativos: alunosInativos,
       estatisticas,
       turmas_disponiveis: turmasDisponiveis,
+      colegios_disponiveis: colegiosDisponiveis,
       periodo_minutos: periodoMinutos,
       ultima_atualizacao: agora.toISOString(),
     }
@@ -909,22 +927,24 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Função auxiliar para buscar turmas com cache
-async function getTurmasDisponiveis(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<string[]> {
+// Função auxiliar para buscar turmas e colégios com cache
+async function getTurmasEColegiosDisponiveis(supabase: ReturnType<typeof getSupabaseAdmin>): Promise<{ turmas: string[]; colegios: string[] }> {
   const agora = Date.now()
 
-  if (turmasCache && (agora - turmasCache.timestamp) < TURMAS_CACHE_TTL) {
-    return turmasCache.data
+  if (turmasColegiosCache && (agora - turmasColegiosCache.timestamp) < TURMAS_CACHE_TTL) {
+    return { turmas: turmasColegiosCache.turmas, colegios: turmasColegiosCache.colegios }
   }
 
-  const { data: turmasData } = await supabase
+  const { data: usuariosData } = await supabase
     .from('usuarios')
-    .select('turma')
+    .select('turma, colegio')
     .eq('tipo', 'estudante')
     .eq('ativo', true)
 
-  const turmas = [...new Set((turmasData || []).map(u => u.turma))].sort()
-  turmasCache = { data: turmas, timestamp: agora }
+  const turmas = [...new Set((usuariosData || []).map(u => u.turma).filter(Boolean))].sort()
+  const colegios = [...new Set((usuariosData || []).map(u => u.colegio).filter(Boolean))].sort() as string[]
 
-  return turmas
+  turmasColegiosCache = { turmas, colegios, timestamp: agora }
+
+  return { turmas, colegios }
 }
