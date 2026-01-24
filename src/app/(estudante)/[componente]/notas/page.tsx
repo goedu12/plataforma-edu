@@ -337,28 +337,50 @@ export default function NotasPage() {
 
               <div
                 className="overflow-hidden transition-all duration-300"
-                style={{ maxHeight: mostrarDetalhes ? '250px' : '0px' }}
+                style={{ maxHeight: mostrarDetalhes ? '280px' : '0px' }}
               >
                 <div className="px-4 pb-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
-                      <p className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: corPrimaria }}>
-                        <Target className="w-4 h-4" /> Acertos (máx 6pts)
+                      <p className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: corPrimaria }}>
+                        <Target className="w-4 h-4" /> Acertos (máx 6 pts)
                       </p>
-                      <div className="space-y-1 text-2xs" style={{ color: 'var(--text-secondary)' }}>
-                        <p>Estudar: <b className="text-xs">+0.04</b></p>
-                        <p>Revisão: <b className="text-xs">+0.02</b></p>
-                        <p>Desafio: <b className="text-xs">+0.01</b></p>
+                      <div className="space-y-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex justify-between items-center">
+                          <span>Estudar</span>
+                          <span className="font-bold" style={{ color: corPrimaria }}>+0.04 pt</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Revisão</span>
+                          <span className="font-bold" style={{ color: corPrimaria }}>+0.02 pt</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Desafio</span>
+                          <span className="font-bold" style={{ color: corPrimaria }}>+0.01 pt</span>
+                        </div>
                       </div>
                     </div>
                     <div className="p-3 rounded-lg" style={{ background: 'var(--bg-elevated)' }}>
-                      <p className="text-xs font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--color-accent)' }}>
-                        <Clock className="w-4 h-4" /> Tempo (máx 4pts)
+                      <p className="text-xs font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-accent)' }}>
+                        <Clock className="w-4 h-4" /> Tempo (máx 4 pts)
                       </p>
-                      <div className="space-y-1 text-2xs" style={{ color: 'var(--text-secondary)' }}>
-                        <p>2 horas <b className="text-xs">→ 1pt</b></p>
-                        <p>3 horas <b className="text-xs">→ 2pts</b></p>
-                        <p>4h → 3pts • 5h+ → 4pts</p>
+                      <div className="space-y-2 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex justify-between items-center">
+                          <span>2 horas</span>
+                          <span className="font-bold" style={{ color: 'var(--color-accent)' }}>1 pt</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>3 horas</span>
+                          <span className="font-bold" style={{ color: 'var(--color-accent)' }}>2 pts</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>4 horas</span>
+                          <span className="font-bold" style={{ color: 'var(--color-accent)' }}>3 pts</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>5+ horas</span>
+                          <span className="font-bold" style={{ color: 'var(--color-accent)' }}>4 pts</span>
+                        </div>
                       </div>
                     </div>
                   </div>
