@@ -148,6 +148,13 @@ export default function TrilhasPage() {
   }, [router, componente])
 
   const iniciarTrilha = async (trilha: Trilha) => {
+    // Trilha Curiosidade tem fluxo especial - vai para seleção de temas
+    if (trilha.id === 'curiosidade') {
+      setModalTrilha(null)
+      router.push(`/${componente}/trilhas/curiosidade`)
+      return
+    }
+
     setIniciando(true)
     try {
       const res = await fetch('/api/trilhas', {
