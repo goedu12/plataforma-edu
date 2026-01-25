@@ -12,9 +12,10 @@ export async function GET() {
 
     // Buscar apenas estudantes ativos com informações básicas
     // NÃO retorna senha ou dados sensíveis
+    // Nota: O campo 'email' é usado como login no sistema
     const { data: usuarios, error } = await supabase
       .from('usuarios')
-      .select('nome, turma, login, componente')
+      .select('nome, turma, email, componentes')
       .eq('tipo', 'estudante')
       .eq('ativo', true)
       .order('turma', { ascending: true })
@@ -26,12 +27,19 @@ export async function GET() {
     }
 
     // Formatar dados (garantir que não há dados sensíveis)
-    const estudantes = (usuarios || []).map(u => ({
-      nome: u.nome || 'Sem nome',
-      turma: u.turma || 'Sem turma',
-      login: u.login || '',
-      componente: u.componente || 'fisica',
-    }))
+    // O email é o login do sistema (formato: nome@turma)
+    const estudantes = (usuarios || []).map(u => {
+      // Pegar o primeiro componente do array ou default para 'fisica'
+      const componentes = u.componentes as string[] | null
+      const componente = componentes && componentes.length > 0 ? componentes[0] : 'fisica'
+
+      return {
+        nome: u.nome || 'Sem nome',
+        turma: u.turma || 'Sem turma',
+        login: u.email || '', // O email é o login
+        componente: componente,
+      }
+    })
 
     return NextResponse.json({
       sucesso: true,
