@@ -37,6 +37,24 @@ export interface ContextoEstudante {
   notaBimestre?: number
   metaBimestre?: number
   conquistaRecente?: string
+  // ═══════════════════════════════════════════════════════════
+  // CONTEXTO AVANÇADO (IA Tutor 2.0)
+  // ═══════════════════════════════════════════════════════════
+  preferencias?: {
+    usarAnalogias: boolean
+    usarFormulas: boolean
+    usarExemplos: boolean
+    preferePasso: boolean
+    nivelDetalhe: 'minimo' | 'medio' | 'maximo'
+    tomConversa: 'formal' | 'amigavel' | 'descontraido'
+  }
+  estadoEmocional?: {
+    engajamento: number // 1-10
+    frustacao: number // 1-10
+    confianca: number // 1-10
+    precisaMotivacao: boolean
+    sequenciaErros: number
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -46,7 +64,17 @@ export interface ContextoEstudante {
 export function detectarModo(mensagem: string, contexto: ContextoEstudante = {}): ModoIA {
   const msg = mensagem.toLowerCase().trim()
 
-  // Verificar estado emocional primeiro (prioridade alta)
+  // Verificar estado emocional avançado primeiro (prioridade alta)
+  if (contexto.estadoEmocional) {
+    const { frustacao, precisaMotivacao, sequenciaErros } = contexto.estadoEmocional
+
+    // Alta frustração ou precisa motivação
+    if (frustacao >= 7 || precisaMotivacao || sequenciaErros >= 3) {
+      return 'ESTIMULAR'
+    }
+  }
+
+  // Fallback para contexto legado
   if (contexto.precisaMotivacao || (contexto.sequenciaErros && contexto.sequenciaErros >= 3)) {
     return 'ESTIMULAR'
   }
