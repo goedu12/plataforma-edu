@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Clock,
   RefreshCw,
+  Trophy,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
@@ -247,7 +248,7 @@ export default function TrilhasPage() {
         <div className="max-w-2xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/menu`} compactOnDesktop />
-            <div>
+            <div className="flex-1">
               <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Trilhas de Aprendizado
               </h1>
@@ -255,6 +256,20 @@ export default function TrilhasPage() {
                 Escolha sua jornada de estudos
               </p>
             </div>
+            {/* Botão de Ranking */}
+            <button
+              onClick={() => router.push(`/${componente}/trilhas/ranking`)}
+              className="p-2.5 rounded-xl flex items-center gap-1.5 transition-all"
+              style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--warning)',
+              }}
+              title="Ver ranking semanal"
+            >
+              <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+              <span className="text-xs lg:text-2xs font-medium hidden sm:inline">Ranking</span>
+            </button>
           </div>
         </div>
       </header>
