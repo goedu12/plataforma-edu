@@ -19,6 +19,7 @@ interface Estudante {
   turma: string
   login: string
   componente: string
+  colegio: string
 }
 
 export default function LoginPage() {
@@ -34,6 +35,7 @@ export default function LoginPage() {
   const [estudantes, setEstudantes] = useState<Estudante[]>([])
   const [turmasDisponiveis, setTurmasDisponiveis] = useState<string[]>([])
   const [carregandoEstudantes, setCarregandoEstudantes] = useState(false)
+  const [erroAjuda, setErroAjuda] = useState('')
   const [config, setConfig] = useState<Configuracoes>({
     nome_plataforma: 'seu10',
     versao: '1.0',
@@ -65,6 +67,7 @@ export default function LoginPage() {
     if (estudantes.length > 0) return // Já carregou
 
     setCarregandoEstudantes(true)
+    setErroAjuda('')
     try {
       const response = await fetch('/api/auth/listar-logins')
       const data = await response.json()
@@ -73,9 +76,15 @@ export default function LoginPage() {
         // Extrair turmas únicas
         const turmas = [...new Set(data.estudantes.map((e: Estudante) => e.turma))].sort()
         setTurmasDisponiveis(turmas as string[])
+        if (data.estudantes?.length === 0) {
+          setErroAjuda('Nenhum estudante cadastrado no sistema.')
+        }
+      } else {
+        setErroAjuda(data.erro || data.detalhes || 'Erro ao carregar estudantes')
       }
-    } catch {
-      // Silenciar erro
+    } catch (err) {
+      setErroAjuda('Erro de conexao ao buscar estudantes')
+      console.error('Erro buscarEstudantes:', err)
     } finally {
       setCarregandoEstudantes(false)
     }
@@ -381,6 +390,13 @@ export default function LoginPage() {
                 <div className="flex items-center justify-center py-8">
                   <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'var(--color-fisica)' }} />
                 </div>
+              ) : erroAjuda ? (
+                <div className="text-center py-8">
+                  <Info className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--error)' }} />
+                  <p className="text-sm" style={{ color: 'var(--error)' }}>
+                    {erroAjuda}
+                  </p>
+                </div>
               ) : estudantesFiltrados.length > 0 ? (
                 <div className="space-y-2">
                   {estudantesFiltrados.map((estudante, index) => (
@@ -397,6 +413,11 @@ export default function LoginPage() {
                           <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                             {estudante.nome}
                           </p>
+                          {estudante.colegio && (
+                            <p className="text-xs truncate mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                              {estudante.colegio}
+                            </p>
+                          )}
                           <div className="flex items-center gap-2 mt-1 flex-wrap">
                             <span
                               className="text-xs px-2 py-0.5 rounded"

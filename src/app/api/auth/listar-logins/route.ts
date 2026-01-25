@@ -15,16 +15,22 @@ export async function GET() {
     // Nota: O campo 'email' é usado como login no sistema
     const { data: usuarios, error } = await supabase
       .from('usuarios')
-      .select('nome, turma, email, componentes')
+      .select('nome, turma, email, componentes, colegio')
       .eq('tipo', 'estudante')
       .eq('ativo', true)
       .order('turma', { ascending: true })
       .order('nome', { ascending: true })
 
     if (error) {
-      console.error('[Listar Logins] Erro:', error)
-      return NextResponse.json({ sucesso: false, erro: 'Erro ao buscar estudantes' }, { status: 500 })
+      console.error('[Listar Logins] Erro Supabase:', error.message, error.details, error.hint)
+      return NextResponse.json({
+        sucesso: false,
+        erro: 'Erro ao buscar estudantes',
+        detalhes: error.message
+      }, { status: 500 })
     }
+
+    console.log('[Listar Logins] Encontrados:', usuarios?.length || 0, 'estudantes')
 
     // Formatar dados (garantir que não há dados sensíveis)
     // O email é o login do sistema (formato: nome@turma)
@@ -38,6 +44,7 @@ export async function GET() {
         turma: u.turma || 'Sem turma',
         login: u.email || '', // O email é o login
         componente: componente,
+        colegio: u.colegio || '',
       }
     })
 
