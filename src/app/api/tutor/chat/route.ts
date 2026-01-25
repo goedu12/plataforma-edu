@@ -7,6 +7,124 @@ import { PONTUACAO } from '@/types'
 import { getPeriodoAtual } from '@/lib/sistema-notas'
 
 // ═══════════════════════════════════════════════════════════
+// TIPOS PARA PREFERÊNCIAS E ESTADO
+// ═══════════════════════════════════════════════════════════
+interface PreferenciasEstudante {
+  prefere_analogias: boolean
+  prefere_formulas: boolean
+  prefere_exemplos: boolean
+  prefere_visual: boolean
+  prefere_passo_a_passo: boolean
+  nivel_detalhe: 'minimo' | 'medio' | 'maximo'
+  tom_conversa: 'formal' | 'amigavel' | 'descontraido'
+  velocidade: 'lento' | 'normal' | 'rapido'
+}
+
+interface EstadoEstudante {
+  nivel_engajamento: number
+  nivel_frustacao: number
+  nivel_confianca: number
+  precisa_motivacao: boolean
+  sequencia_erros: number
+}
+
+// ═══════════════════════════════════════════════════════════
+// FUNCAO PARA BUSCAR CONTEXTO AVANÇADO DO ESTUDANTE
+// ═══════════════════════════════════════════════════════════
+async function buscarContextoAvancado(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  usuarioId: string,
+  componente: Componente
+): Promise<{ preferencias: PreferenciasEstudante | null; estado: EstadoEstudante | null; dificuldades: string[] }> {
+  try {
+    // Buscar preferências
+    const { data: preferencias } = await supabase
+      .from('estudante_preferencias')
+      .select('*')
+      .eq('usuario_id', usuarioId)
+      .single()
+
+    // Buscar estado emocional
+    const { data: estado } = await supabase
+      .from('estudante_estado')
+      .select('*')
+      .eq('usuario_id', usuarioId)
+      .eq('componente', componente)
+      .single()
+
+    // Buscar top 3 dificuldades
+    const { data: dificuldades } = await supabase
+      .from('estudante_dificuldades')
+      .select('topico')
+      .eq('usuario_id', usuarioId)
+      .eq('componente', componente)
+      .gte('nivel_dificuldade', 4)
+      .order('nivel_dificuldade', { ascending: false })
+      .limit(3)
+
+    return {
+      preferencias: preferencias as PreferenciasEstudante | null,
+      estado: estado as EstadoEstudante | null,
+      dificuldades: dificuldades?.map(d => d.topico) || [],
+    }
+  } catch (error) {
+    console.error('[Contexto Avançado] Erro:', error)
+    return { preferencias: null, estado: null, dificuldades: [] }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// FUNCAO PARA BUSCAR/CRIAR SESSÃO DE IA
+// ═══════════════════════════════════════════════════════════
+async function obterOuCriarSessao(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  usuarioId: string,
+  componente: Componente
+): Promise<string | null> {
+  try {
+    // Buscar sessão ativa (aberta nas últimas 2 horas)
+    const duasHorasAtras = new Date()
+    duasHorasAtras.setHours(duasHorasAtras.getHours() - 2)
+
+    const { data: sessaoAtiva } = await supabase
+      .from('ia_sessoes')
+      .select('id')
+      .eq('usuario_id', usuarioId)
+      .eq('componente', componente)
+      .is('fim', null)
+      .gte('inicio', duasHorasAtras.toISOString())
+      .order('inicio', { ascending: false })
+      .limit(1)
+      .single()
+
+    if (sessaoAtiva) {
+      return sessaoAtiva.id
+    }
+
+    // Criar nova sessão
+    const { data: novaSessao, error } = await supabase
+      .from('ia_sessoes')
+      .insert({
+        usuario_id: usuarioId,
+        componente,
+        inicio: new Date().toISOString(),
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('[Sessão IA] Erro ao criar:', error)
+      return null
+    }
+
+    return novaSessao.id
+  } catch (error) {
+    console.error('[Sessão IA] Erro:', error)
+    return null
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // FUNCAO PARA BUSCAR CONTEXTO DO ESTUDANTE
 // ═══════════════════════════════════════════════════════════
 async function buscarContextoEstudante(
@@ -215,7 +333,50 @@ export async function POST(request: NextRequest) {
       usuario.turma
     )
 
+    // ═══════════════════════════════════════════════════════════
+    // BUSCAR CONTEXTO AVANÇADO (preferências, estado, dificuldades)
+    // ═══════════════════════════════════════════════════════════
+    const { preferencias, estado, dificuldades } = await buscarContextoAvancado(
+      supabase,
+      sessao.userId,
+      componente as Componente
+    )
+
+    // Enriquecer contexto com dados avançados
+    if (preferencias) {
+      contextoEstudante.preferencias = {
+        usarAnalogias: preferencias.prefere_analogias,
+        usarFormulas: preferencias.prefere_formulas,
+        usarExemplos: preferencias.prefere_exemplos,
+        preferePasso: preferencias.prefere_passo_a_passo,
+        nivelDetalhe: preferencias.nivel_detalhe,
+        tomConversa: preferencias.tom_conversa,
+      }
+    }
+
+    if (estado) {
+      contextoEstudante.estadoEmocional = {
+        engajamento: estado.nivel_engajamento,
+        frustacao: estado.nivel_frustacao,
+        confianca: estado.nivel_confianca,
+        precisaMotivacao: estado.precisa_motivacao,
+        sequenciaErros: estado.sequencia_erros,
+      }
+    }
+
+    if (dificuldades.length > 0) {
+      contextoEstudante.temasComDificuldade = dificuldades
+    }
+
+    // Obter ou criar sessão de IA
+    const sessaoIaId = await obterOuCriarSessao(
+      supabase,
+      sessao.userId,
+      componente as Componente
+    )
+
     console.log('[Tutor IA] Contexto:', JSON.stringify(contextoEstudante))
+    console.log('[Tutor IA] Sessão:', sessaoIaId)
 
     // Chamar o tutor IA com valores validados e contexto personalizado
     const resultado = await chatComTutor(
@@ -252,7 +413,7 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', sessao.userId)
 
-    // Salvar no histórico com dados de revisão
+    // Salvar no histórico legado (compatibilidade)
     await supabase.from('historico_chat').insert([
       {
         usuario_id: sessao.userId,
@@ -265,11 +426,53 @@ export async function POST(request: NextRequest) {
         componente,
         role: 'assistant',
         content: respostaFinal,
-        // Metadados de revisão (se a coluna existir)
-        // revisao_nota: resultadoRevisao.notaMedia,
-        // revisao_aprovado: resultadoRevisao.aprovado,
       },
     ])
+
+    // ═══════════════════════════════════════════════════════════
+    // SALVAR MENSAGENS NA TABELA AVANÇADA (ia_mensagens)
+    // ═══════════════════════════════════════════════════════════
+    if (sessaoIaId) {
+      try {
+        // Salvar mensagem do usuário
+        await supabase.from('ia_mensagens').insert({
+          sessao_id: sessaoIaId,
+          usuario_id: sessao.userId,
+          componente,
+          role: 'user',
+          content: mensagemValidada,
+          topico: resultado.topico || null,
+        })
+
+        // Salvar resposta do assistente
+        await supabase.from('ia_mensagens').insert({
+          sessao_id: sessaoIaId,
+          usuario_id: sessao.userId,
+          componente,
+          role: 'assistant',
+          content: respostaFinal,
+          modo: resultado.modo || null,
+          topico: resultado.topico || null,
+          modelo_usado: 'gemini-2.0-flash-lite',
+        })
+
+        // Atualizar sessão com modo/tópico predominante
+        if (resultado.modo || resultado.topico) {
+          await supabase
+            .from('ia_sessoes')
+            .update({
+              modo_predominante: resultado.modo || null,
+              topico_principal: resultado.topico || null,
+              msgs_trocadas: novoUso,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', sessaoIaId)
+        }
+      } catch (error) {
+        // Não falhar se erro ao salvar mensagens avançadas
+        console.error('[IA Mensagens] Erro ao salvar:', error)
+      }
+    }
 
     return NextResponse.json({
       sucesso: true,
@@ -278,6 +481,7 @@ export async function POST(request: NextRequest) {
       limite: PONTUACAO.LIMITE_IA_DIARIO,
       modo: resultado.modo,
       topico: resultado.topico,
+      sessaoId: sessaoIaId,
     })
   } catch (error) {
     console.error('Erro no chat com tutor:', error)

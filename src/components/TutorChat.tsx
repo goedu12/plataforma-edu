@@ -14,18 +14,23 @@ import {
   VolumeX,
   Camera,
   XCircle,
-  Keyboard
+  Keyboard,
+  Settings,
+  ThumbsUp,
+  ThumbsDown
 } from 'lucide-react'
 import Button from './ui/Button'
 import { TypingIndicator } from './ui/Loading'
 import { useWebSpeech } from '@/hooks/useWebSpeech'
+import TutorPreferencias from './TutorPreferencias'
+import { TutorFeedbackInline, TutorAvaliacaoSessao } from './TutorFeedback'
 import type { Componente, MensagemChat } from '@/types'
 
 // ═══════════════════════════════════════════════════════════
 // TIPOS
 // ═══════════════════════════════════════════════════════════
 
-type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
+type ModoIA = 'DIRETO' | 'PASSO_A_PASSO' | 'MAPA_MENTAL' | 'ESTIMULAR' | 'SOCRATICO' | 'CONVERSACIONAL'
 
 interface MensagemChatComModo extends MensagemChat {
   modo?: ModoIA
@@ -72,6 +77,11 @@ export default function TutorChat({
   // Estados de imagem
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
   const [imagemBase64, setImagemBase64] = useState<string | null>(null)
+
+  // Estados IA Avançado
+  const [sessaoIaId, setSessaoIaId] = useState<string | null>(null)
+  const [mostrarPreferencias, setMostrarPreferencias] = useState(false)
+  const [mostrarAvaliacaoSessao, setMostrarAvaliacaoSessao] = useState(false)
 
   // Refs
   const chatRef = useRef<HTMLDivElement>(null)
@@ -273,6 +283,10 @@ export default function TutorChat({
         }
         setMensagens(prev => [...prev, respostaTutor])
         setUsoHoje(data.uso_hoje)
+        // Salvar sessão ID para avaliação final
+        if (data.sessaoId) {
+          setSessaoIaId(data.sessaoId)
+        }
       } else {
         setErro(data.erro || 'Erro ao comunicar com o tutor')
       }
@@ -368,6 +382,14 @@ export default function TutorChat({
         </div>
         <div className="flex items-center gap-2">
           <button
+            onClick={() => setMostrarPreferencias(true)}
+            className="p-2.5 rounded-xl transition-all touch-target"
+            style={{ color: 'var(--text-muted)' }}
+            title="Preferencias de estudo"
+          >
+            <Settings className="w-5 h-5" />
+          </button>
+          <button
             onClick={limparChat}
             className="p-2.5 rounded-xl transition-all touch-target"
             style={{ color: 'var(--text-muted)' }}
@@ -376,7 +398,13 @@ export default function TutorChat({
             <Trash2 className="w-5 h-5" />
           </button>
           <button
-            onClick={onClose}
+            onClick={() => {
+              if (sessaoIaId && mensagens.length > 1) {
+                setMostrarAvaliacaoSessao(true)
+              } else {
+                onClose()
+              }
+            }}
             className="p-2.5 rounded-xl transition-all touch-target"
             style={{ color: 'var(--text-muted)' }}
             title="Sair do chat"
@@ -415,20 +443,45 @@ export default function TutorChat({
                   <div className="flex items-center gap-2 mb-2">
                     <Bot className="w-4 h-4" style={{ color: corPrimaria }} />
                     <span className="text-xs font-medium" style={{ color: corPrimaria }}>{nomeTutor}</span>
-                    {/* Botao de ouvir resposta */}
-                    {ttsSupported && (
-                      <button
-                        onClick={() => toggleSpeaking(msg.content)}
-                        className="ml-auto p-1 rounded-lg transition-colors hover:bg-black/10"
-                        title={isSpeaking ? 'Parar de falar' : 'Ouvir resposta'}
+                    {/* Modo da IA */}
+                    {msg.modo && (
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded"
+                        style={{
+                          background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                          color: 'var(--text-muted)',
+                        }}
                       >
-                        {isSpeaking ? (
-                          <VolumeX className="w-4 h-4" style={{ color: 'var(--error)' }} />
-                        ) : (
-                          <Volume2 className="w-4 h-4" style={{ color: corPrimaria }} />
-                        )}
-                      </button>
+                        {msg.modo === 'PASSO_A_PASSO' ? 'Passo a Passo' :
+                         msg.modo === 'DIRETO' ? 'Direto' :
+                         msg.modo === 'ESTIMULAR' ? 'Motivacao' :
+                         msg.modo === 'SOCRATICO' ? 'Socratico' :
+                         msg.modo === 'MAPA_MENTAL' ? 'Mapa' : ''}
+                      </span>
                     )}
+                    <div className="ml-auto flex items-center gap-1">
+                      {/* Feedback inline */}
+                      {msg.id !== '1' && (
+                        <TutorFeedbackInline
+                          componente={componente}
+                          mensagemId={msg.id}
+                        />
+                      )}
+                      {/* Botao de ouvir resposta */}
+                      {ttsSupported && (
+                        <button
+                          onClick={() => toggleSpeaking(msg.content)}
+                          className="p-1 rounded-lg transition-colors hover:bg-black/10"
+                          title={isSpeaking ? 'Parar de falar' : 'Ouvir resposta'}
+                        >
+                          {isSpeaking ? (
+                            <VolumeX className="w-4 h-4" style={{ color: 'var(--error)' }} />
+                          ) : (
+                            <Volume2 className="w-4 h-4" style={{ color: corPrimaria }} />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -662,6 +715,25 @@ export default function TutorChat({
             )}
           </div>
         </div>
+      )}
+
+      {/* Modal de Preferências */}
+      <TutorPreferencias
+        componente={componente}
+        isOpen={mostrarPreferencias}
+        onClose={() => setMostrarPreferencias(false)}
+      />
+
+      {/* Modal de Avaliação de Sessão */}
+      {mostrarAvaliacaoSessao && (
+        <TutorAvaliacaoSessao
+          componente={componente}
+          sessaoId={sessaoIaId || undefined}
+          onClose={() => {
+            setMostrarAvaliacaoSessao(false)
+            onClose()
+          }}
+        />
       )}
     </div>
   )
