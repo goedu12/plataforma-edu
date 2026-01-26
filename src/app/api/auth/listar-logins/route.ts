@@ -6,6 +6,16 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 // Permite que estudantes encontrem seu login antes de entrar
 // ═══════════════════════════════════════════════════════════
 
+// Função para extrair turno da turma (ex: "1A-M" -> "Manhã")
+function extrairTurno(turma: string): string {
+  const turmaUpper = turma.toUpperCase()
+  if (turmaUpper.includes('-M') || turmaUpper.endsWith('M')) return 'Manhã'
+  if (turmaUpper.includes('-T') || turmaUpper.endsWith('T')) return 'Tarde'
+  if (turmaUpper.includes('-N') || turmaUpper.endsWith('N')) return 'Noite'
+  if (turmaUpper.includes('-I') || turmaUpper.endsWith('I')) return 'Integral'
+  return '' // Turno não identificado
+}
+
 export async function GET() {
   try {
     const supabase = getSupabaseAdmin()
@@ -18,6 +28,7 @@ export async function GET() {
       .select('nome, turma, email, componentes, colegio')
       .eq('tipo', 'estudante')
       .eq('ativo', true)
+      .order('colegio', { ascending: true })
       .order('turma', { ascending: true })
       .order('nome', { ascending: true })
 
@@ -38,6 +49,7 @@ export async function GET() {
       // Pegar o primeiro componente do array ou default para 'fisica'
       const componentes = u.componentes as string[] | null
       const componente = componentes && componentes.length > 0 ? componentes[0] : 'fisica'
+      const turno = extrairTurno(u.turma || '')
 
       return {
         nome: u.nome || 'Sem nome',
@@ -45,6 +57,7 @@ export async function GET() {
         login: u.email || '', // O email é o login
         componente: componente,
         colegio: u.colegio || '',
+        turno: turno,
       }
     })
 
