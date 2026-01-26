@@ -6,13 +6,22 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 // Permite que estudantes encontrem seu login antes de entrar
 // ═══════════════════════════════════════════════════════════
 
-// Função para extrair turno da turma (ex: "1A-M" -> "Manhã")
-function extrairTurno(turma: string): string {
+// Função para determinar turno baseado na turma ou colégio
+function determinarTurno(turma: string, colegio: string): string {
   const turmaUpper = turma.toUpperCase()
-  if (turmaUpper.includes('-M') || turmaUpper.endsWith('M')) return 'Manhã'
-  if (turmaUpper.includes('-T') || turmaUpper.endsWith('T')) return 'Tarde'
-  if (turmaUpper.includes('-N') || turmaUpper.endsWith('N')) return 'Noite'
+  const colegioUpper = colegio.toUpperCase()
+
+  // Primeiro tenta extrair da turma
+  if (turmaUpper.includes('-M') || turmaUpper.endsWith('M')) return 'Matutino'
+  if (turmaUpper.includes('-T') || turmaUpper.endsWith('T')) return 'Vespertino'
+  if (turmaUpper.includes('-V') || turmaUpper.endsWith('V')) return 'Vespertino'
+  if (turmaUpper.includes('-N') || turmaUpper.endsWith('N')) return 'Noturno'
   if (turmaUpper.includes('-I') || turmaUpper.endsWith('I')) return 'Integral'
+
+  // Se não conseguiu extrair da turma, determina pelo colégio
+  if (colegioUpper.includes('CORA CORALINA')) return 'Matutino'
+  if (colegioUpper.includes('COLEMAR') || colegioUpper.includes('NATAL E SILVA')) return 'Vespertino'
+
   return '' // Turno não identificado
 }
 
@@ -49,7 +58,7 @@ export async function GET() {
       // Pegar o primeiro componente do array ou default para 'fisica'
       const componentes = u.componentes as string[] | null
       const componente = componentes && componentes.length > 0 ? componentes[0] : 'fisica'
-      const turno = extrairTurno(u.turma || '')
+      const turno = determinarTurno(u.turma || '', u.colegio || '')
 
       return {
         nome: u.nome || 'Sem nome',
