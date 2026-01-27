@@ -113,6 +113,7 @@ export default function MenuComponentePage() {
     { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
     { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
     { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
+    { icon: FileText, label: 'Teoria', href: `/${componente}/teoria`, description: 'Conteúdos', badgeText: 'NOVO' },
     { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Quiz rápido', badgeText: 'TESTE' },
     { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', badgeText: 'TESTE' },
   ]
