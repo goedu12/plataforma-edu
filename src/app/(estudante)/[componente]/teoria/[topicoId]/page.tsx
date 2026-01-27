@@ -6,14 +6,15 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  Lightbulb,
-  Calculator,
   AlertCircle,
+  Calculator,
+  Lightbulb,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { FormulaCard, ExemploResolvido, DicaCard, ConteudoCard } from '@/components/teoria'
 import type { Componente } from '@/types'
 import { getTopico, getConteudoTeoria, type Topico } from '@/lib/teoria'
 
@@ -37,7 +38,6 @@ export default function TopicoTeoriaPage() {
 
     const carregarDados = async () => {
       try {
-        // Buscar usuário para pegar a série
         const userRes = await fetch('/api/usuario')
         const userData = await userRes.json()
 
@@ -49,11 +49,9 @@ export default function TopicoTeoriaPage() {
         const anoUsuario = userData.usuario.ano || 1
         setSerie(anoUsuario)
 
-        // Carregar tópico específico
         const topicoEncontrado = getTopico(componente, anoUsuario, topicoId, bimestre)
         setTopico(topicoEncontrado)
 
-        // Carregar lista de tópicos para navegação
         const todosTopicos = getConteudoTeoria(componente, anoUsuario, bimestre)
         setTopicos(todosTopicos)
       } catch (error) {
@@ -131,11 +129,14 @@ export default function TopicoTeoriaPage() {
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/teoria`} compactOnDesktop />
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg lg:text-base font-bold truncate" style={{ color: 'var(--text-primary)' }}>
-                {topico.titulo}
-              </h1>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{topico.icone}</span>
+                <h1 className="text-lg lg:text-base font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                  {topico.titulo}
+                </h1>
+              </div>
               <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
-                {isFisica ? 'Física' : 'Matemática'} - {serie}ª Série • {bimestre}º Bimestre
+                {isFisica ? 'Física' : 'Matemática'} • {serie}ª Série • {bimestre}º Bimestre
               </p>
             </div>
           </div>
@@ -143,126 +144,46 @@ export default function TopicoTeoriaPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3 space-y-4 lg:space-y-3">
-        {/* Introdução */}
-        <section
-          className="p-4 lg:p-3 rounded-lg"
+      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-3 space-y-4">
+        {/* Resumo */}
+        <div
+          className="p-3 rounded-xl text-center"
           style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-default)',
+            background: `linear-gradient(135deg, ${accentColor}12, ${accentColor}05)`,
+            border: `1px solid ${accentColor}25`,
           }}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: accentColor }} />
-            <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-              Introdução
-            </h2>
-          </div>
-          <div className="space-y-2">
-            {topico.conteudo.map((paragrafo, index) => (
-              <p key={index} className="text-sm lg:text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                {paragrafo}
-              </p>
-            ))}
-          </div>
-        </section>
+          <p className="text-sm lg:text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+            {topico.resumo}
+          </p>
+        </div>
+
+        {/* Conteúdo Principal */}
+        <ConteudoCard
+          paragrafos={topico.conteudo}
+          titulo="O que você precisa saber"
+          accentColor={accentColor}
+        />
 
         {/* Fórmulas */}
         {topico.formulas && topico.formulas.length > 0 && (
-          <section
-            className="p-4 lg:p-3 rounded-lg"
-            style={{
-              background: `linear-gradient(135deg, ${accentColor}10, ${accentColor}05)`,
-              border: `1px solid ${accentColor}30`,
-            }}
-          >
+          <section>
             <div className="flex items-center gap-2 mb-3">
               <Calculator className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: accentColor }} />
               <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-                Fórmulas
+                Fórmulas Importantes
               </h2>
             </div>
-            <div className="space-y-3 lg:space-y-2">
+            <div className="space-y-3">
               {topico.formulas.map((formula, index) => (
-                <div
+                <FormulaCard
                   key={index}
-                  className="p-3 lg:p-2 rounded-md"
-                  style={{ background: 'var(--bg-surface)' }}
-                >
-                  <code
-                    className="block text-base lg:text-sm font-mono p-2 rounded text-center mb-2"
-                    style={{
-                      background: 'var(--bg-elevated)',
-                      color: accentColor,
-                    }}
-                  >
-                    {formula.expressao}
-                  </code>
-                  <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
-                    {formula.descricao}
-                  </p>
-                  {formula.variaveis && formula.variaveis.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {formula.variaveis.map((v, vi) => (
-                        <p key={vi} className="text-2xs" style={{ color: 'var(--text-muted)' }}>
-                          <span style={{ color: accentColor }}>{v.simbolo}</span> = {v.significado}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Exemplos */}
-        {topico.exemplos && topico.exemplos.length > 0 && (
-          <section
-            className="p-4 lg:p-3 rounded-lg"
-            style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-default)',
-            }}
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <Lightbulb className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: 'var(--warning)' }} />
-              <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-                Exemplos Resolvidos
-              </h2>
-            </div>
-            <div className="space-y-3 lg:space-y-2">
-              {topico.exemplos.map((exemplo, index) => (
-                <div
-                  key={index}
-                  className="p-3 lg:p-2 rounded-md"
-                  style={{ background: 'var(--bg-elevated)' }}
-                >
-                  <p className="text-sm lg:text-xs font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
-                    {index + 1}. {exemplo.enunciado}
-                  </p>
-                  <div
-                    className="p-2 rounded border-l-2"
-                    style={{
-                      background: 'var(--bg-surface)',
-                      borderColor: 'var(--success)',
-                    }}
-                  >
-                    <p className="text-xs lg:text-2xs font-medium mb-1" style={{ color: 'var(--success)' }}>
-                      Resolução:
-                    </p>
-                    <div className="space-y-1">
-                      {exemplo.resolucao.map((passo, pi) => (
-                        <p key={pi} className="text-xs lg:text-2xs" style={{ color: 'var(--text-secondary)' }}>
-                          {passo}
-                        </p>
-                      ))}
-                    </div>
-                    <p className="text-xs lg:text-2xs font-semibold mt-2" style={{ color: accentColor }}>
-                      Resposta: {exemplo.resposta}
-                    </p>
-                  </div>
-                </div>
+                  expressao={formula.expressao}
+                  descricao={formula.descricao}
+                  variaveis={formula.variaveis}
+                  accentColor={accentColor}
+                  isFisica={isFisica}
+                />
               ))}
             </div>
           </section>
@@ -270,59 +191,65 @@ export default function TopicoTeoriaPage() {
 
         {/* Dica Importante */}
         {topico.dicaImportante && (
-          <section
-            className="p-4 lg:p-3 rounded-lg"
-            style={{
-              background: 'var(--bg-elevated)',
-              border: '1px solid var(--border-default)',
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-base">💡</span>
+          <DicaCard
+            tipo="macete"
+            conteudo={topico.dicaImportante}
+          />
+        )}
+
+        {/* Exemplos Resolvidos */}
+        {topico.exemplos && topico.exemplos.length > 0 && (
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <Lightbulb className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: 'var(--warning)' }} />
               <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-                Dica Importante
+                Exemplos Resolvidos
               </h2>
+              <span
+                className="text-2xs px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+              >
+                Clique para ver a resolução
+              </span>
             </div>
-            <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-secondary)' }}>
-              {topico.dicaImportante}
-            </p>
+            <div className="space-y-3">
+              {topico.exemplos.map((exemplo, index) => (
+                <ExemploResolvido
+                  key={index}
+                  numero={index + 1}
+                  enunciado={exemplo.enunciado}
+                  resolucao={exemplo.resolucao}
+                  resposta={exemplo.resposta}
+                  accentColor={accentColor}
+                  isFisica={isFisica}
+                />
+              ))}
+            </div>
           </section>
         )}
 
         {/* Conexão com o Cotidiano */}
         {topico.conexaoCotidiano && (
-          <section
-            className="p-4 lg:p-3 rounded-lg"
-            style={{
-              background: `linear-gradient(135deg, ${accentColor}08, ${accentColor}03)`,
-              border: `1px solid ${accentColor}20`,
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-base">🌍</span>
-              <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
-                No seu dia a dia
-              </h2>
-            </div>
-            <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-secondary)' }}>
-              {topico.conexaoCotidiano}
-            </p>
-          </section>
+          <DicaCard
+            tipo="conceito"
+            titulo="No seu dia a dia"
+            conteudo={topico.conexaoCotidiano}
+          />
         )}
 
         {/* Navegação entre tópicos */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2 pt-3">
           {prevTopico ? (
             <button
               onClick={() => router.push(`/${componente}/teoria/${prevTopico.id}`)}
-              className="flex-1 py-2 lg:py-1.5 px-3 rounded-lg font-medium flex items-center justify-center gap-1.5 transition-all"
+              className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-medium flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
                 color: 'var(--text-secondary)',
               }}
             >
-              <ChevronLeft className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+              <ChevronLeft className="w-4 h-4" />
               <span className="text-xs lg:text-2xs truncate">Anterior</span>
             </button>
           ) : (
@@ -331,25 +258,25 @@ export default function TopicoTeoriaPage() {
           {nextTopico ? (
             <button
               onClick={() => router.push(`/${componente}/teoria/${nextTopico.id}`)}
-              className="flex-1 py-2 lg:py-1.5 px-3 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all"
+              className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
                 background: accentColor,
                 color: isFisica ? '#000' : '#fff',
               }}
             >
-              <span className="text-xs lg:text-2xs truncate">Próximo</span>
-              <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
+              <span className="text-xs lg:text-2xs truncate">Próximo: {nextTopico.titulo}</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
             <button
               onClick={() => router.push(`/${componente}/teoria`)}
-              className="flex-1 py-2 lg:py-1.5 px-3 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all"
+              className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
                 background: accentColor,
                 color: isFisica ? '#000' : '#fff',
               }}
             >
-              <span className="text-xs lg:text-2xs">Ver todos os tópicos</span>
+              <span className="text-xs lg:text-2xs">Concluído! Ver todos</span>
             </button>
           )}
         </div>
