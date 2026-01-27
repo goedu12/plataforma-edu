@@ -1,4 +1,5 @@
 'use client'
+// Teoria - Matriz de Habilidades Essenciais 2026
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
