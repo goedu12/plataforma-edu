@@ -1,37 +1,51 @@
 import { NextResponse } from 'next/server'
+import { getSupabaseAdmin } from '@/lib/supabase'
 
 // Força rota dinâmica (sem cache) - essencial para health checks
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-/**
- * Health Check Endpoint para Google Cloud Run
- *
- * Retorna apenas status básico, sem informações sensíveis.
- * Use este endpoint para:
- * - Liveness probes do Cloud Run
- * - Readiness probes
- * - Monitoramento de uptime
- */
 export async function GET() {
+  const inicio = Date.now()
+
   try {
-    // Verificação básica de que a aplicação está respondendo
-    const timestamp = new Date().toISOString()
+    const supabase = getSupabaseAdmin()
+
+    // Verificar conectividade com o banco
+    const { error } = await supabase
+      .from('usuarios')
+      .select('id')
+      .limit(1)
+      .single()
+
+    const latenciaDb = Date.now() - inicio
+
+    // error code PGRST116 = "no rows" which is fine, means DB is reachable
+    if (error && error.code !== 'PGRST116') {
+      return NextResponse.json({
+        status: 'degraded',
+        db: 'error',
+        dbLatencyMs: latenciaDb,
+        timestamp: new Date().toISOString(),
+      }, {
+        status: 503,
+        headers: { 'Cache-Control': 'no-store' },
+      })
+    }
 
     return NextResponse.json({
       status: 'ok',
-      timestamp
+      db: 'ok',
+      dbLatencyMs: latenciaDb,
+      timestamp: new Date().toISOString(),
     }, {
       status: 200,
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-        'Pragma': 'no-cache'
-      }
+      headers: { 'Cache-Control': 'no-store' },
     })
   } catch {
-    // Se algo falhar, retornar erro genérico
     return NextResponse.json({
-      status: 'error'
+      status: 'error',
+      dbLatencyMs: Date.now() - inicio,
     }, { status: 500 })
   }
 }

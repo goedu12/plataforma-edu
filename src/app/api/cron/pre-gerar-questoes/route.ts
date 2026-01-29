@@ -25,6 +25,9 @@ const QUESTOES_POR_POOL = 15
 // Semanas para pré-gerar (atuais + próximas)
 const SEMANAS_PARA_GERAR = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
+// Máximo de combinações por invocação para caber no timeout de 60s do Vercel
+const MAX_POR_BATCH = 5
+
 export async function POST(request: NextRequest) {
   try {
     // Verificar autorização (via header ou query param)
@@ -49,12 +52,21 @@ export async function POST(request: NextRequest) {
       erro?: string
     }> = []
 
-    console.log('[Cron] Iniciando pré-geração de questões...')
+    // Batch index via query param (0-based). Each batch processes MAX_POR_BATCH combos.
+    const url = new URL(request.url)
+    const batchIndex = parseInt(url.searchParams.get('batch') || '0', 10)
 
-    // Para cada série
-    for (const serie of SERIES) {
-      // Para cada semana
-      for (const semana of SEMANAS_PARA_GERAR) {
+    // Build flat list of (serie, semana) combos and slice for this batch
+    const todasCombinacoes = SERIES.flatMap(serie =>
+      SEMANAS_PARA_GERAR.map(semana => ({ serie, semana }))
+    )
+    const inicio = batchIndex * MAX_POR_BATCH
+    const combinacoesBatch = todasCombinacoes.slice(inicio, inicio + MAX_POR_BATCH)
+    const totalBatches = Math.ceil(todasCombinacoes.length / MAX_POR_BATCH)
+
+    console.log(`[Cron] Batch ${batchIndex + 1}/${totalBatches} (${combinacoesBatch.length} combinações)`)
+
+    for (const { serie, semana } of combinacoesBatch) {
         try {
           // Verificar se já tem pool suficiente
           const { data: poolExistente } = await supabase
@@ -151,17 +163,19 @@ export async function POST(request: NextRequest) {
           })
         }
       }
-    }
+
 
     // Resumo
     const ok = resultados.filter(r => r.status === 'ok').length
     const skip = resultados.filter(r => r.status === 'skip').length
     const erro = resultados.filter(r => r.status === 'erro').length
 
-    console.log(`[Cron] Finalizado: ${ok} gerados, ${skip} pulados, ${erro} erros`)
+    console.log(`[Cron] Batch ${batchIndex + 1}/${totalBatches} finalizado: ${ok} gerados, ${skip} pulados, ${erro} erros`)
 
     return NextResponse.json({
       sucesso: true,
+      batch: batchIndex,
+      totalBatches,
       resumo: { gerados: ok, pulados: skip, erros: erro },
       detalhes: resultados
     })

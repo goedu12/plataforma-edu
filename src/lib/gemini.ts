@@ -10,6 +10,23 @@ import {
 } from './ia-modos'
 
 // ═══════════════════════════════════════════════════════════
+// TIMEOUT PARA CHAMADAS GEMINI
+// ═══════════════════════════════════════════════════════════
+const GEMINI_TIMEOUT_MS = 30_000
+
+function comTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`[Timeout] ${label} excedeu ${ms / 1000}s`))
+    }, ms)
+    promise
+      .then(resolve)
+      .catch(reject)
+      .finally(() => clearTimeout(timer))
+  })
+}
+
+// ═══════════════════════════════════════════════════════════
 // CONFIGURAÇÃO DO CLIENTE GEMINI
 // ═══════════════════════════════════════════════════════════
 
@@ -183,7 +200,11 @@ async function testarModelo(
       conteudo = prompt
     }
 
-    const result = await model.generateContent(conteudo)
+    const result = await comTimeout(
+      model.generateContent(conteudo),
+      GEMINI_TIMEOUT_MS,
+      `Gemini ${nomeModelo}`
+    )
     const response = result.response
     const texto = response.text()
 
@@ -1107,14 +1128,18 @@ Retorne APENAS JSON válido:
       const genAI = getGenAI()
       const model = genAI.getGenerativeModel({ model: modelo })
 
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-        generationConfig: {
-          temperature: 0.7, // Menor para gabaritos precisos
-          topP: 0.9,
-          maxOutputTokens: 8192
-        }
-      })
+      const result = await comTimeout(
+        model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+          generationConfig: {
+            temperature: 0.7, // Menor para gabaritos precisos
+            topP: 0.9,
+            maxOutputTokens: 8192
+          }
+        }),
+        GEMINI_TIMEOUT_MS,
+        `Gemini questões ${modelo}`
+      )
 
       let text = result.response.text()
 
@@ -1272,14 +1297,18 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
       const genAI = getGenAI()
       const model = genAI.getGenerativeModel({ model: modelo })
 
-      const result = await model.generateContent({
-        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-        generationConfig: {
-          temperature: 0.8,
-          topP: 0.95,
-          maxOutputTokens: 8192
-        }
-      })
+      const result = await comTimeout(
+        model.generateContent({
+          contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+          generationConfig: {
+            temperature: 0.8,
+            topP: 0.95,
+            maxOutputTokens: 8192
+          }
+        }),
+        GEMINI_TIMEOUT_MS,
+        `Gemini mat-EF ${modelo}`
+      )
 
       let text = result.response.text()
 
@@ -1641,14 +1670,18 @@ Retorne JSON: {"questoes":[...]}`
     const genAI = getGenAI()
     const model = genAI.getGenerativeModel({ model: modelo })
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.9,
-        maxOutputTokens: 2048
-      }
-    })
+    const result = await comTimeout(
+      model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.9,
+          maxOutputTokens: 2048
+        }
+      }),
+      GEMINI_TIMEOUT_MS,
+      `Gemini questões únicas`
+    )
 
     let text = result.response.text()
     if (!text) throw new Error('Resposta vazia')
@@ -1743,14 +1776,18 @@ Retorne JSON: {"questoes":[...]}`
     const genAI = getGenAI()
     const model = genAI.getGenerativeModel({ model: modelo })
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.9,
-        maxOutputTokens: 2048
-      }
-    })
+    const result = await comTimeout(
+      model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.9,
+          maxOutputTokens: 2048
+        }
+      }),
+      GEMINI_TIMEOUT_MS,
+      `Gemini questões únicas`
+    )
 
     let text = result.response.text()
     if (!text) throw new Error('Resposta vazia')
@@ -1853,14 +1890,18 @@ Retorne JSON: {"questoes":[...]}`
     const genAI = getGenAI()
     const model = genAI.getGenerativeModel({ model: modelo })
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.9,
-        maxOutputTokens: 2048
-      }
-    })
+    const result = await comTimeout(
+      model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: promptQuestoes }] }],
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.9,
+          maxOutputTokens: 2048
+        }
+      }),
+      GEMINI_TIMEOUT_MS,
+      `Gemini questões únicas`
+    )
 
     let text = result.response.text()
     if (!text) throw new Error('Resposta vazia')
