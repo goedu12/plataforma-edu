@@ -317,7 +317,7 @@ export default function LoginPage() {
             style={{ color: 'var(--text-muted)' }}
           >
             <HelpCircle className="w-3 h-3" />
-            <span>Nao sabe seu login? Clique aqui</span>
+            <span>Não sabe seu login? Clique aqui</span>
           </button>
         </div>
       </div>
