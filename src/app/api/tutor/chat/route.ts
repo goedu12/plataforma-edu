@@ -37,35 +37,33 @@ async function buscarContextoAvancado(
   componente: Componente
 ): Promise<{ preferencias: PreferenciasEstudante | null; estado: EstadoEstudante | null; dificuldades: string[] }> {
   try {
-    // Buscar preferências
-    const { data: preferencias } = await supabase
-      .from('estudante_preferencias')
-      .select('*')
-      .eq('usuario_id', usuarioId)
-      .single()
-
-    // Buscar estado emocional
-    const { data: estado } = await supabase
-      .from('estudante_estado')
-      .select('*')
-      .eq('usuario_id', usuarioId)
-      .eq('componente', componente)
-      .single()
-
-    // Buscar top 3 dificuldades
-    const { data: dificuldades } = await supabase
-      .from('estudante_dificuldades')
-      .select('topico')
-      .eq('usuario_id', usuarioId)
-      .eq('componente', componente)
-      .gte('nivel_dificuldade', 4)
-      .order('nivel_dificuldade', { ascending: false })
-      .limit(3)
+    // Buscar tudo em paralelo para melhor performance
+    const [prefResult, estadoResult, difResult] = await Promise.all([
+      supabase
+        .from('estudante_preferencias')
+        .select('*')
+        .eq('usuario_id', usuarioId)
+        .single(),
+      supabase
+        .from('estudante_estado')
+        .select('*')
+        .eq('usuario_id', usuarioId)
+        .eq('componente', componente)
+        .single(),
+      supabase
+        .from('estudante_dificuldades')
+        .select('topico')
+        .eq('usuario_id', usuarioId)
+        .eq('componente', componente)
+        .gte('nivel_dificuldade', 4)
+        .order('nivel_dificuldade', { ascending: false })
+        .limit(3),
+    ])
 
     return {
-      preferencias: preferencias as PreferenciasEstudante | null,
-      estado: estado as EstadoEstudante | null,
-      dificuldades: dificuldades?.map(d => d.topico) || [],
+      preferencias: prefResult.data as PreferenciasEstudante | null,
+      estado: estadoResult.data as EstadoEstudante | null,
+      dificuldades: difResult.data?.map(d => d.topico) || [],
     }
   } catch (error) {
     console.error('[Contexto Avançado] Erro:', error)
@@ -324,23 +322,23 @@ export async function POST(request: NextRequest) {
       : undefined
 
     // ═══════════════════════════════════════════════════════════
-    // BUSCAR CONTEXTO PERSONALIZADO DO ESTUDANTE
+    // BUSCAR CONTEXTOS EM PARALELO (melhor performance)
     // ═══════════════════════════════════════════════════════════
-    const contextoEstudante = await buscarContextoEstudante(
-      supabase,
-      sessao.userId,
-      componente as Componente,
-      usuario.turma
-    )
+    const [contextoEstudante, contextoAvancado] = await Promise.all([
+      buscarContextoEstudante(
+        supabase,
+        sessao.userId,
+        componente as Componente,
+        usuario.turma
+      ),
+      buscarContextoAvancado(
+        supabase,
+        sessao.userId,
+        componente as Componente
+      ),
+    ])
 
-    // ═══════════════════════════════════════════════════════════
-    // BUSCAR CONTEXTO AVANÇADO (preferências, estado, dificuldades)
-    // ═══════════════════════════════════════════════════════════
-    const { preferencias, estado, dificuldades } = await buscarContextoAvancado(
-      supabase,
-      sessao.userId,
-      componente as Componente
-    )
+    const { preferencias, estado, dificuldades } = contextoAvancado
 
     // Enriquecer contexto com dados avançados
     if (preferencias) {
