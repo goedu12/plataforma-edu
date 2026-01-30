@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/lib/logger'
+import { getHeartbeats, OCIOSO_TIMEOUT_MS } from '@/lib/heartbeat-store'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -86,12 +87,19 @@ export interface EstatisticasTempoReal {
   }[]
 }
 
+// Presença via heartbeat
+export interface PresencaAluno {
+  usuario_id: string
+  estado: 'ativo' | 'ocioso' | 'offline'
+}
+
 export interface RespostaAtividadesTempoReal {
   sucesso: boolean
   atividades: AtividadeTempoReal[]
   alunos_ativos: AlunoAtivo[]
   alunos_inativos: AlunoInativo[]
   estatisticas: EstatisticasTempoReal
+  presenca: PresencaAluno[]
   turmas_disponiveis: string[]
   colegios_disponiveis: string[]
   periodo_minutos: number
@@ -899,13 +907,24 @@ export async function GET(request: NextRequest) {
       por_turma: porTurma,
     }
 
-    // 10. Resposta final
+    // 10. Presença via heartbeat (in-memory)
+    const heartbeatMap = getHeartbeats()
+    const agoraMs = Date.now()
+    const presenca: PresencaAluno[] = alunosFiltrados.map(aluno => {
+      const hb = heartbeatMap.get(aluno.id)
+      if (!hb) return { usuario_id: aluno.id, estado: 'offline' as const }
+      const ocioso = (agoraMs - hb.ultima_interacao) > OCIOSO_TIMEOUT_MS
+      return { usuario_id: aluno.id, estado: ocioso ? 'ocioso' as const : 'ativo' as const }
+    })
+
+    // 11. Resposta final
     const resposta: RespostaAtividadesTempoReal = {
       sucesso: true,
       atividades: atividades.slice(0, MAX_ATIVIDADES),
       alunos_ativos: alunosAtivos,
       alunos_inativos: alunosInativos,
       estatisticas,
+      presenca,
       turmas_disponiveis: turmasDisponiveis,
       colegios_disponiveis: colegiosDisponiveis,
       periodo_minutos: periodoMinutos,

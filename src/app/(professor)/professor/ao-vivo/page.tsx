@@ -26,6 +26,9 @@ import {
   Eye,
   Building2,
   ArrowLeft,
+  Wifi,
+  WifiOff,
+  Moon,
 } from 'lucide-react'
 import type { Componente } from '@/types'
 
@@ -74,6 +77,11 @@ interface AlunoInativo {
   ultimo_acesso: string | null
 }
 
+interface PresencaAluno {
+  usuario_id: string
+  estado: 'ativo' | 'ocioso' | 'offline'
+}
+
 interface EstatisticasTempoReal {
   alunos_ativos_agora: number
   alunos_inativos: number
@@ -109,6 +117,7 @@ interface DadosTempoReal {
   atividades: AtividadeTempoReal[]
   alunos_ativos: AlunoAtivo[]
   alunos_inativos: AlunoInativo[]
+  presenca: PresencaAluno[]
   estatisticas: EstatisticasTempoReal
   turmas_disponiveis: string[]
   colegios_disponiveis: string[]
@@ -117,7 +126,7 @@ interface DadosTempoReal {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// COMPONENTE PRINCIPAL - DASHBOARD RESPONSIVO
+// COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function DashboardAoVivoPage() {
@@ -134,17 +143,24 @@ export default function DashboardAoVivoPage() {
 
   // Auto-refresh
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const [intervalo] = useState(5)
   const [contadorRefresh, setContadorRefresh] = useState(0)
+  const [intervalo] = useState(5)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Hora atual
+  // Hora
   const [horaAtual, setHoraAtual] = useState(new Date())
 
-  // Atualizar hora
   useEffect(() => {
     const timer = setInterval(() => setHoraAtual(new Date()), 1000)
     return () => clearInterval(timer)
+  }, [])
+
+  // Heartbeat do professor (registrar que está monitorando)
+  useEffect(() => {
+    const ping = () => fetch('/api/heartbeat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {})
+    ping()
+    const hbInterval = setInterval(ping, 10000)
+    return () => clearInterval(hbInterval)
   }, [])
 
   // Buscar dados
@@ -169,71 +185,54 @@ export default function DashboardAoVivoPage() {
         setErro(data.erro || 'Erro ao carregar dados')
       }
     } catch {
-      setErro('Erro de conexao')
+      setErro('Erro de conexão')
     } finally {
       setLoading(false)
     }
   }, [turmaFiltro, componenteFiltro, colegioFiltro, periodoMinutos, router])
 
-  useEffect(() => {
-    buscarDados()
-  }, [buscarDados])
+  useEffect(() => { buscarDados() }, [buscarDados])
 
   useEffect(() => {
     if (autoRefresh) {
       intervalRef.current = setInterval(() => {
         setContadorRefresh(prev => {
-          if (prev >= intervalo) {
-            buscarDados()
-            return 0
-          }
+          if (prev >= intervalo) { buscarDados(); return 0 }
           return prev + 1
         })
       }, 1000)
     }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
-    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current) }
   }, [autoRefresh, intervalo, buscarDados])
 
-  // Formatar tempo relativo
+  // Helpers
   const formatarTempoRelativo = (timestamp: string) => {
-    const agora = new Date()
-    const data = new Date(timestamp)
-    const diffMs = agora.getTime() - data.getTime()
+    const diffMs = new Date().getTime() - new Date(timestamp).getTime()
     const diffSeg = Math.floor(diffMs / 1000)
     const diffMin = Math.floor(diffSeg / 60)
     if (diffSeg < 60) return `${diffSeg}s`
     if (diffMin < 60) return `${diffMin}min`
-    return data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    return new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
   }
 
-  // Configuracao de cores por tipo de atividade
   const atividadeConfig: Record<string, { cor: string; label: string; icon: React.ReactNode }> = {
     estudo: { cor: '#22c55e', label: 'Estudando', icon: <BookOpen className="w-3 h-3" /> },
     desafio: { cor: '#f59e0b', label: 'Desafio', icon: <Zap className="w-3 h-3" /> },
     tutor: { cor: '#3b82f6', label: 'Tutor IA', icon: <Brain className="w-3 h-3" /> },
-    revisao: { cor: '#a855f7', label: 'Revisao', icon: <Layers className="w-3 h-3" /> },
+    revisao: { cor: '#a855f7', label: 'Revisão', icon: <Layers className="w-3 h-3" /> },
     flashcard: { cor: '#a855f7', label: 'Flashcard', icon: <Layers className="w-3 h-3" /> },
     mapa: { cor: '#06b6d4', label: 'Mapa', icon: <Eye className="w-3 h-3" /> },
   }
 
-  // Cor de fundo do avatar baseada no componente
-  const getAvatarBg = (componente: Componente) => {
-    return componente === 'fisica' ? '#22c55e' : '#8b5cf6'
-  }
-
-  // Iniciais do nome
-  const getIniciais = (nome: string) => {
-    return nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
-  }
+  const getAvatarBg = (componente: Componente) => componente === 'fisica' ? '#22c55e' : '#8b5cf6'
+  const getIniciais = (nome: string) => nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
+      <div className="h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
         <div className="text-center">
-          <RefreshCw className="w-12 h-12 text-blue-400 animate-spin mx-auto mb-4" />
-          <p className="text-white text-xl font-medium">Carregando dashboard...</p>
+          <RefreshCw className="w-10 h-10 text-blue-400 animate-spin mx-auto mb-3" />
+          <p className="text-white text-lg font-medium">Carregando dashboard...</p>
         </div>
       </div>
     )
@@ -241,14 +240,11 @@ export default function DashboardAoVivoPage() {
 
   if (erro) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
+      <div className="h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)' }}>
         <div className="text-center">
-          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <p className="text-white text-xl mb-4 font-medium">{erro}</p>
-          <button
-            onClick={buscarDados}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-          >
+          <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+          <p className="text-white text-lg mb-3 font-medium">{erro}</p>
+          <button onClick={buscarDados} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
             Tentar novamente
           </button>
         </div>
@@ -261,449 +257,329 @@ export default function DashboardAoVivoPage() {
   const alunosInativos = dados?.alunos_inativos || []
   const atividades = dados?.atividades || []
   const temasComDificuldade = stats?.temas_com_dificuldade || []
+  const presencaMap = new Map((dados?.presenca || []).map(p => [p.usuario_id, p.estado]))
 
-  // Alunos precisando de ajuda (taxa < 40% com 5+ questoes)
+  // Classificar alunos online por estado de presença
+  const alunosOnline = alunosAtivos.filter(a => presencaMap.get(a.id) === 'ativo')
+  const alunosOciosos = alunosAtivos.filter(a => presencaMap.get(a.id) === 'ocioso')
+  // Alunos com heartbeat ativo mas sem atividade no período
+  const conectadosSemAtividade = alunosInativos.filter(a => {
+    const estado = presencaMap.get(a.id)
+    return estado === 'ativo' || estado === 'ocioso'
+  })
+
+  const totalOnline = alunosAtivos.filter(a => presencaMap.get(a.id) !== 'offline').length + conectadosSemAtividade.length
+  const totalOciosos = alunosOciosos.length + conectadosSemAtividade.filter(a => presencaMap.get(a.id) === 'ocioso').length
+
   const alunosPrecisandoAjuda = alunosAtivos.filter(a => a.questoes_sessao >= 5 && a.taxa_acerto < 40)
-
-  // Filtro de turmas baseado no colegio selecionado
   const turmasVisiveis = dados?.turmas_disponiveis || []
 
   return (
     <div
-      className="min-h-screen flex flex-col"
+      className="h-screen flex flex-col overflow-hidden"
       style={{
         background: 'linear-gradient(180deg, #0f172a 0%, #1e293b 100%)',
         fontFamily: 'system-ui, -apple-system, sans-serif'
       }}
     >
-      {/* ═══════════════════════════════════════════════════════════════════
-          HEADER
-          ═══════════════════════════════════════════════════════════════════ */}
-      <header className="px-4 py-3 flex flex-wrap items-center justify-between gap-3" style={{ background: 'rgba(0,0,0,0.5)' }}>
-        <div className="flex items-center gap-4 flex-wrap">
-          <div className="flex items-center gap-2">
+      {/* HEADER COMPACTO */}
+      <header className="px-3 py-2 flex items-center justify-between gap-2 flex-shrink-0" style={{ background: 'rgba(0,0,0,0.5)' }}>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
             <div className="relative">
-              <Radio className="w-6 h-6 text-green-400" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-400 rounded-full animate-ping" />
+              <Radio className="w-5 h-5 text-green-400" />
+              <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping" />
             </div>
-            <h1 className="text-lg font-bold text-white">
-              Painel da Turma
-            </h1>
+            <h1 className="text-sm font-bold text-white">Ao Vivo</h1>
           </div>
 
-          {/* Info dos Filtros Ativos */}
-          <div className="flex items-center gap-2 text-sm">
-            {colegioFiltro && (
-              <span className="px-2 py-1 bg-purple-600 text-white rounded font-medium shadow">
-                {colegioFiltro}
-              </span>
-            )}
-            {turmaFiltro && (
-              <span className="px-2 py-1 bg-green-600 text-white rounded font-medium shadow">
-                {turmaFiltro}
-              </span>
-            )}
-            {componenteFiltro && (
-              <span className="px-2 py-1 bg-blue-600 text-white rounded font-medium capitalize shadow">
-                {componenteFiltro}
-              </span>
-            )}
-          </div>
+          {colegioFiltro && <span className="px-1.5 py-0.5 bg-purple-600/80 text-white rounded text-[10px] font-medium">{colegioFiltro}</span>}
+          {turmaFiltro && <span className="px-1.5 py-0.5 bg-green-600/80 text-white rounded text-[10px] font-medium">{turmaFiltro}</span>}
+          {componenteFiltro && <span className="px-1.5 py-0.5 bg-blue-600/80 text-white rounded text-[10px] font-medium capitalize">{componenteFiltro}</span>}
 
-          <span className="text-white/80 text-sm font-medium">
-            {horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-          </span>
+          <span className="text-white/70 text-xs">{horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Filtro de Colegio */}
+        <div className="flex items-center gap-1.5">
           {dados?.colegios_disponiveis && dados.colegios_disponiveis.length > 0 && (
-            <div className="relative">
-              <select
-                value={colegioFiltro}
-                onChange={(e) => {
-                  setColegioFiltro(e.target.value)
-                  setTurmaFiltro('') // Reset turma quando muda colegio
-                }}
-                className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-slate-700 text-white border border-slate-500 cursor-pointer hover:bg-slate-600 transition min-w-[160px] font-medium"
-                style={{ WebkitAppearance: 'none' }}
-              >
-                <option value="" className="bg-slate-700 text-white">Todos os Colegios</option>
-                {dados.colegios_disponiveis.map(c => (
-                  <option key={c} value={c} className="bg-slate-700 text-white">{c}</option>
-                ))}
-              </select>
-              <Building2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
-            </div>
+            <select
+              value={colegioFiltro}
+              onChange={(e) => { setColegioFiltro(e.target.value); setTurmaFiltro('') }}
+              className="px-2 py-1 rounded text-[11px] bg-slate-700 text-white border border-slate-600 min-w-[120px]"
+            >
+              <option value="">Todos Colégios</option>
+              {dados.colegios_disponiveis.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           )}
+          <select
+            value={turmaFiltro}
+            onChange={(e) => setTurmaFiltro(e.target.value)}
+            className="px-2 py-1 rounded text-[11px] bg-slate-700 text-white border border-slate-600 min-w-[100px]"
+          >
+            <option value="">Todas Turmas</option>
+            {turmasVisiveis.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <select
+            value={componenteFiltro}
+            onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
+            className="px-2 py-1 rounded text-[11px] bg-slate-700 text-white border border-slate-600"
+          >
+            <option value="">Todos</option>
+            <option value="fisica">Física</option>
+            <option value="matematica">Matemática</option>
+          </select>
 
-          {/* Filtro de Turma */}
-          <div className="relative">
-            <select
-              value={turmaFiltro}
-              onChange={(e) => setTurmaFiltro(e.target.value)}
-              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-slate-700 text-white border border-slate-500 cursor-pointer hover:bg-slate-600 transition min-w-[140px] font-medium"
-              style={{ WebkitAppearance: 'none' }}
-            >
-              <option value="" className="bg-slate-700 text-white">Todas as Turmas</option>
-              {turmasVisiveis.map(t => (
-                <option key={t} value={t} className="bg-slate-700 text-white">{t}</option>
-              ))}
-            </select>
-            <Users className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
-          </div>
-
-          {/* Filtro de Componente */}
-          <div className="relative">
-            <select
-              value={componenteFiltro}
-              onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
-              className="appearance-none px-3 py-1.5 pr-8 rounded text-sm bg-slate-700 text-white border border-slate-500 cursor-pointer hover:bg-slate-600 transition font-medium"
-              style={{ WebkitAppearance: 'none' }}
-            >
-              <option value="" className="bg-slate-700 text-white">Todos</option>
-              <option value="fisica" className="bg-slate-700 text-white">Fisica</option>
-              <option value="matematica" className="bg-slate-700 text-white">Matematica</option>
-            </select>
-            <BookOpen className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/70 pointer-events-none" />
-          </div>
-
-          {/* Auto Refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded transition ${autoRefresh ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-white/10 text-white/60 border border-white/20'}`}
-            title={autoRefresh ? 'Pausar atualizacao' : 'Retomar atualizacao'}
+            className={`p-1 rounded transition ${autoRefresh ? 'text-green-400' : 'text-white/40'}`}
+            title={autoRefresh ? 'Pausar' : 'Retomar'}
           >
             {autoRefresh ? <PlayCircle className="w-4 h-4" /> : <PauseCircle className="w-4 h-4" />}
           </button>
 
-          {/* Contador de refresh */}
           {autoRefresh && (
-            <div
-              className="w-8 h-8 rounded-full border-2 border-green-400 flex items-center justify-center relative"
-              style={{
-                background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)`
-              }}
-            >
-              <div className="w-6 h-6 rounded-full bg-slate-900 flex items-center justify-center">
-                <span className="text-[10px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
+            <div className="w-6 h-6 rounded-full border-2 border-green-400 flex items-center justify-center relative"
+              style={{ background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)` }}>
+              <div className="w-4 h-4 rounded-full bg-slate-900 flex items-center justify-center">
+                <span className="text-[8px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
               </div>
             </div>
           )}
 
-          {/* Botao Voltar */}
           <button
             onClick={() => router.push('/professor/dashboard')}
-            className="flex items-center gap-2 px-3 py-1.5 rounded bg-slate-700 text-white border border-slate-500 hover:bg-slate-600 transition font-medium"
-            title="Voltar ao Dashboard"
+            className="flex items-center gap-1 px-2 py-1 rounded bg-slate-700 text-white border border-slate-600 hover:bg-slate-600 transition text-[11px]"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline text-sm">Voltar</span>
+            <ArrowLeft className="w-3 h-3" />
+            <span className="hidden sm:inline">Voltar</span>
           </button>
         </div>
       </header>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          STATS BAR - 7 Metricas Principais
-          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="px-4 py-2 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-        <StatBox
-          label="Online Agora"
-          value={`${stats?.alunos_ativos_agora || 0}/${stats?.total_alunos_turma || 0}`}
-          color="#22c55e"
-          icon={<Users className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Ativos Agora"
-          value={stats?.alunos_ativos_agora || 0}
-          color="#3b82f6"
-          trend={stats?.tendencia_acerto}
-          icon={<Activity className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Ociosos"
-          value={stats?.alunos_inativos || 0}
-          color="#ef4444"
-          icon={<Clock className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Progresso Medio"
-          value={`${stats?.taxa_participacao || 0}%`}
-          color="#8b5cf6"
-          icon={<Target className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Questoes Respondidas"
-          value={stats?.questoes_periodo_total || 0}
-          color="#f59e0b"
-          icon={<BookOpen className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Acuracia da Turma"
-          value={`${stats?.taxa_acerto_tempo_real || 0}%`}
-          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'}
-          trend={stats?.tendencia_acerto}
-          icon={<CheckCircle className="w-5 h-5" />}
-        />
-        <StatBox
-          label="Tempo Medio"
-          value={stats?.tempo_medio_segundos ? `${stats.tempo_medio_segundos}s` : '-'}
-          color="#06b6d4"
-          icon={<Timer className="w-5 h-5" />}
-        />
+      {/* STATS BAR - 5 métricas compactas */}
+      <div className="px-3 py-1.5 grid grid-cols-5 gap-2 flex-shrink-0">
+        <MiniStat label="Online" value={`${totalOnline}/${stats?.total_alunos_turma || 0}`} color="#22c55e" icon={<Wifi className="w-4 h-4" />} />
+        <MiniStat label="Ociosos" value={totalOciosos} color="#f59e0b" icon={<Moon className="w-4 h-4" />} />
+        <MiniStat label="Questões" value={stats?.questoes_periodo_total || 0} color="#3b82f6" icon={<BookOpen className="w-4 h-4" />} />
+        <MiniStat label="Acurácia" value={`${stats?.taxa_acerto_tempo_real || 0}%`} color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'} icon={<Target className="w-4 h-4" />} trend={stats?.tendencia_acerto} />
+        <MiniStat label="Alertas" value={alunosPrecisandoAjuda.length} color={alunosPrecisandoAjuda.length > 0 ? '#ef4444' : '#22c55e'} icon={<AlertTriangle className="w-4 h-4" />} />
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          MAIN CONTENT
-          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="flex-1 px-4 pb-4 grid grid-cols-1 lg:grid-cols-4 gap-4 overflow-hidden">
+      {/* MAIN: 3 colunas */}
+      <div className="flex-1 px-3 pb-2 grid grid-cols-12 gap-2 overflow-hidden min-h-0">
 
-        {/* COLUNA 1-3: Conteudo Principal */}
-        <div className="lg:col-span-3 flex flex-col gap-4 overflow-hidden">
+        {/* COL 1: Alunos (presença visual) - 5 colunas */}
+        <div className="col-span-5 bg-slate-800/80 rounded-lg p-2 flex flex-col overflow-hidden border border-slate-700">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-blue-400" />
+              Alunos
+            </h2>
+            <div className="flex items-center gap-2 text-[9px]">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-400 inline-block" /> Ativo</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" /> Ocioso</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-500 inline-block" /> Offline</span>
+            </div>
+          </div>
 
-          {/* Status dos Alunos - Grid de Avatares */}
-          <div className="bg-slate-800/80 rounded-xl p-4 flex-1 overflow-hidden flex flex-col min-h-[200px] border border-slate-700">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-semibold flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-400" />
-                Status dos Alunos
-                <span className="text-slate-300 font-normal text-sm">
-                  ({stats?.alunos_ativos_agora || 0} ativos | {stats?.alunos_inativos || 0} inativos)
-                </span>
-              </h2>
-              {/* Legenda */}
-              <div className="hidden sm:flex items-center gap-3 text-[10px]">
-                {Object.entries(atividadeConfig).slice(0, 4).map(([key, cfg]) => (
-                  <div key={key} className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full" style={{ background: cfg.cor }} />
-                    <span className="text-slate-300">{cfg.label}</span>
-                  </div>
+          <div className="flex-1 overflow-y-auto">
+            {alunosAtivos.length === 0 && alunosInativos.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <UserX className="w-8 h-8 mb-1 opacity-70" />
+                <p className="text-xs">Nenhum aluno encontrado</p>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {/* Ativos com heartbeat */}
+                {alunosOnline.map(aluno => {
+                  const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
+                  const precisaAjuda = aluno.questoes_sessao >= 5 && aluno.taxa_acerto < 40
+                  return (
+                    <AlunoAvatar
+                      key={aluno.id}
+                      nome={aluno.nome}
+                      iniciais={getIniciais(aluno.nome)}
+                      bgColor={getAvatarBg(aluno.componente)}
+                      statusColor="#22c55e"
+                      statusIcon={config.icon}
+                      statusBgColor={config.cor}
+                      taxa={aluno.questoes_sessao > 0 ? aluno.taxa_acerto : undefined}
+                      precisaAjuda={precisaAjuda}
+                      tooltip={`${aluno.nome} - ${config.label}\nQuestões: ${aluno.questoes_sessao} | Acertos: ${aluno.taxa_acerto}%`}
+                    />
+                  )
+                })}
+
+                {/* Ociosos (com heartbeat, sem interação recente) */}
+                {alunosOciosos.map(aluno => {
+                  const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
+                  return (
+                    <AlunoAvatar
+                      key={aluno.id}
+                      nome={aluno.nome}
+                      iniciais={getIniciais(aluno.nome)}
+                      bgColor={getAvatarBg(aluno.componente)}
+                      statusColor="#f59e0b"
+                      statusIcon={<Moon className="w-3 h-3" />}
+                      statusBgColor="#f59e0b"
+                      taxa={aluno.questoes_sessao > 0 ? aluno.taxa_acerto : undefined}
+                      tooltip={`${aluno.nome} - OCIOSO\nÚltima atividade: ${config.label}`}
+                      dimmed
+                    />
+                  )
+                })}
+
+                {/* Conectados sem atividade no período */}
+                {conectadosSemAtividade.map(aluno => {
+                  const estado = presencaMap.get(aluno.id)
+                  return (
+                    <AlunoAvatar
+                      key={aluno.id}
+                      nome={aluno.nome}
+                      iniciais={getIniciais(aluno.nome)}
+                      bgColor="#475569"
+                      statusColor={estado === 'ocioso' ? '#f59e0b' : '#22c55e'}
+                      statusIcon={estado === 'ocioso' ? <Moon className="w-3 h-3" /> : <Wifi className="w-3 h-3" />}
+                      statusBgColor={estado === 'ocioso' ? '#f59e0b' : '#22c55e'}
+                      tooltip={`${aluno.nome} - Conectado, sem atividade`}
+                      dimmed
+                    />
+                  )
+                })}
+
+                {/* Offline (sem heartbeat) */}
+                {alunosInativos.filter(a => !presencaMap.get(a.id) || presencaMap.get(a.id) === 'offline').slice(0, 30).map(aluno => (
+                  <AlunoAvatar
+                    key={aluno.id}
+                    nome={aluno.nome}
+                    iniciais={getIniciais(aluno.nome)}
+                    bgColor="#334155"
+                    statusColor="#64748b"
+                    statusIcon={<WifiOff className="w-3 h-3" />}
+                    statusBgColor="#475569"
+                    tooltip={`${aluno.nome} - Offline`}
+                    dimmed
+                    grayscale
+                  />
                 ))}
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
+        {/* COL 2: Desempenho + Temas (4 colunas) */}
+        <div className="col-span-4 flex flex-col gap-2 overflow-hidden">
+          {/* Tabela de Desempenho */}
+          <div className="bg-slate-800/80 rounded-lg p-2 flex-1 flex flex-col overflow-hidden border border-slate-700">
+            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-1.5">
+              <TrendingUp className="w-3.5 h-3.5 text-green-400" />
+              Desempenho
+            </h2>
             <div className="flex-1 overflow-y-auto">
-              {alunosAtivos.length === 0 && alunosInativos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                  <UserX className="w-12 h-12 mb-2 opacity-70" />
-                  <p className="font-medium">Nenhum aluno encontrado</p>
-                  <p className="text-sm text-slate-500">Selecione uma turma ou colegio</p>
-                </div>
+              {alunosAtivos.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-slate-400 text-xs">Sem dados</div>
               ) : (
-                <div className="flex flex-wrap gap-3">
-                  {/* Alunos Ativos */}
-                  {alunosAtivos.map((aluno) => {
-                    const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
-                    const precisaAjuda = aluno.questoes_sessao >= 5 && aluno.taxa_acerto < 40
-
-                    return (
-                      <div
-                        key={aluno.id}
-                        className={`flex flex-col items-center cursor-pointer transition-transform hover:scale-105 ${precisaAjuda ? 'animate-pulse' : ''}`}
-                        title={`${aluno.nome}\nTurma: ${aluno.turma}\nQuestoes: ${aluno.questoes_sessao}\nAcertos: ${aluno.taxa_acerto}%\nAtividade: ${config.label}`}
-                      >
-                        <div className="relative">
-                          <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs shadow-lg"
-                            style={{
-                              background: getAvatarBg(aluno.componente),
-                              boxShadow: precisaAjuda ? '0 0 0 2px #ef4444' : 'none'
-                            }}
-                          >
-                            {getIniciais(aluno.nome)}
-                          </div>
-                          {/* Status indicator */}
-                          <div
-                            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-slate-800 flex items-center justify-center"
-                            style={{ background: config.cor }}
-                          >
-                            {config.icon}
-                          </div>
-                          {/* Taxa de acerto badge */}
-                          {aluno.questoes_sessao > 0 && (
-                            <div
-                              className="absolute -top-1 -left-1 px-1 rounded text-[8px] font-bold"
-                              style={{
-                                background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444',
-                                color: 'white'
-                              }}
-                            >
-                              {aluno.taxa_acerto}%
+                <table className="w-full text-[10px]">
+                  <thead className="sticky top-0 bg-slate-800">
+                    <tr className="text-slate-400">
+                      <th className="text-left pb-1 pl-1">Aluno</th>
+                      <th className="text-center pb-1">Status</th>
+                      <th className="text-center pb-1">Q</th>
+                      <th className="text-center pb-1">Acertos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {alunosAtivos.slice(0, 15).map(aluno => {
+                      const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
+                      const estado = presencaMap.get(aluno.id)
+                      return (
+                        <tr key={aluno.id} className="border-t border-slate-700/50 hover:bg-slate-700/30">
+                          <td className="py-1 pl-1">
+                            <div className="flex items-center gap-1.5">
+                              <div className="relative">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[7px] font-bold" style={{ background: getAvatarBg(aluno.componente) }}>
+                                  {getIniciais(aluno.nome)}
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-slate-800"
+                                  style={{ background: estado === 'ativo' ? '#22c55e' : estado === 'ocioso' ? '#f59e0b' : '#64748b' }} />
+                              </div>
+                              <span className="text-slate-100 truncate max-w-[80px]">{aluno.nome.split(' ').slice(0, 2).join(' ')}</span>
                             </div>
-                          )}
-                        </div>
-                        <span className="text-slate-200 text-[9px] mt-1 truncate max-w-[50px] text-center font-medium">
-                          {aluno.nome.split(' ')[0]}
-                        </span>
-                      </div>
-                    )
-                  })}
-
-                  {/* Alunos Inativos (cinza) */}
-                  {alunosInativos.slice(0, 20).map((aluno) => (
-                    <div
-                      key={aluno.id}
-                      className="flex flex-col items-center opacity-60"
-                      title={`${aluno.nome}\nTurma: ${aluno.turma}\nInativo`}
-                    >
-                      <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-slate-300 font-bold text-xs">
-                        {getIniciais(aluno.nome)}
-                      </div>
-                      <span className="text-slate-400 text-[9px] mt-1 truncate max-w-[50px] text-center">
-                        {aluno.nome.split(' ')[0]}
-                      </span>
-                    </div>
-                  ))}
-                  {alunosInativos.length > 20 && (
-                    <div className="flex flex-col items-center opacity-60">
-                      <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-slate-300 font-bold text-xs">
-                        +{alunosInativos.length - 20}
-                      </div>
-                      <span className="text-slate-400 text-[9px] mt-1">mais</span>
-                    </div>
-                  )}
-                </div>
+                          </td>
+                          <td className="py-1 text-center">
+                            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] font-semibold"
+                              style={{ background: `${config.cor}25`, color: config.cor }}>
+                              {config.label}
+                            </span>
+                          </td>
+                          <td className="py-1 text-center text-slate-300">{aluno.questoes_sessao}</td>
+                          <td className="py-1 text-center">
+                            <span className="font-medium" style={{ color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                              {aluno.acertos_sessao}/{aluno.questoes_sessao}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>
 
-          {/* Linha inferior: Temas com Dificuldade + Desempenho */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[250px]">
-            {/* Temas com Dificuldade */}
-            <div className="bg-slate-800/80 rounded-xl p-4 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-4 h-4 text-red-400" />
-                Temas com Dificuldade
-              </h2>
-              <div className="flex-1 overflow-y-auto">
-                {temasComDificuldade.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <CheckCircle className="w-10 h-10 text-green-400 mb-2" />
-                    <p className="text-green-400 text-sm font-medium">Nenhum tema com dificuldade!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {temasComDificuldade.map((tema) => (
-                      <div key={tema.tema} className="bg-red-900/40 rounded-lg p-2 border border-red-500/40">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-white text-sm font-medium truncate flex-1 mr-2">{tema.tema}</span>
-                          <span className="text-red-300 text-sm font-bold whitespace-nowrap">{tema.taxa_erro}% erro</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-red-900/50 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full"
-                              style={{ width: `${tema.taxa_erro}%` }}
-                            />
-                          </div>
-                          <span className="text-slate-400 text-xs">{tema.quantidade}q</span>
-                        </div>
+          {/* Temas com Dificuldade */}
+          <div className="bg-slate-800/80 rounded-lg p-2 flex-shrink-0 max-h-[30%] overflow-hidden flex flex-col border border-slate-700">
+            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+              Temas Difíceis
+            </h2>
+            <div className="flex-1 overflow-y-auto">
+              {temasComDificuldade.length === 0 ? (
+                <div className="flex items-center gap-2 text-green-400 text-xs py-1">
+                  <CheckCircle className="w-4 h-4" /> Sem dificuldades
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {temasComDificuldade.slice(0, 4).map(tema => (
+                    <div key={tema.tema} className="bg-red-900/30 rounded p-1.5 border border-red-500/30">
+                      <div className="flex items-center justify-between text-[10px]">
+                        <span className="text-white truncate flex-1 mr-2">{tema.tema}</span>
+                        <span className="text-red-300 font-bold">{tema.taxa_erro}%</span>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Tabela de Desempenho dos Alunos */}
-            <div className="bg-slate-800/80 rounded-xl p-4 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-green-400" />
-                Desempenho dos Alunos
-              </h2>
-              <div className="flex-1 overflow-y-auto">
-                {alunosAtivos.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-slate-400 text-sm">
-                    Sem dados de desempenho
-                  </div>
-                ) : (
-                  <table className="w-full text-xs">
-                    <thead className="sticky top-0 bg-slate-800">
-                      <tr className="text-slate-300">
-                        <th className="text-left pb-2 pl-1 font-semibold">Aluno</th>
-                        <th className="text-center pb-2 font-semibold">Status</th>
-                        <th className="text-center pb-2 font-semibold">Questoes</th>
-                        <th className="text-center pb-2 font-semibold">Acertos</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {alunosAtivos.slice(0, 10).map((aluno) => {
-                        const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
-                        return (
-                          <tr key={aluno.id} className="border-t border-slate-700 hover:bg-slate-700/50">
-                            <td className="py-1.5 pl-1">
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[8px] font-bold"
-                                  style={{ background: getAvatarBg(aluno.componente) }}
-                                >
-                                  {getIniciais(aluno.nome)}
-                                </div>
-                                <span className="text-slate-100 truncate max-w-[100px]">
-                                  {aluno.nome.split(' ').slice(0, 2).join(' ')}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="py-1.5 text-center">
-                              <span
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-semibold"
-                                style={{
-                                  background: `${config.cor}30`,
-                                  color: config.cor
-                                }}
-                              >
-                                {config.label}
-                              </span>
-                            </td>
-                            <td className="py-1.5 text-center text-slate-200">{aluno.questoes_sessao}</td>
-                            <td className="py-1.5 text-center">
-                              <span
-                                className="font-medium"
-                                style={{
-                                  color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444'
-                                }}
-                              >
-                                {aluno.acertos_sessao}/{aluno.questoes_sessao}
-                              </span>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </div>
+                      <div className="h-1 bg-red-900/50 rounded-full mt-1 overflow-hidden">
+                        <div className="h-full bg-red-500 rounded-full" style={{ width: `${tema.taxa_erro}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* COLUNA 4: Alertas e Feed */}
-        <div className="lg:col-span-1 flex flex-col gap-4 overflow-hidden">
-
-          {/* Alertas em Tempo Real */}
-          <div className="bg-slate-800/80 rounded-xl p-4 flex-shrink-0 border border-slate-700">
-            <h2 className="text-white font-semibold flex items-center gap-2 mb-3 text-sm">
-              <AlertTriangle className="w-4 h-4 text-yellow-400" />
-              Alertas em Tempo Real
+        {/* COL 3: Alertas + Feed (3 colunas) */}
+        <div className="col-span-3 flex flex-col gap-2 overflow-hidden">
+          {/* Alertas */}
+          <div className="bg-slate-800/80 rounded-lg p-2 flex-shrink-0 border border-slate-700">
+            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" />
+              Alertas
             </h2>
             {alunosPrecisandoAjuda.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-4 text-green-400">
-                <CheckCircle className="w-8 h-8 mb-2" />
-                <p className="text-sm font-medium">Sem alertas</p>
+              <div className="flex items-center gap-2 text-green-400 text-xs py-2">
+                <CheckCircle className="w-4 h-4" /> Sem alertas
               </div>
             ) : (
-              <div className="space-y-2 max-h-[150px] overflow-y-auto">
-                {alunosPrecisandoAjuda.slice(0, 5).map((aluno) => (
-                  <div key={aluno.id} className="flex items-center gap-2 p-2 bg-red-900/40 rounded border border-red-500/40">
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
-                      style={{ background: getAvatarBg(aluno.componente) }}
-                    >
+              <div className="space-y-1 max-h-[120px] overflow-y-auto">
+                {alunosPrecisandoAjuda.slice(0, 4).map(aluno => (
+                  <div key={aluno.id} className="flex items-center gap-1.5 p-1.5 bg-red-900/30 rounded border border-red-500/30">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[7px] font-bold"
+                      style={{ background: getAvatarBg(aluno.componente) }}>
                       {getIniciais(aluno.nome)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-xs font-medium truncate">{aluno.nome.split(' ')[0]}</p>
-                      <p className="text-red-300 text-[10px] font-medium">{aluno.taxa_acerto}% em {aluno.questoes_sessao} questoes</p>
+                      <p className="text-white text-[10px] font-medium truncate">{aluno.nome.split(' ')[0]}</p>
+                      <p className="text-red-300 text-[9px]">{aluno.taxa_acerto}% em {aluno.questoes_sessao}q</p>
                     </div>
                   </div>
                 ))}
@@ -711,56 +587,45 @@ export default function DashboardAoVivoPage() {
             )}
           </div>
 
-          {/* Atividades Recentes */}
-          <div className="bg-slate-800/80 rounded-xl p-4 flex-1 overflow-hidden flex flex-col min-h-[200px] border border-slate-700">
-            <h2 className="text-white font-semibold flex items-center gap-2 mb-3 text-sm">
-              <Activity className="w-4 h-4 text-blue-400" />
-              Atividades Recentes
+          {/* Feed de Atividades */}
+          <div className="bg-slate-800/80 rounded-lg p-2 flex-1 flex flex-col overflow-hidden border border-slate-700">
+            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-1.5">
+              <Activity className="w-3.5 h-3.5 text-blue-400" />
+              Atividades
             </h2>
-            <div className="flex-1 overflow-y-auto space-y-1">
+            <div className="flex-1 overflow-y-auto space-y-0.5">
               {atividades.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                  <Clock className="w-8 h-8 mb-2 opacity-70" />
-                  <p className="text-xs">Aguardando atividades...</p>
+                  <Clock className="w-6 h-6 mb-1 opacity-70" />
+                  <p className="text-[10px]">Aguardando...</p>
                 </div>
               ) : (
-                atividades.slice(0, 20).map((ativ) => (
-                  <div
-                    key={ativ.id}
-                    className="flex items-center gap-2 py-1 px-1.5 rounded hover:bg-slate-700/50 transition"
-                  >
+                atividades.slice(0, 25).map(ativ => (
+                  <div key={ativ.id} className="flex items-center gap-1.5 py-0.5 px-1 rounded hover:bg-slate-700/30 transition">
                     {ativ.tipo === 'resposta' || ativ.tipo === 'revisao' ? (
-                      ativ.detalhes.correta ? (
-                        <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0" />
-                      ) : (
-                        <XCircle className="w-3 h-3 text-red-400 flex-shrink-0" />
-                      )
+                      ativ.detalhes.correta ? <CheckCircle className="w-2.5 h-2.5 text-green-400 flex-shrink-0" /> : <XCircle className="w-2.5 h-2.5 text-red-400 flex-shrink-0" />
                     ) : ativ.tipo === 'desafio_completo' ? (
-                      <Award className="w-3 h-3 text-yellow-400 flex-shrink-0" />
+                      <Award className="w-2.5 h-2.5 text-yellow-400 flex-shrink-0" />
                     ) : ativ.tipo === 'desafio_iniciado' ? (
-                      <Zap className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                      <Zap className="w-2.5 h-2.5 text-orange-400 flex-shrink-0" />
                     ) : ativ.tipo === 'tutor' ? (
-                      <Brain className="w-3 h-3 text-blue-400 flex-shrink-0" />
+                      <Brain className="w-2.5 h-2.5 text-blue-400 flex-shrink-0" />
                     ) : (
-                      <Activity className="w-3 h-3 text-purple-400 flex-shrink-0" />
+                      <Activity className="w-2.5 h-2.5 text-purple-400 flex-shrink-0" />
                     )}
                     <div className="flex-1 min-w-0">
-                      <span className="text-slate-100 text-[10px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
-                      <span className="text-slate-300 text-[10px]">
+                      <span className="text-slate-100 text-[9px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
+                      <span className="text-slate-400 text-[9px]">
                         {' - '}
                         {ativ.tipo === 'resposta' || ativ.tipo === 'revisao'
                           ? (ativ.detalhes.correta ? 'acertou' : 'errou')
-                          : ativ.tipo === 'desafio_completo'
-                          ? 'completou desafio'
-                          : ativ.tipo === 'desafio_iniciado'
-                          ? 'iniciou desafio'
-                          : ativ.tipo === 'tutor'
-                          ? 'perguntou ao tutor'
-                          : 'atividade'
-                        }
+                          : ativ.tipo === 'desafio_completo' ? 'desafio'
+                          : ativ.tipo === 'desafio_iniciado' ? 'iniciou'
+                          : ativ.tipo === 'tutor' ? 'tutor'
+                          : 'atividade'}
                       </span>
                     </div>
-                    <span className="text-slate-400 text-[9px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
+                    <span className="text-slate-500 text-[8px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
                   </div>
                 ))
               )}
@@ -776,32 +641,69 @@ export default function DashboardAoVivoPage() {
 // COMPONENTES AUXILIARES
 // ═══════════════════════════════════════════════════════════════════════════
 
-interface StatBoxProps {
+function MiniStat({ label, value, color, icon, trend }: {
   label: string
   value: string | number
   color: string
   icon: React.ReactNode
   trend?: 'subindo' | 'estavel' | 'descendo'
+}) {
+  return (
+    <div className="rounded-lg px-2 py-1.5 flex items-center gap-2 border border-slate-700"
+      style={{ background: 'rgba(30,41,59,0.9)', borderLeft: `3px solid ${color}` }}>
+      <div style={{ color }} className="flex-shrink-0">{icon}</div>
+      <div className="min-w-0">
+        <div className="flex items-center gap-1">
+          <span className="text-base font-bold text-white">{value}</span>
+          {trend === 'subindo' && <TrendingUp className="w-3 h-3 text-green-400" />}
+          {trend === 'descendo' && <TrendingDown className="w-3 h-3 text-red-400" />}
+        </div>
+        <span className="text-slate-400 text-[9px]">{label}</span>
+      </div>
+    </div>
+  )
 }
 
-function StatBox({ label, value, color, icon, trend }: StatBoxProps) {
+function AlunoAvatar({ nome, iniciais, bgColor, statusColor, statusIcon, statusBgColor, taxa, precisaAjuda, tooltip, dimmed, grayscale }: {
+  nome: string
+  iniciais: string
+  bgColor: string
+  statusColor: string
+  statusIcon: React.ReactNode
+  statusBgColor: string
+  taxa?: number
+  precisaAjuda?: boolean
+  tooltip?: string
+  dimmed?: boolean
+  grayscale?: boolean
+}) {
   return (
     <div
-      className="rounded-lg p-2 sm:p-3 flex flex-col justify-center relative overflow-hidden border border-slate-600"
-      style={{
-        background: 'rgba(30, 41, 59, 0.9)',
-        borderLeft: `4px solid ${color}`
-      }}
+      className={`flex flex-col items-center cursor-pointer transition-transform hover:scale-105 ${precisaAjuda ? 'animate-pulse' : ''} ${dimmed ? 'opacity-50' : ''}`}
+      title={tooltip}
     >
-      <div className="flex items-center gap-2">
-        <div style={{ color }} className="flex-shrink-0">{icon}</div>
-        <div className="flex items-center gap-1 flex-1 min-w-0">
-          <span className="text-lg sm:text-xl font-bold text-white truncate">{value}</span>
-          {trend === 'subindo' && <TrendingUp className="w-4 h-4 text-green-400 flex-shrink-0" />}
-          {trend === 'descendo' && <TrendingDown className="w-4 h-4 text-red-400 flex-shrink-0" />}
+      <div className="relative">
+        <div
+          className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow ${grayscale ? 'grayscale' : ''}`}
+          style={{
+            background: bgColor,
+            boxShadow: precisaAjuda ? '0 0 0 2px #ef4444' : `0 0 0 2px ${statusColor}`,
+          }}
+        >
+          {iniciais}
         </div>
+        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-[1.5px] border-slate-800 flex items-center justify-center"
+          style={{ background: statusBgColor }}>
+          {statusIcon}
+        </div>
+        {taxa !== undefined && (
+          <div className="absolute -top-1 -left-1 px-0.5 rounded text-[7px] font-bold"
+            style={{ background: taxa >= 70 ? '#22c55e' : taxa >= 50 ? '#f59e0b' : '#ef4444', color: 'white' }}>
+            {taxa}%
+          </div>
+        )}
       </div>
-      <span className="text-slate-300 text-[10px] truncate font-medium">{label}</span>
+      <span className="text-slate-300 text-[8px] mt-0.5 truncate max-w-[45px] text-center">{nome.split(' ')[0]}</span>
     </div>
   )
 }
