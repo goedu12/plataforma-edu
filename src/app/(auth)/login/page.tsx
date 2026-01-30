@@ -97,7 +97,7 @@ export default function LoginPage() {
         setErroAjuda(data.erro || data.detalhes || 'Erro ao carregar estudantes')
       }
     } catch (err) {
-      setErroAjuda('Erro de conexao ao buscar estudantes')
+      setErroAjuda('Erro de conexão ao buscar estudantes')
       console.error('Erro buscarEstudantes:', err)
     } finally {
       setCarregandoEstudantes(false)
@@ -117,7 +117,7 @@ export default function LoginPage() {
     const matchTurma = turmaSelecionada === '' || e.turma === turmaSelecionada
     const matchTurno = turnoSelecionado === '' || e.turno === turnoSelecionado
     return matchNome && matchColegio && matchComponente && matchTurma && matchTurno
-  }).slice(0, 30) // Limitar a 30 resultados
+  }).slice(0, 50) // Limitar a 50 resultados
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -150,7 +150,7 @@ export default function LoginPage() {
         setErro(data.erro || 'Erro ao fazer login')
       }
     } catch {
-      setErro('Erro de conexao. Tente novamente.')
+      setErro('Erro de conexão. Tente novamente.')
     } finally {
       setLoading(false)
     }
@@ -496,7 +496,7 @@ export default function LoginPage() {
                               {estudante.turma}
                             </span>
                             <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                              {estudante.componente === 'fisica' ? 'Fisica' : 'Matematica'}
+                              {estudante.componente === 'fisica' ? 'Física' : 'Matemática'}
                             </span>
                           </div>
                         </div>
@@ -531,7 +531,7 @@ export default function LoginPage() {
               style={{ borderColor: 'var(--border-default)', background: 'var(--bg-elevated)' }}
             >
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                A senha e fornecida pelo professor. Caso nao lembre, solicite uma nova.
+                A senha é fornecida pelo professor. Caso não lembre, solicite uma nova.
               </p>
             </div>
           </div>
