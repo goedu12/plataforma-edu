@@ -287,7 +287,7 @@ export default function DashboardAoVivoPage() {
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0f172a', fontFamily: 'system-ui, sans-serif' }}>
 
       {/* HEADER COMPACTO */}
-      <header className="px-3 py-2 flex items-center justify-between gap-2 flex-shrink-0" style={{ background: 'rgba(0,0,0,0.5)' }}>
+      <header className="px-2 py-1.5 flex items-center justify-between gap-2 flex-shrink-0" style={{ background: 'rgba(0,0,0,0.5)' }}>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Radio className="w-5 h-5 text-green-400" />
@@ -355,7 +355,7 @@ export default function DashboardAoVivoPage() {
       </header>
 
       {/* STATS BAR COMPACTA */}
-      <div className="px-3 py-1.5 grid grid-cols-3 sm:grid-cols-6 gap-1.5 flex-shrink-0">
+      <div className="px-2 py-1 grid grid-cols-3 sm:grid-cols-6 gap-1 flex-shrink-0">
         <MiniStat icon={<Wifi className="w-3.5 h-3.5" />} label="Online" value={totalOnline} color="#22c55e" />
         <MiniStat icon={<Coffee className="w-3.5 h-3.5" />} label="Ociosos" value={alunosOciosos.length} color="#f59e0b" />
         <MiniStat icon={<WifiOff className="w-3.5 h-3.5" />} label="Offline" value={alunosInativos.length} color="#64748b" />
@@ -365,13 +365,13 @@ export default function DashboardAoVivoPage() {
       </div>
 
       {/* MAIN CONTENT - Tudo em uma tela */}
-      <div className="flex-1 px-3 pb-2 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-hidden min-h-0">
+      <div className="flex-1 px-2 pb-1.5 grid grid-cols-1 lg:grid-cols-12 gap-1.5 overflow-hidden min-h-0">
 
         {/* COLUNA ESQUERDA: Alunos (8 cols) */}
-        <div className="lg:col-span-8 flex flex-col gap-2 overflow-hidden min-h-0">
+        <div className="lg:col-span-8 flex flex-col gap-1.5 overflow-hidden min-h-0">
 
-          {/* Grid de Alunos - 3 estados */}
-          <div className="bg-slate-800/80 rounded-lg p-3 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
+          {/* Grid de Alunos - 3 estados - ocupa ~65% */}
+          <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700 min-h-0" style={{ flex: '1 1 65%' }}>
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
               <h2 className="text-white font-semibold text-sm flex items-center gap-2">
                 <Users className="w-4 h-4 text-blue-400" />
@@ -484,8 +484,8 @@ export default function DashboardAoVivoPage() {
             </div>
           </div>
 
-          {/* Linha inferior: Dificuldades + Desempenho */}
-          <div className="grid grid-cols-2 gap-2 flex-shrink-0" style={{ maxHeight: '200px' }}>
+          {/* Linha inferior: Dificuldades + Desempenho - ocupa ~35% */}
+          <div className="grid grid-cols-2 gap-1.5 overflow-hidden min-h-0" style={{ flex: '0 1 35%' }}>
             {/* Temas com Dificuldade */}
             <div className="bg-slate-800/80 rounded-lg p-2.5 overflow-hidden flex flex-col border border-slate-700">
               <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2">
@@ -564,10 +564,10 @@ export default function DashboardAoVivoPage() {
         </div>
 
         {/* COLUNA DIREITA: Alertas + Feed (4 cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-2 overflow-hidden min-h-0">
+        <div className="lg:col-span-4 flex flex-col gap-1.5 overflow-hidden min-h-0">
 
           {/* Alertas: Ociosos + Dificuldade */}
-          <div className="bg-slate-800/80 rounded-lg p-2.5 flex-shrink-0 border border-slate-700" style={{ maxHeight: '45%' }}>
+          <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700 min-h-0" style={{ flex: '0 1 40%' }}>
             <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2">
               <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" />
               Alertas
@@ -612,7 +612,7 @@ export default function DashboardAoVivoPage() {
           </div>
 
           {/* Feed de Atividades */}
-          <div className="bg-slate-800/80 rounded-lg p-2.5 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
+          <div className="bg-slate-800/80 rounded-lg p-2 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
             <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2 flex-shrink-0">
               <Activity className="w-3.5 h-3.5 text-blue-400" />
               Atividades Recentes
@@ -673,7 +673,7 @@ function MiniStat({ icon, label, value, color, trend }: {
   trend?: 'subindo' | 'estavel' | 'descendo'
 }) {
   return (
-    <div className="rounded-md p-1.5 flex items-center gap-1.5 border border-slate-700" style={{ background: 'rgba(30,41,59,0.9)', borderLeft: `3px solid ${color}` }}>
+    <div className="rounded-md p-1 flex items-center gap-1.5 border border-slate-700" style={{ background: 'rgba(30,41,59,0.9)', borderLeft: `3px solid ${color}` }}>
       <div style={{ color }} className="flex-shrink-0">{icon}</div>
       <div className="min-w-0">
         <div className="flex items-center gap-0.5">
