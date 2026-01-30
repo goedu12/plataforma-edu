@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Users,
@@ -17,17 +17,16 @@ import {
   Radio,
   Award,
   UserX,
-  Timer,
   AlertTriangle,
   Brain,
   PlayCircle,
   PauseCircle,
   Eye,
-  Building2,
   ArrowLeft,
   Coffee,
   Wifi,
   WifiOff,
+  Star,
 } from 'lucide-react'
 import type { Componente } from '@/types'
 
@@ -129,6 +128,37 @@ interface DadosTempoReal {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// CONSTANTES (fora do render)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const ATIVIDADE_CONFIG: Record<string, { cor: string; label: string }> = {
+  estudo: { cor: '#22c55e', label: 'Estudando' },
+  desafio: { cor: '#f59e0b', label: 'Desafio' },
+  tutor: { cor: '#3b82f6', label: 'Tutor IA' },
+  revisao: { cor: '#a855f7', label: 'Revisao' },
+  flashcard: { cor: '#a855f7', label: 'Flashcard' },
+  mapa: { cor: '#06b6d4', label: 'Mapa' },
+}
+
+const getAvatarBg = (comp: Componente) => comp === 'fisica' ? '#22c55e' : '#8b5cf6'
+const getIniciais = (nome: string) => nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+
+const formatarTempoOcioso = (seg: number) => {
+  if (seg < 60) return `${seg}s`
+  const min = Math.floor(seg / 60)
+  if (min < 60) return `${min}min`
+  return `${Math.floor(min / 60)}h${min % 60}m`
+}
+
+const formatarTempoRelativo = (ts: string) => {
+  const diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000)
+  if (diff < 60) return `${diff}s`
+  const min = Math.floor(diff / 60)
+  if (min < 60) return `${min}min`
+  return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // COMPONENTE PRINCIPAL
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -138,27 +168,27 @@ export default function DashboardAoVivoPage() {
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
 
-  // Filtros
   const [turmaFiltro, setTurmaFiltro] = useState<string>('')
   const [componenteFiltro, setComponenteFiltro] = useState<Componente | ''>('')
   const [colegioFiltro, setColegioFiltro] = useState<string>('')
   const [periodoMinutos] = useState(60)
 
-  // Auto-refresh
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [contadorRefresh, setContadorRefresh] = useState(0)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const intervalo = 5
 
-  // Hora atual
-  const [horaAtual, setHoraAtual] = useState(new Date())
+  // Histórico para sparklines (últimos 12 pontos = 1 min de dados com refresh 5s)
+  const [historicoAcerto, setHistoricoAcerto] = useState<number[]>([])
+  const [historicoQuestoes, setHistoricoQuestoes] = useState<number[]>([])
 
+  // Relógio atualiza a cada 60s (só mostra HH:MM)
+  const [horaAtual, setHoraAtual] = useState(new Date())
   useEffect(() => {
-    const timer = setInterval(() => setHoraAtual(new Date()), 1000)
+    const timer = setInterval(() => setHoraAtual(new Date()), 60_000)
     return () => clearInterval(timer)
   }, [])
 
-  // Sinalizar ao heartbeat que professor está monitorando
   const sinalizarMonitoramento = useCallback(async () => {
     try {
       await fetch('/api/heartbeat', {
@@ -184,6 +214,9 @@ export default function DashboardAoVivoPage() {
       if (data.sucesso) {
         setDados(data)
         setErro(null)
+        // Acumular histórico para sparklines
+        setHistoricoAcerto(prev => [...prev.slice(-11), data.estatisticas.taxa_acerto_tempo_real || 0])
+        setHistoricoQuestoes(prev => [...prev.slice(-11), data.estatisticas.questoes_ultimos_5min || 0])
       } else if (response.status === 403) {
         router.push('/login')
       } else {
@@ -219,34 +252,34 @@ export default function DashboardAoVivoPage() {
     }
   }, [autoRefresh, buscarDados, sinalizarMonitoramento])
 
-  const formatarTempoOcioso = (segundos: number) => {
-    if (segundos < 60) return `${segundos}s`
-    const min = Math.floor(segundos / 60)
-    if (min < 60) return `${min}min`
-    return `${Math.floor(min / 60)}h${min % 60}m`
-  }
+  // Dados derivados (memoizados)
+  const stats = dados?.estatisticas
+  const alunosAtivos = dados?.alunos_ativos || []
+  const alunosOciosos = dados?.alunos_ociosos || []
+  const alunosInativos = dados?.alunos_inativos || []
+  const atividades = dados?.atividades || []
+  const temasComDificuldade = stats?.temas_com_dificuldade || []
 
-  const formatarTempoRelativo = (timestamp: string) => {
-    const diffMs = new Date().getTime() - new Date(timestamp).getTime()
-    const diffSeg = Math.floor(diffMs / 1000)
-    const diffMin = Math.floor(diffSeg / 60)
-    if (diffSeg < 60) return `${diffSeg}s`
-    if (diffMin < 60) return `${diffMin}min`
-    return new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-  }
+  const alunosPrecisandoAjuda = useMemo(
+    () => alunosAtivos.filter(a => a.questoes_sessao >= 5 && a.taxa_acerto < 40),
+    [alunosAtivos]
+  )
 
-  const atividadeConfig: Record<string, { cor: string; label: string; icon: React.ReactNode }> = {
-    estudo: { cor: '#22c55e', label: 'Estudando', icon: <BookOpen className="w-3 h-3" /> },
-    desafio: { cor: '#f59e0b', label: 'Desafio', icon: <Zap className="w-3 h-3" /> },
-    tutor: { cor: '#3b82f6', label: 'Tutor IA', icon: <Brain className="w-3 h-3" /> },
-    revisao: { cor: '#a855f7', label: 'Revisao', icon: <RefreshCw className="w-3 h-3" /> },
-    flashcard: { cor: '#a855f7', label: 'Flashcard', icon: <RefreshCw className="w-3 h-3" /> },
-    mapa: { cor: '#06b6d4', label: 'Mapa', icon: <Eye className="w-3 h-3" /> },
-  }
+  const totalOnline = alunosAtivos.length + alunosOciosos.length
 
-  const getAvatarBg = (componente: Componente) => componente === 'fisica' ? '#22c55e' : '#8b5cf6'
-
-  const getIniciais = (nome: string) => nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+  // Distribuição de atividades para donut chart
+  const distribuicaoAtividades = useMemo(() => {
+    const cont: Record<string, number> = {}
+    for (const a of alunosAtivos) {
+      cont[a.tipo_atividade] = (cont[a.tipo_atividade] || 0) + 1
+    }
+    return Object.entries(cont).map(([tipo, qtd]) => ({
+      tipo,
+      qtd,
+      cor: ATIVIDADE_CONFIG[tipo]?.cor || '#64748b',
+      label: ATIVIDADE_CONFIG[tipo]?.label || tipo,
+    }))
+  }, [alunosAtivos])
 
   if (loading) {
     return (
@@ -273,210 +306,175 @@ export default function DashboardAoVivoPage() {
     )
   }
 
-  const stats = dados?.estatisticas
-  const alunosAtivos = dados?.alunos_ativos || []
-  const alunosOciosos = dados?.alunos_ociosos || []
-  const alunosInativos = dados?.alunos_inativos || []
-  const atividades = dados?.atividades || []
-  const temasComDificuldade = stats?.temas_com_dificuldade || []
-  const alunosPrecisandoAjuda = alunosAtivos.filter(a => a.questoes_sessao >= 5 && a.taxa_acerto < 40)
-
-  const totalOnline = alunosAtivos.length + alunosOciosos.length
-
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0f172a', fontFamily: 'system-ui, sans-serif' }}>
 
-      {/* HEADER COMPACTO */}
-      <header className="px-3 py-2 flex items-center justify-between gap-2 flex-shrink-0" style={{ background: 'rgba(0,0,0,0.5)' }}>
-        <div className="flex items-center gap-3">
+      {/* HEADER */}
+      <header className="px-2 py-1 flex items-center justify-between gap-2 flex-shrink-0" style={{ background: 'rgba(0,0,0,0.5)' }}>
+        <div className="flex items-center gap-2">
           <div className="relative">
-            <Radio className="w-5 h-5 text-green-400" />
+            <Radio className="w-4 h-4 text-green-400" />
             <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-green-400 rounded-full animate-ping" />
           </div>
-          <h1 className="text-sm font-bold text-white">Painel Ao Vivo</h1>
-          {colegioFiltro && <span className="px-2 py-0.5 bg-purple-600 text-white rounded text-xs">{colegioFiltro}</span>}
-          {turmaFiltro && <span className="px-2 py-0.5 bg-green-600 text-white rounded text-xs">{turmaFiltro}</span>}
-          {componenteFiltro && <span className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs capitalize">{componenteFiltro}</span>}
-          <span className="text-white/70 text-xs">{horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+          <h1 className="text-xs font-bold text-white">Ao Vivo</h1>
+          {colegioFiltro && <span className="px-1.5 py-0.5 bg-purple-600 text-white rounded text-[9px]">{colegioFiltro}</span>}
+          {turmaFiltro && <span className="px-1.5 py-0.5 bg-green-600 text-white rounded text-[9px]">{turmaFiltro}</span>}
+          {componenteFiltro && <span className="px-1.5 py-0.5 bg-blue-600 text-white rounded text-[9px] capitalize">{componenteFiltro}</span>}
+          <span className="text-white/50 text-[10px]">{horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {dados?.colegios_disponiveis && dados.colegios_disponiveis.length > 0 && (
-            <select
-              value={colegioFiltro}
-              onChange={(e) => { setColegioFiltro(e.target.value); setTurmaFiltro('') }}
-              className="px-2 py-1 rounded text-xs bg-slate-700 text-white border border-slate-600 min-w-[130px]"
-            >
-              <option value="">Todos Colegios</option>
+            <select value={colegioFiltro} onChange={(e) => { setColegioFiltro(e.target.value); setTurmaFiltro('') }}
+              className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700 text-white border border-slate-600">
+              <option value="">Colegios</option>
               {dados.colegios_disponiveis.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           )}
-          <select
-            value={turmaFiltro}
-            onChange={(e) => setTurmaFiltro(e.target.value)}
-            className="px-2 py-1 rounded text-xs bg-slate-700 text-white border border-slate-600 min-w-[110px]"
-          >
-            <option value="">Todas Turmas</option>
+          <select value={turmaFiltro} onChange={(e) => setTurmaFiltro(e.target.value)}
+            className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700 text-white border border-slate-600">
+            <option value="">Turmas</option>
             {(dados?.turmas_disponiveis || []).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <select
-            value={componenteFiltro}
-            onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
-            className="px-2 py-1 rounded text-xs bg-slate-700 text-white border border-slate-600"
-          >
+          <select value={componenteFiltro} onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
+            className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700 text-white border border-slate-600">
             <option value="">Todos</option>
-            <option value="fisica">Fisica</option>
-            <option value="matematica">Matematica</option>
+            <option value="fisica">Fis</option>
+            <option value="matematica">Mat</option>
           </select>
 
-          <button
-            onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`p-1.5 rounded transition ${autoRefresh ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}
-          >
-            {autoRefresh ? <PlayCircle className="w-4 h-4" /> : <PauseCircle className="w-4 h-4" />}
+          <button onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`p-1 rounded transition ${autoRefresh ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}>
+            {autoRefresh ? <PlayCircle className="w-3.5 h-3.5" /> : <PauseCircle className="w-3.5 h-3.5" />}
           </button>
 
           {autoRefresh && (
-            <div className="w-6 h-6 rounded-full border-2 border-green-400 flex items-center justify-center relative"
+            <div className="w-5 h-5 rounded-full border-2 border-green-400 flex items-center justify-center"
               style={{ background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)` }}>
-              <div className="w-4 h-4 rounded-full bg-slate-900 flex items-center justify-center">
-                <span className="text-[8px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
+              <div className="w-3 h-3 rounded-full bg-slate-900 flex items-center justify-center">
+                <span className="text-[7px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
               </div>
             </div>
           )}
 
-          <button
-            onClick={() => router.push('/professor/dashboard')}
-            className="p-1.5 rounded bg-slate-700 text-white hover:bg-slate-600"
-          >
-            <ArrowLeft className="w-4 h-4" />
+          <button onClick={() => router.push('/professor/dashboard')}
+            className="p-1 rounded bg-slate-700 text-white hover:bg-slate-600">
+            <ArrowLeft className="w-3.5 h-3.5" />
           </button>
         </div>
       </header>
 
-      {/* STATS BAR COMPACTA */}
-      <div className="px-3 py-1.5 grid grid-cols-3 sm:grid-cols-6 gap-1.5 flex-shrink-0">
-        <MiniStat icon={<Wifi className="w-3.5 h-3.5" />} label="Online" value={totalOnline} color="#22c55e" />
-        <MiniStat icon={<Coffee className="w-3.5 h-3.5" />} label="Ociosos" value={alunosOciosos.length} color="#f59e0b" />
-        <MiniStat icon={<WifiOff className="w-3.5 h-3.5" />} label="Offline" value={alunosInativos.length} color="#64748b" />
-        <MiniStat icon={<BookOpen className="w-3.5 h-3.5" />} label="Questoes" value={stats?.questoes_periodo_total || 0} color="#3b82f6" />
-        <MiniStat icon={<CheckCircle className="w-3.5 h-3.5" />} label="Acuracia" value={`${stats?.taxa_acerto_tempo_real || 0}%`} color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'} trend={stats?.tendencia_acerto} />
-        <MiniStat icon={<Target className="w-3.5 h-3.5" />} label="Participacao" value={`${stats?.taxa_participacao || 0}%`} color="#8b5cf6" />
+      {/* STATS BAR */}
+      <div className="px-2 py-0.5 grid grid-cols-6 gap-1 flex-shrink-0">
+        <MiniStat icon={<Wifi className="w-3 h-3" />} label="Online" value={totalOnline} color="#22c55e" />
+        <MiniStat icon={<Coffee className="w-3 h-3" />} label="Ociosos" value={alunosOciosos.length} color="#f59e0b" />
+        <MiniStat icon={<WifiOff className="w-3 h-3" />} label="Offline" value={alunosInativos.length} color="#64748b" />
+        <MiniStat icon={<BookOpen className="w-3 h-3" />} label="Questoes" value={stats?.questoes_periodo_total || 0} color="#3b82f6" />
+        <MiniStat icon={<CheckCircle className="w-3 h-3" />} label="Acuracia" value={`${stats?.taxa_acerto_tempo_real || 0}%`}
+          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'} trend={stats?.tendencia_acerto} />
+        <MiniStat icon={<Star className="w-3 h-3" />} label="Nota Media" value={stats?.media_nota_ativos ? stats.media_nota_ativos.toFixed(1) : '-'} color="#f59e0b" />
       </div>
 
-      {/* MAIN CONTENT - Tudo em uma tela */}
-      <div className="flex-1 px-3 pb-2 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-hidden min-h-0">
+      {/* MAIN CONTENT */}
+      <div className="flex-1 px-2 pb-1 grid grid-cols-12 gap-1.5 overflow-hidden min-h-0">
 
-        {/* COLUNA ESQUERDA: Alunos (8 cols) */}
-        <div className="lg:col-span-8 flex flex-col gap-2 overflow-hidden min-h-0">
+        {/* COLUNA ESQUERDA (8 cols) */}
+        <div className="col-span-8 flex flex-col gap-1 overflow-hidden min-h-0">
 
-          {/* Grid de Alunos - 3 estados */}
-          <div className="bg-slate-800/80 rounded-lg p-3 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
-            <div className="flex items-center justify-between mb-2 flex-shrink-0">
-              <h2 className="text-white font-semibold text-sm flex items-center gap-2">
-                <Users className="w-4 h-4 text-blue-400" />
+          {/* Grid de Alunos */}
+          <div className="bg-slate-800/80 rounded-lg p-1.5 overflow-hidden flex flex-col border border-slate-700 min-h-0" style={{ flex: '1 1 55%' }}>
+            <div className="flex items-center justify-between mb-1 flex-shrink-0">
+              <h2 className="text-white font-semibold text-[11px] flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-blue-400" />
                 Alunos
-                <span className="text-slate-400 font-normal text-xs">
+                <span className="text-slate-400 font-normal text-[9px]">
                   {alunosAtivos.length} ativos | {alunosOciosos.length} ociosos | {alunosInativos.length} offline
                 </span>
               </h2>
-              <div className="flex items-center gap-3 text-[9px]">
-                <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-green-500" /><span className="text-slate-400">Ativo</span></div>
-                <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-yellow-500" /><span className="text-slate-400">Ocioso</span></div>
-                <div className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-500" /><span className="text-slate-400">Offline</span></div>
+              <div className="flex items-center gap-2 text-[8px]">
+                <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" /> Ativo</span>
+                <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-yellow-500 inline-block" /> Ocioso</span>
+                <span className="flex items-center gap-0.5"><span className="w-1.5 h-1.5 rounded-full bg-slate-500 inline-block" /> Off</span>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto min-h-0">
               {alunosAtivos.length === 0 && alunosOciosos.length === 0 && alunosInativos.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                  <UserX className="w-10 h-10 mb-2 opacity-70" />
-                  <p className="text-sm">Nenhum aluno encontrado</p>
+                  <UserX className="w-8 h-8 mb-1 opacity-70" />
+                  <p className="text-xs">Nenhum aluno</p>
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-2 content-start">
-                  {/* ATIVOS - verde */}
+                <div className="flex flex-wrap gap-1.5 content-start">
+                  {/* ATIVOS */}
                   {alunosAtivos.map((aluno) => {
-                    const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
-                    const precisaAjuda = aluno.questoes_sessao >= 5 && aluno.taxa_acerto < 40
+                    const cfg = ATIVIDADE_CONFIG[aluno.tipo_atividade] || ATIVIDADE_CONFIG.estudo
+                    const ajuda = aluno.questoes_sessao >= 5 && aluno.taxa_acerto < 40
                     return (
-                      <div
-                        key={`a-${aluno.id}`}
-                        className={`flex flex-col items-center transition-transform hover:scale-105 ${precisaAjuda ? 'animate-pulse' : ''}`}
-                        title={`${aluno.nome}\nTurma: ${aluno.turma}\nQuestoes: ${aluno.questoes_sessao}\nAcertos: ${aluno.taxa_acerto}%\n${config.label}`}
-                      >
+                      <div key={`a-${aluno.id}`}
+                        className={`flex flex-col items-center hover:scale-105 transition-transform ${ajuda ? 'animate-pulse' : ''}`}
+                        title={`${aluno.nome}\nTurma: ${aluno.turma}\n${cfg.label}\nQuestoes: ${aluno.questoes_sessao} | Acerto: ${aluno.taxa_acerto}%${aluno.nota_atual !== undefined ? `\nNota: ${aluno.nota_atual.toFixed(1)}` : ''}`}>
                         <div className="relative">
-                          <div
-                            className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-md"
-                            style={{
-                              background: getAvatarBg(aluno.componente),
-                              boxShadow: precisaAjuda ? '0 0 0 2px #ef4444' : `0 0 0 2px #22c55e`
-                            }}
-                          >
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[9px]"
+                            style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 2px #ef4444' : '0 0 0 2px #22c55e' }}>
                             {getIniciais(aluno.nome)}
                           </div>
-                          <div
-                            className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-slate-800 flex items-center justify-center"
-                            style={{ background: config.cor }}
-                          >
-                            {config.icon}
+                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-slate-800 flex items-center justify-center" style={{ background: cfg.cor }}>
+                            <span className="text-white text-[6px] font-bold">{cfg.label[0]}</span>
                           </div>
                           {aluno.questoes_sessao > 0 && (
-                            <div
-                              className="absolute -top-1 -left-1 px-0.5 rounded text-[7px] font-bold text-white"
-                              style={{ background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}
-                            >
+                            <div className="absolute -top-1 -left-1 px-0.5 rounded text-[6px] font-bold text-white"
+                              style={{ background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
                               {aluno.taxa_acerto}%
                             </div>
                           )}
+                          {aluno.nota_atual !== undefined && (
+                            <div className="absolute -top-1 right-[-6px] px-0.5 rounded text-[6px] font-bold text-yellow-300 bg-slate-900/80">
+                              {aluno.nota_atual.toFixed(0)}
+                            </div>
+                          )}
                         </div>
-                        <span className="text-slate-200 text-[8px] mt-0.5 truncate max-w-[46px] text-center">{aluno.nome.split(' ')[0]}</span>
+                        <span className="text-slate-200 text-[7px] mt-0.5 truncate max-w-[40px] text-center">{aluno.nome.split(' ')[0]}</span>
                       </div>
                     )
                   })}
 
-                  {/* OCIOSOS - amarelo */}
+                  {/* OCIOSOS */}
                   {alunosOciosos.map((aluno) => (
-                    <div
-                      key={`o-${aluno.id}`}
-                      className="flex flex-col items-center"
-                      title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}\nTela aberta sem atividade`}
-                    >
+                    <div key={`o-${aluno.id}`} className="flex flex-col items-center"
+                      title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}`}>
                       <div className="relative">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-yellow-200 font-bold text-[10px]"
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-yellow-200 font-bold text-[9px]"
                           style={{ background: '#78350f', boxShadow: '0 0 0 2px #f59e0b' }}>
                           {getIniciais(aluno.nome)}
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-slate-800 bg-yellow-500 flex items-center justify-center">
-                          <Coffee className="w-2 h-2 text-yellow-900" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-slate-800 bg-yellow-500 flex items-center justify-center">
+                          <Coffee className="w-1.5 h-1.5 text-yellow-900" />
                         </div>
-                        <div className="absolute -top-1 -left-1 px-0.5 rounded text-[7px] font-bold text-yellow-900 bg-yellow-400">
+                        <div className="absolute -top-1 -left-1 px-0.5 rounded text-[6px] font-bold text-yellow-900 bg-yellow-400">
                           {formatarTempoOcioso(aluno.tempo_ocioso_segundos)}
                         </div>
                       </div>
-                      <span className="text-yellow-400 text-[8px] mt-0.5 truncate max-w-[46px] text-center">{aluno.nome.split(' ')[0]}</span>
+                      <span className="text-yellow-400 text-[7px] mt-0.5 truncate max-w-[40px] text-center">{aluno.nome.split(' ')[0]}</span>
                     </div>
                   ))}
 
-                  {/* INATIVOS/OFFLINE - cinza */}
-                  {alunosInativos.slice(0, 30).map((aluno) => (
-                    <div
-                      key={`i-${aluno.id}`}
-                      className="flex flex-col items-center opacity-40"
-                      title={`${aluno.nome}\nTurma: ${aluno.turma}\nOffline`}
-                    >
-                      <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-[10px]">
+                  {/* OFFLINE */}
+                  {alunosInativos.slice(0, 20).map((aluno) => (
+                    <div key={`i-${aluno.id}`} className="flex flex-col items-center opacity-35"
+                      title={`${aluno.nome}\nTurma: ${aluno.turma}\nOffline`}>
+                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-[9px]">
                         {getIniciais(aluno.nome)}
                       </div>
-                      <span className="text-slate-500 text-[8px] mt-0.5 truncate max-w-[46px] text-center">{aluno.nome.split(' ')[0]}</span>
+                      <span className="text-slate-500 text-[7px] mt-0.5 truncate max-w-[40px]">{aluno.nome.split(' ')[0]}</span>
                     </div>
                   ))}
-                  {alunosInativos.length > 30 && (
-                    <div className="flex flex-col items-center opacity-40">
-                      <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-[10px]">
-                        +{alunosInativos.length - 30}
+                  {alunosInativos.length > 20 && (
+                    <div className="flex flex-col items-center opacity-35">
+                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-[9px]">
+                        +{alunosInativos.length - 20}
                       </div>
-                      <span className="text-slate-500 text-[8px] mt-0.5">mais</span>
+                      <span className="text-slate-500 text-[7px] mt-0.5">mais</span>
                     </div>
                   )}
                 </div>
@@ -484,29 +482,99 @@ export default function DashboardAoVivoPage() {
             </div>
           </div>
 
-          {/* Linha inferior: Dificuldades + Desempenho */}
-          <div className="grid grid-cols-2 gap-2 flex-shrink-0" style={{ maxHeight: '200px' }}>
+          {/* Linha inferior: Gráficos + Desempenho + Dificuldades */}
+          <div className="grid grid-cols-3 gap-1 overflow-hidden min-h-0" style={{ flex: '0 1 45%' }}>
+
+            {/* GRÁFICO: Sparkline Acurácia + Donut Atividades */}
+            <div className="bg-slate-800/80 rounded-lg p-1.5 overflow-hidden flex flex-col border border-slate-700">
+              <h2 className="text-white font-semibold text-[10px] flex items-center gap-1 mb-1">
+                <TrendingUp className="w-3 h-3 text-green-400" />
+                Acuracia
+              </h2>
+              <div className="flex-1 flex flex-col justify-center gap-1.5">
+                {/* Sparkline */}
+                <Sparkline data={historicoAcerto} color="#22c55e" max={100} label="%" />
+                {/* Mini donut de distribuição */}
+                <div className="flex items-center gap-1.5">
+                  <DonutChart data={distribuicaoAtividades} size={36} />
+                  <div className="flex flex-col gap-0.5">
+                    {distribuicaoAtividades.slice(0, 4).map(d => (
+                      <div key={d.tipo} className="flex items-center gap-1 text-[7px]">
+                        <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: d.cor }} />
+                        <span className="text-slate-300">{d.label}</span>
+                        <span className="text-slate-500">{d.qtd}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tabela de Desempenho com Nota */}
+            <div className="bg-slate-800/80 rounded-lg p-1.5 overflow-hidden flex flex-col border border-slate-700">
+              <h2 className="text-white font-semibold text-[10px] flex items-center gap-1 mb-1">
+                <Award className="w-3 h-3 text-yellow-400" />
+                Top Alunos
+              </h2>
+              <div className="flex-1 overflow-y-auto">
+                {alunosAtivos.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-slate-500 text-[9px]">Sem dados</div>
+                ) : (
+                  <table className="w-full text-[9px]">
+                    <thead className="sticky top-0 bg-slate-800">
+                      <tr className="text-slate-500">
+                        <th className="text-left pb-0.5 pl-0.5">Aluno</th>
+                        <th className="text-center pb-0.5">Q</th>
+                        <th className="text-center pb-0.5">%</th>
+                        <th className="text-center pb-0.5">Nota</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {alunosAtivos.slice(0, 8).map((aluno) => (
+                        <tr key={aluno.id} className="border-t border-slate-700/30">
+                          <td className="py-0.5 pl-0.5">
+                            <span className="text-slate-200 truncate max-w-[60px] inline-block">{aluno.nome.split(' ')[0]}</span>
+                          </td>
+                          <td className="py-0.5 text-center text-slate-300">{aluno.questoes_sessao}</td>
+                          <td className="py-0.5 text-center font-medium" style={{ color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                            {aluno.taxa_acerto}%
+                          </td>
+                          <td className="py-0.5 text-center">
+                            {aluno.nota_atual !== undefined ? (
+                              <span className="text-yellow-400 font-bold">{aluno.nota_atual.toFixed(1)}</span>
+                            ) : (
+                              <span className="text-slate-600">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+
             {/* Temas com Dificuldade */}
-            <div className="bg-slate-800/80 rounded-lg p-2.5 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2">
-                <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+            <div className="bg-slate-800/80 rounded-lg p-1.5 overflow-hidden flex flex-col border border-slate-700">
+              <h2 className="text-white font-semibold text-[10px] flex items-center gap-1 mb-1">
+                <AlertTriangle className="w-3 h-3 text-red-400" />
                 Dificuldades
               </h2>
               <div className="flex-1 overflow-y-auto">
                 {temasComDificuldade.length === 0 ? (
-                  <div className="flex items-center justify-center h-full">
-                    <CheckCircle className="w-6 h-6 text-green-400 mr-2" />
-                    <span className="text-green-400 text-xs">Sem dificuldades</span>
+                  <div className="flex items-center justify-center h-full text-green-400">
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    <span className="text-[9px]">Sem dificuldades</span>
                   </div>
                 ) : (
-                  <div className="space-y-1.5">
+                  <div className="space-y-1">
                     {temasComDificuldade.map((tema) => (
-                      <div key={tema.tema} className="bg-red-900/30 rounded p-1.5 border border-red-500/30">
+                      <div key={tema.tema} className="bg-red-900/20 rounded p-1 border border-red-500/20">
                         <div className="flex items-center justify-between">
-                          <span className="text-white text-[10px] truncate flex-1 mr-1">{tema.tema}</span>
-                          <span className="text-red-300 text-[10px] font-bold">{tema.taxa_erro}%</span>
+                          <span className="text-white text-[8px] truncate flex-1 mr-1">{tema.tema}</span>
+                          <span className="text-red-300 text-[8px] font-bold">{tema.taxa_erro}%</span>
                         </div>
-                        <div className="h-1 bg-red-900/50 rounded-full mt-1 overflow-hidden">
+                        <div className="h-0.5 bg-red-900/50 rounded-full mt-0.5 overflow-hidden">
                           <div className="h-full bg-red-500 rounded-full" style={{ width: `${tema.taxa_erro}%` }} />
                         </div>
                       </div>
@@ -515,141 +583,103 @@ export default function DashboardAoVivoPage() {
                 )}
               </div>
             </div>
-
-            {/* Tabela de Desempenho */}
-            <div className="bg-slate-800/80 rounded-lg p-2.5 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2">
-                <TrendingUp className="w-3.5 h-3.5 text-green-400" />
-                Desempenho
-              </h2>
-              <div className="flex-1 overflow-y-auto">
-                {alunosAtivos.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-slate-400 text-xs">Sem dados</div>
-                ) : (
-                  <table className="w-full text-[10px]">
-                    <thead className="sticky top-0 bg-slate-800">
-                      <tr className="text-slate-400">
-                        <th className="text-left pb-1 pl-1">Aluno</th>
-                        <th className="text-center pb-1">Ativ.</th>
-                        <th className="text-center pb-1">Q</th>
-                        <th className="text-center pb-1">%</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {alunosAtivos.slice(0, 8).map((aluno) => {
-                        const config = atividadeConfig[aluno.tipo_atividade] || atividadeConfig.estudo
-                        return (
-                          <tr key={aluno.id} className="border-t border-slate-700/50">
-                            <td className="py-1 pl-1">
-                              <span className="text-slate-200 truncate max-w-[80px] inline-block">{aluno.nome.split(' ').slice(0, 2).join(' ')}</span>
-                            </td>
-                            <td className="py-1 text-center">
-                              <span className="px-1 py-0.5 rounded text-[8px] font-semibold" style={{ background: `${config.cor}30`, color: config.cor }}>
-                                {config.label}
-                              </span>
-                            </td>
-                            <td className="py-1 text-center text-slate-300">{aluno.questoes_sessao}</td>
-                            <td className="py-1 text-center font-medium" style={{ color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
-                              {aluno.taxa_acerto}%
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* COLUNA DIREITA: Alertas + Feed (4 cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-2 overflow-hidden min-h-0">
+        {/* COLUNA DIREITA (4 cols): Gráfico Q/min + Alertas + Feed */}
+        <div className="col-span-4 flex flex-col gap-1 overflow-hidden min-h-0">
 
-          {/* Alertas: Ociosos + Dificuldade */}
-          <div className="bg-slate-800/80 rounded-lg p-2.5 flex-shrink-0 border border-slate-700" style={{ maxHeight: '45%' }}>
-            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-yellow-400" />
+          {/* Gráfico: Questões nos últimos minutos */}
+          <div className="bg-slate-800/80 rounded-lg p-1.5 border border-slate-700 flex-shrink-0" style={{ height: '60px' }}>
+            <div className="flex items-center justify-between mb-0.5">
+              <h2 className="text-white font-semibold text-[10px] flex items-center gap-1">
+                <Activity className="w-3 h-3 text-blue-400" />
+                Ritmo
+              </h2>
+              <span className="text-blue-400 text-[9px] font-bold">{stats?.questoes_ultimos_5min || 0} q/5min</span>
+            </div>
+            <Sparkline data={historicoQuestoes} color="#3b82f6" />
+          </div>
+
+          {/* Alertas */}
+          <div className="bg-slate-800/80 rounded-lg p-1.5 overflow-hidden flex flex-col border border-slate-700 min-h-0" style={{ flex: '0 1 40%' }}>
+            <h2 className="text-white font-semibold text-[10px] flex items-center gap-1 mb-1 flex-shrink-0">
+              <AlertTriangle className="w-3 h-3 text-yellow-400" />
               Alertas
               {(alunosOciosos.length + alunosPrecisandoAjuda.length) > 0 && (
-                <span className="px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded-full text-[9px] font-bold">
+                <span className="px-1 py-0.5 bg-red-500/20 text-red-400 rounded-full text-[8px] font-bold">
                   {alunosOciosos.length + alunosPrecisandoAjuda.length}
                 </span>
               )}
             </h2>
-
-            <div className="overflow-y-auto space-y-1" style={{ maxHeight: 'calc(100% - 28px)' }}>
-              {/* Ociosos */}
+            <div className="flex-1 overflow-y-auto space-y-0.5 min-h-0">
               {alunosOciosos.slice(0, 5).map((aluno) => (
-                <div key={`ao-${aluno.id}`} className="flex items-center gap-2 p-1.5 bg-yellow-900/30 rounded border border-yellow-500/30">
-                  <Coffee className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
+                <div key={`ao-${aluno.id}`} className="flex items-center gap-1.5 p-1 bg-yellow-900/30 rounded border border-yellow-500/20">
+                  <Coffee className="w-3 h-3 text-yellow-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-[10px] font-medium truncate">{aluno.nome.split(' ')[0]}</p>
-                    <p className="text-yellow-400 text-[9px]">Parado ha {formatarTempoOcioso(aluno.tempo_ocioso_segundos)}</p>
+                    <p className="text-white text-[9px] font-medium truncate">{aluno.nome.split(' ')[0]}</p>
+                    <p className="text-yellow-400 text-[8px]">Parado ha {formatarTempoOcioso(aluno.tempo_ocioso_segundos)}</p>
                   </div>
-                  <span className="text-yellow-500 text-[9px] font-bold flex-shrink-0">{aluno.turma}</span>
+                  <span className="text-yellow-500 text-[8px] font-bold">{aluno.turma}</span>
                 </div>
               ))}
-
-              {/* Precisando ajuda */}
               {alunosPrecisandoAjuda.slice(0, 5).map((aluno) => (
-                <div key={`ah-${aluno.id}`} className="flex items-center gap-2 p-1.5 bg-red-900/30 rounded border border-red-500/30">
-                  <AlertTriangle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                <div key={`ah-${aluno.id}`} className="flex items-center gap-1.5 p-1 bg-red-900/30 rounded border border-red-500/20">
+                  <AlertTriangle className="w-3 h-3 text-red-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-[10px] font-medium truncate">{aluno.nome.split(' ')[0]}</p>
-                    <p className="text-red-400 text-[9px]">{aluno.taxa_acerto}% em {aluno.questoes_sessao} questoes</p>
+                    <p className="text-white text-[9px] font-medium truncate">{aluno.nome.split(' ')[0]}</p>
+                    <p className="text-red-400 text-[8px]">{aluno.taxa_acerto}% em {aluno.questoes_sessao}q</p>
                   </div>
                 </div>
               ))}
-
               {alunosOciosos.length === 0 && alunosPrecisandoAjuda.length === 0 && (
-                <div className="flex items-center justify-center py-3 text-green-400">
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  <span className="text-xs">Sem alertas</span>
+                <div className="flex items-center justify-center py-2 text-green-400">
+                  <CheckCircle className="w-4 h-4 mr-1" />
+                  <span className="text-[9px]">Sem alertas</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Feed de Atividades */}
-          <div className="bg-slate-800/80 rounded-lg p-2.5 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
-            <h2 className="text-white font-semibold text-xs flex items-center gap-1.5 mb-2 flex-shrink-0">
-              <Activity className="w-3.5 h-3.5 text-blue-400" />
-              Atividades Recentes
+          <div className="bg-slate-800/80 rounded-lg p-1.5 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
+            <h2 className="text-white font-semibold text-[10px] flex items-center gap-1 mb-1 flex-shrink-0">
+              <Activity className="w-3 h-3 text-blue-400" />
+              Feed
             </h2>
-            <div className="flex-1 overflow-y-auto space-y-0.5 min-h-0">
+            <div className="flex-1 overflow-y-auto space-y-0 min-h-0">
               {atividades.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                  <Clock className="w-6 h-6 mb-1 opacity-70" />
-                  <p className="text-[10px]">Aguardando...</p>
+                  <Clock className="w-5 h-5 mb-1 opacity-70" />
+                  <p className="text-[9px]">Aguardando...</p>
                 </div>
               ) : (
-                atividades.slice(0, 25).map((ativ) => (
-                  <div key={ativ.id} className="flex items-center gap-1.5 py-0.5 px-1 rounded hover:bg-slate-700/50">
+                atividades.slice(0, 30).map((ativ) => (
+                  <div key={ativ.id} className="flex items-center gap-1 py-0.5 px-0.5 rounded hover:bg-slate-700/50">
                     {ativ.tipo === 'resposta' || ativ.tipo === 'revisao' ? (
                       ativ.detalhes.correta
-                        ? <CheckCircle className="w-2.5 h-2.5 text-green-400 flex-shrink-0" />
-                        : <XCircle className="w-2.5 h-2.5 text-red-400 flex-shrink-0" />
+                        ? <CheckCircle className="w-2 h-2 text-green-400 flex-shrink-0" />
+                        : <XCircle className="w-2 h-2 text-red-400 flex-shrink-0" />
                     ) : ativ.tipo === 'desafio_completo' ? (
-                      <Award className="w-2.5 h-2.5 text-yellow-400 flex-shrink-0" />
+                      <Award className="w-2 h-2 text-yellow-400 flex-shrink-0" />
                     ) : ativ.tipo === 'desafio_iniciado' ? (
-                      <Zap className="w-2.5 h-2.5 text-orange-400 flex-shrink-0" />
+                      <Zap className="w-2 h-2 text-orange-400 flex-shrink-0" />
                     ) : ativ.tipo === 'tutor' ? (
-                      <Brain className="w-2.5 h-2.5 text-blue-400 flex-shrink-0" />
+                      <Brain className="w-2 h-2 text-blue-400 flex-shrink-0" />
                     ) : (
-                      <Activity className="w-2.5 h-2.5 text-purple-400 flex-shrink-0" />
+                      <Activity className="w-2 h-2 text-purple-400 flex-shrink-0" />
                     )}
-                    <span className="text-slate-200 text-[9px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
-                    <span className="text-slate-400 text-[9px] truncate flex-1">
+                    <span className="text-slate-200 text-[8px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
+                    <span className="text-slate-400 text-[8px] truncate flex-1">
                       {ativ.tipo === 'resposta' || ativ.tipo === 'revisao'
                         ? (ativ.detalhes.correta ? 'acertou' : 'errou')
-                        : ativ.tipo === 'desafio_completo' ? 'completou desafio'
-                        : ativ.tipo === 'desafio_iniciado' ? 'iniciou desafio'
-                        : ativ.tipo === 'tutor' ? 'tutor IA'
+                        : ativ.tipo === 'desafio_completo' ? 'desafio OK'
+                        : ativ.tipo === 'desafio_iniciado' ? 'desafio'
+                        : ativ.tipo === 'tutor' ? 'tutor'
                         : 'atividade'
                       }
                     </span>
-                    <span className="text-slate-500 text-[8px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
+                    <span className="text-slate-500 text-[7px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
                   </div>
                 ))
               )}
@@ -662,27 +692,92 @@ export default function DashboardAoVivoPage() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// COMPONENTE: Mini Stat
+// COMPONENTES: Gráficos CSS puro (sem dependências)
 // ═══════════════════════════════════════════════════════════════════════════
 
 function MiniStat({ icon, label, value, color, trend }: {
-  icon: React.ReactNode
-  label: string
-  value: string | number
-  color: string
+  icon: React.ReactNode; label: string; value: string | number; color: string
   trend?: 'subindo' | 'estavel' | 'descendo'
 }) {
   return (
-    <div className="rounded-md p-1.5 flex items-center gap-1.5 border border-slate-700" style={{ background: 'rgba(30,41,59,0.9)', borderLeft: `3px solid ${color}` }}>
+    <div className="rounded p-1 flex items-center gap-1 border border-slate-700" style={{ background: 'rgba(30,41,59,0.9)', borderLeft: `2px solid ${color}` }}>
       <div style={{ color }} className="flex-shrink-0">{icon}</div>
       <div className="min-w-0">
         <div className="flex items-center gap-0.5">
-          <span className="text-sm font-bold text-white">{value}</span>
-          {trend === 'subindo' && <TrendingUp className="w-3 h-3 text-green-400" />}
-          {trend === 'descendo' && <TrendingDown className="w-3 h-3 text-red-400" />}
+          <span className="text-xs font-bold text-white leading-none">{value}</span>
+          {trend === 'subindo' && <TrendingUp className="w-2.5 h-2.5 text-green-400" />}
+          {trend === 'descendo' && <TrendingDown className="w-2.5 h-2.5 text-red-400" />}
         </div>
-        <span className="text-slate-400 text-[9px] leading-none">{label}</span>
+        <span className="text-slate-400 text-[8px] leading-none">{label}</span>
       </div>
     </div>
+  )
+}
+
+function Sparkline({ data, color, max, label }: {
+  data: number[]; color: string; max?: number; label?: string
+}) {
+  if (data.length < 2) {
+    return <div className="h-5 flex items-center justify-center text-slate-500 text-[8px]">Coletando dados...</div>
+  }
+
+  const maxVal = max || Math.max(...data, 1)
+  const w = 100
+  const h = 20
+
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * w
+    const y = h - (v / maxVal) * h
+    return `${x},${y}`
+  }).join(' ')
+
+  const ultimo = data[data.length - 1]
+
+  return (
+    <div className="flex items-center gap-1">
+      <svg viewBox={`0 0 ${w} ${h}`} className="flex-1" style={{ height: '20px' }} preserveAspectRatio="none">
+        <polyline points={points} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Ponto atual */}
+        {data.length > 0 && (
+          <circle cx={(data.length - 1) / (data.length - 1) * w} cy={h - (ultimo / maxVal) * h} r="2" fill={color} />
+        )}
+      </svg>
+      <span className="text-[9px] font-bold flex-shrink-0" style={{ color }}>{ultimo}{label || ''}</span>
+    </div>
+  )
+}
+
+function DonutChart({ data, size }: {
+  data: { tipo: string; qtd: number; cor: string }[]; size: number
+}) {
+  const total = data.reduce((acc, d) => acc + d.qtd, 0)
+  if (total === 0) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="14" fill="none" stroke="#334155" strokeWidth="4" />
+      </svg>
+    )
+  }
+
+  let acumulado = 0
+  const circunferencia = 2 * Math.PI * 14 // r=14
+
+  return (
+    <svg width={size} height={size} viewBox="0 0 36 36" style={{ transform: 'rotate(-90deg)' }}>
+      {data.map((d) => {
+        const pct = d.qtd / total
+        const offset = acumulado * circunferencia
+        const dash = pct * circunferencia
+        acumulado += pct
+        return (
+          <circle key={d.tipo} cx="18" cy="18" r="14" fill="none" stroke={d.cor} strokeWidth="4"
+            strokeDasharray={`${dash} ${circunferencia - dash}`} strokeDashoffset={-offset} />
+        )
+      })}
+      <text x="18" y="18" textAnchor="middle" dominantBaseline="central" fill="white" fontSize="8" fontWeight="bold"
+        style={{ transform: 'rotate(90deg)', transformOrigin: '18px 18px' }}>
+        {total}
+      </text>
+    </svg>
   )
 }
