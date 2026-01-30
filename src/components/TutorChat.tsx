@@ -20,6 +20,7 @@ import {
   ThumbsDown
 } from 'lucide-react'
 import Button from './ui/Button'
+import MensagemFormatada from './MensagemFormatada'
 import { TypingIndicator } from './ui/Loading'
 import { useWebSpeech } from '@/hooks/useWebSpeech'
 import TutorPreferencias from './TutorPreferencias'
@@ -522,12 +523,18 @@ export default function TutorChat({
                 )}
 
                 {/* Conteúdo da mensagem */}
-                <p
-                  className="text-sm whitespace-pre-wrap leading-relaxed"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  {msg.content}
-                </p>
+                {msg.role === 'assistant' ? (
+                  <div style={{ color: 'var(--text-primary)' }}>
+                    <MensagemFormatada conteudo={msg.content} />
+                  </div>
+                ) : (
+                  <p
+                    className="text-sm whitespace-pre-wrap leading-relaxed"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {msg.content}
+                  </p>
+                )}
 
                 {/* Botões de sugestão */}
                 {msg.role === 'assistant' && msg.sugestoes && msg.sugestoes.length > 0 && (

@@ -57,7 +57,17 @@ function getGenAI(): GoogleGenerativeAI {
 // CONFIGURAÇÕES DOS TUTORES
 // Baseado em neurociência educacional e pedagogia moderna
 // ═══════════════════════════════════════════════════════════
-const PROMPT_BASE_PEDAGOGICO = `PRINCIPIOS PEDAGOGICOS (baseados em neurociencia):
+const PROMPT_BASE_PEDAGOGICO = `FORMATACAO DE FORMULAS E EQUACOES:
+- Use notacao LaTeX para TODAS as formulas, equacoes e simbolos matematicos/cientificos
+- Para formulas inline (dentro do texto), use cifrão simples: $E = mc^2$
+- Para formulas em bloco (destaque), use cifrão duplo: $$F = m \\cdot a$$
+- Exemplos: $v = v_0 + at$, $\\Delta s = v_0 t + \\frac{1}{2}at^2$, $\\vec{F} = m\\vec{a}$
+- Use \\frac{}{} para fracoes, \\sqrt{} para raizes, \\vec{} para vetores
+- Use \\int para integrais, \\sum para somatorios, \\lim para limites
+- Use **negrito** para destacar conceitos importantes
+- Use listas com - ou 1. para organizar passos
+
+PRINCIPIOS PEDAGOGICOS (baseados em neurociencia):
 
 1. CARGA COGNITIVA: Apresente uma ideia por vez. Respostas curtas e focadas.
 
