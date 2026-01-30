@@ -55,6 +55,16 @@ export interface AlunoInativo {
   ultimo_acesso: string | null
 }
 
+// Aluno com heartbeat mas sem atividade recente
+export interface AlunoOcioso {
+  id: string
+  nome: string
+  turma: string
+  componentes: Componente[]
+  tempo_ocioso_segundos: number
+  ultimo_acesso: string | null
+}
+
 export interface EstatisticasTempoReal {
   alunos_ativos_agora: number
   alunos_inativos: number
@@ -90,6 +100,7 @@ export interface RespostaAtividadesTempoReal {
   sucesso: boolean
   atividades: AtividadeTempoReal[]
   alunos_ativos: AlunoAtivo[]
+  alunos_ociosos: AlunoOcioso[]
   alunos_inativos: AlunoInativo[]
   estatisticas: EstatisticasTempoReal
   turmas_disponiveis: string[]
@@ -688,17 +699,59 @@ export async function GET(request: NextRequest) {
     const alunosAtivos = Array.from(alunosAtivosMap.values())
       .sort((a, b) => new Date(b.ultima_atividade).getTime() - new Date(a.ultima_atividade).getTime())
 
-    // 8. NOVO: Identificar alunos inativos
-    const alunosInativos: AlunoInativo[] = alunosFiltrados
-      .filter(a => !idsAtivos.has(a.id))
-      .map(a => ({
-        id: a.id,
-        nome: a.nome,
-        turma: a.turma,
-        componentes: (a.componentes || []) as Componente[],
-        ultimo_acesso: a.ultimo_acesso,
-      }))
-      .sort((a, b) => a.nome.localeCompare(b.nome))
+    // 8. Identificar alunos inativos e ociosos via heartbeat
+    // Buscar heartbeats internamente (mesma origem, sem rede)
+    let heartbeatData: Record<string, { status: string; tempoOcioso: number }> = {}
+    try {
+      const hbUrl = new URL('/api/heartbeat', request.nextUrl.origin)
+      const hbRes = await fetch(hbUrl.toString(), {
+        headers: { cookie: request.headers.get('cookie') || '' },
+      })
+      if (hbRes.ok) {
+        const hbJson = await hbRes.json()
+        if (hbJson.ok && hbJson.heartbeats) {
+          for (const [uid, info] of Object.entries(hbJson.heartbeats)) {
+            const hb = info as { status: string; tempoOcioso: number }
+            heartbeatData[uid] = { status: hb.status, tempoOcioso: hb.tempoOcioso }
+          }
+        }
+      }
+    } catch {
+      // Heartbeat indisponível - continuar sem dados de ociosidade
+    }
+
+    // Separar: ociosos = têm heartbeat + sem atividade recente, inativos = sem nada
+    const alunosOciosos: AlunoOcioso[] = []
+    const alunosInativos: AlunoInativo[] = []
+
+    for (const a of alunosFiltrados) {
+      if (idsAtivos.has(a.id)) continue // já está ativo
+
+      const hb = heartbeatData[a.id]
+      if (hb) {
+        // Tem heartbeat mas sem atividade = ocioso
+        alunosOciosos.push({
+          id: a.id,
+          nome: a.nome,
+          turma: a.turma,
+          componentes: (a.componentes || []) as Componente[],
+          tempo_ocioso_segundos: hb.tempoOcioso,
+          ultimo_acesso: a.ultimo_acesso,
+        })
+      } else {
+        // Sem heartbeat e sem atividade = offline/inativo
+        alunosInativos.push({
+          id: a.id,
+          nome: a.nome,
+          turma: a.turma,
+          componentes: (a.componentes || []) as Componente[],
+          ultimo_acesso: a.ultimo_acesso,
+        })
+      }
+    }
+
+    alunosOciosos.sort((a, b) => b.tempo_ocioso_segundos - a.tempo_ocioso_segundos)
+    alunosInativos.sort((a, b) => a.nome.localeCompare(b.nome))
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 9. CALCULAR TODAS AS ESTATÍSTICAS EM ÚNICO PASS (OTIMIZADO)
@@ -904,6 +957,7 @@ export async function GET(request: NextRequest) {
       sucesso: true,
       atividades: atividades.slice(0, MAX_ATIVIDADES),
       alunos_ativos: alunosAtivos,
+      alunos_ociosos: alunosOciosos,
       alunos_inativos: alunosInativos,
       estatisticas,
       turmas_disponiveis: turmasDisponiveis,
