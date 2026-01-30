@@ -20,6 +20,7 @@ import {
   ThumbsDown
 } from 'lucide-react'
 import Button from './ui/Button'
+import MensagemFormatada from './MensagemFormatada'
 import { TypingIndicator } from './ui/Loading'
 import { useWebSpeech } from '@/hooks/useWebSpeech'
 import TutorPreferencias from './TutorPreferencias'
@@ -36,6 +37,23 @@ interface MensagemChatComModo extends MensagemChat {
   modo?: ModoIA
   topico?: string
   imagemBase64?: string
+  sugestoes?: string[]
+}
+
+// Extrair sugestões do texto da resposta do tutor
+function extrairSugestoes(texto: string): { textoLimpo: string; sugestoes: string[] } {
+  const regex = /\[SUGESTOES\]([\s\S]*?)\[\/SUGESTOES\]/
+  const match = texto.match(regex)
+  if (!match) return { textoLimpo: texto, sugestoes: [] }
+
+  const textoLimpo = texto.replace(regex, '').trim()
+  const sugestoes = match[1]
+    .split('\n')
+    .map(s => s.replace(/^[\s\-\*•]+/, '').trim())
+    .filter(s => s.length > 0)
+    .slice(0, 3)
+
+  return { textoLimpo, sugestoes }
 }
 
 interface TutorChatProps {
@@ -112,12 +130,17 @@ export default function TutorChat({
 
   // Mensagem inicial
   useEffect(() => {
-    const disciplina = componente === 'fisica' ? 'Fisica' : 'Matematica'
-    const mensagemInicial: MensagemChat = {
+    const disciplina = componente === 'fisica' ? 'Física' : 'Matemática'
+    const mensagemInicial: MensagemChatComModo = {
       id: '1',
       role: 'assistant',
-      content: `${primeiroNome}, sou o ${nomeTutor}, seu tutor de ${disciplina}.\n\nMe conta: o que voce esta estudando ou qual duvida quer resolver?`,
+      content: `${primeiroNome}, sou o ${nomeTutor}, seu tutor de ${disciplina}.\n\nPosso te ajudar com qualquer matéria: Física, Matemática, Biologia, Química, História, Geografia, Redação, Português, Inglês e mais.\n\nVocê também pode enviar foto de uma questão que eu resolvo e mostro o gabarito!`,
       timestamp: new Date().toISOString(),
+      sugestoes: [
+        'Me ajude com uma questão de ' + disciplina,
+        'Tenho dúvida em outra matéria',
+        'Quero enviar foto de uma questão',
+      ],
     }
     setMensagens([mensagemInicial])
   }, [nomeTutor, componente, primeiroNome])
@@ -263,7 +286,7 @@ export default function TutorChat({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           componente,
-          mensagem: texto || 'Analise esta imagem e me ajude a entender ou resolver o que está nela.',
+          mensagem: texto || 'Analise esta imagem. Se for uma questão ou exercício, resolva completamente e me dê o gabarito com a resposta correta. Mostre o passo a passo.',
           historico: mensagens,
           nomeEstudante: primeiroNome,
           imagem: imagemParaEnviar, // Enviar base64 da imagem
@@ -273,13 +296,15 @@ export default function TutorChat({
       const data = await response.json()
 
       if (data.sucesso) {
+        const { textoLimpo, sugestoes } = extrairSugestoes(data.resposta)
         const respostaTutor: MensagemChatComModo = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: data.resposta,
+          content: textoLimpo,
           timestamp: new Date().toISOString(),
           modo: data.modo as ModoIA,
           topico: data.topico,
+          sugestoes,
         }
         setMensagens(prev => [...prev, respostaTutor])
         setUsoHoje(data.uso_hoje)
@@ -498,12 +523,39 @@ export default function TutorChat({
                 )}
 
                 {/* Conteúdo da mensagem */}
-                <p
-                  className="text-sm whitespace-pre-wrap leading-relaxed"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  {msg.content}
-                </p>
+                {msg.role === 'assistant' ? (
+                  <div style={{ color: 'var(--text-primary)' }}>
+                    <MensagemFormatada conteudo={msg.content} />
+                  </div>
+                ) : (
+                  <p
+                    className="text-sm whitespace-pre-wrap leading-relaxed"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {msg.content}
+                  </p>
+                )}
+
+                {/* Botões de sugestão */}
+                {msg.role === 'assistant' && msg.sugestoes && msg.sugestoes.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3 pt-3" style={{ borderTop: '1px solid var(--border-default)' }}>
+                    {msg.sugestoes.map((sugestao, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => enviarMensagem(sugestao)}
+                        disabled={loading || usoHoje >= limiteDiario}
+                        className="text-xs px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
+                        style={{
+                          background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                          border: `1px solid ${isFisica ? 'rgba(34, 197, 94, 0.3)' : 'rgba(139, 92, 246, 0.3)'}`,
+                          color: corPrimaria,
+                        }}
+                      >
+                        {sugestao}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )

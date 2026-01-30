@@ -246,7 +246,7 @@ export const PONTUACAO = {
   RESPOSTA_INCORRETA: 0,
   BONUS_VELOCIDADE: 2, // < 30 segundos
   BONUS_SEQUENCIA_7_DIAS: 50,
-  LIMITE_IA_DIARIO: 15, // 15 interações por dia
+  LIMITE_IA_DIARIO: 30, // 30 interações por dia
 } as const
 
 // ═══════════════════════════════════════════════════════════
