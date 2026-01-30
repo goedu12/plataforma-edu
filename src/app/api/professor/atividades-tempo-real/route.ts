@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/lib/logger'
+import { consultarHeartbeats } from '@/lib/heartbeat-store'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -699,37 +700,18 @@ export async function GET(request: NextRequest) {
     const alunosAtivos = Array.from(alunosAtivosMap.values())
       .sort((a, b) => new Date(b.ultima_atividade).getTime() - new Date(a.ultima_atividade).getTime())
 
-    // 8. Identificar alunos inativos e ociosos via heartbeat
-    // Buscar heartbeats internamente (mesma origem, sem rede)
-    let heartbeatData: Record<string, { status: string; tempoOcioso: number }> = {}
-    try {
-      const hbUrl = new URL('/api/heartbeat', request.nextUrl.origin)
-      const hbRes = await fetch(hbUrl.toString(), {
-        headers: { cookie: request.headers.get('cookie') || '' },
-      })
-      if (hbRes.ok) {
-        const hbJson = await hbRes.json()
-        if (hbJson.ok && hbJson.heartbeats) {
-          for (const [uid, info] of Object.entries(hbJson.heartbeats)) {
-            const hb = info as { status: string; tempoOcioso: number }
-            heartbeatData[uid] = { status: hb.status, tempoOcioso: hb.tempoOcioso }
-          }
-        }
-      }
-    } catch {
-      // Heartbeat indisponível - continuar sem dados de ociosidade
-    }
+    // 8. Identificar alunos inativos e ociosos via heartbeat (import direto, sem HTTP)
+    const heartbeatData = consultarHeartbeats()
 
-    // Separar: ociosos = têm heartbeat + sem atividade recente, inativos = sem nada
     const alunosOciosos: AlunoOcioso[] = []
     const alunosInativos: AlunoInativo[] = []
 
     for (const a of alunosFiltrados) {
-      if (idsAtivos.has(a.id)) continue // já está ativo
+      if (idsAtivos.has(a.id)) continue
 
       const hb = heartbeatData[a.id]
-      if (hb) {
-        // Tem heartbeat mas sem atividade = ocioso
+      if (hb && hb.status === 'ocioso') {
+        // Heartbeat ativo mas sem interacao real > 2 min = ocioso
         alunosOciosos.push({
           id: a.id,
           nome: a.nome,
@@ -738,8 +720,8 @@ export async function GET(request: NextRequest) {
           tempo_ocioso_segundos: hb.tempoOcioso,
           ultimo_acesso: a.ultimo_acesso,
         })
-      } else {
-        // Sem heartbeat e sem atividade = offline/inativo
+      } else if (!hb) {
+        // Sem heartbeat = offline/inativo
         alunosInativos.push({
           id: a.id,
           nome: a.nome,
@@ -748,6 +730,7 @@ export async function GET(request: NextRequest) {
           ultimo_acesso: a.ultimo_acesso,
         })
       }
+      // hb.status === 'ativo' sem atividades = navegando, não ocioso (ignorar)
     }
 
     alunosOciosos.sort((a, b) => b.tempo_ocioso_segundos - a.tempo_ocioso_segundos)
