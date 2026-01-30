@@ -13,7 +13,7 @@ const loginAttempts = new Map<string, RateLimitEntry>()
 
 // Configurações
 const CONFIG = {
-  MAX_TENTATIVAS: 15,          // Máximo de tentativas antes de bloquear
+  MAX_TENTATIVAS: 25,          // Máximo de tentativas antes de bloquear
   JANELA_TEMPO_MS: 15 * 60 * 1000,  // 15 minutos para reset das tentativas
   TEMPO_BLOQUEIO_MS: 15 * 60 * 1000, // 15 minutos de bloqueio
   LIMPEZA_INTERVALO_MS: 5 * 60 * 1000, // Limpar cache a cada 5 minutos
