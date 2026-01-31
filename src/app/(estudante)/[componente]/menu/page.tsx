@@ -139,6 +139,8 @@ export default function MenuComponentePage() {
     >
       <NavigationRail componente={componente} />
 
+      {/* Indicador de monitoramento (via MonitorIndicator no layout) */}
+
       {/* Header Padronizado */}
       <header className="page-header">
         <div className="max-w-2xl mx-auto w-full">
