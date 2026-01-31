@@ -87,7 +87,7 @@ export default function TopicoTeoriaPage() {
           <div className="max-w-4xl mx-auto w-full">
             <div className="flex items-center gap-2">
               <BackButton href={`/${componente}/teoria`} compactOnDesktop />
-              <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+              <h1 className="text-lg lg:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                 Tópico não encontrado
               </h1>
             </div>
@@ -99,7 +99,7 @@ export default function TopicoTeoriaPage() {
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--error)' }} />
-            <p className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-sm lg:text-base font-medium" style={{ color: 'var(--text-secondary)' }}>
               Este tópico não foi encontrado
             </p>
             <button
@@ -131,11 +131,11 @@ export default function TopicoTeoriaPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-xl">{topico.icone}</span>
-                <h1 className="text-lg lg:text-base font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                <h1 className="text-lg lg:text-xl font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                   {topico.titulo}
                 </h1>
               </div>
-              <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs lg:text-sm" style={{ color: 'var(--text-muted)' }}>
                 {isFisica ? 'Física' : 'Matemática'} • {serie}ª Série • {bimestre}º Bimestre
               </p>
             </div>
@@ -144,7 +144,7 @@ export default function TopicoTeoriaPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-4xl mx-auto px-4 lg:px-6 py-3 space-y-4">
+      <main className="max-w-4xl mx-auto px-4 lg:px-8 py-4 lg:py-6 space-y-5 lg:space-y-6">
         {/* Resumo */}
         <div
           className="p-3 rounded-xl text-center"
@@ -153,7 +153,7 @@ export default function TopicoTeoriaPage() {
             border: `1px solid ${accentColor}25`,
           }}
         >
-          <p className="text-sm lg:text-xs font-medium" style={{ color: 'var(--text-primary)' }}>
+          <p className="text-sm lg:text-base font-medium" style={{ color: 'var(--text-primary)' }}>
             {topico.resumo}
           </p>
         </div>
@@ -169,8 +169,8 @@ export default function TopicoTeoriaPage() {
         {topico.formulas && topico.formulas.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
-              <Calculator className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: accentColor }} />
-              <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+              <Calculator className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: accentColor }} />
+              <h2 className="text-sm lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Fórmulas Importantes
               </h2>
             </div>
@@ -201,12 +201,12 @@ export default function TopicoTeoriaPage() {
         {topico.exemplos && topico.exemplos.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
-              <Lightbulb className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: 'var(--warning)' }} />
-              <h2 className="text-sm lg:text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+              <Lightbulb className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: 'var(--warning)' }} />
+              <h2 className="text-sm lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Exemplos Resolvidos
               </h2>
               <span
-                className="text-2xs px-2 py-0.5 rounded-full"
+                className="text-2xs lg:text-xs px-2 py-0.5 rounded-full"
                 style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
               >
                 Clique para ver a resolução
@@ -250,7 +250,7 @@ export default function TopicoTeoriaPage() {
               }}
             >
               <ChevronLeft className="w-4 h-4" />
-              <span className="text-xs lg:text-2xs truncate">Anterior</span>
+              <span className="text-xs lg:text-sm truncate">Anterior</span>
             </button>
           ) : (
             <div className="flex-1" />
@@ -264,7 +264,7 @@ export default function TopicoTeoriaPage() {
                 color: isFisica ? '#000' : '#fff',
               }}
             >
-              <span className="text-xs lg:text-2xs truncate">Próximo: {nextTopico.titulo}</span>
+              <span className="text-xs lg:text-sm truncate">Próximo: {nextTopico.titulo}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
           ) : (
@@ -276,7 +276,7 @@ export default function TopicoTeoriaPage() {
                 color: isFisica ? '#000' : '#fff',
               }}
             >
-              <span className="text-xs lg:text-2xs">Concluído! Ver todos</span>
+              <span className="text-xs lg:text-sm">Concluído! Ver todos</span>
             </button>
           )}
         </div>

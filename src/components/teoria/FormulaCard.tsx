@@ -38,14 +38,14 @@ export default function FormulaCard({
     >
       {/* Header da fórmula */}
       <div
-        className="p-3 lg:p-2.5"
+        className="p-3 lg:p-4"
         style={{
           background: `linear-gradient(135deg, ${accentColor}15, ${accentColor}08)`,
         }}
       >
         {nome && (
           <p
-            className="text-xs lg:text-2xs font-medium mb-1.5 uppercase tracking-wide"
+            className="text-xs lg:text-sm font-medium mb-1.5 uppercase tracking-wide"
             style={{ color: accentColor }}
           >
             {nome}
@@ -61,7 +61,7 @@ export default function FormulaCard({
           }}
         >
           <code
-            className="text-xl lg:text-lg font-mono font-bold tracking-wide"
+            className="text-xl lg:text-2xl font-mono font-bold tracking-wide"
             style={{ color: accentColor }}
           >
             {expressao}
@@ -69,7 +69,7 @@ export default function FormulaCard({
         </div>
 
         <p
-          className="text-xs lg:text-2xs mt-2 text-center"
+          className="text-xs lg:text-sm mt-2 text-center"
           style={{ color: 'var(--text-muted)' }}
         >
           {descricao}
@@ -81,7 +81,7 @@ export default function FormulaCard({
         <>
           <button
             onClick={() => setExpandido(!expandido)}
-            className="w-full px-3 py-2 flex items-center justify-between text-xs lg:text-2xs transition-colors"
+            className="w-full px-3 py-2 flex items-center justify-between text-xs lg:text-sm transition-colors"
             style={{
               background: 'var(--bg-elevated)',
               color: 'var(--text-secondary)',
@@ -111,7 +111,7 @@ export default function FormulaCard({
               {variaveis.map((v, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 text-xs lg:text-2xs"
+                  className="flex items-center gap-2 text-xs lg:text-sm"
                 >
                   <span
                     className="font-mono font-bold min-w-[24px] text-center"
