@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy, TrendingUp, Target, ChevronDown, ChevronUp } from 'lucide-react'
 import Button from './ui/Button'
 import Badge from './ui/Badge'
+import { formatarFormula } from '@/lib/formatacao'
 import type { Questao, Componente, ModoResposta } from '@/types'
 
 interface LimiteInfo {
@@ -221,7 +222,7 @@ export default function QuestaoCard({
           className="text-sm sm:text-base leading-relaxed"
           style={{ color: 'var(--text-primary)' }}
         >
-          {questao.enunciado}
+          {formatarFormula(questao.enunciado)}
         </p>
       </div>
 
@@ -263,7 +264,7 @@ export default function QuestaoCard({
                 )}
               </span>
               <span className="text-sm sm:text-base flex-1" style={{ color: 'var(--text-primary)' }}>
-                {texto}
+                {formatarFormula(texto)}
               </span>
             </button>
           )
@@ -311,7 +312,7 @@ export default function QuestaoCard({
                 <Lightbulb className="w-4 h-4" style={{ color: corPrimaria }} />
                 <span className="text-xs font-medium" style={{ color: corPrimaria }}>Dica</span>
               </div>
-              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{questao.dica}</p>
+              <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica || '')}</p>
             </div>
           ) : (
             <button
@@ -477,7 +478,7 @@ export default function QuestaoCard({
               )}
               {feedback.explicacao && (
                 <p className="text-sm mt-2 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                  {feedback.explicacao}
+                  {formatarFormula(feedback.explicacao)}
                 </p>
               )}
             </div>

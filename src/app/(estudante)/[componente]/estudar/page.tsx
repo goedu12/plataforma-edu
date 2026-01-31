@@ -480,7 +480,7 @@ export default function EstudarPage() {
                           Próxima
                         </Button>
                       ) : (
-                        <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}>
+                        <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-5 lg:h-5" />}>
                           Desafio
                         </Button>
                       )}

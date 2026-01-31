@@ -118,8 +118,25 @@ export async function GET(request: NextRequest) {
       })
     }
 
+    // Buscar questões dos últimos 5 desafios para evitar repetição
+    const { data: desafiosRecentes } = await supabase
+      .from('desafios')
+      .select('questoes_ids')
+      .eq('usuario_id', sessao.userId)
+      .eq('componente', componente)
+      .order('criado_em', { ascending: false })
+      .limit(5)
+
+    const questoesRecentes = new Set(
+      desafiosRecentes?.flatMap(d => d.questoes_ids || []) || []
+    )
+
+    // Priorizar questões não usadas recentemente
+    const questoesNovas = questoesDisponiveis.filter(q => !questoesRecentes.has(q.id))
+    const poolFinal = questoesNovas.length >= DESAFIO.QUESTOES ? questoesNovas : questoesDisponiveis
+
     // Selecionar questões aleatórias
-    const questoesIds = questoesDisponiveis
+    const questoesIds = poolFinal
       .sort(() => Math.random() - 0.5)
       .slice(0, DESAFIO.QUESTOES)
       .map(q => q.id)
