@@ -1,4 +1,5 @@
 import MonitorIndicator from '@/components/MonitorIndicator'
+import TutorFAB from '@/components/TutorFAB'
 
 export default function EstudanteLayout({
   children,
@@ -9,6 +10,7 @@ export default function EstudanteLayout({
     <>
       {children}
       <MonitorIndicator />
+      <TutorFAB />
     </>
   )
 }
