@@ -29,12 +29,12 @@ export async function GET() {
       .single()
 
     const isProfessor = usuario?.tipo === 'professor'
-    const isAluno3SerieEM = usuario?.nivel === 'EM' && usuario?.ano === 3
+    const isAlunoEM = usuario?.nivel === 'EM'
 
-    if (!usuario || (!isProfessor && !isAluno3SerieEM)) {
+    if (!usuario || (!isProfessor && !isAlunoEM)) {
       return NextResponse.json({
         sucesso: false,
-        erro: 'O Simulado ENEM está disponível apenas para alunos da 3ª série do Ensino Médio.',
+        erro: 'O Simulado ENEM está disponível apenas para alunos do Ensino Médio.',
       }, { status: 403 })
     }
 

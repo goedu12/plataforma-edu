@@ -147,7 +147,7 @@ export default function MenuComponentePage() {
 
   // Grupo 2: Explorar
   const grupoExplorar: MenuItem[] = [
-    ...(usuario.nivel === 'EM' && usuario.ano === 3
+    ...(usuario.nivel === 'EM'
       ? [{ icon: GraduationCap, label: 'Enem', href: `/${componente}/simulado-enem`, description: 'Simulado', badgeText: 'TESTE', badgeColor: 'var(--color-accent)' } as MenuItem]
       : []),
     { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', badgeText: 'TESTE', badgeColor: 'var(--color-accent)' },
