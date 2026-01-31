@@ -168,14 +168,19 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Ordenar questões por dificuldade e selecionar a primeira
+    // Ordenar questões por dificuldade e selecionar aleatoriamente dentro do nível mais fácil disponível
     const questoesOrdenadas = questoesDisponiveis.sort((a, b) => {
       const ordemA = ORDEM_DIFICULDADE[a.dificuldade] || 2
       const ordemB = ORDEM_DIFICULDADE[b.dificuldade] || 2
       return ordemA - ordemB
     })
 
-    const questaoSelecionada = questoesOrdenadas[0]
+    // Pegar todas as questões do mesmo nível de dificuldade mais fácil
+    const dificuldadePrioritaria = questoesOrdenadas[0].dificuldade
+    const questoesMesmaDificuldade = questoesOrdenadas.filter(q => q.dificuldade === dificuldadePrioritaria)
+
+    // Selecionar aleatoriamente dentro desse grupo para evitar repetição
+    const questaoSelecionada = questoesMesmaDificuldade[Math.floor(Math.random() * questoesMesmaDificuldade.length)]
 
     // Remover resposta correta da questão enviada ao cliente
     const { resposta_correta, ...questaoSemResposta } = questaoSelecionada
