@@ -1479,106 +1479,110 @@ img {
     }
   }
 
-  /* Alternativa compacta para Chromebook - altura reduzida */
+  /* Alternativa — mobile-first, escala para cima no desktop */
   .alternativa-chromebook {
     @apply w-full px-2 py-1.5 rounded-lg flex items-center gap-2 transition-all text-left;
-    min-height: 36px;
+    min-height: 40px;
   }
   @media (min-width: 1024px) {
     .alternativa-chromebook {
-      min-height: 32px;
-      @apply py-1 rounded-md;
+      min-height: 48px;
+      @apply px-4 py-2.5 rounded-xl gap-3;
     }
   }
 
-  /* Letra da alternativa compacta */
+  /* Letra da alternativa */
   .alternativa-letra-compact {
-    @apply w-6 h-6 rounded flex items-center justify-center font-bold flex-shrink-0 text-xs;
+    @apply w-7 h-7 rounded flex items-center justify-center font-bold flex-shrink-0 text-xs;
+  }
+  @media (min-width: 1024px) {
+    .alternativa-letra-compact {
+      @apply w-9 h-9 rounded-lg text-sm;
+    }
   }
 
-  /* Enunciado compacto */
+  /* Enunciado — legível em todos os dispositivos */
   .enunciado-chromebook {
-    @apply text-sm leading-snug;
+    @apply text-sm leading-relaxed;
   }
   @media (min-width: 1024px) {
     .enunciado-chromebook {
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 16px;
+      line-height: 1.7;
     }
   }
 
-  /* Card sem padding excessivo */
+  /* Card */
   .card-chromebook {
-    @apply rounded-lg p-2;
+    @apply rounded-lg p-3;
     background: var(--bg-surface);
     border: 1px solid var(--border-default);
   }
   @media (min-width: 1024px) {
     .card-chromebook {
-      @apply p-2.5;
+      @apply p-5 rounded-xl;
     }
   }
 
-  /* Botão de ação compacto */
+  /* Botão de ação */
   .btn-chromebook {
     @apply rounded-lg font-semibold transition-all;
-    min-height: 40px;
+    min-height: 44px;
   }
   @media (min-width: 1024px) {
     .btn-chromebook {
-      min-height: 36px;
-      @apply text-sm;
+      min-height: 48px;
+      @apply text-base;
     }
   }
 
-  /* Espaçamento mínimo entre elementos */
+  /* Espaçamento entre elementos */
   .space-chromebook {
-    @apply space-y-1;
+    @apply space-y-2;
   }
   @media (min-width: 1024px) {
     .space-chromebook {
-      @apply space-y-0.5;
+      @apply space-y-3;
     }
   }
 
-  /* Gap mínimo */
+  /* Gap */
   .gap-chromebook {
-    @apply gap-1;
+    @apply gap-2;
   }
   @media (min-width: 1024px) {
     .gap-chromebook {
-      gap: 3px;
+      @apply gap-3;
     }
   }
 
-  /* Badge/tag compacto */
+  /* Badge/tag */
   .badge-chromebook {
     @apply px-2 py-0.5 rounded text-xs font-medium;
   }
   @media (min-width: 1024px) {
     .badge-chromebook {
-      font-size: 11px;
-      @apply px-1.5 py-0;
+      @apply text-sm px-3 py-1;
     }
   }
 
   /* Texto das alternativas */
   .texto-alternativa-chromebook {
-    @apply text-xs leading-tight;
+    @apply text-sm leading-snug;
   }
   @media (min-width: 1024px) {
     .texto-alternativa-chromebook {
-      font-size: 13px;
-      line-height: 1.35;
+      font-size: 16px;
+      line-height: 1.5;
     }
   }
 
-  /* Progress bar fino */
+  /* Progress bar */
   .progress-chromebook {
     @apply h-1 rounded-full;
   }
 
-  /* Área de ações fixa - compacta */
+  /* Área de ações */
   .actions-chromebook {
     @apply px-3 py-2 flex gap-2;
     background: var(--bg-surface);
@@ -1586,53 +1590,48 @@ img {
   }
   @media (min-width: 1024px) {
     .actions-chromebook {
-      @apply py-1.5 px-4;
+      @apply py-3 px-6;
     }
   }
 
-  /* Timer compacto */
+  /* Timer */
   .timer-chromebook {
     @apply flex items-center gap-1 px-2 py-1 rounded text-xs font-mono;
     background: var(--bg-elevated);
   }
   @media (min-width: 1024px) {
     .timer-chromebook {
-      font-size: 11px;
-      @apply px-1.5 py-0.5;
+      @apply text-sm px-3 py-1.5;
     }
   }
 
-  /* Feedback compacto */
+  /* Feedback */
   .feedback-chromebook {
-    @apply rounded-lg p-2 text-xs;
+    @apply rounded-lg p-3 text-sm;
   }
   @media (min-width: 1024px) {
     .feedback-chromebook {
-      @apply p-1.5;
-      font-size: 12px;
+      @apply p-4 text-base;
     }
   }
 
-  /* Container de questão otimizado */
+  /* Container de questão */
   .questao-container-chromebook {
     @apply flex flex-col;
-    /* No Chromebook, usar altura máxima calculada */
   }
   @media (min-width: 1024px) {
     .questao-container-chromebook {
-      /* 768px tela - 80px chrome - 72px nav-rail padding = ~616px */
-      /* Header: 40px, Actions: 44px = sobram ~532px para conteúdo */
       max-height: calc(100vh - 160px);
     }
   }
 
-  /* Ícone pequeno */
+  /* Ícone */
   .icon-chromebook {
     @apply w-3.5 h-3.5;
   }
   @media (min-width: 1024px) {
     .icon-chromebook {
-      @apply w-3 h-3;
+      @apply w-4 h-4;
     }
   }
 }

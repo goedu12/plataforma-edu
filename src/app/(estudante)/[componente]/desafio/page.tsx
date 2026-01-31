@@ -205,11 +205,11 @@ export default function DesafioPage() {
         <NavigationRail componente={componente} />
 
         <header className="header-chromebook" style={{ background: corPrimaria, borderColor: 'transparent' }}>
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
             <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: isFisica ? '#000' : '#fff' }} />
-              <h1 className="font-semibold text-sm lg:text-xs" style={{ color: isFisica ? '#000' : '#fff' }}>
+              <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+              <h1 className="font-semibold text-sm lg:text-base" style={{ color: isFisica ? '#000' : '#fff' }}>
                 Resultado
               </h1>
             </div>
@@ -217,24 +217,24 @@ export default function DesafioPage() {
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-3 py-4 lg:px-4 lg:py-3">
+        <main className="max-w-3xl mx-auto px-3 py-4 lg:px-6 lg:py-5">
           {/* Card de Resultado - Compacto */}
-          <div className="card-chromebook text-center p-4 lg:p-3">
+          <div className="card-chromebook text-center p-4 lg:p-6">
             <div
-              className="w-12 h-12 lg:w-10 lg:h-10 rounded-full mx-auto mb-2 flex items-center justify-center"
+              className="w-12 h-12 lg:w-14 lg:h-14 rounded-full mx-auto mb-3 flex items-center justify-center"
               style={{
                 background: isPerfeito || porcentagem >= 60 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                 border: `2px solid ${isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)'}`,
               }}
             >
               <Trophy
-                className="w-6 h-6 lg:w-5 lg:h-5"
+                className="w-6 h-6 lg:w-7 lg:h-7"
                 style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
               />
             </div>
 
             <p
-              className="text-2xl lg:text-xl font-bold"
+              className="text-2xl lg:text-3xl font-bold"
               style={{ color: isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)' }}
             >
               {resultado.acertos}/{resultado.total}
@@ -244,7 +244,7 @@ export default function DesafioPage() {
             </p>
 
             <div className="mt-2 rounded-lg p-2" style={{ background: 'var(--bg-elevated)' }}>
-              <p className="text-lg lg:text-base font-bold" style={{ color: 'var(--success)' }}>
+              <p className="text-lg lg:text-xl font-bold" style={{ color: 'var(--success)' }}>
                 +{resultado.pontos_ganhos} pts
               </p>
               {resultado.bonus_perfeito && (
@@ -309,7 +309,7 @@ export default function DesafioPage() {
         <NavigationRail componente={componente} />
 
         <header className="header-chromebook">
-          <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="max-w-3xl mx-auto flex items-center justify-between">
             <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4" style={{ color: corPrimaria }} />
@@ -319,7 +319,7 @@ export default function DesafioPage() {
           </div>
         </header>
 
-        <main className="max-w-2xl mx-auto px-4 py-8">
+        <main className="max-w-3xl mx-auto px-4 py-8">
           <div className="card-chromebook p-6 text-center">
             <div
               className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
@@ -370,7 +370,7 @@ export default function DesafioPage() {
           HEADER ULTRA COMPACTO
           ══════════════════════════════════════════════════════════════════ */}
       <header className="header-chromebook flex-shrink-0">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           {/* Linha 1: Back + Título + Timer + Progress (desktop) */}
           <div className="flex items-center gap-2 lg:gap-3">
             <BackButton href={`/${componente}/menu`} mobileOnly />
@@ -381,8 +381,8 @@ export default function DesafioPage() {
             </span>
 
             <div className="flex items-center gap-1.5 flex-1 lg:flex-none lg:ml-auto">
-              <Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} />
-              <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>
+              <Zap className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: corPrimaria }} />
+              <span className="font-semibold text-sm lg:text-base" style={{ color: 'var(--text-primary)' }}>
                 Desafio
               </span>
             </div>
@@ -450,9 +450,9 @@ export default function DesafioPage() {
       {/* ══════════════════════════════════════════════════════════════════
           CONTEÚDO - Tudo junto sem espaço extra
           ══════════════════════════════════════════════════════════════════ */}
-      <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+      <main className="flex-1 max-w-3xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
         {questaoAtualData && (
-          <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5">
+          <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-6 lg:py-4">
             <div className="space-chromebook">
               {/* Tag mobile */}
               <div className="flex lg:hidden items-center gap-2">
