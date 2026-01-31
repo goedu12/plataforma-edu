@@ -292,24 +292,43 @@ export default function MenuComponentePage() {
             </div>
           )}
 
-          {/* Progress do nível */}
-          <div className="mt-3 flex items-center gap-3">
+          {/* Progresso do nível — visível e motivador */}
+          <div
+            className="mt-3 p-3 rounded-xl"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+                {nivel.emoji} {nivel.nome}
+              </span>
+              {proximoNivel ? (
+                <span className="text-2xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                  {pontos} / {proximoNivel.pontos_min} pts
+                </span>
+              ) : (
+                <span className="text-2xs font-medium" style={{ color: accentColor }}>
+                  Nível máximo!
+                </span>
+              )}
+            </div>
             <div
-              className="flex-1 h-2 rounded-full overflow-hidden"
-              style={{ background: 'var(--bg-elevated)' }}
+              className="w-full h-2.5 rounded-full overflow-hidden"
+              style={{ background: 'var(--bg-base)' }}
             >
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full transition-all duration-700"
                 style={{
-                  width: `${Math.min((questoesTotal / 50) * 100, 100)}%`,
+                  width: proximoNivel
+                    ? `${Math.min(((pontos - nivel.pontos_min) / (proximoNivel.pontos_min - nivel.pontos_min)) * 100, 100)}%`
+                    : '100%',
                   background: accentColor,
                 }}
               />
             </div>
             {proximoNivel && (
-              <span className="text-2xs font-semibold whitespace-nowrap" style={{ color: accentColor }}>
-                +{pontosParaProximo} → {proximoNivel.nome}
-              </span>
+              <p className="text-2xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                Faltam <strong style={{ color: accentColor }}>{pontosParaProximo} pts</strong> para {proximoNivel.emoji} {proximoNivel.nome}
+              </p>
             )}
           </div>
         </div>
