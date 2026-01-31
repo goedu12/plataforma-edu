@@ -84,7 +84,7 @@ export default function TopicoTeoriaPage() {
       >
         <NavigationRail componente={componente} />
         <header className="header-chromebook lg:py-2">
-          <div className="max-w-2xl mx-auto w-full">
+          <div className="max-w-4xl mx-auto w-full">
             <div className="flex items-center gap-2">
               <BackButton href={`/${componente}/teoria`} compactOnDesktop />
               <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
@@ -93,7 +93,7 @@ export default function TopicoTeoriaPage() {
             </div>
           </div>
         </header>
-        <main className="max-w-2xl mx-auto px-3 lg:px-4 py-4">
+        <main className="max-w-4xl mx-auto px-3 lg:px-4 py-4">
           <div
             className="p-6 rounded-lg text-center"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
@@ -125,7 +125,7 @@ export default function TopicoTeoriaPage() {
 
       {/* Header */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/teoria`} compactOnDesktop />
             <div className="flex-1 min-w-0">
@@ -144,7 +144,7 @@ export default function TopicoTeoriaPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-3 space-y-4">
+      <main className="max-w-4xl mx-auto px-4 lg:px-6 py-3 space-y-4">
         {/* Resumo */}
         <div
           className="p-3 rounded-xl text-center"
