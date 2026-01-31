@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { logger } from '@/lib/logger'
-import { getHeartbeats, OCIOSO_TIMEOUT_MS } from '@/lib/heartbeat-store'
+import { consultarHeartbeats } from '@/lib/heartbeat-store'
 import type { Componente } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -56,6 +56,16 @@ export interface AlunoInativo {
   ultimo_acesso: string | null
 }
 
+// Aluno com heartbeat mas sem atividade recente
+export interface AlunoOcioso {
+  id: string
+  nome: string
+  turma: string
+  componentes: Componente[]
+  tempo_ocioso_segundos: number
+  ultimo_acesso: string | null
+}
+
 export interface EstatisticasTempoReal {
   alunos_ativos_agora: number
   alunos_inativos: number
@@ -87,19 +97,13 @@ export interface EstatisticasTempoReal {
   }[]
 }
 
-// Presença via heartbeat
-export interface PresencaAluno {
-  usuario_id: string
-  estado: 'ativo' | 'ocioso' | 'offline'
-}
-
 export interface RespostaAtividadesTempoReal {
   sucesso: boolean
   atividades: AtividadeTempoReal[]
   alunos_ativos: AlunoAtivo[]
+  alunos_ociosos: AlunoOcioso[]
   alunos_inativos: AlunoInativo[]
   estatisticas: EstatisticasTempoReal
-  presenca: PresencaAluno[]
   turmas_disponiveis: string[]
   colegios_disponiveis: string[]
   periodo_minutos: number
@@ -696,17 +700,41 @@ export async function GET(request: NextRequest) {
     const alunosAtivos = Array.from(alunosAtivosMap.values())
       .sort((a, b) => new Date(b.ultima_atividade).getTime() - new Date(a.ultima_atividade).getTime())
 
-    // 8. NOVO: Identificar alunos inativos
-    const alunosInativos: AlunoInativo[] = alunosFiltrados
-      .filter(a => !idsAtivos.has(a.id))
-      .map(a => ({
-        id: a.id,
-        nome: a.nome,
-        turma: a.turma,
-        componentes: (a.componentes || []) as Componente[],
-        ultimo_acesso: a.ultimo_acesso,
-      }))
-      .sort((a, b) => a.nome.localeCompare(b.nome))
+    // 8. Identificar alunos inativos e ociosos via heartbeat (import direto, sem HTTP)
+    const heartbeatData = consultarHeartbeats()
+
+    const alunosOciosos: AlunoOcioso[] = []
+    const alunosInativos: AlunoInativo[] = []
+
+    for (const a of alunosFiltrados) {
+      if (idsAtivos.has(a.id)) continue
+
+      const hb = heartbeatData[a.id]
+      if (hb && hb.status === 'ocioso') {
+        // Heartbeat ativo mas sem interacao real > 2 min = ocioso
+        alunosOciosos.push({
+          id: a.id,
+          nome: a.nome,
+          turma: a.turma,
+          componentes: (a.componentes || []) as Componente[],
+          tempo_ocioso_segundos: hb.tempoOcioso,
+          ultimo_acesso: a.ultimo_acesso,
+        })
+      } else if (!hb) {
+        // Sem heartbeat = offline/inativo
+        alunosInativos.push({
+          id: a.id,
+          nome: a.nome,
+          turma: a.turma,
+          componentes: (a.componentes || []) as Componente[],
+          ultimo_acesso: a.ultimo_acesso,
+        })
+      }
+      // hb.status === 'ativo' sem atividades = navegando, não ocioso (ignorar)
+    }
+
+    alunosOciosos.sort((a, b) => b.tempo_ocioso_segundos - a.tempo_ocioso_segundos)
+    alunosInativos.sort((a, b) => a.nome.localeCompare(b.nome))
 
     // ═══════════════════════════════════════════════════════════════════════════
     // 9. CALCULAR TODAS AS ESTATÍSTICAS EM ÚNICO PASS (OTIMIZADO)
@@ -907,24 +935,14 @@ export async function GET(request: NextRequest) {
       por_turma: porTurma,
     }
 
-    // 10. Presença via heartbeat (in-memory)
-    const heartbeatMap = getHeartbeats()
-    const agoraMs = Date.now()
-    const presenca: PresencaAluno[] = alunosFiltrados.map(aluno => {
-      const hb = heartbeatMap.get(aluno.id)
-      if (!hb) return { usuario_id: aluno.id, estado: 'offline' as const }
-      const ocioso = (agoraMs - hb.ultima_interacao) > OCIOSO_TIMEOUT_MS
-      return { usuario_id: aluno.id, estado: ocioso ? 'ocioso' as const : 'ativo' as const }
-    })
-
-    // 11. Resposta final
+    // 10. Resposta final
     const resposta: RespostaAtividadesTempoReal = {
       sucesso: true,
       atividades: atividades.slice(0, MAX_ATIVIDADES),
       alunos_ativos: alunosAtivos,
+      alunos_ociosos: alunosOciosos,
       alunos_inativos: alunosInativos,
       estatisticas,
-      presenca,
       turmas_disponiveis: turmasDisponiveis,
       colegios_disponiveis: colegiosDisponiveis,
       periodo_minutos: periodoMinutos,

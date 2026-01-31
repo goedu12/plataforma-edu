@@ -1,63 +1,65 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 
-/**
- * Hook que envia heartbeat ao servidor a cada 10s
- * Detecta se o estudante está ativo (interagindo) ou ocioso (tela aberta sem ação)
- * Retorna se o professor está monitorando a turma
- */
-export function useHeartbeat(componente: string) {
-  const [monitorado, setMonitorado] = useState(false)
-  const ativoRef = useRef(true)
+// ═══════════════════════════════════════════════════════════════════════════
+// Hook: useHeartbeat
+// Envia heartbeat silencioso ao servidor a cada 30s
+// Rastreia a última interação real do usuário (click, tecla, scroll, touch)
+// Retorna se o professor está monitorando
+// ═══════════════════════════════════════════════════════════════════════════
+
+const HEARTBEAT_INTERVAL = 30_000 // 30 segundos
+const INTERACTION_EVENTS = ['mousedown', 'keydown', 'scroll', 'touchstart'] as const
+
+export function useHeartbeat() {
+  const [monitorando, setMonitorando] = useState(false)
   const ultimaInteracaoRef = useRef(Date.now())
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Detectar interação do usuário
-  const marcarAtivo = useCallback(() => {
-    ativoRef.current = true
+  // Registrar interação do usuário
+  const registrarInteracao = useCallback(() => {
     ultimaInteracaoRef.current = Date.now()
   }, [])
 
-  useEffect(() => {
-    // Eventos que indicam atividade real
-    const eventos = ['mousedown', 'keydown', 'touchstart', 'scroll']
-    eventos.forEach(e => window.addEventListener(e, marcarAtivo, { passive: true }))
-
-    const intervalo = setInterval(async () => {
-      try {
-        // Se passou mais de 30s sem interação, marcar como ocioso
-        const agora = Date.now()
-        if (agora - ultimaInteracaoRef.current > 30000) {
-          ativoRef.current = false
-        }
-
-        const res = await fetch('/api/heartbeat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            componente,
-            ativo: ativoRef.current,
-          }),
-        })
+  // Enviar heartbeat
+  const enviarHeartbeat = useCallback(async () => {
+    try {
+      const res = await fetch('/api/heartbeat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ultimaInteracao: ultimaInteracaoRef.current,
+        }),
+      })
+      if (res.ok) {
         const data = await res.json()
-        setMonitorado(data.monitorado || false)
-      } catch {
-        // silencioso
+        setMonitorando(!!data.monitorando)
       }
-    }, 10000) // a cada 10s
+    } catch {
+      // Silencioso - não interromper o estudante
+    }
+  }, [])
 
-    // Primeiro ping imediato
-    fetch('/api/heartbeat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ componente, ativo: true }),
-    }).then(r => r.json()).then(d => setMonitorado(d.monitorado || false)).catch(() => {})
+  useEffect(() => {
+    // Enviar primeiro heartbeat imediatamente
+    enviarHeartbeat()
+
+    // Configurar intervalo
+    intervalRef.current = setInterval(enviarHeartbeat, HEARTBEAT_INTERVAL)
+
+    // Registrar eventos de interação
+    for (const event of INTERACTION_EVENTS) {
+      window.addEventListener(event, registrarInteracao, { passive: true })
+    }
 
     return () => {
-      clearInterval(intervalo)
-      eventos.forEach(e => window.removeEventListener(e, marcarAtivo))
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      for (const event of INTERACTION_EVENTS) {
+        window.removeEventListener(event, registrarInteracao)
+      }
     }
-  }, [componente, marcarAtivo])
+  }, [enviarHeartbeat, registrarInteracao])
 
-  return { monitorado }
+  return { monitorando }
 }

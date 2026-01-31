@@ -27,7 +27,6 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import ProfilePhoto from '@/components/ProfilePhoto'
 import ThemeIconToggle from '@/components/ThemeIconToggle'
-import { useHeartbeat } from '@/hooks/useHeartbeat'
 import type { Usuario, Componente } from '@/types'
 import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 import type { LucideIcon } from 'lucide-react'
@@ -50,7 +49,6 @@ export default function MenuComponentePage() {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
   const [mostrarEmBreve, setMostrarEmBreve] = useState(false)
-  const { monitorado } = useHeartbeat(componente)
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -141,14 +139,7 @@ export default function MenuComponentePage() {
     >
       <NavigationRail componente={componente} />
 
-      {/* Indicador de monitoramento */}
-      {monitorado && (
-        <div className="fixed top-2 right-2 z-50 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-medium shadow-lg"
-          style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.3)' }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-          Aula monitorada
-        </div>
-      )}
+      {/* Indicador de monitoramento (via MonitorIndicator no layout) */}
 
       {/* Header Padronizado */}
       <header className="page-header">
