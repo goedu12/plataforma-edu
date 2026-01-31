@@ -86,7 +86,7 @@ export default function TeoriaPage() {
 
       {/* Header - Compacto para Chromebook */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/menu`} compactOnDesktop />
             <div className="flex-1">
@@ -116,7 +116,7 @@ export default function TeoriaPage() {
       </header>
 
       {/* Content - Compacto */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
+      <main className="max-w-4xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
         {/* Seletor de Bimestre */}
         <div className="mb-4 lg:mb-3">
           <h2 className="text-xs lg:text-2xs font-semibold mb-2 lg:mb-1.5" style={{ color: 'var(--text-secondary)' }}>
