@@ -355,15 +355,12 @@ function MenuSection({
       <h2 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
         {title}
       </h2>
-      <div
-        className="flex gap-3 overflow-x-auto pb-2"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {items.map((item) => (
           <button
             key={item.label}
             onClick={() => onNavigate(item.href)}
-            className="flex-shrink-0 w-[120px] p-3 rounded-xl text-center transition-all hover:translate-y-[-2px] relative group"
+            className="p-3 rounded-xl text-center transition-all hover:translate-y-[-2px] relative group"
             style={{
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-default)',
