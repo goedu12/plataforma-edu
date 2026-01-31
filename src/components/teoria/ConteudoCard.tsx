@@ -15,7 +15,7 @@ export default function ConteudoCard({
 }: ConteudoCardProps) {
   return (
     <div
-      className="rounded-xl p-4 lg:p-3"
+      className="rounded-xl p-4 lg:p-5"
       style={{
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
@@ -23,11 +23,11 @@ export default function ConteudoCard({
     >
       <div className="flex items-center gap-2 mb-3">
         <BookOpen
-          className="w-5 h-5 lg:w-4 lg:h-4"
+          className="w-5 h-5 lg:w-6 lg:h-6"
           style={{ color: accentColor }}
         />
         <h2
-          className="text-sm lg:text-xs font-bold"
+          className="text-sm lg:text-base font-bold"
           style={{ color: 'var(--text-primary)' }}
         >
           {titulo}
@@ -38,7 +38,7 @@ export default function ConteudoCard({
         {paragrafos.map((paragrafo, index) => (
           <p
             key={index}
-            className="text-sm lg:text-xs leading-relaxed"
+            className="text-sm lg:text-base leading-relaxed"
             style={{ color: 'var(--text-secondary)' }}
           >
             {/* Destacar palavras em negrito entre ** */}

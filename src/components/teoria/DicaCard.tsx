@@ -74,7 +74,7 @@ export default function DicaCard({
 
   return (
     <div
-      className="rounded-xl p-3 lg:p-2.5"
+      className="rounded-xl p-3 lg:p-4"
       style={{
         background: config.bgColor,
         border: `1px solid ${config.borderColor}`,
@@ -84,14 +84,14 @@ export default function DicaCard({
         <span className="text-lg">{config.emoji}</span>
         <div className="flex-1">
           <p
-            className="text-xs lg:text-2xs font-bold mb-1"
+            className="text-xs lg:text-sm font-bold mb-1"
             style={{ color: config.iconColor }}
           >
             {titulo || config.tituloDefault}
           </p>
           {conteudoArray.length === 1 ? (
             <p
-              className="text-xs lg:text-2xs leading-relaxed"
+              className="text-xs lg:text-sm leading-relaxed"
               style={{ color: 'var(--text-secondary)' }}
             >
               {conteudoArray[0]}
@@ -101,7 +101,7 @@ export default function DicaCard({
               {conteudoArray.map((item, index) => (
                 <li
                   key={index}
-                  className="text-xs lg:text-2xs leading-relaxed flex items-start gap-1.5"
+                  className="text-xs lg:text-sm leading-relaxed flex items-start gap-1.5"
                   style={{ color: 'var(--text-secondary)' }}
                 >
                   <span style={{ color: config.iconColor }}>•</span>
