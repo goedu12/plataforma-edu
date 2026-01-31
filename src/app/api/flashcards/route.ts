@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * API de FlashCards
  * GET /api/flashcards - Buscar questões e temas
