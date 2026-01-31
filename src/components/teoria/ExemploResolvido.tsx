@@ -31,7 +31,7 @@ export default function ExemploResolvido({
       }}
     >
       {/* Enunciado */}
-      <div className="p-3 lg:p-2.5">
+      <div className="p-3 lg:p-4">
         <div className="flex items-start gap-2 mb-2">
           <span
             className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
@@ -43,7 +43,7 @@ export default function ExemploResolvido({
             {numero}
           </span>
           <p
-            className="text-sm lg:text-xs font-medium leading-relaxed flex-1"
+            className="text-sm lg:text-base font-medium leading-relaxed flex-1"
             style={{ color: 'var(--text-primary)' }}
           >
             {enunciado}
@@ -53,7 +53,7 @@ export default function ExemploResolvido({
         {/* Botão para mostrar resolução */}
         <button
           onClick={() => setMostrarResolucao(!mostrarResolucao)}
-          className="w-full mt-2 py-2 px-3 rounded-lg flex items-center justify-center gap-2 text-xs lg:text-2xs font-medium transition-all active:scale-[0.98]"
+          className="w-full mt-2 py-2 px-3 rounded-lg flex items-center justify-center gap-2 text-xs lg:text-sm font-medium transition-all active:scale-[0.98]"
           style={{
             background: mostrarResolucao ? `${accentColor}15` : 'var(--bg-elevated)',
             color: mostrarResolucao ? accentColor : 'var(--text-secondary)',
@@ -79,7 +79,7 @@ export default function ExemploResolvido({
           {/* Passos da resolução */}
           <div className="mt-3 space-y-2">
             <p
-              className="text-xs lg:text-2xs font-semibold uppercase tracking-wide"
+              className="text-xs lg:text-sm font-semibold uppercase tracking-wide"
               style={{ color: 'var(--text-muted)' }}
             >
               Resolução:
@@ -104,7 +104,7 @@ export default function ExemploResolvido({
                     {index + 1}
                   </span>
                   <p
-                    className="text-xs lg:text-2xs leading-relaxed font-mono"
+                    className="text-xs lg:text-sm leading-relaxed font-mono"
                     style={{ color: 'var(--text-secondary)' }}
                   >
                     {passo}
@@ -134,7 +134,7 @@ export default function ExemploResolvido({
                 Resposta
               </p>
               <p
-                className="text-sm lg:text-xs font-bold font-mono"
+                className="text-sm lg:text-base font-bold font-mono"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {resposta}

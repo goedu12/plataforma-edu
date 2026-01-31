@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   BookOpen,
-  Bot,
   Trophy,
   Medal,
   LogOut,
@@ -15,11 +14,11 @@ import {
   RotateCcw,
   Zap,
   GraduationCap,
-  ChevronRight,
   Map,
   FileText,
   Sparkles,
   Route,
+  TrendingUp,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
@@ -36,9 +35,16 @@ interface MenuItem {
   label: string
   href: string
   description: string
-  isNew?: boolean
-  isComingSoon?: boolean
   badgeText?: string
+  badgeColor?: string
+}
+
+interface NotaBimestre {
+  nota_final: number
+  nota_acertos: number
+  nota_tempo: number
+  bimestre: number
+  dias_restantes: number
 }
 
 export default function MenuComponentePage() {
@@ -48,7 +54,7 @@ export default function MenuComponentePage() {
 
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
-  const [mostrarEmBreve, setMostrarEmBreve] = useState(false)
+  const [nota, setNota] = useState<NotaBimestre | null>(null)
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -56,19 +62,35 @@ export default function MenuComponentePage() {
       return
     }
 
-    const buscarUsuario = async () => {
+    const buscarDados = async () => {
       try {
-        const response = await fetch('/api/usuario')
-        const data = await response.json()
+        const [resUsuario, resNotas] = await Promise.all([
+          fetch('/api/usuario'),
+          fetch(`/api/notas?componente=${componente}`),
+        ])
+        const dataUsuario = await resUsuario.json()
+        const dataNotas = await resNotas.json()
 
-        if (data.sucesso && data.usuario) {
-          if (!data.usuario.componentes.includes(componente)) {
+        if (dataUsuario.sucesso && dataUsuario.usuario) {
+          if (!dataUsuario.usuario.componentes.includes(componente)) {
             router.push('/selecionar')
             return
           }
-          setUsuario(data.usuario)
+          setUsuario(dataUsuario.usuario)
         } else {
           router.push('/login')
+          return
+        }
+
+        if (dataNotas.sucesso && dataNotas.bimestre_atual) {
+          const b = dataNotas.bimestre_atual
+          setNota({
+            nota_final: b.nota_final ?? 0,
+            nota_acertos: b.nota_acertos ?? 0,
+            nota_tempo: b.nota_tempo ?? 0,
+            bimestre: b.bimestre ?? 1,
+            dias_restantes: b.dias_restantes ?? 0,
+          })
         }
       } catch {
         router.push('/login')
@@ -77,7 +99,7 @@ export default function MenuComponentePage() {
       }
     }
 
-    buscarUsuario()
+    buscarDados()
   }, [router, componente])
 
   const handleLogout = async () => {
@@ -101,36 +123,43 @@ export default function MenuComponentePage() {
   const pontosParaProximo = proximoNivel ? proximoNivel.pontos_min - pontos : 0
 
   const primeiroNome = usuario.nome.split(' ')[0]
-  const nomeTutor = componente === 'fisica' ? 'Newton' : 'Pitágoras'
-
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const accentGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
 
-  // Menu base
-  const menuItemsBase: MenuItem[] = [
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões' },
-    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min' },
-    { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros' },
-    { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
-    { icon: FileText, label: 'Teoria', href: `/${componente}/teoria`, description: 'Conteúdos', badgeText: 'NOVO' },
-    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Quiz rápido', badgeText: 'TESTE' },
-    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', badgeText: 'TESTE' },
+  // Cor da nota baseada no valor
+  const getCorNota = (n: number) => {
+    if (n >= 7) return '#22c55e'
+    if (n >= 5) return '#eab308'
+    return '#ef4444'
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // GRUPOS DE MENU
+  // ═══════════════════════════════════════════════════════════
+
+  // Grupo 1: Aprender & Praticar
+  const grupoAprender: MenuItem[] = [
+    { icon: FileText, label: 'Teoria', href: `/${componente}/teoria`, description: 'Conteúdos' },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões', badgeText: 'NOTA', badgeColor: '#22c55e' },
+    { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros', badgeText: 'NOTA', badgeColor: '#22c55e' },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min', badgeText: 'NOTA', badgeColor: '#22c55e' },
   ]
 
-  // Simulado Enem apenas para 3ª série do Ensino Médio
-  const menuENEM: MenuItem[] = (usuario.nivel === 'EM' && usuario.ano === 3)
-    ? [{ icon: FileText, label: 'Enem', href: `/${componente}/simulado-enem`, description: 'Simulado', badgeText: 'TESTE' }]
-    : []
+  // Grupo 2: Explorar
+  const grupoExplorar: MenuItem[] = [
+    ...(usuario.nivel === 'EM'
+      ? [{ icon: GraduationCap, label: 'Enem', href: `/${componente}/simulado-enem`, description: 'Simulado', badgeText: 'TESTE', badgeColor: 'var(--color-accent)' } as MenuItem]
+      : []),
+    { icon: Route, label: 'Trilhas', href: `/${componente}/trilhas`, description: 'Sua jornada', badgeText: 'TESTE', badgeColor: 'var(--color-accent)' },
+    { icon: Map, label: 'Mapas', href: `/${componente}/mapas`, description: 'Resumos' },
+    { icon: Sparkles, label: 'FlashCards', href: `/${componente}/flashcards`, description: 'Quiz rápido', badgeText: 'TESTE', badgeColor: 'var(--color-accent)' },
+  ]
 
-  const menuItemsFim: MenuItem[] = [
-    { icon: Bot, label: 'Tutor', href: `/${componente}/tutor`, description: nomeTutor },
+  // Grupo 3: Progresso
+  const grupoProgresso: MenuItem[] = [
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },
-    { icon: GraduationCap, label: 'Notas', href: `/${componente}/notas`, description: 'Bimestre' },
   ]
-
-  const menuItems: MenuItem[] = [...menuItemsBase, ...menuENEM, ...menuItemsFim]
 
   return (
     <div
@@ -139,11 +168,11 @@ export default function MenuComponentePage() {
     >
       <NavigationRail componente={componente} />
 
-      {/* Header Padronizado */}
+      {/* Header */}
       <header className="page-header">
         <div className="max-w-2xl mx-auto w-full">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <h1 className="font-display font-semibold" style={{ color: accentColor }}>
                 {componente === 'fisica' ? 'Física' : 'Matemática'}
@@ -178,7 +207,7 @@ export default function MenuComponentePage() {
             </div>
           </div>
 
-          {/* User + Stats em linha */}
+          {/* User + Stats */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push(`/${componente}/perfil`)}
@@ -201,7 +230,6 @@ export default function MenuComponentePage() {
               </div>
             </button>
 
-            {/* Stats inline */}
             <div className="flex gap-2">
               {[
                 { icon: Star, value: pontos, label: 'Pontos', color: accentColor },
@@ -218,153 +246,174 @@ export default function MenuComponentePage() {
               ))}
             </div>
           </div>
-        </div>
-      </header>
 
-      {/* Content */}
-      <main className="max-w-2xl mx-auto px-4 py-4">
-        {/* Progress Card */}
-        <div className="card-standard mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold" style={{ color: 'var(--text-secondary)' }}>
-              Progresso do Nível
-            </span>
-            <span className="text-xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
-              {questoesTotal} questões
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
+          {/* Nota do Bimestre — sempre visível */}
+          {nota && (
             <div
-              className="flex-1 h-2.5 rounded-full overflow-hidden"
-              style={{ background: 'var(--bg-elevated)' }}
+              className="mt-3 p-3 rounded-xl flex items-center gap-3"
+              style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+            >
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <TrendingUp className="w-4 h-4" style={{ color: getCorNota(nota.nota_final) }} />
+                <span
+                  className="text-2xl font-bold tabular-nums"
+                  style={{ color: getCorNota(nota.nota_final) }}
+                >
+                  {nota.nota_final.toFixed(1)}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                    Nota {nota.bimestre}º bimestre
+                  </span>
+                  <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                    {nota.dias_restantes}d restantes
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min((nota.nota_final / 10) * 100, 100)}%`,
+                      background: getCorNota(nota.nota_final),
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span className="text-2xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                    Acertos: {nota.nota_acertos.toFixed(1)}
+                  </span>
+                  <span className="text-2xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
+                    Tempo: {nota.nota_tempo.toFixed(1)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Progresso do nível — visível e motivador */}
+          <div
+            className="mt-3 p-3 rounded-xl"
+            style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-bold" style={{ color: 'var(--text-primary)' }}>
+                {nivel.emoji} {nivel.nome}
+              </span>
+              {proximoNivel ? (
+                <span className="text-2xs font-medium" style={{ color: 'var(--text-muted)' }}>
+                  {pontos} / {proximoNivel.pontos_min} pts
+                </span>
+              ) : (
+                <span className="text-2xs font-medium" style={{ color: accentColor }}>
+                  Nível máximo!
+                </span>
+              )}
+            </div>
+            <div
+              className="w-full h-2.5 rounded-full overflow-hidden"
+              style={{ background: 'var(--bg-base)' }}
             >
               <div
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full transition-all duration-700"
                 style={{
-                  width: `${Math.min((questoesTotal / 50) * 100, 100)}%`,
+                  width: proximoNivel
+                    ? `${Math.min(((pontos - nivel.pontos_min) / (proximoNivel.pontos_min - nivel.pontos_min)) * 100, 100)}%`
+                    : '100%',
                   background: accentColor,
                 }}
               />
             </div>
             {proximoNivel && (
-              <span className="text-xs font-semibold whitespace-nowrap" style={{ color: accentColor }}>
-                +{pontosParaProximo} → {proximoNivel.nome}
-              </span>
+              <p className="text-2xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
+                Faltam <strong style={{ color: accentColor }}>{pontosParaProximo} pts</strong> para {proximoNivel.emoji} {proximoNivel.nome}
+              </p>
             )}
           </div>
         </div>
+      </header>
 
-        {/* Menu Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          {menuItems.map((item, index) => (
-            <button
-              key={item.label}
-              onClick={() => item.isComingSoon ? setMostrarEmBreve(true) : router.push(item.href)}
-              className="list-item text-left transition-all hover:translate-y-[-1px] group relative"
-              style={{
-                animationDelay: `${index * 30}ms`,
-                opacity: item.isComingSoon ? 0.7 : 1,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = accentColor
-                e.currentTarget.style.boxShadow = `0 0 15px ${accentGlow}`
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--border-default)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
-            >
-              {/* Badge NOVO */}
-              {item.isNew && (
-                <span
-                  className="absolute -top-1.5 -right-1.5 px-2 py-0.5 text-2xs font-bold rounded-full"
-                  style={{ background: 'var(--color-accent)', color: '#fff' }}
-                >
-                  NOVO
-                </span>
-              )}
-              {/* Badge personalizado */}
-              {item.badgeText && (
-                <span
-                  className="absolute -top-1.5 -right-1.5 px-2 py-0.5 text-2xs font-bold rounded-full"
-                  style={{ background: 'var(--color-accent)', color: '#fff' }}
-                >
-                  {item.badgeText}
-                </span>
-              )}
-              {/* Badge EM BREVE */}
-              {item.isComingSoon && (
-                <span
-                  className="absolute -top-1.5 -right-1.5 px-2 py-0.5 text-2xs font-bold rounded-full"
-                  style={{ background: 'var(--warning)', color: '#000' }}
-                >
-                  EM BREVE
-                </span>
-              )}
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)' }}
-                >
-                  <item.icon className="w-5 h-5" style={{ color: accentColor }} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
-                    {item.label}
-                  </h3>
-                  <p className="text-2xs truncate" style={{ color: 'var(--text-muted)' }}>
-                    {item.description}
-                  </p>
-                </div>
-                <ChevronRight
-                  className="w-5 h-5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ color: accentColor }}
-                />
-              </div>
-            </button>
-          ))}
-        </div>
+      {/* Content */}
+      <main className="max-w-2xl mx-auto px-4 py-4 space-y-5">
+
+        {/* Grupo 1: Aprender & Praticar */}
+        <MenuSection title="Aprender & Praticar" items={grupoAprender} accentColor={accentColor} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
+
+        {/* Grupo 2: Explorar */}
+        <MenuSection title="Explorar" items={grupoExplorar} accentColor={accentColor} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
+
+        {/* Grupo 3: Progresso */}
+        <MenuSection title="Progresso" items={grupoProgresso} accentColor={accentColor} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
+
       </main>
-
-      {/* Modal Em Breve - Compacto */}
-      {mostrarEmBreve && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-3"
-          style={{ background: 'var(--overlay-modal)' }}
-          onClick={() => setMostrarEmBreve(false)}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className="w-full max-w-xs rounded-xl p-4 text-center"
-            style={{ background: 'var(--bg-surface)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              className="w-12 h-12 lg:w-10 lg:h-10 rounded-full mx-auto mb-3 flex items-center justify-center"
-              style={{ background: 'rgba(245, 158, 11, 0.1)' }}
-            >
-              <FileText className="w-6 h-6 lg:w-5 lg:h-5" style={{ color: 'var(--warning)' }} />
-            </div>
-            <h3 className="text-lg lg:text-base font-bold mb-1.5" style={{ color: 'var(--text-primary)' }}>
-              Simulado ENEM
-            </h3>
-            <p className="text-xs lg:text-2xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-              Questões do ENEM em breve!
-            </p>
-            <button
-              onClick={() => setMostrarEmBreve(false)}
-              className="w-full py-2 lg:py-1.5 rounded-lg font-medium text-sm lg:text-xs btn-chromebook transition-all active:scale-[0.98]"
-              style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
-            >
-              Entendi
-            </button>
-          </div>
-        </div>
-      )}
 
       <BottomNav componente={componente} />
     </div>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
+// Componente: Seção horizontal de menu
+// ═══════════════════════════════════════════════════════════
+function MenuSection({
+  title,
+  items,
+  accentColor,
+  isFisica,
+  onNavigate,
+}: {
+  title: string
+  items: MenuItem[]
+  accentColor: string
+  isFisica: boolean
+  onNavigate: (href: string) => void
+}) {
+  return (
+    <section>
+      <h2 className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>
+        {title}
+      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {items.map((item) => (
+          <button
+            key={item.label}
+            onClick={() => onNavigate(item.href)}
+            className="p-3 rounded-xl text-center transition-all hover:translate-y-[-2px] relative group"
+            style={{
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-default)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = accentColor
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'var(--border-default)'
+            }}
+          >
+            {item.badgeText && (
+              <span
+                className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 text-[9px] font-bold rounded-full text-white"
+                style={{ background: item.badgeColor || 'var(--color-accent)' }}
+              >
+                {item.badgeText}
+              </span>
+            )}
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2"
+              style={{ background: isFisica ? 'rgba(34, 197, 94, 0.12)' : 'rgba(139, 92, 246, 0.12)' }}
+            >
+              <item.icon className="w-5 h-5" style={{ color: accentColor }} />
+            </div>
+            <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+              {item.label}
+            </p>
+            <p className="text-2xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              {item.description}
+            </p>
+          </button>
+        ))}
+      </div>
+    </section>
   )
 }

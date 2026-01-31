@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
@@ -133,31 +135,16 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Buscar questão ativa para revisão
-    // Percorrer todas as questões até encontrar uma ativa
-    let questaoEncontrada = null
-    let questaoErradaInfo = null
-    let questoesAtivasCount = 0
+    // Buscar todas as questões ativas para revisão
+    const questoesIds = questoesParaRevisao.map(q => q.questao_id)
 
-    for (const questaoRevisao of questoesParaRevisao) {
-      const { data: questaoData, error: erroQuestao } = await supabase
-        .from('questoes')
-        .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, explicacao, dica, status')
-        .eq('id', questaoRevisao.questao_id)
-        .eq('status', 'ativa')
-        .single()
+    const { data: questoesAtivas, error: erroQuestoes2 } = await supabase
+      .from('questoes')
+      .select('id, componente, tema, dificuldade, enunciado, alternativa_a, alternativa_b, alternativa_c, alternativa_d, alternativa_e, explicacao, dica')
+      .in('id', questoesIds)
+      .eq('status', 'ativa')
 
-      if (!erroQuestao && questaoData) {
-        questoesAtivasCount++
-        if (!questaoEncontrada) {
-          questaoEncontrada = questaoData
-          questaoErradaInfo = questaoRevisao
-        }
-      }
-    }
-
-    // Se nenhuma questão ativa foi encontrada
-    if (!questaoEncontrada || !questaoErradaInfo) {
+    if (erroQuestoes2 || !questoesAtivas || questoesAtivas.length === 0) {
       return NextResponse.json({
         sucesso: true,
         status: 'SEM_REVISAO',
@@ -165,6 +152,11 @@ export async function GET(request: NextRequest) {
         total: 0,
       })
     }
+
+    // Selecionar aleatoriamente para evitar repetição
+    const indiceAleatorio = Math.floor(Math.random() * questoesAtivas.length)
+    const questaoEncontrada = questoesAtivas[indiceAleatorio]
+    const questaoErradaInfo = questoesParaRevisao.find(q => q.questao_id === questaoEncontrada.id)
 
     return NextResponse.json({
       sucesso: true,
@@ -183,8 +175,8 @@ export async function GET(request: NextRequest) {
         explicacao: questaoEncontrada.explicacao,
         dica: questaoEncontrada.dica,
       },
-      total_revisao: questoesAtivasCount,
-      errou_em: questaoErradaInfo.errou_em,
+      total_revisao: questoesAtivas.length,
+      errou_em: questaoErradaInfo?.errou_em,
     })
   } catch (error) {
     console.error('Erro ao buscar questões para revisão:', error)

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
@@ -155,12 +157,12 @@ export async function GET(request: NextRequest) {
     }
 
     const isProfessor = usuario.tipo === 'professor'
-    const isAluno3SerieEM = usuario.nivel === 'EM' && usuario.ano === 3
+    const isAlunoEM = usuario.nivel === 'EM'
 
-    if (!isProfessor && !isAluno3SerieEM) {
+    if (!isProfessor && !isAlunoEM) {
       return NextResponse.json({
         sucesso: false,
-        erro: 'Simulado ENEM disponível apenas para 3ª série do Ensino Médio.',
+        erro: 'Simulado ENEM disponível apenas para alunos do Ensino Médio.',
       }, { status: 403 })
     }
 

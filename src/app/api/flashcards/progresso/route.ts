@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * API de Progresso dos FlashCards
  * POST /api/flashcards/progresso - Salvar progresso da sessão

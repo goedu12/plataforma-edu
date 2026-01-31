@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * API de Questões da Trilha - OTIMIZADA COM POOL
  *

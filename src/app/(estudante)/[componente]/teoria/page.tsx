@@ -86,15 +86,15 @@ export default function TeoriaPage() {
 
       {/* Header - Compacto para Chromebook */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-4xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/menu`} compactOnDesktop />
             <div className="flex-1">
-              <h1 className="text-lg lg:text-base font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                <BookOpen className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: accentColor }} />
+              <h1 className="text-lg lg:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
+                <BookOpen className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: accentColor }} />
                 Teoria
               </h1>
-              <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs lg:text-sm" style={{ color: 'var(--text-muted)' }}>
                 {isFisica ? 'Física' : 'Matemática'} - {serie}ª Série EM
               </p>
             </div>
@@ -106,8 +106,8 @@ export default function TeoriaPage() {
                 border: '1px solid var(--border-default)',
               }}
             >
-              <GraduationCap className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: accentColor }} />
-              <span className="text-xs lg:text-2xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+              <GraduationCap className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: accentColor }} />
+              <span className="text-xs lg:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                 {serie}ª Série
               </span>
             </div>
@@ -116,10 +116,10 @@ export default function TeoriaPage() {
       </header>
 
       {/* Content - Compacto */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
+      <main className="max-w-4xl mx-auto px-3 lg:px-6 py-3 lg:py-5">
         {/* Seletor de Bimestre */}
-        <div className="mb-4 lg:mb-3">
-          <h2 className="text-xs lg:text-2xs font-semibold mb-2 lg:mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+        <div className="mb-4 lg:mb-4">
+          <h2 className="text-xs lg:text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
             Bimestre
           </h2>
           <div className="flex gap-2">
@@ -140,7 +140,7 @@ export default function TeoriaPage() {
                     : '1px solid var(--border-default)',
                 }}
               >
-                <span className="text-sm lg:text-xs">{b}º</span>
+                <span className="text-sm lg:text-base">{b}º</span>
               </button>
             ))}
           </div>
@@ -155,12 +155,12 @@ export default function TeoriaPage() {
           }}
         >
           <div className="flex items-center gap-2">
-            <ComponenteIcon className="w-5 h-5 lg:w-4 lg:h-4" style={{ color: accentColor }} />
+            <ComponenteIcon className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: accentColor }} />
             <div>
-              <p className="text-sm lg:text-xs font-semibold" style={{ color: 'var(--text-primary)' }}>
+              <p className="text-sm lg:text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {bimestre}º Bimestre - {serie}ª Série
               </p>
-              <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs lg:text-sm" style={{ color: 'var(--text-muted)' }}>
                 {topicos.length} tópico{topicos.length !== 1 ? 's' : ''} disponíve{topicos.length !== 1 ? 'is' : 'l'}
               </p>
             </div>
@@ -168,7 +168,7 @@ export default function TeoriaPage() {
         </div>
 
         {/* Lista de Tópicos */}
-        <h2 className="text-xs lg:text-2xs font-semibold mb-2 lg:mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+        <h2 className="text-xs lg:text-sm font-semibold mb-2" style={{ color: 'var(--text-secondary)' }}>
           Conteúdos
         </h2>
 
@@ -186,12 +186,12 @@ export default function TeoriaPage() {
             </p>
           </div>
         ) : (
-          <div className="space-y-2 lg:space-y-1.5">
+          <div className="space-y-2 lg:space-y-3">
             {topicos.map((topico, index) => (
               <button
                 key={topico.id}
                 onClick={() => router.push(`/${componente}/teoria/${topico.id}`)}
-                className="w-full p-3 lg:p-2.5 rounded-lg text-left transition-all hover:scale-[1.005]"
+                className="w-full p-3 lg:p-4 rounded-lg text-left transition-all hover:scale-[1.005]"
                 style={{
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border-default)',
@@ -199,7 +199,7 @@ export default function TeoriaPage() {
               >
                 <div className="flex items-center gap-3 lg:gap-2">
                   <div
-                    className="w-10 h-10 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center text-lg lg:text-base font-bold"
+                    className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center text-lg lg:text-xl font-bold"
                     style={{
                       background: `${accentColor}20`,
                       color: accentColor,
@@ -208,10 +208,10 @@ export default function TeoriaPage() {
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm lg:text-xs truncate" style={{ color: 'var(--text-primary)' }}>
+                    <h3 className="font-semibold text-sm lg:text-base truncate" style={{ color: 'var(--text-primary)' }}>
                       {topico.titulo}
                     </h3>
-                    <p className="text-xs lg:text-2xs truncate" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-xs lg:text-sm truncate" style={{ color: 'var(--text-muted)' }}>
                       {topico.resumo}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -227,7 +227,7 @@ export default function TeoriaPage() {
                       )}
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 flex-shrink-0" style={{ color: accentColor }} />
+                  <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style={{ color: accentColor }} />
                 </div>
               </button>
             ))}

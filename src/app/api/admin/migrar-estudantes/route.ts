@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { NextResponse } from 'next/server'
 import { obterSessao, hashSenha } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'

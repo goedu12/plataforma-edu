@@ -250,7 +250,7 @@ export default function EstudarPage() {
               HEADER ULTRA COMPACTO
               ══════════════════════════════════════════════════════════════ */}
           <header className="header-chromebook flex-shrink-0">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-3xl mx-auto">
               {/* Linha única: Back + Tags + Título + Timer + Progress */}
               <div className="flex items-center gap-2 lg:gap-3">
                 <BackButton href={`/${componente}/menu`} mobileOnly />
@@ -266,15 +266,15 @@ export default function EstudarPage() {
                 </div>
 
                 <div className="flex items-center gap-1.5 flex-1 lg:flex-none lg:ml-auto">
-                  <BookOpen className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} />
-                  <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>
+                  <BookOpen className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: corPrimaria }} />
+                  <span className="font-semibold text-sm lg:text-base" style={{ color: 'var(--text-primary)' }}>
                     Estudar
                   </span>
                 </div>
 
                 {/* Timer */}
                 <div className="timer-chromebook" style={{ color: corPrimaria }}>
-                  <Clock className="w-3.5 h-3.5 lg:w-3 lg:h-3" />
+                  <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
                   <span>{formatarTempo(tempoDecorrido)}</span>
                 </div>
 
@@ -322,9 +322,9 @@ export default function EstudarPage() {
           {/* ══════════════════════════════════════════════════════════════
               CONTEÚDO - Tudo junto sem espaço extra
               ══════════════════════════════════════════════════════════════ */}
-          <main className="flex-1 max-w-2xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+          <main className="flex-1 max-w-3xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
             {/* Container único scrollável - conteúdo + botão juntos */}
-            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-4 lg:py-1.5">
+            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-6 lg:py-4">
               <div className="space-chromebook">
                 {/* Tags mobile */}
                 <div className="flex lg:hidden items-center gap-1.5 mb-1">
@@ -480,7 +480,7 @@ export default function EstudarPage() {
                           Próxima
                         </Button>
                       ) : (
-                        <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-3.5 lg:h-3.5" />}>
+                        <Button variant="secondary" onClick={() => router.push(`/${componente}/desafio`)} className="flex-1 btn-chromebook" leftIcon={<Zap className="w-4 h-4 lg:w-5 lg:h-5" />}>
                           Desafio
                         </Button>
                       )}
