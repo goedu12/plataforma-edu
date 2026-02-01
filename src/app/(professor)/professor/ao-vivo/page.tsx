@@ -415,26 +415,26 @@ export default function DashboardAoVivoPage() {
                         className={`flex flex-col items-center hover:scale-105 transition-transform ${ajuda ? 'animate-pulse' : ''}`}
                         title={`${aluno.nome}\nTurma: ${aluno.turma}\n${cfg.label}\nQuestoes: ${aluno.questoes_sessao} | Acerto: ${aluno.taxa_acerto}%${aluno.nota_atual !== undefined ? `\nNota: ${aluno.nota_atual.toFixed(1)}` : ''}`}>
                         <div className="relative">
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-[9px]"
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xs"
                             style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 2px #ef4444' : '0 0 0 2px #22c55e' }}>
                             {getIniciais(aluno.nome)}
                           </div>
-                          <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-slate-800 flex items-center justify-center" style={{ background: cfg.cor }}>
-                            <span className="text-white text-[6px] font-bold">{cfg.label[0]}</span>
+                          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border border-slate-800 flex items-center justify-center" style={{ background: cfg.cor }}>
+                            <span className="text-white text-[7px] font-bold">{cfg.label[0]}</span>
                           </div>
                           {aluno.questoes_sessao > 0 && (
-                            <div className="absolute -top-1 -left-1 px-0.5 rounded text-[6px] font-bold text-white"
+                            <div className="absolute -top-1.5 -left-1.5 px-1 rounded text-[8px] font-bold text-white"
                               style={{ background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
                               {aluno.taxa_acerto}%
                             </div>
                           )}
                           {aluno.nota_atual !== undefined && (
-                            <div className="absolute -top-1 right-[-6px] px-0.5 rounded text-[6px] font-bold text-yellow-300 bg-slate-900/80">
+                            <div className="absolute -top-1.5 right-[-6px] px-1 rounded text-[8px] font-bold text-yellow-300 bg-slate-900/80">
                               {aluno.nota_atual.toFixed(0)}
                             </div>
                           )}
                         </div>
-                        <span className="text-slate-200 text-[7px] mt-0.5 truncate max-w-[40px] text-center">{aluno.nome.split(' ')[0]}</span>
+                        <span className="text-slate-200 text-[9px] mt-1 truncate max-w-[56px] text-center">{aluno.nome.split(' ')[0]}</span>
                       </div>
                     )
                   })}
@@ -444,18 +444,18 @@ export default function DashboardAoVivoPage() {
                     <div key={`o-${aluno.id}`} className="flex flex-col items-center"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}`}>
                       <div className="relative">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-yellow-200 font-bold text-[9px]"
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-xs"
                           style={{ background: '#78350f', boxShadow: '0 0 0 2px #f59e0b' }}>
                           {getIniciais(aluno.nome)}
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border border-slate-800 bg-yellow-500 flex items-center justify-center">
-                          <Coffee className="w-1.5 h-1.5 text-yellow-900" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border border-slate-800 bg-yellow-500 flex items-center justify-center">
+                          <Coffee className="w-2 h-2 text-yellow-900" />
                         </div>
-                        <div className="absolute -top-1 -left-1 px-0.5 rounded text-[6px] font-bold text-yellow-900 bg-yellow-400">
+                        <div className="absolute -top-1.5 -left-1.5 px-1 rounded text-[8px] font-bold text-yellow-900 bg-yellow-400">
                           {formatarTempoOcioso(aluno.tempo_ocioso_segundos)}
                         </div>
                       </div>
-                      <span className="text-yellow-400 text-[7px] mt-0.5 truncate max-w-[40px] text-center">{aluno.nome.split(' ')[0]}</span>
+                      <span className="text-yellow-400 text-[9px] mt-1 truncate max-w-[56px] text-center">{aluno.nome.split(' ')[0]}</span>
                     </div>
                   ))}
 
@@ -463,18 +463,18 @@ export default function DashboardAoVivoPage() {
                   {alunosInativos.slice(0, 20).map((aluno) => (
                     <div key={`i-${aluno.id}`} className="flex flex-col items-center opacity-35"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOffline`}>
-                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-[9px]">
+                      <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-xs">
                         {getIniciais(aluno.nome)}
                       </div>
-                      <span className="text-slate-500 text-[7px] mt-0.5 truncate max-w-[40px]">{aluno.nome.split(' ')[0]}</span>
+                      <span className="text-slate-500 text-[9px] mt-1 truncate max-w-[56px]">{aluno.nome.split(' ')[0]}</span>
                     </div>
                   ))}
                   {alunosInativos.length > 20 && (
                     <div className="flex flex-col items-center opacity-35">
-                      <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-[9px]">
+                      <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-xs">
                         +{alunosInativos.length - 20}
                       </div>
-                      <span className="text-slate-500 text-[7px] mt-0.5">mais</span>
+                      <span className="text-slate-500 text-[9px] mt-1">mais</span>
                     </div>
                   )}
                 </div>
