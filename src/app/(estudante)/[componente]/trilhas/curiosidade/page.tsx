@@ -129,17 +129,17 @@ export default function TrilhaCuriosidadePage() {
 
       {/* Header */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/trilhas`} compactOnDesktop />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🔬</span>
-                <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                <h1 className="text-lg lg:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                   Trilha Curiosidade
                 </h1>
               </div>
-              <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs lg:text-sm" style={{ color: 'var(--text-muted)' }}>
                 Descubra a fisica do dia-a-dia
               </p>
             </div>
@@ -148,7 +148,7 @@ export default function TrilhaCuriosidadePage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
+      <main className="max-w-3xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
         {/* Estatísticas */}
         <div
           className="p-4 lg:p-3 rounded-xl mb-4 lg:mb-3"
@@ -197,11 +197,11 @@ export default function TrilhaCuriosidadePage() {
         </div>
 
         {/* Lista de Temas */}
-        <h2 className="text-xs lg:text-2xs font-semibold mb-2 lg:mb-1.5" style={{ color: 'var(--text-secondary)' }}>
+        <h2 className="text-xs lg:text-sm font-semibold mb-2 lg:mb-2" style={{ color: 'var(--text-secondary)' }}>
           Escolha um Tema
         </h2>
 
-        <div className="space-y-2 lg:space-y-1.5">
+        <div className="space-y-2 lg:space-y-2.5">
           {temas.map((tema) => {
             const progresso = tema.total_questoes > 0
               ? ((tema.questoes_respondidas || 0) / tema.total_questoes) * 100
@@ -214,7 +214,7 @@ export default function TrilhaCuriosidadePage() {
                 key={tema.id}
                 onClick={() => selecionarTema(tema)}
                 disabled={selecionandoEste}
-                className="w-full p-3 lg:p-2.5 rounded-lg text-left transition-all hover:scale-[1.005] disabled:opacity-70"
+                className="w-full p-3 lg:p-4 rounded-lg text-left transition-all hover:scale-[1.005] disabled:opacity-70"
                 style={{
                   background: tema.concluido
                     ? `linear-gradient(135deg, var(--success)10, var(--success)05)`
@@ -228,7 +228,7 @@ export default function TrilhaCuriosidadePage() {
               >
                 <div className="flex items-center gap-3 lg:gap-2">
                   <div
-                    className="w-12 h-12 lg:w-10 lg:h-10 rounded-lg flex items-center justify-center text-2xl lg:text-xl"
+                    className="w-12 h-12 lg:w-14 lg:h-14 rounded-lg flex items-center justify-center text-2xl lg:text-3xl"
                     style={{
                       background: tema.concluido
                         ? 'var(--success)20'
@@ -239,7 +239,7 @@ export default function TrilhaCuriosidadePage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <h3 className="font-semibold text-sm lg:text-xs truncate" style={{ color: 'var(--text-primary)' }}>
+                      <h3 className="font-semibold text-sm lg:text-base truncate" style={{ color: 'var(--text-primary)' }}>
                         {tema.nome}
                       </h3>
                       {tema.concluido && (
@@ -260,7 +260,7 @@ export default function TrilhaCuriosidadePage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs lg:text-2xs truncate mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                    <p className="text-xs lg:text-sm truncate mb-1.5" style={{ color: 'var(--text-muted)' }}>
                       {tema.descricao}
                     </p>
 

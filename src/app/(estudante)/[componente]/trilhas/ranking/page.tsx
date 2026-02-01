@@ -140,17 +140,17 @@ export default function RankingTrilhasPage() {
 
       {/* Header */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/trilhas`} compactOnDesktop />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5" style={{ color: 'var(--warning)' }} />
-                <h1 className="text-lg lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
+                <h1 className="text-lg lg:text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
                   Ranking Semanal
                 </h1>
               </div>
-              <p className="text-xs lg:text-2xs" style={{ color: 'var(--text-muted)' }}>
+              <p className="text-xs lg:text-sm" style={{ color: 'var(--text-muted)' }}>
                 Trilha Desafio Total
               </p>
             </div>
@@ -159,7 +159,7 @@ export default function RankingTrilhasPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
+      <main className="max-w-3xl mx-auto px-3 lg:px-4 py-2 lg:py-3">
         {/* Navegação de Semana */}
         <div
           className="flex items-center justify-between p-3 rounded-xl mb-4"
