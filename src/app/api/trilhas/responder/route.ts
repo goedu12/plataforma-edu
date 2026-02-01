@@ -14,6 +14,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
 import { isSerieEF } from '@/lib/gemini'
+import { buscarGabarito } from '@/lib/trilha-gabarito-store'
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     const {
       questao_id,
       resposta,
-      resposta_correta,
+      resposta_correta: resposta_correta_client,
       tempo_segundos = 0,
       usou_dica = false,
       serie,
@@ -52,9 +53,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // SEGURANÇA: Buscar resposta correta do cache server-side (anti-cola)
+    // Fallback para o client caso cache expire (questão gerada há >2h)
+    const respostaDoCache = buscarGabarito(questao_id)
+    const resposta_correta = respostaDoCache || resposta_correta_client
+
     if (!resposta_correta || typeof resposta_correta !== 'string') {
       return NextResponse.json(
-        { erro: 'resposta_correta é obrigatória' },
+        { erro: 'Questão expirada. Recarregue as questões.' },
         { status: 400 }
       )
     }
@@ -106,7 +112,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Buscar ou criar progresso semanal
+    // Buscar ou criar progresso semanal (upsert para evitar race condition)
     let { data: progressoSemanal } = await supabase
       .from('progresso_semanal')
       .select('*')
@@ -117,10 +123,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!progressoSemanal) {
-      // Criar progresso semanal se não existir
       const { data: novoProgresso, error: erroProgresso } = await supabase
         .from('progresso_semanal')
-        .insert({
+        .upsert({
           usuario_id: sessao.userId,
           trilha_id: trilhaId,
           serie: serieAtual,
@@ -132,19 +137,35 @@ export async function POST(request: NextRequest) {
           pontos_semana: 0,
           status: 'em_progresso',
           iniciada_em: new Date().toISOString()
+        }, {
+          onConflict: 'usuario_id,trilha_id,serie,semana',
+          ignoreDuplicates: true,
         })
         .select()
         .single()
 
       if (erroProgresso) {
-        console.error('Erro ao criar progresso:', erroProgresso)
-        return NextResponse.json(
-          { erro: 'Erro ao criar progresso' },
-          { status: 500 }
-        )
-      }
+        // Se upsert falhou por conflito, buscar o existente
+        const { data: existente } = await supabase
+          .from('progresso_semanal')
+          .select('*')
+          .eq('usuario_id', sessao.userId)
+          .eq('trilha_id', trilhaId)
+          .eq('serie', serieAtual)
+          .eq('semana', semanaAtual)
+          .single()
 
-      progressoSemanal = novoProgresso
+        if (!existente) {
+          console.error('Erro ao criar progresso:', erroProgresso)
+          return NextResponse.json(
+            { erro: 'Erro ao criar progresso' },
+            { status: 500 }
+          )
+        }
+        progressoSemanal = existente
+      } else {
+        progressoSemanal = novoProgresso
+      }
     }
 
     // Atualizar progresso semanal

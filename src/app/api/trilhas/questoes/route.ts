@@ -15,6 +15,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
+import { registrarGabarito } from '@/lib/trilha-gabarito-store'
 import {
   gerarQuestoesParaUsuario,
   isSerieEF,
@@ -232,19 +233,24 @@ export async function GET(request: NextRequest) {
     registrarUsoBackground(supabase, sessao.userId, serie, semanaAtual, questoesParaUsar)
 
     // Formatar resposta
-    const questoesFormatadas = questoesParaUsar.map((q, index) => ({
-      id: `${sessao.userId}-${trilhaId}-${semanaAtual}-${Date.now()}-${index}`,
-      ordem: questoesRespondidas_count + index + 1,
-      tipo_questao: q.tipo_questao || 'calculo_direto',
-      enunciado: q.enunciado,
-      alternativas: q.alternativas,
-      dica: q.dica || '',
-      resposta_correta: q.resposta_correta,
-      feedback: q.feedback || '',
-      tema: q.tema || '',
-      subtema: q.subtema || '',
-      contexto: q.contexto || ''
-    }))
+    const questoesFormatadas = questoesParaUsar.map((q, index) => {
+      const id = `${sessao.userId}-${trilhaId}-${semanaAtual}-${Date.now()}-${index}`
+      // SEGURANÇA: Registrar gabarito no cache server-side (anti-cola)
+      registrarGabarito(id, q.resposta_correta)
+      return {
+        id,
+        ordem: questoesRespondidas_count + index + 1,
+        tipo_questao: q.tipo_questao || 'calculo_direto',
+        enunciado: q.enunciado,
+        alternativas: q.alternativas,
+        dica: q.dica || '',
+        resposta_correta: q.resposta_correta,
+        feedback: q.feedback || '',
+        tema: q.tema || '',
+        subtema: q.subtema || '',
+        contexto: q.contexto || ''
+      }
+    })
 
     return NextResponse.json({
       sucesso: true,
