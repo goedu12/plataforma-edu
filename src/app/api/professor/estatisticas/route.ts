@@ -258,7 +258,9 @@ function gerarAlertasComponente(
 }
 
 function calcularDesempenhoPorTurma(estudantes: EstudanteData[]): DesempenhoTurma[] {
-  const turmas = [...new Set(estudantes.map(e => e.turma))]
+  // Filtrar apenas turmas do ensino médio (1x, 2x, 3x)
+  const isTurmaEM = (t: string) => /^[123]/.test(t)
+  const turmas = [...new Set(estudantes.filter(e => isTurmaEM(e.turma)).map(e => e.turma))]
 
   return turmas.flatMap(turma => {
     const dasTurma = estudantes.filter(e => e.turma === turma)

@@ -52,14 +52,18 @@ export async function GET(request: NextRequest) {
     // Remover senha_hash
     const alunosSemSenha = alunos.map(({ senha_hash, ...aluno }) => aluno)
 
-    // Obter lista de turmas únicas
-    const turmas = [...new Set(alunos.map(a => a.turma))].sort()
+    // Filtrar apenas turmas do ensino médio (1x, 2x, 3x)
+    const isTurmaEM = (t: string) => /^[123]/.test(t)
+    const alunosFiltrados = alunosSemSenha.filter(a => isTurmaEM(a.turma))
+
+    // Obter lista de turmas únicas (apenas EM)
+    const turmas = [...new Set(alunosFiltrados.map(a => a.turma))].sort()
 
     return NextResponse.json({
       sucesso: true,
-      alunos: alunosSemSenha,
+      alunos: alunosFiltrados,
       turmas,
-      total: alunos.length,
+      total: alunosFiltrados.length,
     })
   } catch (error) {
     console.error('Erro ao buscar alunos:', error)
