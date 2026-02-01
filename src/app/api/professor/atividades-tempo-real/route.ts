@@ -319,9 +319,11 @@ export async function GET(request: NextRequest) {
     const notasAlunos = notasResult.data || []
 
     // Filtrar alunos por colégio se especificado
-    const todosAlunos = colegioFiltro
+    const isTurmaEM = (t: string) => /^[123]/.test(t)
+    const todosAlunos = (colegioFiltro
       ? todosAlunosRaw.filter(a => a.colegio === colegioFiltro)
       : todosAlunosRaw
+    ).filter(a => !a.turma || isTurmaEM(a.turma))
 
     // Criar mapa de notas por aluno e componente
     const notasPorAluno = new Map<string, { fisica?: number; matematica?: number }>()
@@ -980,7 +982,8 @@ async function getTurmasEColegiosDisponiveis(supabase: ReturnType<typeof getSupa
     .eq('tipo', 'estudante')
     .eq('ativo', true)
 
-  const turmas = [...new Set((usuariosData || []).map(u => u.turma).filter(Boolean))].sort()
+  const isTurmaEM = (t: string) => /^[123]/.test(t)
+  const turmas = [...new Set((usuariosData || []).map(u => u.turma).filter(Boolean))].filter(isTurmaEM).sort()
   const colegios = [...new Set((usuariosData || []).map(u => u.colegio).filter(Boolean))].sort() as string[]
 
   turmasColegiosCache = { turmas, colegios, timestamp: agora }
