@@ -41,6 +41,17 @@ interface Estudante {
   mat_ultimo_estudo?: string
 }
 
+interface NotaAluno {
+  nota_final: number
+  nota_desempenho: number
+  nota_participacao: number
+  nota_frequencia: number
+  bloqueio: string | null
+}
+
+// Map de notas: aluno_id -> { fisica?: NotaAluno, matematica?: NotaAluno }
+type NotasMap = Record<string, Record<string, NotaAluno>>
+
 export default function RelatoriosProfessorPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
@@ -49,18 +60,35 @@ export default function RelatoriosProfessorPage() {
   const [turmas, setTurmas] = useState<string[]>([])
   const [filtroTurma, setFiltroTurma] = useState('')
   const [filtroComponente, setFiltroComponente] = useState<Componente | ''>('')
+  const [notas, setNotas] = useState<NotasMap>({})
+  const [bimestreInfo, setBimestreInfo] = useState<{ bimestre: number; ano: number } | null>(null)
 
   useEffect(() => {
     const buscarDados = async () => {
       try {
-        const response = await fetch('/api/professor/alunos')
-        const data = await response.json()
+        const [resAlunos, resNotas] = await Promise.all([
+          fetch('/api/professor/alunos'),
+          fetch('/api/professor/relatorios?tipo=notas_turma'),
+        ])
 
-        if (data.sucesso) {
-          setEstudantes(data.alunos || [])
-          setTurmas(data.turmas || [])
-        } else if (response.status === 403) {
+        const dataAlunos = await resAlunos.json()
+        const dataNotas = await resNotas.json()
+
+        if (dataAlunos.sucesso) {
+          setEstudantes(dataAlunos.alunos || [])
+          setTurmas(dataAlunos.turmas || [])
+        } else if (resAlunos.status === 403) {
           router.push('/login')
+          return
+        }
+
+        if (dataNotas.sucesso && dataNotas.notas) {
+          const map: NotasMap = {}
+          for (const est of dataNotas.notas) {
+            map[est.id] = est.notas
+          }
+          setNotas(map)
+          setBimestreInfo({ bimestre: dataNotas.bimestre, ano: dataNotas.ano })
         }
       } catch {
         router.push('/login')
@@ -71,6 +99,11 @@ export default function RelatoriosProfessorPage() {
 
     buscarDados()
   }, [router])
+
+  // Helper para obter nota de um aluno
+  const getNotaAluno = (id: string, comp: string): number | null => {
+    return notas[id]?.[comp]?.nota_final ?? null
+  }
 
   const estudantesFiltrados = estudantes.filter(e => {
     if (filtroTurma && e.turma !== filtroTurma) return false
@@ -101,12 +134,14 @@ export default function RelatoriosProfessorPage() {
           'Física - Questões': e.componentes.includes('fisica') ? e.fis_questoes_total : '-',
           'Física - Acertos': e.componentes.includes('fisica') ? e.fis_questoes_corretas : '-',
           'Física - Taxa (%)': e.componentes.includes('fisica') ? calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total) : '-',
+          'Física - Nota Atual': e.componentes.includes('fisica') ? (getNotaAluno(e.id, 'fisica') ?? '-') : '-',
           'Física - Sequência (dias)': e.componentes.includes('fisica') ? e.fis_sequencia_dias : '-',
           'Física - Último Estudo': e.componentes.includes('fisica') && e.fis_ultimo_estudo ? new Date(e.fis_ultimo_estudo).toLocaleDateString('pt-BR') : '-',
           'Matemática - Pontos': e.componentes.includes('matematica') ? e.mat_pontos : '-',
           'Matemática - Questões': e.componentes.includes('matematica') ? e.mat_questoes_total : '-',
           'Matemática - Acertos': e.componentes.includes('matematica') ? e.mat_questoes_corretas : '-',
           'Matemática - Taxa (%)': e.componentes.includes('matematica') ? calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total) : '-',
+          'Matemática - Nota Atual': e.componentes.includes('matematica') ? (getNotaAluno(e.id, 'matematica') ?? '-') : '-',
           'Matemática - Sequência (dias)': e.componentes.includes('matematica') ? e.mat_sequencia_dias : '-',
           'Matemática - Último Estudo': e.componentes.includes('matematica') && e.mat_ultimo_estudo ? new Date(e.mat_ultimo_estudo).toLocaleDateString('pt-BR') : '-',
         }))
@@ -122,6 +157,7 @@ export default function RelatoriosProfessorPage() {
             'Questões Respondidas': e.fis_questoes_total,
             'Questões Corretas': e.fis_questoes_corretas,
             'Taxa de Acerto (%)': calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total),
+            'Nota Atual': getNotaAluno(e.id, 'fisica') ?? '-',
             'Sequência (dias)': e.fis_sequencia_dias,
             'Último Estudo': e.fis_ultimo_estudo ? new Date(e.fis_ultimo_estudo).toLocaleDateString('pt-BR') : 'Nunca',
           }))
@@ -137,6 +173,7 @@ export default function RelatoriosProfessorPage() {
             'Questões Respondidas': e.mat_questoes_total,
             'Questões Corretas': e.mat_questoes_corretas,
             'Taxa de Acerto (%)': calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total),
+            'Nota Atual': getNotaAluno(e.id, 'matematica') ?? '-',
             'Sequência (dias)': e.mat_sequencia_dias,
             'Último Estudo': e.mat_ultimo_estudo ? new Date(e.mat_ultimo_estudo).toLocaleDateString('pt-BR') : 'Nunca',
           }))
@@ -318,19 +355,19 @@ export default function RelatoriosProfessorPage() {
       let linhas: (string | number)[][] = []
 
       if (tipo === 'geral') {
-        colunas = ['Nome', 'Turma', 'Fís Pts', 'Fís %', 'Fís Seq', 'Mat Pts', 'Mat %', 'Mat Seq']
+        colunas = ['Nome', 'Turma', 'Fís Pts', 'Fís %', 'Fís Nota', 'Mat Pts', 'Mat %', 'Mat Nota']
         linhas = estudantesParaExportar.map(e => [
           e.nome.length > 25 ? e.nome.substring(0, 25) + '...' : e.nome,
           e.turma,
           e.componentes.includes('fisica') ? e.fis_pontos : '-',
           e.componentes.includes('fisica') ? `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%` : '-',
-          e.componentes.includes('fisica') ? e.fis_sequencia_dias : '-',
+          e.componentes.includes('fisica') ? (getNotaAluno(e.id, 'fisica')?.toFixed(1) ?? '-') : '-',
           e.componentes.includes('matematica') ? e.mat_pontos : '-',
           e.componentes.includes('matematica') ? `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%` : '-',
-          e.componentes.includes('matematica') ? e.mat_sequencia_dias : '-',
+          e.componentes.includes('matematica') ? (getNotaAluno(e.id, 'matematica')?.toFixed(1) ?? '-') : '-',
         ])
       } else if (tipo === 'fisica') {
-        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Sequência']
+        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Nota']
         linhas = estudantesParaExportar.map(e => [
           e.nome.length > 30 ? e.nome.substring(0, 30) + '...' : e.nome,
           e.turma,
@@ -338,10 +375,10 @@ export default function RelatoriosProfessorPage() {
           e.fis_questoes_total,
           e.fis_questoes_corretas,
           `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%`,
-          e.fis_sequencia_dias,
+          getNotaAluno(e.id, 'fisica')?.toFixed(1) ?? '-',
         ])
       } else {
-        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Sequência']
+        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Nota']
         linhas = estudantesParaExportar.map(e => [
           e.nome.length > 30 ? e.nome.substring(0, 30) + '...' : e.nome,
           e.turma,
@@ -349,7 +386,7 @@ export default function RelatoriosProfessorPage() {
           e.mat_questoes_total,
           e.mat_questoes_corretas,
           `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%`,
-          e.mat_sequencia_dias,
+          getNotaAluno(e.id, 'matematica')?.toFixed(1) ?? '-',
         ])
       }
 
@@ -605,7 +642,14 @@ export default function RelatoriosProfessorPage() {
               <Calendar className="w-5 h-5 text-slate-500" />
               <h3 className="text-heading text-slate-800">Prévia dos Dados</h3>
             </div>
-            <Badge>{estudantesFiltrados.length} registros</Badge>
+            <div className="flex items-center gap-2">
+              {bimestreInfo && (
+                <Badge variant="default" size="sm">
+                  {bimestreInfo.bimestre}º Bim/{bimestreInfo.ano}
+                </Badge>
+              )}
+              <Badge>{estudantesFiltrados.length} registros</Badge>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -614,15 +658,18 @@ export default function RelatoriosProfessorPage() {
                 <tr>
                   <th>Nome</th>
                   <th>Turma</th>
-                  <th className="text-center">Componentes</th>
-                  <th className="text-right">Fís. Pts</th>
+                  <th className="text-center">Comp.</th>
                   <th className="text-right">Fís. %</th>
-                  <th className="text-right">Mat. Pts</th>
+                  <th className="text-right">Fís. Nota</th>
                   <th className="text-right">Mat. %</th>
+                  <th className="text-right">Mat. Nota</th>
                 </tr>
               </thead>
               <tbody>
-                {estudantesFiltrados.slice(0, 10).map(e => (
+                {estudantesFiltrados.slice(0, 10).map(e => {
+                  const notaFis = getNotaAluno(e.id, 'fisica')
+                  const notaMat = getNotaAluno(e.id, 'matematica')
+                  return (
                   <tr key={e.id}>
                     <td>{e.nome}</td>
                     <td>
@@ -639,19 +686,20 @@ export default function RelatoriosProfessorPage() {
                       </div>
                     </td>
                     <td className="text-right text-fisica-500">
-                      {e.componentes.includes('fisica') ? e.fis_pontos : '-'}
-                    </td>
-                    <td className="text-right text-fisica-500">
                       {e.componentes.includes('fisica') ? `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%` : '-'}
                     </td>
-                    <td className="text-right text-matematica-500">
-                      {e.componentes.includes('matematica') ? e.mat_pontos : '-'}
+                    <td className="text-right font-semibold" style={{ color: notaFis !== null ? (notaFis >= 6 ? '#22c55e' : '#ef4444') : undefined }}>
+                      {e.componentes.includes('fisica') ? (notaFis?.toFixed(1) ?? '-') : '-'}
                     </td>
                     <td className="text-right text-matematica-500">
                       {e.componentes.includes('matematica') ? `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%` : '-'}
                     </td>
+                    <td className="text-right font-semibold" style={{ color: notaMat !== null ? (notaMat >= 6 ? '#22c55e' : '#ef4444') : undefined }}>
+                      {e.componentes.includes('matematica') ? (notaMat?.toFixed(1) ?? '-') : '-'}
+                    </td>
                   </tr>
-                ))}
+                  )
+                })}
               </tbody>
             </table>
             {estudantesFiltrados.length > 10 && (
