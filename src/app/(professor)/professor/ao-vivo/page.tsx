@@ -365,7 +365,7 @@ export default function DashboardAoVivoPage() {
       </header>
 
       {/* STATS BAR */}
-      <div className="px-2 py-0.5 grid grid-cols-6 gap-1 flex-shrink-0">
+      <div className="px-2 py-0.5 grid grid-cols-5 lg:grid-cols-10 gap-1 flex-shrink-0">
         <MiniStat icon={<Wifi className="w-3 h-3" />} label="Online" value={totalOnline} color="#22c55e" />
         <MiniStat icon={<Coffee className="w-3 h-3" />} label="Ociosos" value={alunosOciosos.length} color="#f59e0b" />
         <MiniStat icon={<WifiOff className="w-3 h-3" />} label="Offline" value={alunosInativos.length} color="#64748b" />
@@ -373,6 +373,10 @@ export default function DashboardAoVivoPage() {
         <MiniStat icon={<CheckCircle className="w-3 h-3" />} label="Acuracia" value={`${stats?.taxa_acerto_tempo_real || 0}%`}
           color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'} trend={stats?.tendencia_acerto} />
         <MiniStat icon={<Star className="w-3 h-3" />} label="Nota Media" value={stats?.media_nota_ativos ? stats.media_nota_ativos.toFixed(1) : '-'} color="#f59e0b" />
+        <MiniStat icon={<Brain className="w-3 h-3" />} label="Tutor IA" value={stats?.usando_tutor || 0} color="#3b82f6" />
+        <MiniStat icon={<Zap className="w-3 h-3" />} label="Desafio" value={stats?.fazendo_desafio || 0} color="#f97316" />
+        <MiniStat icon={<Target className="w-3 h-3" />} label="Revisao" value={stats?.fazendo_revisao || 0} color="#a855f7" />
+        <MiniStat icon={<AlertTriangle className="w-3 h-3" />} label="Ajuda" value={alunosPrecisandoAjuda.length} color={alunosPrecisandoAjuda.length > 0 ? '#ef4444' : '#22c55e'} />
       </div>
 
       {/* MAIN CONTENT */}
@@ -554,32 +558,40 @@ export default function DashboardAoVivoPage() {
               </div>
             </div>
 
-            {/* Temas com Dificuldade */}
+            {/* Desempenho por Turma */}
             <div className="bg-slate-800/80 rounded-lg p-1.5 overflow-hidden flex flex-col border border-slate-700">
               <h2 className="text-white font-semibold text-[10px] flex items-center gap-1 mb-1">
-                <AlertTriangle className="w-3 h-3 text-red-400" />
-                Dificuldades
+                <Target className="w-3 h-3 text-cyan-400" />
+                Por Turma
               </h2>
               <div className="flex-1 overflow-y-auto">
-                {temasComDificuldade.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-green-400">
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    <span className="text-[9px]">Sem dificuldades</span>
-                  </div>
+                {(stats?.por_turma || []).length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-slate-500 text-[9px]">Sem dados</div>
                 ) : (
-                  <div className="space-y-1">
-                    {temasComDificuldade.map((tema) => (
-                      <div key={tema.tema} className="bg-red-900/20 rounded p-1 border border-red-500/20">
-                        <div className="flex items-center justify-between">
-                          <span className="text-white text-[8px] truncate flex-1 mr-1">{tema.tema}</span>
-                          <span className="text-red-300 text-[8px] font-bold">{tema.taxa_erro}%</span>
-                        </div>
-                        <div className="h-0.5 bg-red-900/50 rounded-full mt-0.5 overflow-hidden">
-                          <div className="h-full bg-red-500 rounded-full" style={{ width: `${tema.taxa_erro}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="w-full text-[9px]">
+                    <thead className="sticky top-0 bg-slate-800">
+                      <tr className="text-slate-500">
+                        <th className="text-left pb-0.5 pl-0.5">Turma</th>
+                        <th className="text-center pb-0.5">On</th>
+                        <th className="text-center pb-0.5">Q</th>
+                        <th className="text-center pb-0.5">%</th>
+                        <th className="text-center pb-0.5">Part</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(stats?.por_turma || []).slice(0, 8).map((t) => (
+                        <tr key={t.turma} className="border-t border-slate-700/30">
+                          <td className="py-0.5 pl-0.5 text-white font-medium">{t.turma}</td>
+                          <td className="py-0.5 text-center text-green-400">{t.ativos}</td>
+                          <td className="py-0.5 text-center text-slate-300">{t.questoes}</td>
+                          <td className="py-0.5 text-center font-medium" style={{ color: t.taxa_acerto >= 70 ? '#22c55e' : t.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                            {t.taxa_acerto}%
+                          </td>
+                          <td className="py-0.5 text-center text-cyan-400">{t.taxa_participacao}%</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 )}
               </div>
             </div>
@@ -632,7 +644,17 @@ export default function DashboardAoVivoPage() {
                   </div>
                 </div>
               ))}
-              {alunosOciosos.length === 0 && alunosPrecisandoAjuda.length === 0 && (
+              {/* Temas difíceis */}
+              {temasComDificuldade.length > 0 && temasComDificuldade.slice(0, 3).map((tema) => (
+                <div key={`td-${tema.tema}`} className="flex items-center gap-1.5 p-1 bg-orange-900/30 rounded border border-orange-500/20">
+                  <BookOpen className="w-3 h-3 text-orange-400 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-[9px] font-medium truncate">{tema.tema}</p>
+                    <p className="text-orange-400 text-[8px]">{tema.taxa_erro}% erro em {tema.quantidade}q</p>
+                  </div>
+                </div>
+              ))}
+              {alunosOciosos.length === 0 && alunosPrecisandoAjuda.length === 0 && temasComDificuldade.length === 0 && (
                 <div className="flex items-center justify-center py-2 text-green-400">
                   <CheckCircle className="w-4 h-4 mr-1" />
                   <span className="text-[9px]">Sem alertas</span>
@@ -658,24 +680,26 @@ export default function DashboardAoVivoPage() {
                   <div key={ativ.id} className="flex items-center gap-1 py-0.5 px-0.5 rounded hover:bg-slate-700/50">
                     {ativ.tipo === 'resposta' || ativ.tipo === 'revisao' ? (
                       ativ.detalhes.correta
-                        ? <CheckCircle className="w-2 h-2 text-green-400 flex-shrink-0" />
-                        : <XCircle className="w-2 h-2 text-red-400 flex-shrink-0" />
+                        ? <CheckCircle className="w-2.5 h-2.5 text-green-400 flex-shrink-0" />
+                        : <XCircle className="w-2.5 h-2.5 text-red-400 flex-shrink-0" />
                     ) : ativ.tipo === 'desafio_completo' ? (
-                      <Award className="w-2 h-2 text-yellow-400 flex-shrink-0" />
+                      <Award className="w-2.5 h-2.5 text-yellow-400 flex-shrink-0" />
                     ) : ativ.tipo === 'desafio_iniciado' ? (
-                      <Zap className="w-2 h-2 text-orange-400 flex-shrink-0" />
+                      <Zap className="w-2.5 h-2.5 text-orange-400 flex-shrink-0" />
                     ) : ativ.tipo === 'tutor' ? (
-                      <Brain className="w-2 h-2 text-blue-400 flex-shrink-0" />
+                      <Brain className="w-2.5 h-2.5 text-blue-400 flex-shrink-0" />
                     ) : (
-                      <Activity className="w-2 h-2 text-purple-400 flex-shrink-0" />
+                      <Eye className="w-2.5 h-2.5 text-cyan-400 flex-shrink-0" />
                     )}
-                    <span className="text-slate-200 text-[8px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
-                    <span className="text-slate-400 text-[8px] truncate flex-1">
+                    <span className="text-white text-[8px] font-semibold">{ativ.usuario_nome.split(' ')[0]}</span>
+                    <span className="text-slate-400 text-[7px] truncate flex-1">
                       {ativ.tipo === 'resposta' || ativ.tipo === 'revisao'
-                        ? (ativ.detalhes.correta ? 'acertou' : 'errou')
-                        : ativ.tipo === 'desafio_completo' ? 'desafio OK'
-                        : ativ.tipo === 'desafio_iniciado' ? 'desafio'
-                        : ativ.tipo === 'tutor' ? 'tutor'
+                        ? `${ativ.detalhes.correta ? '✓' : '✗'} ${ativ.detalhes.tema || ''}${ativ.detalhes.pontos ? ` +${ativ.detalhes.pontos}` : ''}`
+                        : ativ.tipo === 'desafio_completo' ? `desafio ${ativ.detalhes.acertos}/${ativ.detalhes.total}`
+                        : ativ.tipo === 'desafio_iniciado' ? 'iniciou desafio'
+                        : ativ.tipo === 'tutor' ? 'perguntou ao tutor'
+                        : ativ.tipo === 'mapa_curtido' ? `curtiu ${ativ.detalhes.mapa_titulo || 'mapa'}`
+                        : ativ.tipo === 'mapa_baixado' ? `baixou ${ativ.detalhes.mapa_titulo || 'mapa'}`
                         : 'atividade'
                       }
                     </span>
