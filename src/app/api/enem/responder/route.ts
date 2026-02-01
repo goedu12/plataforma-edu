@@ -144,7 +144,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sucesso: true,
       correta,
-      resposta_correta: respostaCorreta,
+      // SEGURANÇA: Só envia resposta correta se acertou (evita coleta de gabaritos)
+      resposta_correta: correta ? respostaCorreta : undefined,
       estatisticas: {
         total_questoes: totalQuestoes,
         total_corretas: totalCorretas,
