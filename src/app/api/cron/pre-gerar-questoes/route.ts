@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 /**
  * CRON JOB: Pré-geração de Questões
  *
