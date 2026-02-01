@@ -83,7 +83,8 @@ export default function LoginPage() {
 
         // Extrair valores únicos para os filtros
         const colegios = [...new Set(lista.map((e: Estudante) => e.colegio).filter(Boolean))].sort() as string[]
-        const turmas = [...new Set(lista.map((e: Estudante) => e.turma))].sort() as string[]
+        const isTurmaEM = (t: string) => /^[123]/.test(t)
+        const turmas = [...new Set(lista.map((e: Estudante) => e.turma).filter(isTurmaEM))].sort() as string[]
         const turnos = [...new Set(lista.map((e: Estudante) => e.turno).filter(Boolean))].sort() as string[]
 
         setColegiosDisponiveis(colegios)
@@ -109,8 +110,8 @@ export default function LoginPage() {
     buscarEstudantes()
   }
 
-  // Filtrar estudantes pelos critérios selecionados
-  const estudantesFiltrados = estudantes.filter(e => {
+  // Filtrar estudantes pelos critérios selecionados (sem turmas EF)
+  const estudantesFiltrados = estudantes.filter(e => /^[123]/.test(e.turma)).filter(e => {
     const matchNome = buscaNome === '' || e.nome.toLowerCase().includes(buscaNome.toLowerCase())
     const matchColegio = colegioSelecionado === '' || e.colegio === colegioSelecionado
     const matchComponente = componenteSelecionado === '' || e.componente === componenteSelecionado

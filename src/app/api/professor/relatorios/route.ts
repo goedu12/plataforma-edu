@@ -137,7 +137,11 @@ export async function GET(request: NextRequest) {
         queryEstudantes = queryEstudantes.eq('turma', turma)
       }
 
-      const { data: estudantes } = await queryEstudantes
+      const { data: estudantesRaw } = await queryEstudantes
+
+      // Filtrar apenas turmas do ensino médio (1x, 2x, 3x)
+      const isTurmaEM = (t: string) => /^[123]/.test(t)
+      const estudantes = (estudantesRaw || []).filter(e => isTurmaEM(e.turma))
 
       if (!estudantes || estudantes.length === 0) {
         return NextResponse.json({
