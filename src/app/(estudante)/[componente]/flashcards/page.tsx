@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   Zap,
@@ -27,6 +27,7 @@ import Badge from '@/components/ui/Badge'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { useActiveTimer } from '@/hooks/useActiveTimer'
 import type { Componente, Usuario } from '@/types'
 import type {
   FlashCard,
@@ -98,8 +99,7 @@ export default function FlashCardsPage() {
   const [mostrarDica, setMostrarDica] = useState(false)
   const [animacaoCorreta, setAnimacaoCorreta] = useState(false)
   const [animacaoErrada, setAnimacaoErrada] = useState(false)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const [tempoQuestao, setTempoQuestao] = useState(0)
+  const { tempoAtivo: tempoQuestao, resetar: resetarTimer } = useActiveTimer()
 
   // Cores do componente
   const isFisica = componente === 'fisica'
@@ -181,7 +181,7 @@ export default function FlashCardsPage() {
         })
         setQuestaoAtualIndex(0)
         setTela('jogando')
-        iniciarTimer()
+        resetarTimer()
       } else {
         setErro(data.erro || 'Nenhuma questão encontrada')
       }
@@ -193,34 +193,10 @@ export default function FlashCardsPage() {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // TIMER
-  // ═══════════════════════════════════════════════════════════════════
-  const iniciarTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    setTempoQuestao(0)
-    timerRef.current = setInterval(() => {
-      setTempoQuestao((prev) => prev + 1)
-    }, 1000)
-  }
-
-  const pararTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }
-
-  useEffect(() => {
-    return () => pararTimer()
-  }, [])
-
-  // ═══════════════════════════════════════════════════════════════════
   // VERIFICAR RESPOSTA
   // ═══════════════════════════════════════════════════════════════════
   const verificarResposta = useCallback(() => {
     if (!sessao || respostaUsuario === null) return
-
-    pararTimer()
     const questao = sessao.questoes[questaoAtualIndex]
     let correta = false
 
@@ -282,7 +258,6 @@ export default function FlashCardsPage() {
     if (!sessao) return
 
     if (questaoAtualIndex + 1 >= sessao.questoes.length) {
-      pararTimer()
       salvarProgresso()
       setTela('resultado')
     } else {
@@ -291,7 +266,7 @@ export default function FlashCardsPage() {
       setMostrarResultado(false)
       setUsouDica(false)
       setMostrarDica(false)
-      iniciarTimer()
+      resetarTimer()
     }
   }
 

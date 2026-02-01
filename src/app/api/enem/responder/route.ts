@@ -103,7 +103,8 @@ export async function POST(request: NextRequest) {
     }
 
     const correta = respostaUpperCase === respostaCorreta
-    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 7200
+    // Máximo 10 min por questão ENEM (timer pausa em ociosidade no client)
+    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 600
       ? Math.floor(tempo_segundos)
       : 0
 

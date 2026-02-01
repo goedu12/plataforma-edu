@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import {
   Clock,
@@ -27,6 +27,7 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import { processarContexto, processarTexto, isValidImageUrl } from '@/lib/limpezaTexto'
 import { ENEM_CONFIG } from '@/types'
+import { useActiveTimer } from '@/hooks/useActiveTimer'
 import type { Componente, AreaENEM, SubareaENEM } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -115,9 +116,8 @@ export default function SimuladoENEMPage() {
   const [acertou, setAcertou] = useState<boolean | null>(null)
   const [enviando, setEnviando] = useState(false)
 
-  // Timer
-  const [tempoDecorrido, setTempoDecorrido] = useState(0)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  // Timer (pausa em ociosidade)
+  const { tempoAtivo, pausado, resetar: resetarTimer } = useActiveTimer()
 
   // Estatísticas
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null)
@@ -145,9 +145,8 @@ export default function SimuladoENEMPage() {
     setAlternativaSelecionada(null)
     setRespondida(false)
     setAcertou(null)
-    setTempoDecorrido(0)
+    resetarTimer()
     setImagensComErro(new Set())
-    pararTimer()
 
     try {
       const urlParams = new URLSearchParams()
@@ -181,27 +180,16 @@ export default function SimuladoENEMPage() {
       // Será retornada apenas após submeter a resposta
       setRespostaCorreta(null)
       setStatus('ok')
-      iniciarTimer()
     } catch {
       setStatus('erro')
       setErro('Erro de conexão')
     }
   }
 
-  // Timer
-  const iniciarTimer = () => {
-    pararTimer()
-    timerRef.current = setInterval(() => setTempoDecorrido(p => p + 1), 1000)
-  }
-  const pararTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-  }
-
   // Submeter resposta
   const submeterResposta = async () => {
     if (!questao || !alternativaSelecionada || enviando) return
     setEnviando(true)
-    pararTimer()
 
     try {
       const response = await fetch('/api/enem/responder', {
@@ -210,7 +198,7 @@ export default function SimuladoENEMPage() {
         body: JSON.stringify({
           questao_id: questao.id,
           resposta: alternativaSelecionada,
-          tempo_segundos: tempoDecorrido,
+          tempo_segundos: tempoAtivo,
         }),
       })
       const data = await response.json()
@@ -246,7 +234,6 @@ export default function SimuladoENEMPage() {
       return
     }
     buscarQuestao()
-    return () => pararTimer()
   }, [componente])
 
   // Quando muda a área, limpa a subárea
@@ -444,7 +431,7 @@ export default function SimuladoENEMPage() {
           {status === 'ok' && !respondida && (
             <div className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-mono text-xs" style={{ background: 'var(--bg-elevated)', color: corPrimaria }}>
               <Clock className="w-3.5 h-3.5" />
-              {formatarTempo(tempoDecorrido)}
+              {formatarTempo(tempoAtivo)}
             </div>
           )}
         </div>
@@ -632,7 +619,7 @@ export default function SimuladoENEMPage() {
                     {acertou ? 'Resposta Correta!' : `Incorreta. Resposta: ${respostaCorreta}`}
                   </span>
                 </div>
-                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{formatarTempo(tempoDecorrido)}</span>
+                <span className="text-sm" style={{ color: 'var(--text-muted)' }}>{formatarTempo(tempoAtivo)}</span>
               </div>
             )}
 
