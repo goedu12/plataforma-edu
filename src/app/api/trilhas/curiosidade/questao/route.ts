@@ -133,6 +133,96 @@ export async function GET(request: NextRequest) {
       .eq('trilha_id', 'curiosidade')
       .eq('correta', true)
 
+    // Sortear tipo de atividade: 40% múltipla escolha, 30% V/F, 30% complete a fórmula
+    const sorteio = Math.random()
+    let tipoAtividade: 'multipla_escolha' | 'verdadeiro_falso' | 'complete_formula' = 'multipla_escolha'
+
+    if (sorteio < 0.3) {
+      tipoAtividade = 'verdadeiro_falso'
+    } else if (sorteio < 0.6) {
+      tipoAtividade = 'complete_formula'
+    }
+
+    // Montar dados extras conforme tipo de atividade
+    let dadosExtra: Record<string, unknown> = {}
+    const alternativas = questao.alternativas as Record<string, string> | null
+    const respostaCorreta = (questao.resposta_correta || '') as string
+
+    if (tipoAtividade === 'verdadeiro_falso' && alternativas && respostaCorreta) {
+      // Criar afirmação a partir da alternativa correta
+      const textoCorreto = alternativas[respostaCorreta]
+      if (textoCorreto) {
+        // 50% chance de ser verdadeiro, 50% falso (usando alternativa errada)
+        const ehVerdadeiro = Math.random() < 0.5
+        let afirmacao = textoCorreto
+        let justificativa = textoCorreto
+
+        if (!ehVerdadeiro) {
+          // Pegar uma alternativa errada para usar como afirmação falsa
+          const letrasErradas = Object.keys(alternativas).filter(
+            l => l !== respostaCorreta && alternativas[l]
+          )
+          if (letrasErradas.length > 0) {
+            const letraErrada = letrasErradas[Math.floor(Math.random() * letrasErradas.length)]
+            afirmacao = alternativas[letraErrada]
+            justificativa = `A afirmação está incorreta. O correto é: ${textoCorreto}`
+          }
+        } else {
+          justificativa = `Correto! ${textoCorreto}`
+        }
+
+        dadosExtra = {
+          afirmacao,
+          respostaVF: ehVerdadeiro ? 'V' : 'F',
+          justificativa,
+        }
+      } else {
+        tipoAtividade = 'multipla_escolha' // fallback
+      }
+    } else if (tipoAtividade === 'complete_formula' && alternativas && respostaCorreta) {
+      // Usar a alternativa correta como "fórmula completa" e esconder parte dela
+      const textoCorreto = alternativas[respostaCorreta]
+      if (textoCorreto && textoCorreto.length > 3) {
+        // Encontrar um trecho para esconder (palavra ou símbolo)
+        const palavras = textoCorreto.split(/\s+/)
+        if (palavras.length >= 2) {
+          // Esconder uma palavra aleatória (não a primeira)
+          const idxEsconder = 1 + Math.floor(Math.random() * (palavras.length - 1))
+          const palavraEscondida = palavras[idxEsconder]
+          const formulaComLacuna = palavras.map((p, i) => i === idxEsconder ? '______' : p).join(' ')
+
+          // Criar opções: a correta + 2 distratores das alternativas erradas
+          const opcoes: string[] = [palavraEscondida]
+          const letrasErradas = Object.keys(alternativas).filter(
+            l => l !== respostaCorreta && alternativas[l]
+          )
+          for (const letraErrada of letrasErradas.slice(0, 2)) {
+            const textoErrado = alternativas[letraErrada]
+            const palavrasErradas = textoErrado.split(/\s+/)
+            if (palavrasErradas.length > idxEsconder) {
+              opcoes.push(palavrasErradas[idxEsconder])
+            } else if (palavrasErradas.length > 0) {
+              opcoes.push(palavrasErradas[Math.floor(Math.random() * palavrasErradas.length)])
+            }
+          }
+
+          // Embaralhar opções
+          const opcoesEmbaralhadas = opcoes.sort(() => Math.random() - 0.5)
+
+          dadosExtra = {
+            formulaComLacuna,
+            respostaLacuna: palavraEscondida,
+            opcoes: opcoesEmbaralhadas,
+            textoCompleto: textoCorreto,
+          }
+        } else {
+          tipoAtividade = 'multipla_escolha' // fallback
+        }
+      } else {
+        tipoAtividade = 'multipla_escolha' // fallback
+      }
+    }
+
     return NextResponse.json({
       sucesso: true,
       questao: {
@@ -145,6 +235,8 @@ export async function GET(request: NextRequest) {
         dificuldade: questao.dificuldade,
         tipo: questao.tipo_questao,
         contexto: questao.contexto_cotidiano,
+        tipoAtividade,
+        ...dadosExtra,
       },
       progresso: {
         respondidas: totalRespondidas,
@@ -171,10 +263,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ sucesso: false, erro: 'Não autenticado' }, { status: 401 })
     }
 
-    const { questaoId, resposta, tempo, usouDica } = await request.json()
+    const { questaoId, resposta, tempo, usouDica, tipoAtividade, respostaVF, respostaVFEsperada, respostaLacuna, respostaLacunaEsperada } = await request.json()
 
-    if (!questaoId || !resposta) {
+    if (!questaoId) {
       return NextResponse.json({ sucesso: false, erro: 'Dados incompletos' }, { status: 400 })
+    }
+
+    // Para V/F e Complete, a resposta vem em campos específicos
+    const respostaFinal = tipoAtividade === 'verdadeiro_falso'
+      ? respostaVF
+      : tipoAtividade === 'complete_formula'
+        ? respostaLacuna
+        : resposta
+
+    if (!respostaFinal) {
+      return NextResponse.json({ sucesso: false, erro: 'Resposta não fornecida' }, { status: 400 })
     }
 
     const supabase = getSupabaseAdmin()
@@ -216,7 +319,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ sucesso: false, erro: 'Questão não encontrada' }, { status: 404 })
     }
 
-    const correta = resposta.toUpperCase() === respostaCorreta.toUpperCase()
+    // Verificar resposta baseada no tipo de atividade
+    let correta = false
+    if (tipoAtividade === 'verdadeiro_falso') {
+      correta = respostaVF === respostaVFEsperada
+    } else if (tipoAtividade === 'complete_formula') {
+      correta = respostaLacuna?.trim().toLowerCase() === respostaLacunaEsperada?.trim().toLowerCase()
+    } else {
+      correta = respostaFinal.toUpperCase() === respostaCorreta.toUpperCase()
+    }
 
     // Calcular pontos
     let pontos = 0
@@ -231,7 +342,7 @@ export async function POST(request: NextRequest) {
         usuario_id: sessaoAuth.userId,
         questao_id: questaoId,
         trilha_id: 'curiosidade',
-        resposta_dada: resposta.toUpperCase(),
+        resposta_dada: (respostaFinal || '').toString().toUpperCase(),
         correta,
         tempo_segundos: tempo || 0,
         usou_dica: usouDica || false,
