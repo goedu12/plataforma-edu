@@ -93,7 +93,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar tempo e modo
-    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 3600
+    // Máximo 5 min por questão (timer já pausa em ociosidade no client)
+    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 300
       ? Math.floor(tempo_segundos)
       : 0
 

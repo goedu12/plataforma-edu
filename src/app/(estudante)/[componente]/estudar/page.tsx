@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp } from 'lucide-react'
+import { BookOpen, CheckCircle2, XCircle, WifiOff, RefreshCw, AlertTriangle, Calendar, Zap, Clock, Lightbulb, Trophy, TrendingUp, Pause } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { useActiveTimer } from '@/hooks/useActiveTimer'
 import type { Componente, Questao } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
 
@@ -53,9 +54,8 @@ export default function EstudarPage() {
   const [status, setStatus] = useState<StatusQuestao | null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
-  const [tempoDecorrido, setTempoDecorrido] = useState(0)
+  const { tempoAtivo, pausado, resetar: resetarTimer } = useActiveTimer()
   const [limite, setLimite] = useState<LimiteInfo | null>(null)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
 
   // Estados da questão
@@ -94,8 +94,7 @@ export default function EstudarPage() {
 
         if (data.status === 'OK' && data.questao) {
           setQuestao(data.questao)
-          setTempoDecorrido(0)
-          iniciarTimer()
+          resetarTimer()
         } else {
           setQuestao(null)
         }
@@ -116,20 +115,6 @@ export default function EstudarPage() {
     }
   }
 
-  const iniciarTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      setTempoDecorrido(prev => prev + 1)
-    }, 1000)
-  }
-
-  const pararTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }
-
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
@@ -137,7 +122,6 @@ export default function EstudarPage() {
     }
     buscarQuestao()
     return () => {
-      pararTimer()
       // Cancelar requisições pendentes ao desmontar
       if (abortControllerRef.current) {
         abortControllerRef.current.abort()
@@ -151,7 +135,6 @@ export default function EstudarPage() {
     if (!selecionada || !questao) return
 
     setRespondendo(true)
-    pararTimer()
 
     try {
       const response = await fetch('/api/questoes/responder', {
@@ -161,7 +144,7 @@ export default function EstudarPage() {
           questao_id: questao.id,
           componente,
           resposta: selecionada,
-          tempo_segundos: tempoDecorrido,
+          tempo_segundos: tempoAtivo,
           usou_dica: usouDica,
           modo: 'estudo',
         }),
@@ -273,9 +256,9 @@ export default function EstudarPage() {
                 </div>
 
                 {/* Timer */}
-                <div className="timer-chromebook" style={{ color: corPrimaria }}>
-                  <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-                  <span>{formatarTempo(tempoDecorrido)}</span>
+                <div className={`timer-chromebook ${pausado ? 'opacity-50' : ''}`} style={{ color: corPrimaria }}>
+                  {pausado ? <Pause className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> : <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4" />}
+                  <span>{formatarTempo(tempoAtivo)}</span>
                 </div>
 
                 {/* Progress inline - só desktop */}
