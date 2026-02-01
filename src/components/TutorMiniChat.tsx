@@ -1,19 +1,24 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Bot, Send, X, Minimize2, Zap } from 'lucide-react'
+import { Bot, Send, Minimize2, Zap, Camera, Mic, MicOff, XCircle } from 'lucide-react'
 import MensagemFormatada from './MensagemFormatada'
 import { TypingIndicator } from './ui/Loading'
+import { useWebSpeech } from '@/hooks/useWebSpeech'
 import type { Componente, MensagemChat } from '@/types'
 import { PONTUACAO } from '@/types'
 
 // ═══════════════════════════════════════════════════════════
 // TutorMiniChat — Widget flutuante do Tutor IA
-// Pode ser usado em qualquer página do estudante
+// Posicionado à direita, com suporte a imagem e voz
 // ═══════════════════════════════════════════════════════════
+
+const IMAGE_QUALITY = 0.7
+const MAX_DIM = 800
 
 interface MensagemMini extends MensagemChat {
   modo?: string
+  imagemBase64?: string
 }
 
 export default function TutorMiniChat({ componente }: { componente: Componente }) {
@@ -24,14 +29,31 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
   const [usoHoje, setUsoHoje] = useState(0)
   const [nomeEstudante, setNomeEstudante] = useState('Estudante')
   const [inicializado, setInicializado] = useState(false)
+  const [imagemPreview, setImagemPreview] = useState<string | null>(null)
+  const [imagemBase64, setImagemBase64] = useState<string | null>(null)
   const chatRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const isFisica = componente === 'fisica'
   const nomeTutor = isFisica ? 'Newton' : 'Pitágoras'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const limiteDiario = PONTUACAO.LIMITE_IA_DIARIO
   const restantes = Math.max(limiteDiario - usoHoje, 0)
+
+  // Hook de voz
+  const {
+    isListening,
+    transcript,
+    startListening,
+    stopListening,
+    sttSupported,
+  } = useWebSpeech()
+
+  // Atualizar input com transcrição de voz
+  useEffect(() => {
+    if (transcript) setInput(transcript)
+  }, [transcript])
 
   // Buscar dados do usuário na primeira abertura
   useEffect(() => {
@@ -53,7 +75,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
     setMensagens([{
       id: '1',
       role: 'assistant',
-      content: `Olá! Sou o ${nomeTutor}. Como posso te ajudar com ${disciplina}?`,
+      content: `Olá! Sou o ${nomeTutor}. Como posso te ajudar com ${disciplina}?\n\nVocê pode digitar, falar ou enviar foto de uma questão!`,
       timestamp: new Date().toISOString(),
     }])
   }, [aberto, inicializado, isFisica, nomeTutor])
@@ -72,19 +94,83 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
     }
   }, [aberto])
 
+  // ═══════════════════════════════════════════════════════════
+  // HANDLERS DE IMAGEM
+  // ═══════════════════════════════════════════════════════════
+
+  const comprimirImagem = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const img = document.createElement('img')
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let { width, height } = img
+          if (width > MAX_DIM || height > MAX_DIM) {
+            if (width > height) {
+              height = (height / width) * MAX_DIM
+              width = MAX_DIM
+            } else {
+              width = (width / height) * MAX_DIM
+              height = MAX_DIM
+            }
+          }
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (!ctx) { reject(new Error('Erro')); return }
+          ctx.drawImage(img, 0, 0, width, height)
+          const base64 = canvas.toDataURL('image/jpeg', IMAGE_QUALITY)
+          resolve(base64.split(',')[1])
+        }
+        img.onerror = () => reject(new Error('Erro ao carregar imagem'))
+        img.src = e.target?.result as string
+      }
+      reader.onerror = () => reject(new Error('Erro ao ler arquivo'))
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
+  const handleImagemSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return
+    try {
+      const base64 = await comprimirImagem(file)
+      setImagemBase64(base64)
+      setImagemPreview(`data:image/jpeg;base64,${base64}`)
+    } catch { /* ignore */ }
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }, [comprimirImagem])
+
+  const removerImagem = useCallback(() => {
+    setImagemPreview(null)
+    setImagemBase64(null)
+  }, [])
+
+  // ═══════════════════════════════════════════════════════════
+  // ENVIAR MENSAGEM
+  // ═══════════════════════════════════════════════════════════
+
   const enviarMensagem = useCallback(async () => {
     const texto = input.trim()
-    if (!texto || loading || restantes <= 0) return
+    if ((!texto && !imagemBase64) || loading || restantes <= 0) return
+
+    if (isListening) stopListening()
+
+    const imagemParaEnviar = imagemBase64
 
     const novaMensagem: MensagemMini = {
       id: Date.now().toString(),
       role: 'user',
-      content: texto,
+      content: texto || '[Imagem enviada]',
       timestamp: new Date().toISOString(),
+      imagemBase64: imagemParaEnviar || undefined,
     }
 
     setMensagens(prev => [...prev, novaMensagem])
     setInput('')
+    setImagemBase64(null)
+    setImagemPreview(null)
     setLoading(true)
 
     try {
@@ -98,18 +184,17 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           componente,
-          mensagem: texto,
+          mensagem: texto || 'Analise esta imagem. Se for uma questão, resolva completamente e me dê o gabarito. Mostre o passo a passo.',
           historico,
           nomeEstudante,
+          imagem: imagemParaEnviar,
         }),
       })
 
       const data = await res.json()
 
       if (data.sucesso && data.resposta) {
-        // Remove [SUGESTOES]...[/SUGESTOES] block
         const textoLimpo = data.resposta.replace(/\[SUGESTOES\][\s\S]*?\[\/SUGESTOES\]/, '').trim()
-
         setMensagens(prev => [...prev, {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
@@ -136,29 +221,40 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
     } finally {
       setLoading(false)
     }
-  }, [input, loading, restantes, mensagens, componente, nomeEstudante])
+  }, [input, imagemBase64, loading, restantes, isListening, stopListening, mensagens, componente, nomeEstudante])
 
-  // FAB (Floating Action Button)
+  const toggleListening = () => {
+    if (isListening) stopListening()
+    else startListening()
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // FAB (lado direito)
+  // ═══════════════════════════════════════════════════════════
+
   if (!aberto) {
     return (
       <button
         onClick={() => setAberto(true)}
-        className="fixed bottom-4 left-4 z-50 flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
+        className="fixed bottom-20 right-4 lg:bottom-4 lg:right-4 z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
         style={{ background: corPrimaria }}
         title={`Perguntar ao ${nomeTutor}`}
       >
-        <Bot className="w-6 h-6 text-white" />
+        <Bot className="w-7 h-7 text-white" />
       </button>
     )
   }
 
-  // Chat aberto
+  // ═══════════════════════════════════════════════════════════
+  // CHAT ABERTO (lado direito)
+  // ═══════════════════════════════════════════════════════════
+
   return (
     <div
-      className="fixed bottom-4 left-4 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+      className="fixed bottom-4 right-4 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden"
       style={{
-        width: 'min(360px, calc(100vw - 32px))',
-        height: 'min(480px, calc(100dvh - 32px))',
+        width: 'min(380px, calc(100vw - 32px))',
+        height: 'min(520px, calc(100dvh - 32px))',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
       }}
@@ -205,6 +301,17 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
                 border: msg.role === 'assistant' ? '1px solid var(--border-default)' : 'none',
               }}
             >
+              {/* Imagem enviada */}
+              {msg.imagemBase64 && (
+                <div className="mb-2">
+                  <img
+                    src={`data:image/jpeg;base64,${msg.imagemBase64}`}
+                    alt="Imagem enviada"
+                    className="max-w-full rounded-lg"
+                    style={{ maxHeight: '150px' }}
+                  />
+                </div>
+              )}
               {msg.role === 'assistant' ? (
                 <MensagemFormatada conteudo={msg.content} />
               ) : (
@@ -225,29 +332,89 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
         )}
       </div>
 
-      {/* Input */}
+      {/* Preview de imagem */}
+      {imagemPreview && (
+        <div
+          className="px-3 py-2 flex items-center gap-2 flex-shrink-0"
+          style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border-default)' }}
+        >
+          <div className="relative">
+            <img src={imagemPreview} alt="Preview" className="w-12 h-12 object-cover rounded-lg" />
+            <button
+              onClick={removerImagem}
+              className="absolute -top-1.5 -right-1.5 p-0.5 rounded-full"
+              style={{ background: 'var(--error)', color: 'white' }}
+            >
+              <XCircle className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Pronta para enviar</span>
+        </div>
+      )}
+
+      {/* Input com botões de imagem e voz */}
       <div
-        className="flex items-center gap-2 px-3 py-2 flex-shrink-0"
+        className="flex items-center gap-1.5 px-2 py-2 flex-shrink-0"
         style={{
           background: 'var(--bg-surface)',
           borderTop: '1px solid var(--border-default)',
         }}
       >
+        {/* Input file oculto */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleImagemSelect}
+          className="hidden"
+        />
+
+        {/* Botão câmera */}
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={loading || restantes <= 0}
+          className="p-2 rounded-lg transition-colors disabled:opacity-30 flex-shrink-0"
+          style={{ color: 'var(--text-muted)' }}
+          title="Enviar foto"
+        >
+          <Camera className="w-5 h-5" />
+        </button>
+
+        {/* Botão voz */}
+        {sttSupported && (
+          <button
+            onClick={toggleListening}
+            disabled={loading || restantes <= 0}
+            className={`p-2 rounded-lg transition-colors disabled:opacity-30 flex-shrink-0 ${isListening ? 'animate-pulse' : ''}`}
+            style={{
+              background: isListening ? corPrimaria : 'transparent',
+              color: isListening ? '#fff' : 'var(--text-muted)',
+            }}
+            title={isListening ? 'Parar de ouvir' : 'Falar'}
+          >
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+          </button>
+        )}
+
+        {/* Input de texto */}
         <input
           ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value.slice(0, 500))}
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && enviarMensagem()}
-          placeholder={restantes > 0 ? 'Pergunte algo...' : 'Limite diário atingido'}
-          disabled={restantes <= 0}
-          className="flex-1 bg-transparent text-sm outline-none"
+          placeholder={isListening ? 'Ouvindo...' : restantes > 0 ? 'Pergunte algo...' : 'Limite atingido'}
+          disabled={restantes <= 0 || isListening}
+          className="flex-1 bg-transparent text-sm outline-none min-w-0"
           style={{ color: 'var(--text-primary)' }}
         />
+
+        {/* Botão enviar */}
         <button
           onClick={enviarMensagem}
-          disabled={!input.trim() || loading || restantes <= 0}
-          className="p-1.5 rounded-lg transition-colors disabled:opacity-30"
+          disabled={(!input.trim() && !imagemBase64) || loading || restantes <= 0}
+          className="p-2 rounded-lg transition-colors disabled:opacity-30 flex-shrink-0"
           style={{ background: corPrimaria }}
         >
           <Send className="w-4 h-4 text-white" />
