@@ -256,13 +256,13 @@ export default function EstudarCuriosidadePage() {
 
       {/* Header compacto */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/trilhas/curiosidade`} compactOnDesktop />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-lg">{tema?.icone || '🔬'}</span>
-                <h1 className="text-base lg:text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                <h1 className="text-base lg:text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                   {tema?.nome || 'Curiosidade'}
                 </h1>
               </div>
@@ -289,7 +289,7 @@ export default function EstudarCuriosidadePage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-3">
+      <main className="max-w-3xl mx-auto px-3 lg:px-4 py-3">
         {questao ? (
           <div className="space-y-4">
             {/* Info da questão */}
