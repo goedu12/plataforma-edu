@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import { buscarCuriosidade } from '@/lib/curiosidades-fisica'
 
 // ═══════════════════════════════════════════════════════════
 // API DE QUESTÕES DA TRILHA CURIOSIDADE
@@ -223,6 +224,10 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Buscar curiosidade física relacionada ao tema da questão
+    const componente = 'fisica' // Trilha curiosidade é sempre de física
+    const curiosidade = buscarCuriosidade(questao.tema || tema.nome, componente)
+
     return NextResponse.json({
       sucesso: true,
       questao: {
@@ -237,6 +242,11 @@ export async function GET(request: NextRequest) {
         contexto: questao.contexto_cotidiano,
         tipoAtividade,
         ...dadosExtra,
+      },
+      curiosidade: {
+        voceSabia: curiosidade.voceSabia,
+        saibaMais: curiosidade.saibaMais,
+        fonteReal: curiosidade.fonteReal || null,
       },
       progresso: {
         respondidas: totalRespondidas,

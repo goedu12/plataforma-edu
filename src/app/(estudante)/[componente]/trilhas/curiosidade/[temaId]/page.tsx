@@ -61,6 +61,12 @@ interface Feedback {
   erroComum?: string
 }
 
+interface CuriosidadeInfo {
+  voceSabia: string
+  saibaMais: string
+  fonteReal?: string | null
+}
+
 export default function EstudarCuriosidadePage() {
   const router = useRouter()
   const params = useParams()
@@ -80,6 +86,7 @@ export default function EstudarCuriosidadePage() {
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const [pontos, setPontos] = useState(0)
 
+  const [curiosidade, setCuriosidade] = useState<CuriosidadeInfo | null>(null)
   const [mostrarDica, setMostrarDica] = useState(false)
   const [usouDica, setUsouDica] = useState(false)
   const [serie, setSerie] = useState('1EM')
@@ -115,6 +122,7 @@ export default function EstudarCuriosidadePage() {
         } else {
           setQuestao(data.questao)
           setTema(data.tema)
+          setCuriosidade(data.curiosidade || null)
           setProgresso(data.progresso || { respondidas: 0, corretas: 0, total: 15 })
         }
       } else {
@@ -352,6 +360,26 @@ export default function EstudarCuriosidadePage() {
               >
                 {questao.tipoAtividade === 'verdadeiro_falso' ? '✓✗ Verdadeiro ou Falso' : '✏️ Complete'}
               </span>
+            )}
+
+            {/* Você sabia? */}
+            {curiosidade && !mostrarResultado && (
+              <div
+                className="p-4 rounded-xl"
+                style={{ background: `${corPrimaria}08`, border: `1px solid ${corPrimaria}30` }}
+              >
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: corPrimaria }} />
+                  <div>
+                    <p className="text-xs lg:text-sm font-semibold mb-1" style={{ color: corPrimaria }}>
+                      Você sabia?
+                    </p>
+                    <p className="text-sm lg:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                      {curiosidade.voceSabia}
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Enunciado */}
@@ -637,6 +665,29 @@ export default function EstudarCuriosidadePage() {
                     <div>
                       <p className="text-xs font-medium mb-0.5" style={{ color: corPrimaria }}>Curiosidade</p>
                       <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{feedback.curiosidade}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Saiba mais - da curiosidade */}
+                {curiosidade && (
+                  <div
+                    className="p-3 rounded-lg"
+                    style={{ background: `${corPrimaria}10`, border: `1px solid ${corPrimaria}25` }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: corPrimaria }} />
+                      <div>
+                        <p className="text-xs font-semibold mb-0.5" style={{ color: corPrimaria }}>Saiba mais</p>
+                        <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                          {curiosidade.saibaMais}
+                        </p>
+                        {curiosidade.fonteReal && (
+                          <p className="text-xs mt-1.5 italic" style={{ color: 'var(--text-muted)' }}>
+                            Fonte: {curiosidade.fonteReal}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
