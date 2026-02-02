@@ -509,7 +509,7 @@ export async function GET(request: NextRequest) {
     try {
       const { data: notaExistente } = await supabase
         .from('notas_2025')
-        .select('id')
+        .select('id, status')
         .eq('usuario_id', sessao.userId)
         .eq('componente', componente)
         .eq('ano_letivo', ano)
@@ -544,7 +544,11 @@ export async function GET(request: NextRequest) {
         atualizado_em: new Date().toISOString(),
       }
 
-      if (notaExistente) {
+      // Não sobrescrever bimestres congelados (status='fechado')
+      if (notaExistente?.status === 'fechado') {
+        // Bimestre já congelado — usa dados do snapshot, não atualiza
+        console.info(`Bimestre ${bimestre}/${ano} já congelado para ${sessao.userId}/${componente}`)
+      } else if (notaExistente) {
         await supabase.from('notas_2025').update(dadosNota).eq('id', notaExistente.id)
       } else {
         await supabase.from('notas_2025').insert(dadosNota)
