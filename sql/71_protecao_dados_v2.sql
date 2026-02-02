@@ -189,8 +189,8 @@ CREATE POLICY "Bloquear delete respostas_enem" ON respostas_enem
     FOR DELETE TO authenticated USING (false);
 
 -- Conquistas: bloquear DELETE
-DROP POLICY IF EXISTS "Bloquear delete conquistas" ON conquistas_usuario;
-CREATE POLICY "Bloquear delete conquistas" ON conquistas_usuario
+DROP POLICY IF EXISTS "Bloquear delete conquistas" ON conquistas_usuarios;
+CREATE POLICY "Bloquear delete conquistas" ON conquistas_usuarios
     FOR DELETE TO authenticated USING (false);
 
 -- notas_2025: bloquear DELETE para authenticated
