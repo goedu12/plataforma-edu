@@ -307,23 +307,12 @@ export async function GET(request: NextRequest) {
     // ═══════════════════════════════════════════════════════════════════════
     // DETERMINAR INTERVALO DE DATAS PARA BUSCAR RESPOSTAS
     // ═══════════════════════════════════════════════════════════════════════
-    // Se estamos fora do período letivo, usar últimos 30 dias para mostrar progresso
+    // Sempre usar as datas do bimestre solicitado (config.regular.inicio/fim)
+    // Isso garante que bimestres passados retornem os dados corretos
 
     const hoje = new Date().toISOString().split('T')[0]
-    let dataInicioBusca: string
-    let dataFimBusca: string
-
-    if (periodoAtual) {
-      // Período ativo - usar datas do bimestre
-      dataInicioBusca = config.regular.inicio
-      dataFimBusca = config.regular.fim
-    } else {
-      // Fora do período (férias/prática) - usar últimos 30 dias
-      const data30DiasAtras = new Date()
-      data30DiasAtras.setDate(data30DiasAtras.getDate() - 30)
-      dataInicioBusca = data30DiasAtras.toISOString().split('T')[0]
-      dataFimBusca = hoje
-    }
+    const dataInicioBusca = config.regular.inicio
+    const dataFimBusca = config.regular.fim
 
     // ═══════════════════════════════════════════════════════════════════════
     // BUSCAR DADOS DO PERÍODO - NOVA FÓRMULA v2
@@ -592,10 +581,9 @@ export async function GET(request: NextRequest) {
 
     // Projeção de nota final (se mantiver o ritmo atual)
     // Usar datas de busca para cálculo correto fora do período
-    const diasDecorridos = Math.max(1, Math.floor((new Date(hoje).getTime() - new Date(dataInicioBusca).getTime()) / (1000 * 60 * 60 * 24)))
-    const diasTotais = periodoAtual
-      ? Math.floor((new Date(config.regular.fim).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
-      : 30 // Fora do período, usar 30 dias como referência
+    const fimReferencia = hoje < dataFimBusca ? hoje : dataFimBusca
+    const diasDecorridos = Math.max(1, Math.floor((new Date(fimReferencia).getTime() - new Date(dataInicioBusca).getTime()) / (1000 * 60 * 60 * 24)))
+    const diasTotais = Math.floor((new Date(config.regular.fim).getTime() - new Date(config.regular.inicio).getTime()) / (1000 * 60 * 60 * 24))
     const taxaDiaria = questoesRespondidas / diasDecorridos
     const projecaoQuestoes = Math.round(taxaDiaria * diasTotais)
     const projecaoNota = calcularNotaRegular(
@@ -617,7 +605,9 @@ export async function GET(request: NextRequest) {
         tipo_periodo: emRecuperacao || emPeriodoRecuperacao ? 'recuperacao' : 'regular',
         data_inicio: emRecuperacao ? config.recuperacao.inicio : config.regular.inicio,
         data_fim: emRecuperacao ? config.recuperacao.fim : config.regular.fim,
-        dias_restantes: periodoAtual?.diasRestantes || 0,
+        dias_restantes: hoje <= config.regular.fim
+          ? Math.ceil((new Date(config.regular.fim).getTime() - new Date(hoje).getTime()) / (1000 * 60 * 60 * 24))
+          : 0,
 
         // NOVA FÓRMULA v2
         acertos_estudo: acertosEstudo,

@@ -141,11 +141,9 @@ export default function NotasPage() {
         if (!isMountedRef.current) return
 
         if (document.visibilityState === 'visible') {
-          buscarNotas(true).then(() => {
-            // Reset do backoff se a requisição foi bem sucedida
+          buscarNotas(true, bimestreSelecionado, anoSelecionado).then(() => {
             backoffRef.current = 30000
           }).catch(() => {
-            // Aumenta o backoff em caso de erro (exponential backoff)
             backoffRef.current = Math.min(backoffRef.current * 1.5, maxBackoff)
           })
         }
@@ -166,9 +164,8 @@ export default function NotasPage() {
       if (!isMountedRef.current) return
 
       if (document.visibilityState === 'visible') {
-        // Só busca se passou mais de 10 segundos
         if (Date.now() - ultimaAtualizacaoRef.current > 10000) {
-          buscarNotas(true)
+          buscarNotas(true, bimestreSelecionado, anoSelecionado)
         }
         // Reset do backoff quando o usuário volta à aba
         backoffRef.current = 30000
@@ -192,7 +189,7 @@ export default function NotasPage() {
       if (pollingRef.current) clearTimeout(pollingRef.current)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [componente, buscarNotas, router])
+  }, [componente, buscarNotas, router, bimestreSelecionado, anoSelecionado])
 
   const getStatusConfig = (status: string, nota: number) => {
     if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' }
