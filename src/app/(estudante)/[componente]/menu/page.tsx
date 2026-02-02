@@ -214,10 +214,11 @@ export default function MenuComponentePage() {
           </div>
 
           {/* User + Stats */}
-          <div className="flex items-center gap-3">
+          <div className="space-y-3">
+            {/* Linha 1: Avatar + Nome */}
             <button
               onClick={() => router.push(`/${componente}/perfil`)}
-              className="flex items-center gap-3 flex-1 min-w-0"
+              className="flex items-center gap-3 w-full text-left"
             >
               <ProfilePhoto
                 fotoUrl={usuario.foto_url}
@@ -227,7 +228,7 @@ export default function MenuComponentePage() {
                 componente={componente}
               />
               <div className="min-w-0">
-                <p className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                <p className="font-display text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                   Olá, {primeiroNome}!
                 </p>
                 <Badge variant={isFisica ? 'fisica' : 'matematica'} size="sm">
@@ -236,13 +237,14 @@ export default function MenuComponentePage() {
               </div>
             </button>
 
-            <div className="flex gap-2">
+            {/* Linha 2: Stats */}
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { icon: Star, value: pontos, label: 'Pontos', color: accentColor },
                 { icon: Flame, value: sequenciaDias, label: 'Dias', color: 'var(--color-streak)' },
                 { icon: Target, value: `${taxaAcerto}%`, label: 'Acerto', color: accentColor },
               ].map((stat) => (
-                <div key={stat.label} className="stat-box min-w-[64px]">
+                <div key={stat.label} className="stat-box">
                   <stat.icon className="w-5 h-5 mx-auto mb-1" style={{ color: stat.color }} />
                   <p className="text-xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                     {stat.value}
