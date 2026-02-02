@@ -10,9 +10,11 @@ import {
   ChevronRight,
   TrendingUp,
   ChevronDown,
+  ChevronLeft,
   Zap,
   BookOpen,
   Calendar,
+  History,
 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Loading from '@/components/ui/Loading'
@@ -59,10 +61,14 @@ export default function NotasPage() {
   const componente = params.componente as Componente
 
   const [notaAtual, setNotaAtual] = useState<NotaBimestre | null>(null)
+  const [historico, setHistorico] = useState<Array<Record<string, unknown>>>([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
   const [atualizando, setAtualizando] = useState(false)
   const [mostrarDetalhes, setMostrarDetalhes] = useState(false)
+  const [mostrarHistorico, setMostrarHistorico] = useState(false)
+  const [bimestreSelecionado, setBimestreSelecionado] = useState<number | null>(null)
+  const [anoSelecionado, setAnoSelecionado] = useState<number | null>(null)
   const pollingRef = useRef<NodeJS.Timeout | null>(null)
   const ultimaAtualizacaoRef = useRef<number>(Date.now())
   const backoffRef = useRef<number>(30000) // Intervalo inicial de 30s
@@ -72,7 +78,7 @@ export default function NotasPage() {
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  const buscarNotas = useCallback(async (silencioso = false) => {
+  const buscarNotas = useCallback(async (silencioso = false, bim?: number | null, ano?: number | null) => {
     // Cancelar requisição anterior se existir
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -84,13 +90,18 @@ export default function NotasPage() {
     setErro(null)
 
     try {
-      const response = await fetch(`/api/notas?componente=${componente}&_t=${Date.now()}`, {
+      let url = `/api/notas?componente=${componente}&_t=${Date.now()}`
+      if (bim) url += `&bimestre=${bim}`
+      if (ano) url += `&ano=${ano}`
+
+      const response = await fetch(url, {
         signal: abortControllerRef.current.signal
       })
       const data = await response.json()
 
       if (data.sucesso) {
         setNotaAtual(data.bimestre_atual)
+        if (data.historico) setHistorico(data.historico)
         ultimaAtualizacaoRef.current = Date.now()
       } else if (!silencioso) {
         setErro(data.erro || 'Erro ao carregar notas')
@@ -214,12 +225,59 @@ export default function NotasPage() {
               Notas
             </span>
             {notaAtual && (
-              <span
-                className="badge-standard ml-1"
-                style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
-              >
-                {notaAtual.bimestre}º Bimestre
-              </span>
+              <div className="flex items-center gap-1 ml-1">
+                <button
+                  onClick={() => {
+                    const bim = bimestreSelecionado || notaAtual.bimestre
+                    const ano = anoSelecionado || notaAtual.ano
+                    const prevBim = bim === 1 ? 4 : bim - 1
+                    const prevAno = bim === 1 ? ano - 1 : ano
+                    setBimestreSelecionado(prevBim)
+                    setAnoSelecionado(prevAno)
+                    buscarNotas(false, prevBim, prevAno)
+                  }}
+                  className="p-1 rounded"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span
+                  className="badge-standard"
+                  style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)' }}
+                >
+                  {notaAtual.bimestre}ºB {notaAtual.ano}
+                </span>
+                {(bimestreSelecionado || anoSelecionado) && (
+                  <button
+                    onClick={() => {
+                      const bim = bimestreSelecionado || notaAtual.bimestre
+                      const ano = anoSelecionado || notaAtual.ano
+                      const nextBim = bim === 4 ? 1 : bim + 1
+                      const nextAno = bim === 4 ? ano + 1 : ano
+                      setBimestreSelecionado(nextBim)
+                      setAnoSelecionado(nextAno)
+                      buscarNotas(false, nextBim, nextAno)
+                    }}
+                    className="p-1 rounded"
+                    style={{ color: 'var(--text-muted)' }}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                )}
+                {(bimestreSelecionado || anoSelecionado) && (
+                  <button
+                    onClick={() => {
+                      setBimestreSelecionado(null)
+                      setAnoSelecionado(null)
+                      buscarNotas(false)
+                    }}
+                    className="text-2xs px-1.5 py-0.5 rounded"
+                    style={{ background: corPrimaria, color: '#fff' }}
+                  >
+                    Atual
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
@@ -405,6 +463,62 @@ export default function NotasPage() {
                 </div>
               )}
             </div>
+
+            {/* Histórico de Bimestres */}
+            {historico.length > 1 && (
+              <div className="card-standard p-0 overflow-hidden">
+                <button
+                  onClick={() => setMostrarHistorico(!mostrarHistorico)}
+                  className="w-full p-4 flex items-center justify-between text-left"
+                >
+                  <div className="flex items-center gap-3">
+                    <History className="w-5 h-5" style={{ color: corPrimaria }} />
+                    <span className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                      Bimestres anteriores
+                    </span>
+                  </div>
+                  <ChevronDown
+                    className="w-5 h-5 transition-transform duration-200"
+                    style={{
+                      color: 'var(--text-muted)',
+                      transform: mostrarHistorico ? 'rotate(180deg)' : 'rotate(0deg)'
+                    }}
+                  />
+                </button>
+                <div
+                  className="overflow-hidden transition-all duration-300"
+                  style={{ maxHeight: mostrarHistorico ? '400px' : '0px' }}
+                >
+                  <div className="px-4 pb-4 space-y-2">
+                    {historico
+                      .filter(h => !(h.bimestre === notaAtual?.bimestre && h.ano_letivo === notaAtual?.ano))
+                      .map((h, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setBimestreSelecionado(h.bimestre as number)
+                            setAnoSelecionado(h.ano_letivo as number)
+                            buscarNotas(false, h.bimestre as number, h.ano_letivo as number)
+                            setMostrarHistorico(false)
+                          }}
+                          className="w-full flex items-center justify-between p-3 rounded-lg"
+                          style={{ background: 'var(--bg-elevated)' }}
+                        >
+                          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                            {h.bimestre as number}º Bimestre {h.ano_letivo as number}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold tabular-nums" style={{ color: corPrimaria }}>
+                              {typeof h.nota_final === 'number' ? (h.nota_final as number).toFixed(1) : '0.0'}
+                            </span>
+                            <ChevronRight className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Botões de Ação */}
             <div className="grid grid-cols-2 gap-3 mt-auto pt-2">
