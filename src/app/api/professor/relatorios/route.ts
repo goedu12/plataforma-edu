@@ -44,6 +44,8 @@ export async function GET(request: NextRequest) {
     const tipo = searchParams.get('tipo') // 'temas_dificeis' | 'notas_turma'
     const componente = searchParams.get('componente') as Componente | null
     const turma = searchParams.get('turma')
+    const bimestreParam = searchParams.get('bimestre')
+    const anoParam = searchParams.get('ano')
 
     const supabase = getSupabaseAdmin()
 
@@ -124,7 +126,41 @@ export async function GET(request: NextRequest) {
 
     // Relatório: Notas da Turma
     if (tipo === 'notas_turma') {
-      const { bimestre, ano, dataInicio, dataFim } = calcularBimestreAtual()
+      const bimestreAtual = calcularBimestreAtual()
+      const bimestre = bimestreParam ? parseInt(bimestreParam) as 1 | 2 | 3 | 4 : bimestreAtual.bimestre
+      const ano = anoParam ? parseInt(anoParam) : bimestreAtual.ano
+
+      // Recalcular datas se bimestre/ano foi especificado manualmente
+      let dataInicio = bimestreAtual.dataInicio
+      let dataFim = bimestreAtual.dataFim
+      if (bimestreParam || anoParam) {
+        const periodo = getPeriodoAtual(ano)
+        if (periodo && periodo.bimestre === bimestre) {
+          dataInicio = periodo.config.regular.inicio
+          dataFim = periodo.config.regular.fim
+        } else {
+          // Buscar config diretamente para bimestres que não são o atual
+          const configAno = {
+            2025: {
+              1: { inicio: '2025-02-03', fim: '2025-03-24' },
+              2: { inicio: '2025-04-04', fim: '2025-06-16' },
+              3: { inicio: '2025-08-04', fim: '2025-09-23' },
+              4: { inicio: '2025-10-04', fim: '2025-12-04' },
+            },
+            2026: {
+              1: { inicio: '2025-02-03', fim: '2026-04-15' },
+              2: { inicio: '2026-04-16', fim: '2026-06-16' },
+              3: { inicio: '2026-08-04', fim: '2026-09-23' },
+              4: { inicio: '2026-10-04', fim: '2026-12-04' },
+            },
+          } as Record<number, Record<number, { inicio: string; fim: string }>>
+          const cfg = configAno[ano]?.[bimestre]
+          if (cfg) {
+            dataInicio = cfg.inicio
+            dataFim = cfg.fim
+          }
+        }
+      }
 
       // Buscar estudantes da turma (ou todas se não especificada)
       let queryEstudantes = supabase
@@ -137,7 +173,11 @@ export async function GET(request: NextRequest) {
         queryEstudantes = queryEstudantes.eq('turma', turma)
       }
 
-      const { data: estudantes } = await queryEstudantes
+      const { data: estudantesRaw } = await queryEstudantes
+
+      // Filtrar apenas turmas do ensino médio (1x, 2x, 3x)
+      const isTurmaEM = (t: string) => /^[123]/.test(t)
+      const estudantes = (estudantesRaw || []).filter(e => isTurmaEM(e.turma))
 
       if (!estudantes || estudantes.length === 0) {
         return NextResponse.json({

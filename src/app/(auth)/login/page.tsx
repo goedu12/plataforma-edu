@@ -34,6 +34,7 @@ export default function LoginPage() {
   const [buscaNome, setBuscaNome] = useState('')
   const [colegioSelecionado, setColegioSelecionado] = useState('')
   const [componenteSelecionado, setComponenteSelecionado] = useState('')
+  const [serieSelecionada, setSerieSelecionada] = useState('')
   const [turmaSelecionada, setTurmaSelecionada] = useState('')
   const [turnoSelecionado, setTurnoSelecionado] = useState('')
   const [estudantes, setEstudantes] = useState<Estudante[]>([])
@@ -83,7 +84,8 @@ export default function LoginPage() {
 
         // Extrair valores únicos para os filtros
         const colegios = [...new Set(lista.map((e: Estudante) => e.colegio).filter(Boolean))].sort() as string[]
-        const turmas = [...new Set(lista.map((e: Estudante) => e.turma))].sort() as string[]
+        const isTurmaEM = (t: string) => /^[123]/.test(t)
+        const turmas = [...new Set(lista.map((e: Estudante) => e.turma).filter(isTurmaEM))].sort() as string[]
         const turnos = [...new Set(lista.map((e: Estudante) => e.turno).filter(Boolean))].sort() as string[]
 
         setColegiosDisponiveis(colegios)
@@ -109,14 +111,20 @@ export default function LoginPage() {
     buscarEstudantes()
   }
 
-  // Filtrar estudantes pelos critérios selecionados
-  const estudantesFiltrados = estudantes.filter(e => {
+  // Verificar se algum filtro foi selecionado
+  const algumFiltroSelecionado = colegioSelecionado !== '' || componenteSelecionado !== '' ||
+    serieSelecionada !== '' || turmaSelecionada !== '' || turnoSelecionado !== '' || buscaNome !== ''
+
+  // Filtrar estudantes pelos critérios selecionados (sem turmas EF)
+  // Só filtra se algum filtro foi selecionado
+  const estudantesFiltrados = !algumFiltroSelecionado ? [] : estudantes.filter(e => /^[123]/.test(e.turma)).filter(e => {
     const matchNome = buscaNome === '' || e.nome.toLowerCase().includes(buscaNome.toLowerCase())
     const matchColegio = colegioSelecionado === '' || e.colegio === colegioSelecionado
     const matchComponente = componenteSelecionado === '' || e.componente === componenteSelecionado
+    const matchSerie = serieSelecionada === '' || e.turma.startsWith(serieSelecionada)
     const matchTurma = turmaSelecionada === '' || e.turma === turmaSelecionada
     const matchTurno = turnoSelecionado === '' || e.turno === turnoSelecionado
-    return matchNome && matchColegio && matchComponente && matchTurma && matchTurno
+    return matchNome && matchColegio && matchComponente && matchSerie && matchTurma && matchTurno
   }).slice(0, 50) // Limitar a 50 resultados
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -356,12 +364,29 @@ export default function LoginPage() {
 
             {/* Filtros */}
             <div className="p-4 space-y-3 border-b" style={{ borderColor: 'var(--border-default)' }}>
-              {/* Linha 1: Colégio e Componente */}
-              <div className="grid grid-cols-2 gap-2">
-                {/* Seletor de Colégio */}
+              {/* Linha 1: Colégio (largura total) */}
+              <select
+                value={colegioSelecionado}
+                onChange={e => setColegioSelecionado(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm"
+                style={{
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-default)',
+                  color: 'var(--text-primary)',
+                }}
+              >
+                <option value="">Selecione o Colégio</option>
+                {colegiosDisponiveis.map(colegio => (
+                  <option key={colegio} value={colegio}>{colegio}</option>
+                ))}
+              </select>
+
+              {/* Linha 2: Série, Turma, Turno */}
+              <div className="grid grid-cols-3 gap-2">
+                {/* Seletor de Série */}
                 <select
-                  value={colegioSelecionado}
-                  onChange={e => setColegioSelecionado(e.target.value)}
+                  value={serieSelecionada}
+                  onChange={e => setSerieSelecionada(e.target.value)}
                   className="px-3 py-2 rounded-lg text-sm"
                   style={{
                     background: 'var(--bg-elevated)',
@@ -369,31 +394,12 @@ export default function LoginPage() {
                     color: 'var(--text-primary)',
                   }}
                 >
-                  <option value="">Colégio</option>
-                  {colegiosDisponiveis.map(colegio => (
-                    <option key={colegio} value={colegio}>{colegio}</option>
-                  ))}
+                  <option value="">Série</option>
+                  <option value="1">1º ano</option>
+                  <option value="2">2º ano</option>
+                  <option value="3">3º ano</option>
                 </select>
 
-                {/* Seletor de Componente */}
-                <select
-                  value={componenteSelecionado}
-                  onChange={e => setComponenteSelecionado(e.target.value)}
-                  className="px-3 py-2 rounded-lg text-sm"
-                  style={{
-                    background: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-default)',
-                    color: 'var(--text-primary)',
-                  }}
-                >
-                  <option value="">Componente</option>
-                  <option value="fisica">Física</option>
-                  <option value="matematica">Matemática</option>
-                </select>
-              </div>
-
-              {/* Linha 2: Turma e Turno */}
-              <div className="grid grid-cols-2 gap-2">
                 {/* Seletor de Turma */}
                 <select
                   value={turmaSelecionada}
@@ -406,9 +412,11 @@ export default function LoginPage() {
                   }}
                 >
                   <option value="">Turma</option>
-                  {turmasDisponiveis.map(turma => (
-                    <option key={turma} value={turma}>{turma}</option>
-                  ))}
+                  {turmasDisponiveis
+                    .filter(t => serieSelecionada === '' || t.startsWith(serieSelecionada))
+                    .map(turma => (
+                      <option key={turma} value={turma}>{turma}</option>
+                    ))}
                 </select>
 
                 {/* Seletor de Turno */}
@@ -450,7 +458,7 @@ export default function LoginPage() {
               </div>
 
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                Filtre por colégio, componente, turma e turno para encontrar seu login.
+                Selecione o colégio e a série/turma para ver a lista de estudantes.
               </p>
             </div>
 
@@ -517,9 +525,9 @@ export default function LoginPage() {
                 <div className="text-center py-8">
                   <BookOpen className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--text-muted)' }} />
                   <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    {buscaNome || turmaSelecionada
+                    {algumFiltroSelecionado
                       ? 'Nenhum estudante encontrado'
-                      : 'Selecione uma turma ou busque pelo nome'}
+                      : 'Selecione colégio, turma ou busque pelo nome'}
                   </p>
                 </div>
               )}

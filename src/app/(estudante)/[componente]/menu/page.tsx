@@ -45,6 +45,9 @@ interface NotaBimestre {
   nota_tempo: number
   bimestre: number
   dias_restantes: number
+  tempo_uso_horas: number
+  questoes_respondidas: number
+  acertos_estudo: number
 }
 
 export default function MenuComponentePage() {
@@ -90,6 +93,9 @@ export default function MenuComponentePage() {
             nota_tempo: b.nota_tempo ?? 0,
             bimestre: b.bimestre ?? 1,
             dias_restantes: b.dias_restantes ?? 0,
+            tempo_uso_horas: b.tempo_uso_horas ?? 0,
+            questoes_respondidas: b.questoes_respondidas ?? 0,
+            acertos_estudo: b.acertos_estudo ?? 0,
           })
         }
       } catch {
@@ -208,10 +214,11 @@ export default function MenuComponentePage() {
           </div>
 
           {/* User + Stats */}
-          <div className="flex items-center gap-3">
+          <div className="space-y-3">
+            {/* Linha 1: Avatar + Nome */}
             <button
               onClick={() => router.push(`/${componente}/perfil`)}
-              className="flex items-center gap-3 flex-1 min-w-0"
+              className="flex items-center gap-3 w-full text-left"
             >
               <ProfilePhoto
                 fotoUrl={usuario.foto_url}
@@ -221,7 +228,7 @@ export default function MenuComponentePage() {
                 componente={componente}
               />
               <div className="min-w-0">
-                <p className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                <p className="font-display text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                   Olá, {primeiroNome}!
                 </p>
                 <Badge variant={isFisica ? 'fisica' : 'matematica'} size="sm">
@@ -230,18 +237,19 @@ export default function MenuComponentePage() {
               </div>
             </button>
 
-            <div className="flex gap-2">
+            {/* Linha 2: Stats */}
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { icon: Star, value: pontos, label: 'Pontos', color: accentColor },
                 { icon: Flame, value: sequenciaDias, label: 'Dias', color: 'var(--color-streak)' },
                 { icon: Target, value: `${taxaAcerto}%`, label: 'Acerto', color: accentColor },
               ].map((stat) => (
-                <div key={stat.label} className="stat-box min-w-[64px]">
-                  <stat.icon className="w-4 h-4 mx-auto mb-1" style={{ color: stat.color }} />
-                  <p className="text-base font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                <div key={stat.label} className="stat-box">
+                  <stat.icon className="w-5 h-5 mx-auto mb-1" style={{ color: stat.color }} />
+                  <p className="text-xl font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
                     {stat.value}
                   </p>
-                  <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{stat.label}</p>
                 </div>
               ))}
             </div>
@@ -250,43 +258,68 @@ export default function MenuComponentePage() {
           {/* Nota do Bimestre — sempre visível */}
           {nota && (
             <div
-              className="mt-3 p-3 rounded-xl flex items-center gap-3"
+              className="mt-3 p-4 rounded-xl"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <TrendingUp className="w-4 h-4" style={{ color: getCorNota(nota.nota_final) }} />
-                <span
-                  className="text-2xl font-bold tabular-nums"
-                  style={{ color: getCorNota(nota.nota_final) }}
-                >
-                  {nota.nota_final.toFixed(1)}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                    Nota {nota.bimestre}º bimestre
+              {/* Cabeçalho: nota grande + bimestre + dias restantes */}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-5 h-5" style={{ color: getCorNota(nota.nota_final) }} />
+                  <span
+                    className="text-3xl font-bold tabular-nums"
+                    style={{ color: getCorNota(nota.nota_final) }}
+                  >
+                    {nota.nota_final.toFixed(1)}
                   </span>
-                  <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                  <span className="text-sm" style={{ color: 'var(--text-muted)' }}>/10</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    {nota.bimestre}º Bimestre
+                  </p>
+                  <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>
                     {nota.dias_restantes}d restantes
-                  </span>
+                  </p>
                 </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-base)' }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min((nota.nota_final / 10) * 100, 100)}%`,
-                      background: getCorNota(nota.nota_final),
-                    }}
-                  />
+              </div>
+
+              {/* Barra de progresso */}
+              <div className="w-full h-3 rounded-full overflow-hidden flex mb-3" style={{ background: 'var(--bg-base)' }}>
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min((nota.nota_acertos / 10) * 100, 100)}%`,
+                    background: accentColor,
+                  }}
+                />
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min((nota.nota_tempo / 10) * 100, 100)}%`,
+                    background: 'var(--color-accent)',
+                  }}
+                />
+              </div>
+
+              {/* Stats: Acertos | Tempo de uso | Questões */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-lg font-bold tabular-nums" style={{ color: accentColor }}>
+                    {nota.nota_acertos.toFixed(1)}<span className="text-xs font-normal">/6</span>
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Acertos</p>
                 </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-2xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                    Acertos: {nota.nota_acertos.toFixed(1)}
-                  </span>
-                  <span className="text-2xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                    Tempo: {nota.nota_tempo.toFixed(1)}
-                  </span>
+                <div>
+                  <p className="text-lg font-bold tabular-nums" style={{ color: 'var(--color-accent)' }}>
+                    {nota.tempo_uso_horas.toFixed(1)}<span className="text-xs font-normal">h</span>
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Tempo de uso</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold tabular-nums" style={{ color: 'var(--text-primary)' }}>
+                    {nota.questoes_respondidas}
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Questões</p>
                 </div>
               </div>
             </div>

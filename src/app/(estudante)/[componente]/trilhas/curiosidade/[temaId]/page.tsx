@@ -19,6 +19,7 @@ import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente } from '@/types'
+import { formatarFormula } from '@/lib/formatacao'
 
 interface Questao {
   id: number
@@ -30,6 +31,16 @@ interface Questao {
   dificuldade: string
   tipo: string
   contexto: string
+  tipoAtividade?: 'multipla_escolha' | 'verdadeiro_falso' | 'complete_formula'
+  // V/F
+  afirmacao?: string
+  respostaVF?: string
+  justificativa?: string
+  // Complete
+  formulaComLacuna?: string
+  respostaLacuna?: string
+  opcoes?: string[]
+  textoCompleto?: string
 }
 
 interface Tema {
@@ -48,6 +59,12 @@ interface Feedback {
   explicacao: string
   curiosidade?: string
   erroComum?: string
+}
+
+interface CuriosidadeInfo {
+  voceSabia: string
+  saibaMais: string
+  fonteReal?: string | null
 }
 
 export default function EstudarCuriosidadePage() {
@@ -69,9 +86,16 @@ export default function EstudarCuriosidadePage() {
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const [pontos, setPontos] = useState(0)
 
+  const [curiosidade, setCuriosidade] = useState<CuriosidadeInfo | null>(null)
   const [mostrarDica, setMostrarDica] = useState(false)
   const [usouDica, setUsouDica] = useState(false)
   const [serie, setSerie] = useState('1EM')
+
+  // V/F state
+  const [respostaVF, setRespostaVF] = useState<'V' | 'F' | null>(null)
+
+  // Complete a fórmula state
+  const [respostaLacuna, setRespostaLacuna] = useState<string | null>(null)
 
   const [temaConcluido, setTemaConcluido] = useState(false)
 
@@ -81,6 +105,8 @@ export default function EstudarCuriosidadePage() {
   const carregarQuestao = useCallback(async () => {
     setLoading(true)
     setRespostaSelecionada(null)
+    setRespostaVF(null)
+    setRespostaLacuna(null)
     setMostrarResultado(false)
     setMostrarDica(false)
     setUsouDica(false)
@@ -96,6 +122,7 @@ export default function EstudarCuriosidadePage() {
         } else {
           setQuestao(data.questao)
           setTema(data.tema)
+          setCuriosidade(data.curiosidade || null)
           setProgresso(data.progresso || { respondidas: 0, corretas: 0, total: 15 })
         }
       } else {
@@ -130,7 +157,14 @@ export default function EstudarCuriosidadePage() {
   }, [router, componente, carregarQuestao])
 
   const responderQuestao = async () => {
-    if (!respostaSelecionada || !questao) return
+    if (!questao) return
+
+    const tipo = questao.tipoAtividade || 'multipla_escolha'
+
+    // Verificar se tem resposta baseado no tipo
+    if (tipo === 'multipla_escolha' && !respostaSelecionada) return
+    if (tipo === 'verdadeiro_falso' && !respostaVF) return
+    if (tipo === 'complete_formula' && !respostaLacuna) return
 
     setRespondendo(true)
 
@@ -141,8 +175,13 @@ export default function EstudarCuriosidadePage() {
         body: JSON.stringify({
           questaoId: questao.id,
           resposta: respostaSelecionada,
-          tempo: 0, // Sem cronômetro na curiosidade
+          tempo: 0,
           usouDica,
+          tipoAtividade: tipo,
+          respostaVF: tipo === 'verdadeiro_falso' ? respostaVF : undefined,
+          respostaVFEsperada: tipo === 'verdadeiro_falso' ? questao.respostaVF : undefined,
+          respostaLacuna: tipo === 'complete_formula' ? respostaLacuna : undefined,
+          respostaLacunaEsperada: tipo === 'complete_formula' ? questao.respostaLacuna : undefined,
         }),
       })
 
@@ -256,13 +295,13 @@ export default function EstudarCuriosidadePage() {
 
       {/* Header compacto */}
       <header className="header-chromebook lg:py-2">
-        <div className="max-w-2xl mx-auto w-full">
+        <div className="max-w-3xl mx-auto w-full">
           <div className="flex items-center gap-2">
             <BackButton href={`/${componente}/trilhas/curiosidade`} compactOnDesktop />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <span className="text-lg">{tema?.icone || '🔬'}</span>
-                <h1 className="text-base lg:text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>
+                <h1 className="text-base lg:text-lg font-bold truncate" style={{ color: 'var(--text-primary)' }}>
                   {tema?.nome || 'Curiosidade'}
                 </h1>
               </div>
@@ -289,7 +328,7 @@ export default function EstudarCuriosidadePage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-3">
+      <main className="max-w-3xl mx-auto px-3 lg:px-4 py-3">
         {questao ? (
           <div className="space-y-4">
             {/* Info da questão */}
@@ -310,82 +349,261 @@ export default function EstudarCuriosidadePage() {
               )}
             </div>
 
+            {/* Badge tipo de atividade */}
+            {questao.tipoAtividade && questao.tipoAtividade !== 'multipla_escolha' && (
+              <span
+                className="badge-chromebook inline-block"
+                style={{
+                  background: questao.tipoAtividade === 'verdadeiro_falso' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(59, 130, 246, 0.15)',
+                  color: questao.tipoAtividade === 'verdadeiro_falso' ? 'var(--warning)' : '#3B82F6',
+                }}
+              >
+                {questao.tipoAtividade === 'verdadeiro_falso' ? '✓✗ Verdadeiro ou Falso' : '✏️ Complete'}
+              </span>
+            )}
+
+            {/* Você sabia? */}
+            {curiosidade && !mostrarResultado && (
+              <div
+                className="p-4 rounded-xl"
+                style={{ background: `${corPrimaria}08`, border: `1px solid ${corPrimaria}30` }}
+              >
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: corPrimaria }} />
+                  <div>
+                    <p className="text-xs lg:text-sm font-semibold mb-1" style={{ color: corPrimaria }}>
+                      Você sabia?
+                    </p>
+                    <p className="text-sm lg:text-base leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                      {curiosidade.voceSabia}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Enunciado */}
             <div
               className="p-4 rounded-xl"
               style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-primary)' }}>
-                {questao.enunciado}
+              <p className="text-sm lg:text-base leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-primary)' }}>
+                {formatarFormula(questao.enunciado)}
               </p>
             </div>
 
-            {/* Alternativas */}
-            <div className="space-y-2">
-              {Object.entries(questao.alternativas).map(([letra, texto]) => {
-                const selecionada = respostaSelecionada === letra
-                const eCorreta = mostrarResultado && letra === respostaCorreta
-                const eErrada = mostrarResultado && selecionada && !acertou
+            {/* ═══ VERDADEIRO OU FALSO ═══ */}
+            {questao.tipoAtividade === 'verdadeiro_falso' && questao.afirmacao && (
+              <div className="space-y-3">
+                {/* Afirmação */}
+                <div
+                  className="p-4 rounded-xl"
+                  style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+                >
+                  <p className="text-xs lg:text-sm font-medium mb-1" style={{ color: 'var(--warning)' }}>Analise a afirmação:</p>
+                  <p className="text-sm lg:text-base font-medium leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                    &ldquo;{formatarFormula(questao.afirmacao)}&rdquo;
+                  </p>
+                </div>
 
-                let bgColor = 'var(--bg-surface)'
-                let borderColor = 'var(--border-default)'
+                {/* Botões V/F */}
+                <div className="grid grid-cols-2 gap-3">
+                  {(['V', 'F'] as const).map(opcao => {
+                    const selecionado = respostaVF === opcao
+                    const ehCorreto = mostrarResultado && opcao === questao.respostaVF
+                    const ehErrado = mostrarResultado && selecionado && !acertou
 
-                if (mostrarResultado) {
-                  if (eCorreta) {
-                    bgColor = 'var(--success)15'
-                    borderColor = 'var(--success)'
-                  } else if (eErrada) {
-                    bgColor = 'var(--error)15'
-                    borderColor = 'var(--error)'
-                  }
-                } else if (selecionada) {
-                  bgColor = `${corPrimaria}15`
-                  borderColor = corPrimaria
-                }
+                    return (
+                      <button
+                        key={opcao}
+                        onClick={() => !mostrarResultado && setRespostaVF(opcao)}
+                        disabled={mostrarResultado}
+                        className="p-4 lg:p-5 rounded-xl text-center transition-all"
+                        style={{
+                          background: mostrarResultado
+                            ? ehCorreto ? 'rgba(34, 197, 94, 0.15)' : ehErrado ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-surface)'
+                            : selecionado ? `${corPrimaria}15` : 'var(--bg-surface)',
+                          border: `2px solid ${
+                            mostrarResultado
+                              ? ehCorreto ? 'var(--success)' : ehErrado ? 'var(--error)' : 'var(--border-default)'
+                              : selecionado ? corPrimaria : 'var(--border-default)'
+                          }`,
+                        }}
+                      >
+                        <div className="flex flex-col items-center gap-1.5">
+                          <span
+                            className="w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center"
+                            style={{
+                              background: mostrarResultado
+                                ? ehCorreto ? 'var(--success)' : ehErrado ? 'var(--error)' : 'var(--bg-elevated)'
+                                : selecionado ? corPrimaria : 'var(--bg-elevated)',
+                              color: (mostrarResultado && (ehCorreto || ehErrado)) || selecionado ? '#fff' : 'var(--text-secondary)',
+                            }}
+                          >
+                            {mostrarResultado && ehCorreto ? (
+                              <Check className="w-5 h-5" />
+                            ) : mostrarResultado && ehErrado ? (
+                              <X className="w-5 h-5" />
+                            ) : opcao === 'V' ? (
+                              <Check className="w-5 h-5" />
+                            ) : (
+                              <X className="w-5 h-5" />
+                            )}
+                          </span>
+                          <span className="text-sm lg:text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                            {opcao === 'V' ? 'Verdadeiro' : 'Falso'}
+                          </span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
 
-                return (
-                  <button
-                    key={letra}
-                    onClick={() => !mostrarResultado && setRespostaSelecionada(letra)}
-                    disabled={mostrarResultado}
-                    className="w-full p-3 rounded-lg text-left transition-all flex items-start gap-3"
-                    style={{
-                      background: bgColor,
-                      border: `1.5px solid ${borderColor}`,
-                    }}
+                {/* Justificativa após resposta */}
+                {mostrarResultado && questao.justificativa && (
+                  <div
+                    className="p-3 lg:p-4 rounded-xl"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
                   >
-                    <span
-                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm"
+                    <p className="text-xs lg:text-sm font-medium mb-1" style={{ color: corPrimaria }}>Justificativa:</p>
+                    <p className="text-sm lg:text-base" style={{ color: 'var(--text-primary)' }}>
+                      {formatarFormula(questao.justificativa)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ═══ COMPLETE A FÓRMULA ═══ */}
+            {questao.tipoAtividade === 'complete_formula' && questao.formulaComLacuna && (
+              <div className="space-y-3">
+                {/* Fórmula com lacuna */}
+                <div
+                  className="p-4 rounded-xl text-center"
+                  style={{ background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.3)' }}
+                >
+                  <p className="text-xs lg:text-sm font-medium mb-2" style={{ color: '#3B82F6' }}>Complete a lacuna:</p>
+                  <p className="text-lg lg:text-xl font-mono font-bold leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                    {formatarFormula(questao.formulaComLacuna)}
+                  </p>
+                </div>
+
+                {/* Opções para preencher */}
+                {questao.opcoes && questao.opcoes.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {questao.opcoes.map((opcao, idx) => {
+                      const selecionado = respostaLacuna === opcao
+                      const ehCorreto = mostrarResultado && opcao === questao.respostaLacuna
+                      const ehErrado = mostrarResultado && selecionado && !acertou
+
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => !mostrarResultado && setRespostaLacuna(opcao)}
+                          disabled={mostrarResultado}
+                          className="p-3 lg:p-4 rounded-xl text-center transition-all font-mono font-semibold text-sm lg:text-base"
+                          style={{
+                            background: mostrarResultado
+                              ? ehCorreto ? 'rgba(34, 197, 94, 0.15)' : ehErrado ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-surface)'
+                              : selecionado ? `${corPrimaria}15` : 'var(--bg-surface)',
+                            border: `2px solid ${
+                              mostrarResultado
+                                ? ehCorreto ? 'var(--success)' : ehErrado ? 'var(--error)' : 'var(--border-default)'
+                                : selecionado ? corPrimaria : 'var(--border-default)'
+                            }`,
+                            color: 'var(--text-primary)',
+                          }}
+                        >
+                          {formatarFormula(opcao)}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Texto completo após resposta */}
+                {mostrarResultado && questao.textoCompleto && (
+                  <div
+                    className="p-3 lg:p-4 rounded-xl"
+                    style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+                  >
+                    <p className="text-xs lg:text-sm font-medium mb-1" style={{ color: '#3B82F6' }}>Resposta completa:</p>
+                    <p className="text-sm lg:text-base font-mono" style={{ color: 'var(--text-primary)' }}>
+                      {formatarFormula(questao.textoCompleto)}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ═══ MÚLTIPLA ESCOLHA (padrão) ═══ */}
+            {(!questao.tipoAtividade || questao.tipoAtividade === 'multipla_escolha') && (
+              <div className="space-y-2">
+                {Object.entries(questao.alternativas).map(([letra, texto]) => {
+                  const selecionada = respostaSelecionada === letra
+                  const eCorreta = mostrarResultado && letra === respostaCorreta
+                  const eErrada = mostrarResultado && selecionada && !acertou
+
+                  let bgColor = 'var(--bg-surface)'
+                  let borderColor = 'var(--border-default)'
+
+                  if (mostrarResultado) {
+                    if (eCorreta) {
+                      bgColor = 'rgba(34, 197, 94, 0.15)'
+                      borderColor = 'var(--success)'
+                    } else if (eErrada) {
+                      bgColor = 'rgba(239, 68, 68, 0.15)'
+                      borderColor = 'var(--error)'
+                    }
+                  } else if (selecionada) {
+                    bgColor = `${corPrimaria}15`
+                    borderColor = corPrimaria
+                  }
+
+                  return (
+                    <button
+                      key={letra}
+                      onClick={() => !mostrarResultado && setRespostaSelecionada(letra)}
+                      disabled={mostrarResultado}
+                      className="w-full p-3 lg:p-4 rounded-lg text-left transition-all flex items-start gap-3"
                       style={{
-                        background: mostrarResultado
-                          ? eCorreta
-                            ? 'var(--success)'
-                            : eErrada
-                            ? 'var(--error)'
-                            : 'var(--bg-elevated)'
-                          : selecionada
-                          ? corPrimaria
-                          : 'var(--bg-elevated)',
-                        color: (mostrarResultado && (eCorreta || eErrada)) || selecionada
-                          ? '#fff'
-                          : 'var(--text-secondary)',
+                        background: bgColor,
+                        border: `1.5px solid ${borderColor}`,
                       }}
                     >
-                      {mostrarResultado && eCorreta ? (
-                        <Check className="w-4 h-4" />
-                      ) : mostrarResultado && eErrada ? (
-                        <X className="w-4 h-4" />
-                      ) : (
-                        letra
-                      )}
-                    </span>
-                    <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                      {texto}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
+                      <span
+                        className="w-7 h-7 lg:w-9 lg:h-9 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm lg:text-base"
+                        style={{
+                          background: mostrarResultado
+                            ? eCorreta
+                              ? 'var(--success)'
+                              : eErrada
+                              ? 'var(--error)'
+                              : 'var(--bg-elevated)'
+                            : selecionada
+                            ? corPrimaria
+                            : 'var(--bg-elevated)',
+                          color: (mostrarResultado && (eCorreta || eErrada)) || selecionada
+                            ? '#fff'
+                            : 'var(--text-secondary)',
+                        }}
+                      >
+                        {mostrarResultado && eCorreta ? (
+                          <Check className="w-4 h-4" />
+                        ) : mostrarResultado && eErrada ? (
+                          <X className="w-4 h-4" />
+                        ) : (
+                          letra
+                        )}
+                      </span>
+                      <span className="text-sm lg:text-base flex-1" style={{ color: 'var(--text-primary)' }}>
+                        {formatarFormula(texto)}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
             {/* Dica */}
             {!mostrarResultado && (
@@ -451,6 +669,29 @@ export default function EstudarCuriosidadePage() {
                   </div>
                 )}
 
+                {/* Saiba mais - da curiosidade */}
+                {curiosidade && (
+                  <div
+                    className="p-3 rounded-lg"
+                    style={{ background: `${corPrimaria}10`, border: `1px solid ${corPrimaria}25` }}
+                  >
+                    <div className="flex items-start gap-2">
+                      <Lightbulb className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: corPrimaria }} />
+                      <div>
+                        <p className="text-xs font-semibold mb-0.5" style={{ color: corPrimaria }}>Saiba mais</p>
+                        <p className="text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
+                          {curiosidade.saibaMais}
+                        </p>
+                        {curiosidade.fonteReal && (
+                          <p className="text-xs mt-1.5 italic" style={{ color: 'var(--text-muted)' }}>
+                            Fonte: {curiosidade.fonteReal}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {feedback.erroComum && (
                   <div
                     className="p-3 rounded-lg"
@@ -467,14 +708,20 @@ export default function EstudarCuriosidadePage() {
 
             {/* Botões de ação */}
             <div className="pt-2">
-              {!mostrarResultado ? (
+              {!mostrarResultado ? (() => {
+                const tipo = questao.tipoAtividade || 'multipla_escolha'
+                const temResposta = tipo === 'verdadeiro_falso' ? !!respostaVF
+                  : tipo === 'complete_formula' ? !!respostaLacuna
+                  : !!respostaSelecionada
+
+                return (
                 <button
                   onClick={responderQuestao}
-                  disabled={!respostaSelecionada || respondendo}
-                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+                  disabled={!temResposta || respondendo}
+                  className="w-full py-3 lg:py-4 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50 text-base"
                   style={{
-                    background: respostaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                    color: respostaSelecionada ? '#fff' : 'var(--text-muted)',
+                    background: temResposta ? corPrimaria : 'var(--bg-elevated)',
+                    color: temResposta ? '#fff' : 'var(--text-muted)',
                   }}
                 >
                   {respondendo ? (
@@ -489,13 +736,14 @@ export default function EstudarCuriosidadePage() {
                     </>
                   )}
                 </button>
-              ) : (
+                )
+              })() : (
                 <button
                   onClick={proximaQuestao}
-                  className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
+                  className="w-full py-3 lg:py-4 rounded-xl font-semibold flex items-center justify-center gap-2 text-base"
                   style={{ background: corPrimaria, color: '#fff' }}
                 >
-                  Proxima Questao
+                  Próxima Questão
                   <ArrowRight className="w-5 h-5" />
                 </button>
               )}

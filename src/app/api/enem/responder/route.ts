@@ -103,7 +103,8 @@ export async function POST(request: NextRequest) {
     }
 
     const correta = respostaUpperCase === respostaCorreta
-    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 7200
+    // Máximo 10 min por questão ENEM (timer pausa em ociosidade no client)
+    const tempoValidado = typeof tempo_segundos === 'number' && tempo_segundos >= 0 && tempo_segundos <= 600
       ? Math.floor(tempo_segundos)
       : 0
 
@@ -143,7 +144,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sucesso: true,
       correta,
-      resposta_correta: respostaCorreta,
+      // SEGURANÇA: Só envia resposta correta se acertou (evita coleta de gabaritos)
+      resposta_correta: correta ? respostaCorreta : undefined,
       estatisticas: {
         total_questoes: totalQuestoes,
         total_corretas: totalCorretas,

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Search, Filter, Atom, Calculator, Key, Copy, Check } from 'lucide-react'
+import { Users, Search, Filter, Atom, Calculator, Key, Copy, Check, UserPlus } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
@@ -23,6 +23,25 @@ interface NovaSenhaModal {
   show: boolean
   nomeAluno: string
   senha: string
+}
+
+// Estado do formulário de cadastro
+interface CadastroForm {
+  nome: string
+  turma: string
+  colegio: string
+  fisica: boolean
+  matematica: boolean
+}
+
+// Estado do resultado do cadastro
+interface CadastroResultado {
+  show: boolean
+  sucesso: boolean
+  mensagem: string
+  email?: string
+  senha?: string
+  atualizado?: boolean
 }
 
 export default function AlunosProfessorPage() {
@@ -48,6 +67,16 @@ export default function AlunosProfessorPage() {
   // Estado para indicar se a senha foi copiada
   const [copiado, setCopiado] = useState(false)
 
+  // Estado do modal de cadastro
+  const [showCadastro, setShowCadastro] = useState(false)
+  const [cadastroForm, setCadastroForm] = useState<CadastroForm>({
+    nome: '', turma: '', colegio: '', fisica: false, matematica: true,
+  })
+  const [cadastrando, setCadastrando] = useState(false)
+  const [cadastroResultado, setCadastroResultado] = useState<CadastroResultado>({
+    show: false, sucesso: false, mensagem: '',
+  })
+
   // Função para mostrar toast
   const showToast = useCallback((message: string, type: ToastState['type']) => {
     setToast({ show: true, message, type })
@@ -62,6 +91,53 @@ export default function AlunosProfessorPage() {
       setTimeout(() => setCopiado(false), 2000)
     } catch {
       showToast('Erro ao copiar senha', 'error')
+    }
+  }
+
+  const cadastrarAluno = async () => {
+    const componentes: string[] = []
+    if (cadastroForm.fisica) componentes.push('fisica')
+    if (cadastroForm.matematica) componentes.push('matematica')
+
+    if (!cadastroForm.nome.trim() || !cadastroForm.turma.trim() || componentes.length === 0) {
+      showToast('Preencha todos os campos obrigatórios', 'warning')
+      return
+    }
+
+    setCadastrando(true)
+    try {
+      const res = await fetch('/api/professor/alunos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: cadastroForm.nome.trim(),
+          turma: cadastroForm.turma.trim(),
+          componentes,
+          colegio: cadastroForm.colegio.trim() || undefined,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.sucesso) {
+        setCadastroResultado({
+          show: true,
+          sucesso: true,
+          mensagem: data.mensagem,
+          email: data.email,
+          senha: data.senha,
+          atualizado: data.atualizado,
+        })
+        setCadastroForm({ nome: '', turma: '', colegio: '', fisica: false, matematica: true })
+        setShowCadastro(false)
+        buscarAlunos()
+      } else {
+        showToast(data.erro || 'Erro ao cadastrar', 'error')
+      }
+    } catch {
+      showToast('Erro de conexão', 'error')
+    } finally {
+      setCadastrando(false)
     }
   }
 
@@ -149,7 +225,14 @@ export default function AlunosProfessorPage() {
               </h1>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{alunos.length} estudantes cadastrados</p>
             </div>
-            <div className="w-10" />
+            <button
+              onClick={() => setShowCadastro(true)}
+              className="p-2.5 rounded-xl transition-all"
+              style={{ background: 'var(--color-accent)', color: '#fff' }}
+              title="Cadastrar aluno"
+            >
+              <UserPlus className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </header>
@@ -327,6 +410,188 @@ export default function AlunosProfessorPage() {
                 background: 'var(--color-accent)',
                 color: 'white',
               }}
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Cadastro de Aluno */}
+      {showCadastro && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div
+            className="w-full max-w-md rounded-2xl p-6 shadow-xl"
+            style={{ background: 'var(--bg-surface)' }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
+              Cadastrar Novo Aluno
+            </h2>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  Nome completo *
+                </label>
+                <input
+                  type="text"
+                  value={cadastroForm.nome}
+                  onChange={e => setCadastroForm(f => ({ ...f, nome: e.target.value }))}
+                  placeholder="Ex: João Silva Santos"
+                  className="w-full px-4 py-3 border rounded-xl text-sm"
+                  style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  Turma * <span className="text-xs font-normal" style={{ color: 'var(--text-muted)' }}>(ex: 1A, 2B, 6C)</span>
+                </label>
+                <input
+                  type="text"
+                  value={cadastroForm.turma}
+                  onChange={e => setCadastroForm(f => ({ ...f, turma: e.target.value }))}
+                  placeholder="1A"
+                  maxLength={4}
+                  className="w-full px-4 py-3 border rounded-xl text-sm uppercase"
+                  style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  Colégio <span className="text-xs font-normal" style={{ color: 'var(--text-muted)' }}>(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  value={cadastroForm.colegio}
+                  onChange={e => setCadastroForm(f => ({ ...f, colegio: e.target.value }))}
+                  placeholder="Nome do colégio"
+                  className="w-full px-4 py-3 border rounded-xl text-sm"
+                  style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  Componentes *
+                </label>
+                <div className="flex gap-3">
+                  <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer border" style={{
+                    background: cadastroForm.fisica ? 'rgba(34, 197, 94, 0.1)' : 'var(--bg-elevated)',
+                    borderColor: cadastroForm.fisica ? '#22c55e' : 'var(--border-default)',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={cadastroForm.fisica}
+                      onChange={e => setCadastroForm(f => ({ ...f, fisica: e.target.checked }))}
+                      className="sr-only"
+                    />
+                    <Atom className="w-4 h-4" style={{ color: cadastroForm.fisica ? '#22c55e' : 'var(--text-muted)' }} />
+                    <span className="text-sm font-medium" style={{ color: cadastroForm.fisica ? '#22c55e' : 'var(--text-muted)' }}>
+                      Física
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer border" style={{
+                    background: cadastroForm.matematica ? 'rgba(168, 85, 247, 0.1)' : 'var(--bg-elevated)',
+                    borderColor: cadastroForm.matematica ? '#a855f7' : 'var(--border-default)',
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={cadastroForm.matematica}
+                      onChange={e => setCadastroForm(f => ({ ...f, matematica: e.target.checked }))}
+                      className="sr-only"
+                    />
+                    <Calculator className="w-4 h-4" style={{ color: cadastroForm.matematica ? '#a855f7' : 'var(--text-muted)' }} />
+                    <span className="text-sm font-medium" style={{ color: cadastroForm.matematica ? '#a855f7' : 'var(--text-muted)' }}>
+                      Matemática
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowCadastro(false)}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={cadastrarAluno}
+                disabled={cadastrando}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ background: 'var(--color-accent)', color: '#fff' }}
+              >
+                {cadastrando ? (
+                  <Loading size="sm" />
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4" />
+                    Cadastrar
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Resultado do Cadastro */}
+      {cadastroResultado.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div
+            className="w-full max-w-md rounded-2xl p-6 shadow-xl"
+            style={{ background: 'var(--bg-surface)' }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="text-center mb-4">
+              <div
+                className="w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center"
+                style={{ background: 'rgba(34, 197, 94, 0.15)' }}
+              >
+                <Check className="w-7 h-7 text-green-500" />
+              </div>
+              <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                {cadastroResultado.atualizado ? 'Aluno Atualizado' : 'Aluno Cadastrado'}
+              </h2>
+              <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
+                {cadastroResultado.mensagem}
+              </p>
+            </div>
+
+            {cadastroResultado.email && (
+              <div className="space-y-2 mb-4">
+                <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
+                  <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Email gerado</p>
+                  <p className="text-sm font-mono font-medium" style={{ color: 'var(--text-primary)' }}>
+                    {cadastroResultado.email}
+                  </p>
+                </div>
+                {cadastroResultado.senha && (
+                  <div className="p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
+                    <p className="text-xs mb-1" style={{ color: 'var(--text-muted)' }}>Senha inicial</p>
+                    <p className="text-sm font-mono font-bold" style={{ color: 'var(--text-primary)' }}>
+                      {cadastroResultado.senha}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+              O estudante deverá alterar a senha no primeiro acesso.
+            </p>
+
+            <button
+              onClick={() => setCadastroResultado({ show: false, sucesso: false, mensagem: '' })}
+              className="w-full py-3 px-4 rounded-xl font-semibold"
+              style={{ background: 'var(--color-accent)', color: '#fff' }}
             >
               Fechar
             </button>

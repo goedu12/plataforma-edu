@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { RotateCcw, CheckCircle2, XCircle, WifiOff, RefreshCw, BookOpen, Clock, Lightbulb, Trophy, AlertCircle } from 'lucide-react'
+import { RotateCcw, CheckCircle2, XCircle, WifiOff, RefreshCw, BookOpen, Clock, Lightbulb, Trophy, AlertCircle, Pause } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { useActiveTimer } from '@/hooks/useActiveTimer'
 import type { Componente, Questao } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
 
@@ -31,10 +32,9 @@ export default function RevisaoPage() {
   const [status, setStatus] = useState<StatusRevisao | null>(null)
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState<string | null>(null)
-  const [tempoDecorrido, setTempoDecorrido] = useState(0)
+  const { tempoAtivo, pausado, resetar: resetarTimer } = useActiveTimer()
   const [totalRevisao, setTotalRevisao] = useState(0)
   const [errouEm, setErrouEm] = useState<string | null>(null)
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   const [selecionada, setSelecionada] = useState<Alternativa | null>(null)
   const [mostrarDica, setMostrarDica] = useState(false)
@@ -64,8 +64,7 @@ export default function RevisaoPage() {
           setQuestao(data.questao)
           setTotalRevisao(data.total_revisao)
           setErrouEm(data.errou_em)
-          setTempoDecorrido(0)
-          iniciarTimer()
+          resetarTimer()
         } else {
           setQuestao(null)
           setTotalRevisao(0)
@@ -83,27 +82,12 @@ export default function RevisaoPage() {
     }
   }
 
-  const iniciarTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-    timerRef.current = setInterval(() => {
-      setTempoDecorrido(prev => prev + 1)
-    }, 1000)
-  }
-
-  const pararTimer = () => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
-  }
-
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
       router.push('/selecionar')
       return
     }
     buscarQuestao()
-    return () => pararTimer()
   }, [componente])
 
   const handleVoltar = () => router.push(`/${componente}/menu`)
@@ -112,7 +96,6 @@ export default function RevisaoPage() {
     if (!selecionada || !questao) return
 
     setRespondendo(true)
-    pararTimer()
 
     try {
       const response = await fetch('/api/questoes/responder', {
@@ -122,7 +105,7 @@ export default function RevisaoPage() {
           questao_id: questao.id,
           componente,
           resposta: selecionada,
-          tempo_segundos: tempoDecorrido,
+          tempo_segundos: tempoAtivo,
           usou_dica: usouDica,
           modo: 'revisao',
         }),
@@ -230,9 +213,9 @@ export default function RevisaoPage() {
                 </div>
 
                 {/* Timer */}
-                <div className="timer-chromebook" style={{ color: 'var(--warning)' }}>
-                  <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-                  <span>{formatarTempo(tempoDecorrido)}</span>
+                <div className={`timer-chromebook ${pausado ? 'opacity-50' : ''}`} style={{ color: 'var(--warning)' }}>
+                  {pausado ? <Pause className="w-3.5 h-3.5 lg:w-4 lg:h-4" /> : <Clock className="w-3.5 h-3.5 lg:w-4 lg:h-4" />}
+                  <span>{formatarTempo(tempoAtivo)}</span>
                 </div>
 
                 {/* Progress inline - desktop */}
