@@ -15,7 +15,7 @@ import {
 import Button from './ui/Button'
 import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
-import { processarTexto, processarContexto, isTextoValido } from '@/lib/limpezaTexto'
+import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 
@@ -221,60 +221,85 @@ export default function QuestaoENEM({
 
       {/* ═══════════════════════════════════════════════════════════════
           ENUNCIADO (CONTEXTO)
+          Ordem: Texto → Imagem → Fonte (como na prova ENEM original)
           ═══════════════════════════════════════════════════════════════ */}
-      <div
-        className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto"
-        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-      >
-        {/* Imagem principal do contexto */}
-        {isValidImageUrl(questao.imagem_principal) && (
-          <div className="mb-4 relative">
-            <div className="relative w-full max-w-md mx-auto">
-              <SafeImage
-                src={questao.imagem_principal}
-                alt="Imagem da questão"
-                width={600}
-                height={400}
-                className="rounded-lg object-contain w-full h-auto max-h-[250px] cursor-pointer"
-                onClick={() => setImagemExpandida(questao.imagem_principal || null)}
-                showPlaceholder
-                fallback={
-                  <div className="flex items-center justify-center bg-[var(--bg-elevated)] rounded-lg p-4 min-h-[100px]">
-                    <div className="text-center">
-                      <ImageOff className="w-8 h-8 mx-auto mb-2 text-[var(--text-muted)]" />
-                      <span className="text-xs text-[var(--text-muted)]">Imagem indisponível</span>
-                    </div>
-                  </div>
-                }
-              />
-              <button
-                onClick={() => setImagemExpandida(questao.imagem_principal || null)}
-                className="absolute top-2 right-2 p-1.5 rounded-lg transition-all"
-                style={{ background: 'var(--bg-elevated)' }}
-              >
-                <ZoomIn className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-              </button>
-            </div>
-          </div>
-        )}
+      {(() => {
+        // Processa o contexto e extrai as fontes separadamente
+        const contextoProcessado = processarContexto(questao.contexto)
+        const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
 
-        {/* Texto do contexto/enunciado */}
-        <div
-          className="text-sm sm:text-base leading-relaxed"
-          style={{ color: 'var(--text-primary)' }}
-          dangerouslySetInnerHTML={{ __html: processarContexto(questao.contexto) }}
-        />
-
-        {/* Comando (texto antes das alternativas) */}
-        {questao.comando && (
-          <p
-            className="text-sm sm:text-base font-medium mt-4"
-            style={{ color: 'var(--text-primary)' }}
+        return (
+          <div
+            className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
-            {questao.comando}
-          </p>
-        )}
-      </div>
+            {/* 1. Texto do contexto/enunciado (SEM as fontes) */}
+            {textoSemSmall && (
+              <div
+                className="text-sm sm:text-base leading-relaxed"
+                style={{ color: 'var(--text-primary)' }}
+                dangerouslySetInnerHTML={{ __html: textoSemSmall }}
+              />
+            )}
+
+            {/* 2. Imagem principal do contexto */}
+            {isValidImageUrl(questao.imagem_principal) && (
+              <div className="my-4 relative">
+                <div className="relative w-full max-w-md mx-auto">
+                  <SafeImage
+                    src={questao.imagem_principal}
+                    alt="Imagem da questão"
+                    width={600}
+                    height={400}
+                    className="rounded-lg object-contain w-full h-auto max-h-[250px] cursor-pointer"
+                    onClick={() => setImagemExpandida(questao.imagem_principal || null)}
+                    showPlaceholder
+                    fallback={
+                      <div className="flex items-center justify-center bg-[var(--bg-elevated)] rounded-lg p-4 min-h-[100px]">
+                        <div className="text-center">
+                          <ImageOff className="w-8 h-8 mx-auto mb-2 text-[var(--text-muted)]" />
+                          <span className="text-xs text-[var(--text-muted)]">Imagem indisponível</span>
+                        </div>
+                      </div>
+                    }
+                  />
+                  <button
+                    onClick={() => setImagemExpandida(questao.imagem_principal || null)}
+                    className="absolute top-2 right-2 p-1.5 rounded-lg transition-all"
+                    style={{ background: 'var(--bg-elevated)' }}
+                  >
+                    <ZoomIn className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 3. Fontes/Referências (APÓS as imagens, como na prova ENEM) */}
+            {fontes.length > 0 && (
+              <div className="mt-3 pt-2 border-t border-[var(--border-default)]">
+                {fontes.map((fonte, index) => (
+                  <p
+                    key={index}
+                    className="text-xs leading-relaxed"
+                    style={{ color: 'var(--text-muted)' }}
+                    dangerouslySetInnerHTML={{ __html: fonte }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* 4. Comando (texto antes das alternativas) */}
+            {questao.comando && (
+              <p
+                className="text-sm sm:text-base font-medium mt-4"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {questao.comando}
+              </p>
+            )}
+          </div>
+        )
+      })()}
 
       {/* ═══════════════════════════════════════════════════════════════
           ALTERNATIVAS (5)

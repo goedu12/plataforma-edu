@@ -646,6 +646,49 @@ export function questaoTemQualidade(questao: {
 }
 
 /**
+ * Extrai tags <small> do texto HTML e retorna o texto separado em duas partes:
+ * - textoSemSmall: o texto original sem as tags <small>
+ * - fontes: array com o conteúdo de cada tag <small>
+ *
+ * Usado para renderizar as fontes/referências em posição diferente (ex: após imagens)
+ */
+export function extrairFontesDoContexto(html: string): {
+  textoSemSmall: string
+  fontes: string[]
+} {
+  if (!html || typeof html !== 'string') {
+    return { textoSemSmall: '', fontes: [] }
+  }
+
+  const fontes: string[] = []
+
+  // Regex para capturar tags <small>...</small> (incluindo conteúdo)
+  const smallRegex = /<small[^>]*>([\s\S]*?)<\/small>/gi
+
+  // Extrair todas as ocorrências de <small>
+  let match
+  while ((match = smallRegex.exec(html)) !== null) {
+    // Guarda o conteúdo interno da tag <small>
+    const conteudo = match[1].trim()
+    if (conteudo) {
+      fontes.push(conteudo)
+    }
+  }
+
+  // Remover todas as tags <small>...</small> do texto original
+  let textoSemSmall = html.replace(/<small[^>]*>[\s\S]*?<\/small>/gi, '')
+
+  // Limpar espaços extras deixados pela remoção
+  textoSemSmall = textoSemSmall
+    .replace(/<br>\s*<br>\s*<br>/g, '<br>')
+    .replace(/<p>\s*<\/p>/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+
+  return { textoSemSmall, fontes }
+}
+
+/**
  * Extrai todas as imagens válidas de uma questão
  */
 export function extrairImagensQuestao(questao: {
