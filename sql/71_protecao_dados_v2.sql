@@ -99,10 +99,12 @@ CREATE POLICY "Service role full access auditoria" ON auditoria_notas
 -- 3. TRIGGER: auditar alterações em notas_2025
 -- ============================================================
 CREATE OR REPLACE FUNCTION auditar_notas_2025()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SET search_path = ''
+AS $$
 BEGIN
     IF TG_OP = 'DELETE' THEN
-        INSERT INTO auditoria_notas (
+        INSERT INTO public.auditoria_notas (
             nota_2025_id, usuario_id, componente, ano_letivo, bimestre,
             operacao, nota_final_antes, dados_antes
         ) VALUES (
@@ -116,7 +118,7 @@ BEGIN
         IF OLD.nota_final IS DISTINCT FROM NEW.nota_final
            OR OLD.status IS DISTINCT FROM NEW.status
            OR OLD.questoes_respondidas IS DISTINCT FROM NEW.questoes_respondidas THEN
-            INSERT INTO auditoria_notas (
+            INSERT INTO public.auditoria_notas (
                 nota_2025_id, usuario_id, componente, ano_letivo, bimestre,
                 operacao, nota_final_antes, nota_final_depois,
                 dados_antes, dados_depois
@@ -142,9 +144,11 @@ CREATE TRIGGER trigger_auditar_notas_2025
 -- Registra qualquer tentativa de deletar respostas
 -- ============================================================
 CREATE OR REPLACE FUNCTION auditar_delete_respostas()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+SET search_path = ''
+AS $$
 BEGIN
-    INSERT INTO auditoria_notas (
+    INSERT INTO public.auditoria_notas (
         usuario_id, componente, ano_letivo, bimestre,
         operacao, dados_antes
     ) VALUES (
@@ -207,7 +211,9 @@ CREATE OR REPLACE FUNCTION congelar_bimestre(
     p_bimestre INTEGER,
     p_motivo TEXT DEFAULT 'fechamento_bimestre'
 )
-RETURNS TABLE(usuarios_congelados INTEGER) AS $$
+RETURNS TABLE(usuarios_congelados INTEGER)
+SET search_path = ''
+AS $$
 DECLARE
     v_count INTEGER := 0;
     r RECORD;
@@ -216,13 +222,13 @@ BEGIN
     FOR r IN
         SELECT n.*, u.fis_pontos, u.fis_questoes_total, u.fis_questoes_corretas,
                u.mat_pontos, u.mat_questoes_total, u.mat_questoes_corretas
-        FROM notas_2025 n
-        JOIN usuarios u ON u.id = n.usuario_id
+        FROM public.notas_2025 n
+        JOIN public.usuarios u ON u.id = n.usuario_id
         WHERE n.ano_letivo = p_ano AND n.bimestre = p_bimestre
           AND n.status != 'fechado'
     LOOP
         -- Criar snapshot (ignora se já existe)
-        INSERT INTO snapshots_bimestre (
+        INSERT INTO public.snapshots_bimestre (
             usuario_id, componente, ano_letivo, bimestre,
             nota_final, nota_acertos, nota_tempo,
             questoes_respondidas, acertos_estudo, acertos_revisao, acertos_desafio,
@@ -244,7 +250,7 @@ BEGIN
         ) ON CONFLICT (usuario_id, componente, ano_letivo, bimestre) DO NOTHING;
 
         -- Marcar como fechado
-        UPDATE notas_2025 SET status = 'fechado', atualizado_em = NOW()
+        UPDATE public.notas_2025 SET status = 'fechado', atualizado_em = NOW()
         WHERE id = r.id;
 
         v_count := v_count + 1;
