@@ -509,6 +509,27 @@ export function processarContexto(
 }
 
 /**
+ * Detecta padrões repetitivos no texto (ex: "ENEM2025ENEM2025ENEM2025...")
+ * Retorna true se detectar padrão repetitivo suspeito
+ */
+function temPadraoRepetitivo(texto: string): boolean {
+  if (!texto || texto.length < 20) return false
+
+  // Verifica se há um padrão de 4-20 caracteres repetido 3+ vezes consecutivas
+  const padraoRepetitivo = /(.{4,20})\1{2,}/i
+  if (padraoRepetitivo.test(texto)) {
+    return true
+  }
+
+  // Verifica padrões específicos conhecidos (ENEM + ano repetido)
+  if (/ENEM\d{4}ENEM\d{4}/i.test(texto)) {
+    return true
+  }
+
+  return false
+}
+
+/**
  * Verifica se uma questão tem qualidade suficiente para exibição
  * Retorna true se a questão pode ser exibida, false se deve ser ocultada
  * Critérios rigorosos para garantir boa experiência ao estudante
@@ -520,10 +541,17 @@ export function questaoTemQualidade(questao: {
   alternativa_c: string | null
   alternativa_d: string | null
   alternativa_e: string | null
+  comando?: string | null
   imagem_principal?: string | null
   imagens_extras?: string[] | null
 }): { valida: boolean; motivo?: string } {
   const contexto = questao.contexto || ''
+  const comando = questao.comando || ''
+
+  // 0. Verificar padrões repetitivos no comando ou contexto (dados mal formatados)
+  if (temPadraoRepetitivo(comando) || temPadraoRepetitivo(contexto)) {
+    return { valida: false, motivo: 'padrao_repetitivo' }
+  }
 
   // 1. Contexto deve existir e ter conteúdo mínimo
   const contextoLimpo = limparTexto(contexto)
@@ -569,6 +597,13 @@ export function questaoTemQualidade(questao: {
     questao.alternativa_d,
     questao.alternativa_e,
   ]
+
+  // 6a. Verificar padrões repetitivos nas alternativas
+  for (const alt of alternativas) {
+    if (alt && temPadraoRepetitivo(alt)) {
+      return { valida: false, motivo: 'alternativa_padrao_repetitivo' }
+    }
+  }
 
   const alternativasValidas = alternativas.filter(alt => {
     if (!alt) return false
