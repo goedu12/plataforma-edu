@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
   CheckCircle2,
   XCircle,
@@ -11,13 +11,16 @@ import {
   Calendar,
   BookOpen,
   ImageOff,
+  FileText,
 } from 'lucide-react'
 import Button from './ui/Button'
 import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
+import ConteudoQuestao from './enem/ConteudoQuestao'
 import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
+import 'katex/dist/katex.min.css'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // COMPONENTE: QuestaoENEM
@@ -222,24 +225,35 @@ export default function QuestaoENEM({
       {/* ═══════════════════════════════════════════════════════════════
           ENUNCIADO (CONTEXTO)
           Ordem: Texto → Imagem → Fonte (como na prova ENEM original)
+          Suporte a LaTeX/KaTeX para fórmulas matemáticas
           ═══════════════════════════════════════════════════════════════ */}
       {(() => {
         // Processa o contexto e extrai as fontes separadamente
         const contextoProcessado = processarContexto(questao.contexto)
         const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
 
+        // Detecta se há fórmulas LaTeX no contexto
+        const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.contexto || '')
+
         return (
           <div
-            className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto"
+            className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto questao-contexto"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
             {/* 1. Texto do contexto/enunciado (SEM as fontes) */}
             {textoSemSmall && (
-              <div
-                className="text-sm sm:text-base leading-relaxed"
-                style={{ color: 'var(--text-primary)' }}
-                dangerouslySetInnerHTML={{ __html: textoSemSmall }}
-              />
+              temLatex ? (
+                <ConteudoQuestao
+                  conteudo={textoSemSmall}
+                  tipo="contexto"
+                />
+              ) : (
+                <div
+                  className="text-sm sm:text-base leading-relaxed questao-texto"
+                  style={{ color: 'var(--text-primary)' }}
+                  dangerouslySetInnerHTML={{ __html: textoSemSmall }}
+                />
+              )
             )}
 
             {/* 2. Imagem principal do contexto */}
@@ -251,7 +265,7 @@ export default function QuestaoENEM({
                     alt="Imagem da questão"
                     width={600}
                     height={400}
-                    className="rounded-lg object-contain w-full h-auto max-h-[250px] cursor-pointer"
+                    className="rounded-lg object-contain w-full h-auto max-h-[250px] cursor-pointer shadow-sm"
                     onClick={() => setImagemExpandida(questao.imagem_principal || null)}
                     showPlaceholder
                     fallback={
@@ -265,12 +279,32 @@ export default function QuestaoENEM({
                   />
                   <button
                     onClick={() => setImagemExpandida(questao.imagem_principal || null)}
-                    className="absolute top-2 right-2 p-1.5 rounded-lg transition-all"
+                    className="absolute top-2 right-2 p-1.5 rounded-lg transition-all hover:scale-105"
                     style={{ background: 'var(--bg-elevated)' }}
+                    aria-label="Expandir imagem"
                   >
                     <ZoomIn className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
                   </button>
                 </div>
+              </div>
+            )}
+
+            {/* 2b. Imagens extras (se houver) */}
+            {questao.imagens_extras && questao.imagens_extras.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 my-4">
+                {questao.imagens_extras.filter(isValidImageUrl).map((img, idx) => (
+                  <div key={idx} className="relative">
+                    <SafeImage
+                      src={img}
+                      alt={`Imagem ${idx + 2} da questão`}
+                      width={300}
+                      height={200}
+                      className="rounded-lg object-contain w-full h-auto max-h-[150px] cursor-pointer"
+                      onClick={() => setImagemExpandida(img)}
+                      showPlaceholder
+                    />
+                  </div>
+                ))}
               </div>
             )}
 
@@ -280,7 +314,7 @@ export default function QuestaoENEM({
                 {fontes.map((fonte, index) => (
                   <p
                     key={index}
-                    className="text-xs leading-relaxed"
+                    className="text-xs leading-relaxed italic"
                     style={{ color: 'var(--text-muted)' }}
                     dangerouslySetInnerHTML={{ __html: fonte }}
                   />
@@ -290,12 +324,21 @@ export default function QuestaoENEM({
 
             {/* 4. Comando (texto antes das alternativas) */}
             {questao.comando && (
-              <p
-                className="text-sm sm:text-base font-medium mt-4"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {questao.comando}
-              </p>
+              <div className="mt-4 pt-3 border-t border-[var(--border-default)]">
+                {temLatex || /\$[^$]+\$/.test(questao.comando) ? (
+                  <ConteudoQuestao
+                    conteudo={questao.comando}
+                    tipo="comando"
+                  />
+                ) : (
+                  <p
+                    className="text-sm sm:text-base font-medium"
+                    style={{ color: 'var(--text-primary)' }}
+                  >
+                    {questao.comando}
+                  </p>
+                )}
+              </div>
             )}
           </div>
         )
@@ -360,14 +403,21 @@ export default function QuestaoENEM({
                     />
                   </div>
                 )}
-                {/* Texto da alternativa */}
+                {/* Texto da alternativa (com suporte a LaTeX) */}
                 {texto ? (
-                  <span
-                    className="text-sm sm:text-base leading-snug"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    {texto}
-                  </span>
+                  /\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
+                    <ConteudoQuestao
+                      conteudo={texto}
+                      tipo="alternativa"
+                      className="flex-1"
+                    />
+                  ) : (
+                    <span
+                      className="text-sm sm:text-base leading-snug"
+                      style={{ color: 'var(--text-primary)' }}
+                      dangerouslySetInnerHTML={{ __html: texto }}
+                    />
+                  )
                 ) : (
                   <span
                     className="text-sm italic"
