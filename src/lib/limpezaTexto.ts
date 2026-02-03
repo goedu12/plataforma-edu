@@ -9,7 +9,8 @@ const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'N
 // Tags HTML permitidas (sanitização XSS)
 const TAGS_PERMITIDAS = new Set([
   'p', 'br', 'em', 'strong', 'span', 'div', 'img',
-  'b', 'i', 'u', 'sub', 'sup', 'ul', 'ol', 'li'
+  'b', 'i', 'u', 'sub', 'sup', 'ul', 'ol', 'li',
+  'small' // Para fontes/referências em tamanho menor (como na prova ENEM)
 ])
 
 // Atributos permitidos por tag
