@@ -116,6 +116,7 @@ function formatarQuestao(q: QuestaoENEMDB): QuestaoFormatada {
 function verificarQualidade(q: QuestaoENEMDB): boolean {
   const resultado = questaoTemQualidade({
     contexto: q.contexto,
+    comando: q.comando,
     alternativa_a: q.alternativa_a,
     alternativa_b: q.alternativa_b,
     alternativa_c: q.alternativa_c,
