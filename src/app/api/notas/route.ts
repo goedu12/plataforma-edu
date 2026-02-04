@@ -369,11 +369,33 @@ export async function GET(request: NextRequest) {
     const acertosDesafio = respostasDesafio?.length || 0
     const questoesRespondidas = respostasEstudo?.length || 0
 
-    // Calcular tempo total de uso em horas
+    // Calcular tempo das questões
     const tempoEstudo = respostasEstudo?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
     const tempoRevisao = respostasRevisao?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
     const tempoDesafio = respostasDesafio?.reduce((acc, r) => acc + (r.tempo_segundos || 0), 0) || 0
-    const tempoTotalSegundos = tempoEstudo + tempoRevisao + tempoDesafio
+    const tempoQuestoesSegundos = tempoEstudo + tempoRevisao + tempoDesafio
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // BUSCAR TEMPO DE USO EFETIVO DE OUTRAS ATIVIDADES
+    // (teoria, flashcards, mapas, tutor, menu, etc.)
+    // ═══════════════════════════════════════════════════════════════════════
+    let tempoAtividadesSegundos = 0
+    try {
+      const { data: tempoUso } = await supabase
+        .from('tempo_uso')
+        .select('segundos_total')
+        .eq('usuario_id', sessao.userId)
+        .eq('componente', componente)
+        .gte('data', dataInicioBusca)
+        .lte('data', dataFimBusca)
+
+      tempoAtividadesSegundos = tempoUso?.reduce((acc, t) => acc + (t.segundos_total || 0), 0) || 0
+    } catch {
+      // Tabela pode não existir ainda - continua sem tempo de atividades
+    }
+
+    // TEMPO TOTAL = tempo das questões + tempo de outras atividades
+    const tempoTotalSegundos = tempoQuestoesSegundos + tempoAtividadesSegundos
     const tempoTotalHoras = tempoTotalSegundos / 3600
 
     // Contar dias ativos (datas distintas com respostas)
@@ -668,13 +690,17 @@ export async function GET(request: NextRequest) {
         dias_totais: diasTotais,
         projecao_questoes: projecaoQuestoes,
         projecao_nota: projecaoNota.nota_final,
-        // Nova fórmula v2
+        // Nova fórmula v2 - Tempo de uso efetivo
         tempo_total_segundos: tempoTotalSegundos,
         tempo_total_horas: Math.round(tempoTotalHoras * 100) / 100,
-        horas_para_proximo_nivel: tempoTotalHoras < 2 ? 2 - tempoTotalHoras :
-                                   tempoTotalHoras < 3 ? 3 - tempoTotalHoras :
-                                   tempoTotalHoras < 4 ? 4 - tempoTotalHoras :
-                                   tempoTotalHoras < 5 ? 5 - tempoTotalHoras : 0,
+        tempo_questoes_segundos: tempoQuestoesSegundos,
+        tempo_questoes_horas: Math.round((tempoQuestoesSegundos / 3600) * 100) / 100,
+        tempo_atividades_segundos: tempoAtividadesSegundos,
+        tempo_atividades_horas: Math.round((tempoAtividadesSegundos / 3600) * 100) / 100,
+        horas_para_proximo_nivel: tempoTotalHoras < 2 ? Math.round((2 - tempoTotalHoras) * 100) / 100 :
+                                   tempoTotalHoras < 3 ? Math.round((3 - tempoTotalHoras) * 100) / 100 :
+                                   tempoTotalHoras < 4 ? Math.round((4 - tempoTotalHoras) * 100) / 100 :
+                                   tempoTotalHoras < 5 ? Math.round((5 - tempoTotalHoras) * 100) / 100 : 0,
       },
 
       historico,

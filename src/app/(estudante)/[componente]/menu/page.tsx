@@ -26,6 +26,7 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import ProfilePhoto from '@/components/ProfilePhoto'
 import ThemeIconToggle from '@/components/ThemeIconToggle'
+import useTempoUso from '@/hooks/useTempoUso'
 import type { Usuario, Componente } from '@/types'
 import { obterNivelPorPontos, calcularTaxaAcerto, NIVEIS_JOGADOR } from '@/types'
 import type { LucideIcon } from 'lucide-react'
@@ -51,6 +52,9 @@ export default function MenuComponentePage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
+
+  // Rastrear tempo de uso efetivo
+  useTempoUso(componente, 'menu')
 
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)

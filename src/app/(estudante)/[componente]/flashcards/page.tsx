@@ -27,6 +27,7 @@ import Badge from '@/components/ui/Badge'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import useTempoUso from '@/hooks/useTempoUso'
 import type { Componente, Usuario } from '@/types'
 import type {
   FlashCard,
@@ -74,6 +75,9 @@ export default function FlashCardsPage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
+
+  // Rastrear tempo de uso efetivo
+  useTempoUso(componente, 'flashcards')
 
   // Estados do usuário
   const [usuario, setUsuario] = useState<Usuario | null>(null)

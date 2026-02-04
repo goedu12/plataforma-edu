@@ -7,6 +7,7 @@ import TutorChat from '@/components/TutorChat'
 import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
 import NavigationRail from '@/components/NavigationRail'
+import useTempoUso from '@/hooks/useTempoUso'
 import type { Componente, Usuario } from '@/types'
 import { PONTUACAO } from '@/types'
 
@@ -14,6 +15,9 @@ export default function TutorPage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
+
+  // Rastrear tempo de uso efetivo
+  useTempoUso(componente, 'tutor')
 
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
