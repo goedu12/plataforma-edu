@@ -1951,3 +1951,234 @@ img {
 .animate-fade-in {
   animation: fadeInUp 0.3s ease-out;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   IMAGENS DE QUESTÕES - RESPONSIVAS E AMPLIÁVEIS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Container de imagem da questão */
+.questao-imagem-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+}
+
+/* Imagem principal - tamanhos responsivos */
+.questao-imagem-principal {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.questao-imagem-principal:hover {
+  transform: scale(1.01);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Diferentes tamanhos de tela */
+@media (min-width: 640px) {
+  .questao-imagem-principal {
+    max-height: 400px;
+    object-fit: contain;
+  }
+}
+
+@media (min-width: 768px) {
+  .questao-imagem-principal {
+    max-height: 500px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .questao-imagem-principal {
+    max-height: 600px;
+  }
+}
+
+/* Grid de imagens extras */
+.questao-imagens-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.questao-imagens-grid.grid-1 {
+  grid-template-columns: 1fr;
+  max-width: 32rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.questao-imagens-grid.grid-2 {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .questao-imagens-grid.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Imagens extras */
+.questao-imagem-extra {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .questao-imagem-extra {
+    max-height: 300px;
+  }
+}
+
+.questao-imagem-extra:hover {
+  transform: scale(1.02);
+}
+
+/* Botão de ampliar overlay */
+.imagem-ampliar-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border-radius: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.questao-imagem-container:hover .imagem-ampliar-btn {
+  opacity: 1;
+}
+
+/* Modal de imagem */
+.imagem-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+}
+
+.imagem-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.imagem-modal-controles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.imagem-modal-btn {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: white;
+  transition: background 0.2s ease;
+}
+
+.imagem-modal-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.imagem-modal-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.imagem-modal-zoom-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  color: white;
+  min-width: 60px;
+  text-align: center;
+}
+
+.imagem-modal-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.imagem-modal-content:active {
+  cursor: grabbing;
+}
+
+.imagem-modal-img {
+  max-width: 95vw;
+  max-height: 85vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  pointer-events: none;
+}
+
+.imagem-modal-footer {
+  text-align: center;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .imagem-modal-header {
+    padding: 1rem;
+  }
+
+  .imagem-modal-footer {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Loading skeleton para imagens */
+.imagem-skeleton {
+  background: var(--bg-elevated);
+  border-radius: 0.75rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Imagens em alternativas */
+.alternativa-imagem {
+  max-height: 80px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 0.375rem;
+}
+
+@media (min-width: 640px) {
+  .alternativa-imagem {
+    max-height: 100px;
+  }
+}
