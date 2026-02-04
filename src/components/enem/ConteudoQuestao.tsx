@@ -40,8 +40,8 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '^{$1}') // Converter para LaTeX superscript
   texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '_{$1}') // Converter para LaTeX subscript
 
-  // Converter <small> para classe especial (será tratado pelo CSS)
-  texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="fonte-pequena">$1</span>')
+  // Converter <small> para classe especial - fonte alinhada à direita
+  texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
   // Remover tags não suportadas mantendo conteúdo
   texto = texto.replace(/<\/?p>/gi, '\n')
