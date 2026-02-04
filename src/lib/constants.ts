@@ -14,7 +14,7 @@
  *
  * Histórico:
  * - 2025: notas_2025
- * - 2026: atualizar para notas_2026 quando tabela for criada
+ * - 2026: notas_2025 (usando mesma tabela com coluna ano_letivo)
  */
 export const TABELA_NOTAS = 'notas_2025' as const
 
