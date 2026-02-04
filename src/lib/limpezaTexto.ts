@@ -662,13 +662,10 @@ export function extrairFontesDoContexto(html: string): {
 
   const fontes: string[] = []
 
-  // Regex para capturar tags <small>...</small> (incluindo conteúdo)
+  // 1. Primeiro, tentar extrair de tags <small>...</small>
   const smallRegex = /<small[^>]*>([\s\S]*?)<\/small>/gi
-
-  // Extrair todas as ocorrências de <small>
   let match
   while ((match = smallRegex.exec(html)) !== null) {
-    // Guarda o conteúdo interno da tag <small>
     const conteudo = match[1].trim()
     if (conteudo) {
       fontes.push(conteudo)
@@ -678,10 +675,45 @@ export function extrairFontesDoContexto(html: string): {
   // Remover todas as tags <small>...</small> do texto original
   let textoSemSmall = html.replace(/<small[^>]*>[\s\S]*?<\/small>/gi, '')
 
+  // 2. Se não encontrou fontes em <small>, detectar automaticamente
+  if (fontes.length === 0) {
+    // Padrões de fonte ENEM (última linha que parece referência)
+    const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+
+    // Verificar as últimas linhas (pode ter múltiplas fontes)
+    for (let i = linhas.length - 1; i >= Math.max(0, linhas.length - 3); i--) {
+      const linha = linhas[i]
+
+      // Padrões que indicam fonte/referência:
+      const ehFonte =
+        // Padrão: SOBRENOME, Nome. Título... (autor em maiúsculas)
+        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ\s]+,\s*[A-Z]/.test(linha) ||
+        // Padrão: Disponível em: URL
+        /Dispon[ií]vel\s+em:/i.test(linha) ||
+        // Padrão: Acesso em: DATA
+        /Acesso\s+em:/i.test(linha) ||
+        // Padrão: (adaptado) ou (Adaptado)
+        /\(adaptado\)/i.test(linha) ||
+        // Padrão: Revista/Jornal Nome, n. XX
+        /^(Revista|Jornal)\s+/i.test(linha) ||
+        // Padrão: termina com ano entre parênteses ou ponto
+        /,\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(linha) ||
+        // Padrão: URL no final
+        /\.(com|org|gov|edu|br)\b/i.test(linha)
+
+      if (ehFonte && linha.length > 15 && linha.length < 500) {
+        fontes.unshift(linha) // Adiciona no início para manter ordem
+        // Remover a linha do texto
+        textoSemSmall = textoSemSmall.replace(linha, '').trim()
+      }
+    }
+  }
+
   // Limpar espaços extras deixados pela remoção
   textoSemSmall = textoSemSmall
     .replace(/<br>\s*<br>\s*<br>/g, '<br>')
     .replace(/<p>\s*<\/p>/g, '')
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
     .replace(/\s{2,}/g, ' ')
     .trim()
 
