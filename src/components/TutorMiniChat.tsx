@@ -143,7 +143,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
     return (
       <button
         onClick={() => setAberto(true)}
-        className="fixed bottom-4 left-4 z-50 flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
+        className="fixed bottom-20 right-4 lg:bottom-4 z-50 flex items-center justify-center w-12 h-12 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-95"
         style={{ background: corPrimaria }}
         title={`Perguntar ao ${nomeTutor}`}
       >
@@ -155,10 +155,10 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
   // Chat aberto
   return (
     <div
-      className="fixed bottom-4 left-4 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+      className="fixed bottom-20 right-4 lg:bottom-4 z-50 flex flex-col rounded-2xl shadow-2xl overflow-hidden"
       style={{
         width: 'min(360px, calc(100vw - 32px))',
-        height: 'min(480px, calc(100dvh - 32px))',
+        height: 'min(440px, calc(100dvh - 96px))',
         background: 'var(--bg-surface)',
         border: '1px solid var(--border-default)',
       }}
