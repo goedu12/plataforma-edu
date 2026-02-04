@@ -14,6 +14,7 @@ import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import useTempoUso from '@/hooks/useTempoUso'
 import type { Componente } from '@/types'
 import { getConteudoTeoria, type Topico } from '@/lib/teoria'
 
@@ -21,6 +22,9 @@ export default function TeoriaPage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
+
+  // Rastrear tempo de uso efetivo
+  useTempoUso(componente, 'teoria')
 
   const [topicos, setTopicos] = useState<Topico[]>([])
   const [loading, setLoading] = useState(true)

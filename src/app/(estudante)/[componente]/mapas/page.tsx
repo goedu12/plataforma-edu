@@ -21,6 +21,7 @@ import BackButton from '@/components/ui/BackButton'
 import Loading from '@/components/ui/Loading'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import useTempoUso from '@/hooks/useTempoUso'
 import type { Componente, MapaMentalComStatus, SerieMapa, Bimestre, NivelEnsino } from '@/types'
 import { SERIES_MAPA_LABELS, BIMESTRES_LABELS } from '@/types'
 
@@ -28,6 +29,9 @@ export default function MapasMentaisPage() {
   const router = useRouter()
   const params = useParams()
   const componente = params.componente as Componente
+
+  // Rastrear tempo de uso efetivo
+  useTempoUso(componente, 'mapas')
 
   const [mapas, setMapas] = useState<MapaMentalComStatus[]>([])
   const [loading, setLoading] = useState(true)

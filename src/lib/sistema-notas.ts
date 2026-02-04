@@ -88,51 +88,52 @@ export interface VerificacaoCompleta {
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CONFIGURAÇÃO DOS BIMESTRES 2025 e 2026
+// AJUSTADO: 1º bim até 15/04, 2º bim de 15/04 a 15/06
 // ═══════════════════════════════════════════════════════════════════════════
 
 const CONFIG_BIMESTRES: Record<number, Record<1 | 2 | 3 | 4, ConfigBimestre>> = {
   2025: {
     1: {
       bimestre: 1,
-      regular: { inicio: '2025-02-03', fim: '2025-03-24', meta: 105 },
-      recuperacao: { inicio: '2025-03-25', fim: '2025-04-03' },
+      regular: { inicio: '2025-01-01', fim: '2025-04-15', meta: 150 },
+      recuperacao: { inicio: '2025-04-16', fim: '2025-04-30' },
     },
     2: {
       bimestre: 2,
-      regular: { inicio: '2025-04-04', fim: '2025-06-16', meta: 150 },
-      recuperacao: { inicio: '2025-06-17', fim: '2025-06-26' },
+      regular: { inicio: '2025-04-15', fim: '2025-06-15', meta: 100 },
+      recuperacao: { inicio: '2025-06-16', fim: '2025-06-30' },
     },
     3: {
       bimestre: 3,
-      regular: { inicio: '2025-08-04', fim: '2025-09-23', meta: 105 },
-      recuperacao: { inicio: '2025-09-24', fim: '2025-10-03' },
+      regular: { inicio: '2025-08-01', fim: '2025-09-30', meta: 105 },
+      recuperacao: { inicio: '2025-10-01', fim: '2025-10-15' },
     },
     4: {
       bimestre: 4,
-      regular: { inicio: '2025-10-04', fim: '2025-12-04', meta: 135 },
-      recuperacao: { inicio: '2025-12-05', fim: '2025-12-15' },
+      regular: { inicio: '2025-10-01', fim: '2025-12-15', meta: 135 },
+      recuperacao: { inicio: '2025-12-16', fim: '2025-12-20' },
     },
   },
   2026: {
     1: {
       bimestre: 1,
-      regular: { inicio: '2026-02-02', fim: '2026-03-24', meta: 105 },
-      recuperacao: { inicio: '2026-03-25', fim: '2026-04-03' },
+      regular: { inicio: '2025-01-01', fim: '2026-04-15', meta: 150 },
+      recuperacao: { inicio: '2026-04-16', fim: '2026-04-30' },
     },
     2: {
       bimestre: 2,
-      regular: { inicio: '2026-04-04', fim: '2026-06-16', meta: 150 },
-      recuperacao: { inicio: '2026-06-17', fim: '2026-06-26' },
+      regular: { inicio: '2026-04-15', fim: '2026-06-15', meta: 100 },
+      recuperacao: { inicio: '2026-06-16', fim: '2026-06-30' },
     },
     3: {
       bimestre: 3,
-      regular: { inicio: '2026-08-04', fim: '2026-09-23', meta: 105 },
-      recuperacao: { inicio: '2026-09-24', fim: '2026-10-03' },
+      regular: { inicio: '2026-08-01', fim: '2026-09-30', meta: 105 },
+      recuperacao: { inicio: '2026-10-01', fim: '2026-10-15' },
     },
     4: {
       bimestre: 4,
-      regular: { inicio: '2026-10-04', fim: '2026-12-04', meta: 135 },
-      recuperacao: { inicio: '2026-12-05', fim: '2026-12-15' },
+      regular: { inicio: '2026-10-01', fim: '2026-12-15', meta: 135 },
+      recuperacao: { inicio: '2026-12-16', fim: '2026-12-20' },
     },
   },
 }
