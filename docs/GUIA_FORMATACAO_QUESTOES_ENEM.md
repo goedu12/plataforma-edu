@@ -113,15 +113,101 @@ Exemplo:
 
 ---
 
+## IMAGENS - COMO INSERIR CORRETAMENTE
+
+**IMPORTANTE:** As imagens devem ser URLs reais nos campos apropriados, NAO descricoes textuais!
+
+### Campos para Imagens no Banco de Dados
+
+| Campo | Tipo | Uso |
+|-------|------|-----|
+| `imagem_principal` | TEXT (URL) | Imagem principal do contexto |
+| `imagens_extras` | TEXT[] (Array de URLs) | Imagens adicionais |
+| `imagem_a` | TEXT (URL) | Imagem na alternativa A |
+| `imagem_b` | TEXT (URL) | Imagem na alternativa B |
+| `imagem_c` | TEXT (URL) | Imagem na alternativa C |
+| `imagem_d` | TEXT (URL) | Imagem na alternativa D |
+| `imagem_e` | TEXT (URL) | Imagem na alternativa E |
+
+### ERRADO vs CORRETO
+
+**ERRADO** - Descricao textual no contexto:
+```sql
+UPDATE questoes_enem SET
+contexto = '<em>[Cartaz publicitario da UNICEF com fotos de criancas]</em>
+
+Texto do cartaz...'
+WHERE id = 'xxx';
+```
+
+**CORRETO** - URL real no campo de imagem:
+```sql
+UPDATE questoes_enem SET
+contexto = 'Texto do cartaz...',
+imagem_principal = 'https://exemplo.com/imagens/cartaz-unicef.jpg'
+WHERE id = 'xxx';
+```
+
+### Exemplo Completo com Imagem Real
+
+```sql
+UPDATE questoes_enem SET
+  contexto = '<strong>EM UM MUNDO DE DIFERENCAS ENXERGUE A IGUALDADE</strong>
+
+O Brasil tem 31 milhoes de criancas negras e indigenas. A maioria sofre com discriminacao racial, sem ter acesso a educacao, a saude e ao desenvolvimento.
+
+<small>Disponivel em: www.unicef.org.br. Acesso em: 15 jan. 2024 (adaptado).</small>',
+  imagem_principal = 'https://www.unicef.org/brazil/media/12345/cartaz-igualdade.jpg',
+  comando = 'Nesse cartaz, a utilizacao de frases que projetam a vida profissional de duas criancas tem como objetivo'
+WHERE ano_prova = 2024 AND numero_questao = 24;
+```
+
+### Exemplo com Multiplas Imagens
+
+```sql
+UPDATE questoes_enem SET
+  contexto = 'O retrato como genero da pintura ocidental ficou vinculado as elites...
+
+<strong>Figura 1:</strong> PAULA, D. <em>Zeferina.</em> Oleo sobre tela, 59 x 44 cm. Masp, 2018.
+<strong>Figura 2:</strong> PAULA, D. <em>Joao de Deus Nascimento.</em> Oleo sobre tela, 59,5 x 44 cm. Masp, 2018.
+
+<small>Disponivel em: www.masp.org.br. Acesso em: 5 maio 2024 (adaptado).</small>',
+  imagem_principal = 'https://masp.org.br/acervo/zeferina.jpg',
+  imagens_extras = ARRAY['https://masp.org.br/acervo/joao-de-deus.jpg'],
+  comando = 'Ao dar protagonismo a Zeferina e a Joao de Deus, o artista evidencia que'
+WHERE ano_prova = 2024 AND numero_questao = 15;
+```
+
+### Exemplo com Imagens nas Alternativas
+
+```sql
+UPDATE questoes_enem SET
+  contexto = 'Analise os graficos abaixo e identifique qual representa uma funcao exponencial.',
+  imagem_a = 'https://exemplo.com/graficos/grafico-a.png',
+  imagem_b = 'https://exemplo.com/graficos/grafico-b.png',
+  imagem_c = 'https://exemplo.com/graficos/grafico-c.png',
+  imagem_d = 'https://exemplo.com/graficos/grafico-d.png',
+  imagem_e = 'https://exemplo.com/graficos/grafico-e.png',
+  alternativa_a = '',
+  alternativa_b = '',
+  alternativa_c = '',
+  alternativa_d = '',
+  alternativa_e = '',
+  comando = 'A funcao exponencial esta representada em'
+WHERE ano_prova = 2024 AND numero_questao = 150;
+```
+
+---
+
 ## Imagens Responsivas - Melhores Praticas
 
-### Dimensoes Recomendadas
+### Dimensoes Recomendadas para Upload
 
-| Tipo | Largura Max | Altura Max | Uso |
-|------|-------------|------------|-----|
-| Principal | 800px | 600px | Imagem unica do contexto |
-| Extra | 500px | 400px | Imagens adicionais em grid |
-| Alternativa | 200px | 150px | Imagens nas alternativas |
+| Tipo | Largura | Altura | Formato |
+|------|---------|--------|---------|
+| Principal | 800-1200px | 600-900px | JPG, PNG, WebP |
+| Extra | 500-800px | 400-600px | JPG, PNG, WebP |
+| Alternativa | 200-400px | 150-300px | PNG (graficos) |
 
 ### Classes CSS Responsivas
 
@@ -176,10 +262,10 @@ comando = 'No que diz respeito ao genero bilhete, a autora dessa cronica'
 WHERE id = 'xxx';
 ```
 
-### Questao com Multiplos Textos
+### Questao com Multiplos Textos e Imagem
 ```sql
-UPDATE questoes_enem SET contexto =
-'<strong>TEXTO I</strong>
+UPDATE questoes_enem SET
+contexto = '<strong>TEXTO I</strong>
 
 A Ilha do Ferro, situada a 18 km do municipio de Pao de Acucar, nao e uma ilha, como o nome indica...
 
@@ -187,31 +273,23 @@ A Ilha do Ferro, situada a 18 km do municipio de Pao de Acucar, nao e uma ilha, 
 
 <strong>TEXTO II</strong>
 
-<em>[Fotografia de escultura em madeira com figuras humanas sobre uma base]</em>
-
 FARIAS, Y. <em>Bailarino entalhado em gravetos de madeira.</em> Artesanato em madeira, 20 x 13 x 51 cm. Ilha do Ferro (AL).
 
 <small>Disponivel em: www.nidelins.com.br. Acesso em: 5 fev. 2025.</small>',
+imagem_principal = 'https://www.nidelins.com.br/obras/bailarino-madeira.jpg',
 comando = 'A originalidade do trabalho dos artistas da Ilha do Ferro se da pela'
 WHERE id = 'xxx';
 ```
 
-### Questao com Imagem
+### Questao com Cartaz/Infografico
 ```sql
 UPDATE questoes_enem SET
-contexto = '<em>[Cartaz publicitario da UNICEF Brasil dividido em duas partes com fotos de rostos de criancas]</em>
+contexto = '<strong>EM UM MUNDO DE DIFERENCAS ENXERGUE A IGUALDADE</strong>
 
-<strong>Parte superior:</strong>
-- Foto de um menino indigena: <em>"Carlos Pataxicore, aos 36 anos, medico e o futuro todo pela frente."</em>
-- Foto de uma menina negra: <em>"Quezia Silva, aos 29 anos, advogada e o futuro todo pela frente."</em>
-
-<strong>Parte inferior:</strong>
-<strong>EM UM MUNDO DE DIFERENCAS ENXERGUE A IGUALDADE</strong>
-
-<em>O Brasil tem 31 milhoes de criancas negras e indigenas...</em>
+O Brasil tem 31 milhoes de criancas negras e indigenas. A maioria sofre com discriminacao racial, sem ter acesso a educacao, a saude e ao desenvolvimento. Ajude a mudar essa realidade.
 
 <small>Disponivel em: www.unicef.org.br. Acesso em: 15 jan. 2024 (adaptado).</small>',
-imagem_principal = 'https://exemplo.com/cartaz-unicef.jpg',
+imagem_principal = 'https://www.unicef.org/brazil/cartaz-igualdade-2024.jpg',
 comando = 'Nesse cartaz, a utilizacao de frases que projetam a vida profissional de duas criancas tem como objetivo'
 WHERE id = 'xxx';
 ```
