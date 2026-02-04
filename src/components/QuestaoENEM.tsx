@@ -16,6 +16,7 @@ import {
 import Button from './ui/Button'
 import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
+import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
 import ConteudoQuestao from './enem/ConteudoQuestao'
 import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
@@ -256,54 +257,34 @@ export default function QuestaoENEM({
               )
             )}
 
-            {/* 2. Imagem principal do contexto */}
+            {/* 2. Imagem principal do contexto - RESPONSIVA E AMPLIÁVEL */}
             {isValidImageUrl(questao.imagem_principal) && (
-              <div className="my-4 relative">
-                <div className="relative w-full max-w-md mx-auto">
-                  <SafeImage
-                    src={questao.imagem_principal}
-                    alt="Imagem da questão"
-                    width={600}
-                    height={400}
-                    className="rounded-lg object-contain w-full h-auto max-h-[250px] cursor-pointer shadow-sm"
-                    onClick={() => setImagemExpandida(questao.imagem_principal || null)}
-                    showPlaceholder
-                    fallback={
-                      <div className="flex items-center justify-center bg-[var(--bg-elevated)] rounded-lg p-4 min-h-[100px]">
-                        <div className="text-center">
-                          <ImageOff className="w-8 h-8 mx-auto mb-2 text-[var(--text-muted)]" />
-                          <span className="text-xs text-[var(--text-muted)]">Imagem indisponível</span>
-                        </div>
-                      </div>
-                    }
-                  />
-                  <button
-                    onClick={() => setImagemExpandida(questao.imagem_principal || null)}
-                    className="absolute top-2 right-2 p-1.5 rounded-lg transition-all hover:scale-105"
-                    style={{ background: 'var(--bg-elevated)' }}
-                    aria-label="Expandir imagem"
-                  >
-                    <ZoomIn className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
-                  </button>
-                </div>
+              <div className="my-4">
+                <ImagemQuestao
+                  src={questao.imagem_principal}
+                  alt="Imagem da questão"
+                  tipo="principal"
+                  onExpandir={setImagemExpandida}
+                />
               </div>
             )}
 
-            {/* 2b. Imagens extras (se houver) */}
+            {/* 2b. Imagens extras (se houver) - GRID RESPONSIVO */}
             {questao.imagens_extras && questao.imagens_extras.length > 0 && (
-              <div className="grid grid-cols-2 gap-2 my-4">
+              <div className={`
+                grid gap-3 my-4
+                ${questao.imagens_extras.filter(isValidImageUrl).length === 1
+                  ? 'grid-cols-1 max-w-lg mx-auto'
+                  : 'grid-cols-1 sm:grid-cols-2'}
+              `}>
                 {questao.imagens_extras.filter(isValidImageUrl).map((img, idx) => (
-                  <div key={idx} className="relative">
-                    <SafeImage
-                      src={img}
-                      alt={`Imagem ${idx + 2} da questão`}
-                      width={300}
-                      height={200}
-                      className="rounded-lg object-contain w-full h-auto max-h-[150px] cursor-pointer"
-                      onClick={() => setImagemExpandida(img)}
-                      showPlaceholder
-                    />
-                  </div>
+                  <ImagemQuestao
+                    key={idx}
+                    src={img}
+                    alt={`Imagem ${idx + 2} da questão`}
+                    tipo="extra"
+                    onExpandir={setImagemExpandida}
+                  />
                 ))}
               </div>
             )}
@@ -582,38 +563,14 @@ export default function QuestaoENEM({
 
       {/* ═══════════════════════════════════════════════════════════════
           MODAL DE IMAGEM EXPANDIDA
+          Com zoom, pan e suporte a gestos touch
           ═══════════════════════════════════════════════════════════════ */}
-      {imagemExpandida && isValidImageUrl(imagemExpandida) && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0, 0, 0, 0.9)' }}
-          onClick={() => setImagemExpandida(null)}
-        >
-          <button
-            className="absolute top-4 right-4 p-2 rounded-full"
-            style={{ background: 'var(--bg-surface)' }}
-            onClick={() => setImagemExpandida(null)}
-          >
-            <X className="w-6 h-6" style={{ color: 'var(--text-primary)' }} />
-          </button>
-          <SafeImage
-            src={imagemExpandida}
-            alt="Imagem expandida"
-            width={1200}
-            height={800}
-            className="max-w-full max-h-[90vh] object-contain rounded-lg"
-            onClick={(e) => e.stopPropagation()}
-            showPlaceholder
-            fallback={
-              <div className="flex items-center justify-center bg-[var(--bg-surface)] rounded-lg p-8">
-                <div className="text-center">
-                  <ImageOff className="w-12 h-12 mx-auto mb-3 text-[var(--text-muted)]" />
-                  <span className="text-[var(--text-muted)]">Imagem não disponível</span>
-                </div>
-              </div>
-            }
-          />
-        </div>
+      {imagemExpandida && (
+        <ImagemModal
+          src={imagemExpandida}
+          alt="Imagem da questão ampliada"
+          onClose={() => setImagemExpandida(null)}
+        />
       )}
     </div>
   )
