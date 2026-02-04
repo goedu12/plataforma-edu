@@ -289,13 +289,13 @@ export default function QuestaoENEM({
               </div>
             )}
 
-            {/* 3. Fontes/Referências (APÓS as imagens, como na prova ENEM) */}
+            {/* 3. Fontes/Referências - ALINHADAS À DIREITA (padrão ENEM) */}
             {fontes.length > 0 && (
-              <div className="mt-3 pt-2 border-t border-[var(--border-default)]">
+              <div className="mt-4 pt-3">
                 {fontes.map((fonte, index) => (
                   <p
                     key={index}
-                    className="text-xs leading-relaxed italic"
+                    className="text-xs sm:text-sm leading-relaxed italic text-right"
                     style={{ color: 'var(--text-muted)' }}
                     dangerouslySetInnerHTML={{ __html: fonte }}
                   />

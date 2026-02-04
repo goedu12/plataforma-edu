@@ -2182,3 +2182,112 @@ img {
     max-height: 100px;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FORMATAÇÃO QUESTÕES ENEM - Padrão Oficial
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Container do contexto da questão */
+.questao-contexto {
+  line-height: 1.7;
+}
+
+/* Título em negrito com espaçamento */
+.questao-contexto strong:first-child,
+.questao-texto strong:first-child {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+@media (min-width: 640px) {
+  .questao-contexto strong:first-child,
+  .questao-texto strong:first-child {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Texto do enunciado */
+.questao-texto {
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+}
+
+@media (min-width: 640px) {
+  .questao-texto {
+    font-size: 1rem;
+    line-height: 1.8;
+  }
+}
+
+/* Parágrafos com espaçamento */
+.questao-texto p,
+.questao-contexto p {
+  margin-bottom: 0.75rem;
+}
+
+.questao-texto p:last-child,
+.questao-contexto p:last-child {
+  margin-bottom: 0;
+}
+
+/* Fonte/Referência - Itálico e alinhada à direita */
+.questao-fonte,
+.fonte-pequena {
+  display: block;
+  text-align: right;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .questao-fonte,
+  .fonte-pequena {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Identificadores de texto (TEXTO I, TEXTO II) */
+.questao-contexto strong[class*="texto-"],
+.questao-texto strong {
+  display: block;
+  font-weight: 700;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+/* Citações e trechos em destaque */
+.questao-contexto em,
+.questao-texto em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Espaçamento para imagens dentro do contexto */
+.questao-contexto .imagem-container {
+  margin: 1rem 0;
+}
+
+/* Responsividade para telas muito pequenas */
+@media (max-width: 374px) {
+  .questao-contexto {
+    padding: 0.75rem;
+  }
+  
+  .questao-texto {
+    font-size: 0.8125rem;
+  }
+  
+  .questao-fonte,
+  .fonte-pequena {
+    font-size: 0.6875rem;
+  }
+}
