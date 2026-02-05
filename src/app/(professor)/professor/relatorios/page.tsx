@@ -13,6 +13,9 @@ import {
   Calculator,
   TrendingUp,
   Calendar,
+  AlertTriangle,
+  Clock,
+  UserX,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Loading from '@/components/ui/Loading'
@@ -34,11 +37,17 @@ interface Estudante {
   fis_questoes_corretas: number
   fis_sequencia_dias: number
   fis_ultimo_estudo?: string
+  fis_nota_atual?: number | null
+  fis_status_nota?: string | null
   mat_pontos: number
   mat_questoes_total: number
   mat_questoes_corretas: number
   mat_sequencia_dias: number
   mat_ultimo_estudo?: string
+  mat_nota_atual?: number | null
+  mat_status_nota?: string | null
+  nunca_logou: boolean
+  dias_sem_atividade: number | null
 }
 
 export default function RelatoriosProfessorPage() {
@@ -49,6 +58,7 @@ export default function RelatoriosProfessorPage() {
   const [turmas, setTurmas] = useState<string[]>([])
   const [filtroTurma, setFiltroTurma] = useState('')
   const [filtroComponente, setFiltroComponente] = useState<Componente | ''>('')
+  const [bimestreAtual, setBimestreAtual] = useState(1)
 
   useEffect(() => {
     const buscarDados = async () => {
@@ -59,6 +69,9 @@ export default function RelatoriosProfessorPage() {
         if (data.sucesso) {
           setEstudantes(data.alunos || [])
           setTurmas(data.turmas || [])
+          if (data.bimestre_atual) {
+            setBimestreAtual(data.bimestre_atual)
+          }
         } else if (response.status === 403) {
           router.push('/login')
         }
@@ -97,12 +110,15 @@ export default function RelatoriosProfessorPage() {
           'Email': e.email,
           'Turma': e.turma,
           'Componentes': e.componentes.join(', '),
+          'Último Acesso': e.nunca_logou ? 'NUNCA ACESSOU' : formatarInatividade(e.dias_sem_atividade, e.nunca_logou),
+          'Física - Nota Atual': e.componentes.includes('fisica') && e.fis_nota_atual !== null ? e.fis_nota_atual : '-',
           'Física - Pontos': e.componentes.includes('fisica') ? e.fis_pontos : '-',
           'Física - Questões': e.componentes.includes('fisica') ? e.fis_questoes_total : '-',
           'Física - Acertos': e.componentes.includes('fisica') ? e.fis_questoes_corretas : '-',
           'Física - Taxa (%)': e.componentes.includes('fisica') ? calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total) : '-',
           'Física - Sequência (dias)': e.componentes.includes('fisica') ? e.fis_sequencia_dias : '-',
           'Física - Último Estudo': e.componentes.includes('fisica') && e.fis_ultimo_estudo ? new Date(e.fis_ultimo_estudo).toLocaleDateString('pt-BR') : '-',
+          'Matemática - Nota Atual': e.componentes.includes('matematica') && e.mat_nota_atual !== null ? e.mat_nota_atual : '-',
           'Matemática - Pontos': e.componentes.includes('matematica') ? e.mat_pontos : '-',
           'Matemática - Questões': e.componentes.includes('matematica') ? e.mat_questoes_total : '-',
           'Matemática - Acertos': e.componentes.includes('matematica') ? e.mat_questoes_corretas : '-',
@@ -118,6 +134,8 @@ export default function RelatoriosProfessorPage() {
             'Nome': e.nome,
             'Email': e.email,
             'Turma': e.turma,
+            'Último Acesso': e.nunca_logou ? 'NUNCA ACESSOU' : formatarInatividade(e.dias_sem_atividade, e.nunca_logou),
+            [`Nota Atual (B${bimestreAtual})`]: e.fis_nota_atual !== null ? e.fis_nota_atual : '-',
             'Pontos': e.fis_pontos,
             'Questões Respondidas': e.fis_questoes_total,
             'Questões Corretas': e.fis_questoes_corretas,
@@ -133,6 +151,8 @@ export default function RelatoriosProfessorPage() {
             'Nome': e.nome,
             'Email': e.email,
             'Turma': e.turma,
+            'Último Acesso': e.nunca_logou ? 'NUNCA ACESSOU' : formatarInatividade(e.dias_sem_atividade, e.nunca_logou),
+            [`Nota Atual (B${bimestreAtual})`]: e.mat_nota_atual !== null ? e.mat_nota_atual : '-',
             'Pontos': e.mat_pontos,
             'Questões Respondidas': e.mat_questoes_total,
             'Questões Corretas': e.mat_questoes_corretas,
@@ -317,39 +337,55 @@ export default function RelatoriosProfessorPage() {
       let colunas: string[] = []
       let linhas: (string | number)[][] = []
 
+      // Função auxiliar para formatar nota no PDF
+      const formatarNotaPDF = (nota: number | null | undefined): string => {
+        if (nota === null || nota === undefined) return '-'
+        return nota.toFixed(1)
+      }
+
+      // Função auxiliar para formatar inatividade no PDF
+      const formatarInatividadePDF = (e: Estudante): string => {
+        if (e.nunca_logou) return 'NUNCA'
+        if (e.dias_sem_atividade === null) return '-'
+        if (e.dias_sem_atividade === 0) return 'Hoje'
+        if (e.dias_sem_atividade <= 7) return `${e.dias_sem_atividade}d`
+        return `${Math.floor(e.dias_sem_atividade / 7)}sem`
+      }
+
       if (tipo === 'geral') {
-        colunas = ['Nome', 'Turma', 'Fís Pts', 'Fís %', 'Fís Seq', 'Mat Pts', 'Mat %', 'Mat Seq']
+        colunas = ['Nome', 'Turma', 'Acesso', 'Fís Nota', 'Fís Pts', 'Fís %', 'Mat Nota', 'Mat Pts', 'Mat %']
         linhas = estudantesParaExportar.map(e => [
-          e.nome.length > 25 ? e.nome.substring(0, 25) + '...' : e.nome,
+          e.nome.length > 22 ? e.nome.substring(0, 22) + '...' : e.nome,
           e.turma,
+          formatarInatividadePDF(e),
+          e.componentes.includes('fisica') ? formatarNotaPDF(e.fis_nota_atual) : '-',
           e.componentes.includes('fisica') ? e.fis_pontos : '-',
           e.componentes.includes('fisica') ? `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%` : '-',
-          e.componentes.includes('fisica') ? e.fis_sequencia_dias : '-',
+          e.componentes.includes('matematica') ? formatarNotaPDF(e.mat_nota_atual) : '-',
           e.componentes.includes('matematica') ? e.mat_pontos : '-',
           e.componentes.includes('matematica') ? `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%` : '-',
-          e.componentes.includes('matematica') ? e.mat_sequencia_dias : '-',
         ])
       } else if (tipo === 'fisica') {
-        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Sequência']
+        colunas = ['Nome', 'Turma', 'Acesso', `Nota B${bimestreAtual}`, 'Pontos', 'Questões', 'Taxa (%)']
         linhas = estudantesParaExportar.map(e => [
-          e.nome.length > 30 ? e.nome.substring(0, 30) + '...' : e.nome,
+          e.nome.length > 28 ? e.nome.substring(0, 28) + '...' : e.nome,
           e.turma,
+          formatarInatividadePDF(e),
+          formatarNotaPDF(e.fis_nota_atual),
           e.fis_pontos,
           e.fis_questoes_total,
-          e.fis_questoes_corretas,
           `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%`,
-          e.fis_sequencia_dias,
         ])
       } else {
-        colunas = ['Nome', 'Turma', 'Pontos', 'Questões', 'Acertos', 'Taxa (%)', 'Sequência']
+        colunas = ['Nome', 'Turma', 'Acesso', `Nota B${bimestreAtual}`, 'Pontos', 'Questões', 'Taxa (%)']
         linhas = estudantesParaExportar.map(e => [
-          e.nome.length > 30 ? e.nome.substring(0, 30) + '...' : e.nome,
+          e.nome.length > 28 ? e.nome.substring(0, 28) + '...' : e.nome,
           e.turma,
+          formatarInatividadePDF(e),
+          formatarNotaPDF(e.mat_nota_atual),
           e.mat_pontos,
           e.mat_questoes_total,
-          e.mat_questoes_corretas,
           `${calcularTaxaAcerto(e.mat_questoes_corretas, e.mat_questoes_total)}%`,
-          e.mat_sequencia_dias,
         ])
       }
 
@@ -402,6 +438,17 @@ export default function RelatoriosProfessorPage() {
     }
   }
 
+  // Função para formatar dias de inatividade
+  const formatarInatividade = (diasSemAtividade: number | null, nuncaLogou: boolean): string => {
+    if (nuncaLogou) return 'Nunca acessou'
+    if (diasSemAtividade === null) return '-'
+    if (diasSemAtividade === 0) return 'Hoje'
+    if (diasSemAtividade === 1) return 'Ontem'
+    if (diasSemAtividade <= 7) return `${diasSemAtividade} dias`
+    if (diasSemAtividade <= 30) return `${Math.floor(diasSemAtividade / 7)} sem.`
+    return `${Math.floor(diasSemAtividade / 30)} mês(es)`
+  }
+
   // Estatísticas rápidas
   const estatisticas = {
     total: estudantesFiltrados.length,
@@ -413,6 +460,8 @@ export default function RelatoriosProfessorPage() {
     mediaMatematica: estudantesFiltrados.filter(e => e.componentes.includes('matematica')).length > 0
       ? Math.round(estudantesFiltrados.filter(e => e.componentes.includes('matematica')).reduce((acc, e) => acc + e.mat_pontos, 0) / estudantesFiltrados.filter(e => e.componentes.includes('matematica')).length)
       : 0,
+    nuncaLogaram: estudantesFiltrados.filter(e => e.nunca_logou).length,
+    inativos7dias: estudantesFiltrados.filter(e => !e.nunca_logou && e.dias_sem_atividade !== null && e.dias_sem_atividade >= 7).length,
   }
 
   if (loading) {
@@ -477,7 +526,7 @@ export default function RelatoriosProfessorPage() {
         </Card>
 
         {/* Estatísticas Resumidas */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           <div className="stat-card-2026 text-center">
             <Users className="w-8 h-8 mx-auto mb-2 text-slate-500" />
             <p className="stat-value">{estatisticas.total}</p>
@@ -499,6 +548,16 @@ export default function RelatoriosProfessorPage() {
               {Math.round((estatisticas.mediaFisica + estatisticas.mediaMatematica) / 2)}
             </p>
             <p className="stat-label">Média Pontos</p>
+          </div>
+          <div className="stat-card-2026 text-center" style={{ borderTop: '3px solid #ef4444' }}>
+            <UserX className="w-8 h-8 mx-auto mb-2 text-red-500" />
+            <p className="stat-value text-red-500">{estatisticas.nuncaLogaram}</p>
+            <p className="stat-label">Nunca Acessaram</p>
+          </div>
+          <div className="stat-card-2026 text-center" style={{ borderTop: '3px solid #f59e0b' }}>
+            <Clock className="w-8 h-8 mx-auto mb-2 text-amber-500" />
+            <p className="stat-value text-amber-500">{estatisticas.inativos7dias}</p>
+            <p className="stat-label">Inativos 7+ dias</p>
           </div>
         </div>
 
@@ -604,6 +663,7 @@ export default function RelatoriosProfessorPage() {
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-slate-500" />
               <h3 className="text-heading text-slate-800">Prévia dos Dados</h3>
+              <Badge variant="default" size="sm">{bimestreAtual}º Bimestre</Badge>
             </div>
             <Badge>{estudantesFiltrados.length} registros</Badge>
           </div>
@@ -614,35 +674,51 @@ export default function RelatoriosProfessorPage() {
                 <tr>
                   <th>Nome</th>
                   <th>Turma</th>
-                  <th className="text-center">Componentes</th>
+                  <th className="text-center">Último Acesso</th>
+                  <th className="text-right">Fís. Nota</th>
                   <th className="text-right">Fís. Pts</th>
                   <th className="text-right">Fís. %</th>
+                  <th className="text-right">Mat. Nota</th>
                   <th className="text-right">Mat. Pts</th>
                   <th className="text-right">Mat. %</th>
                 </tr>
               </thead>
               <tbody>
                 {estudantesFiltrados.slice(0, 10).map(e => (
-                  <tr key={e.id}>
-                    <td>{e.nome}</td>
+                  <tr key={e.id} className={e.nunca_logou ? 'bg-red-50' : e.dias_sem_atividade !== null && e.dias_sem_atividade >= 7 ? 'bg-amber-50' : ''}>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        {e.nunca_logou && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                        <span>{e.nome}</span>
+                      </div>
+                    </td>
                     <td>
                       <Badge variant="default" size="sm">{e.turma}</Badge>
                     </td>
                     <td className="text-center">
-                      <div className="flex justify-center gap-1">
-                        {e.componentes.includes('fisica') && (
-                          <Badge variant="fisica" size="sm">Fís</Badge>
-                        )}
-                        {e.componentes.includes('matematica') && (
-                          <Badge variant="matematica" size="sm">Mat</Badge>
-                        )}
-                      </div>
+                      <span className={`text-sm ${e.nunca_logou ? 'text-red-600 font-medium' : e.dias_sem_atividade !== null && e.dias_sem_atividade >= 7 ? 'text-amber-600' : 'text-slate-500'}`}>
+                        {formatarInatividade(e.dias_sem_atividade, e.nunca_logou)}
+                      </span>
+                    </td>
+                    <td className="text-right">
+                      {e.componentes.includes('fisica') ? (
+                        <span className={`font-semibold ${(e.fis_nota_atual ?? 0) >= 6 ? 'text-green-600' : (e.fis_nota_atual ?? 0) >= 4 ? 'text-amber-600' : 'text-red-600'}`}>
+                          {e.fis_nota_atual !== null && e.fis_nota_atual !== undefined ? e.fis_nota_atual.toFixed(1) : '-'}
+                        </span>
+                      ) : '-'}
                     </td>
                     <td className="text-right text-fisica-500">
                       {e.componentes.includes('fisica') ? e.fis_pontos : '-'}
                     </td>
                     <td className="text-right text-fisica-500">
                       {e.componentes.includes('fisica') ? `${calcularTaxaAcerto(e.fis_questoes_corretas, e.fis_questoes_total)}%` : '-'}
+                    </td>
+                    <td className="text-right">
+                      {e.componentes.includes('matematica') ? (
+                        <span className={`font-semibold ${(e.mat_nota_atual ?? 0) >= 6 ? 'text-green-600' : (e.mat_nota_atual ?? 0) >= 4 ? 'text-amber-600' : 'text-red-600'}`}>
+                          {e.mat_nota_atual !== null && e.mat_nota_atual !== undefined ? e.mat_nota_atual.toFixed(1) : '-'}
+                        </span>
+                      ) : '-'}
                     </td>
                     <td className="text-right text-matematica-500">
                       {e.componentes.includes('matematica') ? e.mat_pontos : '-'}
@@ -664,6 +740,33 @@ export default function RelatoriosProfessorPage() {
                 Nenhum estudante encontrado com os filtros selecionados.
               </p>
             )}
+          </div>
+
+          {/* Legenda */}
+          <div className="mt-4 pt-4 border-t border-slate-200">
+            <p className="text-caption text-slate-500 mb-2">Legenda:</p>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
+                <span className="text-slate-600">Nunca acessou a plataforma</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-amber-50 border border-amber-200 rounded"></div>
+                <span className="text-slate-600">Inativo há 7+ dias</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-green-600">6.0+</span>
+                <span className="text-slate-600">Aprovado</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-amber-600">4.0-5.9</span>
+                <span className="text-slate-600">Atenção</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-red-600">&lt;4.0</span>
+                <span className="text-slate-600">Recuperação</span>
+              </div>
+            </div>
           </div>
         </Card>
       </main>

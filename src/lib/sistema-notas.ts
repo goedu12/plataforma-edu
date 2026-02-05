@@ -117,7 +117,7 @@ const CONFIG_BIMESTRES: Record<number, Record<1 | 2 | 3 | 4, ConfigBimestre>> = 
   2026: {
     1: {
       bimestre: 1,
-      regular: { inicio: '2025-01-01', fim: '2026-04-15', meta: 150 },
+      regular: { inicio: '2026-01-01', fim: '2026-04-15', meta: 150 },
       recuperacao: { inicio: '2026-04-16', fim: '2026-04-30' },
     },
     2: {
