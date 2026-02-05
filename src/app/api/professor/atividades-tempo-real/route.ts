@@ -318,10 +318,13 @@ export async function GET(request: NextRequest) {
     const mapasDownloads = mapasDownloadsResult.data || []
     const notasAlunos = notasResult.data || []
 
-    // Filtrar alunos por colégio se especificado
-    const todosAlunos = colegioFiltro
-      ? todosAlunosRaw.filter(a => a.colegio === colegioFiltro)
-      : todosAlunosRaw
+    // Filtrar turmas do ensino fundamental (6º ao 9º ano)
+    const turmasEnsinoFundamental = /^(6|7|8|9)(º|°)?(\s|[A-Za-z]|$)/i
+
+    // Filtrar alunos: excluir ensino fundamental e aplicar filtro de colégio se especificado
+    const todosAlunos = todosAlunosRaw
+      .filter(a => !turmasEnsinoFundamental.test(a.turma || ''))
+      .filter(a => !colegioFiltro || a.colegio === colegioFiltro)
 
     // Criar mapa de notas por aluno e componente
     const notasPorAluno = new Map<string, { fisica?: number; matematica?: number }>()
@@ -360,10 +363,13 @@ export async function GET(request: NextRequest) {
       return dados
     }
 
-    // Função auxiliar para verificar se é estudante ativo
+    // Função auxiliar para verificar se é estudante ativo (exclui ensino fundamental)
     const isEstudanteAtivo = (usuario: UsuarioInfo | null): boolean => {
       if (!usuario) return false
-      return usuario.tipo === 'estudante' && usuario.ativo === true
+      if (usuario.tipo !== 'estudante' || usuario.ativo !== true) return false
+      // Excluir turmas do ensino fundamental (6º ao 9º ano)
+      if (turmasEnsinoFundamental.test(usuario.turma || '')) return false
+      return true
     }
 
     // Criar Set de IDs de usuários do colégio filtrado (para filtrar atividades)
@@ -980,7 +986,11 @@ async function getTurmasEColegiosDisponiveis(supabase: ReturnType<typeof getSupa
     .eq('tipo', 'estudante')
     .eq('ativo', true)
 
-  const turmas = [...new Set((usuariosData || []).map(u => u.turma).filter(Boolean))].sort()
+  // Filtrar turmas do ensino fundamental (6º ao 9º ano)
+  const turmasEnsinoFundamental = /^(6|7|8|9)(º|°)?(\s|[A-Za-z]|$)/i
+  const todasTurmas = [...new Set((usuariosData || []).map(u => u.turma).filter(Boolean))].sort()
+  const turmas = todasTurmas.filter(t => !turmasEnsinoFundamental.test(t))
+
   const colegios = [...new Set((usuariosData || []).map(u => u.colegio).filter(Boolean))].sort() as string[]
 
   turmasColegiosCache = { turmas, colegios, timestamp: agora }
