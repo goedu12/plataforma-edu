@@ -370,8 +370,12 @@ export async function POST(request: NextRequest) {
     const senhaTemporaria = gerarSenhaTemporaria()
     const senhaHash = await hashSenha(senhaTemporaria)
 
-    // Extrair ano da turma se não fornecido
-    const anoEstudante = ano || parseInt(turma.charAt(0)) || 1
+    // Extrair ano da turma se não fornecido (ex: "2A" -> ano 2)
+    const anoExtraido = parseInt(turma.trim().charAt(0))
+    const anoEstudante = ano || (anoExtraido >= 1 && anoExtraido <= 9 ? anoExtraido : 1)
+
+    // Determinar nível: 6-9 = EF (Ensino Fundamental), 1-3 = EM (Ensino Médio)
+    const nivel = anoEstudante >= 6 ? 'EF' : 'EM'
 
     // Criar estudante
     const { data: novoAluno, error } = await supabase
@@ -382,6 +386,7 @@ export async function POST(request: NextRequest) {
         turma: turma.trim().toUpperCase(),
         colegio: colegio?.trim() || null,
         ano: anoEstudante,
+        nivel: nivel,
         componentes: componentesFiltrados,
         tipo: 'estudante',
         ativo: true,
