@@ -2,7 +2,19 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Search, Filter, Atom, Calculator, Key, Copy, Check, Plus, X } from 'lucide-react'
+import {
+  Users,
+  Search,
+  Filter,
+  Atom,
+  Calculator,
+  Key,
+  Copy,
+  Check,
+  UserPlus,
+  X,
+  Loader2,
+} from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Input from '@/components/ui/Input'
 import Badge from '@/components/ui/Badge'
@@ -25,20 +37,13 @@ interface NovaSenhaModal {
   senha: string
 }
 
-// Estado do modal de cadastro
-interface CadastroModal {
+// Estado do modal de novo aluno
+interface NovoAlunoModal {
   show: boolean
-  loading: boolean
-}
-
-// Estado do formulário de cadastro
-interface FormCadastro {
   nome: string
-  email: string
   turma: string
   colegio: string
-  fisica: boolean
-  matematica: boolean
+  componentes: string[]
 }
 
 export default function AlunosProfessorPage() {
@@ -50,6 +55,7 @@ export default function AlunosProfessorPage() {
   const [componenteFiltro, setComponenteFiltro] = useState('')
   const [busca, setBusca] = useState('')
   const [resetando, setResetando] = useState<string | null>(null)
+  const [criandoAluno, setCriandoAluno] = useState(false)
 
   // Estado do toast para feedback
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' })
@@ -61,31 +67,17 @@ export default function AlunosProfessorPage() {
     senha: '',
   })
 
-  // Estado para indicar se a senha foi copiada
-  const [copiado, setCopiado] = useState(false)
-
-  // Estado do modal de cadastro
-  const [cadastroModal, setCadastroModal] = useState<CadastroModal>({
+  // Estado do modal para criar novo aluno
+  const [novoAlunoModal, setNovoAlunoModal] = useState<NovoAlunoModal>({
     show: false,
-    loading: false,
-  })
-
-  // Estado do formulário de cadastro
-  const [formCadastro, setFormCadastro] = useState<FormCadastro>({
     nome: '',
-    email: '',
     turma: '',
     colegio: '',
-    fisica: true,
-    matematica: false,
+    componentes: ['fisica', 'matematica'],
   })
 
-  // Estado para mostrar senha do novo aluno
-  const [novaCadastroSenha, setNovaCadastroSenha] = useState<{ show: boolean; nome: string; senha: string }>({
-    show: false,
-    nome: '',
-    senha: '',
-  })
+  // Estado para indicar se a senha foi copiada
+  const [copiado, setCopiado] = useState(false)
 
   // Função para mostrar toast
   const showToast = useCallback((message: string, type: ToastState['type']) => {
@@ -132,7 +124,6 @@ export default function AlunosProfessorPage() {
   }, [turmaFiltro, componenteFiltro])
 
   const handleResetSenha = async (usuarioId: string, nomeAluno: string) => {
-    // Usar window.confirm para confirmação (mais seguro que o antigo alert)
     const confirmacao = window.confirm(
       `Deseja gerar uma nova senha temporária para ${nomeAluno}?\n\nA senha atual será substituída.`
     )
@@ -149,7 +140,6 @@ export default function AlunosProfessorPage() {
 
       const data = await response.json()
       if (data.sucesso && data.nova_senha) {
-        // Mostrar modal com a nova senha
         setNovaSenhaModal({
           show: true,
           nomeAluno,
@@ -166,93 +156,72 @@ export default function AlunosProfessorPage() {
     }
   }
 
-  const alunosFiltrados = alunos.filter(aluno =>
-    aluno.nome.toLowerCase().includes(busca.toLowerCase())
-  )
-
-  // Função para abrir modal de cadastro
-  const abrirModalCadastro = () => {
-    setFormCadastro({
-      nome: '',
-      email: '',
-      turma: '',
-      colegio: '',
-      fisica: true,
-      matematica: false,
-    })
-    setCadastroModal({ show: true, loading: false })
-  }
-
-  // Função para fechar modal de cadastro
-  const fecharModalCadastro = () => {
-    setCadastroModal({ show: false, loading: false })
-  }
-
-  // Função para cadastrar novo aluno
-  const handleCadastrarAluno = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Validações básicas
-    if (!formCadastro.nome.trim()) {
-      showToast('Nome é obrigatório', 'error')
+  const handleCriarAluno = async () => {
+    if (!novoAlunoModal.nome.trim()) {
+      showToast('Digite o nome do estudante', 'warning')
       return
     }
-    if (!formCadastro.email.trim()) {
-      showToast('Email é obrigatório', 'error')
+    if (!novoAlunoModal.turma.trim()) {
+      showToast('Digite a turma', 'warning')
       return
     }
-    if (!formCadastro.turma.trim()) {
-      showToast('Turma é obrigatória', 'error')
-      return
-    }
-    if (!formCadastro.fisica && !formCadastro.matematica) {
-      showToast('Selecione pelo menos um componente', 'error')
+    if (novoAlunoModal.componentes.length === 0) {
+      showToast('Selecione pelo menos um componente', 'warning')
       return
     }
 
-    setCadastroModal(prev => ({ ...prev, loading: true }))
-
+    setCriandoAluno(true)
     try {
-      const componentes = []
-      if (formCadastro.fisica) componentes.push('fisica')
-      if (formCadastro.matematica) componentes.push('matematica')
-
       const response = await fetch('/api/professor/alunos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nome: formCadastro.nome.trim(),
-          email: formCadastro.email.trim(),
-          turma: formCadastro.turma.trim(),
-          colegio: formCadastro.colegio.trim() || undefined,
-          componentes,
+          nome: novoAlunoModal.nome,
+          turma: novoAlunoModal.turma,
+          colegio: novoAlunoModal.colegio || null,
+          componentes: novoAlunoModal.componentes,
         }),
       })
 
       const data = await response.json()
-
       if (data.sucesso) {
-        showToast('Estudante cadastrado com sucesso!', 'success')
-        fecharModalCadastro()
-
-        // Mostrar senha temporária
-        setNovaCadastroSenha({
+        // Fechar modal de criação e abrir modal com senha
+        setNovoAlunoModal({
+          show: false,
+          nome: '',
+          turma: '',
+          colegio: '',
+          componentes: ['fisica', 'matematica'],
+        })
+        setNovaSenhaModal({
           show: true,
-          nome: formCadastro.nome,
+          nomeAluno: data.aluno.nome,
           senha: data.senha_temporaria,
         })
-
-        // Atualizar lista
-        buscarAlunos()
+        showToast(data.mensagem, 'success')
+        buscarAlunos() // Recarregar lista
       } else {
-        showToast(data.erro || 'Erro ao cadastrar estudante', 'error')
+        showToast(data.erro || 'Erro ao criar estudante', 'error')
       }
     } catch {
-      showToast('Erro de conexão ao cadastrar estudante', 'error')
+      showToast('Erro de conexão', 'error')
     } finally {
-      setCadastroModal(prev => ({ ...prev, loading: false }))
+      setCriandoAluno(false)
     }
   }
+
+  const toggleComponente = (comp: string) => {
+    setNovoAlunoModal(prev => ({
+      ...prev,
+      componentes: prev.componentes.includes(comp)
+        ? prev.componentes.filter(c => c !== comp)
+        : [...prev.componentes, comp],
+    }))
+  }
+
+  const alunosFiltrados = alunos.filter(aluno =>
+    aluno.nome.toLowerCase().includes(busca.toLowerCase())
+  )
 
   if (loading && alunos.length === 0) {
     return <Loading fullScreen />
@@ -272,12 +241,13 @@ export default function AlunosProfessorPage() {
               </h1>
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>{alunos.length} estudantes cadastrados</p>
             </div>
+            {/* Botão Novo Aluno */}
             <button
-              onClick={abrirModalCadastro}
-              className="p-2 rounded-xl bg-accent-orange text-white hover:bg-orange-600 transition-colors"
-              title="Cadastrar novo estudante"
+              onClick={() => setNovoAlunoModal(prev => ({ ...prev, show: true }))}
+              className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors shadow-lg"
             >
-              <Plus className="w-5 h-5" />
+              <UserPlus className="w-5 h-5" />
+              <span className="hidden sm:inline">Novo Aluno</span>
             </button>
           </div>
         </div>
@@ -303,7 +273,7 @@ export default function AlunosProfessorPage() {
             <select
               value={turmaFiltro}
               onChange={e => setTurmaFiltro(e.target.value)}
-              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-accent-orange focus:border-transparent bg-white text-slate-800"
+              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-slate-800"
             >
               <option value="">Todas as turmas</option>
               {turmas.map(t => (
@@ -315,7 +285,7 @@ export default function AlunosProfessorPage() {
             <select
               value={componenteFiltro}
               onChange={e => setComponenteFiltro(e.target.value)}
-              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-accent-orange focus:border-transparent bg-white text-slate-800"
+              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-slate-800"
             >
               <option value="">Todos os componentes</option>
               <option value="fisica">Física</option>
@@ -325,43 +295,46 @@ export default function AlunosProfessorPage() {
         </Card>
 
         {/* Lista de Alunos */}
-        <div className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {alunosFiltrados.map((aluno, index) => (
             <Card
               key={aluno.id}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 30}ms` }}
+              className="animate-slide-up hover:shadow-lg transition-shadow"
+              style={{ animationDelay: `${index * 20}ms` }}
             >
-              <div className="flex items-center gap-4">
+              <div className="flex items-start gap-3">
                 {/* Avatar */}
-                <div className="w-12 h-12 rounded-xl bg-gray-700 flex items-center justify-center text-white font-bold text-lg">
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
+                  style={{
+                    background: aluno.componentes.includes('fisica')
+                      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                      : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                  }}
+                >
                   {aluno.nome.charAt(0).toUpperCase()}
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-800 truncate">{aluno.nome}</h3>
+                    <h3 className="font-semibold text-slate-800 truncate text-sm">{aluno.nome}</h3>
                     <Badge variant="default" size="sm">
                       {aluno.turma}
                     </Badge>
                   </div>
-                  <p className="text-sm text-slate-500 truncate">{aluno.email}</p>
-                  <div className="flex items-center gap-4 mt-2">
+                  <p className="text-xs text-slate-500 truncate mb-2">{aluno.email}</p>
+                  <div className="flex items-center gap-3">
                     {aluno.componentes.includes('fisica') && (
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <div className="w-6 h-6 rounded-lg bg-fisica-50 flex items-center justify-center">
-                          <Atom className="w-3.5 h-3.5 text-fisica-500" />
-                        </div>
-                        <span className="font-medium text-fisica-500">{aluno.fis_pontos} pts</span>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Atom className="w-4 h-4 text-green-500" />
+                        <span className="font-semibold text-green-600">{aluno.fis_pontos}</span>
                       </div>
                     )}
                     {aluno.componentes.includes('matematica') && (
-                      <div className="flex items-center gap-1.5 text-xs">
-                        <div className="w-6 h-6 rounded-lg bg-matematica-50 flex items-center justify-center">
-                          <Calculator className="w-3.5 h-3.5 text-matematica-500" />
-                        </div>
-                        <span className="font-medium text-matematica-500">{aluno.mat_pontos} pts</span>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Calculator className="w-4 h-4 text-purple-500" />
+                        <span className="font-semibold text-purple-600">{aluno.mat_pontos}</span>
                       </div>
                     )}
                   </div>
@@ -371,12 +344,12 @@ export default function AlunosProfessorPage() {
                 <button
                   onClick={() => handleResetSenha(aluno.id, aluno.nome)}
                   disabled={resetando === aluno.id}
-                  className="p-3 text-slate-500 hover:text-accent-orange hover:bg-orange-50 rounded-xl transition-all disabled:opacity-50"
+                  className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all disabled:opacity-50"
                   title="Gerar nova senha"
                   aria-label={`Gerar nova senha para ${aluno.nome}`}
                 >
                   {resetando === aluno.id ? (
-                    <Loading size="sm" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
                     <Key className="w-5 h-5" />
                   )}
@@ -386,20 +359,155 @@ export default function AlunosProfessorPage() {
           ))}
 
           {alunosFiltrados.length === 0 && (
-            <Card className="text-center py-10 animate-slide-up">
+            <Card className="text-center py-10 animate-slide-up col-span-full">
               <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-slate-100">
                 <Users className="w-8 h-8 text-slate-500" />
               </div>
               <h2 className="text-xl font-bold text-slate-800 mb-2">
                 Nenhum aluno encontrado
               </h2>
-              <p className="text-slate-600">
-                Ajuste os filtros ou importe novos alunos.
+              <p className="text-slate-600 mb-4">
+                Ajuste os filtros ou adicione novos alunos.
               </p>
+              <button
+                onClick={() => setNovoAlunoModal(prev => ({ ...prev, show: true }))}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors"
+              >
+                <UserPlus className="w-5 h-5" />
+                Adicionar Aluno
+              </button>
             </Card>
           )}
         </div>
       </main>
+
+      {/* Modal de Novo Aluno */}
+      {novoAlunoModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div
+            className="w-full max-w-md rounded-2xl p-6 shadow-xl"
+            style={{ background: 'var(--bg-surface)' }}
+            role="dialog"
+            aria-modal="true"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                Novo Estudante
+              </h2>
+              <button
+                onClick={() => setNovoAlunoModal(prev => ({ ...prev, show: false }))}
+                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Nome */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  Nome completo *
+                </label>
+                <input
+                  type="text"
+                  value={novoAlunoModal.nome}
+                  onChange={e => setNovoAlunoModal(prev => ({ ...prev, nome: e.target.value }))}
+                  placeholder="Ex: João Silva Santos"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Turma */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  Turma *
+                </label>
+                <input
+                  type="text"
+                  value={novoAlunoModal.turma}
+                  onChange={e => setNovoAlunoModal(prev => ({ ...prev, turma: e.target.value.toUpperCase() }))}
+                  placeholder="Ex: 2A, 3B"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Colégio (opcional) */}
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
+                  Colégio (opcional)
+                </label>
+                <input
+                  type="text"
+                  value={novoAlunoModal.colegio}
+                  onChange={e => setNovoAlunoModal(prev => ({ ...prev, colegio: e.target.value }))}
+                  placeholder="Nome do colégio"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Componentes */}
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
+                  Componentes *
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => toggleComponente('fisica')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                      novoAlunoModal.componentes.includes('fisica')
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                    }`}
+                  >
+                    <Atom className="w-5 h-5" />
+                    Física
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleComponente('matematica')}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
+                      novoAlunoModal.componentes.includes('matematica')
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                    }`}
+                  >
+                    <Calculator className="w-5 h-5" />
+                    Matemática
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setNovoAlunoModal(prev => ({ ...prev, show: false }))}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold border border-slate-200 hover:bg-slate-50 transition-colors"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCriarAluno}
+                disabled={criandoAluno}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold bg-green-500 hover:bg-green-600 text-white transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {criandoAluno ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Criando...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-5 h-5" />
+                    Criar Estudante
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de Nova Senha */}
       {novaSenhaModal.show && (
@@ -416,7 +524,7 @@ export default function AlunosProfessorPage() {
               className="text-lg font-bold mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Nova Senha Gerada
+              Senha Gerada
             </h2>
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
               Senha temporária para <strong>{novaSenhaModal.nomeAluno}</strong>:
@@ -427,35 +535,31 @@ export default function AlunosProfessorPage() {
               style={{ background: 'var(--bg-elevated)' }}
             >
               <code
-                className="flex-1 text-lg font-mono font-bold tracking-wider"
+                className="flex-1 text-2xl font-mono font-bold tracking-widest text-center"
                 style={{ color: 'var(--text-primary)' }}
               >
                 {novaSenhaModal.senha}
               </code>
               <button
                 onClick={copiarSenha}
-                className="p-2 rounded-lg transition-colors hover:bg-black/10"
+                className="p-3 rounded-lg transition-colors hover:bg-black/10"
                 aria-label="Copiar senha"
               >
                 {copiado ? (
-                  <Check className="w-5 h-5 text-green-500" />
+                  <Check className="w-6 h-6 text-green-500" />
                 ) : (
-                  <Copy className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
+                  <Copy className="w-6 h-6" style={{ color: 'var(--text-muted)' }} />
                 )}
               </button>
             </div>
 
-            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
+            <p className="text-xs mb-4 text-center" style={{ color: 'var(--text-muted)' }}>
               O estudante deverá alterar esta senha no primeiro acesso.
             </p>
 
             <button
               onClick={() => setNovaSenhaModal({ show: false, nomeAluno: '', senha: '' })}
-              className="w-full py-3 px-4 rounded-xl font-semibold transition-colors"
-              style={{
-                background: 'var(--color-accent)',
-                color: 'white',
-              }}
+              className="w-full py-3 px-4 rounded-xl font-semibold transition-colors bg-green-500 hover:bg-green-600 text-white"
             >
               Fechar
             </button>
@@ -470,205 +574,6 @@ export default function AlunosProfessorPage() {
           type={toast.type}
           onClose={() => setToast(prev => ({ ...prev, show: false }))}
         />
-      )}
-
-      {/* Modal de Cadastro de Estudante */}
-      {cadastroModal.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div
-            className="w-full max-w-md rounded-2xl p-6 shadow-xl"
-            style={{ background: 'var(--bg-surface)' }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-cadastro-titulo"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                id="modal-cadastro-titulo"
-                className="text-lg font-bold"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                Cadastrar Estudante
-              </h2>
-              <button
-                onClick={fecharModalCadastro}
-                className="p-2 rounded-lg hover:bg-black/10 transition-colors"
-                aria-label="Fechar modal"
-              >
-                <X className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-              </button>
-            </div>
-
-            <form onSubmit={handleCadastrarAluno} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                  Nome completo *
-                </label>
-                <input
-                  type="text"
-                  value={formCadastro.nome}
-                  onChange={e => setFormCadastro(prev => ({ ...prev, nome: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-accent-orange focus:border-transparent"
-                  placeholder="Nome do estudante"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  value={formCadastro.email}
-                  onChange={e => setFormCadastro(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-accent-orange focus:border-transparent"
-                  placeholder="email@exemplo.com"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Turma *
-                  </label>
-                  <input
-                    type="text"
-                    value={formCadastro.turma}
-                    onChange={e => setFormCadastro(prev => ({ ...prev, turma: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-accent-orange focus:border-transparent"
-                    placeholder="Ex: 1A, 2B"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>
-                    Colégio
-                  </label>
-                  <input
-                    type="text"
-                    value={formCadastro.colegio}
-                    onChange={e => setFormCadastro(prev => ({ ...prev, colegio: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-accent-orange focus:border-transparent"
-                    placeholder="Opcional"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-                  Componentes *
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formCadastro.fisica}
-                      onChange={e => setFormCadastro(prev => ({ ...prev, fisica: e.target.checked }))}
-                      className="w-5 h-5 rounded border-slate-300 text-fisica-500 focus:ring-fisica-500"
-                    />
-                    <span className="flex items-center gap-1">
-                      <Atom className="w-4 h-4 text-fisica-500" />
-                      <span style={{ color: 'var(--text-primary)' }}>Física</span>
-                    </span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formCadastro.matematica}
-                      onChange={e => setFormCadastro(prev => ({ ...prev, matematica: e.target.checked }))}
-                      className="w-5 h-5 rounded border-slate-300 text-matematica-500 focus:ring-matematica-500"
-                    />
-                    <span className="flex items-center gap-1">
-                      <Calculator className="w-4 h-4 text-matematica-500" />
-                      <span style={{ color: 'var(--text-primary)' }}>Matemática</span>
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={fecharModalCadastro}
-                  className="flex-1 py-3 px-4 rounded-xl font-semibold border border-slate-200 hover:bg-slate-50 transition-colors"
-                  style={{ color: 'var(--text-primary)' }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={cadastroModal.loading}
-                  className="flex-1 py-3 px-4 rounded-xl font-semibold bg-accent-orange text-white hover:bg-orange-600 transition-colors disabled:opacity-50"
-                >
-                  {cadastroModal.loading ? 'Cadastrando...' : 'Cadastrar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de Senha do Novo Cadastro */}
-      {novaCadastroSenha.show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div
-            className="w-full max-w-md rounded-2xl p-6 shadow-xl"
-            style={{ background: 'var(--bg-surface)' }}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-senha-cadastro-titulo"
-          >
-            <h2
-              id="modal-senha-cadastro-titulo"
-              className="text-lg font-bold mb-2"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              Estudante Cadastrado
-            </h2>
-            <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              Senha temporária para <strong>{novaCadastroSenha.nome}</strong>:
-            </p>
-
-            <div
-              className="flex items-center gap-2 p-4 rounded-xl mb-4"
-              style={{ background: 'var(--bg-elevated)' }}
-            >
-              <code
-                className="flex-1 text-lg font-mono font-bold tracking-wider"
-                style={{ color: 'var(--text-primary)' }}
-              >
-                {novaCadastroSenha.senha}
-              </code>
-              <button
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(novaCadastroSenha.senha)
-                    showToast('Senha copiada!', 'success')
-                  } catch {
-                    showToast('Erro ao copiar', 'error')
-                  }
-                }}
-                className="p-2 rounded-lg transition-colors hover:bg-black/10"
-                aria-label="Copiar senha"
-              >
-                <Copy className="w-5 h-5" style={{ color: 'var(--text-muted)' }} />
-              </button>
-            </div>
-
-            <p className="text-xs mb-4" style={{ color: 'var(--text-muted)' }}>
-              Anote esta senha! O estudante deverá usá-la no primeiro acesso.
-            </p>
-
-            <button
-              onClick={() => setNovaCadastroSenha({ show: false, nome: '', senha: '' })}
-              className="w-full py-3 px-4 rounded-xl font-semibold bg-accent-orange text-white hover:bg-orange-600 transition-colors"
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
       )}
     </div>
   )

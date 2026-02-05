@@ -280,6 +280,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Gerar email a partir do nome e turma (quando não fornecido)
+function gerarEmailAutomatico(nome: string, turma: string): string {
+  const primeiroNome = nome.split(' ')[0].toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const ultimoNome = nome.split(' ').pop()?.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '') || ''
+  return `${primeiroNome}.${ultimoNome}@${turma.toLowerCase()}`
+}
+
 // POST: Cadastrar novo estudante
 export async function POST(request: NextRequest) {
   try {
@@ -292,7 +301,8 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { nome, email, turma, colegio, ano, componentes } = body
+    const { nome, turma, colegio, ano, componentes } = body
+    let { email } = body
 
     // Validações
     if (!nome || !nome.trim()) {
@@ -302,27 +312,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!email || !email.trim()) {
-      return NextResponse.json(
-        { sucesso: false, erro: 'Email é obrigatório' },
-        { status: 400 }
-      )
-    }
-
-    // Validar formato do email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(email.trim())) {
-      return NextResponse.json(
-        { sucesso: false, erro: 'Formato de email inválido' },
-        { status: 400 }
-      )
-    }
-
     if (!turma || !turma.trim()) {
       return NextResponse.json(
         { sucesso: false, erro: 'Turma é obrigatória' },
         { status: 400 }
       )
+    }
+
+    // Gerar email automaticamente se não fornecido
+    if (!email || !email.trim()) {
+      email = gerarEmailAutomatico(nome.trim(), turma.trim())
+    } else {
+      // Validar formato do email se fornecido
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(email.trim())) {
+        return NextResponse.json(
+          { sucesso: false, erro: 'Formato de email inválido' },
+          { status: 400 }
+        )
+      }
     }
 
     if (!componentes || !Array.isArray(componentes) || componentes.length === 0) {
@@ -353,7 +361,7 @@ export async function POST(request: NextRequest) {
 
     if (existente) {
       return NextResponse.json(
-        { sucesso: false, erro: 'Este email já está cadastrado' },
+        { sucesso: false, erro: `Email ${email} já cadastrado. Tente com um sobrenome diferente.` },
         { status: 409 }
       )
     }
@@ -403,7 +411,7 @@ export async function POST(request: NextRequest) {
       sucesso: true,
       aluno: novoAluno,
       senha_temporaria: senhaTemporaria,
-      mensagem: 'Estudante cadastrado com sucesso',
+      mensagem: `Estudante ${nome.trim()} cadastrado com sucesso!`,
     })
   } catch (error) {
     console.error('Erro ao cadastrar aluno:', error)
