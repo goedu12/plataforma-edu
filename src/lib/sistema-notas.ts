@@ -704,8 +704,15 @@ export async function nivel5PersistenciaNotificacao(
       questoes_respondidas: notaAtualizada.questoes_respondidas,
       meta_questoes: notaAtualizada.meta_questoes,
       dias_ativos: notaAtualizada.dias_ativos,
-      nota_base: notaAtualizada.nota_nova - notaAtualizada.bonus_frequencia,
-      bonus_frequencia: notaAtualizada.bonus_frequencia,
+      // Campos v2 - Fórmula por acertos + tempo
+      acertos_estudo: notaAtualizada.acertos_estudo,
+      acertos_revisao: notaAtualizada.acertos_revisao,
+      acertos_desafio: notaAtualizada.acertos_desafio,
+      nota_acertos: notaAtualizada.nota_acertos,
+      nota_tempo: notaAtualizada.nota_tempo,
+      // Campos legado (mantidos para compatibilidade)
+      nota_base: notaAtualizada.nota_acertos,
+      bonus_frequencia: notaAtualizada.nota_tempo,
       nota_regular: notaAtualizada.nota_nova,
       nota_final: notaAtualizada.nota_nova,
       status: notaAtualizada.nota_nova >= 6.0 ? 'em_andamento' : 'em_andamento',
