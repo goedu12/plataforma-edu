@@ -59,11 +59,11 @@ export default function DashboardProfessorPage() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <Card className="text-center py-8 max-w-md">
           <AlertCircle className="w-16 h-16 text-error mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Erro ao carregar</h2>
-          <p className="text-slate-600">Não foi possível carregar as estatísticas.</p>
+          <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>Erro ao carregar</h2>
+          <p style={{ color: 'var(--text-secondary)' }}>Não foi possível carregar as estatísticas.</p>
         </Card>
       </div>
     )
@@ -140,8 +140,8 @@ export default function DashboardProfessorPage() {
                 <Atom className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg text-slate-800">Física</h2>
-                <p className="text-sm text-slate-600">
+                <h2 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Física</h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   {stats.fisica.total_estudantes} estudantes matriculados
                 </p>
               </div>
@@ -175,8 +175,8 @@ export default function DashboardProfessorPage() {
                 <Calculator className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg text-slate-800">Matemática</h2>
-                <p className="text-sm text-slate-600">
+                <h2 className="font-semibold text-lg" style={{ color: 'var(--text-primary)' }}>Matemática</h2>
+                <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                   {stats.matematica.total_estudantes} estudantes matriculados
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default function DashboardProfessorPage() {
         {/* Alertas */}
         {stats.alertas.length > 0 && (
           <Card className="mb-6 animate-slide-up border-l-4 border-warning" style={{ animationDelay: '200ms' }}>
-            <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
               <AlertCircle className="w-5 h-5 text-warning" />
               Atenção Necessária
             </h3>
@@ -220,10 +220,10 @@ export default function DashboardProfessorPage() {
                 >
                   <div className={`w-2 h-2 rounded-full ${alerta.tipo === 'inativo' ? 'bg-error' : 'bg-warning'}`} />
                   <div className="flex-1">
-                    <p className="font-medium text-slate-800">
-                      {alerta.nome} <span className="text-slate-500">({alerta.turma})</span>
+                    <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
+                      {alerta.nome} <span style={{ color: 'var(--text-tertiary)' }}>({alerta.turma})</span>
                     </p>
-                    <p className="text-sm text-slate-600">{alerta.descricao}</p>
+                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>{alerta.descricao}</p>
                   </div>
                   <Badge variant={alerta.componente === 'fisica' ? 'fisica' : 'matematica'} size="sm">
                     {alerta.componente === 'fisica' ? 'Física' : 'Matemática'}
@@ -236,14 +236,14 @@ export default function DashboardProfessorPage() {
 
         {/* Desempenho por Turma */}
         <Card className="mb-6 animate-slide-up" style={{ animationDelay: '300ms' }}>
-          <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+          <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <TrendingUp className="w-5 h-5 text-success" />
             Desempenho por Turma
           </h3>
           <div className="space-y-3">
             {stats.desempenho_turmas.map((turma) => (
               <div key={`${turma.turma}-${turma.componente}`} className="flex items-center gap-4">
-                <span className="font-medium text-slate-800 w-12 text-sm">{turma.turma}</span>
+                <span className="font-medium w-12 text-sm" style={{ color: 'var(--text-primary)' }}>{turma.turma}</span>
                 <Badge variant={turma.componente === 'fisica' ? 'fisica' : 'matematica'} size="sm">
                   {turma.componente === 'fisica' ? 'Fís' : 'Mat'}
                 </Badge>
@@ -255,7 +255,7 @@ export default function DashboardProfessorPage() {
                     style={{ width: `${turma.media_acerto}%` }}
                   />
                 </div>
-                <span className="text-sm font-medium text-slate-800 w-12 text-right">
+                <span className="text-sm font-medium w-12 text-right" style={{ color: 'var(--text-primary)' }}>
                   {turma.media_acerto}%
                 </span>
               </div>
@@ -279,8 +279,8 @@ export default function DashboardProfessorPage() {
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
                 )}
               </div>
-              <h3 className="font-semibold text-slate-800 text-center">{item.label}</h3>
-              <p className="text-xs text-slate-500 text-center">{item.description}</p>
+              <h3 className="font-semibold text-center" style={{ color: 'var(--text-primary)' }}>{item.label}</h3>
+              <p className="text-xs text-center" style={{ color: 'var(--text-tertiary)' }}>{item.description}</p>
             </Card>
           ))}
         </div>
@@ -289,7 +289,7 @@ export default function DashboardProfessorPage() {
         <div className="mt-6 animate-fade-in" style={{ animationDelay: '600ms' }}>
           <TerminalCard title="sistema-status.sh">
             <div className="space-y-1">
-              <p><span className="text-green-400">$</span> <span className="text-gray-500">plataforma --status</span></p>
+              <p><span className="text-green-400">$</span> <span style={{ color: 'var(--text-tertiary)' }}>plataforma --status</span></p>
               <p><span className="text-blue-400">INFO:</span> Sistema operacional</p>
               <p><span className="text-yellow-400">ALUNOS:</span> {stats.total_alunos_unicos ?? (stats.fisica.total_estudantes + stats.matematica.total_estudantes)} cadastrados</p>
               <p><span className="text-green-400">UPTIME:</span> 99.9% disponibilidade</p>

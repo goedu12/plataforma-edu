@@ -113,9 +113,9 @@ export default function ConfigProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="bg-white border-b border-border px-4 py-6">
+      <header className="border-b border-border px-4 py-6" style={{ background: 'var(--bg-surface)' }}>
         <div className="max-w-4xl mx-auto">
           <div className="mb-4">
             <BackButton href="/professor/dashboard" showLabel label="Voltar ao Dashboard" />
@@ -125,8 +125,8 @@ export default function ConfigProfessorPage() {
               <Settings className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-title text-slate-800">Configurações</h1>
-              <p className="text-caption text-slate-500">Gerencie o seu10 e suas preferências</p>
+              <h1 className="text-title" style={{ color: 'var(--text-primary)' }}>Configurações</h1>
+              <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Gerencie o seu10 e suas preferências</p>
             </div>
           </div>
         </div>
@@ -137,17 +137,17 @@ export default function ConfigProfessorPage() {
         {/* Informações do Professor */}
         <Card>
           <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-slate-500" />
-            <h3 className="text-heading text-slate-800">Sua Conta</h3>
+            <Shield className="w-5 h-5" style={{ color: 'var(--text-tertiary)' }} />
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Sua Conta</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-white rounded-xl">
-              <label className="text-caption text-slate-500">Nome</label>
-              <p className="font-medium text-slate-800">{professor?.nome}</p>
+            <div className="p-4 rounded-xl" style={{ background: 'var(--bg-surface)' }}>
+              <label className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Nome</label>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{professor?.nome}</p>
             </div>
-            <div className="p-4 bg-white rounded-xl">
-              <label className="text-caption text-slate-500">Email</label>
-              <p className="font-medium text-slate-800">{professor?.email}</p>
+            <div className="p-4 rounded-xl" style={{ background: 'var(--bg-surface)' }}>
+              <label className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Email</label>
+              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{professor?.email}</p>
             </div>
           </div>
         </Card>
@@ -156,27 +156,27 @@ export default function ConfigProfessorPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Info className="w-5 h-5 text-accent-500" />
-            <h3 className="text-heading text-slate-800">Configurações do seu10</h3>
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Configurações do seu10</h3>
           </div>
-          <p className="text-body text-slate-600 mb-4">
+          <p className="text-body mb-4" style={{ color: 'var(--text-secondary)' }}>
             Configurações globais do sistema de aprendizado.
           </p>
           <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-4 bg-white rounded-xl border border-matematica-500/20">
+            <div className="p-4 rounded-xl border border-matematica-500/20" style={{ background: 'var(--bg-surface)' }}>
               <div className="flex items-center gap-2 mb-2">
                 <Bot className="w-5 h-5 text-matematica-500" />
-                <span className="font-medium text-slate-800">Limite Tutor IA</span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Limite Tutor IA</span>
               </div>
               <p className="text-2xl font-bold text-matematica-500">{PONTUACAO.LIMITE_IA_DIARIO}</p>
-              <p className="text-caption text-slate-500">interações por dia por aluno</p>
+              <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>interações por dia por aluno</p>
             </div>
-            <div className="p-4 bg-white rounded-xl border border-primary-500/20">
+            <div className="p-4 rounded-xl border border-primary-500/20" style={{ background: 'var(--bg-surface)' }}>
               <div className="flex items-center gap-2 mb-2">
                 <Target className="w-5 h-5 text-primary-500" />
-                <span className="font-medium text-slate-800">Meta Semanal</span>
+                <span className="font-medium" style={{ color: 'var(--text-primary)' }}>Meta Semanal</span>
               </div>
               <p className="text-2xl font-bold text-primary-500">50</p>
-              <p className="text-caption text-slate-500">questões por semana</p>
+              <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>questões por semana</p>
             </div>
           </div>
           <div className="mt-4 p-4 bg-accent-500/10 border border-accent-500/20 rounded-xl">
@@ -199,7 +199,7 @@ export default function ConfigProfessorPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <Key className="w-5 h-5 text-warning" />
-            <h3 className="text-heading text-slate-800">Alterar Senha</h3>
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Alterar Senha</h3>
           </div>
 
           {mensagem && (
@@ -221,7 +221,7 @@ export default function ConfigProfessorPage() {
 
           <form onSubmit={alterarSenha} className="space-y-4">
             <div>
-              <label className="block text-caption text-slate-600 mb-2">
+              <label className="block text-caption mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Senha Atual
               </label>
               <div className="relative">
@@ -229,13 +229,15 @@ export default function ConfigProfessorPage() {
                   type={mostrarSenhaAtual ? 'text' : 'password'}
                   value={senhaAtual}
                   onChange={e => setSenhaAtual(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-slate-800 placeholder-text-muted pr-12 transition-all"
+                  className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 placeholder-text-muted pr-12 transition-all"
+                  style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
                   placeholder="Digite sua senha atual"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarSenhaAtual(!mostrarSenhaAtual)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'var(--text-tertiary)' }}
                 >
                   {mostrarSenhaAtual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -243,7 +245,7 @@ export default function ConfigProfessorPage() {
             </div>
 
             <div>
-              <label className="block text-caption text-slate-600 mb-2">
+              <label className="block text-caption mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Nova Senha
               </label>
               <div className="relative">
@@ -251,13 +253,15 @@ export default function ConfigProfessorPage() {
                   type={mostrarNovaSenha ? 'text' : 'password'}
                   value={novaSenha}
                   onChange={e => setNovaSenha(e.target.value)}
-                  className="w-full px-4 py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-slate-800 placeholder-text-muted pr-12 transition-all"
+                  className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 placeholder-text-muted pr-12 transition-all"
+                  style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
                   placeholder="Digite a nova senha (mínimo 6 caracteres)"
                 />
                 <button
                   type="button"
                   onClick={() => setMostrarNovaSenha(!mostrarNovaSenha)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: 'var(--text-tertiary)' }}
                 >
                   {mostrarNovaSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -265,14 +269,15 @@ export default function ConfigProfessorPage() {
             </div>
 
             <div>
-              <label className="block text-caption text-slate-600 mb-2">
+              <label className="block text-caption mb-2" style={{ color: 'var(--text-secondary)' }}>
                 Confirmar Nova Senha
               </label>
               <input
                 type="password"
                 value={confirmarSenha}
                 onChange={e => setConfirmarSenha(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 text-slate-800 placeholder-text-muted transition-all"
+                className="w-full px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 placeholder-text-muted transition-all"
+                style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
                 placeholder="Confirme a nova senha"
               />
             </div>

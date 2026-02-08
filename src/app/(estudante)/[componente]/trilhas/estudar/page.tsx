@@ -283,7 +283,7 @@ export default function TrilhasEstudarPage() {
   }
 
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const textOnAccent = isFisica ? '#000' : '#fff'
 
   // Tela de sem questões / gerando
@@ -297,11 +297,11 @@ export default function TrilhasEstudarPage() {
         <div className="text-center p-6 max-w-sm">
           <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
             {gerando ? (
-              <Loader2 className="w-10 h-10 animate-spin" style={{ color: accentColor }} />
+              <Loader2 className="w-10 h-10 animate-spin" style={{ color: corPrimaria }} />
             ) : completou ? (
-              <Trophy className="w-10 h-10" style={{ color: accentColor }} />
+              <Trophy className="w-10 h-10" style={{ color: corPrimaria }} />
             ) : (
-              <Zap className="w-10 h-10" style={{ color: accentColor }} />
+              <Zap className="w-10 h-10" style={{ color: corPrimaria }} />
             )}
           </div>
 
@@ -325,7 +325,7 @@ export default function TrilhasEstudarPage() {
                   <div
                     key={i}
                     className="w-2 h-2 rounded-full animate-bounce"
-                    style={{ background: accentColor, animationDelay: `${i * 0.15}s` }}
+                    style={{ background: corPrimaria, animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
               </div>
@@ -372,7 +372,7 @@ export default function TrilhasEstudarPage() {
             <BackButton href={`/${componente}/trilhas`} mobileOnly />
 
             <div className="flex items-center gap-1.5 flex-1 lg:flex-none">
-              <Target className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: accentColor }} />
+              <Target className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} />
               <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>Trilha</span>
             </div>
 
@@ -384,7 +384,7 @@ export default function TrilhasEstudarPage() {
                     key={index}
                     className="w-1.5 h-3 rounded-sm"
                     style={{
-                      background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                      background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? corPrimaria : 'var(--bg-elevated)'
                     }}
                   />
                 ))}
@@ -408,7 +408,7 @@ export default function TrilhasEstudarPage() {
                   key={index}
                   className="flex-1 h-1 rounded-full"
                   style={{
-                    background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                    background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? corPrimaria : 'var(--bg-elevated)'
                   }}
                 />
               ))}
@@ -423,7 +423,7 @@ export default function TrilhasEstudarPage() {
           <div className="space-chromebook">
             {/* Tag tema - inline no mobile */}
             {questao.tema && (
-              <span className="badge-chromebook inline-block mb-1" style={{ background: `${accentColor}15`, color: accentColor }}>
+              <span className="badge-chromebook inline-block mb-1" style={{ background: `${corPrimaria}15`, color: corPrimaria }}>
                 {questao.tema}
               </span>
             )}
@@ -441,8 +441,8 @@ export default function TrilhasEstudarPage() {
                 {mostrarDica ? (
                   <div className="feedback-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)', border: '1px dashed var(--border-default)' }}>
                     <div className="flex items-center gap-1 mb-0.5">
-                      <Lightbulb className="icon-chromebook" style={{ color: accentColor }} />
-                      <span className="text-[10px] font-medium" style={{ color: accentColor }}>Dica</span>
+                      <Lightbulb className="icon-chromebook" style={{ color: corPrimaria }} />
+                      <span className="text-[10px] font-medium" style={{ color: corPrimaria }}>Dica</span>
                     </div>
                     <p style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
                   </div>
@@ -482,7 +482,7 @@ export default function TrilhasEstudarPage() {
                   } else if (isCurrentSelection) {
                     style = {
                       background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                      border: `2px solid ${accentColor}`
+                      border: `2px solid ${corPrimaria}`
                     }
                   }
 
@@ -502,7 +502,7 @@ export default function TrilhasEstudarPage() {
                             : showResult && isSubmitted
                               ? 'var(--error)'
                               : isCurrentSelection
-                                ? accentColor
+                                ? corPrimaria
                                 : 'var(--bg-elevated)',
                           color: (showResult && (isCorrect || isSubmitted)) || isCurrentSelection
                             ? isFisica ? '#000' : '#fff'
@@ -611,7 +611,7 @@ export default function TrilhasEstudarPage() {
             </p>
 
             <div className="p-4 rounded-xl mb-4" style={{ background: 'var(--bg-elevated)' }}>
-              <p className="text-3xl font-bold" style={{ color: accentColor }}>{resultadoSemana.taxaAcerto}%</p>
+              <p className="text-3xl font-bold" style={{ color: corPrimaria }}>{resultadoSemana.taxaAcerto}%</p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Taxa de acerto</p>
             </div>
 

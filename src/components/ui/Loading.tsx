@@ -49,8 +49,8 @@ export default function Loading({
   if (fullScreen) {
     return (
       <div
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-sm"
-        style={{ background: 'var(--bg-base)' }}
+        className="fixed inset-0 flex flex-col items-center justify-center backdrop-blur-sm"
+        style={{ background: 'var(--bg-base)', zIndex: 100 }}
       >
         {/* Logo seu10 */}
         <div className="mb-8">

@@ -469,9 +469,9 @@ export default function RelatoriosProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="bg-white border-b border-border px-4 py-6">
+      <header className="border-b border-border px-4 py-6" style={{ background: 'var(--bg-surface)' }}>
         <div className="max-w-6xl mx-auto">
           <div className="mb-4">
             <BackButton href="/professor/dashboard" showLabel label="Voltar ao Dashboard" />
@@ -481,8 +481,8 @@ export default function RelatoriosProfessorPage() {
               <BarChart3 className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-title text-slate-800">Relatórios</h1>
-              <p className="text-caption text-slate-500">Exporte dados e visualize estatísticas</p>
+              <h1 className="text-title" style={{ color: 'var(--text-primary)' }}>Relatórios</h1>
+              <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Exporte dados e visualize estatísticas</p>
             </div>
           </div>
         </div>
@@ -493,12 +493,12 @@ export default function RelatoriosProfessorPage() {
         {/* Filtros */}
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5 text-slate-500" />
-            <h3 className="text-heading text-slate-800">Filtros</h3>
+            <Filter className="w-5 h-5" style={{ color: 'var(--text-tertiary)' }} />
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Filtros</h3>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-caption text-slate-600 mb-2">Turma</label>
+              <label className="block text-caption mb-2" style={{ color: 'var(--text-secondary)' }}>Turma</label>
               <select
                 value={filtroTurma}
                 onChange={e => setFiltroTurma(e.target.value)}
@@ -511,7 +511,7 @@ export default function RelatoriosProfessorPage() {
               </select>
             </div>
             <div>
-              <label className="block text-caption text-slate-600 mb-2">Componente</label>
+              <label className="block text-caption mb-2" style={{ color: 'var(--text-secondary)' }}>Componente</label>
               <select
                 value={filtroComponente}
                 onChange={e => setFiltroComponente(e.target.value as Componente | '')}
@@ -528,7 +528,7 @@ export default function RelatoriosProfessorPage() {
         {/* Estatísticas Resumidas */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
           <div className="stat-card-2026 text-center">
-            <Users className="w-8 h-8 mx-auto mb-2 text-slate-500" />
+            <Users className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--text-tertiary)' }} />
             <p className="stat-value">{estatisticas.total}</p>
             <p className="stat-label">Estudantes</p>
           </div>
@@ -565,7 +565,7 @@ export default function RelatoriosProfessorPage() {
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FileSpreadsheet className="w-5 h-5 text-success" />
-            <h3 className="text-heading text-slate-800">Exportar para Excel</h3>
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Exportar para Excel</h3>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
             <button
@@ -573,10 +573,10 @@ export default function RelatoriosProfessorPage() {
               disabled={exportando || estudantesFiltrados.length === 0}
               className="export-btn"
             >
-              <Download className="w-5 h-5 text-slate-500" />
+              <Download className="w-5 h-5" style={{ color: 'var(--text-tertiary)' }} />
               <div className="text-left">
-                <p className="text-body font-medium text-slate-800">Relatório Geral</p>
-                <p className="text-caption text-slate-500">Todos os dados de todos os alunos</p>
+                <p className="text-body font-medium" style={{ color: 'var(--text-primary)' }}>Relatório Geral</p>
+                <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Todos os dados de todos os alunos</p>
               </div>
             </button>
 
@@ -610,7 +610,7 @@ export default function RelatoriosProfessorPage() {
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="w-5 h-5 text-error" />
-            <h3 className="text-heading text-slate-800">Exportar para PDF</h3>
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Exportar para PDF</h3>
             <Badge variant="default" size="sm">Novo</Badge>
           </div>
           <div className="grid md:grid-cols-3 gap-4">
@@ -621,8 +621,8 @@ export default function RelatoriosProfessorPage() {
             >
               <FileText className="w-5 h-5 text-error" />
               <div className="text-left">
-                <p className="text-body font-medium text-slate-800">PDF Geral</p>
-                <p className="text-caption text-slate-500">Relatório completo formatado</p>
+                <p className="text-body font-medium" style={{ color: 'var(--text-primary)' }}>PDF Geral</p>
+                <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Relatório completo formatado</p>
               </div>
             </button>
 
@@ -651,7 +651,7 @@ export default function RelatoriosProfessorPage() {
             </button>
           </div>
           {exportando && (
-            <p className="text-center text-caption text-slate-500 mt-4">
+            <p className="text-center text-caption mt-4" style={{ color: 'var(--text-tertiary)' }}>
               Gerando relatório...
             </p>
           )}
@@ -661,8 +661,8 @@ export default function RelatoriosProfessorPage() {
         <Card>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-slate-500" />
-              <h3 className="text-heading text-slate-800">Prévia dos Dados</h3>
+              <Calendar className="w-5 h-5" style={{ color: 'var(--text-tertiary)' }} />
+              <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Prévia dos Dados</h3>
               <Badge variant="default" size="sm">{bimestreAtual}º Bimestre</Badge>
             </div>
             <Badge>{estudantesFiltrados.length} registros</Badge>
@@ -696,7 +696,7 @@ export default function RelatoriosProfessorPage() {
                       <Badge variant="default" size="sm">{e.turma}</Badge>
                     </td>
                     <td className="text-center">
-                      <span className={`text-sm ${e.nunca_logou ? 'text-red-600 font-medium' : e.dias_sem_atividade !== null && e.dias_sem_atividade >= 7 ? 'text-amber-600' : 'text-slate-500'}`}>
+                      <span className={`text-sm ${e.nunca_logou ? 'text-red-600 font-medium' : e.dias_sem_atividade !== null && e.dias_sem_atividade >= 7 ? 'text-amber-600' : ''}`} style={!e.nunca_logou && !(e.dias_sem_atividade !== null && e.dias_sem_atividade >= 7) ? { color: 'var(--text-tertiary)' } : {}}>
                         {formatarInatividade(e.dias_sem_atividade, e.nunca_logou)}
                       </span>
                     </td>
@@ -731,40 +731,40 @@ export default function RelatoriosProfessorPage() {
               </tbody>
             </table>
             {estudantesFiltrados.length > 10 && (
-              <p className="text-center text-caption text-slate-500 mt-4">
+              <p className="text-center text-caption mt-4" style={{ color: 'var(--text-tertiary)' }}>
                 Mostrando 10 de {estudantesFiltrados.length} registros. Exporte o Excel para ver todos.
               </p>
             )}
             {estudantesFiltrados.length === 0 && (
-              <p className="text-center text-slate-500 py-8">
+              <p className="text-center py-8" style={{ color: 'var(--text-tertiary)' }}>
                 Nenhum estudante encontrado com os filtros selecionados.
               </p>
             )}
           </div>
 
           {/* Legenda */}
-          <div className="mt-4 pt-4 border-t border-slate-200">
-            <p className="text-caption text-slate-500 mb-2">Legenda:</p>
+          <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--border-default)' }}>
+            <p className="text-caption mb-2" style={{ color: 'var(--text-tertiary)' }}>Legenda:</p>
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
-                <span className="text-slate-600">Nunca acessou a plataforma</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Nunca acessou a plataforma</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-amber-50 border border-amber-200 rounded"></div>
-                <span className="text-slate-600">Inativo há 7+ dias</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Inativo há 7+ dias</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-green-600">6.0+</span>
-                <span className="text-slate-600">Aprovado</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Aprovado</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-amber-600">4.0-5.9</span>
-                <span className="text-slate-600">Atenção</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Atenção</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-red-600">&lt;4.0</span>
-                <span className="text-slate-600">Recuperação</span>
+                <span style={{ color: 'var(--text-secondary)' }}>Recuperação</span>
               </div>
             </div>
           </div>

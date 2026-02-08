@@ -69,7 +69,7 @@ export default function TopicoTeoriaPage() {
   }
 
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   // Navegação entre tópicos
   const currentIndex = topicos.findIndex(t => t.id === topicoId)
@@ -105,7 +105,7 @@ export default function TopicoTeoriaPage() {
             <button
               onClick={() => router.push(`/${componente}/teoria`)}
               className="mt-4 px-4 py-2 rounded-lg font-medium"
-              style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+              style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
             >
               Voltar para Teoria
             </button>
@@ -149,8 +149,8 @@ export default function TopicoTeoriaPage() {
         <div
           className="p-3 rounded-xl text-center"
           style={{
-            background: `linear-gradient(135deg, ${accentColor}12, ${accentColor}05)`,
-            border: `1px solid ${accentColor}25`,
+            background: `linear-gradient(135deg, ${corPrimaria}12, ${corPrimaria}05)`,
+            border: `1px solid ${corPrimaria}25`,
           }}
         >
           <p className="text-sm lg:text-base font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -162,14 +162,14 @@ export default function TopicoTeoriaPage() {
         <ConteudoCard
           paragrafos={topico.conteudo}
           titulo="O que você precisa saber"
-          accentColor={accentColor}
+          accentColor={corPrimaria}
         />
 
         {/* Fórmulas */}
         {topico.formulas && topico.formulas.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-3">
-              <Calculator className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: accentColor }} />
+              <Calculator className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: corPrimaria }} />
               <h2 className="text-sm lg:text-base font-bold" style={{ color: 'var(--text-primary)' }}>
                 Fórmulas Importantes
               </h2>
@@ -181,7 +181,7 @@ export default function TopicoTeoriaPage() {
                   expressao={formula.expressao}
                   descricao={formula.descricao}
                   variaveis={formula.variaveis}
-                  accentColor={accentColor}
+                  accentColor={corPrimaria}
                   isFisica={isFisica}
                 />
               ))}
@@ -220,7 +220,7 @@ export default function TopicoTeoriaPage() {
                   enunciado={exemplo.enunciado}
                   resolucao={exemplo.resolucao}
                   resposta={exemplo.resposta}
-                  accentColor={accentColor}
+                  accentColor={corPrimaria}
                   isFisica={isFisica}
                 />
               ))}
@@ -260,7 +260,7 @@ export default function TopicoTeoriaPage() {
               onClick={() => router.push(`/${componente}/teoria/${nextTopico.id}`)}
               className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
-                background: accentColor,
+                background: corPrimaria,
                 color: isFisica ? '#000' : '#fff',
               }}
             >
@@ -272,7 +272,7 @@ export default function TopicoTeoriaPage() {
               onClick={() => router.push(`/${componente}/teoria`)}
               className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
-                background: accentColor,
+                background: corPrimaria,
                 color: isFisica ? '#000' : '#fff',
               }}
             >

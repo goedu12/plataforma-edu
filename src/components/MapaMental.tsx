@@ -104,8 +104,9 @@ export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMent
 
   return (
     <div
-      className={`relative rounded-xl overflow-hidden ${fullscreen ? 'fixed inset-4 z-50' : ''}`}
+      className={`relative rounded-xl overflow-hidden ${fullscreen ? 'fixed inset-4' : ''}`}
       style={{
+        ...(fullscreen ? { zIndex: 100 } : {}),
         background: 'var(--bg-elevated)',
         border: '1px solid var(--border-default)'
       }}
