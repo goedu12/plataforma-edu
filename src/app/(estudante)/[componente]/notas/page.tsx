@@ -204,10 +204,10 @@ export default function NotasPage() {
   const statusConfig = notaAtual ? getStatusConfig(notaAtual.status, notaAtual.nota_final) : null
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      <div className="h-full flex flex-col max-w-lg mx-auto px-4 py-4">
+      <div className="h-full flex flex-col max-w-2xl mx-auto px-4 py-4">
         {/* Header Padronizado */}
         <header className="flex items-center justify-between mb-3">
           <BackButton href={`/${componente}/menu`} mobileOnly />

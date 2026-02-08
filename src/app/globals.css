@@ -2289,13 +2289,203 @@ img {
   .questao-contexto {
     padding: 0.75rem;
   }
-  
+
   .questao-texto {
     font-size: 0.8125rem;
   }
-  
+
   .questao-fonte,
   .fonte-pequena {
     font-size: 0.6875rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Flashcards - Animações
+   (movido de flashcards/page.tsx <style jsx global>)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes pulse-success {
+  0%, 100% { background-color: var(--bg-base); }
+  50% { background-color: rgba(34, 197, 94, 0.1); }
+}
+.animate-pulse-success {
+  animation: pulse-success 0.6s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+}
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+.animate-bounce-subtle {
+  animation: bounce-subtle 1s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+  50% { transform: translateY(-20px) rotate(180deg); opacity: 0.6; }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Simulado ENEM - Estilos .texto-questao
+   (movido de simulado-enem/page.tsx <style jsx global>)
+   Usa data-componente no container pai para cores dinâmicas
+   ═══════════════════════════════════════════════════════════════════════════ */
+.texto-questao {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+.texto-questao p {
+  margin: 0 0 0.85em 0;
+  text-indent: 0;
+}
+.texto-questao p:last-child {
+  margin-bottom: 0;
+}
+.texto-questao br {
+  display: block;
+  content: "";
+  margin-top: 0.3em;
+}
+
+/* Tabelas */
+.texto-questao .tabela-enem {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.8rem;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.texto-questao .tabela-enem th,
+.texto-questao .tabela-enem td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-default);
+}
+.texto-questao .tabela-enem th {
+  background: var(--bg-surface);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.texto-questao .tabela-enem td {
+  color: var(--text-secondary);
+}
+
+/* Imagens embutidas */
+.texto-questao .imagem-embutida {
+  margin: 12px 0;
+  text-align: center;
+}
+.texto-questao .imagem-contexto {
+  max-width: 100%;
+  max-height: 280px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.texto-questao .imagem-contexto:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+/* Seções TEXTO I, TEXTO II - cores por componente */
+.texto-questao .secao-texto-header {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+  margin: 12px 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+[data-componente="fisica"] .texto-questao .secao-texto-header {
+  background: var(--color-fisica);
+  color: #000;
+}
+[data-componente="matematica"] .texto-questao .secao-texto-header {
+  background: var(--color-matematica);
+  color: #fff;
+}
+
+/* Negrito e itálico */
+.texto-questao strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.texto-questao em {
+  font-style: italic;
+}
+
+/* Citações e fontes */
+.texto-questao small {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 8px;
+}
+
+/* Referências a figuras */
+.texto-questao .ref-figura {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Referências a tabelas/quadros - cores por componente */
+[data-componente="fisica"] .texto-questao .ref-tabela {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-fisica);
+}
+[data-componente="matematica"] .texto-questao .ref-tabela {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-matematica);
+}
+
+/* Responsivo - Mobile */
+@media (max-width: 640px) {
+  .texto-questao {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    text-align: justify;
+  }
+  .texto-questao p {
+    margin: 0 0 0.7em 0;
+  }
+  .texto-questao .tabela-enem {
+    font-size: 0.7rem;
+  }
+  .texto-questao .imagem-contexto {
+    max-height: 200px;
+  }
+  .texto-questao .secao-texto-header {
+    font-size: 0.7rem;
+    padding: 3px 10px;
+    margin: 10px 0 6px 0;
   }
 }

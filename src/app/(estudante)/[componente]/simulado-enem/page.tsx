@@ -266,145 +266,8 @@ export default function SimuladoENEMPage() {
   ) || []
 
   return (
-    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
-      {/* Estilos CSS */}
-      <style jsx global>{`
-        /* Texto base com espaçamento otimizado */
-        .texto-questao {
-          font-size: 0.9375rem;
-          line-height: 1.6;
-          letter-spacing: 0.01em;
-          text-align: justify;
-          text-justify: inter-word;
-          hyphens: auto;
-          -webkit-hyphens: auto;
-        }
-        .texto-questao p {
-          margin: 0 0 0.85em 0;
-          text-indent: 0;
-        }
-        .texto-questao p:last-child {
-          margin-bottom: 0;
-        }
-        .texto-questao br {
-          display: block;
-          content: "";
-          margin-top: 0.3em;
-        }
-
-        /* Tabelas */
-        .texto-questao .tabela-enem {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 12px 0;
-          font-size: 0.8rem;
-          background: var(--bg-elevated);
-          border-radius: 8px;
-          overflow: hidden;
-        }
-        .texto-questao .tabela-enem th,
-        .texto-questao .tabela-enem td {
-          padding: 8px 12px;
-          text-align: left;
-          border-bottom: 1px solid var(--border-default);
-        }
-        .texto-questao .tabela-enem th {
-          background: var(--bg-surface);
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-        .texto-questao .tabela-enem td {
-          color: var(--text-secondary);
-        }
-
-        /* Imagens embutidas (quando não há galeria separada) */
-        .texto-questao .imagem-embutida {
-          margin: 12px 0;
-          text-align: center;
-        }
-        .texto-questao .imagem-contexto {
-          max-width: 100%;
-          max-height: 280px;
-          object-fit: contain;
-          border-radius: 8px;
-          background: var(--bg-elevated);
-          cursor: pointer;
-          transition: transform 0.2s, box-shadow 0.2s;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .texto-questao .imagem-contexto:hover {
-          transform: scale(1.02);
-          box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-        }
-
-        /* Seções TEXTO I, TEXTO II */
-        .texto-questao .secao-texto-header {
-          display: inline-block;
-          background: ${corPrimaria};
-          color: ${isFisica ? '#000' : '#fff'};
-          font-weight: 700;
-          font-size: 0.75rem;
-          padding: 4px 12px;
-          border-radius: 6px;
-          margin: 12px 0 8px 0;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        /* Negrito e itálico */
-        .texto-questao strong {
-          font-weight: 600;
-          color: var(--text-primary);
-        }
-        .texto-questao em {
-          font-style: italic;
-        }
-
-        /* Citações e fontes */
-        .texto-questao small {
-          font-size: 0.8rem;
-          color: var(--text-muted);
-          display: block;
-          margin-top: 8px;
-        }
-
-        /* Referências a figuras (discreto, pois imagem está na galeria) */
-        .texto-questao .ref-figura {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-          font-style: italic;
-        }
-
-        /* Referências a tabelas/quadros (mais visível) */
-        .texto-questao .ref-tabela {
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: ${corPrimaria};
-        }
-
-        /* Responsivo - Mobile */
-        @media (max-width: 640px) {
-          .texto-questao {
-            font-size: 0.875rem;
-            line-height: 1.55;
-            text-align: justify;
-          }
-          .texto-questao p {
-            margin: 0 0 0.7em 0;
-          }
-          .texto-questao .tabela-enem {
-            font-size: 0.7rem;
-          }
-          .texto-questao .imagem-contexto {
-            max-height: 200px;
-          }
-          .texto-questao .secao-texto-header {
-            font-size: 0.7rem;
-            padding: 3px 10px;
-            margin: 10px 0 6px 0;
-          }
-        }
-      `}</style>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" data-componente={componente} style={{ background: 'var(--bg-base)' }}>
+      {/* Estilos movidos para globals.css: .texto-questao */}
 
       <NavigationRail componente={componente} />
 
@@ -451,7 +314,7 @@ export default function SimuladoENEMPage() {
       </header>
 
       {/* Conteúdo */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto max-w-3xl mx-auto w-full">
         {status === 'sem_questoes' && (
           <div className="p-6 text-center">
             <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.15)' }}>
@@ -512,7 +375,7 @@ export default function SimuladoENEMPage() {
             {/* 1. Contexto/Enunciado */}
             <div
               className="text-base rounded-xl p-4 texto-questao"
-              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border-default)' }}
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: 'min(400px, 45vh)', overflowY: 'auto', border: '1px solid var(--border-default)' }}
               dangerouslySetInnerHTML={processarTextoQuestao(questao.contexto, imagensValidas.length > 0)}
               onClick={(e) => {
                 const target = e.target as HTMLElement

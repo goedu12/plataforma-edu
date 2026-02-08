@@ -1126,40 +1126,7 @@ export default function FlashCardsPage() {
 
       <BottomNav componente={componente} />
 
-      {/* Estilos de animação */}
-      <style jsx global>{`
-        @keyframes pulse-success {
-          0%, 100% { background-color: var(--bg-base); }
-          50% { background-color: rgba(34, 197, 94, 0.1); }
-        }
-        .animate-pulse-success {
-          animation: pulse-success 0.6s ease-in-out;
-        }
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          20% { transform: translateX(-8px); }
-          40% { transform: translateX(8px); }
-          60% { transform: translateX(-8px); }
-          80% { transform: translateX(8px); }
-        }
-        .animate-shake {
-          animation: shake 0.5s ease-in-out;
-        }
-        @keyframes bounce-subtle {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-        .animate-bounce-subtle {
-          animation: bounce-subtle 1s ease-in-out infinite;
-        }
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
-          50% { transform: translateY(-20px) rotate(180deg); opacity: 0.6; }
-        }
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
+      {/* Estilos de animação movidos para globals.css */}
     </div>
   )
 }
