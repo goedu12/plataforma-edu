@@ -62,12 +62,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'fisica':
           return {
             background: 'var(--color-fisica)',
-            color: '#000',
+            color: 'var(--text-on-fisica)',
           }
         case 'matematica':
           return {
             background: 'var(--color-matematica)',
-            color: '#fff',
+            color: 'var(--text-on-matematica)',
           }
         case 'secondary':
           return {

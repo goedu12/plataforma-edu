@@ -284,7 +284,7 @@ export default function TrilhasEstudarPage() {
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const textOnAccent = isFisica ? '#000' : '#fff'
+  const textOnAccent = isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'
 
   // Tela de sem questões / gerando
   if (questoes.length === 0) {
@@ -439,7 +439,7 @@ export default function TrilhasEstudarPage() {
             {!mostrarResultado && questao.dica && (
               <div>
                 {mostrarDica ? (
-                  <div className="feedback-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)', border: '1px dashed var(--border-default)' }}>
+                  <div className="feedback-chromebook" style={{ background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)', border: '1px dashed var(--border-default)' }}>
                     <div className="flex items-center gap-1 mb-0.5">
                       <Lightbulb className="icon-chromebook" style={{ color: corPrimaria }} />
                       <span className="text-[10px] font-medium" style={{ color: corPrimaria }}>Dica</span>
@@ -481,7 +481,7 @@ export default function TrilhasEstudarPage() {
                     }
                   } else if (isCurrentSelection) {
                     style = {
-                      background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                      background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)',
                       border: `2px solid ${corPrimaria}`
                     }
                   }
@@ -505,7 +505,7 @@ export default function TrilhasEstudarPage() {
                                 ? corPrimaria
                                 : 'var(--bg-elevated)',
                           color: (showResult && (isCorrect || isSubmitted)) || isCurrentSelection
-                            ? isFisica ? '#000' : '#fff'
+                            ? isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'
                             : 'var(--text-muted)',
                         }}
                       >
@@ -530,7 +530,7 @@ export default function TrilhasEstudarPage() {
               <div
                 className="feedback-chromebook flex items-center gap-2"
                 style={{
-                  background: acertou ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  background: acertou ? 'var(--success-bg-15)' : 'rgba(239, 68, 68, 0.15)',
                   border: `1px solid ${acertou ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
                 }}
               >

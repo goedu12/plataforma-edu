@@ -460,7 +460,7 @@ export default function FlashCardsPage() {
                   background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
                 }}
               >
-                <Brain className="w-7 h-7" style={{ color: isFisica ? '#000' : '#fff' }} />
+                <Brain className="w-7 h-7" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -596,7 +596,7 @@ export default function FlashCardsPage() {
                         background: quantidadeQuestoes === qtd
                           ? `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`
                           : 'var(--bg-elevated)',
-                        color: quantidadeQuestoes === qtd ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)',
+                        color: quantidadeQuestoes === qtd ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-secondary)',
                         border: quantidadeQuestoes === qtd ? 'none' : '1px solid var(--border-default)',
                       }}
                     >
@@ -625,7 +625,7 @@ export default function FlashCardsPage() {
               className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               style={{
                 background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
-                color: isFisica ? '#000' : '#fff',
+                color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
                 boxShadow: `0 6px 24px rgba(${corPrimariaRgb}, 0.3)`,
               }}
             >
@@ -663,7 +663,7 @@ export default function FlashCardsPage() {
                   <span
                     className="badge-chromebook"
                     style={{
-                      background: questaoAtual.dificuldade === 'facil' ? 'rgba(34, 197, 94, 0.15)'
+                      background: questaoAtual.dificuldade === 'facil' ? 'var(--success-bg-15)'
                         : questaoAtual.dificuldade === 'medio' ? 'rgba(245, 158, 11, 0.15)'
                         : 'rgba(239, 68, 68, 0.15)',
                       color: questaoAtual.dificuldade === 'facil' ? 'var(--success)'
@@ -707,7 +707,7 @@ export default function FlashCardsPage() {
                           className="alternativa-chromebook w-full transition-all text-left"
                           style={{
                             background: mostrarResultado && correta
-                              ? 'rgba(34, 197, 94, 0.15)'
+                              ? 'var(--success-bg-15)'
                               : errada
                                 ? 'rgba(239, 68, 68, 0.15)'
                                 : selecionada
@@ -733,7 +733,7 @@ export default function FlashCardsPage() {
                                     ? corPrimaria
                                     : 'var(--bg-surface)',
                               color: (mostrarResultado && correta) || errada || selecionada
-                                ? (isFisica ? '#000' : '#fff')
+                                ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)')
                                 : 'var(--text-muted)',
                             }}
                           >
@@ -773,7 +773,7 @@ export default function FlashCardsPage() {
                           className="p-3 lg:p-2.5 rounded-xl flex flex-col items-center gap-2 lg:gap-1.5 transition-all"
                           style={{
                             background: mostrarResultado && correta
-                              ? 'rgba(34, 197, 94, 0.15)'
+                              ? 'var(--success-bg-15)'
                               : errada
                                 ? 'rgba(239, 68, 68, 0.15)'
                                 : selecionada
@@ -960,7 +960,7 @@ export default function FlashCardsPage() {
                   : `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
                 color: respostaUsuario === null && !mostrarResultado
                   ? 'var(--text-muted)'
-                  : (isFisica ? '#000' : '#fff'),
+                  : (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'),
               }}
             >
               {mostrarResultado ? (
@@ -1012,7 +1012,7 @@ export default function FlashCardsPage() {
                     background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
                   }}
                 >
-                  <Trophy className="w-12 h-12" style={{ color: isFisica ? '#000' : '#fff' }} />
+                  <Trophy className="w-12 h-12" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
                 </div>
 
                 <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -1091,7 +1091,7 @@ export default function FlashCardsPage() {
                 className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 style={{
                   background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
-                  color: isFisica ? '#000' : '#fff',
+                  color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
                   boxShadow: `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`,
                 }}
               >

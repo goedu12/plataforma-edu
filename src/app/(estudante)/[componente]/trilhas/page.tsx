@@ -303,7 +303,7 @@ export default function TrilhasPage() {
                     </h3>
                     <span
                       className="badge-chromebook"
-                      style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+                      style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
                     >
                       Ativa
                     </span>
@@ -333,7 +333,7 @@ export default function TrilhasPage() {
                 <button
                   onClick={() => router.push(`/${componente}/trilhas/estudar`)}
                   className="flex-1 py-2 lg:py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 btn-chromebook transition-all active:scale-[0.98]"
-                  style={{ background: trilhaAtiva.cor_primaria, color: isFisica ? '#000' : '#fff' }}
+                  style={{ background: trilhaAtiva.cor_primaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
                 >
                   <Play className="w-4 h-4 lg:w-3.5 lg:h-3.5" />
                   <span className="text-sm lg:text-xs">Continuar</span>
@@ -514,7 +514,7 @@ export default function TrilhasPage() {
                 onClick={() => iniciarTrilha(modalTrilha)}
                 disabled={iniciando}
                 className="flex-1 py-2 lg:py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1.5 btn-chromebook transition-all active:scale-[0.98] disabled:opacity-50"
-                style={{ background: modalTrilha.cor_primaria, color: isFisica ? '#000' : '#fff' }}
+                style={{ background: modalTrilha.cor_primaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               >
                 {iniciando ? (
                   <RefreshCw className="w-4 h-4 lg:w-3.5 lg:h-3.5 animate-spin" />

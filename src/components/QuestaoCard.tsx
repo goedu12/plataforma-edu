@@ -149,14 +149,14 @@ export default function QuestaoCard({
     if (feedback) {
       if (letra === feedback.respostaCorreta) {
         return {
-          background: 'rgba(34, 197, 94, 0.15)',
+          background: 'var(--success-bg-15)',
           border: '2px solid var(--success)',
           color: 'var(--success)',
         }
       }
       if (letra === selecionada && !feedback.correta) {
         return {
-          background: 'rgba(239, 68, 68, 0.15)',
+          background: 'var(--error-bg-15)',
           border: '2px solid var(--error)',
           color: 'var(--error)',
         }
@@ -170,7 +170,7 @@ export default function QuestaoCard({
 
     if (selecionada === letra) {
       return {
-        background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+        background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)',
         border: `2px solid ${corPrimaria}`,
       }
     }
@@ -251,7 +251,7 @@ export default function QuestaoCard({
                         ? corPrimaria
                         : 'var(--bg-elevated)',
                   color: (feedback && (letra === feedback.respostaCorreta || (letra === selecionada && !feedback.correta))) || selecionada === letra
-                    ? isFisica ? '#000' : '#fff'
+                    ? isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'
                     : 'var(--text-muted)',
                 }}
               >
@@ -277,7 +277,7 @@ export default function QuestaoCard({
       {erro && (
         <div
           className="rounded-xl p-3 mt-3"
-          style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+          style={{ background: 'var(--error-bg-15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
         >
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />
@@ -304,7 +304,7 @@ export default function QuestaoCard({
             <div
               className="p-3 rounded-xl"
               style={{
-                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
                 border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
               }}
             >
@@ -337,7 +337,7 @@ export default function QuestaoCard({
       {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
         <div
           className="rounded-xl p-4 text-center mt-3 animate-fade-in"
-          style={{ background: 'rgba(245, 158, 11, 0.15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
+          style={{ background: 'var(--warning-bg-15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
         >
           <div className="flex items-center justify-center gap-2 mb-2">
             <Trophy className="w-5 h-5" style={{ color: 'var(--warning)' }} />
@@ -364,7 +364,7 @@ export default function QuestaoCard({
         <div
           className="rounded-xl p-3 mt-3 animate-fade-in"
           style={{
-            background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+            background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
             border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
           }}
         >
@@ -442,7 +442,7 @@ export default function QuestaoCard({
         <div
           className="rounded-xl p-4 mt-3 animate-fade-in"
           style={{
-            background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            background: feedback.correta ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
             border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
           }}
         >
@@ -492,7 +492,7 @@ export default function QuestaoCard({
       {feedback && feedback.notaTempoReal && !feedback.notaTempoReal.pode_continuar && (
         <div
           className="rounded-xl p-3 mt-3"
-          style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+          style={{ background: 'var(--warning-bg-15)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
         >
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4" style={{ color: 'var(--warning)' }} />

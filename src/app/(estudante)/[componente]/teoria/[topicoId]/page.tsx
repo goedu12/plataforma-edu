@@ -105,7 +105,7 @@ export default function TopicoTeoriaPage() {
             <button
               onClick={() => router.push(`/${componente}/teoria`)}
               className="mt-4 px-4 py-2 rounded-lg font-medium"
-              style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+              style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
             >
               Voltar para Teoria
             </button>
@@ -261,7 +261,7 @@ export default function TopicoTeoriaPage() {
               className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
                 background: corPrimaria,
-                color: isFisica ? '#000' : '#fff',
+                color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
               }}
             >
               <span className="text-xs lg:text-sm truncate">Próximo: {nextTopico.titulo}</span>
@@ -273,7 +273,7 @@ export default function TopicoTeoriaPage() {
               className="flex-1 py-2.5 lg:py-2 px-3 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
               style={{
                 background: corPrimaria,
-                color: isFisica ? '#000' : '#fff',
+                color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
               }}
             >
               <span className="text-xs lg:text-sm">Concluído! Ver todos</span>

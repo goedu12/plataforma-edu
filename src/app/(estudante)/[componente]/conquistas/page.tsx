@@ -94,10 +94,10 @@ export default function ConquistasPage() {
 
             <div className="text-center">
               <div className="flex items-center justify-center gap-1.5">
-                <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
+                <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
                 <span
                   className="font-display text-base lg:text-lg font-bold"
-                  style={{ color: isFisica ? '#000' : '#fff' }}
+                  style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
                 >
                   Conquistas
                 </span>
@@ -110,7 +110,7 @@ export default function ConquistasPage() {
             <button
               onClick={buscarConquistas}
               className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors hover:bg-black/20"
-              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
+              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               aria-label="Atualizar conquistas"
             >
               <RefreshCw className="w-4 h-4" />
@@ -125,12 +125,12 @@ export default function ConquistasPage() {
             >
               <div
                 className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${porcentagem}%`, background: isFisica ? '#000' : '#fff' }}
+                style={{ width: `${porcentagem}%`, background: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               />
             </div>
             <span
               className="text-sm lg:text-base font-bold tabular-nums"
-              style={{ color: isFisica ? '#000' : '#fff' }}
+              style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
             >
               {porcentagem}%
             </span>

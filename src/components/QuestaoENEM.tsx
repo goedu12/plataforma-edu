@@ -147,14 +147,14 @@ export default function QuestaoENEM({
     if (feedback) {
       if (letra === feedback.respostaCorreta) {
         return {
-          background: 'rgba(34, 197, 94, 0.15)',
+          background: 'var(--success-bg-15)',
           border: '2px solid var(--success)',
           color: 'var(--success)',
         }
       }
       if (letra === selecionada && !feedback.correta) {
         return {
-          background: 'rgba(239, 68, 68, 0.15)',
+          background: 'var(--error-bg-15)',
           border: '2px solid var(--error)',
           color: 'var(--error)',
         }
