@@ -96,7 +96,7 @@ export default function RankingPage() {
 
       {/* Header */}
       <header className="header-chromebook lg:py-3" style={{ background: corPrimaria, borderColor: 'transparent' }}>
-        <div className="max-w-lg mx-auto">
+        <div className="max-w-2xl mx-auto">
           <div className="flex items-center justify-between mb-2">
             <BackButton href={`/${componente}/menu`} mobileOnly />
 
@@ -177,7 +177,7 @@ export default function RankingPage() {
 
       {/* Meta pessoal — motivação */}
       {posicaoUsuario > 1 && pessoaAcima && (
-        <div className="max-w-lg mx-auto px-3 lg:px-4 pt-3">
+        <div className="max-w-2xl mx-auto px-3 lg:px-4 pt-3">
           <div
             className="p-3 lg:p-4 rounded-xl space-y-2"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
@@ -234,7 +234,7 @@ export default function RankingPage() {
       )}
 
       {/* Content */}
-      <main className="max-w-lg mx-auto px-3 lg:px-4 py-3 lg:py-4">
+      <main className="max-w-2xl mx-auto px-3 lg:px-4 py-3 lg:py-4">
         {erro ? (
           <div className="card-chromebook text-center py-6">
             <WifiOff className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
