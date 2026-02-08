@@ -128,7 +128,7 @@ export default function ProfilePhoto({
           ${sizeClasses[size]}
           rounded-full overflow-hidden relative
           flex items-center justify-center
-          ${displayUrl ? 'bg-gray-200' : bgColor}
+          ${displayUrl ? '' : bgColor}
           text-white font-bold
           transition-all duration-300
           ${editable ? 'cursor-pointer hover:opacity-90' : ''}
@@ -159,11 +159,14 @@ export default function ProfilePhoto({
             className={`
               absolute -bottom-1 -right-1
               ${size === 'sm' ? 'w-5 h-5' : 'w-7 h-7'}
-              rounded-full bg-calm-surface border-2 border-calm-border
-              flex items-center justify-center
-              hover:bg-calm-elevated transition-colors
-              shadow-sm
+              rounded-full flex items-center justify-center
+              transition-colors shadow-sm
             `}
+            style={{
+              background: 'var(--bg-surface)',
+              border: '2px solid var(--border-default)',
+              color: 'var(--text-secondary)',
+            }}
             title="Alterar foto"
           >
             <Camera className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />
@@ -201,7 +204,7 @@ export default function ProfilePhoto({
       {/* Erro */}
       {error && (
         <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap">
-          <span className="text-xs text-red-500 bg-red-50 px-2 py-1 rounded">
+          <span className="text-xs px-2 py-1 rounded" style={{ color: 'var(--error)', background: 'var(--bg-elevated)' }}>
             {error}
           </span>
         </div>

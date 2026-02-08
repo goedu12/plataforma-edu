@@ -60,6 +60,12 @@
   --overlay-modal: rgba(0, 0, 0, 0.7);
   --overlay-dropdown: rgba(0, 0, 0, 0.5);
 
+  /* Z-Index Scale */
+  --z-nav: 50;
+  --z-fab: 60;
+  --z-modal: 100;
+  --z-toast: 150;
+
   /* Color scheme */
   color-scheme: dark;
 }
@@ -611,7 +617,7 @@ img {
   /* Button sizes */
   .btn-sm {
     @apply px-4 py-2 text-sm rounded-lg;
-    min-height: 40px;
+    min-height: 44px;
   }
   .btn-lg {
     @apply px-8 py-4 text-base rounded-2xl;
@@ -802,7 +808,7 @@ img {
     border-top: 1px solid var(--border-default);
     box-shadow: var(--shadow-nav);
     padding-bottom: env(safe-area-inset-bottom, 0);
-    z-index: 50;
+    z-index: var(--z-nav, 50);
   }
 
   .bottom-nav-item {
@@ -826,7 +832,9 @@ img {
   }
 
   .bottom-nav-label {
-    @apply text-label-sm;
+    font-size: 0.625rem;
+    line-height: 1.2;
+    font-weight: 500;
     text-transform: none;
   }
 
@@ -841,7 +849,7 @@ img {
       width: 72px;
       background: var(--bg-elevated);
       border-right: 1px solid var(--border-default);
-      z-index: 50;
+      z-index: var(--z-nav, 50);
       transition: width 0.3s ease;
     }
 

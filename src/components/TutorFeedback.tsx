@@ -86,20 +86,20 @@ export function TutorFeedbackInline({ componente, mensagemId, onFeedbackEnviado 
       <button
         onClick={() => enviarFeedbackRapido(true)}
         disabled={enviando}
-        className="p-1 rounded transition-colors hover:bg-black/10"
+        className="p-2 rounded-lg transition-colors hover:bg-black/10 flex items-center justify-center"
         title="Resposta util"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: 'var(--text-muted)', minWidth: '36px', minHeight: '36px' }}
       >
-        <ThumbsUp className="w-3.5 h-3.5" />
+        <ThumbsUp className="w-4 h-4" />
       </button>
       <button
         onClick={() => enviarFeedbackRapido(false)}
         disabled={enviando}
-        className="p-1 rounded transition-colors hover:bg-black/10"
+        className="p-2 rounded-lg transition-colors hover:bg-black/10 flex items-center justify-center"
         title="Resposta pode melhorar"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: 'var(--text-muted)', minWidth: '36px', minHeight: '36px' }}
       >
-        <ThumbsDown className="w-3.5 h-3.5" />
+        <ThumbsDown className="w-4 h-4" />
       </button>
     </div>
   )
@@ -204,7 +204,7 @@ function TutorFeedbackDetalhado({
           <button
             key={tipo.valor}
             onClick={() => setTipoProblema(tipoProblema === tipo.valor ? null : tipo.valor)}
-            className="px-2 py-1 rounded text-xs transition-all flex items-center gap-1"
+            className="px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1"
             style={{
               background: tipoProblema === tipo.valor ? `${corPrimaria}20` : 'var(--bg-surface)',
               border: tipoProblema === tipo.valor ? `1px solid ${corPrimaria}` : '1px solid var(--border-default)',
@@ -225,7 +225,7 @@ function TutorFeedbackDetalhado({
               <button
                 key={n}
                 onClick={() => setClareza(clareza === n ? 0 : n)}
-                className="p-0.5"
+                className="p-1"
               >
                 <Star
                   className="w-3.5 h-3.5"
@@ -245,7 +245,7 @@ function TutorFeedbackDetalhado({
               <button
                 key={n}
                 onClick={() => setPrecisao(precisao === n ? 0 : n)}
-                className="p-0.5"
+                className="p-1"
               >
                 <Star
                   className="w-3.5 h-3.5"
@@ -375,8 +375,8 @@ export function TutorAvaliacaoSessao({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: 'var(--overlay-modal)', zIndex: 100 }}
     >
       <div
         className="w-full max-w-sm rounded-2xl p-6 space-y-4"

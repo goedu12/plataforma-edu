@@ -32,10 +32,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     // Size classes with proper touch targets (48px minimum)
     const sizeClasses = {
-      sm: 'px-4 py-2 text-sm rounded-lg min-h-[40px]',
+      sm: 'px-4 py-2 text-sm rounded-lg min-h-[44px]',
       md: 'px-6 py-3 text-base rounded-xl min-h-[48px]',
       lg: 'px-8 py-4 text-lg rounded-2xl min-h-[56px]',
     }
+
+    // Hover class based on variant
+    const hoverClass =
+      actualVariant === 'fisica' ? 'hover:brightness-110' :
+      actualVariant === 'matematica' ? 'hover:brightness-110' :
+      actualVariant === 'secondary' || actualVariant === 'ghost' ? 'hover:bg-[var(--bg-surface-hover)]' :
+      actualVariant === 'danger' ? 'hover:brightness-110' :
+      actualVariant === 'accent' ? 'hover:brightness-110' : ''
 
     // Base classes
     const baseClasses = `
@@ -45,6 +53,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
       disabled:opacity-50 disabled:cursor-not-allowed
       active:scale-[0.98]
+      ${hoverClass}
     `.trim()
 
     // Variant styles using CSS variables
@@ -94,24 +103,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         className={`${baseClasses} ${sizeClasses[size]} ${className}`}
         style={variantStyle as React.CSSProperties}
-        onMouseEnter={(e) => {
-          if (actualVariant === 'fisica') {
-            e.currentTarget.style.background = 'var(--color-fisica-light)'
-          } else if (actualVariant === 'matematica') {
-            e.currentTarget.style.background = 'var(--color-matematica-light)'
-          } else if (actualVariant === 'secondary' || actualVariant === 'ghost') {
-            e.currentTarget.style.background = 'var(--bg-surface-hover)'
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (actualVariant === 'fisica') {
-            e.currentTarget.style.background = 'var(--color-fisica)'
-          } else if (actualVariant === 'matematica') {
-            e.currentTarget.style.background = 'var(--color-matematica)'
-          } else if (actualVariant === 'secondary' || actualVariant === 'ghost') {
-            e.currentTarget.style.background = 'transparent'
-          }
-        }}
         {...props}
       >
         {loading ? (

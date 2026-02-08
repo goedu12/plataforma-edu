@@ -33,7 +33,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
         borderTop: '1px solid var(--border-default)',
         paddingBottom: 'env(safe-area-inset-bottom, 0)',
         zIndex: 50,
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
+        boxShadow: 'var(--shadow-nav)',
       }}
     >
       {items.map((item) => {
@@ -60,7 +60,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
             }}
           >
             <item.icon style={{ width: '20px', height: '20px' }} />
-            <span style={{ fontSize: '9px', fontWeight: 500 }}>{item.label}</span>
+            <span style={{ fontSize: '10px', fontWeight: 500, lineHeight: 1.2 }}>{item.label}</span>
           </button>
         )
       })}

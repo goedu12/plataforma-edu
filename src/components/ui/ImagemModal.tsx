@@ -167,8 +167,8 @@ export default function ImagemModal({ src, alt = 'Imagem ampliada', onClose }: I
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: 'rgba(0, 0, 0, 0.95)' }}
+      className="fixed inset-0 flex flex-col"
+      style={{ background: 'rgba(0, 0, 0, 0.95)', zIndex: 100 }}
     >
       {/* Header com controles */}
       <div
