@@ -102,10 +102,10 @@ export default function RankingPage() {
 
             <div className="text-center">
               <h1 className="flex items-center justify-center gap-1.5">
-                <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? '#000' : '#fff' }} aria-hidden="true" />
+                <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} aria-hidden="true" />
                 <span
                   className="font-display text-base lg:text-lg font-bold"
-                  style={{ color: isFisica ? '#000' : '#fff' }}
+                  style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
                 >
                   Ranking
                 </span>
@@ -119,7 +119,7 @@ export default function RankingPage() {
               onClick={() => buscarDados(true)}
               disabled={atualizando}
               className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors hover:bg-black/20"
-              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? '#000' : '#fff' }}
+              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               aria-label={atualizando ? 'Atualizando ranking...' : 'Atualizar ranking'}
             >
               <RefreshCw className={`w-4 h-4 ${atualizando ? 'animate-spin' : ''}`} aria-hidden="true" />
@@ -143,13 +143,13 @@ export default function RankingPage() {
                     }}
                   />
                 ) : (
-                  <Medal className="w-6 h-6 lg:w-7 lg:h-7" style={{ color: isFisica ? '#000' : '#fff' }} />
+                  <Medal className="w-6 h-6 lg:w-7 lg:h-7" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
                 )}
                 <div>
                   <p className="text-2xs lg:text-xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
                     Posição
                   </p>
-                  <p className="font-display text-xl lg:text-2xl font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
+                  <p className="font-display text-xl lg:text-2xl font-bold tabular-nums" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
                     {posicaoUsuario}º
                   </p>
                 </div>
@@ -158,7 +158,7 @@ export default function RankingPage() {
                 <p className="text-2xs lg:text-xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
                   Nível
                 </p>
-                <p className="text-sm lg:text-base font-bold" style={{ color: isFisica ? '#000' : '#fff' }}>
+                <p className="text-sm lg:text-base font-bold" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
                   {nivelUsuario.emoji} {nivelUsuario.nome}
                 </p>
               </div>
@@ -166,7 +166,7 @@ export default function RankingPage() {
                 <p className="text-2xs lg:text-xs uppercase tracking-wider" style={{ color: isFisica ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.6)' }}>
                   Pontos
                 </p>
-                <p className="font-display text-lg lg:text-xl font-bold tabular-nums" style={{ color: isFisica ? '#000' : '#fff' }}>
+                <p className="font-display text-lg lg:text-xl font-bold tabular-nums" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
                   {pontosUsuario}
                 </p>
               </div>

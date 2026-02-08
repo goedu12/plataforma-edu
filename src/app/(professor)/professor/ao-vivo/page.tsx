@@ -132,15 +132,15 @@ interface DadosTempoReal {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const ATIVIDADE_CONFIG: Record<string, { cor: string; label: string }> = {
-  estudo: { cor: '#22c55e', label: 'Estudando' },
-  desafio: { cor: '#f59e0b', label: 'Desafio' },
-  tutor: { cor: '#3b82f6', label: 'Tutor IA' },
-  revisao: { cor: '#a855f7', label: 'Revisao' },
-  flashcard: { cor: '#a855f7', label: 'Flashcard' },
-  mapa: { cor: '#06b6d4', label: 'Mapa' },
+  estudo: { cor: 'var(--success)', label: 'Estudando' },
+  desafio: { cor: 'var(--warning)', label: 'Desafio' },
+  tutor: { cor: 'var(--info)', label: 'Tutor IA' },
+  revisao: { cor: 'var(--color-matematica-light)', label: 'Revisao' },
+  flashcard: { cor: 'var(--color-matematica-light)', label: 'Flashcard' },
+  mapa: { cor: 'var(--color-accent)', label: 'Mapa' },
 }
 
-const getAvatarBg = (comp: Componente) => comp === 'fisica' ? '#22c55e' : '#8b5cf6'
+const getAvatarBg = (comp: Componente) => comp === 'fisica' ? 'var(--color-fisica)' : 'var(--color-matematica)'
 const getIniciais = (nome: string) => nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
 const formatarTempoOcioso = (seg: number) => {
@@ -276,7 +276,7 @@ export default function DashboardAoVivoPage() {
     return Object.entries(cont).map(([tipo, qtd]) => ({
       tipo,
       qtd,
-      cor: ATIVIDADE_CONFIG[tipo]?.cor || '#64748b',
+      cor: ATIVIDADE_CONFIG[tipo]?.cor || 'var(--text-tertiary)',
       label: ATIVIDADE_CONFIG[tipo]?.label || tipo,
     }))
   }, [alunosAtivos])
@@ -285,7 +285,7 @@ export default function DashboardAoVivoPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
-          <RefreshCw className="w-10 h-10 text-blue-400 animate-spin mx-auto mb-3" />
+          <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-3" style={{ color: 'var(--info)' }} />
           <p className="text-lg" style={{ color: 'var(--text-primary)' }}>Carregando...</p>
         </div>
       </div>
@@ -296,9 +296,9 @@ export default function DashboardAoVivoPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
-          <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
           <p className="mb-3" style={{ color: 'var(--text-primary)' }}>{erro}</p>
-          <button onClick={buscarDados} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button onClick={buscarDados} className="px-4 py-2 rounded-lg" style={{ background: 'var(--info)', color: '#fff' }}>
             Tentar novamente
           </button>
         </div>
@@ -353,10 +353,9 @@ export default function DashboardAoVivoPage() {
           </button>
 
           {autoRefresh && (
-            <div className="w-6 h-6 rounded-full border-2 border-green-400 flex items-center justify-center"
-              style={{ background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)` }}>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ borderColor: 'var(--success)', borderWidth: 2, borderStyle: 'solid', background: `conic-gradient(var(--success) ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)` }}>
               <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
-                <span className="text-[10px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
+                <span className="text-[10px] font-bold" style={{ color: 'var(--success)' }}>{intervalo - contadorRefresh}</span>
               </div>
             </div>
           )}
@@ -371,13 +370,13 @@ export default function DashboardAoVivoPage() {
 
       {/* STATS BAR */}
       <div className="px-2 py-1 grid grid-cols-3 lg:grid-cols-6 gap-2 flex-shrink-0">
-        <MiniStat icon={<Wifi className="w-5 h-5" />} label="Online" value={totalOnline} color="#22c55e" />
-        <MiniStat icon={<Coffee className="w-5 h-5" />} label="Ociosos" value={alunosOciosos.length} color="#f59e0b" />
-        <MiniStat icon={<WifiOff className="w-5 h-5" />} label="Offline" value={alunosInativos.length} color="#64748b" />
-        <MiniStat icon={<BookOpen className="w-5 h-5" />} label="Questoes" value={stats?.questoes_periodo_total || 0} color="#3b82f6" />
+        <MiniStat icon={<Wifi className="w-5 h-5" />} label="Online" value={totalOnline} color="var(--success)" />
+        <MiniStat icon={<Coffee className="w-5 h-5" />} label="Ociosos" value={alunosOciosos.length} color="var(--warning)" />
+        <MiniStat icon={<WifiOff className="w-5 h-5" />} label="Offline" value={alunosInativos.length} color="var(--text-tertiary)" />
+        <MiniStat icon={<BookOpen className="w-5 h-5" />} label="Questoes" value={stats?.questoes_periodo_total || 0} color="var(--info)" />
         <MiniStat icon={<CheckCircle className="w-5 h-5" />} label="Acuracia" value={`${stats?.taxa_acerto_tempo_real || 0}%`}
-          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'} trend={stats?.tendencia_acerto} />
-        <MiniStat icon={<Star className="w-5 h-5" />} label="Nota Media" value={stats?.media_nota_ativos ? stats.media_nota_ativos.toFixed(1) : '-'} color="#f59e0b" />
+          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? 'var(--success)' : 'var(--warning)'} trend={stats?.tendencia_acerto} />
+        <MiniStat icon={<Star className="w-5 h-5" />} label="Nota Media" value={stats?.media_nota_ativos ? stats.media_nota_ativos.toFixed(1) : '-'} color="var(--warning)" />
       </div>
 
       {/* MAIN CONTENT */}
@@ -421,7 +420,7 @@ export default function DashboardAoVivoPage() {
                         title={`${aluno.nome}\nTurma: ${aluno.turma}\n${cfg.label}\nQuestoes: ${aluno.questoes_sessao} | Acerto: ${aluno.taxa_acerto}%${aluno.nota_atual !== undefined ? `\nNota: ${aluno.nota_atual.toFixed(1)}` : ''}`}>
                         <div className="relative">
                           <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                            style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 3px #ef4444' : '0 0 0 3px #22c55e' }}>
+                            style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 3px var(--error)' : '0 0 0 3px var(--success)' }}>
                             {getIniciais(aluno.nome)}
                           </div>
                           <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 flex items-center justify-center" style={{ background: cfg.cor }}>
@@ -429,7 +428,7 @@ export default function DashboardAoVivoPage() {
                           </div>
                           {aluno.questoes_sessao > 0 && (
                             <div className="absolute -top-1 -left-1 px-1 rounded text-[10px] font-bold text-white"
-                              style={{ background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                              style={{ background: aluno.taxa_acerto >= 70 ? 'var(--success)' : aluno.taxa_acerto >= 50 ? 'var(--warning)' : 'var(--error)' }}>
                               {aluno.taxa_acerto}%
                             </div>
                           )}
@@ -450,7 +449,7 @@ export default function DashboardAoVivoPage() {
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}`}>
                       <div className="relative">
                         <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-sm"
-                          style={{ background: '#78350f', boxShadow: '0 0 0 3px #f59e0b' }}>
+                          style={{ background: 'rgba(245, 158, 11, 0.3)', boxShadow: '0 0 0 3px var(--warning)' }}>
                           {getIniciais(aluno.nome)}
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 bg-yellow-500 flex items-center justify-center">
@@ -498,7 +497,7 @@ export default function DashboardAoVivoPage() {
               </h2>
               <div className="flex-1 flex flex-col justify-center gap-2">
                 {/* Sparkline */}
-                <Sparkline data={historicoAcerto} color="#22c55e" max={100} label="%" />
+                <Sparkline data={historicoAcerto} color="var(--success)" max={100} label="%" />
                 {/* Mini donut de distribuição */}
                 <div className="flex items-center gap-2">
                   <DonutChart data={distribuicaoAtividades} size={44} />
@@ -541,7 +540,7 @@ export default function DashboardAoVivoPage() {
                             <span className="truncate max-w-[70px] inline-block font-medium" style={{ color: 'var(--text-primary)' }}>{aluno.nome.split(' ')[0]}</span>
                           </td>
                           <td className="py-1 text-center" style={{ color: 'var(--text-secondary)' }}>{aluno.questoes_sessao}</td>
-                          <td className="py-1 text-center font-bold" style={{ color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                          <td className="py-1 text-center font-bold" style={{ color: aluno.taxa_acerto >= 70 ? 'var(--success)' : aluno.taxa_acerto >= 50 ? 'var(--warning)' : 'var(--error)' }}>
                             {aluno.taxa_acerto}%
                           </td>
                           <td className="py-1 text-center">
@@ -603,7 +602,7 @@ export default function DashboardAoVivoPage() {
               </h2>
               <span className="text-blue-400 text-xs font-bold">{stats?.questoes_ultimos_5min || 0} q/5min</span>
             </div>
-            <Sparkline data={historicoQuestoes} color="#3b82f6" />
+            <Sparkline data={historicoQuestoes} color="var(--info)" />
           </div>
 
           {/* Alertas */}
@@ -759,7 +758,7 @@ function DonutChart({ data, size }: {
   if (total === 0) {
     return (
       <svg width={size} height={size} viewBox="0 0 36 36">
-        <circle cx="18" cy="18" r="14" fill="none" stroke="#334155" strokeWidth="5" />
+        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--text-muted)" strokeWidth="5" />
       </svg>
     )
   }

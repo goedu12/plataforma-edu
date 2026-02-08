@@ -14,7 +14,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
 
   const isFisica = componente === 'fisica'
   const activeColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const activeBg = isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)'
+  const activeBg = isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)'
 
   const items = [
     { icon: Home, label: 'Início', href: `/${componente}/menu` },

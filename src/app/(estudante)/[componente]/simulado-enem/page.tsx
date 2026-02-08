@@ -278,7 +278,7 @@ export default function SimuladoENEMPage() {
           <Target className="w-5 h-5" style={{ color: corPrimaria }} />
           <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Simulado ENEM</span>
           {estatisticas && (
-            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(34,197,94,0.15)', color: 'var(--success)' }}>
+            <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'var(--success-bg-15)', color: 'var(--success)' }}>
               {estatisticas.taxa_acerto}%
             </span>
           )}
@@ -296,7 +296,7 @@ export default function SimuladoENEMPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
             style={{
               background: temFiltrosAtivos ? corPrimaria : 'var(--bg-elevated)',
-              color: temFiltrosAtivos ? (isFisica ? '#000' : '#fff') : 'var(--text-secondary)'
+              color: temFiltrosAtivos ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-secondary)'
             }}
           >
             <Filter className="w-3.5 h-3.5" />
@@ -317,7 +317,7 @@ export default function SimuladoENEMPage() {
       <main className="flex-1 overflow-auto max-w-3xl mx-auto w-full">
         {status === 'sem_questoes' && (
           <div className="p-6 text-center">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(34,197,94,0.15)' }}>
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'var(--success-bg-15)' }}>
               <CheckCircle2 className="w-8 h-8" style={{ color: 'var(--success)' }} />
             </div>
             <h2 className="font-semibold mb-2 text-lg" style={{ color: 'var(--text-primary)' }}>Parabéns!</h2>
@@ -330,7 +330,7 @@ export default function SimuladoENEMPage() {
               <button onClick={() => { limparFiltros(); setMostrarFiltro(true); }} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
                 Mudar Filtros
               </button>
-              <button onClick={() => router.push(`/${componente}/menu`)} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}>
+              <button onClick={() => router.push(`/${componente}/menu`)} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
                 Voltar ao Menu
               </button>
             </div>
@@ -353,7 +353,7 @@ export default function SimuladoENEMPage() {
           <div className="p-4 space-y-4">
             {/* Badges de informação */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}>
+              <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
                 ENEM {questao.ano_prova}
               </span>
               <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
@@ -454,7 +454,7 @@ export default function SimuladoENEMPage() {
                       className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm flex-shrink-0"
                       style={{
                         background: isSelected || isCorreta ? corPrimaria : 'var(--bg-elevated)',
-                        color: isSelected || isCorreta ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                        color: isSelected || isCorreta ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                       }}
                     >
                       {alt.letra}
@@ -526,7 +526,7 @@ export default function SimuladoENEMPage() {
               onClick={respondida ? buscarQuestao : submeterResposta}
               disabled={!respondida && (!alternativaSelecionada || enviando)}
               className="w-full py-3.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-              style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+              style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
             >
               {enviando ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Enviando...</>
@@ -592,7 +592,7 @@ export default function SimuladoENEMPage() {
                     className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all col-span-2 sm:col-span-1"
                     style={{
                       background: !anoSelecionado ? corPrimaria : 'var(--bg-elevated)',
-                      color: !anoSelecionado ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                      color: !anoSelecionado ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                     }}
                   >
                     Todos
@@ -604,7 +604,7 @@ export default function SimuladoENEMPage() {
                       className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
                       style={{
                         background: anoSelecionado === ano ? corPrimaria : 'var(--bg-elevated)',
-                        color: anoSelecionado === ano ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                        color: anoSelecionado === ano ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                       }}
                     >
                       {ano}
@@ -626,7 +626,7 @@ export default function SimuladoENEMPage() {
                       className="px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
                       style={{
                         background: !areaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                        color: !areaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                        color: !areaSelecionada ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                       }}
                     >
                       Todas as Áreas
@@ -641,7 +641,7 @@ export default function SimuladoENEMPage() {
                           className="px-4 py-3 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2"
                           style={{
                             background: areaSelecionada === area ? corPrimaria : 'var(--bg-elevated)',
-                            color: areaSelecionada === area ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                            color: areaSelecionada === area ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                           }}
                         >
                           <Icon className="w-4 h-4" />
@@ -666,7 +666,7 @@ export default function SimuladoENEMPage() {
                       className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
                       style={{
                         background: !subareaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                        color: !subareaSelecionada ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                        color: !subareaSelecionada ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                       }}
                     >
                       Todas
@@ -678,7 +678,7 @@ export default function SimuladoENEMPage() {
                         className="px-3 py-2.5 rounded-lg text-sm font-medium transition-all truncate"
                         style={{
                           background: subareaSelecionada === subarea ? corPrimaria : 'var(--bg-elevated)',
-                          color: subareaSelecionada === subarea ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)'
+                          color: subareaSelecionada === subarea ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)'
                         }}
                         title={ENEM_CONFIG.SUBAREAS_LABELS[subarea] || subarea}
                       >
@@ -700,7 +700,7 @@ export default function SimuladoENEMPage() {
               <button
                 onClick={() => { setMostrarFiltro(false); buscarQuestao() }}
                 className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+                style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               >
                 Aplicar Filtros
               </button>

@@ -188,11 +188,11 @@ export default function NotasPage() {
   }, [componente, buscarNotas, router])
 
   const getStatusConfig = (status: string, nota: number) => {
-    if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' }
+    if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'var(--success-bg-15)' }
     const config: Record<string, { label: string; color: string; bg: string }> = {
-      aprovado: { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' },
-      reprovado: { label: 'Recuperação', color: 'var(--error)', bg: 'rgba(239, 68, 68, 0.15)' },
-      recuperacao: { label: 'Recuperação', color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.15)' },
+      aprovado: { label: 'Aprovado', color: 'var(--success)', bg: 'var(--success-bg-15)' },
+      reprovado: { label: 'Recuperação', color: 'var(--error)', bg: 'var(--error-bg-15)' },
+      recuperacao: { label: 'Recuperação', color: 'var(--warning)', bg: 'var(--warning-bg-15)' },
       em_andamento: { label: 'Em Andamento', color: 'var(--color-accent)', bg: 'rgba(59, 130, 246, 0.15)' },
     }
     return config[status] || config.em_andamento

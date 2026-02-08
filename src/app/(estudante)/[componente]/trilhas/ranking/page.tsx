@@ -291,7 +291,7 @@ export default function RankingTrilhasPage() {
             <div className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+                style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               >
                 {posicaoUsuario.posicao}
               </div>

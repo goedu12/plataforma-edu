@@ -137,7 +137,7 @@ export default function TeoriaPage() {
                 style={{
                   background: bimestre === b ? corPrimaria : 'var(--bg-surface)',
                   color: bimestre === b
-                    ? (isFisica ? '#000' : '#fff')
+                    ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)')
                     : 'var(--text-secondary)',
                   border: bimestre === b
                     ? `1.5px solid ${corPrimaria}`

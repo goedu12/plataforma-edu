@@ -208,8 +208,8 @@ export default function DesafioPage() {
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <BackButton href={`/${componente}/menu`} mobileOnly />
             <div className="flex items-center gap-2">
-              <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? '#000' : '#fff' }} />
-              <h1 className="font-semibold text-sm lg:text-base" style={{ color: isFisica ? '#000' : '#fff' }}>
+              <Trophy className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
+              <h1 className="font-semibold text-sm lg:text-base" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
                 Resultado
               </h1>
             </div>
@@ -223,7 +223,7 @@ export default function DesafioPage() {
             <div
               className="w-12 h-12 lg:w-14 lg:h-14 rounded-full mx-auto mb-3 flex items-center justify-center"
               style={{
-                background: isPerfeito || porcentagem >= 60 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                background: isPerfeito || porcentagem >= 60 ? 'var(--success-bg-15)' : 'rgba(245, 158, 11, 0.15)',
                 border: `2px solid ${isPerfeito || porcentagem >= 60 ? 'var(--success)' : 'var(--warning)'}`,
               }}
             >
@@ -269,7 +269,7 @@ export default function DesafioPage() {
               >
                 <div
                   className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0"
-                  style={{ background: r.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)' }}
+                  style={{ background: r.correta ? 'var(--success-bg-15)' : 'rgba(239, 68, 68, 0.15)' }}
                 >
                   {r.correta ? (
                     <CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />
@@ -376,7 +376,7 @@ export default function DesafioPage() {
             <BackButton href={`/${componente}/menu`} mobileOnly />
 
             {/* Tag tema - só desktop */}
-            <span className="hidden lg:inline badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+            <span className="hidden lg:inline badge-chromebook" style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)', color: corPrimaria }}>
               {questaoAtualData?.tema}
             </span>
 
@@ -456,7 +456,7 @@ export default function DesafioPage() {
             <div className="space-chromebook">
               {/* Tag mobile */}
               <div className="flex lg:hidden items-center gap-2">
-                <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                <span className="badge-chromebook" style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)', color: corPrimaria }}>
                   {questaoAtualData.tema}
                 </span>
                 <span className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
@@ -480,7 +480,7 @@ export default function DesafioPage() {
                     className="alternativa-chromebook"
                     style={{
                       background: respostaAtual === letra
-                        ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                        ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                         : 'var(--bg-surface)',
                       border: `2px solid ${respostaAtual === letra ? corPrimaria : 'var(--border-default)'}`,
                     }}
@@ -489,7 +489,7 @@ export default function DesafioPage() {
                       className="alternativa-letra-compact"
                       style={{
                         background: respostaAtual === letra ? corPrimaria : 'var(--bg-elevated)',
-                        color: respostaAtual === letra ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+                        color: respostaAtual === letra ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)',
                       }}
                     >
                       {letra}

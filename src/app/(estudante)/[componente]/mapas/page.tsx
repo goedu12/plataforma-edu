@@ -412,7 +412,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                   {/* Badge série */}
                   <span
                     className="absolute top-2 right-2 text-[10px] px-2 py-0.5 rounded-full font-medium"
-                    style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
+                    style={{ background: corPrimaria, color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
                   >
                     {mapa.serie}ª
                   </span>
