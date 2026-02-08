@@ -234,7 +234,7 @@ export default function TrilhasPage() {
   }
 
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   return (
     <div
@@ -303,7 +303,7 @@ export default function TrilhasPage() {
                     </h3>
                     <span
                       className="badge-chromebook"
-                      style={{ background: accentColor, color: isFisica ? '#000' : '#fff' }}
+                      style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
                     >
                       Ativa
                     </span>
@@ -421,7 +421,7 @@ export default function TrilhasPage() {
                     {hasPreviousProgress ? (
                       <RotateCcw className="w-4 h-4 lg:w-3.5 lg:h-3.5 flex-shrink-0" style={{ color: trilha.cor_primaria }} />
                     ) : (
-                      <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 flex-shrink-0" style={{ color: accentColor }} />
+                      <ChevronRight className="w-4 h-4 lg:w-3.5 lg:h-3.5 flex-shrink-0" style={{ color: corPrimaria }} />
                     )}
                   </div>
                 </button>

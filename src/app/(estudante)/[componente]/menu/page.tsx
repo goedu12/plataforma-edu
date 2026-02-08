@@ -128,7 +128,7 @@ export default function MenuComponentePage() {
 
   const primeiroNome = usuario.nome.split(' ')[0]
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   // Cor da nota baseada no valor
   const getCorNota = (n: number) => {
@@ -178,7 +178,7 @@ export default function MenuComponentePage() {
           {/* Top Bar */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <h1 className="font-display font-semibold" style={{ color: accentColor }}>
+              <h1 className="font-display font-semibold" style={{ color: corPrimaria }}>
                 {componente === 'fisica' ? 'Física' : 'Matemática'}
               </h1>
               <span
@@ -236,9 +236,9 @@ export default function MenuComponentePage() {
 
             <div className="flex gap-2">
               {[
-                { icon: Star, value: pontos, label: 'Pontos', color: accentColor },
+                { icon: Star, value: pontos, label: 'Pontos', color: corPrimaria },
                 { icon: Flame, value: sequenciaDias, label: 'Dias', color: 'var(--color-streak)' },
-                { icon: Target, value: `${taxaAcerto}%`, label: 'Acerto', color: accentColor },
+                { icon: Target, value: `${taxaAcerto}%`, label: 'Acerto', color: corPrimaria },
               ].map((stat) => (
                 <div key={stat.label} className="stat-box min-w-[64px]">
                   <stat.icon className="w-4 h-4 mx-auto mb-1" style={{ color: stat.color }} />
@@ -310,7 +310,7 @@ export default function MenuComponentePage() {
                   {pontos} / {proximoNivel.pontos_min} pts
                 </span>
               ) : (
-                <span className="text-2xs font-medium" style={{ color: accentColor }}>
+                <span className="text-2xs font-medium" style={{ color: corPrimaria }}>
                   Nível máximo!
                 </span>
               )}
@@ -325,13 +325,13 @@ export default function MenuComponentePage() {
                   width: proximoNivel
                     ? `${Math.min(((pontos - nivel.pontos_min) / (proximoNivel.pontos_min - nivel.pontos_min)) * 100, 100)}%`
                     : '100%',
-                  background: accentColor,
+                  background: corPrimaria,
                 }}
               />
             </div>
             {proximoNivel && (
               <p className="text-2xs mt-1.5" style={{ color: 'var(--text-muted)' }}>
-                Faltam <strong style={{ color: accentColor }}>{pontosParaProximo} pts</strong> para {proximoNivel.emoji} {proximoNivel.nome}
+                Faltam <strong style={{ color: corPrimaria }}>{pontosParaProximo} pts</strong> para {proximoNivel.emoji} {proximoNivel.nome}
               </p>
             )}
           </div>
@@ -342,13 +342,13 @@ export default function MenuComponentePage() {
       <main className="max-w-2xl mx-auto px-4 py-4 space-y-5">
 
         {/* Grupo 1: Aprender & Praticar */}
-        <MenuSection title="Aprender & Praticar" items={grupoAprender} accentColor={accentColor} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
+        <MenuSection title="Aprender & Praticar" items={grupoAprender} accentColor={corPrimaria} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
 
         {/* Grupo 2: Explorar */}
-        <MenuSection title="Explorar" items={grupoExplorar} accentColor={accentColor} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
+        <MenuSection title="Explorar" items={grupoExplorar} accentColor={corPrimaria} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
 
         {/* Grupo 3: Progresso */}
-        <MenuSection title="Progresso" items={grupoProgresso} accentColor={accentColor} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
+        <MenuSection title="Progresso" items={grupoProgresso} accentColor={corPrimaria} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
 
       </main>
 

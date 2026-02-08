@@ -46,8 +46,8 @@ export default function RankingTrilhasPage() {
   const [serie, setSerie] = useState<string>('1EM')
 
   const isFisica = componente === 'fisica'
-  const corPrimaria = '#9C27B0' // Cor da trilha desafio (roxo)
-  const corAccent = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corTrilha = '#9C27B0' // Cor da trilha desafio (roxo)
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -223,7 +223,7 @@ export default function RankingTrilhasPage() {
               <p className="text-xs font-medium mt-1 truncate w-full text-center" style={{ color: 'var(--text-primary)' }}>
                 {ranking[1]?.nome.split(' ')[0]}
               </p>
-              <p className="text-xs" style={{ color: corPrimaria }}>{ranking[1]?.pontos_semana}pts</p>
+              <p className="text-xs" style={{ color: corTrilha }}>{ranking[1]?.pontos_semana}pts</p>
             </div>
 
             {/* 1º Lugar */}
@@ -249,7 +249,7 @@ export default function RankingTrilhasPage() {
               <p className="text-sm font-semibold mt-1 truncate w-full text-center" style={{ color: 'var(--text-primary)' }}>
                 {ranking[0]?.nome.split(' ')[0]}
               </p>
-              <p className="text-sm font-bold" style={{ color: corPrimaria }}>{ranking[0]?.pontos_semana}pts</p>
+              <p className="text-sm font-bold" style={{ color: corTrilha }}>{ranking[0]?.pontos_semana}pts</p>
             </div>
 
             {/* 3º Lugar */}
@@ -274,7 +274,7 @@ export default function RankingTrilhasPage() {
               <p className="text-xs font-medium mt-1 truncate w-full text-center" style={{ color: 'var(--text-primary)' }}>
                 {ranking[2]?.nome.split(' ')[0]}
               </p>
-              <p className="text-xs" style={{ color: corPrimaria }}>{ranking[2]?.pontos_semana}pts</p>
+              <p className="text-xs" style={{ color: corTrilha }}>{ranking[2]?.pontos_semana}pts</p>
             </div>
           </div>
         )}
@@ -284,14 +284,14 @@ export default function RankingTrilhasPage() {
           <div
             className="p-3 rounded-xl mb-4"
             style={{
-              background: `linear-gradient(135deg, ${corAccent}20, ${corAccent}10)`,
-              border: `2px solid ${corAccent}`,
+              background: `linear-gradient(135deg, ${corPrimaria}20, ${corPrimaria}10)`,
+              border: `2px solid ${corPrimaria}`,
             }}
           >
             <div className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-full flex items-center justify-center font-bold"
-                style={{ background: corAccent, color: isFisica ? '#000' : '#fff' }}
+                style={{ background: corPrimaria, color: isFisica ? '#000' : '#fff' }}
               >
                 {posicaoUsuario.posicao}
               </div>
@@ -301,7 +301,7 @@ export default function RankingTrilhasPage() {
                 </p>
                 <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
                   <span className="flex items-center gap-1">
-                    <Star className="w-3 h-3" style={{ color: corPrimaria }} />
+                    <Star className="w-3 h-3" style={{ color: corTrilha }} />
                     {posicaoUsuario.pontos_semana}pts
                   </span>
                   <span className="flex items-center gap-1">
@@ -331,10 +331,10 @@ export default function RankingTrilhasPage() {
                 className="flex items-center gap-3 p-3 rounded-lg transition-all"
                 style={{
                   background: isUser
-                    ? `linear-gradient(135deg, ${corAccent}15, ${corAccent}05)`
+                    ? `linear-gradient(135deg, ${corPrimaria}15, ${corPrimaria}05)`
                     : 'var(--bg-surface)',
                   border: isUser
-                    ? `1.5px solid ${corAccent}`
+                    ? `1.5px solid ${corPrimaria}`
                     : '1px solid var(--border-default)',
                 }}
               >
@@ -359,7 +359,7 @@ export default function RankingTrilhasPage() {
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                     {entry.nome}
-                    {isUser && <span className="ml-1 text-xs" style={{ color: corAccent }}>(voce)</span>}
+                    {isUser && <span className="ml-1 text-xs" style={{ color: corPrimaria }}>(voce)</span>}
                   </p>
                   <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                     {entry.turma}
@@ -367,7 +367,7 @@ export default function RankingTrilhasPage() {
                 </div>
 
                 <div className="text-right">
-                  <p className="font-bold text-sm" style={{ color: corPrimaria }}>
+                  <p className="font-bold text-sm" style={{ color: corTrilha }}>
                     {entry.pontos_semana}pts
                   </p>
                   <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--text-muted)' }}>
@@ -408,7 +408,7 @@ export default function RankingTrilhasPage() {
           </p>
           <div className="grid grid-cols-2 gap-2 text-2xs" style={{ color: 'var(--text-muted)' }}>
             <div className="flex items-center gap-1.5">
-              <Star className="w-3 h-3" style={{ color: corPrimaria }} />
+              <Star className="w-3 h-3" style={{ color: corTrilha }} />
               <span>Pontos por questao</span>
             </div>
             <div className="flex items-center gap-1.5">

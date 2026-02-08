@@ -78,7 +78,7 @@ export default function TeoriaPage() {
   }
 
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
   const ComponenteIcon = isFisica ? Atom : Calculator
 
   return (
@@ -95,7 +95,7 @@ export default function TeoriaPage() {
             <BackButton href={`/${componente}/menu`} compactOnDesktop />
             <div className="flex-1">
               <h1 className="text-lg lg:text-xl font-bold flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
-                <BookOpen className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: accentColor }} />
+                <BookOpen className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: corPrimaria }} />
                 Teoria
               </h1>
               <p className="text-xs lg:text-sm" style={{ color: 'var(--text-muted)' }}>
@@ -110,7 +110,7 @@ export default function TeoriaPage() {
                 border: '1px solid var(--border-default)',
               }}
             >
-              <GraduationCap className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: accentColor }} />
+              <GraduationCap className="w-4 h-4 lg:w-5 lg:h-5" style={{ color: corPrimaria }} />
               <span className="text-xs lg:text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
                 {serie}ª Série
               </span>
@@ -135,12 +135,12 @@ export default function TeoriaPage() {
                   bimestre === b ? 'scale-[1.02]' : ''
                 }`}
                 style={{
-                  background: bimestre === b ? accentColor : 'var(--bg-surface)',
+                  background: bimestre === b ? corPrimaria : 'var(--bg-surface)',
                   color: bimestre === b
                     ? (isFisica ? '#000' : '#fff')
                     : 'var(--text-secondary)',
                   border: bimestre === b
-                    ? `1.5px solid ${accentColor}`
+                    ? `1.5px solid ${corPrimaria}`
                     : '1px solid var(--border-default)',
                 }}
               >
@@ -154,12 +154,12 @@ export default function TeoriaPage() {
         <div
           className="mb-4 lg:mb-3 p-3 lg:p-2.5 rounded-lg"
           style={{
-            background: `linear-gradient(135deg, ${accentColor}15, ${accentColor}05)`,
-            border: `1px solid ${accentColor}30`,
+            background: `linear-gradient(135deg, ${corPrimaria}15, ${corPrimaria}05)`,
+            border: `1px solid ${corPrimaria}30`,
           }}
         >
           <div className="flex items-center gap-2">
-            <ComponenteIcon className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: accentColor }} />
+            <ComponenteIcon className="w-5 h-5 lg:w-6 lg:h-6" style={{ color: corPrimaria }} />
             <div>
               <p className="text-sm lg:text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
                 {bimestre}º Bimestre - {serie}ª Série
@@ -205,8 +205,8 @@ export default function TeoriaPage() {
                   <div
                     className="w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center text-lg lg:text-xl font-bold"
                     style={{
-                      background: `${accentColor}20`,
-                      color: accentColor,
+                      background: `${corPrimaria}20`,
+                      color: corPrimaria,
                     }}
                   >
                     {index + 1}
@@ -231,7 +231,7 @@ export default function TeoriaPage() {
                       )}
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style={{ color: accentColor }} />
+                  <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5 flex-shrink-0" style={{ color: corPrimaria }} />
                 </div>
               </button>
             ))}

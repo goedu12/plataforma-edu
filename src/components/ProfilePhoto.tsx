@@ -179,11 +179,14 @@ export default function ProfilePhoto({
               className={`
                 absolute -bottom-1 -left-1
                 ${size === 'sm' ? 'w-5 h-5' : 'w-7 h-7'}
-                rounded-full bg-red-100 border-2 border-red-200
-                flex items-center justify-center
-                hover:bg-red-200 transition-colors
-                shadow-sm text-red-600
+                rounded-full flex items-center justify-center
+                transition-colors shadow-sm
               `}
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '2px solid rgba(239, 68, 68, 0.3)',
+                color: 'var(--error)',
+              }}
               title="Remover foto"
             >
               <Trash2 className={size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'} />

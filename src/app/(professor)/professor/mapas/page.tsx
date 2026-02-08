@@ -155,8 +155,8 @@ export default function MapasMentaisUploadPage() {
         <div className="max-w-4xl mx-auto flex items-center gap-4">
           <BackButton href="/professor/dashboard" />
           <div>
-            <h1 className="font-display text-lg font-bold text-slate-800">Mapas Mentais</h1>
-            <p className="text-slate-500 text-sm">Upload e gerenciamento</p>
+            <h1 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Mapas Mentais</h1>
+            <p className="text-sm" style={{ color: 'var(--text-tertiary)' }}>Upload e gerenciamento</p>
           </div>
         </div>
       </header>
@@ -176,15 +176,16 @@ export default function MapasMentaisUploadPage() {
 
         {/* Filtros */}
         <Card>
-          <h2 className="font-semibold text-slate-800 mb-4">Filtros</h2>
+          <h2 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Filtros</h2>
           <div className="grid grid-cols-3 gap-4">
             {/* Componente */}
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Componente</label>
+              <label className="text-sm mb-1 block" style={{ color: 'var(--text-secondary)' }}>Componente</label>
               <select
                 value={componente}
                 onChange={(e) => setComponente(e.target.value as Componente)}
-                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
+                className="w-full p-3 rounded-xl border-0 focus:ring-2 focus:ring-fisica-500"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
               >
                 <option value="fisica">Física</option>
                 <option value="matematica">Matemática</option>
@@ -193,11 +194,12 @@ export default function MapasMentaisUploadPage() {
 
             {/* Série */}
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Série</label>
+              <label className="text-sm mb-1 block" style={{ color: 'var(--text-secondary)' }}>Série</label>
               <select
                 value={serie}
                 onChange={(e) => setSerie(Number(e.target.value) as SerieEM)}
-                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
+                className="w-full p-3 rounded-xl border-0 focus:ring-2 focus:ring-fisica-500"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
               >
                 <option value={1}>1ª Série</option>
                 <option value={2}>2ª Série</option>
@@ -207,11 +209,12 @@ export default function MapasMentaisUploadPage() {
 
             {/* Bimestre */}
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Bimestre</label>
+              <label className="text-sm mb-1 block" style={{ color: 'var(--text-secondary)' }}>Bimestre</label>
               <select
                 value={bimestre}
                 onChange={(e) => setBimestre(Number(e.target.value) as Bimestre)}
-                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500"
+                className="w-full p-3 rounded-xl border-0 focus:ring-2 focus:ring-fisica-500"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
               >
                 <option value={1}>1º Bimestre</option>
                 <option value={2}>2º Bimestre</option>
@@ -224,7 +227,7 @@ export default function MapasMentaisUploadPage() {
 
         {/* Upload Form */}
         <Card>
-          <h2 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+          <h2 className="font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
             <Upload className="w-5 h-5" />
             Novo Mapa Mental
           </h2>
@@ -232,19 +235,20 @@ export default function MapasMentaisUploadPage() {
           <div className="space-y-4">
             {/* Título */}
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Título do Mapa</label>
+              <label className="text-sm mb-1 block" style={{ color: 'var(--text-secondary)' }}>Título do Mapa</label>
               <input
                 type="text"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex: Introdução à Física - Grandezas e Unidades"
-                className="w-full p-3 rounded-xl bg-slate-100 text-slate-800 border-0 focus:ring-2 focus:ring-fisica-500 placeholder:text-slate-500"
+                className="w-full p-3 rounded-xl border-0 focus:ring-2 focus:ring-fisica-500"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-primary)' }}
               />
             </div>
 
             {/* File Input */}
             <div>
-              <label className="text-sm text-slate-600 mb-1 block">Imagem</label>
+              <label className="text-sm mb-1 block" style={{ color: 'var(--text-secondary)' }}>Imagem</label>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -258,7 +262,8 @@ export default function MapasMentaisUploadPage() {
                   <img
                     src={preview}
                     alt="Preview"
-                    className="w-full max-h-96 object-contain rounded-xl bg-slate-100"
+                    className="w-full max-h-96 object-contain rounded-xl"
+                    style={{ background: 'var(--bg-elevated)' }}
                   />
                   <button
                     onClick={() => {
@@ -274,7 +279,8 @@ export default function MapasMentaisUploadPage() {
               ) : (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full p-8 rounded-xl border-2 border-dashed border-text-muted/30 hover:border-fisica-500 transition-colors flex flex-col items-center gap-2 text-slate-500 hover:text-fisica-500"
+                  className="w-full p-8 rounded-xl border-2 border-dashed border-text-muted/30 hover:border-fisica-500 transition-colors flex flex-col items-center gap-2 hover:text-fisica-500"
+                  style={{ color: 'var(--text-tertiary)' }}
                 >
                   <ImageIcon className="w-12 h-12" />
                   <span>Clique para selecionar imagem</span>
@@ -307,7 +313,7 @@ export default function MapasMentaisUploadPage() {
 
         {/* Lista de Mapas Existentes */}
         <Card>
-          <h2 className="font-semibold text-slate-800 mb-4">
+          <h2 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
             Mapas Existentes ({mapas.length})
           </h2>
 
@@ -316,7 +322,7 @@ export default function MapasMentaisUploadPage() {
               <Loading />
             </div>
           ) : mapas.length === 0 ? (
-            <div className="py-8 text-center text-slate-500">
+            <div className="py-8 text-center" style={{ color: 'var(--text-tertiary)' }}>
               <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
               <p>Nenhum mapa mental cadastrado</p>
               <p className="text-sm">para {componente} - {serie}ª série - {bimestre}º bimestre</p>
@@ -326,7 +332,8 @@ export default function MapasMentaisUploadPage() {
               {mapas.map((mapa) => (
                 <div
                   key={mapa.id}
-                  className="bg-slate-100 rounded-xl overflow-hidden group"
+                  className="rounded-xl overflow-hidden group"
+                  style={{ background: 'var(--bg-elevated)' }}
                 >
                   <div className="relative aspect-video">
                     <img
@@ -350,10 +357,10 @@ export default function MapasMentaisUploadPage() {
                     </div>
                   </div>
                   <div className="p-3">
-                    <p className="font-medium text-slate-800 text-sm truncate">
+                    <p className="font-medium text-sm truncate" style={{ color: 'var(--text-primary)' }}>
                       {mapa.titulo}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
                       {mapa.curtidas} curtidas · {mapa.downloads} downloads
                     </p>
                   </div>
