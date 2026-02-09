@@ -228,7 +228,7 @@ export default function RankingTrilhasPage() {
 
             {/* 1º Lugar */}
             <div className="flex flex-col items-center w-28">
-              <Crown className="w-8 h-8 mb-1" style={{ color: '#FFD700' }} />
+              <Crown className="w-8 h-8 mb-1" style={{ color: 'var(--medal-gold)' }} />
               <div
                 className="w-16 h-16 rounded-full flex items-center justify-center mb-2 text-2xl font-bold"
                 style={{ background: getPodiumStyle(1).bg, color: getPodiumStyle(1).color }}

@@ -66,7 +66,7 @@ export default function RankingTable({
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: getPodiumColor(2), color: '#000' }}
+                  style={{ background: getPodiumColor(2), color: 'var(--text-on-fisica)' }}
                 >
                   2
                 </div>
@@ -105,7 +105,7 @@ export default function RankingTable({
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
                   style={{ background: getPodiumColor(1) }}
                 >
-                  <Trophy className="w-4 h-4" style={{ color: '#000' }} />
+                  <Trophy className="w-4 h-4" style={{ color: 'var(--text-on-fisica)' }} />
                 </div>
               </div>
               <p className="text-base font-bold text-center truncate max-w-full" style={{ color: 'var(--text-primary)' }}>
@@ -137,7 +137,7 @@ export default function RankingTable({
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: getPodiumColor(3), color: '#fff' }}
+                  style={{ background: getPodiumColor(3), color: 'var(--text-primary)' }}
                 >
                   3
                 </div>

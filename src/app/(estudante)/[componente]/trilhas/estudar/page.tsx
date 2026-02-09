@@ -473,9 +473,9 @@ export default function TrilhasEstudarPage() {
 
                   if (showResult) {
                     if (isCorrect) {
-                      style = { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
+                      style = { background: 'var(--color-fisica-bg-20)', border: '2px solid var(--success)' }
                     } else if (isSubmitted) {
-                      style = { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
+                      style = { background: 'var(--error-bg-20)', border: '2px solid var(--error)' }
                     } else {
                       style = { ...style, opacity: 0.5 }
                     }
@@ -530,13 +530,13 @@ export default function TrilhasEstudarPage() {
               <div
                 className="feedback-chromebook flex items-center gap-2"
                 style={{
-                  background: acertou ? 'var(--success-bg-15)' : 'rgba(239, 68, 68, 0.15)',
-                  border: `1px solid ${acertou ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                  background: acertou ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
+                  border: `1px solid ${acertou ? 'var(--color-fisica-bg-40)' : 'var(--error-bg-40)'}`,
                 }}
               >
                 <div
                   className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
-                  style={{ background: acertou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                  style={{ background: acertou ? 'var(--color-fisica-bg-20)' : 'var(--error-bg-20)' }}
                 >
                   {acertou ? <CheckCircle className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
                 </div>
@@ -589,11 +589,11 @@ export default function TrilhasEstudarPage() {
 
       {/* Modal de Conclusão */}
       {mostrarConclusao && resultadoSemana && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'var(--overlay-60)' }}>
           <div className="w-full max-w-sm rounded-2xl p-6 text-center animate-in zoom-in-95 duration-200" style={{ background: 'var(--bg-surface)' }}>
             <div
               className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: resultadoSemana.avancou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)' }}
+              style={{ background: resultadoSemana.avancou ? 'var(--color-fisica-bg-20)' : 'var(--warning-bg-20)' }}
             >
               {resultadoSemana.avancou ? (
                 <Trophy className="w-8 h-8" style={{ color: 'var(--color-success)' }} />

@@ -537,9 +537,9 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                   onClick={() => handleCurtir(mapaAtual)}
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
                   style={{
-                    background: mapaAtual.curtido ? 'var(--error-bg-20)' : 'rgba(255,255,255,0.1)',
+                    background: mapaAtual.curtido ? 'var(--error-bg-20)' : 'var(--white-10)',
                     color: mapaAtual.curtido ? 'var(--error)' : 'white',
-                    border: `1px solid ${mapaAtual.curtido ? 'var(--error-bg-30)' : 'rgba(255,255,255,0.2)'}`
+                    border: `1px solid ${mapaAtual.curtido ? 'var(--error-bg-30)' : 'var(--white-20)'}`
                   }}
                 >
                   <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
@@ -549,9 +549,9 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                   onClick={() => handleDownload(mapaAtual)}
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
                   style={{
-                    background: 'rgba(255,255,255,0.1)',
+                    background: 'var(--white-10)',
                     color: 'white',
-                    border: '1px solid rgba(255,255,255,0.2)'
+                    border: '1px solid var(--white-20)'
                   }}
                 >
                   <Download className="w-5 h-5" />
@@ -607,7 +607,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
               <div
                 key={idx}
                 className="h-1 flex-1 rounded-full transition-colors cursor-pointer"
-                style={{ background: idx === indiceAtual ? corPrimaria : 'rgba(255,255,255,0.3)' }}
+                style={{ background: idx === indiceAtual ? corPrimaria : 'var(--white-30)' }}
                 onClick={() => setIndiceAtual(idx)}
               />
             ))}
@@ -666,12 +666,12 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 onClick={() => handleCurtir(mapaAtual)}
                 className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
-                  background: mapaAtual.curtido ? 'var(--error-bg-20)' : 'rgba(255,255,255,0.1)',
+                  background: mapaAtual.curtido ? 'var(--error-bg-20)' : 'var(--white-10)',
                   color: mapaAtual.curtido ? 'var(--error)' : 'white',
                   minHeight: '72px'
                 }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: mapaAtual.curtido ? 'var(--error-bg-30)' : 'rgba(255,255,255,0.1)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: mapaAtual.curtido ? 'var(--error-bg-30)' : 'var(--white-10)' }}>
                   <Heart className="w-6 h-6" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
                 </div>
                 <span className="text-[10px] font-medium">{mapaAtual.curtido ? 'Curtido' : 'Curtir'}</span>
@@ -682,12 +682,12 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 onClick={() => handleDownload(mapaAtual)}
                 className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'var(--white-10)',
                   color: 'white',
                   minHeight: '72px'
                 }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--white-10)' }}>
                   <Download className="w-6 h-6" />
                 </div>
                 <span className="text-[10px] font-medium">Baixar</span>
@@ -698,7 +698,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 onClick={() => handleCompartilhar(mapaAtual)}
                 className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
-                  background: 'rgba(37, 211, 102, 0.2)',
+                  background: 'var(--whatsapp-bg-20)',
                   color: 'var(--color-whatsapp)',
                   minHeight: '72px'
                 }}
@@ -714,12 +714,12 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 onClick={fecharVisualizacao}
                 className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
-                  background: 'rgba(255,255,255,0.1)',
+                  background: 'var(--white-10)',
                   color: 'white',
                   minHeight: '72px'
                 }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.1)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--white-10)' }}>
                   <X className="w-6 h-6" />
                 </div>
                 <span className="text-[10px] font-medium">Fechar</span>

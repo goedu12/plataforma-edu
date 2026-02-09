@@ -544,7 +544,7 @@ export default function SimuladoENEMPage() {
       {mostrarFiltro && (
         <div
           className="fixed inset-0 z-50 flex items-end lg:items-center justify-center pb-nav lg:pb-0"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'var(--overlay-60)' }}
           onClick={() => setMostrarFiltro(false)}
         >
           <div
@@ -711,8 +711,8 @@ export default function SimuladoENEMPage() {
 
       {/* Modal de Zoom */}
       {imagemZoom && isValidImageUrl(imagemZoom) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }} onClick={() => setImagemZoom(null)}>
-          <button className="absolute top-4 right-4 p-2 rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'var(--overlay-image)' }} onClick={() => setImagemZoom(null)}>
+          <button className="absolute top-4 right-4 p-2 rounded-full" style={{ background: 'var(--white-10)' }}>
             <X className="w-6 h-6 text-white" />
           </button>
           <img

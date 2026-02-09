@@ -56,12 +56,22 @@
   --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-nav: 0 -4px 20px rgba(0, 0, 0, 0.4);
 
-  /* Overlays */
-  --overlay-modal: rgba(0, 0, 0, 0.7);
-  --overlay-dropdown: rgba(0, 0, 0, 0.5);
+  /* Overlays - black */
   --overlay-light: rgba(0, 0, 0, 0.3);
+  --overlay-dropdown: rgba(0, 0, 0, 0.5);
+  --overlay-60: rgba(0, 0, 0, 0.6);
+  --overlay-modal: rgba(0, 0, 0, 0.7);
   --overlay-heavy: rgba(0, 0, 0, 0.9);
   --overlay-image: rgba(0, 0, 0, 0.95);
+
+  /* Overlays - white */
+  --white-10: rgba(255, 255, 255, 0.1);
+  --white-20: rgba(255, 255, 255, 0.2);
+  --white-30: rgba(255, 255, 255, 0.3);
+
+  /* Overlays - black subtle */
+  --black-10: rgba(0, 0, 0, 0.1);
+  --black-15: rgba(0, 0, 0, 0.15);
 
   /* Text on brand colors */
   --text-on-fisica: #000000;
@@ -76,12 +86,14 @@
   --color-star: #eab308;
 
   /* Brand color transparencies - Fisica */
+  --color-fisica-bg-05: rgba(34, 197, 94, 0.05);
   --color-fisica-bg-10: rgba(34, 197, 94, 0.1);
   --color-fisica-bg-15: rgba(34, 197, 94, 0.15);
   --color-fisica-bg-20: rgba(34, 197, 94, 0.2);
   --color-fisica-bg-30: rgba(34, 197, 94, 0.3);
 
   /* Brand color transparencies - Matematica */
+  --color-matematica-bg-05: rgba(139, 92, 246, 0.05);
   --color-matematica-bg-10: rgba(139, 92, 246, 0.1);
   --color-matematica-bg-15: rgba(139, 92, 246, 0.15);
   --color-matematica-bg-20: rgba(139, 92, 246, 0.2);
@@ -123,6 +135,7 @@
   --warning-bg-08: rgba(245, 158, 11, 0.08);
   --warning-bg-10: rgba(245, 158, 11, 0.1);
   --warning-bg-15: rgba(245, 158, 11, 0.15);
+  --warning-bg-20: rgba(245, 158, 11, 0.2);
   --warning-bg-30: rgba(245, 158, 11, 0.3);
   --warning-bg-40: rgba(245, 158, 11, 0.4);
   --info-bg-08: rgba(59, 130, 246, 0.08);
@@ -136,6 +149,7 @@
   --color-orange: #f97316;
   --orange-bg-15: rgba(249, 115, 22, 0.15);
   --color-whatsapp: #25D366;
+  --whatsapp-bg-20: rgba(37, 211, 102, 0.2);
   --color-curiosidade: #00BCD4;
   --color-desafio-trail: #9C27B0;
 

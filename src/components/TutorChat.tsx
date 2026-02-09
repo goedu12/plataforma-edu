@@ -587,7 +587,7 @@ export default function TutorChat({
             className="p-4 rounded-2xl"
             style={{
               background: 'var(--error-bg-10)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              border: '1px solid var(--error-bg-30)',
             }}
           >
             <div className="flex items-center gap-3" style={{ color: 'var(--error)' }}>
@@ -604,7 +604,7 @@ export default function TutorChat({
           className="px-4 py-4 border-t"
           style={{
             background: 'var(--warning-bg-10)',
-            borderColor: 'rgba(245, 158, 11, 0.3)',
+            borderColor: 'var(--warning-bg-30)',
           }}
         >
           <div className="flex items-center gap-3 mb-3">
