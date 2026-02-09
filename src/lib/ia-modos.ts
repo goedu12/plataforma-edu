@@ -47,6 +47,7 @@ export interface ContextoEstudante {
     preferePasso: boolean
     nivelDetalhe: 'minimo' | 'medio' | 'maximo'
     tomConversa: 'formal' | 'amigavel' | 'descontraido'
+    velocidade?: 'lento' | 'normal' | 'rapido'
   }
   estadoEmocional?: {
     engajamento: number // 1-10

@@ -171,11 +171,19 @@ export {
 async function testarModelo(
   nomeModelo: string,
   prompt: string,
-  imagemBase64?: string
+  imagemBase64?: string,
+  systemInstruction?: string
 ): Promise<{ sucesso: boolean; resposta?: string; erro?: string }> {
   try {
     const genAI = getGenAI()
-    const model = genAI.getGenerativeModel({ model: nomeModelo })
+    const modelConfig: { model: string; systemInstruction?: string } = { model: nomeModelo }
+
+    // Usar systemInstruction nativa da API para melhor separação de contexto
+    if (systemInstruction) {
+      modelConfig.systemInstruction = systemInstruction
+    }
+
+    const model = genAI.getGenerativeModel(modelConfig)
 
     // Construir conteúdo multimodal se tiver imagem
     let conteudo: string | Part[]
@@ -295,6 +303,31 @@ export async function chatComTutor(
     parteContexto.push(`Conquista recente: "${contexto.conquistaRecente}"`)
   }
 
+  // Incluir preferências de estudo no contexto
+  if (contexto.preferencias) {
+    const pref = contexto.preferencias
+    const prefParts: string[] = []
+    if (pref.usarAnalogias) prefParts.push('use analogias com o dia-a-dia')
+    if (pref.usarFormulas) prefParts.push('inclua formulas matematicas')
+    if (!pref.usarFormulas) prefParts.push('evite formulas quando possivel, prefira explicacao conceitual')
+    if (pref.usarExemplos) prefParts.push('de exemplos praticos')
+    if (pref.preferePasso) prefParts.push('prefere resolucoes passo a passo')
+    if (pref.nivelDetalhe === 'minimo') prefParts.push('respostas curtas e diretas')
+    if (pref.nivelDetalhe === 'maximo') prefParts.push('respostas detalhadas e completas')
+    if (pref.tomConversa === 'formal') prefParts.push('tom formal e academico')
+    if (pref.tomConversa === 'descontraido') prefParts.push('tom descontraido e informal')
+    if (prefParts.length > 0) {
+      parteContexto.push(`Preferencias de estudo: ${prefParts.join(', ')}`)
+    }
+  }
+
+  // Incluir ritmo/velocidade se disponível
+  if (contexto.preferencias?.velocidade) {
+    const vel = contexto.preferencias.velocidade
+    if (vel === 'lento') parteContexto.push('Ritmo: devagar, explicar cada detalhe')
+    if (vel === 'rapido') parteContexto.push('Ritmo: rapido, ir direto ao essencial')
+  }
+
   const contextoEstudante = parteContexto.length > 0
     ? `\nCONTEXTO DO ESTUDANTE (use para adaptar sua resposta. Se o estudante perguntar sobre seu desempenho, acertos, progresso ou conquistas, pode mencionar esses dados diretamente de forma natural):\n${parteContexto.join('\n')}\n`
     : ''
@@ -312,10 +345,13 @@ export async function chatComTutor(
 A imagem pode ser de QUALQUER disciplina escolar - adapte sua resposta ao conteudo.]\n`
     : ''
 
-  const prompt = `${tutor.system}
-${contextoEstudante}${instrucaoImagem}
-${promptModo ? `\n${promptModo}\n` : ''}
-${historicoTexto ? `HISTORICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudante: ${mensagem}
+  // Separar system instruction (identidade + regras) do prompt do usuário
+  const systemInstruction = `${tutor.system}
+${contextoEstudante}
+${promptModo ? `\n${promptModo}\n` : ''}`
+
+  // Prompt do usuário contém apenas histórico + mensagem atual
+  const prompt = `${instrucaoImagem}${historicoTexto ? `HISTORICO DA CONVERSA:\n${historicoTexto}\n\n` : ''}Estudante: ${mensagem}
 
 ${tutor.nome}:`
 
@@ -330,7 +366,7 @@ ${tutor.nome}:`
   for (const nomeModelo of modelosParaTentar) {
     console.log(`[Gemini] Tentando modelo: ${nomeModelo}${imagemBase64 ? ' (com imagem)' : ''}`)
 
-    const resultado = await testarModelo(nomeModelo, prompt, imagemBase64)
+    const resultado = await testarModelo(nomeModelo, prompt, imagemBase64, systemInstruction)
 
     if (resultado.sucesso && resultado.resposta) {
       // Cachear o modelo que funcionou
