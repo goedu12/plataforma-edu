@@ -65,6 +65,7 @@ interface AlunoAtivo {
   taxa_acerto: number
   nota_atual?: number
   posicao_ranking?: number
+  foto_url?: string | null
 }
 
 interface AlunoOcioso {
@@ -74,6 +75,7 @@ interface AlunoOcioso {
   componentes: Componente[]
   tempo_ocioso_segundos: number
   ultimo_acesso: string | null
+  foto_url?: string | null
 }
 
 interface AlunoInativo {
@@ -82,6 +84,7 @@ interface AlunoInativo {
   turma: string
   componentes: Componente[]
   ultimo_acesso: string | null
+  foto_url?: string | null
 }
 
 interface EstatisticasTempoReal {
@@ -283,7 +286,7 @@ export default function DashboardAoVivoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+      <div className="ao-vivo-dark min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
           <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-3" style={{ color: 'var(--info)' }} />
           <p className="text-lg" style={{ color: 'var(--text-primary)' }}>Carregando...</p>
@@ -294,7 +297,7 @@ export default function DashboardAoVivoPage() {
 
   if (erro) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+      <div className="ao-vivo-dark min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
           <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
           <p className="mb-3" style={{ color: 'var(--text-primary)' }}>{erro}</p>
@@ -307,7 +310,7 @@ export default function DashboardAoVivoPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden font-sans" style={{ background: 'var(--bg-base)' }}>
+    <div className="ao-vivo-dark h-screen flex flex-col overflow-hidden font-sans" style={{ background: 'var(--bg-base)' }}>
 
       {/* HEADER */}
       <header className="px-3 py-1.5 flex items-center justify-between gap-3 flex-shrink-0" style={{ background: 'var(--bg-overlay)' }}>
@@ -419,9 +422,13 @@ export default function DashboardAoVivoPage() {
                         className={`flex flex-col items-center hover:scale-105 transition-transform ${ajuda ? 'animate-pulse' : ''}`}
                         title={`${aluno.nome}\nTurma: ${aluno.turma}\n${cfg.label}\nQuestoes: ${aluno.questoes_sessao} | Acerto: ${aluno.taxa_acerto}%${aluno.nota_atual !== undefined ? `\nNota: ${aluno.nota_atual.toFixed(1)}` : ''}`}>
                         <div className="relative">
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm"
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm overflow-hidden"
                             style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 3px var(--error)' : '0 0 0 3px var(--success)' }}>
-                            {getIniciais(aluno.nome)}
+                            {aluno.foto_url ? (
+                              <img src={aluno.foto_url} alt={aluno.nome} className="w-full h-full object-cover" />
+                            ) : (
+                              getIniciais(aluno.nome)
+                            )}
                           </div>
                           <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 flex items-center justify-center" style={{ background: cfg.cor }}>
                             <span className="text-white text-[9px] font-bold">{cfg.label[0]}</span>
@@ -448,9 +455,13 @@ export default function DashboardAoVivoPage() {
                     <div key={`o-${aluno.id}`} className="flex flex-col items-center"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}`}>
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-sm"
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-sm overflow-hidden"
                           style={{ background: 'var(--warning-bg-30)', boxShadow: '0 0 0 3px var(--warning)' }}>
-                          {getIniciais(aluno.nome)}
+                          {aluno.foto_url ? (
+                            <img src={aluno.foto_url} alt={aluno.nome} className="w-full h-full object-cover opacity-70" />
+                          ) : (
+                            getIniciais(aluno.nome)
+                          )}
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 bg-yellow-500 flex items-center justify-center">
                           <Coffee className="w-2.5 h-2.5 text-yellow-900" />
@@ -467,8 +478,12 @@ export default function DashboardAoVivoPage() {
                   {alunosInativos.slice(0, 20).map((aluno) => (
                     <div key={`i-${aluno.id}`} className="flex flex-col items-center opacity-40"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOffline`}>
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
-                        {getIniciais(aluno.nome)}
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
+                        {aluno.foto_url ? (
+                          <img src={aluno.foto_url} alt={aluno.nome} className="w-full h-full object-cover grayscale" />
+                        ) : (
+                          getIniciais(aluno.nome)
+                        )}
                       </div>
                       <span className="text-[10px] mt-1 truncate max-w-[56px] font-medium" style={{ color: 'var(--text-tertiary)' }}>{aluno.nome.split(' ')[0]}</span>
                     </div>
@@ -691,6 +706,14 @@ export default function DashboardAoVivoPage() {
           </div>
         </div>
       </div>
+
+      {/* FOOTER - Créditos do Projeto */}
+      <footer className="px-3 py-1.5 flex items-center justify-center gap-2 flex-shrink-0" style={{ background: 'var(--bg-overlay)', borderTop: '1px solid var(--border-default)' }}>
+        <BookOpen className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--info)' }} />
+        <span className="text-[10px] text-center" style={{ color: 'var(--text-muted)' }}>
+          Projeto desenvolvido pelo Professor Leonardo Dantas Vieira com estudantes do Colégio Cora Coralina e Colemar Natal e Silva
+        </span>
+      </footer>
     </div>
   )
 }
