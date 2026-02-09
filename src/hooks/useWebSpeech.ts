@@ -168,12 +168,41 @@ export function useWebSpeech(): UseWebSpeechReturn {
     // Cancelar qualquer fala em andamento
     window.speechSynthesis.cancel()
 
-    // Limpar texto (remover emojis e markdown)
+    // Limpar texto (remover emojis, markdown e LaTeX)
     const cleanText = text
       .replace(/[\u{1F300}-\u{1F9FF}]/gu, '') // Remover emojis
+      .replace(/\$\$([\s\S]*?)\$\$/g, ' fórmula ') // LaTeX em bloco -> "fórmula"
+      .replace(/\$(.*?)\$/g, (_match, formula: string) => {
+        // Tentar ler fórmulas simples naturalmente
+        return formula
+          .replace(/\\frac\{(.*?)\}\{(.*?)\}/g, '$1 sobre $2')
+          .replace(/\\sqrt\{(.*?)\}/g, 'raiz de $1')
+          .replace(/\\vec\{(.*?)\}/g, 'vetor $1')
+          .replace(/\\cdot/g, ' vezes ')
+          .replace(/\\times/g, ' vezes ')
+          .replace(/\\div/g, ' dividido por ')
+          .replace(/\\pm/g, ' mais ou menos ')
+          .replace(/\\neq/g, ' diferente de ')
+          .replace(/\\leq/g, ' menor ou igual a ')
+          .replace(/\\geq/g, ' maior ou igual a ')
+          .replace(/\\approx/g, ' aproximadamente ')
+          .replace(/\\infty/g, ' infinito ')
+          .replace(/\\Delta/g, 'delta ')
+          .replace(/\\alpha/g, 'alfa ')
+          .replace(/\\beta/g, 'beta ')
+          .replace(/\\theta/g, 'teta ')
+          .replace(/\\pi/g, 'pi ')
+          .replace(/\\[a-zA-Z]+/g, ' ') // Remover outros comandos LaTeX
+          .replace(/[{}^_]/g, ' ') // Remover sintaxe LaTeX restante
+          .replace(/\s+/g, ' ')
+          .trim()
+      })
+      .replace(/```mermaid[\s\S]*?```/g, ' diagrama ') // Remover blocos mermaid
+      .replace(/```[\s\S]*?```/g, ' código ') // Remover blocos de código
       .replace(/[*_`#]/g, '') // Remover markdown
       .replace(/\n{2,}/g, '. ') // Converter múltiplas quebras em pausa
       .replace(/\n/g, ' ') // Quebras simples viram espaço
+      .replace(/\s+/g, ' ') // Normalizar espaços
       .trim()
 
     if (!cleanText) return

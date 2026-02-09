@@ -69,7 +69,7 @@ interface TutorChatProps {
 // CONSTANTES
 // ═══════════════════════════════════════════════════════════
 
-const MAX_CARACTERES = 500
+const MAX_CARACTERES = 2000
 const MAX_IMAGE_SIZE = 1024 * 1024 // 1MB apos compressao
 const IMAGE_QUALITY = 0.7
 
@@ -287,7 +287,7 @@ export default function TutorChat({
         body: JSON.stringify({
           componente,
           mensagem: texto || 'Analise esta imagem. Se for uma questão ou exercício, resolva completamente e me dê o gabarito com a resposta correta. Mostre o passo a passo.',
-          historico: mensagens,
+          historico: mensagens.filter(m => m.id !== '1'),
           nomeEstudante: primeiroNome,
           imagem: imagemParaEnviar, // Enviar base64 da imagem
         }),
@@ -723,7 +723,7 @@ export default function TutorChat({
                   color: 'var(--text-primary)',
                 }}
               />
-              {input.length > 400 && (
+              {input.length > 1800 && (
                 <span
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
                   style={{ color: input.length >= MAX_CARACTERES ? 'var(--error)' : 'var(--text-muted)' }}

@@ -23,14 +23,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validar componente
+    if (!['fisica', 'matematica'].includes(componente)) {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Componente inválido' },
+        { status: 400 }
+      )
+    }
+
     const supabase = getSupabaseAdmin()
 
     // Limpar histórico de chat do usuário para o componente
-    await supabase
+    const { error } = await supabase
       .from('historico_chat')
       .delete()
       .eq('usuario_id', sessao.userId)
       .eq('componente', componente)
+
+    if (error) {
+      console.error('[Limpar Chat] Erro ao deletar:', error)
+      return NextResponse.json(
+        { sucesso: false, erro: 'Erro ao limpar conversa' },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({ sucesso: true })
   } catch (error) {
