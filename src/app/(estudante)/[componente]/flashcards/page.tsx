@@ -108,7 +108,12 @@ export default function FlashCardsPage() {
   // Cores do componente
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const corPrimariaRgb = isFisica ? '34, 197, 94' : '139, 92, 246'
+  const corBg05 = isFisica ? 'var(--color-fisica-bg-05)' : 'var(--color-matematica-bg-05)'
+  const corBg10 = isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)'
+  const corBg15 = isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
+  const corBg20 = isFisica ? 'var(--color-fisica-bg-20)' : 'var(--color-matematica-bg-20)'
+  const corBg30 = isFisica ? 'var(--color-fisica-bg-30)' : 'var(--color-matematica-bg-30)'
+  const corGlow = isFisica ? 'var(--color-fisica-glow)' : 'var(--color-matematica-glow)'
   const nomeComponente = isFisica ? 'Física' : 'Matemática'
 
   // ═══════════════════════════════════════════════════════════════════
@@ -396,7 +401,7 @@ export default function FlashCardsPage() {
                 {sessao.sequenciaAtual > 0 && (
                   <div
                     className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-sm font-bold animate-bounce-subtle"
-                    style={{ background: `rgba(${corPrimariaRgb}, 0.15)`, color: corPrimaria }}
+                    style={{ background: corBg15, color: corPrimaria }}
                   >
                     <Flame className="w-4 h-4" />
                     <span>{sessao.sequenciaAtual}</span>
@@ -450,8 +455,8 @@ export default function FlashCardsPage() {
             <div
               className="relative overflow-hidden rounded-2xl p-4 flex items-center gap-4"
               style={{
-                background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
-                border: `2px solid rgba(${corPrimariaRgb}, 0.3)`,
+                background: `linear-gradient(135deg, ${corBg20} 0%, ${corBg05} 100%)`,
+                border: `2px solid ${corBg30}`,
               }}
             >
               <div
@@ -522,7 +527,7 @@ export default function FlashCardsPage() {
                   className="p-2.5 rounded-lg text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     background: !temaSelecionado
-                      ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.1) 100%)`
+                      ? `linear-gradient(135deg, ${corBg20} 0%, ${corBg10} 100%)`
                       : 'var(--bg-elevated)',
                     border: !temaSelecionado ? `2px solid ${corPrimaria}` : '1px solid var(--border-default)',
                   }}
@@ -550,7 +555,7 @@ export default function FlashCardsPage() {
                     className="p-2.5 rounded-lg text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
                     style={{
                       background: temaSelecionado === tema.nome
-                        ? `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.1) 100%)`
+                        ? `linear-gradient(135deg, ${corBg20} 0%, ${corBg10} 100%)`
                         : 'var(--bg-elevated)',
                       border: temaSelecionado === tema.nome ? `2px solid ${corPrimaria}` : '1px solid var(--border-default)',
                     }}
@@ -626,7 +631,7 @@ export default function FlashCardsPage() {
               style={{
                 background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                 color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
-                boxShadow: `0 6px 24px rgba(${corPrimariaRgb}, 0.3)`,
+                boxShadow: `0 6px 24px ${corBg30}`,
               }}
             >
               <Play className="w-5 h-5" />
@@ -652,12 +657,12 @@ export default function FlashCardsPage() {
               <div
                 className="px-3 py-2 lg:px-3 lg:py-1.5 flex items-center justify-between"
                 style={{
-                  background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.1) 0%, transparent 100%)`,
+                  background: `linear-gradient(135deg, ${corBg10} 0%, transparent 100%)`,
                   borderBottom: '1px solid var(--border-default)',
                 }}
               >
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="badge-chromebook" style={{ background: `rgba(${corPrimariaRgb}, 0.15)`, color: corPrimaria }}>
+                  <span className="badge-chromebook" style={{ background: corBg15, color: corPrimaria }}>
                     {questaoAtual.tema}
                   </span>
                   <span
@@ -711,7 +716,7 @@ export default function FlashCardsPage() {
                               : errada
                                 ? 'var(--error-bg-15)'
                                 : selecionada
-                                  ? `rgba(${corPrimariaRgb}, 0.15)`
+                                  ? corBg15
                                   : 'var(--bg-elevated)',
                             border: mostrarResultado && correta
                               ? '2px solid var(--success)'
@@ -777,7 +782,7 @@ export default function FlashCardsPage() {
                               : errada
                                 ? 'var(--error-bg-15)'
                                 : selecionada
-                                  ? `rgba(${corPrimariaRgb}, 0.15)`
+                                  ? corBg15
                                   : 'var(--bg-elevated)',
                             border: mostrarResultado && correta
                               ? '2px solid var(--success)'
@@ -871,7 +876,7 @@ export default function FlashCardsPage() {
                   <div
                     className="feedback-chromebook"
                     style={{
-                      background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.1) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
+                      background: `linear-gradient(135deg, ${corBg10} 0%, ${corBg05} 100%)`,
                       border: `1px dashed ${corPrimaria}`,
                     }}
                   >
@@ -984,7 +989,7 @@ export default function FlashCardsPage() {
             <div
               className="relative overflow-hidden rounded-3xl p-8 text-center"
               style={{
-                background: `linear-gradient(135deg, rgba(${corPrimariaRgb}, 0.2) 0%, rgba(${corPrimariaRgb}, 0.05) 100%)`,
+                background: `linear-gradient(135deg, ${corBg20} 0%, ${corBg05} 100%)`,
                 border: `2px solid ${corPrimaria}`,
               }}
             >
@@ -1065,7 +1070,7 @@ export default function FlashCardsPage() {
                   label: 'Média por Questão',
                   value: `${Math.round(sessao.pontos / sessao.questoes.length)} pts`,
                   color: corPrimaria,
-                  bg: `rgba(${corPrimariaRgb}, 0.1)`,
+                  bg: corBg10,
                 },
               ].map((stat) => (
                 <div
@@ -1092,7 +1097,7 @@ export default function FlashCardsPage() {
                 style={{
                   background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                   color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
-                  boxShadow: `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`,
+                  boxShadow: `0 8px 32px ${corBg30}`,
                 }}
               >
                 <RotateCcw className="w-5 h-5" />
