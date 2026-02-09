@@ -183,8 +183,8 @@ export default function ProfilePhoto({
                 transition-colors shadow-sm
               `}
               style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '2px solid rgba(239, 68, 68, 0.3)',
+                background: 'var(--error-bg-15)',
+                border: '2px solid var(--error-bg-30)',
                 color: 'var(--error)',
               }}
               title="Remover foto"

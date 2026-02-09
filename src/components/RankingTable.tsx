@@ -22,9 +22,9 @@ export default function RankingTable({
 
   const getPodiumColor = (posicao: number) => {
     switch (posicao) {
-      case 1: return '#FFD700'
-      case 2: return '#C0C0C0'
-      case 3: return '#CD7F32'
+      case 1: return 'var(--medal-gold)'
+      case 2: return 'var(--medal-silver)'
+      case 3: return 'var(--medal-bronze)'
       default: return 'var(--text-muted)'
     }
   }
@@ -179,7 +179,7 @@ export default function RankingTable({
                     className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
                     style={{
                       background: item.posicao <= 10
-                        ? (isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)')
+                        ? (isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)')
                         : 'var(--bg-elevated)',
                       color: item.posicao <= 10 ? corPrimaria : 'var(--text-muted)',
                     }}

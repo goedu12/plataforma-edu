@@ -186,7 +186,7 @@ export default function QuestaoCard({
 
   const getNotaColor = (nota: number) => {
     if (nota >= 7) return 'var(--success)'
-    if (nota >= 6) return '#4ade80'
+    if (nota >= 6) return 'var(--color-fisica-light)'
     if (nota >= 5) return 'var(--warning)'
     return 'var(--error)'
   }
@@ -277,7 +277,7 @@ export default function QuestaoCard({
       {erro && (
         <div
           className="rounded-xl p-3 mt-3"
-          style={{ background: 'var(--error-bg-15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+          style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}
         >
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />
@@ -337,7 +337,7 @@ export default function QuestaoCard({
       {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
         <div
           className="rounded-xl p-4 text-center mt-3 animate-fade-in"
-          style={{ background: 'var(--warning-bg-15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
+          style={{ background: 'var(--warning-bg-15)', border: '2px solid var(--warning-bg-40)' }}
         >
           <div className="flex items-center justify-center gap-2 mb-2">
             <Trophy className="w-5 h-5" style={{ color: 'var(--warning)' }} />
@@ -348,7 +348,7 @@ export default function QuestaoCard({
               <span
                 key={index}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}
+                style={{ background: 'var(--warning-bg-20)', color: 'var(--warning)' }}
               >
                 {conquista.icone} {conquista.nome}
               </span>
@@ -443,13 +443,13 @@ export default function QuestaoCard({
           className="rounded-xl p-4 mt-3 animate-fade-in"
           style={{
             background: feedback.correta ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
-            border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            border: `1px solid ${feedback.correta ? 'var(--success-bg-40)' : 'var(--error-bg-40)'}`,
           }}
         >
           <div className="flex items-start gap-3">
             <div
               className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+              style={{ background: feedback.correta ? 'var(--success-bg-20)' : 'var(--error-bg-20)' }}
             >
               {feedback.correta ? (
                 <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} />
@@ -465,7 +465,7 @@ export default function QuestaoCard({
                 {feedback.correta && feedback.pontosGanhos > 0 && (
                   <span
                     className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}
+                    style={{ background: 'var(--success-bg-20)', color: 'var(--success)' }}
                   >
                     +{feedback.pontosGanhos} pts
                   </span>
@@ -492,7 +492,7 @@ export default function QuestaoCard({
       {feedback && feedback.notaTempoReal && !feedback.notaTempoReal.pode_continuar && (
         <div
           className="rounded-xl p-3 mt-3"
-          style={{ background: 'var(--warning-bg-15)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+          style={{ background: 'var(--warning-bg-15)', border: '1px solid var(--warning-bg-30)' }}
         >
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4" style={{ color: 'var(--warning)' }} />

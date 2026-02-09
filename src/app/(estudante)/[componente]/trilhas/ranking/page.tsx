@@ -46,7 +46,7 @@ export default function RankingTrilhasPage() {
   const [serie, setSerie] = useState<string>('1EM')
 
   const isFisica = componente === 'fisica'
-  const corTrilha = '#9C27B0' // Cor da trilha desafio (roxo)
+  const corTrilha = 'var(--color-desafio-trail)' // Cor da trilha desafio (roxo)
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   useEffect(() => {
@@ -117,11 +117,11 @@ export default function RankingTrilhasPage() {
   const getPodiumStyle = (posicao: number) => {
     switch (posicao) {
       case 1:
-        return { bg: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)', color: '#000', icon: <Crown className="w-5 h-5" /> }
+        return { bg: 'linear-gradient(135deg, var(--medal-gold) 0%, var(--medal-gold-dark) 100%)', color: 'var(--text-on-fisica)', icon: <Crown className="w-5 h-5" /> }
       case 2:
-        return { bg: 'linear-gradient(135deg, #C0C0C0 0%, #A0A0A0 100%)', color: '#000', icon: <Medal className="w-5 h-5" /> }
+        return { bg: 'linear-gradient(135deg, var(--medal-silver) 0%, var(--medal-silver-dark) 100%)', color: 'var(--text-on-fisica)', icon: <Medal className="w-5 h-5" /> }
       case 3:
-        return { bg: 'linear-gradient(135deg, #CD7F32 0%, #8B4513 100%)', color: '#fff', icon: <Medal className="w-5 h-5" /> }
+        return { bg: 'linear-gradient(135deg, var(--medal-bronze) 0%, var(--medal-bronze-dark) 100%)', color: 'var(--text-primary)', icon: <Medal className="w-5 h-5" /> }
       default:
         return { bg: 'var(--bg-elevated)', color: 'var(--text-primary)', icon: null }
     }
@@ -219,7 +219,7 @@ export default function RankingTrilhasPage() {
               >
                 <p className="text-2xl font-bold" style={{ color: getPodiumStyle(2).color }}>2</p>
               </div>
-              <div className="w-full h-16 rounded-b-lg" style={{ background: '#A0A0A0' }} />
+              <div className="w-full h-16 rounded-b-lg" style={{ background: 'var(--medal-silver-dark)' }} />
               <p className="text-xs font-medium mt-1 truncate w-full text-center" style={{ color: 'var(--text-primary)' }}>
                 {ranking[1]?.nome.split(' ')[0]}
               </p>
@@ -245,7 +245,7 @@ export default function RankingTrilhasPage() {
               >
                 <p className="text-3xl font-bold" style={{ color: getPodiumStyle(1).color }}>1</p>
               </div>
-              <div className="w-full h-24 rounded-b-lg" style={{ background: '#FFA500' }} />
+              <div className="w-full h-24 rounded-b-lg" style={{ background: 'var(--medal-gold-dark)' }} />
               <p className="text-sm font-semibold mt-1 truncate w-full text-center" style={{ color: 'var(--text-primary)' }}>
                 {ranking[0]?.nome.split(' ')[0]}
               </p>
@@ -270,7 +270,7 @@ export default function RankingTrilhasPage() {
               >
                 <p className="text-2xl font-bold" style={{ color: getPodiumStyle(3).color }}>3</p>
               </div>
-              <div className="w-full h-12 rounded-b-lg" style={{ background: '#8B4513' }} />
+              <div className="w-full h-12 rounded-b-lg" style={{ background: 'var(--medal-bronze-dark)' }} />
               <p className="text-xs font-medium mt-1 truncate w-full text-center" style={{ color: 'var(--text-primary)' }}>
                 {ranking[2]?.nome.split(' ')[0]}
               </p>

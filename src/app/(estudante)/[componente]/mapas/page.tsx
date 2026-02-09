@@ -286,7 +286,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 className="p-2 rounded-lg relative"
                 style={{
                   background: temFiltros ? corPrimaria : 'var(--bg-surface)',
-                  color: temFiltros ? '#fff' : 'var(--text-secondary)',
+                  color: temFiltros ? 'var(--text-primary)' : 'var(--text-secondary)',
                   border: '1px solid var(--border-default)'
                 }}
               >
@@ -445,7 +445,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
       {modalAberto && mapaAtual && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: 'rgba(0,0,0,0.9)' }}
+          style={{ background: 'var(--overlay-heavy)' }}
           onClick={(e) => {
             if (e.target === e.currentTarget) fecharVisualizacao()
           }}
@@ -522,7 +522,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
               {/* Stats */}
               <div className="flex items-center gap-6 text-sm text-white/60 mb-4">
                 <span className="flex items-center gap-2">
-                  <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? '#ef4444' : 'inherit' }} />
+                  <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? 'var(--error)' : 'inherit' }} />
                   {mapaAtual.curtidas} curtidas
                 </span>
                 <span className="flex items-center gap-2">
@@ -537,9 +537,9 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                   onClick={() => handleCurtir(mapaAtual)}
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
                   style={{
-                    background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.1)',
-                    color: mapaAtual.curtido ? '#ef4444' : 'white',
-                    border: `1px solid ${mapaAtual.curtido ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.2)'}`
+                    background: mapaAtual.curtido ? 'var(--error-bg-20)' : 'rgba(255,255,255,0.1)',
+                    color: mapaAtual.curtido ? 'var(--error)' : 'white',
+                    border: `1px solid ${mapaAtual.curtido ? 'var(--error-bg-30)' : 'rgba(255,255,255,0.2)'}`
                   }}
                 >
                   <Heart className="w-5 h-5" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
@@ -561,7 +561,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                   onClick={() => handleCompartilhar(mapaAtual)}
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium transition-all hover:scale-105"
                   style={{
-                    background: '#25D366',
+                    background: 'var(--color-whatsapp)',
                     color: 'white'
                   }}
                 >
@@ -650,7 +650,7 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
             {/* Stats compactos */}
             <div className="flex items-center justify-center gap-6 text-sm text-white/70 mb-4">
               <span className="flex items-center gap-1.5">
-                <Heart className="w-4 h-4" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? '#ef4444' : 'inherit' }} />
+                <Heart className="w-4 h-4" fill={mapaAtual.curtido ? 'currentColor' : 'none'} style={{ color: mapaAtual.curtido ? 'var(--error)' : 'inherit' }} />
                 {mapaAtual.curtidas}
               </span>
               <span className="flex items-center gap-1.5">
@@ -666,12 +666,12 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 onClick={() => handleCurtir(mapaAtual)}
                 className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
-                  background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255,255,255,0.1)',
-                  color: mapaAtual.curtido ? '#ef4444' : 'white',
+                  background: mapaAtual.curtido ? 'var(--error-bg-20)' : 'rgba(255,255,255,0.1)',
+                  color: mapaAtual.curtido ? 'var(--error)' : 'white',
                   minHeight: '72px'
                 }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: mapaAtual.curtido ? 'rgba(239, 68, 68, 0.3)' : 'rgba(255,255,255,0.1)' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: mapaAtual.curtido ? 'var(--error-bg-30)' : 'rgba(255,255,255,0.1)' }}>
                   <Heart className="w-6 h-6" fill={mapaAtual.curtido ? 'currentColor' : 'none'} />
                 </div>
                 <span className="text-[10px] font-medium">{mapaAtual.curtido ? 'Curtido' : 'Curtir'}</span>
@@ -699,11 +699,11 @@ ${componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERIES_MA
                 className="flex flex-col items-center justify-center gap-1 py-3 rounded-2xl transition-all active:scale-95"
                 style={{
                   background: 'rgba(37, 211, 102, 0.2)',
-                  color: '#25D366',
+                  color: 'var(--color-whatsapp)',
                   minHeight: '72px'
                 }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: '#25D366' }}>
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'var(--color-whatsapp)' }}>
                   <Share2 className="w-6 h-6 text-white" />
                 </div>
                 <span className="text-[10px] font-medium">WhatsApp</span>

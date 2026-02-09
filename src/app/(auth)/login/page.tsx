@@ -247,8 +247,8 @@ export default function LoginPage() {
             <div
               className="p-4 rounded-xl flex items-start gap-3 animate-fade-in"
               style={{
-                background: 'rgba(239, 68, 68, 0.1)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                background: 'var(--error-bg-10)',
+                border: '1px solid var(--error-bg-30)',
               }}
             >
               <Info
@@ -326,7 +326,7 @@ export default function LoginPage() {
       {mostrarAjuda && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+          style={{ background: 'var(--overlay-modal)' }}
           onClick={() => setMostrarAjuda(false)}
         >
           <div

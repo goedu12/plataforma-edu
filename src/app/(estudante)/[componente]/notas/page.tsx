@@ -193,7 +193,7 @@ export default function NotasPage() {
       aprovado: { label: 'Aprovado', color: 'var(--success)', bg: 'var(--success-bg-15)' },
       reprovado: { label: 'Recuperação', color: 'var(--error)', bg: 'var(--error-bg-15)' },
       recuperacao: { label: 'Recuperação', color: 'var(--warning)', bg: 'var(--warning-bg-15)' },
-      em_andamento: { label: 'Em Andamento', color: 'var(--color-accent)', bg: 'rgba(59, 130, 246, 0.15)' },
+      em_andamento: { label: 'Em Andamento', color: 'var(--color-accent)', bg: 'var(--info-bg-15)' },
     }
     return config[status] || config.em_andamento
   }

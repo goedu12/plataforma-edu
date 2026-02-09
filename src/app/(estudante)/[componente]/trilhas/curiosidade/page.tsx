@@ -46,7 +46,7 @@ export default function TrilhaCuriosidadePage() {
   const [serie, setSerie] = useState<string>('1EM')
 
   const isFisica = componente === 'fisica'
-  const corTrilha = '#00BCD4' // Cor da trilha curiosidade
+  const corTrilha = 'var(--color-curiosidade)' // Cor da trilha curiosidade
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   useEffect(() => {

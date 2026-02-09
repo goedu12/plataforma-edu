@@ -339,7 +339,7 @@ export default function SimuladoENEMPage() {
 
         {(status === 'erro' || status === 'acesso_negado') && (
           <div className="p-6 text-center">
-            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.1)' }}>
+            <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'var(--error-bg-10)' }}>
               <XCircle className="w-8 h-8" style={{ color: 'var(--error)' }} />
             </div>
             <p className="text-sm mb-4" style={{ color: 'var(--text-muted)' }}>{erro}</p>
@@ -435,10 +435,10 @@ export default function SimuladoENEMPage() {
                 let border = 'var(--border-default)'
 
                 if (respondida) {
-                  if (isCorreta) { bg = 'rgba(34,197,94,0.12)'; border = 'var(--success)' }
-                  else if (isErrada) { bg = 'rgba(239,68,68,0.12)'; border = 'var(--error)' }
+                  if (isCorreta) { bg = 'var(--success-bg-12)'; border = 'var(--success)' }
+                  else if (isErrada) { bg = 'var(--error-bg-12)'; border = 'var(--error)' }
                 } else if (isSelected) {
-                  bg = isFisica ? 'rgba(34,197,94,0.12)' : 'rgba(139,92,246,0.12)'
+                  bg = isFisica ? 'var(--color-fisica-bg-12)' : 'var(--color-matematica-bg-12)'
                   border = corPrimaria
                 }
 
@@ -488,7 +488,7 @@ export default function SimuladoENEMPage() {
 
             {/* Feedback */}
             {respondida && (
-              <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: acertou ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)' }}>
+              <div className="rounded-xl p-4 flex items-center justify-between" style={{ background: acertou ? 'var(--success-bg-12)' : 'var(--error-bg-12)' }}>
                 <div className="flex items-center gap-3">
                   {acertou ? <CheckCircle2 className="w-6 h-6" style={{ color: 'var(--success)' }} /> : <XCircle className="w-6 h-6" style={{ color: 'var(--error)' }} />}
                   <span className="font-semibold" style={{ color: acertou ? 'var(--success)' : 'var(--error)' }}>

@@ -132,7 +132,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)' }}
+              style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)' }}
             >
               <Settings className="w-5 h-5" style={{ color: corPrimaria }} />
             </div>
@@ -218,7 +218,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                       className="p-3 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: preferencias.nivel_detalhe === nivel
-                          ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                          ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                           : 'var(--bg-elevated)',
                         border: preferencias.nivel_detalhe === nivel
                           ? `2px solid ${corPrimaria}`
@@ -247,7 +247,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                       className="p-3 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: preferencias.tom_conversa === tom
-                          ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                          ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                           : 'var(--bg-elevated)',
                         border: preferencias.tom_conversa === tom
                           ? `2px solid ${corPrimaria}`
@@ -276,7 +276,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                       className="p-3 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: preferencias.velocidade === vel
-                          ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                          ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                           : 'var(--bg-elevated)',
                         border: preferencias.velocidade === vel
                           ? `2px solid ${corPrimaria}`
@@ -310,7 +310,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
             className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
             style={{
               background: salvo ? 'var(--success)' : corPrimaria,
-              color: isFisica ? '#000' : '#fff',
+              color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
               opacity: (salvando || loading) ? 0.7 : 1,
             }}
           >

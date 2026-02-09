@@ -298,7 +298,7 @@ export default function DashboardAoVivoPage() {
         <div className="text-center">
           <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
           <p className="mb-3" style={{ color: 'var(--text-primary)' }}>{erro}</p>
-          <button onClick={buscarDados} className="px-4 py-2 rounded-lg" style={{ background: 'var(--info)', color: '#fff' }}>
+          <button onClick={buscarDados} className="px-4 py-2 rounded-lg" style={{ background: 'var(--info)', color: 'var(--text-primary)' }}>
             Tentar novamente
           </button>
         </div>

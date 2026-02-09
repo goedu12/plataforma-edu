@@ -132,9 +132,9 @@ export default function MenuComponentePage() {
 
   // Cor da nota baseada no valor
   const getCorNota = (n: number) => {
-    if (n >= 7) return '#22c55e'
-    if (n >= 5) return '#eab308'
-    return '#ef4444'
+    if (n >= 7) return 'var(--success)'
+    if (n >= 5) return 'var(--warning)'
+    return 'var(--error)'
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -144,9 +144,9 @@ export default function MenuComponentePage() {
   // Grupo 1: Aprender & Praticar
   const grupoAprender: MenuItem[] = [
     { icon: FileText, label: 'Teoria', href: `/${componente}/teoria`, description: 'Conteúdos' },
-    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões', badgeText: 'NOTA', badgeColor: '#22c55e' },
-    { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros', badgeText: 'NOTA', badgeColor: '#22c55e' },
-    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min', badgeText: 'NOTA', badgeColor: '#22c55e' },
+    { icon: BookOpen, label: 'Estudar', href: `/${componente}/estudar`, description: 'Questões', badgeText: 'NOTA', badgeColor: 'var(--success)' },
+    { icon: RotateCcw, label: 'Revisar', href: `/${componente}/revisao`, description: 'Erros', badgeText: 'NOTA', badgeColor: 'var(--success)' },
+    { icon: Zap, label: 'Desafio', href: `/${componente}/desafio`, description: '5 em 5min', badgeText: 'NOTA', badgeColor: 'var(--success)' },
   ]
 
   // Grupo 2: Explorar

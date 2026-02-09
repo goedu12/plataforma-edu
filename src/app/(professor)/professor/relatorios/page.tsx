@@ -197,16 +197,16 @@ export default function RelatoriosProfessorPage() {
       // Filtrar estudantes conforme tipo
       let estudantesParaExportar = estudantesFiltrados
       let titulo = 'Relatório Geral'
-      let corTema = '#10b981' // verde padrão
+      let corTema = 'var(--success)' // verde padrão
 
       if (tipo === 'fisica') {
         estudantesParaExportar = estudantesFiltrados.filter(e => e.componentes.includes('fisica'))
         titulo = 'Relatório de Física'
-        corTema = '#22c55e'
+        corTema = 'var(--color-fisica)'
       } else if (tipo === 'matematica') {
         estudantesParaExportar = estudantesFiltrados.filter(e => e.componentes.includes('matematica'))
         titulo = 'Relatório de Matemática'
-        corTema = '#a855f7'
+        corTema = 'var(--color-matematica-light)'
       }
 
       if (estudantesParaExportar.length === 0) {
@@ -293,10 +293,10 @@ export default function RelatoriosProfessorPage() {
         : 0
 
       const cards = [
-        { label: 'Total de Alunos', value: totalAlunos.toString(), color: '#3b82f6' },
-        { label: tipo === 'matematica' ? 'Média Matemática' : 'Média Física', value: tipo === 'matematica' ? `${mediaMat} pts` : `${mediaFis} pts`, color: tipo === 'matematica' ? '#a855f7' : '#22c55e' },
-        { label: tipo === 'matematica' ? 'Taxa Acerto Mat' : 'Taxa Acerto Fís', value: tipo === 'matematica' ? `${taxaMat}%` : `${taxaFis}%`, color: tipo === 'matematica' ? '#a855f7' : '#22c55e' },
-        { label: tipo === 'geral' ? 'Média Matemática' : 'Total Questões', value: tipo === 'geral' ? `${mediaMat} pts` : estudantesParaExportar.reduce((acc, e) => acc + (tipo === 'fisica' ? e.fis_questoes_total : e.mat_questoes_total), 0).toString(), color: tipo === 'geral' ? '#a855f7' : '#f59e0b' },
+        { label: 'Total de Alunos', value: totalAlunos.toString(), color: 'var(--info)' },
+        { label: tipo === 'matematica' ? 'Média Matemática' : 'Média Física', value: tipo === 'matematica' ? `${mediaMat} pts` : `${mediaFis} pts`, color: tipo === 'matematica' ? 'var(--color-matematica-light)' : 'var(--color-fisica)' },
+        { label: tipo === 'matematica' ? 'Taxa Acerto Mat' : 'Taxa Acerto Fís', value: tipo === 'matematica' ? `${taxaMat}%` : `${taxaFis}%`, color: tipo === 'matematica' ? 'var(--color-matematica-light)' : 'var(--color-fisica)' },
+        { label: tipo === 'geral' ? 'Média Matemática' : 'Total Questões', value: tipo === 'geral' ? `${mediaMat} pts` : estudantesParaExportar.reduce((acc, e) => acc + (tipo === 'fisica' ? e.fis_questoes_total : e.mat_questoes_total), 0).toString(), color: tipo === 'geral' ? 'var(--color-matematica-light)' : 'var(--warning)' },
       ]
 
       cards.forEach((card, i) => {
@@ -549,12 +549,12 @@ export default function RelatoriosProfessorPage() {
             </p>
             <p className="stat-label">Média Pontos</p>
           </div>
-          <div className="stat-card-2026 text-center" style={{ borderTop: '3px solid #ef4444' }}>
+          <div className="stat-card-2026 text-center" style={{ borderTop: '3px solid var(--error)' }}>
             <UserX className="w-8 h-8 mx-auto mb-2 text-red-500" />
             <p className="stat-value text-red-500">{estatisticas.nuncaLogaram}</p>
             <p className="stat-label">Nunca Acessaram</p>
           </div>
-          <div className="stat-card-2026 text-center" style={{ borderTop: '3px solid #f59e0b' }}>
+          <div className="stat-card-2026 text-center" style={{ borderTop: '3px solid var(--warning)' }}>
             <Clock className="w-8 h-8 mx-auto mb-2 text-amber-500" />
             <p className="stat-value text-amber-500">{estatisticas.inativos7dias}</p>
             <p className="stat-label">Inativos 7+ dias</p>
