@@ -97,7 +97,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
               minHeight: '48px',
               padding: expanded ? '0 12px' : '0',
               justifyContent: expanded ? 'flex-start' : 'center',
-              borderRadius: '12px',
+              borderRadius: '0.75rem',
               background: active ? activeBg : 'transparent',
               color: active ? accentColor : 'var(--text-secondary)',
             }}
@@ -112,7 +112,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
             {expanded && (
               <span
                 style={{
-                  fontSize: '14px',
+                  fontSize: '0.875rem',
                   fontWeight: active ? 600 : 400,
                   whiteSpace: 'nowrap',
                 }}
