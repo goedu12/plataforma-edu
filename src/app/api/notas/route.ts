@@ -453,8 +453,8 @@ export async function GET(request: NextRequest) {
     const progressoSemanal = agruparPorSemana(respostasEstudo || [], dataInicioBusca)
       .map(s => ({
         ...s,
-        limite: 15,
-        percentual: Math.round((s.questoes / 15) * 100),
+        limite: 70,
+        percentual: Math.round((s.questoes / 70) * 100),
       }))
 
     // Calcular semana atual
@@ -514,8 +514,8 @@ export async function GET(request: NextRequest) {
       .lte('criado_em', domingoFimStr + 'T23:59:59')
 
     const questoesSemanaAtual = questoesSemana?.length || 0
-    const limiteSemanal = emRecuperacao || emPeriodoRecuperacao ? null : 15
-    const podeResponder = emRecuperacao || emPeriodoRecuperacao || questoesSemanaAtual < 15
+    const limiteSemanal = emRecuperacao || emPeriodoRecuperacao ? null : 70
+    const podeResponder = emRecuperacao || emPeriodoRecuperacao || questoesSemanaAtual < 70
 
     // ═══════════════════════════════════════════════════════════════════════
     // DETERMINAR NOTA FINAL E STATUS (usando nova fórmula)

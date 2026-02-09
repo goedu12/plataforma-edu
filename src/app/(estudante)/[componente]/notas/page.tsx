@@ -418,7 +418,7 @@ export default function NotasPage() {
                 disabled={!notaAtual.pode_responder}
                 rightIcon={notaAtual.pode_responder ? <ChevronRight className="w-5 h-5" /> : undefined}
               >
-                {notaAtual.pode_responder ? 'Estudar' : `Limite: ${notaAtual.questoes_semana}/15`}
+                {notaAtual.pode_responder ? 'Estudar' : `Limite: ${notaAtual.questoes_semana}/${notaAtual.limite_semanal ?? 70}`}
               </Button>
               <Button
                 variant="secondary"

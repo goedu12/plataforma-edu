@@ -281,16 +281,14 @@ export default function EstudarPage() {
                 {/* Progress inline - só desktop */}
                 {limite && limite.limite_semanal !== null && (
                   <div className="hidden lg:flex items-center gap-1.5">
-                    <div className="flex gap-0.5">
-                      {Array.from({ length: Math.min(limite.limite_semanal, 15) }).map((_, index) => (
-                        <div
-                          key={index}
-                          className="w-1.5 h-3 rounded-sm"
-                          style={{
-                            background: index < limite.questoes_semana ? corPrimaria : 'var(--bg-elevated)',
-                          }}
-                        />
-                      ))}
+                    <div className="w-24 h-3 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{
+                          width: `${Math.min((limite.questoes_semana / limite.limite_semanal) * 100, 100)}%`,
+                          background: corPrimaria,
+                        }}
+                      />
                     </div>
                     <span className="text-[10px] font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
                       {limite.questoes_semana}/{limite.limite_semanal}
@@ -302,14 +300,14 @@ export default function EstudarPage() {
               {/* Progress mobile - linha separada */}
               {limite && limite.limite_semanal !== null && (
                 <div className="flex lg:hidden items-center gap-2 mt-1.5">
-                  <div className="flex gap-0.5 flex-1">
-                    {Array.from({ length: limite.limite_semanal }).map((_, index) => (
-                      <div
-                        key={index}
-                        className="flex-1 h-1 rounded-full"
-                        style={{ background: index < limite.questoes_semana ? corPrimaria : 'var(--bg-elevated)' }}
-                      />
-                    ))}
+                  <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--bg-elevated)' }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min((limite.questoes_semana / limite.limite_semanal) * 100, 100)}%`,
+                        background: corPrimaria,
+                      }}
+                    />
                   </div>
                   <span className="text-[10px] font-medium tabular-nums" style={{ color: 'var(--text-muted)' }}>
                     {limite.questoes_semana}/{limite.limite_semanal}
@@ -535,7 +533,7 @@ export default function EstudarPage() {
             </h2>
 
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              {status === 'LIMITE_SEMANAL' && `Você respondeu ${limite?.questoes_semana || 15} questões esta semana. Volte na segunda ou use o modo Desafio!`}
+              {status === 'LIMITE_SEMANAL' && `Você respondeu ${limite?.questoes_semana || limite?.limite_semanal || 70} questões esta semana. Volte na segunda ou use o modo Desafio!`}
               {status === 'FORA_PERIODO' && 'Use o modo Desafio para praticar!'}
               {status === 'COMPLETOU' && 'Você completou todas as questões!'}
               {status === 'ERRO' && erro}
