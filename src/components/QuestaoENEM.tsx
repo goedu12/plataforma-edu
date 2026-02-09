@@ -168,7 +168,7 @@ export default function QuestaoENEM({
 
     if (selecionada === letra) {
       return {
-        background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+        background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)',
         border: `2px solid ${corPrimaria}`,
       }
     }
@@ -355,8 +355,8 @@ export default function QuestaoENEM({
                     (feedback && (letra === feedback.respostaCorreta || (letra === selecionada && !feedback.correta))) ||
                     selecionada === letra
                       ? isFisica
-                        ? '#000'
-                        : '#fff'
+                        ? 'var(--text-on-fisica)'
+                        : 'var(--text-on-matematica)'
                       : 'var(--text-muted)',
                 }}
               >
@@ -420,7 +420,7 @@ export default function QuestaoENEM({
         <div
           className="rounded-xl p-3 mt-3"
           style={{
-            background: 'rgba(239, 68, 68, 0.15)',
+            background: 'var(--error-bg-15)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
           }}
         >
@@ -450,8 +450,8 @@ export default function QuestaoENEM({
           className="rounded-xl p-4 mt-3 animate-fade-in"
           style={{
             background: feedback.correta
-              ? 'rgba(34, 197, 94, 0.15)'
-              : 'rgba(239, 68, 68, 0.15)',
+              ? 'var(--success-bg-15)'
+              : 'var(--error-bg-15)',
             border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
           }}
         >

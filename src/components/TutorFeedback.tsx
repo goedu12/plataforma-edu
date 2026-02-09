@@ -167,7 +167,7 @@ function TutorFeedbackDetalhado({
       <div
         className="p-3 rounded-xl text-sm"
         style={{
-          background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+          background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
           border: `1px solid ${corPrimaria}`,
           color: corPrimaria,
         }}
@@ -281,7 +281,7 @@ function TutorFeedbackDetalhado({
           className="px-3 py-2 rounded-lg"
           style={{
             background: corPrimaria,
-            color: isFisica ? '#000' : '#fff',
+            color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
           }}
         >
           {enviando ? '...' : <Send className="w-4 h-4" />}
@@ -427,7 +427,7 @@ export function TutorAvaliacaoSessao({
             className="flex-1 py-2 rounded-xl text-sm font-medium"
             style={{
               background: satisfacao ? corPrimaria : 'var(--bg-overlay)',
-              color: satisfacao ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+              color: satisfacao ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)',
             }}
           >
             {enviando ? 'Enviando...' : 'Enviar'}
