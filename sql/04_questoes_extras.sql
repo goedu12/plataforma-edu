@@ -539,8 +539,8 @@ INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, al
 -- 6º Ano - Difíceis
 ('matematica', 6, 'Frações', 'Problemas', 'dificil',
 'João tem R$ 120. Gastou 1/3 e depois 1/4 do que sobrou. Quanto gastou no total?',
-'R$ 40', 'R$ 60', 'R$ 70', 'R$ 80', 'C',
-'1/3 de 120 = 40. Sobrou 80. 1/4 de 80 = 20. Total: 40 + 30 = 70.',
+'R$ 40', 'R$ 60', 'R$ 70', 'R$ 80', 'B',
+'1/3 de 120 = 40. Sobrou 80. 1/4 de 80 = 20. Total gasto: 40 + 20 = 60.',
 'Calcule por etapas'),
 
 -- 7º Ano - Fáceis
@@ -777,12 +777,12 @@ INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, al
 
 ('matematica', 9, 'Probabilidade', 'Básica', 'medio',
 'Ao lançar dois dados, qual a probabilidade de somar 7?',
-'1/6', '1/12', '6/36', '7/36', 'A',
+'1/6', '1/12', '5/36', '7/36', 'A',
 'Combinações que somam 7: (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6. P = 6/36 = 1/6.',
 'Conte as combinações favoráveis'),
 
 ('matematica', 9, 'Probabilidade', 'Básica', 'dificil',
 'Uma urna tem 3 bolas vermelhas e 2 azuis. Retirando 2 bolas sem reposição, qual a probabilidade de ambas serem vermelhas?',
-'9/25', '6/20', '3/10', '2/5', 'C',
+'9/25', '6/25', '3/10', '2/5', 'C',
 'P = (3/5) × (2/4) = 6/20 = 3/10.',
 'Multiplique as probabilidades');
