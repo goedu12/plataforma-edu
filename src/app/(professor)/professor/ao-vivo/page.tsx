@@ -307,7 +307,7 @@ export default function DashboardAoVivoPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--bg-base)', fontFamily: 'system-ui, sans-serif' }}>
+    <div className="h-screen flex flex-col overflow-hidden font-sans" style={{ background: 'var(--bg-base)' }}>
 
       {/* HEADER */}
       <header className="px-3 py-1.5 flex items-center justify-between gap-3 flex-shrink-0" style={{ background: 'var(--bg-overlay)' }}>

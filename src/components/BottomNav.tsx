@@ -45,13 +45,12 @@ export default function BottomNav({ componente }: BottomNavProps) {
             key={item.label}
             onClick={() => router.push(item.href)}
             aria-label={item.label}
-            className="flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center rounded-xl"
             style={{
               gap: '2px',
               minWidth: '56px',
               minHeight: '48px',
               padding: '6px 8px',
-              borderRadius: '12px',
               background: isActive ? activeBg : 'transparent',
               color: isActive ? activeColor : 'var(--text-muted)',
               border: 'none',
@@ -60,7 +59,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
             }}
           >
             <item.icon style={{ width: '20px', height: '20px' }} />
-            <span style={{ fontSize: '10px', fontWeight: 500, lineHeight: 1.2 }}>{item.label}</span>
+            <span className="text-[10px] font-medium leading-tight">{item.label}</span>
           </button>
         )
       })}
