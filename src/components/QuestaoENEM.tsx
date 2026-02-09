@@ -421,7 +421,7 @@ export default function QuestaoENEM({
           className="rounded-xl p-3 mt-3"
           style={{
             background: 'var(--error-bg-15)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            border: '1px solid var(--error-bg-30)',
           }}
         >
           <div className="flex items-center gap-3">
@@ -452,7 +452,7 @@ export default function QuestaoENEM({
             background: feedback.correta
               ? 'var(--success-bg-15)'
               : 'var(--error-bg-15)',
-            border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            border: `1px solid ${feedback.correta ? 'var(--color-fisica-bg-40)' : 'var(--error-bg-40)'}`,
           }}
         >
           <div className="flex items-center gap-3">
@@ -460,8 +460,8 @@ export default function QuestaoENEM({
               className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{
                 background: feedback.correta
-                  ? 'rgba(34, 197, 94, 0.2)'
-                  : 'rgba(239, 68, 68, 0.2)',
+                  ? 'var(--color-fisica-bg-20)'
+                  : 'var(--error-bg-20)',
               }}
             >
               {feedback.correta ? (

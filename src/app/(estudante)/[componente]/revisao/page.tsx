@@ -376,7 +376,7 @@ export default function RevisaoPage() {
                     className="feedback-chromebook flex items-center gap-2"
                     style={{
                       background: feedback.correta ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
-                      border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                      border: `1px solid ${feedback.correta ? 'var(--color-fisica-bg-40)' : 'var(--error-bg-40)'}`,
                     }}
                   >
                     <div
@@ -417,7 +417,7 @@ export default function RevisaoPage() {
 
                 {/* Erro */}
                 {erro && (
-                  <div className="feedback-chromebook" style={{ background: 'var(--error-bg-15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                  <div className="feedback-chromebook" style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}>
                     <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
                   </div>
                 )}
@@ -434,7 +434,7 @@ export default function RevisaoPage() {
                       <button
                         onClick={buscarQuestao}
                         className="flex-1 btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98]"
-                        style={{ background: 'var(--warning)', color: '#000' }}
+                        style={{ background: 'var(--warning)', color: 'var(--text-on-fisica)' }}
                       >
                         Próxima
                       </button>
@@ -446,7 +446,7 @@ export default function RevisaoPage() {
                       className="w-full btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
                       style={{
                         background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
-                        color: selecionada ? '#000' : 'var(--text-muted)'
+                        color: selecionada ? 'var(--text-on-fisica)' : 'var(--text-muted)'
                       }}
                     >
                       {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione'}
@@ -493,7 +493,7 @@ export default function RevisaoPage() {
            ══════════════════════════════════════════════════════════════════ */
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="card-chromebook p-6 text-center max-w-md w-full">
-            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'var(--error-bg-15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}>
               <WifiOff className="w-6 h-6" style={{ color: 'var(--error)' }} />
             </div>
 

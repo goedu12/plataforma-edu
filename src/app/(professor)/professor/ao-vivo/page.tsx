@@ -449,7 +449,7 @@ export default function DashboardAoVivoPage() {
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}`}>
                       <div className="relative">
                         <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-sm"
-                          style={{ background: 'rgba(245, 158, 11, 0.3)', boxShadow: '0 0 0 3px var(--warning)' }}>
+                          style={{ background: 'var(--warning-bg-30)', boxShadow: '0 0 0 3px var(--warning)' }}>
                           {getIniciais(aluno.nome)}
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 bg-yellow-500 flex items-center justify-center">

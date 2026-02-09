@@ -80,7 +80,7 @@ export default function MapaMental({ codigo, corPrimaria = 'var(--color-fisica)'
       <div
         className="p-4 rounded-xl text-sm"
         style={{
-          background: 'rgba(239, 68, 68, 0.1)',
+          background: 'var(--error-bg-10)',
           color: 'var(--error)'
         }}
       >

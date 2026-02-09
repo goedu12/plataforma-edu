@@ -119,7 +119,7 @@ export default function RankingPage() {
               onClick={() => buscarDados(true)}
               disabled={atualizando}
               className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors hover:bg-black/20"
-              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
+              style={{ background: 'var(--black-10)', color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               aria-label={atualizando ? 'Atualizando ranking...' : 'Atualizar ranking'}
             >
               <RefreshCw className={`w-4 h-4 ${atualizando ? 'animate-spin' : ''}`} aria-hidden="true" />
@@ -130,7 +130,7 @@ export default function RankingPage() {
           {posicaoUsuario > 0 && (
             <div
               className="rounded-lg p-3 lg:p-4 flex items-center justify-between"
-              style={{ background: 'rgba(0,0,0,0.15)' }}
+              style={{ background: 'var(--black-15)' }}
             >
               <div className="flex items-center gap-2">
                 {posicaoUsuario <= 3 ? (
