@@ -139,7 +139,7 @@ const CONFIG_BIMESTRES: Record<number, Record<1 | 2 | 3 | 4, ConfigBimestre>> = 
 }
 
 // Limites
-const LIMITE_SEMANAL_ESTUDO = 15
+const LIMITE_SEMANAL_ESTUDO = 70
 const NOTA_MAXIMA_REGULAR = 10.0
 const NOTA_MAXIMA_RECUPERACAO = 6.0
 
