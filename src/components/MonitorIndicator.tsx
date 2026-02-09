@@ -19,7 +19,7 @@ export default function MonitorIndicator() {
     <div
       className="fixed bottom-20 lg:bottom-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-lg animate-fade-in"
       style={{
-        background: 'rgba(34, 197, 94, 0.15)',
+        background: 'var(--success-bg-15)',
         border: '1px solid var(--border-fisica)',
         backdropFilter: 'blur(8px)',
         zIndex: 60,

@@ -203,10 +203,10 @@ export default function EstudarPage() {
   const getAlternativaStyle = (letra: Alternativa) => {
     if (feedback) {
       if (feedback.correta && letra === selecionada) {
-        return { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
+        return { background: 'var(--success-bg-20)', border: '2px solid var(--success)' }
       }
       if (!feedback.correta && letra === selecionada) {
-        return { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
+        return { background: 'var(--error-bg-20)', border: '2px solid var(--error)' }
       }
       return { background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', opacity: 0.5 }
     }
@@ -238,7 +238,7 @@ export default function EstudarPage() {
   ] : []
 
   const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
-  const dificuldadeColor = { facil: '#10b981', medio: '#f59e0b', dificil: '#ef4444' } as const
+  const dificuldadeColor = { facil: 'var(--difficulty-easy)', medio: 'var(--difficulty-medium)', dificil: 'var(--difficulty-hard)' } as const
 
   return (
     <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
@@ -415,13 +415,13 @@ export default function EstudarPage() {
                   <div
                     className="feedback-chromebook flex items-center gap-2"
                     style={{
-                      background: feedback.correta ? 'var(--success-bg-15)' : 'rgba(239, 68, 68, 0.15)',
-                      border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                      background: feedback.correta ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
+                      border: `1px solid ${feedback.correta ? 'var(--success-bg-40)' : 'var(--error-bg-40)'}`,
                     }}
                   >
                     <div
                       className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
-                      style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                      style={{ background: feedback.correta ? 'var(--success-bg-20)' : 'var(--error-bg-20)' }}
                     >
                       {feedback.correta ? <CheckCircle2 className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
                     </div>
@@ -431,7 +431,7 @@ export default function EstudarPage() {
                           {feedback.correta ? 'Correto!' : 'Incorreto'}
                         </span>
                         {feedback.correta && feedback.pontosGanhos > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--success-bg-20)', color: 'var(--success)' }}>
                             +{feedback.pontosGanhos} pts
                           </span>
                         )}
@@ -452,7 +452,7 @@ export default function EstudarPage() {
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <Trophy className="w-3.5 h-3.5" style={{ color: 'var(--warning)' }} />
                     {feedback.conquistasDesbloqueadas.map((c, i) => (
-                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}>
+                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--warning-bg-15)', color: 'var(--warning)' }}>
                         {c.icone} {c.nome}
                       </span>
                     ))}
@@ -461,7 +461,7 @@ export default function EstudarPage() {
 
                 {/* Erro */}
                 {erro && (
-                  <div className="feedback-chromebook" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                  <div className="feedback-chromebook" style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}>
                     <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
                   </div>
                 )}
@@ -513,8 +513,8 @@ export default function EstudarPage() {
             <div
               className="w-14 h-14 rounded-full mx-auto mb-4 flex items-center justify-center"
               style={{
-                background: status === 'LIMITE_SEMANAL' ? 'rgba(245, 158, 11, 0.15)'
-                  : status === 'ERRO' ? 'rgba(239, 68, 68, 0.15)'
+                background: status === 'LIMITE_SEMANAL' ? 'var(--warning-bg-15)'
+                  : status === 'ERRO' ? 'var(--error-bg-15)'
                   : status === 'COMPLETOU' ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                   : 'var(--bg-elevated)',
               }}

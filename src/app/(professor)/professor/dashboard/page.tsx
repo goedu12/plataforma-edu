@@ -86,7 +86,7 @@ export default function DashboardProfessorPage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'var(--warning)' }}>
-                <span className="font-bold text-lg" style={{ color: '#000' }}>P</span>
+                <span className="font-bold text-lg" style={{ color: 'var(--text-on-fisica)' }}>P</span>
               </div>
               <div>
                 <h1 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Dashboard</h1>

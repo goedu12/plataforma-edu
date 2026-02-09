@@ -89,7 +89,7 @@ export default function PerfilPage() {
                 <User className="w-5 h-5" />
                 Meu Perfil
               </h1>
-              <p className="text-sm" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.8)' }}>
+              <p className="text-sm" style={{ color: isFisica ? 'var(--text-on-fisica-70)' : 'var(--text-on-matematica-80)' }}>
                 {nomeComponente}
               </p>
             </div>
@@ -105,7 +105,7 @@ export default function PerfilPage() {
           <div
             className="mb-4 p-4 rounded-xl flex items-center gap-3 animate-fade-in"
             style={{
-              background: mensagem.tipo === 'sucesso' ? 'var(--success-bg-15)' : 'rgba(239, 68, 68, 0.15)',
+              background: mensagem.tipo === 'sucesso' ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
               color: mensagem.tipo === 'sucesso' ? 'var(--success)' : 'var(--error)',
             }}
           >

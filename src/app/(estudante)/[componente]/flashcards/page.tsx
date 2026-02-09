@@ -404,7 +404,7 @@ export default function FlashCardsPage() {
                 )}
                 <div
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-sm font-bold"
-                  style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}
+                  style={{ background: 'var(--warning-bg-15)', color: 'var(--warning)' }}
                 >
                   <Star className="w-4 h-4" />
                   <span>{sessao.pontos}</span>
@@ -424,7 +424,7 @@ export default function FlashCardsPage() {
                     className="h-full rounded-full transition-all duration-500 ease-out"
                     style={{
                       width: `${((questaoAtualIndex + (mostrarResultado ? 1 : 0)) / sessao.questoes.length) * 100}%`,
-                      background: `linear-gradient(90deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                      background: `linear-gradient(90deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                     }}
                   />
                 </div>
@@ -457,7 +457,7 @@ export default function FlashCardsPage() {
               <div
                 className="w-14 h-14 rounded-xl flex-shrink-0 flex items-center justify-center shadow-lg"
                 style={{
-                  background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                  background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                 }}
               >
                 <Brain className="w-7 h-7" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
@@ -594,7 +594,7 @@ export default function FlashCardsPage() {
                       className="flex-1 py-2 px-2 rounded-lg font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
                       style={{
                         background: quantidadeQuestoes === qtd
-                          ? `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`
+                          ? `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`
                           : 'var(--bg-elevated)',
                         color: quantidadeQuestoes === qtd ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-secondary)',
                         border: quantidadeQuestoes === qtd ? 'none' : '1px solid var(--border-default)',
@@ -611,7 +611,7 @@ export default function FlashCardsPage() {
             {erro && (
               <div
                 className="p-3 rounded-xl flex items-center gap-2"
-                style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+                style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}
               >
                 <XCircle className="w-4 h-4 flex-shrink-0" style={{ color: 'var(--error)' }} />
                 <p className="text-xs" style={{ color: 'var(--error)' }}>{erro}</p>
@@ -624,7 +624,7 @@ export default function FlashCardsPage() {
               disabled={loading}
               className="w-full py-4 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
               style={{
-                background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                 color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
                 boxShadow: `0 6px 24px rgba(${corPrimariaRgb}, 0.3)`,
               }}
@@ -664,8 +664,8 @@ export default function FlashCardsPage() {
                     className="badge-chromebook"
                     style={{
                       background: questaoAtual.dificuldade === 'facil' ? 'var(--success-bg-15)'
-                        : questaoAtual.dificuldade === 'medio' ? 'rgba(245, 158, 11, 0.15)'
-                        : 'rgba(239, 68, 68, 0.15)',
+                        : questaoAtual.dificuldade === 'medio' ? 'var(--warning-bg-15)'
+                        : 'var(--error-bg-15)',
                       color: questaoAtual.dificuldade === 'facil' ? 'var(--success)'
                         : questaoAtual.dificuldade === 'medio' ? 'var(--warning)'
                         : 'var(--error)'
@@ -709,7 +709,7 @@ export default function FlashCardsPage() {
                             background: mostrarResultado && correta
                               ? 'var(--success-bg-15)'
                               : errada
-                                ? 'rgba(239, 68, 68, 0.15)'
+                                ? 'var(--error-bg-15)'
                                 : selecionada
                                   ? `rgba(${corPrimariaRgb}, 0.15)`
                                   : 'var(--bg-elevated)',
@@ -775,7 +775,7 @@ export default function FlashCardsPage() {
                             background: mostrarResultado && correta
                               ? 'var(--success-bg-15)'
                               : errada
-                                ? 'rgba(239, 68, 68, 0.15)'
+                                ? 'var(--error-bg-15)'
                                 : selecionada
                                   ? `rgba(${corPrimariaRgb}, 0.15)`
                                   : 'var(--bg-elevated)',
@@ -799,7 +799,7 @@ export default function FlashCardsPage() {
                                     ? corPrimaria
                                     : 'var(--bg-surface)',
                               color: (mostrarResultado && correta) || errada || selecionada
-                                ? '#fff'
+                                ? 'var(--text-primary)'
                                 : cor,
                             }}
                           >
@@ -851,7 +851,7 @@ export default function FlashCardsPage() {
                     {mostrarResultado && !sessao.respostas[questaoAtualIndex]?.correta && (
                       <div
                         className="mt-1.5 p-2 lg:p-1.5 rounded-lg flex items-center gap-1.5"
-                        style={{ background: 'rgba(34, 197, 94, 0.1)' }}
+                        style={{ background: 'var(--success-bg-10)' }}
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" style={{ color: 'var(--success)' }} />
                         <span className="text-xs lg:text-[11px]" style={{ color: 'var(--success)' }}>
@@ -904,9 +904,9 @@ export default function FlashCardsPage() {
                 className="feedback-chromebook animate-fade-in"
                 style={{
                   background: sessao.respostas[questaoAtualIndex]?.correta
-                    ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)'
-                    : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)',
-                  border: `1px solid ${sessao.respostas[questaoAtualIndex]?.correta ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                    ? 'linear-gradient(135deg, var(--success-bg-15) 0%, var(--success-bg-05) 100%)'
+                    : 'linear-gradient(135deg, var(--error-bg-15) 0%, var(--error-bg-05) 100%)',
+                  border: `1px solid ${sessao.respostas[questaoAtualIndex]?.correta ? 'var(--success-bg-30)' : 'var(--error-bg-30)'}`,
                 }}
               >
                 <div className="flex items-start gap-2">
@@ -937,7 +937,7 @@ export default function FlashCardsPage() {
                       {sessao.respostas[questaoAtualIndex]?.correta && sessao.respostas[questaoAtualIndex]?.pontos_ganhos > 0 && (
                         <span
                           className="px-1.5 py-0.5 rounded text-[10px] font-bold"
-                          style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}
+                          style={{ background: 'var(--success-bg-20)', color: 'var(--success)' }}
                         >
                           +{sessao.respostas[questaoAtualIndex]?.pontos_ganhos} pts
                         </span>
@@ -957,7 +957,7 @@ export default function FlashCardsPage() {
               style={{
                 background: respostaUsuario === null && !mostrarResultado
                   ? 'var(--bg-elevated)'
-                  : `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                  : `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                 color: respostaUsuario === null && !mostrarResultado
                   ? 'var(--text-muted)'
                   : (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'),
@@ -1009,7 +1009,7 @@ export default function FlashCardsPage() {
                 <div
                   className="w-24 h-24 rounded-3xl mx-auto mb-5 flex items-center justify-center shadow-2xl"
                   style={{
-                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                   }}
                 >
                   <Trophy className="w-12 h-12" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }} />
@@ -1022,7 +1022,7 @@ export default function FlashCardsPage() {
                 <div
                   className="text-5xl font-bold mb-2"
                   style={{
-                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                    background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                     WebkitBackgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
                   }}
@@ -1044,21 +1044,21 @@ export default function FlashCardsPage() {
                   label: 'Taxa de Acerto',
                   value: `${Math.round((sessao.respostas.filter((r) => r.correta).length / sessao.questoes.length) * 100)}%`,
                   color: 'var(--success)',
-                  bg: 'rgba(34, 197, 94, 0.1)',
+                  bg: 'var(--success-bg-10)',
                 },
                 {
                   icon: Flame,
                   label: 'Maior Sequência',
                   value: sessao.maiorSequencia.toString(),
                   color: 'var(--warning)',
-                  bg: 'rgba(245, 158, 11, 0.1)',
+                  bg: 'var(--warning-bg-10)',
                 },
                 {
                   icon: Clock,
                   label: 'Tempo Total',
                   value: `${Math.floor((Date.now() - sessao.tempoInicio) / 1000 / 60)}:${String(Math.floor((Date.now() - sessao.tempoInicio) / 1000) % 60).padStart(2, '0')}`,
                   color: 'var(--color-accent)',
-                  bg: 'rgba(59, 130, 246, 0.1)',
+                  bg: 'var(--info-bg-08)',
                 },
                 {
                   icon: TrendingUp,
@@ -1090,7 +1090,7 @@ export default function FlashCardsPage() {
                 onClick={jogarNovamente}
                 className="w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 style={{
-                  background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? '#4ade80' : '#a78bfa'} 100%)`,
+                  background: `linear-gradient(135deg, ${corPrimaria} 0%, ${isFisica ? 'var(--color-fisica-light)' : 'var(--color-matematica-light)'} 100%)`,
                   color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
                   boxShadow: `0 8px 32px rgba(${corPrimariaRgb}, 0.3)`,
                 }}

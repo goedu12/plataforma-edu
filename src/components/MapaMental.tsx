@@ -8,7 +8,7 @@ interface MapaMentalProps {
   corPrimaria?: string
 }
 
-export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMentalProps) {
+export default function MapaMental({ codigo, corPrimaria = 'var(--color-fisica)' }: MapaMentalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [svg, setSvg] = useState<string>('')
   const [zoom, setZoom] = useState(1)
@@ -28,11 +28,11 @@ export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMent
           theme: 'base',
           themeVariables: {
             primaryColor: corPrimaria,
-            primaryTextColor: '#ffffff',
+            primaryTextColor: 'var(--text-primary)',
             primaryBorderColor: corPrimaria,
             lineColor: corPrimaria,
-            secondaryColor: '#f0f0f0',
-            tertiaryColor: '#ffffff',
+            secondaryColor: 'var(--bg-surface-hover)',
+            tertiaryColor: 'var(--text-primary)',
             background: 'transparent',
           },
           mindmap: {

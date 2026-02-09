@@ -58,7 +58,7 @@ function transformarTrilha(t: TrilhaAPI): Trilha {
     icone: t.icone,
     descricao_curta: t.descricao_curta || '',
     descricao_completa: t.descricao || t.descricao_curta || '',
-    cor_primaria: t.cor || '#22c55e',
+    cor_primaria: t.cor || 'var(--color-fisica)',
     questoes_por_semana: t.config?.questoes_por_semana || 10,
     total_semanas: t.config?.total_semanas || 40,
     ordem: t.ordem,

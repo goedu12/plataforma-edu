@@ -25,7 +25,7 @@ export default function MapaPublicoPage() {
   const [erro, setErro] = useState<string | null>(null)
 
   const isFisica = mapa?.componente === 'fisica'
-  const corPrimaria = isFisica ? '#22C55E' : '#A855F7'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica-light)'
 
   useEffect(() => {
     const buscarMapa = async () => {
@@ -179,7 +179,7 @@ ${mapa.componente === 'fisica' ? '⚛️ Física' : '📐 Matemática'} - ${SERI
           <button
             onClick={handleCompartilhar}
             className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all active:scale-95"
-            style={{ background: '#25D366', color: 'white' }}
+            style={{ background: 'var(--color-whatsapp)', color: 'var(--text-primary)' }}
           >
             <Share2 className="w-5 h-5" />
             WhatsApp

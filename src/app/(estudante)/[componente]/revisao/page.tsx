@@ -193,7 +193,7 @@ export default function RevisaoPage() {
   ] : []
 
   const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
-  const dificuldadeColor = { facil: '#10b981', medio: '#f59e0b', dificil: '#ef4444' } as const
+  const dificuldadeColor = { facil: 'var(--difficulty-easy)', medio: 'var(--difficulty-medium)', dificil: 'var(--difficulty-hard)' } as const
 
   return (
     <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
@@ -275,7 +275,7 @@ export default function RevisaoPage() {
               <div className="space-chromebook">
                 {/* Info de quando errou - só mobile */}
                 {errouEm && (
-                  <div className="lg:hidden px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'var(--warning-bg-10)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                  <div className="lg:hidden px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'var(--warning-bg-10)', border: '1px solid var(--warning-bg-30)' }}>
                     <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--warning)' }} />
                     <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
                       Você errou em {formatarDataErro(errouEm)}
@@ -326,7 +326,7 @@ export default function RevisaoPage() {
                                   ? 'var(--warning)'
                                   : 'var(--bg-elevated)',
                             color: (feedback && letra === selecionada) || selecionada === letra
-                              ? '#000'
+                              ? 'var(--text-on-fisica)'
                               : 'var(--text-muted)',
                           }}
                         >

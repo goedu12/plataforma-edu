@@ -26,11 +26,11 @@ interface ConquistaComStatus extends Conquista {
 }
 
 const DIFICULDADE_CONFIG: Record<DificuldadeConquista, { label: string; cor: string; bg: string }> = {
-  facil: { label: 'Fácil', cor: '#22c55e', bg: 'rgba(34, 197, 94, 0.15)' },
-  medio: { label: 'Médio', cor: '#f59e0b', bg: 'rgba(245, 158, 11, 0.15)' },
-  dificil: { label: 'Difícil', cor: '#ef4444', bg: 'rgba(239, 68, 68, 0.15)' },
-  muito_dificil: { label: 'Difícil+', cor: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.15)' },
-  lendario: { label: 'Lendário', cor: '#eab308', bg: 'rgba(234, 179, 8, 0.2)' },
+  facil: { label: 'Fácil', cor: 'var(--difficulty-easy)', bg: 'var(--success-bg-15)' },
+  medio: { label: 'Médio', cor: 'var(--difficulty-medium)', bg: 'var(--warning-bg-15)' },
+  dificil: { label: 'Difícil', cor: 'var(--difficulty-hard)', bg: 'var(--error-bg-15)' },
+  muito_dificil: { label: 'Difícil+', cor: 'var(--difficulty-harder)', bg: 'var(--color-matematica-bg-15)' },
+  lendario: { label: 'Lendário', cor: 'var(--difficulty-legendary)', bg: 'var(--warning-bg-15)' },
 }
 
 export default function ConquistasPage() {
@@ -102,7 +102,7 @@ export default function ConquistasPage() {
                   Conquistas
                 </span>
               </div>
-              <p className="text-2xs lg:text-xs mt-0.5" style={{ color: isFisica ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)' }}>
+              <p className="text-2xs lg:text-xs mt-0.5" style={{ color: isFisica ? 'var(--text-on-fisica-70)' : 'var(--text-on-matematica-70)' }}>
                 {stats.desbloqueadas}/{stats.total} desbloqueadas
               </p>
             </div>
@@ -110,7 +110,7 @@ export default function ConquistasPage() {
             <button
               onClick={buscarConquistas}
               className="w-9 h-9 flex items-center justify-center rounded-lg transition-colors hover:bg-black/20"
-              style={{ background: 'rgba(0,0,0,0.1)', color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
+              style={{ background: 'var(--overlay-light)', color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}
               aria-label="Atualizar conquistas"
             >
               <RefreshCw className="w-4 h-4" />
@@ -121,7 +121,7 @@ export default function ConquistasPage() {
           <div className="flex items-center gap-2">
             <div
               className="flex-1 h-2 lg:h-2.5 rounded-full overflow-hidden"
-              style={{ background: 'rgba(0,0,0,0.2)' }}
+              style={{ background: 'var(--border-hover)' }}
             >
               <div
                 className="h-full rounded-full transition-all duration-700"
@@ -212,7 +212,7 @@ export default function ConquistasPage() {
                     <div className="flex items-center justify-center gap-2 flex-wrap">
                       {conquista.req_pontos && (
                         <span className="text-2xs lg:text-xs flex items-center gap-0.5" style={{ color: 'var(--text-muted)' }}>
-                          <Star className="w-3 h-3 lg:w-3.5 lg:h-3.5" style={{ color: '#eab308' }} />
+                          <Star className="w-3 h-3 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--color-star)' }} />
                           {conquista.req_pontos >= 1000
                             ? `${(conquista.req_pontos / 1000).toFixed(conquista.req_pontos % 1000 === 0 ? 0 : 1)}k`
                             : conquista.req_pontos}
@@ -246,7 +246,7 @@ export default function ConquistasPage() {
             {/* Legenda */}
             <div className="flex items-center justify-center gap-4 lg:gap-6 py-3 mt-2">
               <span className="text-2xs lg:text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
-                <Star className="w-3 h-3 lg:w-3.5 lg:h-3.5" style={{ color: '#eab308' }} /> Pontos
+                <Star className="w-3 h-3 lg:w-3.5 lg:h-3.5" style={{ color: 'var(--color-star)' }} /> Pontos
               </span>
               <span className="text-2xs lg:text-xs flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
                 <Target className="w-3 h-3 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} /> Acertos

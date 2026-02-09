@@ -76,7 +76,7 @@ export default function EstudarCuriosidadePage() {
   const [temaConcluido, setTemaConcluido] = useState(false)
 
   const isFisica = componente === 'fisica'
-  const corPrimaria = '#00BCD4' // Cor da trilha curiosidade
+  const corPrimaria = 'var(--color-curiosidade)' // Cor da trilha curiosidade
 
   const carregarQuestao = useCallback(async () => {
     setLoading(true)
@@ -226,7 +226,7 @@ export default function EstudarCuriosidadePage() {
             <button
               onClick={() => router.push(`/${componente}/trilhas/curiosidade`)}
               className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-              style={{ background: corPrimaria, color: '#fff' }}
+              style={{ background: corPrimaria, color: 'var(--text-primary)' }}
             >
               <Sparkles className="w-5 h-5" />
               Explorar Outros Temas
@@ -367,7 +367,7 @@ export default function EstudarCuriosidadePage() {
                           ? corPrimaria
                           : 'var(--bg-elevated)',
                         color: (mostrarResultado && (eCorreta || eErrada)) || selecionada
-                          ? '#fff'
+                          ? 'var(--text-primary)'
                           : 'var(--text-secondary)',
                       }}
                     >
@@ -474,7 +474,7 @@ export default function EstudarCuriosidadePage() {
                   className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
                   style={{
                     background: respostaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                    color: respostaSelecionada ? '#fff' : 'var(--text-muted)',
+                    color: respostaSelecionada ? 'var(--text-primary)' : 'var(--text-muted)',
                   }}
                 >
                   {respondendo ? (
@@ -493,7 +493,7 @@ export default function EstudarCuriosidadePage() {
                 <button
                   onClick={proximaQuestao}
                   className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-                  style={{ background: corPrimaria, color: '#fff' }}
+                  style={{ background: corPrimaria, color: 'var(--text-primary)' }}
                 >
                   Proxima Questao
                   <ArrowRight className="w-5 h-5" />

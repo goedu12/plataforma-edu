@@ -310,8 +310,8 @@ export default function AlunosProfessorPage() {
                   className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
                   style={{
                     background: aluno.componentes.includes('fisica')
-                      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                      : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      ? 'linear-gradient(135deg, var(--color-fisica) 0%, var(--color-fisica-dark) 100%)'
+                      : 'linear-gradient(135deg, var(--color-matematica) 0%, var(--color-matematica-dark) 100%)',
                   }}
                 >
                   {aluno.nome.charAt(0).toUpperCase()}

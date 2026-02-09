@@ -83,12 +83,12 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         case 'danger':
           return {
             background: 'var(--error)',
-            color: '#fff',
+            color: 'var(--text-on-error)',
           }
         case 'accent':
           return {
             background: 'var(--color-accent)',
-            color: '#fff',
+            color: 'var(--text-on-accent)',
           }
         default:
           return {}
