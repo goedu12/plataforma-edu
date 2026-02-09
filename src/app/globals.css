@@ -211,6 +211,23 @@
   color-scheme: light;
 }
 
+/* Force dark theme for ao-vivo page within professor-theme */
+.professor-theme .ao-vivo-dark {
+  --bg-base: #0a0a0a;
+  --bg-elevated: #111111;
+  --bg-surface: #171717;
+  --bg-surface-hover: #1f1f1f;
+  --bg-overlay: #262626;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+  --text-muted: #52525b;
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-hover: rgba(255, 255, 255, 0.2);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  color-scheme: dark;
+}
+
 /* ─────────────────────────────────────────────────────────────────────────────
    PROFESSOR THEME - Tema claro e profissional para o painel do professor
    ───────────────────────────────────────────────────────────────────────────── */
