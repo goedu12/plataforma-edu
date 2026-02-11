@@ -5,8 +5,10 @@ import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { getPeriodoAtual, calcularNotaNova } from '@/lib/sistema-notas'
 import { hashSenha } from '@/lib/auth'
-import { gerarSenhaTemporaria } from '@/lib/utils'
 import type { Componente } from '@/types'
+
+// Senha padrão para todos os estudantes
+const SENHA_PADRAO_ESTUDANTE = '@estudante'
 
 // Constantes para cálculo de nota
 const VALOR_ACERTO_ESTUDO = 0.04
@@ -366,9 +368,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Gerar senha temporária
-    const senhaTemporaria = gerarSenhaTemporaria()
-    const senhaHash = await hashSenha(senhaTemporaria)
+    // Usar senha padrão @estudante
+    const senhaHash = await hashSenha(SENHA_PADRAO_ESTUDANTE)
 
     // Extrair ano da turma se não fornecido (ex: "2A" -> ano 2)
     const anoExtraido = parseInt(turma.trim().charAt(0))
@@ -391,6 +392,7 @@ export async function POST(request: NextRequest) {
         tipo: 'estudante',
         ativo: true,
         senha_hash: senhaHash,
+        senha_alterada: false, // Indica que deve trocar a senha no primeiro login
         // Inicializar campos de progresso
         fis_pontos: 0,
         fis_questoes_total: 0,
@@ -415,8 +417,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       sucesso: true,
       aluno: novoAluno,
-      senha_temporaria: senhaTemporaria,
-      mensagem: `Estudante ${nome.trim()} cadastrado com sucesso!`,
+      senha_temporaria: SENHA_PADRAO_ESTUDANTE,
+      mensagem: `Estudante ${nome.trim()} cadastrado com sucesso! Senha padrão: ${SENHA_PADRAO_ESTUDANTE}`,
     })
   } catch (error) {
     console.error('Erro ao cadastrar aluno:', error)

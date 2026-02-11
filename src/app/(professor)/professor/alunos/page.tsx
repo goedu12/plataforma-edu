@@ -125,7 +125,7 @@ export default function AlunosProfessorPage() {
 
   const handleResetSenha = async (usuarioId: string, nomeAluno: string) => {
     const confirmacao = window.confirm(
-      `Deseja gerar uma nova senha temporária para ${nomeAluno}?\n\nA senha atual será substituída.`
+      `Deseja resetar a senha de ${nomeAluno} para @estudante?\n\nA senha atual será substituída.`
     )
 
     if (!confirmacao) return
@@ -145,7 +145,7 @@ export default function AlunosProfessorPage() {
           nomeAluno,
           senha: data.nova_senha,
         })
-        showToast('Senha temporária gerada com sucesso!', 'success')
+        showToast('Senha resetada para @estudante!', 'success')
       } else {
         showToast(data.erro || 'Erro ao resetar senha', 'error')
       }
@@ -533,10 +533,10 @@ export default function AlunosProfessorPage() {
               className="text-lg font-bold mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Senha Gerada
+              Senha Padrão
             </h2>
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              Senha temporária para <strong>{novaSenhaModal.nomeAluno}</strong>:
+              Senha para <strong>{novaSenhaModal.nomeAluno}</strong>:
             </p>
 
             <div
@@ -563,7 +563,7 @@ export default function AlunosProfessorPage() {
             </div>
 
             <p className="text-xs mb-4 text-center" style={{ color: 'var(--text-muted)' }}>
-              O estudante deverá alterar esta senha no primeiro acesso.
+              Senha padrão para todos os estudantes. O estudante deverá alterá-la no primeiro acesso.
             </p>
 
             <button
