@@ -19,6 +19,9 @@ import {
   Sparkles,
   Route,
   TrendingUp,
+  Bot,
+  Info,
+  X,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
@@ -59,6 +62,7 @@ export default function MenuComponentePage() {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [loading, setLoading] = useState(true)
   const [nota, setNota] = useState<NotaBimestre | null>(null)
+  const [mostrarSobre, setMostrarSobre] = useState(false)
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -161,6 +165,7 @@ export default function MenuComponentePage() {
 
   // Grupo 3: Progresso
   const grupoProgresso: MenuItem[] = [
+    { icon: Bot, label: 'Tutor IA', href: `/${componente}/tutor`, description: `${isFisica ? 'Newton' : 'Pitágoras'}` },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },
   ]
@@ -350,7 +355,90 @@ export default function MenuComponentePage() {
         {/* Grupo 3: Progresso */}
         <MenuSection title="Progresso" items={grupoProgresso} accentColor={corPrimaria} isFisica={isFisica} onNavigate={(href) => router.push(href)} />
 
+        {/* Sobre o Projeto */}
+        <button
+          onClick={() => setMostrarSobre(true)}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all"
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border-default)',
+            color: 'var(--text-secondary)',
+          }}
+        >
+          <Info className="w-4 h-4" />
+          Sobre o Projeto
+        </button>
+
       </main>
+
+      {/* Modal Sobre o Projeto */}
+      {mostrarSobre && (
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)', zIndex: 100 }}
+          onClick={() => setMostrarSobre(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[80dvh] overflow-y-auto"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
+                Sobre o Projeto
+              </h2>
+              <button
+                onClick={() => setMostrarSobre(false)}
+                className="p-1.5 rounded-lg"
+                style={{ color: 'var(--text-muted)' }}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
+              <p>
+                <strong style={{ color: 'var(--text-primary)' }}>Plataforma Edu</strong> é uma plataforma educacional gamificada desenvolvida para
+                estudantes do Ensino Médio, com foco em <strong>Física</strong> e <strong>Matemática</strong>.
+              </p>
+
+              <div
+                className="p-3 rounded-xl space-y-2"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+              >
+                <p className="font-semibold text-xs" style={{ color: corPrimaria }}>Funcionalidades</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <li>• <strong>Tutor IA</strong> — Assistente inteligente com câmera, voz e mapas mentais</li>
+                  <li>• <strong>Questões</strong> — Banco com centenas de questões por tema</li>
+                  <li>• <strong>Simulado ENEM</strong> — Prática no formato da prova</li>
+                  <li>• <strong>Trilhas</strong> — Jornadas personalizadas de estudo</li>
+                  <li>• <strong>FlashCards</strong> — Quiz rápido para revisão</li>
+                  <li>• <strong>Mapas Mentais</strong> — Resumos visuais dos conteúdos</li>
+                  <li>• <strong>Gamificação</strong> — Pontos, níveis, ranking e conquistas</li>
+                  <li>• <strong>Notas</strong> — Acompanhamento bimestral automático</li>
+                </ul>
+              </div>
+
+              <div
+                className="p-3 rounded-xl space-y-2"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+              >
+                <p className="font-semibold text-xs" style={{ color: corPrimaria }}>Tecnologias</p>
+                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <li>• Next.js 14 + React 18 + TypeScript</li>
+                  <li>• Supabase (PostgreSQL)</li>
+                  <li>• Google Gemini 2.5 Flash (IA)</li>
+                  <li>• Tailwind CSS + Design Responsivo</li>
+                </ul>
+              </div>
+
+              <p className="text-xs text-center pt-2" style={{ color: 'var(--text-muted)' }}>
+                Desenvolvido para transformar a experiência de aprendizado.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNav componente={componente} />
     </div>
