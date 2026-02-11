@@ -315,7 +315,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
             className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className="max-w-[88%] px-3 py-2 rounded-xl text-sm"
+              className="max-w-[90%] px-3.5 py-2.5 rounded-xl text-[13px] leading-relaxed"
               style={{
                 background: msg.role === 'user' ? corPrimaria : 'var(--bg-surface)',
                 color: msg.role === 'user' ? 'white' : 'var(--text-primary)',
@@ -467,8 +467,12 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
           placeholder={isListening ? 'Ouvindo...' : restantes > 0 ? 'Pergunte algo...' : 'Limite atingido'}
           disabled={restantes <= 0 || isListening}
           maxLength={MAX_CARACTERES}
-          className="flex-1 bg-transparent text-sm outline-none min-w-0"
-          style={{ color: 'var(--text-primary)' }}
+          className="flex-1 text-sm outline-none min-w-0 px-3 py-2 rounded-xl"
+          style={{
+            color: 'var(--text-primary)',
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-default)',
+          }}
         />
 
         {/* Send button */}

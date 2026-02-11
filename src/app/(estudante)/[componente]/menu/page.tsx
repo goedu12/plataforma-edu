@@ -418,7 +418,7 @@ export default function MenuComponentePage() {
               {/* Necessidade do Projeto */}
               <div>
                 <p className="text-sm leading-relaxed">
-                  <strong style={{ color: 'var(--text-primary)' }}>Plataforma Edu</strong> nasceu da necessidade
+                  <strong style={{ color: corPrimaria }}>seu10.com</strong> nasceu da necessidade
                   de tornar o ensino de <strong>Física</strong> e <strong>Matemática</strong> mais acessível,
                   engajante e personalizado. Muitos estudantes enfrentam dificuldades nessas disciplinas
                   e não têm acesso a acompanhamento individualizado. A plataforma usa <strong>gamificação</strong> e{' '}
@@ -541,20 +541,6 @@ export default function MenuComponentePage() {
                   <li>• <strong>FlashCards & Mapas</strong> — Revisão rápida e visual</li>
                   <li>• <strong>Gamificação</strong> — Pontos, níveis, ranking e conquistas</li>
                   <li>• <strong>Notas</strong> — Acompanhamento bimestral automático</li>
-                </ul>
-              </div>
-
-              {/* Tecnologias */}
-              <div
-                className="p-3 rounded-xl"
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
-              >
-                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>Tecnologias</p>
-                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  <li>• Next.js 14 + React 18 + TypeScript</li>
-                  <li>• Supabase (PostgreSQL)</li>
-                  <li>• Google Gemini 2.5 Flash (IA)</li>
-                  <li>• Tailwind CSS + Design Responsivo</li>
                 </ul>
               </div>
 
