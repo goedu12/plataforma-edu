@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       .from('usuarios')
       .update({
         senha_hash: novaSenhaHash,
-        senha_alterada: false,
+        senha_alterada: true, // Senha padrão @estudante, sem obrigar troca
       })
       .eq('id', usuario_id)
 

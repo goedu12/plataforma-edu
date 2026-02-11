@@ -563,7 +563,7 @@ export default function AlunosProfessorPage() {
             </div>
 
             <p className="text-xs mb-4 text-center" style={{ color: 'var(--text-muted)' }}>
-              Senha padrão para todos os estudantes. O estudante deverá alterá-la no primeiro acesso.
+              Senha padrão para todos os estudantes.
             </p>
 
             <button

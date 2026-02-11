@@ -392,7 +392,7 @@ export async function POST(request: NextRequest) {
         tipo: 'estudante',
         ativo: true,
         senha_hash: senhaHash,
-        senha_alterada: false, // Indica que deve trocar a senha no primeiro login
+        senha_alterada: true, // Senha padrão @estudante, sem obrigar troca
         // Inicializar campos de progresso
         fis_pontos: 0,
         fis_questoes_total: 0,
