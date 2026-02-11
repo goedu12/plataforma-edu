@@ -63,6 +63,10 @@ export default function MenuComponentePage() {
   const [loading, setLoading] = useState(true)
   const [nota, setNota] = useState<NotaBimestre | null>(null)
   const [mostrarSobre, setMostrarSobre] = useState(false)
+  const [dadosSobre, setDadosSobre] = useState<{
+    professores: { id: string; nome: string; foto_url: string | null; email: string }[]
+    alunosDestaque: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; questoesRespondidas: number; diasAtivos: number; pontos: number; taxaAcerto: number }[]
+  } | null>(null)
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -357,7 +361,19 @@ export default function MenuComponentePage() {
 
         {/* Sobre o Projeto */}
         <button
-          onClick={() => setMostrarSobre(true)}
+          onClick={() => {
+            setMostrarSobre(true)
+            if (!dadosSobre) {
+              fetch('/api/sobre')
+                .then(r => r.json())
+                .then(data => {
+                  if (data.sucesso) {
+                    setDadosSobre({ professores: data.professores, alunosDestaque: data.alunosDestaque })
+                  }
+                })
+                .catch(() => {})
+            }
+          }}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all"
           style={{
             background: 'var(--bg-surface)',
@@ -379,10 +395,11 @@ export default function MenuComponentePage() {
           onClick={() => setMostrarSobre(false)}
         >
           <div
-            className="w-full max-w-md rounded-2xl p-6 space-y-4 max-h-[80dvh] overflow-y-auto"
+            className="w-full max-w-md rounded-2xl p-5 space-y-4 max-h-[85dvh] overflow-y-auto"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Header */}
             <div className="flex items-center justify-between">
               <h2 className="font-display text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
                 Sobre o Projeto
@@ -396,34 +413,143 @@ export default function MenuComponentePage() {
               </button>
             </div>
 
-            <div className="space-y-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-              <p>
-                <strong style={{ color: 'var(--text-primary)' }}>Plataforma Edu</strong> é uma plataforma educacional gamificada desenvolvida para
-                estudantes do Ensino Médio, com foco em <strong>Física</strong> e <strong>Matemática</strong>.
-              </p>
+            <div className="space-y-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
 
+              {/* Necessidade do Projeto */}
+              <div>
+                <p className="text-sm leading-relaxed">
+                  <strong style={{ color: 'var(--text-primary)' }}>Plataforma Edu</strong> nasceu da necessidade
+                  de tornar o ensino de <strong>Física</strong> e <strong>Matemática</strong> mais acessível,
+                  engajante e personalizado. Muitos estudantes enfrentam dificuldades nessas disciplinas
+                  e não têm acesso a acompanhamento individualizado. A plataforma usa <strong>gamificação</strong> e{' '}
+                  <strong>inteligência artificial</strong> para adaptar o aprendizado ao ritmo de cada aluno,
+                  identificando pontos fracos e oferecendo suporte em tempo real.
+                </p>
+              </div>
+
+              {/* Professor Responsável */}
+              {dadosSobre && dadosSobre.professores.length > 0 && (
+                <div
+                  className="p-3 rounded-xl"
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+                >
+                  <p className="font-semibold text-xs mb-3" style={{ color: corPrimaria }}>
+                    Professor Responsável
+                  </p>
+                  {dadosSobre.professores.map((prof) => (
+                    <div key={prof.id} className="flex items-center gap-3">
+                      <ProfilePhoto
+                        fotoUrl={prof.foto_url}
+                        nome={prof.nome}
+                        size="lg"
+                        editable={false}
+                        componente={componente}
+                      />
+                      <div>
+                        <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                          {prof.nome}
+                        </p>
+                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                          Professor de Física e Matemática
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Alunos Destaque */}
+              {dadosSobre && dadosSobre.alunosDestaque.length > 0 && (
+                <div
+                  className="p-3 rounded-xl"
+                  style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+                >
+                  <p className="font-semibold text-xs mb-3" style={{ color: corPrimaria }}>
+                    Alunos Destaque — Matemática 2A
+                  </p>
+                  <div className="space-y-3">
+                    {dadosSobre.alunosDestaque.map((aluno, idx) => (
+                      <div key={aluno.id} className="flex items-center gap-3">
+                        <div className="relative">
+                          <ProfilePhoto
+                            fotoUrl={aluno.fotoUrl}
+                            nome={aluno.nome}
+                            size="md"
+                            editable={false}
+                            componente="matematica"
+                          />
+                          {idx === 0 && (
+                            <span className="absolute -top-1 -right-1 text-sm">🥇</span>
+                          )}
+                          {idx === 1 && (
+                            <span className="absolute -top-1 -right-1 text-sm">🥈</span>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
+                            {aluno.nome.split(' ').slice(0, 2).join(' ')}
+                          </p>
+                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                            Turma {aluno.turma}
+                          </p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-base font-bold tabular-nums" style={{ color: aluno.notaFinal >= 7 ? 'var(--success)' : aluno.notaFinal >= 5 ? 'var(--warning)' : 'var(--error)' }}>
+                            {aluno.notaFinal.toFixed(1)}
+                          </p>
+                          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                            {aluno.pontos} pts • {aluno.taxaAcerto}%
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Colégios Envolvidos */}
               <div
-                className="p-3 rounded-xl space-y-2"
+                className="p-3 rounded-xl"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
               >
-                <p className="font-semibold text-xs" style={{ color: corPrimaria }}>Funcionalidades</p>
+                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>
+                  Colégios Envolvidos
+                </p>
+                <ul className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  <li className="flex items-start gap-2">
+                    <GraduationCap className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: corPrimaria }} />
+                    <span><strong>Colégio Estadual Governador Luiz Viana Filho</strong> — Jequié/BA</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <GraduationCap className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: corPrimaria }} />
+                    <span><strong>Colégio Estadual Luiz Navarro de Brito</strong> — Jequié/BA</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Funcionalidades */}
+              <div
+                className="p-3 rounded-xl"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+              >
+                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>Funcionalidades</p>
                 <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  <li>• <strong>Tutor IA</strong> — Assistente inteligente com câmera, voz e mapas mentais</li>
-                  <li>• <strong>Questões</strong> — Banco com centenas de questões por tema</li>
+                  <li>• <strong>Tutor IA</strong> — Assistente com câmera, voz e mapas mentais</li>
+                  <li>• <strong>Questões</strong> — Centenas de questões por tema e nível</li>
                   <li>• <strong>Simulado ENEM</strong> — Prática no formato da prova</li>
                   <li>• <strong>Trilhas</strong> — Jornadas personalizadas de estudo</li>
-                  <li>• <strong>FlashCards</strong> — Quiz rápido para revisão</li>
-                  <li>• <strong>Mapas Mentais</strong> — Resumos visuais dos conteúdos</li>
+                  <li>• <strong>FlashCards & Mapas</strong> — Revisão rápida e visual</li>
                   <li>• <strong>Gamificação</strong> — Pontos, níveis, ranking e conquistas</li>
                   <li>• <strong>Notas</strong> — Acompanhamento bimestral automático</li>
                 </ul>
               </div>
 
+              {/* Tecnologias */}
               <div
-                className="p-3 rounded-xl space-y-2"
+                className="p-3 rounded-xl"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
               >
-                <p className="font-semibold text-xs" style={{ color: corPrimaria }}>Tecnologias</p>
+                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>Tecnologias</p>
                 <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
                   <li>• Next.js 14 + React 18 + TypeScript</li>
                   <li>• Supabase (PostgreSQL)</li>
@@ -432,8 +558,9 @@ export default function MenuComponentePage() {
                 </ul>
               </div>
 
-              <p className="text-xs text-center pt-2" style={{ color: 'var(--text-muted)' }}>
-                Desenvolvido para transformar a experiência de aprendizado.
+              <p className="text-[11px] text-center pt-1" style={{ color: 'var(--text-muted)' }}>
+                Desenvolvido para transformar a experiência de aprendizado
+                no Ensino Médio público da Bahia.
               </p>
             </div>
           </div>
