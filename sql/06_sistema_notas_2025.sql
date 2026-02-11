@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS config_bimestres (
     data_inicio DATE NOT NULL,
     data_fim DATE NOT NULL,
     meta_questoes INTEGER, -- NULL para recuperação (calcula com base nas pendentes)
-    limite_semanal INTEGER, -- 15 para regular, NULL para recuperação
+    limite_semanal INTEGER, -- 70 para regular, NULL para recuperação
     nota_maxima DECIMAL(3,1) DEFAULT 10.0, -- 10.0 para regular, 6.0 para recuperação
 
     UNIQUE(bimestre, ano_letivo, tipo)
@@ -26,22 +26,22 @@ CREATE TABLE IF NOT EXISTS config_bimestres (
 INSERT INTO config_bimestres (bimestre, ano_letivo, tipo, data_inicio, data_fim, meta_questoes, limite_semanal, nota_maxima)
 VALUES
     -- 1º Bimestre
-    (1, 2025, 'regular', '2025-02-03', '2025-03-24', 105, 15, 10.0),
+    (1, 2025, 'regular', '2025-02-03', '2025-03-24', 490, 70, 10.0),
     (1, 2025, 'recuperacao', '2025-03-25', '2025-04-03', NULL, NULL, 6.0),
 
     -- 2º Bimestre
-    (2, 2025, 'regular', '2025-04-04', '2025-06-16', 150, 15, 10.0),
+    (2, 2025, 'regular', '2025-04-04', '2025-06-16', 700, 70, 10.0),
     (2, 2025, 'recuperacao', '2025-06-17', '2025-06-26', NULL, NULL, 6.0),
 
     -- Férias de Julho (informativo)
     (2, 2025, 'ferias', '2025-06-27', '2025-08-03', NULL, NULL, NULL),
 
     -- 3º Bimestre
-    (3, 2025, 'regular', '2025-08-04', '2025-09-23', 105, 15, 10.0),
+    (3, 2025, 'regular', '2025-08-04', '2025-09-23', 490, 70, 10.0),
     (3, 2025, 'recuperacao', '2025-09-24', '2025-10-03', NULL, NULL, 6.0),
 
     -- 4º Bimestre
-    (4, 2025, 'regular', '2025-10-04', '2025-12-04', 135, 15, 10.0),
+    (4, 2025, 'regular', '2025-10-04', '2025-12-04', 630, 70, 10.0),
     (4, 2025, 'recuperacao', '2025-12-05', '2025-12-15', NULL, NULL, 6.0)
 ON CONFLICT (bimestre, ano_letivo, tipo) DO UPDATE SET
     data_inicio = EXCLUDED.data_inicio,
@@ -239,20 +239,20 @@ BEGIN
     v_questoes_semana := contar_questoes_semana(p_usuario_id, p_componente);
 
     -- Verifica limite
-    IF v_questoes_semana >= 15 THEN
+    IF v_questoes_semana >= 70 THEN
         RETURN QUERY SELECT
             FALSE::BOOLEAN,
             v_questoes_semana,
-            15::INTEGER,
+            70::INTEGER,
             FALSE::BOOLEAN,
-            'Limite semanal de 15 questões atingido'::VARCHAR(100);
+            'Limite semanal de 70 questões atingido'::VARCHAR(100);
         RETURN;
     END IF;
 
     RETURN QUERY SELECT
         TRUE::BOOLEAN,
         v_questoes_semana,
-        15::INTEGER,
+        70::INTEGER,
         FALSE::BOOLEAN,
         'OK'::VARCHAR(100);
 END;
@@ -452,7 +452,7 @@ BEGIN
         v_nota.nota_recuperacao,
         v_nota.status,
         v_questoes_semana,
-        CASE WHEN v_periodo.tipo = 'recuperacao' OR v_nota.em_recuperacao THEN NULL ELSE 15 END;
+        CASE WHEN v_periodo.tipo = 'recuperacao' OR v_nota.em_recuperacao THEN NULL ELSE 70 END;
 END;
 $$ LANGUAGE plpgsql;
 

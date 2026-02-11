@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
             nivel: validacao.nivel!,
             componentes: dadosEstudante.componentes,
             tipo: 'estudante',
-            senha_alterada: false, // Indica que deve trocar a senha no primeiro login
+            senha_alterada: true, // Senha padrão @estudante, sem obrigar troca
           })
 
           resultados.novos++
