@@ -453,7 +453,7 @@ export default function MenuComponentePage() {
                   className="p-3 rounded-xl"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
                 >
-                  <p className="font-semibold text-xs mb-3" style={{ color: corPrimaria }}>
+                  <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>
                     Professor Orientador
                   </p>
                   {dadosSobre.professores.map((prof) => (
@@ -461,7 +461,7 @@ export default function MenuComponentePage() {
                       <ProfilePhoto
                         fotoUrl={prof.foto_url}
                         nome={prof.nome}
-                        size="lg"
+                        size="md"
                         editable={false}
                         componente={componente}
                       />
@@ -469,7 +469,7 @@ export default function MenuComponentePage() {
                         <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
                           {prof.nome}
                         </p>
-                        <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                        <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
                           Professor de Física e Matemática
                         </p>
                       </div>
@@ -481,7 +481,7 @@ export default function MenuComponentePage() {
               {/* Estudantes Participantes */}
               {dadosSobre && (dadosSobre.alunosFisica.length > 0 || dadosSobre.alunosMatematica.length > 0) && (
                 <div
-                  className="p-3 rounded-xl space-y-4"
+                  className="p-3 rounded-xl space-y-3"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
                 >
                   <p className="font-semibold text-xs" style={{ color: corPrimaria }}>
@@ -491,24 +491,24 @@ export default function MenuComponentePage() {
                   {/* Física */}
                   {dadosSobre.alunosFisica.length > 0 && (
                     <div>
-                      <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--color-fisica)' }}>
-                        Física — Turma 2A
+                      <p className="text-[10px] font-medium uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-fisica)' }}>
+                        Física — 2ª série A
                       </p>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {dadosSobre.alunosFisica.map((aluno) => (
-                          <div key={aluno.id} className="flex items-center gap-3">
+                          <div key={aluno.id} className="flex items-center gap-2.5">
                             <ProfilePhoto
                               fotoUrl={aluno.fotoUrl}
                               nome={aluno.nome}
-                              size="lg"
+                              size="sm"
                               editable={false}
                               componente="fisica"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                              <p className="font-medium text-xs" style={{ color: 'var(--text-primary)' }}>
                                 {aluno.nome}
                               </p>
-                              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                                 {aluno.colegio}
                               </p>
                             </div>
@@ -521,24 +521,24 @@ export default function MenuComponentePage() {
                   {/* Matemática */}
                   {dadosSobre.alunosMatematica.length > 0 && (
                     <div>
-                      <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--color-matematica)' }}>
-                        Matemática — Turma 2A
+                      <p className="text-[10px] font-medium uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-matematica)' }}>
+                        Matemática — 2ª série A
                       </p>
-                      <div className="space-y-3">
+                      <div className="space-y-2">
                         {dadosSobre.alunosMatematica.map((aluno) => (
-                          <div key={aluno.id} className="flex items-center gap-3">
+                          <div key={aluno.id} className="flex items-center gap-2.5">
                             <ProfilePhoto
                               fotoUrl={aluno.fotoUrl}
                               nome={aluno.nome}
-                              size="lg"
+                              size="sm"
                               editable={false}
                               componente="matematica"
                             />
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                              <p className="font-medium text-xs" style={{ color: 'var(--text-primary)' }}>
                                 {aluno.nome}
                               </p>
-                              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                                 {aluno.colegio}
                               </p>
                             </div>
