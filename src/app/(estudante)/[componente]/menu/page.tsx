@@ -65,8 +65,8 @@ export default function MenuComponentePage() {
   const [mostrarSobre, setMostrarSobre] = useState(false)
   const [dadosSobre, setDadosSobre] = useState<{
     professores: { id: string; nome: string; foto_url: string | null; email: string }[]
-    alunosFisica: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; pontos: number; taxaAcerto: number; colegio: string }[]
-    alunosMatematica: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; pontos: number; taxaAcerto: number; colegio: string }[]
+    alunosFisica: { id: string; nome: string; turma: string; fotoUrl: string | null; colegio: string }[]
+    alunosMatematica: { id: string; nome: string; turma: string; fotoUrl: string | null; colegio: string }[]
   } | null>(null)
 
   useEffect(() => {
@@ -475,13 +475,13 @@ export default function MenuComponentePage() {
                       <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--color-fisica)' }}>
                         Física — Turma 2A
                       </p>
-                      <div className="space-y-2.5">
+                      <div className="space-y-3">
                         {dadosSobre.alunosFisica.map((aluno) => (
                           <div key={aluno.id} className="flex items-center gap-3">
                             <ProfilePhoto
                               fotoUrl={aluno.fotoUrl}
                               nome={aluno.nome}
-                              size="md"
+                              size="lg"
                               editable={false}
                               componente="fisica"
                             />
@@ -505,13 +505,13 @@ export default function MenuComponentePage() {
                       <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--color-matematica)' }}>
                         Matemática — Turma 2A
                       </p>
-                      <div className="space-y-2.5">
+                      <div className="space-y-3">
                         {dadosSobre.alunosMatematica.map((aluno) => (
                           <div key={aluno.id} className="flex items-center gap-3">
                             <ProfilePhoto
                               fotoUrl={aluno.fotoUrl}
                               nome={aluno.nome}
-                              size="md"
+                              size="lg"
                               editable={false}
                               componente="matematica"
                             />
