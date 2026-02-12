@@ -3,9 +3,9 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
-// Nomes dos alunos participantes por componente
-const ALUNOS_FISICA = ['Hiarley', 'Ana Luiza']
-const ALUNOS_MATEMATICA = ['João Alexandre', 'Davi Valente']
+// Nomes dos alunos participantes por componente (termos de busca robustos)
+const ALUNOS_FISICA = ['Hiarley', 'Ana Luiza', 'Ana Lu']
+const ALUNOS_MATEMATICA = ['Alexandre', 'Valente', 'Davi Val']
 
 // Mapeamento de colégio por aluno (DB não tem campo de escola)
 function obterColegio(nome: string): string {
