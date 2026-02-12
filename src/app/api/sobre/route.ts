@@ -11,9 +11,9 @@ const ALUNOS_MATEMATICA = ['João Alexandre', 'Davi Valente']
 function obterColegio(nome: string): string {
   const n = nome.toLowerCase()
   if (n.includes('hiarley') || n.includes('ana luiza') || n.includes('ana lu')) {
-    return 'CE Gov. Luiz Viana Filho — Jequié/BA'
+    return 'CE Cora Coralina — Goiânia/GO'
   }
-  return 'CE Luiz Navarro de Brito — Jequié/BA'
+  return 'CE Colemar Natal e Silva — Goiânia/GO'
 }
 
 export async function GET() {

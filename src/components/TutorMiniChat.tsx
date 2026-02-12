@@ -215,7 +215,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
       if (data.sucesso && data.resposta) {
         const { textoLimpo, sugestoes } = extrairSugestoes(data.resposta)
         setMensagens(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           role: 'assistant',
           content: textoLimpo,
           timestamp: new Date().toISOString(),
@@ -225,7 +225,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
         if (data.uso_hoje !== undefined) setUsoHoje(data.uso_hoje)
       } else {
         setMensagens(prev => [...prev, {
-          id: (Date.now() + 1).toString(),
+          id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           role: 'assistant',
           content: data.erro || 'Erro ao gerar resposta.',
           timestamp: new Date().toISOString(),
@@ -438,7 +438,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
           style={{ color: 'var(--text-muted)' }}
           title="Enviar foto"
         >
-          <Camera className="w-4.5 h-4.5" />
+          <Camera className="w-5 h-5" />
         </button>
 
         {/* Mic button */}
@@ -453,7 +453,7 @@ export default function TutorMiniChat({ componente }: { componente: Componente }
             }}
             title={isListening ? 'Parar' : 'Falar'}
           >
-            {isListening ? <MicOff className="w-4.5 h-4.5" /> : <Mic className="w-4.5 h-4.5" />}
+            {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
           </button>
         )}
 

@@ -416,26 +416,45 @@ export default function MenuComponentePage() {
 
             <div className="space-y-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
 
-              {/* Necessidade do Projeto */}
+              {/* Apresentação do Projeto */}
               <div>
                 <p className="text-sm leading-relaxed">
-                  <strong style={{ color: corPrimaria }}>seu10.com</strong> nasceu da necessidade
-                  de tornar o ensino de <strong>Física</strong> e <strong>Matemática</strong> mais acessível,
-                  engajante e personalizado. Muitos estudantes enfrentam dificuldades nessas disciplinas
-                  e não têm acesso a acompanhamento individualizado. A plataforma usa <strong>gamificação</strong> e{' '}
-                  <strong>inteligência artificial</strong> para adaptar o aprendizado ao ritmo de cada aluno,
-                  identificando pontos fracos e oferecendo suporte em tempo real.
+                  <strong style={{ color: corPrimaria }}>seu10.com</strong> é um projeto educacional
+                  que investiga o uso da <strong>Inteligência Artificial</strong> como ferramenta de apoio
+                  ao ensino de <strong>Física</strong> e <strong>Matemática</strong> no Ensino Médio da rede pública.
+                </p>
+                <p className="text-sm leading-relaxed mt-2">
+                  A plataforma integra um <strong>Tutor IA</strong> que oferece atendimento
+                  individualizado — reconhecendo o nível de cada estudante, adaptando
+                  explicações e sugerindo caminhos de estudo personalizados.
+                  A abordagem combina <strong>gamificação</strong>, trilhas de aprendizagem
+                  e acompanhamento contínuo de desempenho.
                 </p>
               </div>
 
-              {/* Professor Responsável */}
+              {/* Objetivo */}
+              <div
+                className="p-3 rounded-xl"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
+              >
+                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>
+                  Objetivo
+                </p>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                  Avaliar como a inteligência artificial generativa pode contribuir para a
+                  melhoria do aprendizado em Física e Matemática, oferecendo suporte
+                  pedagógico personalizado e acessível a estudantes do Ensino Médio público.
+                </p>
+              </div>
+
+              {/* Professor Orientador */}
               {dadosSobre && dadosSobre.professores.length > 0 && (
                 <div
                   className="p-3 rounded-xl"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
                 >
                   <p className="font-semibold text-xs mb-3" style={{ color: corPrimaria }}>
-                    Professor Responsável
+                    Professor Orientador
                   </p>
                   {dadosSobre.professores.map((prof) => (
                     <div key={prof.id} className="flex items-center gap-3">
@@ -531,46 +550,46 @@ export default function MenuComponentePage() {
                 </div>
               )}
 
-              {/* Colégios Envolvidos */}
+              {/* Escolas Participantes */}
               <div
                 className="p-3 rounded-xl"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
               >
                 <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>
-                  Colégios Envolvidos
+                  Escolas Participantes
                 </p>
                 <ul className="space-y-1.5 text-xs" style={{ color: 'var(--text-secondary)' }}>
                   <li className="flex items-start gap-2">
                     <GraduationCap className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: corPrimaria }} />
-                    <span><strong>Colégio Estadual Governador Luiz Viana Filho</strong> — Jequié/BA</span>
+                    <span><strong>Colégio Estadual Cora Coralina</strong> — Goiânia/GO</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <GraduationCap className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" style={{ color: corPrimaria }} />
-                    <span><strong>Colégio Estadual Luiz Navarro de Brito</strong> — Jequié/BA</span>
+                    <span><strong>Colégio Estadual Colemar Natal e Silva</strong> — Goiânia/GO</span>
                   </li>
                 </ul>
               </div>
 
-              {/* Funcionalidades */}
+              {/* Recursos Pedagógicos */}
               <div
                 className="p-3 rounded-xl"
                 style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
               >
-                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>Funcionalidades</p>
+                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>Recursos Pedagógicos</p>
                 <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  <li>• <strong>Tutor IA</strong> — Assistente com câmera, voz e mapas mentais</li>
-                  <li>• <strong>Questões</strong> — Centenas de questões por tema e nível</li>
-                  <li>• <strong>Simulado ENEM</strong> — Prática no formato da prova</li>
-                  <li>• <strong>Trilhas</strong> — Jornadas personalizadas de estudo</li>
-                  <li>• <strong>FlashCards & Mapas</strong> — Revisão rápida e visual</li>
-                  <li>• <strong>Gamificação</strong> — Pontos, níveis, ranking e conquistas</li>
-                  <li>• <strong>Notas</strong> — Acompanhamento bimestral automático</li>
+                  <li>• <strong>Tutor IA</strong> — Atendimento individualizado com câmera, voz e mapas mentais</li>
+                  <li>• <strong>Questões adaptativas</strong> — Banco de questões organizadas por tema e dificuldade</li>
+                  <li>• <strong>Simulado ENEM</strong> — Prática no formato oficial da prova</li>
+                  <li>• <strong>Trilhas de aprendizagem</strong> — Percursos personalizados de estudo</li>
+                  <li>• <strong>FlashCards e Mapas Mentais</strong> — Ferramentas de revisão visual</li>
+                  <li>• <strong>Gamificação</strong> — Pontos, níveis, ranking e conquistas para engajamento</li>
+                  <li>• <strong>Acompanhamento</strong> — Notas e desempenho por bimestre em tempo real</li>
                 </ul>
               </div>
 
               <p className="text-[11px] text-center pt-1" style={{ color: 'var(--text-muted)' }}>
-                Desenvolvido para transformar a experiência de aprendizado
-                no Ensino Médio público da Bahia.
+                Projeto educacional para o Ensino Médio da rede pública
+                com uso de Inteligência Artificial.
               </p>
             </div>
           </div>
