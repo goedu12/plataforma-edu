@@ -3,14 +3,16 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 
-// Nomes dos alunos participantes por componente (termos de busca robustos)
+// Termos de busca por grupo
 const ALUNOS_FISICA = ['Hiarley', 'Ana Luiza', 'Ana Lu']
 const ALUNOS_MATEMATICA = ['Alexandre', 'Valente', 'Davi Val']
+const ALUNOS_CORA_EXTRA = ['Georgi', 'Scaglio', 'Roberto Sc']
 
-// Mapeamento de colégio por aluno (DB não tem campo de escola)
+// Mapeamento de colégio por aluno
 function obterColegio(nome: string): string {
   const n = nome.toLowerCase()
-  if (n.includes('hiarley') || n.includes('ana luiza') || n.includes('ana lu')) {
+  if (n.includes('hiarley') || n.includes('ana luiza') || n.includes('ana lu') ||
+      n.includes('georgi') || n.includes('scaglio') || n.includes('roberto sc')) {
     return 'CE Cora Coralina — Goiânia/GO'
   }
   return 'CE Colemar Natal e Silva — Goiânia/GO'
@@ -28,7 +30,7 @@ export async function GET() {
       .eq('ativo', true)
       .limit(5)
 
-    // Buscar alunos de Física direto da tabela usuarios
+    // Buscar alunos de Física (CE Cora Coralina — 2A)
     const { data: fisicaRaw } = await supabase
       .from('usuarios')
       .select('id, nome, turma, foto_url')
@@ -37,13 +39,22 @@ export async function GET() {
       .or(ALUNOS_FISICA.map(n => `nome.ilike.%${n}%`).join(','))
       .limit(2)
 
-    // Buscar alunos de Matemática direto da tabela usuarios
+    // Buscar alunos de Matemática (CE Colemar — 2A)
     const { data: matRaw } = await supabase
       .from('usuarios')
       .select('id, nome, turma, foto_url')
       .eq('tipo', 'estudante')
       .eq('ativo', true)
       .or(ALUNOS_MATEMATICA.map(n => `nome.ilike.%${n}%`).join(','))
+      .limit(2)
+
+    // Buscar alunos extras do CE Cora Coralina (Georgi + Roberto)
+    const { data: coraExtraRaw } = await supabase
+      .from('usuarios')
+      .select('id, nome, turma, foto_url')
+      .eq('tipo', 'estudante')
+      .eq('ativo', true)
+      .or(ALUNOS_CORA_EXTRA.map(n => `nome.ilike.%${n}%`).join(','))
       .limit(2)
 
     const formatarAluno = (u: { id: string; nome: string; turma: string; foto_url: string | null }) => ({
@@ -59,9 +70,10 @@ export async function GET() {
       professores: professores || [],
       alunosFisica: (fisicaRaw || []).map(formatarAluno),
       alunosMatematica: (matRaw || []).map(formatarAluno),
+      alunosCoraExtra: (coraExtraRaw || []).map(formatarAluno),
     })
   } catch (error) {
     console.error('[Sobre] Erro:', error)
-    return NextResponse.json({ sucesso: false, professores: [], alunosFisica: [], alunosMatematica: [] })
+    return NextResponse.json({ sucesso: false, professores: [], alunosFisica: [], alunosMatematica: [], alunosCoraExtra: [] })
   }
 }

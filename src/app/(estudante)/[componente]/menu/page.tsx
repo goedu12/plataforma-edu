@@ -67,6 +67,7 @@ export default function MenuComponentePage() {
     professores: { id: string; nome: string; foto_url: string | null; email: string }[]
     alunosFisica: { id: string; nome: string; turma: string; fotoUrl: string | null; colegio: string }[]
     alunosMatematica: { id: string; nome: string; turma: string; fotoUrl: string | null; colegio: string }[]
+    alunosCoraExtra: { id: string; nome: string; turma: string; fotoUrl: string | null; colegio: string }[]
   } | null>(null)
 
   useEffect(() => {
@@ -369,7 +370,7 @@ export default function MenuComponentePage() {
                 .then(r => r.json())
                 .then(data => {
                   if (data.sucesso) {
-                    setDadosSobre({ professores: data.professores, alunosFisica: data.alunosFisica || [], alunosMatematica: data.alunosMatematica || [] })
+                    setDadosSobre({ professores: data.professores, alunosFisica: data.alunosFisica || [], alunosMatematica: data.alunosMatematica || [], alunosCoraExtra: data.alunosCoraExtra || [] })
                   }
                 })
                 .catch(() => {})
@@ -479,7 +480,7 @@ export default function MenuComponentePage() {
               )}
 
               {/* Estudantes Participantes */}
-              {dadosSobre && (dadosSobre.alunosFisica.length > 0 || dadosSobre.alunosMatematica.length > 0) && (
+              {dadosSobre && (dadosSobre.alunosFisica.length > 0 || dadosSobre.alunosMatematica.length > 0 || dadosSobre.alunosCoraExtra.length > 0) && (
                 <div
                   className="p-3 rounded-xl space-y-3"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
@@ -540,6 +541,36 @@ export default function MenuComponentePage() {
                               </p>
                               <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
                                 {aluno.colegio}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* CE Cora Coralina — extras */}
+                  {dadosSobre.alunosCoraExtra.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-medium uppercase tracking-wider mb-1.5" style={{ color: corPrimaria }}>
+                        CE Cora Coralina
+                      </p>
+                      <div className="space-y-2">
+                        {dadosSobre.alunosCoraExtra.map((aluno) => (
+                          <div key={aluno.id} className="flex items-center gap-2.5">
+                            <ProfilePhoto
+                              fotoUrl={aluno.fotoUrl}
+                              nome={aluno.nome}
+                              size="sm"
+                              editable={false}
+                              componente={componente}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-xs" style={{ color: 'var(--text-primary)' }}>
+                                {aluno.nome}
+                              </p>
+                              <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
+                                Turma {aluno.turma} — {aluno.colegio}
                               </p>
                             </div>
                           </div>
