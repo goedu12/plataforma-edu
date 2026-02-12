@@ -5,7 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase'
 
 // Termos de busca por grupo
 const ALUNOS_FISICA = ['Hiarley', 'Ana Luiza', 'Ana Lu']
-const ALUNOS_MATEMATICA = ['Alexandre', 'Valente', 'Davi Val']
+const ALUNOS_MATEMATICA = ['Fonseca', 'Cardoso Fonseca', 'Valente', 'Davi Val']
 const ALUNOS_CORA_EXTRA = ['Georgi', 'Scaglio', 'Roberto Sc']
 
 // Mapeamento de colégio por aluno
