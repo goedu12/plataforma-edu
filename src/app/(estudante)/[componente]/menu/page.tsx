@@ -65,7 +65,8 @@ export default function MenuComponentePage() {
   const [mostrarSobre, setMostrarSobre] = useState(false)
   const [dadosSobre, setDadosSobre] = useState<{
     professores: { id: string; nome: string; foto_url: string | null; email: string }[]
-    alunosDestaque: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; questoesRespondidas: number; diasAtivos: number; pontos: number; taxaAcerto: number }[]
+    alunosFisica: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; pontos: number; taxaAcerto: number; colegio: string }[]
+    alunosMatematica: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; pontos: number; taxaAcerto: number; colegio: string }[]
   } | null>(null)
 
   useEffect(() => {
