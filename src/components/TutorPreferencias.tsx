@@ -58,16 +58,31 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
     }
   }, [isOpen])
 
+  const PREFERENCIAS_PADRAO: Preferencias = {
+    prefere_analogias: true,
+    prefere_formulas: true,
+    prefere_exemplos: true,
+    prefere_visual: true,
+    prefere_passo_a_passo: true,
+    nivel_detalhe: 'medio',
+    tom_conversa: 'amigavel',
+    velocidade: 'normal',
+    usar_exemplos_brasileiros: true,
+  }
+
   const carregarPreferencias = async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/tutor/preferencias')
       const data = await res.json()
-      if (data.sucesso) {
+      if (data.sucesso && data.preferencias) {
         setPreferencias(data.preferencias)
+      } else {
+        setPreferencias(PREFERENCIAS_PADRAO)
       }
     } catch (error) {
       console.error('Erro ao carregar preferências:', error)
+      setPreferencias(PREFERENCIAS_PADRAO)
     } finally {
       setLoading(false)
     }

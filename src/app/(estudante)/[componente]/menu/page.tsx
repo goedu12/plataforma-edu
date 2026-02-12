@@ -65,7 +65,8 @@ export default function MenuComponentePage() {
   const [mostrarSobre, setMostrarSobre] = useState(false)
   const [dadosSobre, setDadosSobre] = useState<{
     professores: { id: string; nome: string; foto_url: string | null; email: string }[]
-    alunosDestaque: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; questoesRespondidas: number; diasAtivos: number; pontos: number; taxaAcerto: number }[]
+    alunosFisica: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; pontos: number; taxaAcerto: number; colegio: string }[]
+    alunosMatematica: { id: string; nome: string; turma: string; fotoUrl: string | null; notaFinal: number; pontos: number; taxaAcerto: number; colegio: string }[]
   } | null>(null)
 
   useEffect(() => {
@@ -368,7 +369,7 @@ export default function MenuComponentePage() {
                 .then(r => r.json())
                 .then(data => {
                   if (data.sucesso) {
-                    setDadosSobre({ professores: data.professores, alunosDestaque: data.alunosDestaque })
+                    setDadosSobre({ professores: data.professores, alunosFisica: data.alunosFisica || [], alunosMatematica: data.alunosMatematica || [] })
                   }
                 })
                 .catch(() => {})
@@ -418,7 +419,7 @@ export default function MenuComponentePage() {
               {/* Necessidade do Projeto */}
               <div>
                 <p className="text-sm leading-relaxed">
-                  <strong style={{ color: 'var(--text-primary)' }}>Plataforma Edu</strong> nasceu da necessidade
+                  <strong style={{ color: corPrimaria }}>seu10.com</strong> nasceu da necessidade
                   de tornar o ensino de <strong>Física</strong> e <strong>Matemática</strong> mais acessível,
                   engajante e personalizado. Muitos estudantes enfrentam dificuldades nessas disciplinas
                   e não têm acesso a acompanhamento individualizado. A plataforma usa <strong>gamificação</strong> e{' '}
@@ -458,52 +459,75 @@ export default function MenuComponentePage() {
                 </div>
               )}
 
-              {/* Alunos Destaque */}
-              {dadosSobre && dadosSobre.alunosDestaque.length > 0 && (
+              {/* Estudantes Participantes */}
+              {dadosSobre && (dadosSobre.alunosFisica.length > 0 || dadosSobre.alunosMatematica.length > 0) && (
                 <div
-                  className="p-3 rounded-xl"
+                  className="p-3 rounded-xl space-y-4"
                   style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
                 >
-                  <p className="font-semibold text-xs mb-3" style={{ color: corPrimaria }}>
-                    Alunos Destaque — Matemática 2A
+                  <p className="font-semibold text-xs" style={{ color: corPrimaria }}>
+                    Estudantes Participantes
                   </p>
-                  <div className="space-y-3">
-                    {dadosSobre.alunosDestaque.map((aluno, idx) => (
-                      <div key={aluno.id} className="flex items-center gap-3">
-                        <div className="relative">
-                          <ProfilePhoto
-                            fotoUrl={aluno.fotoUrl}
-                            nome={aluno.nome}
-                            size="md"
-                            editable={false}
-                            componente="matematica"
-                          />
-                          {idx === 0 && (
-                            <span className="absolute -top-1 -right-1 text-sm">🥇</span>
-                          )}
-                          {idx === 1 && (
-                            <span className="absolute -top-1 -right-1 text-sm">🥈</span>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate" style={{ color: 'var(--text-primary)' }}>
-                            {aluno.nome.split(' ').slice(0, 2).join(' ')}
-                          </p>
-                          <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                            Turma {aluno.turma}
-                          </p>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-base font-bold tabular-nums" style={{ color: aluno.notaFinal >= 7 ? 'var(--success)' : aluno.notaFinal >= 5 ? 'var(--warning)' : 'var(--error)' }}>
-                            {aluno.notaFinal.toFixed(1)}
-                          </p>
-                          <p className="text-[10px]" style={{ color: 'var(--text-muted)' }}>
-                            {aluno.pontos} pts • {aluno.taxaAcerto}%
-                          </p>
-                        </div>
+
+                  {/* Física */}
+                  {dadosSobre.alunosFisica.length > 0 && (
+                    <div>
+                      <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--color-fisica)' }}>
+                        Física — Turma 2A
+                      </p>
+                      <div className="space-y-2.5">
+                        {dadosSobre.alunosFisica.map((aluno) => (
+                          <div key={aluno.id} className="flex items-center gap-3">
+                            <ProfilePhoto
+                              fotoUrl={aluno.fotoUrl}
+                              nome={aluno.nome}
+                              size="md"
+                              editable={false}
+                              componente="fisica"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                                {aluno.nome}
+                              </p>
+                              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                                {aluno.colegio}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Matemática */}
+                  {dadosSobre.alunosMatematica.length > 0 && (
+                    <div>
+                      <p className="text-[11px] font-medium mb-2" style={{ color: 'var(--color-matematica)' }}>
+                        Matemática — Turma 2A
+                      </p>
+                      <div className="space-y-2.5">
+                        {dadosSobre.alunosMatematica.map((aluno) => (
+                          <div key={aluno.id} className="flex items-center gap-3">
+                            <ProfilePhoto
+                              fotoUrl={aluno.fotoUrl}
+                              nome={aluno.nome}
+                              size="md"
+                              editable={false}
+                              componente="matematica"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm" style={{ color: 'var(--text-primary)' }}>
+                                {aluno.nome}
+                              </p>
+                              <p className="text-[11px]" style={{ color: 'var(--text-muted)' }}>
+                                {aluno.colegio}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -541,20 +565,6 @@ export default function MenuComponentePage() {
                   <li>• <strong>FlashCards & Mapas</strong> — Revisão rápida e visual</li>
                   <li>• <strong>Gamificação</strong> — Pontos, níveis, ranking e conquistas</li>
                   <li>• <strong>Notas</strong> — Acompanhamento bimestral automático</li>
-                </ul>
-              </div>
-
-              {/* Tecnologias */}
-              <div
-                className="p-3 rounded-xl"
-                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
-              >
-                <p className="font-semibold text-xs mb-2" style={{ color: corPrimaria }}>Tecnologias</p>
-                <ul className="space-y-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
-                  <li>• Next.js 14 + React 18 + TypeScript</li>
-                  <li>• Supabase (PostgreSQL)</li>
-                  <li>• Google Gemini 2.5 Flash (IA)</li>
-                  <li>• Tailwind CSS + Design Responsivo</li>
                 </ul>
               </div>
 

@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'seu10.com - Plataforma Educacional',
-  description: 'Plataforma educacional para estudo de Física e Matemática',
+  title: 'seu10.com — Física e Matemática',
+  description: 'seu10.com — Estudo de Física e Matemática com gamificação e IA',
   keywords: ['educação', 'física', 'matemática', 'estudos', 'escola'],
   authors: [{ name: 'Prof. Leonardo' }],
   manifest: '/manifest.json',

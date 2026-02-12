@@ -69,7 +69,7 @@ export default function HomePage() {
           className="text-sm tracking-widest mb-8"
           style={{ color: 'var(--text-muted)' }}
         >
-          Plataforma Educacional
+          Física e Matemática
         </p>
 
         {/* Loading */}
