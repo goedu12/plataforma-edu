@@ -18,7 +18,7 @@ import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
 import ConteudoQuestao from './enem/ConteudoQuestao'
-import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto } from '@/lib/limpezaTexto'
+import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 import 'katex/dist/katex.min.css'
@@ -233,31 +233,47 @@ export default function QuestaoENEM({
         const contextoProcessado = processarContexto(questao.contexto)
         const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
 
+        // Extrai título do texto-base (se houver)
+        const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+
         // Detecta se há fórmulas LaTeX no contexto
         const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.contexto || '')
+
+        // Também usar o título da questão (campo titulo) se existir
+        const tituloExibir = questao.titulo || titulo
 
         return (
           <div
             className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto questao-contexto"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
-            {/* 1. Texto do contexto/enunciado (SEM as fontes) */}
-            {textoSemSmall && (
+            {/* 1. Título em negrito (se houver) */}
+            {tituloExibir && (
+              <h3
+                className="font-bold text-sm sm:text-base mb-3 pb-1"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {tituloExibir}
+              </h3>
+            )}
+
+            {/* 2. Texto do contexto/enunciado (SEM as fontes, SEM o título) */}
+            {(titulo ? textoCorpo : textoSemSmall) && (
               temLatex ? (
                 <ConteudoQuestao
-                  conteudo={textoSemSmall}
+                  conteudo={titulo ? textoCorpo : textoSemSmall}
                   tipo="contexto"
                 />
               ) : (
                 <div
                   className="text-sm sm:text-base leading-relaxed questao-texto"
                   style={{ color: 'var(--text-primary)' }}
-                  dangerouslySetInnerHTML={{ __html: textoSemSmall }}
+                  dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
                 />
               )
             )}
 
-            {/* 2. Imagem principal do contexto - RESPONSIVA E AMPLIÁVEL */}
+            {/* 3. Imagem principal do contexto - RESPONSIVA E AMPLIÁVEL */}
             {isValidImageUrl(questao.imagem_principal) && (
               <div className="my-4">
                 <ImagemQuestao
@@ -269,7 +285,7 @@ export default function QuestaoENEM({
               </div>
             )}
 
-            {/* 2b. Imagens extras (se houver) - GRID RESPONSIVO */}
+            {/* 3b. Imagens extras (se houver) - GRID RESPONSIVO */}
             {questao.imagens_extras && questao.imagens_extras.length > 0 && (
               <div className={`
                 grid gap-3 my-4
@@ -289,13 +305,16 @@ export default function QuestaoENEM({
               </div>
             )}
 
-            {/* 3. Fontes/Referências - ALINHADAS À DIREITA (padrão ENEM) */}
+            {/* 4. Fontes/Referências - Separadas por linha em branco, alinhadas à direita */}
             {fontes.length > 0 && (
-              <div className="mt-4 pt-3">
+              <div
+                className="mt-6 pt-3"
+                style={{ borderTop: '1px solid var(--border-default)' }}
+              >
                 {fontes.map((fonte, index) => (
                   <p
                     key={index}
-                    className="text-xs sm:text-sm leading-relaxed italic text-right"
+                    className="text-xs sm:text-sm leading-relaxed italic text-right mt-1"
                     style={{ color: 'var(--text-muted)' }}
                     dangerouslySetInnerHTML={{ __html: fonte }}
                   />
@@ -303,7 +322,7 @@ export default function QuestaoENEM({
               </div>
             )}
 
-            {/* 4. Comando (texto antes das alternativas) */}
+            {/* 5. Comando (texto antes das alternativas) */}
             {questao.comando && (
               <div className="mt-4 pt-3 border-t border-[var(--border-default)]">
                 {temLatex || /\$[^$]+\$/.test(questao.comando) ? (

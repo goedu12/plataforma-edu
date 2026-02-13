@@ -4,8 +4,13 @@ import { useState } from 'react'
 import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy, TrendingUp, Target, ChevronDown, ChevronUp } from 'lucide-react'
 import Button from './ui/Button'
 import Badge from './ui/Badge'
+import SafeImage, { isValidImageUrl } from './ui/SafeImage'
+import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
+import ConteudoQuestao from './enem/ConteudoQuestao'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
 import type { Questao, Componente, ModoResposta } from '@/types'
+import 'katex/dist/katex.min.css'
 
 interface LimiteInfo {
   questoes_semana: number
@@ -73,6 +78,7 @@ export default function QuestaoCard({
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [mostrarDetalhesNota, setMostrarDetalhesNota] = useState(false)
+  const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
@@ -212,19 +218,87 @@ export default function QuestaoCard({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          ENUNCIADO - Área expansível
+          ENUNCIADO - Com suporte a título, LaTeX, imagens e fontes
           ═══════════════════════════════════════════════════════════════ */}
-      <div
-        className="flex-shrink-0 p-4 rounded-xl mb-3"
-        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-      >
-        <p
-          className="text-sm sm:text-base leading-relaxed"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          {formatarFormula(questao.enunciado)}
-        </p>
-      </div>
+      {(() => {
+        const enunciadoProcessado = processarContexto(questao.enunciado)
+        const { textoSemSmall, fontes } = extrairFontesDoContexto(enunciadoProcessado)
+        const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+        const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.enunciado || '')
+
+        // Extrair imagens inline do enunciado
+        const imagensEnunciado: string[] = []
+        const imgRegex = /https?:\/\/[^\s<>"]+\.(png|jpg|jpeg|gif|webp|svg)/gi
+        let imgMatch
+        while ((imgMatch = imgRegex.exec(questao.enunciado || '')) !== null) {
+          if (isValidImageUrl(imgMatch[0])) imagensEnunciado.push(imgMatch[0])
+        }
+
+        return (
+          <div
+            className="flex-shrink-0 p-4 rounded-xl mb-3"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+          >
+            {/* Título em negrito (se houver) */}
+            {titulo && (
+              <h3
+                className="font-bold text-sm sm:text-base mb-3 pb-1"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {titulo}
+              </h3>
+            )}
+
+            {/* Texto do enunciado */}
+            {(titulo ? textoCorpo : textoSemSmall) && (
+              temLatex ? (
+                <ConteudoQuestao
+                  conteudo={titulo ? textoCorpo : textoSemSmall}
+                  tipo="contexto"
+                />
+              ) : (
+                <p
+                  className="text-sm sm:text-base leading-relaxed"
+                  style={{ color: 'var(--text-primary)' }}
+                  dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
+                />
+              )
+            )}
+
+            {/* Imagens do enunciado - com zoom */}
+            {imagensEnunciado.length > 0 && (
+              <div className="my-3">
+                {imagensEnunciado.map((img, idx) => (
+                  <ImagemQuestao
+                    key={idx}
+                    src={img}
+                    alt={`Imagem ${idx + 1} da questão`}
+                    tipo="principal"
+                    onExpandir={setImagemExpandida}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Fontes/Referências - Separadas com linha em branco */}
+            {fontes.length > 0 && (
+              <div
+                className="mt-6 pt-3"
+                style={{ borderTop: '1px solid var(--border-default)' }}
+              >
+                {fontes.map((fonte, index) => (
+                  <p
+                    key={index}
+                    className="text-xs sm:text-sm leading-relaxed italic text-right mt-1"
+                    style={{ color: 'var(--text-muted)' }}
+                    dangerouslySetInnerHTML={{ __html: fonte }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* ═══════════════════════════════════════════════════════════════
           ALTERNATIVAS - Touch targets maiores no mobile
@@ -264,7 +338,14 @@ export default function QuestaoCard({
                 )}
               </span>
               <span className="text-sm sm:text-base flex-1" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(texto)}
+                {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
+                  <ConteudoQuestao
+                    conteudo={texto}
+                    tipo="alternativa"
+                  />
+                ) : (
+                  formatarFormula(texto)
+                )}
               </span>
             </button>
           )
@@ -535,6 +616,15 @@ export default function QuestaoCard({
           </Button>
         )}
       </div>
+
+      {/* Modal de imagem expandida */}
+      {imagemExpandida && (
+        <ImagemModal
+          src={imagemExpandida}
+          alt="Imagem da questão ampliada"
+          onClose={() => setImagemExpandida(null)}
+        />
+      )}
     </div>
   )
 }
