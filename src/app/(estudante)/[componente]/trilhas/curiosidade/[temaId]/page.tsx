@@ -391,8 +391,8 @@ export default function EstudarCuriosidadePage() {
                       {fontes.map((fonte, index) => (
                         <p
                           key={index}
-                          className="text-xs leading-relaxed italic text-right mt-1"
-                          style={{ color: 'var(--text-muted)' }}
+                          className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
+                          style={{ color: 'var(--text-secondary)' }}
                           dangerouslySetInnerHTML={{ __html: fonte }}
                         />
                       ))}
