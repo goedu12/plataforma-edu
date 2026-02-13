@@ -1844,9 +1844,8 @@ img {
   color: var(--text-secondary);
 }
 
-/* Descrições de imagens entre colchetes */
-.questao-contexto em:has-text("["),
-.questao-texto em {
+/* Descrições de imagens (classe específica, não afeta em/itálico inline) */
+.descricao-imagem-bloco {
   display: block;
   padding: 0.75rem 1rem;
   margin: 0.75rem 0;
@@ -1854,7 +1853,9 @@ img {
   border-left: 3px solid var(--color-accent);
   border-radius: 0 0.5rem 0.5rem 0;
   font-size: 0.875rem;
+  font-style: italic;
   line-height: 1.5;
+  color: var(--text-secondary);
 }
 
 /* Títulos dentro do contexto */
@@ -2035,10 +2036,10 @@ img {
 .fonte-referencia,
 .questao-contexto small,
 .conteudo-questao .fonte-pequena {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1.4;
-  color: var(--text-muted);
-  font-style: italic;
+  color: var(--text-secondary);
+  font-weight: 700;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -2416,18 +2417,16 @@ img {
 .questao-fonte,
 .fonte-pequena {
   display: block;
-  text-align: right;
-  font-style: italic;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-top: 1rem;
-  padding-top: 0.5rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
 }
 
 @media (min-width: 640px) {
   .questao-fonte,
   .fonte-pequena {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
   }
 }
 

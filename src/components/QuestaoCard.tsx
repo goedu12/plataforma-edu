@@ -280,17 +280,17 @@ export default function QuestaoCard({
               </div>
             )}
 
-            {/* Fontes/Referências - Separadas com linha em branco */}
+            {/* Fontes/Referências - Separadas com linha, fonte menor e em negrito */}
             {fontes.length > 0 && (
               <div
-                className="mt-6 pt-3"
+                className="mt-4 pt-2"
                 style={{ borderTop: '1px solid var(--border-default)' }}
               >
                 {fontes.map((fonte, index) => (
                   <p
                     key={index}
-                    className="text-xs sm:text-sm leading-relaxed italic text-right mt-1"
-                    style={{ color: 'var(--text-muted)' }}
+                    className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
+                    style={{ color: 'var(--text-secondary)' }}
                     dangerouslySetInnerHTML={{ __html: fonte }}
                   />
                 ))}

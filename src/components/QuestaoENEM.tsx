@@ -229,7 +229,8 @@ export default function QuestaoENEM({
           ═══════════════════════════════════════════════════════════════ */}
       {(() => {
         // Processa o contexto e extrai as fontes separadamente
-        const contextoProcessado = processarContexto(questao.contexto)
+        // removerImagens: true pois imagens são exibidas via galeria abaixo
+        const contextoProcessado = processarContexto(questao.contexto, { removerImagens: true })
         const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
 
         // Separa em múltiplos textos (TEXTO I, TEXTO II, etc.)
@@ -365,37 +366,45 @@ export default function QuestaoENEM({
               </div>
             )}
 
-            {/* 3c. Imagens inline extraídas do texto */}
-            {imagensInline.length > 0 && !isValidImageUrl(questao.imagem_principal) && (
-              <div className={`
-                grid gap-3 my-4
-                ${imagensInline.length === 1
-                  ? 'grid-cols-1 max-w-lg mx-auto'
-                  : 'grid-cols-1 sm:grid-cols-2'}
-              `}>
-                {imagensInline.map((img, idx) => (
-                  <ImagemQuestao
-                    key={`inline-${idx}`}
-                    src={img}
-                    alt={`Imagem ${idx + 1} do contexto`}
-                    tipo={imagensInline.length === 1 ? 'principal' : 'extra'}
-                    onExpandir={setImagemExpandida}
-                  />
-                ))}
-              </div>
-            )}
+            {/* 3c. Imagens inline extraídas do texto (sem duplicar as já exibidas) */}
+            {(() => {
+              // Filtrar imagens inline que não são duplicatas da principal ou extras
+              const imagensJaExibidas = new Set<string>()
+              if (isValidImageUrl(questao.imagem_principal)) imagensJaExibidas.add(questao.imagem_principal!)
+              if (questao.imagens_extras) questao.imagens_extras.forEach(img => imagensJaExibidas.add(img))
+              const imagensNovas = imagensInline.filter(img => !imagensJaExibidas.has(img))
 
-            {/* 4. Fontes/Referências - Separadas por linha em branco, alinhadas à direita */}
+              return imagensNovas.length > 0 ? (
+                <div className={`
+                  grid gap-3 my-4
+                  ${imagensNovas.length === 1
+                    ? 'grid-cols-1 max-w-lg mx-auto'
+                    : 'grid-cols-1 sm:grid-cols-2'}
+                `}>
+                  {imagensNovas.map((img, idx) => (
+                    <ImagemQuestao
+                      key={`inline-${idx}`}
+                      src={img}
+                      alt={`Imagem ${idx + 1} do contexto`}
+                      tipo={imagensNovas.length === 1 ? 'principal' : 'extra'}
+                      onExpandir={setImagemExpandida}
+                    />
+                  ))}
+                </div>
+              ) : null
+            })()}
+
+            {/* 4. Fontes/Referências - Separadas com linha, fonte menor e em negrito */}
             {fontes.length > 0 && (
               <div
-                className="mt-6 pt-3"
+                className="mt-4 pt-2"
                 style={{ borderTop: '1px solid var(--border-default)' }}
               >
                 {fontes.map((fonte, index) => (
                   <p
                     key={index}
-                    className="text-xs sm:text-sm leading-relaxed italic text-right mt-1"
-                    style={{ color: 'var(--text-muted)' }}
+                    className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
+                    style={{ color: 'var(--text-secondary)' }}
                     dangerouslySetInnerHTML={{ __html: fonte }}
                   />
                 ))}

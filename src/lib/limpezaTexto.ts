@@ -724,34 +724,53 @@ export function extrairFontesDoContexto(html: string): {
 
   // 2. Se não encontrou fontes em <small>, detectar automaticamente
   if (fontes.length === 0) {
-    // Padrões de fonte ENEM (última linha que parece referência)
-    const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+    // Extrair parágrafos de tags <p> (processarContexto converte \n\n em </p><p>)
+    const paragrafos: { textoLimpo: string; htmlOriginal: string }[] = []
+    const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi
+    let pMatch
+    while ((pMatch = pRegex.exec(textoSemSmall)) !== null) {
+      const textoLimpo = pMatch[1].replace(/<[^>]+>/g, '').trim()
+      if (textoLimpo) {
+        paragrafos.push({ textoLimpo, htmlOriginal: pMatch[0] })
+      }
+    }
 
-    // Verificar as últimas linhas (pode ter múltiplas fontes)
-    for (let i = linhas.length - 1; i >= Math.max(0, linhas.length - 3); i--) {
-      const linha = linhas[i]
+    // Fallback: se não tem <p> tags, separar por \n ou <br>
+    if (paragrafos.length === 0) {
+      const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+      for (const linha of linhas) {
+        const textoLimpo = linha.replace(/<[^>]+>/g, '').trim()
+        if (textoLimpo) {
+          paragrafos.push({ textoLimpo, htmlOriginal: linha })
+        }
+      }
+    }
+
+    // Verificar os últimos parágrafos (pode ter múltiplas fontes)
+    for (let i = paragrafos.length - 1; i >= Math.max(0, paragrafos.length - 3); i--) {
+      const { textoLimpo, htmlOriginal } = paragrafos[i]
 
       // Padrões que indicam fonte/referência:
       const ehFonte =
         // Padrão: SOBRENOME, Nome. Título... (autor em maiúsculas)
-        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ\s]+,\s*[A-Z]/.test(linha) ||
+        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ\s]+,\s*[A-Z]/.test(textoLimpo) ||
         // Padrão: Disponível em: URL
-        /Dispon[ií]vel\s+em:/i.test(linha) ||
+        /Dispon[ií]vel\s+em:/i.test(textoLimpo) ||
         // Padrão: Acesso em: DATA
-        /Acesso\s+em:/i.test(linha) ||
+        /Acesso\s+em:/i.test(textoLimpo) ||
         // Padrão: (adaptado) ou (Adaptado)
-        /\(adaptado\)/i.test(linha) ||
+        /\(adaptado\)/i.test(textoLimpo) ||
         // Padrão: Revista/Jornal Nome, n. XX
-        /^(Revista|Jornal)\s+/i.test(linha) ||
+        /^(Revista|Jornal)\s+/i.test(textoLimpo) ||
         // Padrão: termina com ano entre parênteses ou ponto
-        /,\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(linha) ||
+        /,\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(textoLimpo) ||
         // Padrão: URL no final
-        /\.(com|org|gov|edu|br)\b/i.test(linha)
+        /\.(com|org|gov|edu|br)\b/i.test(textoLimpo)
 
-      if (ehFonte && linha.length > 15 && linha.length < 500) {
-        fontes.unshift(linha) // Adiciona no início para manter ordem
-        // Remover a linha do texto
-        textoSemSmall = textoSemSmall.replace(linha, '').trim()
+      if (ehFonte && textoLimpo.length > 15 && textoLimpo.length < 500) {
+        fontes.unshift(textoLimpo) // Adiciona no início para manter ordem
+        // Remover o parágrafo HTML completo do texto
+        textoSemSmall = textoSemSmall.replace(htmlOriginal, '').trim()
       }
     }
   }
@@ -785,17 +804,34 @@ export function extrairTituloDoTexto(texto: string): {
 
   const textoTrimmed = texto.trim()
 
-  // Separar por quebras de linha ou <br>
-  const linhas = textoTrimmed.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+  // Extrair parágrafos de tags <p> (processarContexto converte \n\n em </p><p>)
+  const paragrafos: { textoLimpo: string; htmlOriginal: string; htmlConteudo: string }[] = []
+  const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi
+  let pMatch
+  while ((pMatch = pRegex.exec(textoTrimmed)) !== null) {
+    const textoLimpo = pMatch[1].replace(/<[^>]+>/g, '').trim()
+    if (textoLimpo) {
+      paragrafos.push({ textoLimpo, htmlOriginal: pMatch[0], htmlConteudo: pMatch[1].trim() })
+    }
+  }
 
-  if (linhas.length < 2) {
+  // Fallback: se não tem <p> tags, separar por \n ou <br>
+  if (paragrafos.length === 0) {
+    const linhas = textoTrimmed.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+    for (const linha of linhas) {
+      const textoLimpo = linha.replace(/<[^>]+>/g, '').trim()
+      if (textoLimpo) {
+        paragrafos.push({ textoLimpo, htmlOriginal: linha, htmlConteudo: linha })
+      }
+    }
+  }
+
+  if (paragrafos.length < 2) {
     return { titulo: null, corpo: textoTrimmed }
   }
 
-  const primeiraLinha = linhas[0]
-
-  // Remover tags HTML para análise
-  const primeiraLinhaLimpa = primeiraLinha.replace(/<[^>]+>/g, '').trim()
+  const primeiraLinhaLimpa = paragrafos[0].textoLimpo
+  const primeiraLinhaHtml = paragrafos[0].htmlConteudo
 
   // Padrões de título:
   const ehTitulo =
@@ -807,8 +843,8 @@ export function extrairTituloDoTexto(texto: string): {
     // Título entre aspas
     /^["'""«][^"'""»]+["'""»]$/.test(primeiraLinhaLimpa) ||
     // Título em negrito (já processado como <strong> ou **)
-    /^<strong>.*<\/strong>$/i.test(primeiraLinha) ||
-    /^\*\*[^*]+\*\*$/.test(primeiraLinha) ||
+    /^<strong>.*<\/strong>$/i.test(primeiraLinhaHtml) ||
+    /^\*\*[^*]+\*\*$/.test(primeiraLinhaLimpa) ||
     // Padrão "TEXTO I", "TEXTO II" etc
     /^TEXTO\s+[IVX\d]+$/i.test(primeiraLinhaLimpa)
 
@@ -817,7 +853,7 @@ export function extrairTituloDoTexto(texto: string): {
   }
 
   // A segunda linha deve ter conteúdo substancial (indica que a primeira é realmente um título)
-  const restoTexto = linhas.slice(1).join('\n')
+  const restoTexto = textoTrimmed.replace(paragrafos[0].htmlOriginal, '').trim()
   const restoLimpo = restoTexto.replace(/<[^>]+>/g, '').trim()
   if (restoLimpo.length < 30) {
     return { titulo: null, corpo: textoTrimmed }
