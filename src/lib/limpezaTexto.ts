@@ -721,6 +721,68 @@ export function extrairFontesDoContexto(html: string): {
 }
 
 /**
+ * Extrai título do texto-base de uma questão.
+ * Detecta padrões comuns de títulos em textos ENEM:
+ * - Primeira linha curta (até 120 chars) sem ponto final
+ * - Títulos entre aspas
+ * - Títulos em negrito/itálico
+ * Retorna o título separado do corpo do texto.
+ */
+export function extrairTituloDoTexto(texto: string): {
+  titulo: string | null
+  corpo: string
+} {
+  if (!texto || typeof texto !== 'string') {
+    return { titulo: null, corpo: '' }
+  }
+
+  const textoTrimmed = texto.trim()
+
+  // Separar por quebras de linha ou <br>
+  const linhas = textoTrimmed.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+
+  if (linhas.length < 2) {
+    return { titulo: null, corpo: textoTrimmed }
+  }
+
+  const primeiraLinha = linhas[0]
+
+  // Remover tags HTML para análise
+  const primeiraLinhaLimpa = primeiraLinha.replace(/<[^>]+>/g, '').trim()
+
+  // Padrões de título:
+  const ehTitulo =
+    // Linha curta (até 120 chars) que não termina com ponto ou dois-pontos
+    (primeiraLinhaLimpa.length <= 120 && primeiraLinhaLimpa.length >= 3 &&
+     !/[.;:]$/.test(primeiraLinhaLimpa) &&
+     // Não é uma frase comum (começa com maiúscula ou tem aspas)
+     (/^["'""«]/.test(primeiraLinhaLimpa) || /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/.test(primeiraLinhaLimpa))) ||
+    // Título entre aspas
+    /^["'""«][^"'""»]+["'""»]$/.test(primeiraLinhaLimpa) ||
+    // Título em negrito (já processado como <strong> ou **)
+    /^<strong>.*<\/strong>$/i.test(primeiraLinha) ||
+    /^\*\*[^*]+\*\*$/.test(primeiraLinha) ||
+    // Padrão "TEXTO I", "TEXTO II" etc
+    /^TEXTO\s+[IVX\d]+$/i.test(primeiraLinhaLimpa)
+
+  if (!ehTitulo) {
+    return { titulo: null, corpo: textoTrimmed }
+  }
+
+  // A segunda linha deve ter conteúdo substancial (indica que a primeira é realmente um título)
+  const restoTexto = linhas.slice(1).join('\n')
+  const restoLimpo = restoTexto.replace(/<[^>]+>/g, '').trim()
+  if (restoLimpo.length < 30) {
+    return { titulo: null, corpo: textoTrimmed }
+  }
+
+  return {
+    titulo: primeiraLinhaLimpa,
+    corpo: restoTexto
+  }
+}
+
+/**
  * Extrai todas as imagens válidas de uma questão
  */
 export function extrairImagensQuestao(questao: {

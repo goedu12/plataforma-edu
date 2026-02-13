@@ -17,8 +17,13 @@ import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { isValidImageUrl } from '@/components/ui/SafeImage'
+import ImagemModal, { ImagemQuestao } from '@/components/ui/ImagemModal'
+import ConteudoQuestao from '@/components/enem/ConteudoQuestao'
 import type { Componente } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
+import 'katex/dist/katex.min.css'
 
 interface Alternativas {
   A: string
@@ -39,6 +44,8 @@ interface Questao {
   contexto: string
   tema: string
   subtema: string
+  imagens?: string[]
+  imagem_principal?: string
 }
 
 interface Progresso {
@@ -72,6 +79,7 @@ export default function TrilhasEstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [tempoInicio, setTempoInicio] = useState(Date.now())
   const [animandoProxima, setAnimandoProxima] = useState(false)
+  const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
 
   // Modal de conclusão
   const [mostrarConclusao, setMostrarConclusao] = useState(false)
@@ -428,12 +436,83 @@ export default function TrilhasEstudarPage() {
               </span>
             )}
 
-            {/* Enunciado */}
-            <div className="card-chromebook">
-              <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(questao.enunciado)}
-              </p>
-            </div>
+            {/* Enunciado - com suporte a título, LaTeX, imagens e fontes */}
+            {(() => {
+              const enunciadoProcessado = processarContexto(questao.enunciado)
+              const { textoSemSmall, fontes } = extrairFontesDoContexto(enunciadoProcessado)
+              const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+              const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.enunciado || '')
+
+              return (
+                <div className="card-chromebook">
+                  {/* Título em negrito */}
+                  {titulo && (
+                    <h3
+                      className="font-bold text-sm sm:text-base mb-2"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {titulo}
+                    </h3>
+                  )}
+
+                  {/* Texto do enunciado */}
+                  {(titulo ? textoCorpo : textoSemSmall) && (
+                    temLatex ? (
+                      <ConteudoQuestao
+                        conteudo={titulo ? textoCorpo : textoSemSmall}
+                        tipo="contexto"
+                      />
+                    ) : (
+                      <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
+                        {formatarFormula((titulo ? textoCorpo : textoSemSmall).replace(/<[^>]+>/g, ''))}
+                      </p>
+                    )
+                  )}
+
+                  {/* Imagens com zoom */}
+                  {questao.imagem_principal && isValidImageUrl(questao.imagem_principal) && (
+                    <div className="my-3">
+                      <ImagemQuestao
+                        src={questao.imagem_principal}
+                        alt="Imagem da questão"
+                        tipo="principal"
+                        onExpandir={setImagemExpandida}
+                      />
+                    </div>
+                  )}
+                  {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
+                    <div className="my-3 space-y-2">
+                      {questao.imagens.filter(isValidImageUrl).map((img, idx) => (
+                        <ImagemQuestao
+                          key={idx}
+                          src={img}
+                          alt={`Imagem ${idx + 1} da questão`}
+                          tipo="extra"
+                          onExpandir={setImagemExpandida}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Fontes/Referências - com linha em branco antes */}
+                  {fontes.length > 0 && (
+                    <div
+                      className="mt-4 pt-2"
+                      style={{ borderTop: '1px solid var(--border-default)' }}
+                    >
+                      {fontes.map((fonte, index) => (
+                        <p
+                          key={index}
+                          className="text-[10px] sm:text-xs leading-relaxed italic text-right mt-1"
+                          style={{ color: 'var(--text-muted)' }}
+                          dangerouslySetInnerHTML={{ __html: fonte }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Dica */}
             {!mostrarResultado && questao.dica && (
@@ -518,7 +597,14 @@ export default function TrilhasEstudarPage() {
                         )}
                       </span>
                       <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
-                        {formatarFormula(texto as string)}
+                        {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto as string) ? (
+                          <ConteudoQuestao
+                            conteudo={texto as string}
+                            tipo="alternativa"
+                          />
+                        ) : (
+                          formatarFormula(texto as string)
+                        )}
                       </span>
                     </button>
                   )
@@ -586,6 +672,15 @@ export default function TrilhasEstudarPage() {
       </main>
 
       <BottomNav componente={componente} />
+
+      {/* Modal de imagem expandida */}
+      {imagemExpandida && (
+        <ImagemModal
+          src={imagemExpandida}
+          alt="Imagem da questão ampliada"
+          onClose={() => setImagemExpandida(null)}
+        />
+      )}
 
       {/* Modal de Conclusão */}
       {mostrarConclusao && resultadoSemana && (
