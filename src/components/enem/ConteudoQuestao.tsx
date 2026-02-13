@@ -43,6 +43,11 @@ function htmlParaMarkdown(html: string): string {
   // Converter <small> para classe especial - fonte alinhada à direita
   texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
+  // Preservar spans com classes importantes (fontes, referências)
+  texto = texto.replace(/<span\s+class="questao-fonte">([\s\S]*?)<\/span>/gi, '\n\n*$1*')
+  texto = texto.replace(/<span\s+class="ref-figura">([\s\S]*?)<\/span>/gi, '$1')
+  texto = texto.replace(/<span\s+class="ref-tabela">([\s\S]*?)<\/span>/gi, '**$1**')
+
   // Remover tags não suportadas mantendo conteúdo
   texto = texto.replace(/<\/?p>/gi, '\n')
   texto = texto.replace(/<\/?div>/gi, '\n')
@@ -242,9 +247,9 @@ export default function ConteudoQuestao({
 
   // Estilos baseados no tipo de conteúdo
   const estilosBase = {
-    contexto: 'text-sm sm:text-base leading-relaxed',
+    contexto: 'text-sm sm:text-base leading-relaxed questao-texto',
     comando: 'text-sm sm:text-base font-medium leading-relaxed',
-    alternativa: 'text-sm leading-relaxed',
+    alternativa: 'text-sm leading-snug',
     fonte: 'text-xs leading-relaxed opacity-70',
   }
 

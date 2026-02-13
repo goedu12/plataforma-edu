@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import {
   CheckCircle2,
   XCircle,
@@ -10,15 +10,14 @@ import {
   X,
   Calendar,
   BookOpen,
-  ImageOff,
-  FileText,
 } from 'lucide-react'
 import Button from './ui/Button'
 import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
 import ConteudoQuestao from './enem/ConteudoQuestao'
-import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto, extrairTituloDoTexto, separarMultiplosTextos, extrairImagensInline } from '@/lib/limpezaTexto'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, separarMultiplosTextos, extrairImagensInline } from '@/lib/limpezaTexto'
+import { formatarFormula } from '@/lib/formatacao'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 import 'katex/dist/katex.min.css'
@@ -73,13 +72,13 @@ export default function QuestaoENEM({
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  // Alternativas do ENEM (5) - com limpeza de texto
+  // Alternativas do ENEM (5) - preservar texto original para formatação correta
   const alternativas: { letra: AlternativaENEM; texto: string; imagem?: string }[] = [
-    { letra: 'A', texto: processarTexto(questao.alternativa_a), imagem: questao.imagem_a },
-    { letra: 'B', texto: processarTexto(questao.alternativa_b), imagem: questao.imagem_b },
-    { letra: 'C', texto: processarTexto(questao.alternativa_c), imagem: questao.imagem_c },
-    { letra: 'D', texto: processarTexto(questao.alternativa_d), imagem: questao.imagem_d },
-    { letra: 'E', texto: processarTexto(questao.alternativa_e), imagem: questao.imagem_e },
+    { letra: 'A', texto: questao.alternativa_a || '', imagem: questao.imagem_a },
+    { letra: 'B', texto: questao.alternativa_b || '', imagem: questao.imagem_b },
+    { letra: 'C', texto: questao.alternativa_c || '', imagem: questao.imagem_c },
+    { letra: 'D', texto: questao.alternativa_d || '', imagem: questao.imagem_d },
+    { letra: 'E', texto: questao.alternativa_e || '', imagem: questao.imagem_e },
   ]
 
   // Obter nome da área
@@ -281,7 +280,7 @@ export default function QuestaoENEM({
                       {bloco.titulo && (
                         <h4
                           className="font-bold text-xs sm:text-sm mb-2 uppercase tracking-wide"
-                          style={{ color: 'var(--text-muted)' }}
+                          style={{ color: corPrimaria, opacity: 0.8 }}
                         >
                           {bloco.titulo}
                         </h4>
@@ -303,7 +302,7 @@ export default function QuestaoENEM({
                         />
                       ) : (
                         <div
-                          className="text-sm sm:text-base leading-relaxed questao-texto"
+                          className="questao-texto"
                           style={{ color: 'var(--text-primary)' }}
                           dangerouslySetInnerHTML={{ __html: blocoTitulo ? blocoCorpo : bloco.conteudo }}
                         />
@@ -326,7 +325,7 @@ export default function QuestaoENEM({
                   />
                 ) : (
                   <div
-                    className="text-sm sm:text-base leading-relaxed questao-texto"
+                    className="questao-texto"
                     style={{ color: 'var(--text-primary)' }}
                     dangerouslySetInnerHTML={{ __html: tituloDetectado ? textoCorpo : textoSemSmall }}
                   />
@@ -482,7 +481,7 @@ export default function QuestaoENEM({
                     />
                   </div>
                 )}
-                {/* Texto da alternativa (com suporte a LaTeX) */}
+                {/* Texto da alternativa (com suporte a LaTeX e fórmulas químicas) */}
                 {texto ? (
                   /\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
                     <ConteudoQuestao
@@ -494,8 +493,9 @@ export default function QuestaoENEM({
                     <span
                       className="text-sm sm:text-base leading-snug"
                       style={{ color: 'var(--text-primary)' }}
-                      dangerouslySetInnerHTML={{ __html: texto }}
-                    />
+                    >
+                      {formatarFormula(texto)}
+                    </span>
                   )
                 ) : (
                   <span

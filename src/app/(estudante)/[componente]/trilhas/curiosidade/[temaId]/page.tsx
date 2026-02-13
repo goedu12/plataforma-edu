@@ -341,7 +341,7 @@ export default function EstudarCuriosidadePage() {
                     </h3>
                   )}
 
-                  {/* Texto do enunciado */}
+                  {/* Texto do enunciado - justificado, ocupa todo o espaço */}
                   {(titulo ? textoCorpo : textoSemSmall) && (
                     temLatex ? (
                       <ConteudoQuestao
@@ -349,8 +349,8 @@ export default function EstudarCuriosidadePage() {
                         tipo="contexto"
                       />
                     ) : (
-                      <p
-                        className="text-sm leading-relaxed"
+                      <div
+                        className="questao-texto"
                         style={{ color: 'var(--text-primary)' }}
                         dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
                       />
@@ -430,14 +430,14 @@ export default function EstudarCuriosidadePage() {
                     key={letra}
                     onClick={() => !mostrarResultado && setRespostaSelecionada(letra)}
                     disabled={mostrarResultado}
-                    className="w-full p-3 rounded-lg text-left transition-all flex items-start gap-3"
+                    className="w-full p-3 sm:p-4 rounded-xl text-left transition-all flex items-start gap-3 active:scale-[0.98]"
                     style={{
                       background: bgColor,
                       border: `1.5px solid ${borderColor}`,
                     }}
                   >
                     <span
-                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm"
                       style={{
                         background: mostrarResultado
                           ? eCorreta
