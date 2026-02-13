@@ -455,7 +455,7 @@ export default function TrilhasEstudarPage() {
                     </h3>
                   )}
 
-                  {/* Texto do enunciado */}
+                  {/* Texto do enunciado - justificado, ocupa todo o espaço */}
                   {(titulo ? textoCorpo : textoSemSmall) && (
                     temLatex ? (
                       <ConteudoQuestao
@@ -463,9 +463,11 @@ export default function TrilhasEstudarPage() {
                         tipo="contexto"
                       />
                     ) : (
-                      <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-                        {formatarFormula((titulo ? textoCorpo : textoSemSmall).replace(/<[^>]+>/g, ''))}
-                      </p>
+                      <div
+                        className="questao-texto"
+                        style={{ color: 'var(--text-primary)' }}
+                        dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
+                      />
                     )
                   )}
 

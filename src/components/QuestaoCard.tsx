@@ -249,7 +249,7 @@ export default function QuestaoCard({
               </h3>
             )}
 
-            {/* Texto do enunciado */}
+            {/* Texto do enunciado - div para suportar parágrafos internos */}
             {(titulo ? textoCorpo : textoSemSmall) && (
               temLatex ? (
                 <ConteudoQuestao
@@ -257,8 +257,8 @@ export default function QuestaoCard({
                   tipo="contexto"
                 />
               ) : (
-                <p
-                  className="text-sm sm:text-base leading-relaxed"
+                <div
+                  className="questao-texto"
                   style={{ color: 'var(--text-primary)' }}
                   dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
                 />

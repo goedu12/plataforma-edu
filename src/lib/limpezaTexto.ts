@@ -241,12 +241,61 @@ export function isTextoValido(texto: string | null | undefined): boolean {
 }
 
 /**
+ * Formata fórmulas químicas comuns para Unicode (H2O → H₂O, CO2 → CO₂)
+ * Aplicado no texto ANTES da conversão para HTML
+ */
+function formatarQuimica(texto: string): string {
+  if (!texto) return ''
+
+  const formulas: [RegExp, string][] = [
+    // Ácidos
+    [/\bH2SO4\b/g, 'H₂SO₄'], [/\bH3PO4\b/g, 'H₃PO₄'], [/\bHNO3\b/g, 'HNO₃'],
+    [/\bH2CO3\b/g, 'H₂CO₃'], [/\bH2S\b/g, 'H₂S'], [/\bH2O2\b/g, 'H₂O₂'],
+    // Bases
+    [/\bCa\(OH\)2\b/g, 'Ca(OH)₂'], [/\bMg\(OH\)2\b/g, 'Mg(OH)₂'],
+    [/\bAl\(OH\)3\b/g, 'Al(OH)₃'], [/\bNH4OH\b/g, 'NH₄OH'],
+    // Óxidos e moléculas comuns
+    [/\bCO2\b/g, 'CO₂'], [/\bH2O\b/g, 'H₂O'], [/\bSO2\b/g, 'SO₂'], [/\bSO3\b/g, 'SO₃'],
+    [/\bNO2\b/g, 'NO₂'], [/\bN2O\b/g, 'N₂O'], [/\bFe2O3\b/g, 'Fe₂O₃'],
+    [/\bAl2O3\b/g, 'Al₂O₃'], [/\bSiO2\b/g, 'SiO₂'],
+    // Gases
+    [/\bO2\b/g, 'O₂'], [/\bO3\b/g, 'O₃'], [/\bN2\b/g, 'N₂'], [/\bH2\b/g, 'H₂'],
+    [/\bCl2\b/g, 'Cl₂'], [/\bNH3\b/g, 'NH₃'],
+    // Orgânicos
+    [/\bCH4\b/g, 'CH₄'], [/\bC2H5OH\b/g, 'C₂H₅OH'], [/\bC6H12O6\b/g, 'C₆H₁₂O₆'],
+    [/\bCH3COOH\b/g, 'CH₃COOH'], [/\bC6H6\b/g, 'C₆H₆'],
+    // Sais
+    [/\bCaCO3\b/g, 'CaCO₃'], [/\bNa2CO3\b/g, 'Na₂CO₃'], [/\bKMnO4\b/g, 'KMnO₄'],
+    // Setas de reação
+    [/<=>/g, '⇌'], [/(?<!=)->/g, '→'],
+    // Notação científica
+    [/(\d)\s*[xX×]\s*10\^(-?\d+)/g, (_, n, exp) => {
+      const superMap: Record<string, string> = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻' }
+      return n + '×10' + exp.split('').map((c: string) => superMap[c] || c).join('')
+    }],
+  ]
+
+  let resultado = texto
+  for (const [padrao, sub] of formulas) {
+    if (typeof sub === 'string') {
+      resultado = resultado.replace(padrao, sub)
+    } else {
+      resultado = resultado.replace(padrao, sub as (...args: string[]) => string)
+    }
+  }
+  return resultado
+}
+
+/**
  * Formata LaTeX básico para exibição
  */
 export function formatarMatematica(texto: string): string {
   if (!texto) return ''
 
-  let formatado = texto
+  // Primeiro aplicar formatação química
+  let formatado = formatarQuimica(texto)
+
+  formatado = formatado
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1/$2)')
     .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
     .replace(/\\sqrt\[(\d+)\]\{([^}]+)\}/g, '$1√($2)')

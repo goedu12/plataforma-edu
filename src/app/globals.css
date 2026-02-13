@@ -2324,33 +2324,16 @@ img {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   FORMATAÇÃO QUESTÕES ENEM - Padrão Oficial
+   FORMATAÇÃO QUESTÕES - Padrão Oficial ENEM
+   Texto justificado, parágrafos com recuo, fontes à direita
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Container do contexto da questão */
+/* Container do contexto da questão - consolidado */
 .questao-contexto {
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
-/* Título em negrito com espaçamento */
-.questao-contexto strong:first-child,
-.questao-texto strong:first-child {
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: var(--text-primary);
-}
-
-@media (min-width: 640px) {
-  .questao-contexto strong:first-child,
-  .questao-texto strong:first-child {
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-  }
-}
-
-/* Texto do enunciado - justificado com recuo */
+/* ── Texto do enunciado - justificado, ocupa todo o espaço ── */
 .questao-texto {
   font-size: 0.875rem;
   line-height: 1.75;
@@ -2358,6 +2341,7 @@ img {
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
+  word-break: break-word;
 }
 
 @media (min-width: 640px) {
@@ -2367,7 +2351,7 @@ img {
   }
 }
 
-/* Parágrafos com recuo e espaçamento entre eles */
+/* ── Parágrafos dentro do contexto - recuo na primeira linha ── */
 .questao-texto p,
 .questao-contexto p {
   margin-bottom: 0.75rem;
@@ -2377,23 +2361,41 @@ img {
   -webkit-hyphens: auto;
 }
 
-/* Primeiro parágrafo após título sem recuo (estilo editorial) */
-.questao-texto p:first-child,
+/* Primeiro parágrafo e parágrafo após título: sem recuo (estilo editorial) */
+.questao-texto > p:first-child,
+.questao-contexto > p:first-child,
 .questao-contexto h3 + p,
-.questao-contexto h4 + p {
+.questao-contexto h4 + p,
+.questao-texto h3 + p,
+.questao-texto h4 + p {
   text-indent: 0;
 }
 
-.questao-texto p:last-child,
-.questao-contexto p:last-child {
+/* Último parágrafo sem margem inferior */
+.questao-texto > p:last-child,
+.questao-contexto > p:last-child {
   margin-bottom: 0;
 }
 
-/* Conteudo questão (ReactMarkdown) - também justificado */
+/* ── Negrito e itálico dentro do texto ── */
+.questao-texto strong,
+.questao-contexto strong {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.questao-texto em,
+.questao-contexto em {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ── ConteudoQuestao (ReactMarkdown com KaTeX) ── */
 .conteudo-questao {
   text-align: justify;
   hyphens: auto;
   -webkit-hyphens: auto;
+  word-break: break-word;
 }
 
 .conteudo-questao p {
@@ -2402,11 +2404,15 @@ img {
   text-align: justify;
 }
 
-.conteudo-questao p:first-child {
+.conteudo-questao > p:first-child {
   text-indent: 0;
 }
 
-/* Fonte/Referência - Itálico e alinhada à direita */
+.conteudo-questao > p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Fonte/Referência bibliográfica ── */
 .questao-fonte,
 .fonte-pequena {
   display: block;
@@ -2425,29 +2431,13 @@ img {
   }
 }
 
-/* Identificadores de texto (TEXTO I, TEXTO II) */
-.questao-contexto strong[class*="texto-"],
-.questao-texto strong {
-  display: block;
-  font-weight: 700;
-  margin-top: 1.25rem;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
-}
-
-/* Citações e trechos em destaque */
-.questao-contexto em,
-.questao-texto em {
-  font-style: italic;
-  color: var(--text-secondary);
-}
-
-/* Espaçamento para imagens dentro do contexto */
-.questao-contexto .imagem-container {
+/* ── Imagens dentro do contexto ── */
+.questao-contexto .imagem-container,
+.questao-texto .imagem-container {
   margin: 1rem 0;
 }
 
-/* Responsividade para telas muito pequenas */
+/* ── Responsividade para telas muito pequenas ── */
 @media (max-width: 374px) {
   .questao-contexto {
     padding: 0.75rem;
@@ -2455,6 +2445,7 @@ img {
 
   .questao-texto {
     font-size: 0.8125rem;
+    line-height: 1.7;
   }
 
   .questao-fonte,
