@@ -268,21 +268,19 @@ function formatarQuimica(texto: string): string {
     [/\bCaCO3\b/g, 'CaCO₃'], [/\bNa2CO3\b/g, 'Na₂CO₃'], [/\bKMnO4\b/g, 'KMnO₄'],
     // Setas de reação
     [/<=>/g, '⇌'], [/(?<!=)->/g, '→'],
-    // Notação científica
-    [/(\d)\s*[xX×]\s*10\^(-?\d+)/g, (_, n, exp) => {
-      const superMap: Record<string, string> = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻' }
-      return n + '×10' + exp.split('').map((c: string) => superMap[c] || c).join('')
-    }],
   ]
 
   let resultado = texto
   for (const [padrao, sub] of formulas) {
-    if (typeof sub === 'string') {
-      resultado = resultado.replace(padrao, sub)
-    } else {
-      resultado = resultado.replace(padrao, sub as (...args: string[]) => string)
-    }
+    resultado = resultado.replace(padrao, sub)
   }
+
+  // Notação científica: 5x10^12 → 5×10¹²
+  const superMap: Record<string, string> = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻' }
+  resultado = resultado.replace(/(\d)\s*[xX×]\s*10\^(-?\d+)/g, (_match, n, exp) => {
+    return n + '×10' + exp.split('').map((c: string) => superMap[c] || c).join('')
+  })
+
   return resultado
 }
 
