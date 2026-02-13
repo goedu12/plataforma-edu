@@ -55,9 +55,8 @@ function htmlParaMarkdown(html: string): string {
   return texto
 }
 
-// Detecta se o texto contém fórmulas LaTeX
+// Detecta se o texto contém fórmulas LaTeX ou notação científica
 function contemLatex(texto: string): boolean {
-  // Padrões comuns de LaTeX
   const padroes = [
     /\$[^$]+\$/,           // $inline$
     /\$\$[^$]+\$\$/,       // $$block$$
@@ -70,6 +69,12 @@ function contemLatex(texto: string): boolean {
     /\^{[^}]+}/,           // ^{expoente}
     /_{[^}]+}/,            // _{subscrito}
     /\\[a-zA-Z]+\{/,       // qualquer comando LaTeX
+    /\\times/,             // multiplicação LaTeX
+    /\\div/,               // divisão LaTeX
+    /\\pm/,                // mais ou menos LaTeX
+    /\\vec\{/,             // vetor LaTeX
+    /\\overline\{/,        // barra sobre
+    /\\Delta/,             // delta LaTeX
   ]
 
   return padroes.some(p => p.test(texto))
@@ -89,19 +94,100 @@ function formatarSimbolos(texto: string): string {
     [/(\d+)\s*m³/g, '$1 m³'],
     [/(\d+)\s*cm²/g, '$1 cm²'],
     [/(\d+)\s*cm³/g, '$1 cm³'],
+    [/(\d+)\s*J\/mol/g, '$1 J/mol'],
+    [/(\d+)\s*kJ\/mol/g, '$1 kJ/mol'],
+    [/(\d+)\s*g\/mol/g, '$1 g/mol'],
+    [/(\d+)\s*mol\/L/g, '$1 mol/L'],
+    [/(\d+)\s*atm/g, '$1 atm'],
+    [/(\d+)\s*kPa/g, '$1 kPa'],
 
     // Notação científica (converte para LaTeX)
     [/(\d+)\s*[xX×]\s*10\^(\d+)/g, '$1 \\times 10^{$2}'],
     [/(\d+)\s*[xX×]\s*10\^(-?\d+)/g, '$1 \\times 10^{$2}'],
 
-    // Símbolos químicos com índices
-    [/CO2/g, 'CO₂'],
-    [/H2O/g, 'H₂O'],
-    [/O2/g, 'O₂'],
-    [/N2/g, 'N₂'],
-    [/CO₂/g, 'CO₂'], // Já formatado
+    // Fórmulas químicas comuns - Ácidos
+    [/\bH2SO4\b/g, 'H₂SO₄'],
+    [/\bH3PO4\b/g, 'H₃PO₄'],
+    [/\bHNO3\b/g, 'HNO₃'],
+    [/\bHCl\b/g, 'HCl'],
+    [/\bH2CO3\b/g, 'H₂CO₃'],
+    [/\bH2S\b/g, 'H₂S'],
+    [/\bH2O2\b/g, 'H₂O₂'],
+    // Bases
+    [/\bCa\(OH\)2\b/g, 'Ca(OH)₂'],
+    [/\bMg\(OH\)2\b/g, 'Mg(OH)₂'],
+    [/\bAl\(OH\)3\b/g, 'Al(OH)₃'],
+    [/\bFe\(OH\)2\b/g, 'Fe(OH)₂'],
+    [/\bFe\(OH\)3\b/g, 'Fe(OH)₃'],
+    [/\bNH4OH\b/g, 'NH₄OH'],
+    // Sais
+    [/\bCaCO3\b/g, 'CaCO₃'],
+    [/\bNa2CO3\b/g, 'Na₂CO₃'],
+    [/\bNaHCO3\b/g, 'NaHCO₃'],
+    [/\bCaSO4\b/g, 'CaSO₄'],
+    [/\bBaSO4\b/g, 'BaSO₄'],
+    [/\bAgNO3\b/g, 'AgNO₃'],
+    [/\bFeCl3\b/g, 'FeCl₃'],
+    [/\bFeCl2\b/g, 'FeCl₂'],
+    [/\bKMnO4\b/g, 'KMnO₄'],
+    [/\bK2Cr2O7\b/g, 'K₂Cr₂O₇'],
+    [/\bNa2SO4\b/g, 'Na₂SO₄'],
+    // Óxidos
+    [/\bCO2\b/g, 'CO₂'],
+    [/\bH2O\b/g, 'H₂O'],
+    [/\bSO2\b/g, 'SO₂'],
+    [/\bSO3\b/g, 'SO₃'],
+    [/\bNO2\b/g, 'NO₂'],
+    [/\bN2O\b/g, 'N₂O'],
+    [/\bN2O4\b/g, 'N₂O₄'],
+    [/\bN2O5\b/g, 'N₂O₅'],
+    [/\bFe2O3\b/g, 'Fe₂O₃'],
+    [/\bFe3O4\b/g, 'Fe₃O₄'],
+    [/\bAl2O3\b/g, 'Al₂O₃'],
+    [/\bSiO2\b/g, 'SiO₂'],
+    [/\bP2O5\b/g, 'P₂O₅'],
+    // Gases
+    [/\bO2\b/g, 'O₂'],
+    [/\bO3\b/g, 'O₃'],
+    [/\bN2\b/g, 'N₂'],
+    [/\bH2\b/g, 'H₂'],
+    [/\bCl2\b/g, 'Cl₂'],
+    [/\bF2\b/g, 'F₂'],
+    [/\bNH3\b/g, 'NH₃'],
+    // Compostos orgânicos
+    [/\bCH4\b/g, 'CH₄'],
+    [/\bC2H6\b/g, 'C₂H₆'],
+    [/\bC2H4\b/g, 'C₂H₄'],
+    [/\bC2H2\b/g, 'C₂H₂'],
+    [/\bC3H8\b/g, 'C₃H₈'],
+    [/\bC6H12O6\b/g, 'C₆H₁₂O₆'],
+    [/\bC2H5OH\b/g, 'C₂H₅OH'],
+    [/\bCH3OH\b/g, 'CH₃OH'],
+    [/\bCH3COOH\b/g, 'CH₃COOH'],
+    [/\bC6H6\b/g, 'C₆H₆'],
+    // Íons comuns
+    [/\bNH4\+/g, 'NH₄⁺'],
+    [/\bSO4\^?2-/g, 'SO₄²⁻'],
+    [/\bNO3-/g, 'NO₃⁻'],
+    [/\bCO3\^?2-/g, 'CO₃²⁻'],
+    [/\bHCO3-/g, 'HCO₃⁻'],
+    [/\bPO4\^?3-/g, 'PO₄³⁻'],
+    [/\bOH-/g, 'OH⁻'],
+    [/\bMnO4-/g, 'MnO₄⁻'],
+    [/\bFe\^?2\+/g, 'Fe²⁺'],
+    [/\bFe\^?3\+/g, 'Fe³⁺'],
+    [/\bCu\^?2\+/g, 'Cu²⁺'],
+    [/\bZn\^?2\+/g, 'Zn²⁺'],
+    [/\bAl\^?3\+/g, 'Al³⁺'],
+    [/\bCa\^?2\+/g, 'Ca²⁺'],
+    [/\bMg\^?2\+/g, 'Mg²⁺'],
+    [/\bNa\+/g, 'Na⁺'],
+    [/\bK\+/g, 'K⁺'],
+    [/\bH\+/g, 'H⁺'],
+    [/\bCl-/g, 'Cl⁻'],
 
-    // Setas
+    // Setas de reação
+    [/<=>/g, '⇌'],
     [/->/g, '→'],
     [/<->/g, '↔'],
     [/=>/g, '⇒'],
@@ -113,6 +199,9 @@ function formatarSimbolos(texto: string): string {
     [/<=/g, '≤'],
     [/!=/g, '≠'],
     [/~=/g, '≈'],
+
+    // Letras gregas comuns em contexto científico
+    [/\bdelta\b/gi, 'Δ'],
   ]
 
   let resultado = texto

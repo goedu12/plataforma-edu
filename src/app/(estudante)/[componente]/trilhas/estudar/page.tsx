@@ -22,7 +22,7 @@ import ImagemModal, { ImagemQuestao } from '@/components/ui/ImagemModal'
 import ConteudoQuestao from '@/components/enem/ConteudoQuestao'
 import type { Componente } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
 import 'katex/dist/katex.min.css'
 
 interface Alternativas {
@@ -596,16 +596,42 @@ export default function TrilhasEstudarPage() {
                           letra
                         )}
                       </span>
-                      <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
-                        {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto as string) ? (
-                          <ConteudoQuestao
-                            conteudo={texto as string}
-                            tipo="alternativa"
-                          />
-                        ) : (
-                          formatarFormula(texto as string)
-                        )}
-                      </span>
+                      <div className="texto-alternativa-chromebook flex-1 min-w-0">
+                        {(() => {
+                          const textoStr = texto as string
+                          const { imagens: imgAlt, textoLimpo: textoAlt } = extrairImagensInline(textoStr)
+                          const textoExibir = imgAlt.length > 0 ? textoAlt : textoStr
+                          return (
+                            <>
+                              {imgAlt.length > 0 && (
+                                <div className="mb-1">
+                                  {imgAlt.map((img, idx) => (
+                                    <ImagemQuestao
+                                      key={idx}
+                                      src={img}
+                                      alt={`Alternativa ${letra}`}
+                                      tipo="alternativa"
+                                      onExpandir={setImagemExpandida}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              {textoExibir && (
+                                <span style={{ color: 'var(--text-primary)' }}>
+                                  {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(textoExibir) ? (
+                                    <ConteudoQuestao
+                                      conteudo={textoExibir}
+                                      tipo="alternativa"
+                                    />
+                                  ) : (
+                                    formatarFormula(textoExibir)
+                                  )}
+                                </span>
+                              )}
+                            </>
+                          )
+                        })()}
+                      </div>
                     </button>
                   )
                 })}

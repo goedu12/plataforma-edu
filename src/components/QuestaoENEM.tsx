@@ -18,7 +18,7 @@ import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
 import ConteudoQuestao from './enem/ConteudoQuestao'
-import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
+import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto, extrairTituloDoTexto, separarMultiplosTextos, extrairImagensInline } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 import 'katex/dist/katex.min.css'
@@ -233,22 +233,31 @@ export default function QuestaoENEM({
         const contextoProcessado = processarContexto(questao.contexto)
         const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
 
-        // Extrai título do texto-base (se houver)
-        const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+        // Separa em múltiplos textos (TEXTO I, TEXTO II, etc.)
+        const blocos = separarMultiplosTextos(textoSemSmall)
+        const temMultiplosTextos = blocos.length > 1
+
+        // Extrai título do texto-base (se for bloco único)
+        const { titulo: tituloDetectado, corpo: textoCorpo } = !temMultiplosTextos
+          ? extrairTituloDoTexto(textoSemSmall)
+          : { titulo: null, corpo: textoSemSmall }
 
         // Detecta se há fórmulas LaTeX no contexto
-        const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.contexto || '')
+        const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int|\\times|\\div|\\vec/.test(questao.contexto || '')
 
         // Também usar o título da questão (campo titulo) se existir
-        const tituloExibir = questao.titulo || titulo
+        const tituloExibir = questao.titulo || tituloDetectado
+
+        // Extrair imagens inline do contexto
+        const { imagens: imagensInline } = extrairImagensInline(questao.contexto || '')
 
         return (
           <div
             className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto questao-contexto"
             style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
           >
-            {/* 1. Título em negrito (se houver) */}
-            {tituloExibir && (
+            {/* 1. Título em negrito (se houver e bloco único) */}
+            {tituloExibir && !temMultiplosTextos && (
               <h3
                 className="font-bold text-sm sm:text-base mb-3 pb-1"
                 style={{ color: 'var(--text-primary)' }}
@@ -257,19 +266,71 @@ export default function QuestaoENEM({
               </h3>
             )}
 
-            {/* 2. Texto do contexto/enunciado (SEM as fontes, SEM o título) */}
-            {(titulo ? textoCorpo : textoSemSmall) && (
-              temLatex ? (
-                <ConteudoQuestao
-                  conteudo={titulo ? textoCorpo : textoSemSmall}
-                  tipo="contexto"
-                />
-              ) : (
-                <div
-                  className="text-sm sm:text-base leading-relaxed questao-texto"
-                  style={{ color: 'var(--text-primary)' }}
-                  dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
-                />
+            {/* 2. Renderizar blocos de texto */}
+            {temMultiplosTextos ? (
+              // Múltiplos textos (TEXTO I, TEXTO II, etc.)
+              <div className="space-y-4">
+                {blocos.map((bloco, idx) => {
+                  const { titulo: blocoTitulo, corpo: blocoCorpo } = bloco.titulo
+                    ? { titulo: null, corpo: bloco.conteudo }
+                    : extrairTituloDoTexto(bloco.conteudo)
+
+                  return (
+                    <div key={idx}>
+                      {/* Cabeçalho do bloco (TEXTO I, TEXTO II...) */}
+                      {bloco.titulo && (
+                        <h4
+                          className="font-bold text-xs sm:text-sm mb-2 uppercase tracking-wide"
+                          style={{ color: 'var(--text-muted)' }}
+                        >
+                          {bloco.titulo}
+                        </h4>
+                      )}
+                      {/* Título interno do bloco */}
+                      {blocoTitulo && (
+                        <h3
+                          className="font-bold text-sm sm:text-base mb-2"
+                          style={{ color: 'var(--text-primary)' }}
+                        >
+                          {blocoTitulo}
+                        </h3>
+                      )}
+                      {/* Conteúdo do bloco */}
+                      {temLatex ? (
+                        <ConteudoQuestao
+                          conteudo={blocoTitulo ? blocoCorpo : bloco.conteudo}
+                          tipo="contexto"
+                        />
+                      ) : (
+                        <div
+                          className="text-sm sm:text-base leading-relaxed questao-texto"
+                          style={{ color: 'var(--text-primary)' }}
+                          dangerouslySetInnerHTML={{ __html: blocoTitulo ? blocoCorpo : bloco.conteudo }}
+                        />
+                      )}
+                      {/* Separador entre blocos */}
+                      {idx < blocos.length - 1 && (
+                        <div className="mt-3 pt-1" style={{ borderBottom: '1px dashed var(--border-default)' }} />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              // Bloco único
+              (tituloDetectado ? textoCorpo : textoSemSmall) && (
+                temLatex ? (
+                  <ConteudoQuestao
+                    conteudo={tituloDetectado ? textoCorpo : textoSemSmall}
+                    tipo="contexto"
+                  />
+                ) : (
+                  <div
+                    className="text-sm sm:text-base leading-relaxed questao-texto"
+                    style={{ color: 'var(--text-primary)' }}
+                    dangerouslySetInnerHTML={{ __html: tituloDetectado ? textoCorpo : textoSemSmall }}
+                  />
+                )
               )
             )}
 
@@ -299,6 +360,26 @@ export default function QuestaoENEM({
                     src={img}
                     alt={`Imagem ${idx + 2} da questão`}
                     tipo="extra"
+                    onExpandir={setImagemExpandida}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* 3c. Imagens inline extraídas do texto */}
+            {imagensInline.length > 0 && !isValidImageUrl(questao.imagem_principal) && (
+              <div className={`
+                grid gap-3 my-4
+                ${imagensInline.length === 1
+                  ? 'grid-cols-1 max-w-lg mx-auto'
+                  : 'grid-cols-1 sm:grid-cols-2'}
+              `}>
+                {imagensInline.map((img, idx) => (
+                  <ImagemQuestao
+                    key={`inline-${idx}`}
+                    src={img}
+                    alt={`Imagem ${idx + 1} do contexto`}
+                    tipo={imagensInline.length === 1 ? 'principal' : 'extra'}
                     onExpandir={setImagemExpandida}
                   />
                 ))}
@@ -389,17 +470,15 @@ export default function QuestaoENEM({
               </span>
 
               {/* Conteúdo da alternativa */}
-              <div className="flex-1 min-w-0 flex items-center">
-                {/* Imagem da alternativa (se houver e for válida) */}
+              <div className="flex-1 min-w-0">
+                {/* Imagem da alternativa (se houver e for válida) - AMPLIÁVEL */}
                 {isValidImageUrl(imagem) && (
-                  <div className="mr-3 flex-shrink-0">
-                    <SafeImage
+                  <div className="mb-2">
+                    <ImagemQuestao
                       src={imagem}
                       alt={`Alternativa ${letra}`}
-                      width={120}
-                      height={80}
-                      className="rounded object-contain max-h-[60px] w-auto"
-                      showPlaceholder={false}
+                      tipo="alternativa"
+                      onExpandir={setImagemExpandida}
                     />
                   </div>
                 )}
