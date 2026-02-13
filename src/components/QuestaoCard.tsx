@@ -8,7 +8,7 @@ import SafeImage, { isValidImageUrl } from './ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
 import ConteudoQuestao from './enem/ConteudoQuestao'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
 import type { Questao, Componente, ModoResposta } from '@/types'
 import 'katex/dist/katex.min.css'
 
@@ -306,16 +306,18 @@ export default function QuestaoCard({
       <div className="space-y-2 sm:space-y-3 flex-shrink-0">
         {alternativas.map(({ letra, texto }) => {
           const style = getAlternativaStyle(letra)
+          const { imagens: imgAlt, textoLimpo: textoAlt } = extrairImagensInline(texto)
+          const textoExibir = imgAlt.length > 0 ? textoAlt : texto
           return (
             <button
               key={letra}
               onClick={() => !feedback && !loading && setSelecionada(letra)}
               disabled={!!feedback || loading}
-              className="w-full min-h-[52px] sm:min-h-[56px] px-3 sm:px-4 py-3 rounded-xl flex items-center gap-3 transition-all active:scale-[0.98] text-left"
+              className="w-full min-h-[52px] sm:min-h-[56px] px-3 sm:px-4 py-3 rounded-xl flex items-start gap-3 transition-all active:scale-[0.98] text-left"
               style={style}
             >
               <span
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base mt-0.5"
                 style={{
                   background: feedback && letra === feedback.respostaCorreta
                     ? 'var(--success)'
@@ -337,16 +339,35 @@ export default function QuestaoCard({
                   letra
                 )}
               </span>
-              <span className="text-sm sm:text-base flex-1" style={{ color: 'var(--text-primary)' }}>
-                {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
-                  <ConteudoQuestao
-                    conteudo={texto}
-                    tipo="alternativa"
-                  />
-                ) : (
-                  formatarFormula(texto)
+              <div className="flex-1 min-w-0">
+                {/* Imagens inline da alternativa - com zoom */}
+                {imgAlt.length > 0 && (
+                  <div className="mb-2">
+                    {imgAlt.map((img, idx) => (
+                      <ImagemQuestao
+                        key={idx}
+                        src={img}
+                        alt={`Alternativa ${letra}`}
+                        tipo="alternativa"
+                        onExpandir={setImagemExpandida}
+                      />
+                    ))}
+                  </div>
                 )}
-              </span>
+                {/* Texto da alternativa */}
+                {textoExibir && (
+                  <span className="text-sm sm:text-base leading-snug" style={{ color: 'var(--text-primary)' }}>
+                    {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(textoExibir) ? (
+                      <ConteudoQuestao
+                        conteudo={textoExibir}
+                        tipo="alternativa"
+                      />
+                    ) : (
+                      formatarFormula(textoExibir)
+                    )}
+                  </span>
+                )}
+              </div>
             </button>
           )
         })}

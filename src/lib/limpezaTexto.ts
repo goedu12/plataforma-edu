@@ -783,6 +783,112 @@ export function extrairTituloDoTexto(texto: string): {
 }
 
 /**
+ * Separa texto que contém múltiplos trechos (TEXTO I, TEXTO II, etc.)
+ * Retorna um array de blocos, cada um com título opcional e conteúdo.
+ * Se o texto não tem múltiplos blocos, retorna um único bloco sem título.
+ */
+export function separarMultiplosTextos(texto: string): {
+  titulo: string | null
+  conteudo: string
+}[] {
+  if (!texto || typeof texto !== 'string') {
+    return [{ titulo: null, conteudo: '' }]
+  }
+
+  // Padrões que indicam múltiplos textos/trechos
+  const padraoTexto = /(?:^|\n|<br\s*\/?>)\s*(TEXTO\s+[IVX\d]+|Texto\s+[IVX\d]+|TRECHO\s+[IVX\d]+|Trecho\s+[IVX\d]+|FRAGMENTO\s+[IVX\d]+|Fragmento\s+[IVX\d]+)\s*(?:\n|<br\s*\/?>)/gi
+
+  const matches: { index: number; titulo: string }[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = padraoTexto.exec(texto)) !== null) {
+    matches.push({
+      index: match.index,
+      titulo: match[1].trim()
+    })
+  }
+
+  // Se não há múltiplos textos, retornar como um bloco único
+  if (matches.length < 2) {
+    return [{ titulo: null, conteudo: texto }]
+  }
+
+  // Separar os blocos
+  const blocos: { titulo: string | null; conteudo: string }[] = []
+
+  // Conteúdo antes do primeiro texto (se houver)
+  const antesDosPrimeiro = texto.substring(0, matches[0].index).trim()
+  if (antesDosPrimeiro) {
+    blocos.push({ titulo: null, conteudo: antesDosPrimeiro })
+  }
+
+  // Cada bloco de texto
+  for (let i = 0; i < matches.length; i++) {
+    const inicio = matches[i].index
+    const fim = i < matches.length - 1 ? matches[i + 1].index : texto.length
+
+    let conteudo = texto.substring(inicio, fim)
+    // Remover o marcador do título do conteúdo
+    conteudo = conteudo.replace(new RegExp(`^\\s*(\\n|<br\\s*\\/?>)?\\s*${matches[i].titulo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(\\n|<br\\s*\\/?>)?`, 'i'), '').trim()
+
+    blocos.push({
+      titulo: matches[i].titulo,
+      conteudo: conteudo
+    })
+  }
+
+  return blocos
+}
+
+/**
+ * Extrai URLs de imagens embutidas em texto (inline)
+ * Retorna as URLs encontradas e o texto limpo (sem as URLs)
+ */
+export function extrairImagensInline(texto: string): {
+  imagens: string[]
+  textoLimpo: string
+} {
+  if (!texto || typeof texto !== 'string') {
+    return { imagens: [], textoLimpo: '' }
+  }
+
+  const imagens: string[] = []
+  let textoLimpo = texto
+
+  // Padrão: URLs de imagem diretas no texto
+  const imgUrlRegex = /https?:\/\/[^\s<>"']+\.(png|jpg|jpeg|gif|webp|svg)(\?[^\s<>"']*)?/gi
+  let urlMatch: RegExpExecArray | null
+
+  while ((urlMatch = imgUrlRegex.exec(texto)) !== null) {
+    const url = urlMatch[0]
+    if (isValidImageUrl(url) && !imagens.includes(url)) {
+      imagens.push(url)
+    }
+  }
+
+  // Padrão: Tags <img> no texto
+  const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi
+  while ((urlMatch = imgTagRegex.exec(texto)) !== null) {
+    const url = urlMatch[1]
+    if (isValidImageUrl(url) && !imagens.includes(url)) {
+      imagens.push(url)
+    }
+    // Remover a tag <img> do texto
+    textoLimpo = textoLimpo.replace(urlMatch[0], '')
+  }
+
+  // Remover URLs de imagem soltas do texto
+  for (const img of imagens) {
+    textoLimpo = textoLimpo.replace(img, '')
+  }
+
+  // Limpar espaços extras
+  textoLimpo = textoLimpo.replace(/\n\s*\n\s*\n/g, '\n\n').trim()
+
+  return { imagens, textoLimpo }
+}
+
+/**
  * Extrai todas as imagens válidas de uma questão
  */
 export function extrairImagensQuestao(questao: {

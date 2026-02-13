@@ -2350,11 +2350,14 @@ img {
   }
 }
 
-/* Texto do enunciado */
+/* Texto do enunciado - justificado com recuo */
 .questao-texto {
   font-size: 0.875rem;
   line-height: 1.75;
   color: var(--text-primary);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }
 
 @media (min-width: 640px) {
@@ -2364,15 +2367,43 @@ img {
   }
 }
 
-/* Parágrafos com espaçamento */
+/* Parágrafos com recuo e espaçamento entre eles */
 .questao-texto p,
 .questao-contexto p {
   margin-bottom: 0.75rem;
+  text-indent: 1.5em;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Primeiro parágrafo após título sem recuo (estilo editorial) */
+.questao-texto p:first-child,
+.questao-contexto h3 + p,
+.questao-contexto h4 + p {
+  text-indent: 0;
 }
 
 .questao-texto p:last-child,
 .questao-contexto p:last-child {
   margin-bottom: 0;
+}
+
+/* Conteudo questão (ReactMarkdown) - também justificado */
+.conteudo-questao {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+.conteudo-questao p {
+  text-indent: 1.5em;
+  margin-bottom: 0.75rem;
+  text-align: justify;
+}
+
+.conteudo-questao p:first-child {
+  text-indent: 0;
 }
 
 /* Fonte/Referência - Itálico e alinhada à direita */

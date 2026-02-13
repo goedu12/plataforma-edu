@@ -47,6 +47,33 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'i.imgur.com',
       },
+      // Wikipedia/Wikimedia (imagens de questões)
+      {
+        protocol: 'https',
+        hostname: '*.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.wikipedia.org',
+      },
+      // INEP / MEC (provas oficiais)
+      {
+        protocol: 'https',
+        hostname: '*.inep.gov.br',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.mec.gov.br',
+      },
+      // Catch-all para imagens educacionais
+      {
+        protocol: 'https',
+        hostname: '*.wp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.staticflickr.com',
+      },
     ],
     minimumCacheTTL: 60,
     // Desabilitar otimização para URLs externas problemáticas

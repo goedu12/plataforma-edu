@@ -22,7 +22,7 @@ import { isValidImageUrl } from '@/components/ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from '@/components/ui/ImagemModal'
 import ConteudoQuestao from '@/components/enem/ConteudoQuestao'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto } from '@/lib/limpezaTexto'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
 import type { Componente } from '@/types'
 import 'katex/dist/katex.min.css'
 
@@ -461,16 +461,41 @@ export default function EstudarCuriosidadePage() {
                         letra
                       )}
                     </span>
-                    <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                      {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
-                        <ConteudoQuestao
-                          conteudo={texto}
-                          tipo="alternativa"
-                        />
-                      ) : (
-                        formatarFormula(texto)
-                      )}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      {(() => {
+                        const { imagens: imgAlt, textoLimpo: textoAlt } = extrairImagensInline(texto)
+                        const textoExibir = imgAlt.length > 0 ? textoAlt : texto
+                        return (
+                          <>
+                            {imgAlt.length > 0 && (
+                              <div className="mb-1.5">
+                                {imgAlt.map((img, idx) => (
+                                  <ImagemQuestao
+                                    key={idx}
+                                    src={img}
+                                    alt={`Alternativa ${letra}`}
+                                    tipo="alternativa"
+                                    onExpandir={setImagemExpandida}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            {textoExibir && (
+                              <span className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                                {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(textoExibir) ? (
+                                  <ConteudoQuestao
+                                    conteudo={textoExibir}
+                                    tipo="alternativa"
+                                  />
+                                ) : (
+                                  formatarFormula(textoExibir)
+                                )}
+                              </span>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
                   </button>
                 )
               })}
