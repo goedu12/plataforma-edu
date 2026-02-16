@@ -17,15 +17,18 @@ import { ENEM_CONFIG } from '@/types'
 // GET /api/enem?modo=aleatorio                        → questão aleatória com filtros
 // ═══════════════════════════════════════════════════════════════════════════
 
-const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/'
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
 
 // Construir URL completa de imagem do storage
 function buildImageUrl(path: string | null | undefined): string | null {
   if (!path) return null
+  const trimmed = path.trim()
+  // Filtrar valores inválidos importados do CSV/API
+  if (!trimmed || ['nan', 'none', 'null', 'undefined', 'NaN', 'None'].includes(trimmed)) return null
   // Se já é URL absoluta, retornar como está
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) return trimmed
   // Construir URL do storage
-  return `${STORAGE_BASE_URL}${path}`
+  return `${STORAGE_BASE_URL}${trimmed}`
 }
 
 // Processar enunciado_html: converter caminhos relativos de imagens para URLs absolutas

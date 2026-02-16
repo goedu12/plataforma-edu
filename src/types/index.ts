@@ -640,7 +640,7 @@ export const ENEM_CONFIG = {
   NIVEL_MINIMO: 'EM' as NivelEnsino,
 
   // Storage bucket para imagens ENEM 2024/2025
-  STORAGE_BASE_URL: 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/',
+  STORAGE_BASE_URL: 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/',
 
   // Mapeamento de áreas descritivas do banco para AreaENEM
   AREA_DESCRITIVA_TO_AREA: {

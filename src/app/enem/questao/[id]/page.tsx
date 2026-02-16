@@ -29,7 +29,7 @@ import { processarContexto, isValidImageUrl } from '@/lib/limpezaTexto'
 // - ?modo=simulado               → navegação sequencial prev/next
 // ═══════════════════════════════════════════════════════════════════════════
 
-const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/'
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
 
 interface Alternativa {
   letra: string
@@ -467,11 +467,11 @@ export default function QuestaoENEMPage() {
           const contextoHtml = !temHtml && questao.contexto
             ? processarContexto(questao.contexto, { removerImagens: false })
             : null
-          // Imagens separadas (da API ou consolidadas)
+          // Imagens separadas (da API ou consolidadas) — manter mesmo com erro para mostrar placeholder
           const todasImagens = (questao.todas_imagens || [
             questao.imagem_principal,
             ...(questao.imagens_extras || []),
-          ]).filter((img): img is string => !!img && isValidImageUrl(img) && !imagensComErro.has(img))
+          ]).filter((img): img is string => !!img && isValidImageUrl(img))
 
           return (
             <div
@@ -509,22 +509,33 @@ export default function QuestaoENEMPage() {
                     {todasImagens.length > 0 && (
                       <div className="my-4 flex flex-col items-center gap-3">
                         {todasImagens.map((img, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => setImagemExpandida(img)}
-                            className="relative rounded-lg overflow-hidden group inline-block"
-                            style={{ background: 'var(--bg-elevated)' }}
-                          >
-                            <img
-                              src={img}
-                              alt={`Figura ${idx + 1}`}
-                              className="max-w-full max-h-[350px] sm:max-h-[450px] h-auto object-contain"
-                              onError={() => handleImageError(img)}
-                            />
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                              <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all drop-shadow-md" />
+                          imagensComErro.has(img) ? (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 px-4 py-3 rounded-lg text-xs"
+                              style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px dashed var(--border-default)' }}
+                            >
+                              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                              <span>Figura {idx + 1} — imagem indisponível</span>
                             </div>
-                          </button>
+                          ) : (
+                            <button
+                              key={idx}
+                              onClick={() => setImagemExpandida(img)}
+                              className="relative rounded-lg overflow-hidden group inline-block"
+                              style={{ background: 'var(--bg-elevated)' }}
+                            >
+                              <img
+                                src={img}
+                                alt={`Figura ${idx + 1}`}
+                                className="max-w-full max-h-[350px] sm:max-h-[450px] h-auto object-contain"
+                                onError={() => handleImageError(img)}
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all drop-shadow-md" />
+                              </div>
+                            </button>
+                          )
                         ))}
                       </div>
                     )}
@@ -550,7 +561,9 @@ export default function QuestaoENEMPage() {
             const style = getAlternativaStyle(alt.letra)
             const isImagemAlternativa = alt.tipo === 'imagem' || alt.texto === '[Imagem]'
             const imgUrl = alt.imagem ? ensureAbsoluteUrl(alt.imagem) : null
-            const temImagem = imgUrl && imgUrl !== 'null' && isValidImageUrl(imgUrl) && !imagensComErro.has(imgUrl)
+            const imgValida = imgUrl && imgUrl !== 'null' && isValidImageUrl(imgUrl)
+            const imgComErro = imgValida && imagensComErro.has(imgUrl!)
+            const temImagem = imgValida && !imgComErro
             const dimmed = confirmada && alt.letra !== respostaCorreta && alt.letra !== selecionada
 
             return (
@@ -621,8 +634,14 @@ export default function QuestaoENEMPage() {
                         </span>
                       )}
                     </>
+                  ) : imgComErro ? (
+                    /* Caso 3: imagem da alternativa falhou */
+                    <div className="flex items-center gap-2 text-xs py-1" style={{ color: 'var(--text-muted)' }}>
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>Imagem indisponível</span>
+                    </div>
                   ) : (
-                    /* Caso 3: alternativa só texto */
+                    /* Caso 4: alternativa só texto */
                     <span
                       className="text-sm leading-relaxed block"
                       style={{ color: (alt.texto && alt.texto !== '[Imagem]') ? 'var(--text-primary)' : 'var(--text-muted)' }}

@@ -28,7 +28,7 @@ import 'katex/dist/katex.min.css'
 // Sem sistema de pontos/conquistas - apenas feedback de acerto/erro
 // ═══════════════════════════════════════════════════════════════════════════
 
-const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/'
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
 
 // Processar HTML: converter img src relativos para absolutos
 function processarHtmlImagens(html: string): string {
