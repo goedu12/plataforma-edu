@@ -443,40 +443,60 @@ export type SubareaENEM =
   | 'filosofia'
   | 'sociologia'
 
+// Tipo de alternativa ENEM
+export type TipoAlternativaENEM = 'texto' | 'imagem'
+
 // Questão ENEM
 export interface QuestaoENEM {
   id: string
   id_api?: string
   ano_prova: number
+  dia?: number  // 1 ou 2
   numero_questao: number
   caderno?: string
-  area: AreaENEM
+  area: AreaENEM | string  // permite string para áreas descritivas do banco
   area_nome?: string
-  subarea?: SubareaENEM
+  componente_enem?: string  // componente curricular
+  subarea?: SubareaENEM | string
+  lingua_estrangeira?: string | null  // 'inglês' | 'espanhol' | null
   idioma?: string
   titulo?: string
   contexto: string
   comando?: string
-  imagem_principal?: string
-  imagens_extras?: string[]
+  enunciado_html?: string  // HTML completo com <figure>, <img>, etc.
+  imagem_principal?: string | null
+  imagens_extras?: string[] | null
   alternativa_a: string
   alternativa_b: string
   alternativa_c: string
   alternativa_d: string
   alternativa_e: string
-  imagem_a?: string
-  imagem_b?: string
-  imagem_c?: string
-  imagem_d?: string
-  imagem_e?: string
-  resposta_correta: AlternativaENEM
+  imagem_a?: string | null
+  imagem_b?: string | null
+  imagem_c?: string | null
+  imagem_d?: string | null
+  imagem_e?: string | null
+  alt_a_tipo?: TipoAlternativaENEM
+  alt_b_tipo?: TipoAlternativaENEM
+  alt_c_tipo?: TipoAlternativaENEM
+  alt_d_tipo?: TipoAlternativaENEM
+  alt_e_tipo?: TipoAlternativaENEM
+  resposta_correta: AlternativaENEM | string | null  // null se anulada
   conteudos?: string[]
   conteudo_principal?: string
-  dificuldade?: Dificuldade
+  dificuldade?: Dificuldade | string
   tags?: string[]
-  status: StatusQuestao
-  fonte?: string  // 'ENEM', 'ENEM-API', etc.
+  status: StatusQuestao | string
+  fonte?: string
+  tem_imagem?: boolean
+  tem_formula?: boolean
+  tem_tabela?: boolean
+  anulada?: boolean
+  validado?: boolean
   importado_em?: string
+  // Da view questao_completa:
+  textos_motivadores_json?: any[]
+  imagens_json?: any[]
 }
 
 // Questão ENEM para exibição (sem resposta correta)
@@ -557,7 +577,7 @@ export interface EstatisticasENEM {
 
 // Configurações do ENEM
 export const ENEM_CONFIG = {
-  ANOS_DISPONIVEIS: [2019, 2020, 2021, 2022, 2023] as const,
+  ANOS_DISPONIVEIS: [2019, 2020, 2021, 2022, 2023, 2024, 2025] as const,
 
   AREAS: {
     'ciencias-natureza': {
@@ -617,7 +637,26 @@ export const ENEM_CONFIG = {
     matematica: 'matematica'
   } as Record<string, Componente>,
 
-  NIVEL_MINIMO: 'EM' as NivelEnsino
+  NIVEL_MINIMO: 'EM' as NivelEnsino,
+
+  // Storage bucket para imagens ENEM 2024/2025
+  STORAGE_BASE_URL: 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/',
+
+  // Mapeamento de áreas descritivas do banco para AreaENEM
+  AREA_DESCRITIVA_TO_AREA: {
+    'linguagens, códigos e suas tecnologias': 'linguagens',
+    'linguagens, códigos e suas tecnologias - inglês': 'linguagens',
+    'linguagens, códigos e suas tecnologias - espanhol': 'linguagens',
+    'ciências humanas e suas tecnologias': 'ciencias-humanas',
+    'ciências da natureza e suas tecnologias': 'ciencias-natureza',
+    'matemática e suas tecnologias': 'matematica',
+  } as Record<string, AreaENEM>,
+
+  // Dias da prova
+  DIAS: {
+    1: { nome: 'Dia 1', areas: ['Linguagens', 'Ciências Humanas'] },
+    2: { nome: 'Dia 2', areas: ['Ciências da Natureza', 'Matemática'] },
+  } as Record<number, { nome: string; areas: string[] }>,
 } as const
 
 // ═══════════════════════════════════════════════════════════

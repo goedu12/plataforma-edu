@@ -8,112 +8,100 @@ import type { AreaENEM, SubareaENEM, AlternativaENEM } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 
 // ═══════════════════════════════════════════════════════════════════════════
-// API ENEM - Buscar questões para estudantes da 3ª série
-// GET /api/enem - Retorna uma questão aleatória não respondida
-// GET /api/enem?area=matematica - Filtra por área
-// GET /api/enem?ano=2023 - Filtra por ano da prova
-// GET /api/enem?subarea=fisica - Filtra por subárea
-// Inclui filtro de qualidade para ocultar questões mal formatadas
+// API ENEM - Buscar questões para estudantes do Ensino Médio
+//
+// Modos de operação:
+// GET /api/enem?id_api=enem-2024-d1-azul-001-inglês  → questão específica (view questao_completa)
+// GET /api/enem?modo=listar&ano=2024&dia=1            → listar questões com filtros
+// GET /api/enem?ano=2024&area=matematica              → questão aleatória (modo legado)
+// GET /api/enem?modo=aleatorio                        → questão aleatória com filtros
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Interface da questão no banco (tabela questoes_enem)
-interface QuestaoENEMDB {
-  id: string
-  id_api: string
-  ano_prova: number
-  numero_questao: number
-  area: AreaENEM
-  subarea: SubareaENEM
-  idioma: string | null
-  titulo: string | null
-  contexto: string
-  comando: string | null
-  imagem_principal: string | null
-  imagens_extras: string[] | null
-  alternativa_a: string
-  alternativa_b: string
-  alternativa_c: string
-  alternativa_d: string
-  alternativa_e: string
-  imagem_a: string | null
-  imagem_b: string | null
-  imagem_c: string | null
-  imagem_d: string | null
-  imagem_e: string | null
-  resposta_correta: AlternativaENEM
-  fonte: string
-  status: string
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/'
+
+// Construir URL completa de imagem do storage
+function buildImageUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  // Se já é URL absoluta, retornar como está
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  // Construir URL do storage
+  return `${STORAGE_BASE_URL}${path}`
 }
 
-// Interface para o frontend (sem resposta correta)
-interface QuestaoFormatada {
-  id: string
-  id_api: string
-  ano_prova: number
-  numero_questao: number
-  area: AreaENEM
-  area_nome: string
-  subarea: SubareaENEM
-  subarea_nome: string
-  idioma: string | null
-  titulo: string | null
-  contexto: string
-  comando: string | null
-  imagem_principal: string | null
-  imagens_extras: string[]
-  todas_imagens: string[] // Todas as imagens válidas extraídas
-  alternativas: Array<{
-    letra: AlternativaENEM
-    texto: string
-    imagem: string | null
-  }>
-}
+// Formatar questão para o frontend (formato público sem resposta_correta)
+function formatarQuestaoPublica(q: any): any {
+  // Determinar area_nome: usar campo do banco ou mapear
+  const areaNome = q.area_nome ||
+    ENEM_CONFIG.AREAS[q.area as AreaENEM]?.nome ||
+    q.area
 
-// Formatar questão para o frontend
-function formatarQuestao(q: QuestaoENEMDB): QuestaoFormatada {
-  const areaConfig = ENEM_CONFIG.AREAS[q.area]
-  const subareaNome = ENEM_CONFIG.SUBAREAS_LABELS[q.subarea] || q.subarea
-
-  // Extrair todas as imagens válidas
-  const todasImagens = extrairImagensQuestao({
-    contexto: q.contexto,
-    imagem_principal: q.imagem_principal,
-    imagens_extras: q.imagens_extras,
-    imagem_a: q.imagem_a,
-    imagem_b: q.imagem_b,
-    imagem_c: q.imagem_c,
-    imagem_d: q.imagem_d,
-    imagem_e: q.imagem_e,
-  })
+  // Construir imagens de alternativas com URLs completas
+  const imgA = buildImageUrl(q.imagem_a)
+  const imgB = buildImageUrl(q.imagem_b)
+  const imgC = buildImageUrl(q.imagem_c)
+  const imgD = buildImageUrl(q.imagem_d)
+  const imgE = buildImageUrl(q.imagem_e)
 
   return {
     id: q.id,
     id_api: q.id_api,
     ano_prova: q.ano_prova,
+    dia: q.dia,
     numero_questao: q.numero_questao,
+    caderno: q.caderno,
     area: q.area,
-    area_nome: areaConfig?.nome || q.area,
+    area_nome: areaNome,
+    componente: q.componente,
     subarea: q.subarea,
-    subarea_nome: subareaNome,
-    idioma: q.idioma,
+    lingua_estrangeira: q.lingua_estrangeira,
     titulo: q.titulo,
     contexto: q.contexto,
     comando: q.comando,
-    imagem_principal: isValidImageUrl(q.imagem_principal) ? q.imagem_principal : null,
-    imagens_extras: (q.imagens_extras || []).filter(isValidImageUrl),
-    todas_imagens: todasImagens,
+    enunciado_html: q.enunciado_html,
+    imagem_principal: buildImageUrl(q.imagem_principal),
+    imagens_extras: (q.imagens_extras || []).map(buildImageUrl).filter(Boolean),
+    alternativa_a: q.alternativa_a,
+    alternativa_b: q.alternativa_b,
+    alternativa_c: q.alternativa_c,
+    alternativa_d: q.alternativa_d,
+    alternativa_e: q.alternativa_e,
+    imagem_a: imgA,
+    imagem_b: imgB,
+    imagem_c: imgC,
+    imagem_d: imgD,
+    imagem_e: imgE,
+    alt_a_tipo: q.alt_a_tipo || 'texto',
+    alt_b_tipo: q.alt_b_tipo || 'texto',
+    alt_c_tipo: q.alt_c_tipo || 'texto',
+    alt_d_tipo: q.alt_d_tipo || 'texto',
+    alt_e_tipo: q.alt_e_tipo || 'texto',
+    fonte: q.fonte,
+    tags: q.tags,
+    dificuldade: q.dificuldade,
+    status: q.status,
+    tem_imagem: q.tem_imagem,
+    tem_formula: q.tem_formula,
+    tem_tabela: q.tem_tabela,
+    anulada: q.anulada,
+    // Da view questao_completa:
+    textos_motivadores_json: q.textos_motivadores_json,
+    imagens_json: q.imagens_json,
+    // Alternativas formatadas para compatibilidade com componente existente
     alternativas: [
-      { letra: 'A', texto: q.alternativa_a, imagem: isValidImageUrl(q.imagem_a) ? q.imagem_a : null },
-      { letra: 'B', texto: q.alternativa_b, imagem: isValidImageUrl(q.imagem_b) ? q.imagem_b : null },
-      { letra: 'C', texto: q.alternativa_c, imagem: isValidImageUrl(q.imagem_c) ? q.imagem_c : null },
-      { letra: 'D', texto: q.alternativa_d, imagem: isValidImageUrl(q.imagem_d) ? q.imagem_d : null },
-      { letra: 'E', texto: q.alternativa_e, imagem: isValidImageUrl(q.imagem_e) ? q.imagem_e : null },
-    ]
+      { letra: 'A', texto: q.alternativa_a, imagem: imgA, tipo: q.alt_a_tipo || 'texto' },
+      { letra: 'B', texto: q.alternativa_b, imagem: imgB, tipo: q.alt_b_tipo || 'texto' },
+      { letra: 'C', texto: q.alternativa_c, imagem: imgC, tipo: q.alt_c_tipo || 'texto' },
+      { letra: 'D', texto: q.alternativa_d, imagem: imgD, tipo: q.alt_d_tipo || 'texto' },
+      { letra: 'E', texto: q.alternativa_e, imagem: imgE, tipo: q.alt_e_tipo || 'texto' },
+    ],
   }
 }
 
-// Verificar se uma questão passa no filtro de qualidade
-function verificarQualidade(q: QuestaoENEMDB): boolean {
+// Verificar se uma questão passa no filtro de qualidade (para questões antigas)
+function verificarQualidade(q: any): boolean {
+  // Questões 2024/2025 importadas do banco local sempre passam no filtro
+  if (q.ano_prova >= 2024 && q.enunciado_html) return true
+
   const resultado = questaoTemQualidade({
     contexto: q.contexto,
     comando: q.comando,
@@ -136,14 +124,24 @@ export async function GET(request: NextRequest) {
     }
 
     const searchParams = request.nextUrl.searchParams
+    const modo = searchParams.get('modo') // 'listar' | 'aleatorio' | null
+    const idApiParam = searchParams.get('id_api')
     const anoParam = searchParams.get('ano')
-    const areaParam = searchParams.get('area') as AreaENEM | null
+    const diaParam = searchParams.get('dia')
+    const areaParam = searchParams.get('area')
     const subareaParam = searchParams.get('subarea') as SubareaENEM | null
+    const linguaParam = searchParams.get('lingua') // 'inglês' | 'espanhol'
+    const paginaParam = searchParams.get('pagina')
+    const limitParam = searchParams.get('limit')
+
     const ano = anoParam ? parseInt(anoParam) : null
+    const dia = diaParam ? parseInt(diaParam) : null
+    const pagina = paginaParam ? parseInt(paginaParam) : 1
+    const limit = limitParam ? Math.min(parseInt(limitParam), 100) : 20
 
     const supabase = getSupabaseAdmin()
 
-    // Verificar acesso (3ª série EM ou professor)
+    // Verificar acesso (Ensino Médio ou professor)
     const { data: usuario, error: erroUsuario } = await supabase
       .from('usuarios')
       .select('nivel, ano, tipo')
@@ -167,11 +165,121 @@ export async function GET(request: NextRequest) {
       }, { status: 403 })
     }
 
+    // ─── MODO 1: Buscar questão específica por id_api (via view questao_completa) ───
+    if (idApiParam) {
+      // Tentar buscar da view questao_completa primeiro
+      let questao: any = null
+      const { data: questaoView } = await supabase
+        .from('questao_completa')
+        .select('*')
+        .eq('id_api', idApiParam)
+        .single()
+
+      if (questaoView) {
+        questao = questaoView
+      } else {
+        // Fallback: buscar da tabela questoes_enem
+        const { data: questaoTabela } = await supabase
+          .from('questoes_enem')
+          .select('*')
+          .eq('id_api', idApiParam)
+          .single()
+        questao = questaoTabela
+      }
+
+      if (!questao) {
+        return NextResponse.json({
+          sucesso: false,
+          erro: 'Questão não encontrada',
+        }, { status: 404 })
+      }
+
+      return NextResponse.json({
+        sucesso: true,
+        status: 'OK',
+        questao: formatarQuestaoPublica(questao),
+      })
+    }
+
+    // ─── MODO 2: Listar questões com filtros e paginação ───
+    if (modo === 'listar') {
+      let query = supabase
+        .from('questoes_enem')
+        .select('id, id_api, ano_prova, dia, numero_questao, caderno, area, area_nome, componente, lingua_estrangeira, titulo, anulada, dificuldade, tem_imagem, tem_formula, status', { count: 'exact' })
+
+      // Filtrar questões que não estão com status 'inativa' (permitir 'ativa' e sem status)
+      query = query.or('status.eq.ativa,status.is.null')
+
+      if (ano) query = query.eq('ano_prova', ano)
+      if (dia) query = query.eq('dia', dia)
+      if (areaParam) {
+        // Suportar tanto o formato 'matematica' quanto o formato descritivo
+        query = query.or(`area.eq.${areaParam},area.ilike.%${areaParam}%`)
+      }
+      if (subareaParam) query = query.eq('subarea', subareaParam)
+      if (linguaParam) query = query.eq('lingua_estrangeira', linguaParam)
+
+      // Ordenar por numero_questao
+      query = query.order('ano_prova', { ascending: false })
+        .order('dia', { ascending: true })
+        .order('numero_questao', { ascending: true })
+
+      // Paginação
+      const offset = (pagina - 1) * limit
+      query = query.range(offset, offset + limit - 1)
+
+      const { data: questoes, error: erroQuery, count } = await query
+
+      if (erroQuery) {
+        console.error('Erro ao listar questões ENEM:', erroQuery)
+        return NextResponse.json({
+          sucesso: false,
+          erro: 'Erro ao buscar questões',
+          detalhes: erroQuery.message,
+        }, { status: 500 })
+      }
+
+      // Buscar contagens por área para os filtros ativos
+      let contagemQuery = supabase
+        .from('questoes_enem')
+        .select('area, area_nome, dia')
+        .or('status.eq.ativa,status.is.null')
+
+      if (ano) contagemQuery = contagemQuery.eq('ano_prova', ano)
+
+      const { data: contagemData } = await contagemQuery
+
+      // Agrupar contagens
+      const contagemPorArea: Record<string, number> = {}
+      const contagemPorDia: Record<number, number> = {}
+      contagemData?.forEach(q => {
+        const areaKey = q.area_nome || q.area
+        contagemPorArea[areaKey] = (contagemPorArea[areaKey] || 0) + 1
+        if (q.dia) {
+          contagemPorDia[q.dia] = (contagemPorDia[q.dia] || 0) + 1
+        }
+      })
+
+      return NextResponse.json({
+        sucesso: true,
+        status: 'OK',
+        questoes: questoes || [],
+        total: count || 0,
+        pagina,
+        limite: limit,
+        total_paginas: Math.ceil((count || 0) / limit),
+        contagem_por_area: contagemPorArea,
+        contagem_por_dia: contagemPorDia,
+      })
+    }
+
+    // ─── MODO 3: Questão aleatória (comportamento original) ───
+
     // Buscar anos disponíveis
     const { data: anosData } = await supabase
       .from('questoes_enem')
       .select('ano_prova')
-      .eq('status', 'ativa')
+      .or('status.eq.ativa,status.is.null')
 
     const anosDisponiveis = [...new Set(anosData?.map(a => a.ano_prova).filter(Boolean) || [])]
       .sort((a, b) => b - a)
@@ -179,19 +287,27 @@ export async function GET(request: NextRequest) {
     // Buscar áreas disponíveis
     const { data: areasData } = await supabase
       .from('questoes_enem')
-      .select('area')
-      .eq('status', 'ativa')
+      .select('area, area_nome')
+      .or('status.eq.ativa,status.is.null')
 
-    const areasDisponiveis = [...new Set(areasData?.map(a => a.area).filter(Boolean) || [])]
+    const areasDisponiveis = [...new Set(areasData?.map(a => a.area_nome || a.area).filter(Boolean) || [])]
+
+    // Buscar dias disponíveis
+    const { data: diasData } = await supabase
+      .from('questoes_enem')
+      .select('dia')
+      .or('status.eq.ativa,status.is.null')
+
+    const diasDisponiveis = [...new Set(diasData?.map(a => a.dia).filter(Boolean) || [])].sort()
 
     // Buscar subáreas disponíveis (filtradas por área se selecionada)
     let subareasQuery = supabase
       .from('questoes_enem')
       .select('subarea')
-      .eq('status', 'ativa')
+      .or('status.eq.ativa,status.is.null')
 
     if (areaParam) {
-      subareasQuery = subareasQuery.eq('area', areaParam)
+      subareasQuery = subareasQuery.or(`area.eq.${areaParam},area.ilike.%${areaParam}%`)
     }
 
     const { data: subareasData } = await subareasQuery
@@ -208,23 +324,21 @@ export async function GET(request: NextRequest) {
       respostasUsuario?.map(r => r.questao_id).filter(Boolean) || []
     )
 
-    // Construir query
+    // Construir query principal
     let query = supabase
       .from('questoes_enem')
       .select('*')
-      .eq('status', 'ativa')
+      .or('status.eq.ativa,status.is.null')
 
-    if (ano) {
-      query = query.eq('ano_prova', ano)
-    }
+    if (ano) query = query.eq('ano_prova', ano)
+    if (dia) query = query.eq('dia', dia)
 
     if (areaParam) {
-      query = query.eq('area', areaParam)
+      query = query.or(`area.eq.${areaParam},area.ilike.%${areaParam}%`)
     }
 
-    if (subareaParam) {
-      query = query.eq('subarea', subareaParam)
-    }
+    if (subareaParam) query = query.eq('subarea', subareaParam)
+    if (linguaParam) query = query.eq('lingua_estrangeira', linguaParam)
 
     const { data: questoes, error: erroQuery } = await query.limit(1000)
 
@@ -233,11 +347,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         sucesso: false,
         erro: 'Erro ao buscar questões',
-        detalhes: erroQuery.message
+        detalhes: erroQuery.message,
       }, { status: 500 })
     }
 
-    // Verificar se existem questões
     if (!questoes || questoes.length === 0) {
       return NextResponse.json({
         sucesso: true,
@@ -245,23 +358,23 @@ export async function GET(request: NextRequest) {
         mensagem: 'Nenhuma questão disponível. O professor precisa importar questões.',
         anos_disponiveis: anosDisponiveis,
         areas_disponiveis: areasDisponiveis,
+        dias_disponiveis: diasDisponiveis,
         subareas_disponiveis: subareasDisponiveis,
         respondidas: idsRespondidos.size,
       })
     }
 
     // Filtrar por qualidade E não respondidas
-    const questoesComQualidade = questoes.filter(q => verificarQualidade(q as QuestaoENEMDB))
+    const questoesComQualidade = questoes.filter(q => verificarQualidade(q))
     const disponiveis = questoesComQualidade.filter(q => !idsRespondidos.has(q.id))
 
-    // Log para debug
     console.log(`[ENEM] Total: ${questoes.length}, Com qualidade: ${questoesComQualidade.length}, Disponíveis: ${disponiveis.length}`)
 
     if (disponiveis.length === 0) {
       const filtroTexto = []
       if (ano) filtroTexto.push(`de ${ano}`)
-      if (areaParam) filtroTexto.push(`de ${ENEM_CONFIG.AREAS[areaParam]?.nome || areaParam}`)
-      if (subareaParam) filtroTexto.push(`de ${ENEM_CONFIG.SUBAREAS_LABELS[subareaParam] || subareaParam}`)
+      if (dia) filtroTexto.push(`do dia ${dia}`)
+      if (areaParam) filtroTexto.push(`de ${areaParam}`)
 
       return NextResponse.json({
         sucesso: true,
@@ -271,6 +384,7 @@ export async function GET(request: NextRequest) {
           : 'Você respondeu todas as questões disponíveis!',
         anos_disponiveis: anosDisponiveis,
         areas_disponiveis: areasDisponiveis,
+        dias_disponiveis: diasDisponiveis,
         subareas_disponiveis: subareasDisponiveis,
         respondidas: idsRespondidos.size,
         total_questoes: questoesComQualidade.length,
@@ -278,11 +392,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Selecionar questão aleatória
-    const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)] as QuestaoENEMDB
-    const questaoFormatada = formatarQuestao(questaoRaw)
-
-    // SEGURANÇA: Resposta correta NÃO é enviada ao cliente
-    // A validação acontece server-side em /api/enem/responder
+    const questaoRaw = disponiveis[Math.floor(Math.random() * disponiveis.length)]
+    const questaoFormatada = formatarQuestaoPublica(questaoRaw)
 
     return NextResponse.json({
       sucesso: true,
@@ -290,6 +401,7 @@ export async function GET(request: NextRequest) {
       questao: questaoFormatada,
       anos_disponiveis: anosDisponiveis,
       areas_disponiveis: areasDisponiveis,
+      dias_disponiveis: diasDisponiveis,
       subareas_disponiveis: subareasDisponiveis,
       respondidas: idsRespondidos.size,
       total_questoes: questoesComQualidade.length,
