@@ -290,9 +290,9 @@ export default function MenuComponentePage() {
                     {nota.nota_final.toFixed(1)}
                   </span>
                 </div>
-                <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
-                  <Clock className="w-3 h-3" />
-                  <span className="text-2xs font-medium tabular-nums">
+                <div className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
+                  <Clock className="w-4 h-4" />
+                  <span className="text-sm font-bold tabular-nums">
                     {formatarTempo(nota.tempo_uso_horas)}
                   </span>
                 </div>
