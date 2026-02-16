@@ -23,9 +23,19 @@ const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/ob
 function buildImageUrl(path: string | null | undefined): string | null {
   if (!path) return null
   // Se já é URL absoluta, retornar como está
-  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path
   // Construir URL do storage
   return `${STORAGE_BASE_URL}${path}`
+}
+
+// Processar enunciado_html: converter caminhos relativos de imagens para URLs absolutas
+function processarEnunciadoHtml(html: string | null | undefined): string | null {
+  if (!html) return null
+  // Substituir src de <img> que não são URLs absolutas
+  return html.replace(
+    /(<img\s[^>]*?src\s*=\s*["'])(?!https?:\/\/|data:)([^"']+)(["'])/gi,
+    (_, prefix, path, suffix) => `${prefix}${STORAGE_BASE_URL}${path}${suffix}`
+  )
 }
 
 // Formatar questão para o frontend (formato público sem resposta_correta)
@@ -57,7 +67,7 @@ function formatarQuestaoPublica(q: any): any {
     titulo: q.titulo,
     contexto: q.contexto,
     comando: q.comando,
-    enunciado_html: q.enunciado_html,
+    enunciado_html: processarEnunciadoHtml(q.enunciado_html),
     imagem_principal: buildImageUrl(q.imagem_principal),
     imagens_extras: (q.imagens_extras || []).map(buildImageUrl).filter(Boolean),
     alternativa_a: q.alternativa_a,
@@ -83,6 +93,11 @@ function formatarQuestaoPublica(q: any): any {
     tem_formula: q.tem_formula,
     tem_tabela: q.tem_tabela,
     anulada: q.anulada,
+    // Imagens consolidadas para compatibilidade com simulado antigo
+    todas_imagens: [
+      buildImageUrl(q.imagem_principal),
+      ...(q.imagens_extras || []).map(buildImageUrl).filter(Boolean),
+    ].filter(Boolean),
     // Da view questao_completa:
     textos_motivadores_json: q.textos_motivadores_json,
     imagens_json: q.imagens_json,
