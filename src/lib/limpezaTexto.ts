@@ -3,6 +3,9 @@
  * Versão 3.1 - Limpeza completa de markdown, filtros de qualidade e sanitização XSS
  */
 
+// URL base do Supabase Storage para imagens ENEM
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
+
 // Valores que devem ser tratados como vazio
 const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
 
@@ -98,10 +101,15 @@ function sanitizarAtributos(tagCompleta: string, tagName: string): string {
         .replace(/vbscript\s*:/gi, '')
         .replace(/on\w+\s*=/gi, '')
 
-      // Para src de imagens, validar URL
+      // Para src de imagens, validar e converter URLs
       if (attrNameLower === 'src') {
-        if (!valorLimpo.startsWith('http') && !valorLimpo.startsWith('data:image')) {
-          continue // Pular src inválido
+        // Bloquear protocolos perigosos
+        if (/^(javascript|vbscript):/i.test(valorLimpo)) {
+          continue
+        }
+        // Converter caminhos relativos para URLs absolutas do storage
+        if (!valorLimpo.startsWith('http') && !valorLimpo.startsWith('data:image') && !valorLimpo.startsWith('//')) {
+          valorLimpo = STORAGE_BASE_URL + valorLimpo
         }
       }
 
@@ -124,14 +132,20 @@ function sanitizarAtributos(tagCompleta: string, tagName: string): string {
 
 /**
  * Valida se é uma URL de imagem válida
+ * Aceita URLs absolutas (http/https), data URIs e caminhos relativos do storage
  */
 export function isValidImageUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false
   const trimmed = url.trim()
   if (!trimmed) return false
   if (VALORES_INVALIDOS.includes(trimmed.toLowerCase())) return false
-  // Deve começar com http ou data:image
-  if (!trimmed.startsWith('http') && !trimmed.startsWith('data:image')) return false
+  // Aceitar URLs absolutas, data URIs e caminhos relativos (ex: enem/2024/img.jpeg)
+  if (!trimmed.startsWith('http') && !trimmed.startsWith('data:image') && !trimmed.startsWith('//')) {
+    // Caminho relativo: verificar se parece um caminho de arquivo válido (não um script/protocolo)
+    if (/^(javascript|vbscript):/i.test(trimmed)) return false
+    // Aceitar caminhos relativos que parecem ser arquivos de imagem ou paths do storage
+    if (!/\.(png|jpg|jpeg|gif|webp|svg|bmp)(\?.*)?$/i.test(trimmed) && !trimmed.includes('/')) return false
+  }
   // Rejeitar URLs muito curtas ou claramente inválidas
   if (trimmed.length < 10) return false
   return true

@@ -28,6 +28,16 @@ import 'katex/dist/katex.min.css'
 // Sem sistema de pontos/conquistas - apenas feedback de acerto/erro
 // ═══════════════════════════════════════════════════════════════════════════
 
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
+
+// Processar HTML: converter img src relativos para absolutos
+function processarHtmlImagens(html: string): string {
+  return html.replace(
+    /(<img\s[^>]*?src\s*=\s*["'])(?!https?:\/\/|data:)([^"']+)(["'])/gi,
+    (_, pre, path, suf) => `${pre}${STORAGE_BASE_URL}${path}${suf}`
+  )
+}
+
 interface QuestaoENEMProps {
   questao: Omit<QuestaoENEM, 'resposta_correta'>
   componente?: Componente  // Para herdar cores do Studão
@@ -246,11 +256,11 @@ export default function QuestaoENEM({
             </div>
           )}
 
-          {/* Renderizar enunciado_html — imagens já têm URLs absolutas */}
+          {/* Renderizar enunciado_html — com processamento de URLs de imagem */}
           <div
             className="enem-enunciado-html text-sm sm:text-base leading-relaxed"
             style={{ color: 'var(--text-primary)' }}
-            dangerouslySetInnerHTML={{ __html: questao.enunciado_html! }}
+            dangerouslySetInnerHTML={{ __html: processarHtmlImagens(questao.enunciado_html!) }}
             onClick={(e) => {
               const target = e.target as HTMLElement
               if (target.tagName === 'IMG') {

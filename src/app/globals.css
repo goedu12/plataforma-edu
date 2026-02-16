@@ -2648,33 +2648,52 @@ img {
    Classe: .enem-enunciado-html
    ═══════════════════════════════════════════════════════════════════════ */
 
+/* Visual fiel a prova oficial do ENEM */
 .enem-enunciado-html {
   word-wrap: break-word;
   overflow-wrap: break-word;
+  font-family: 'Georgia', 'Times New Roman', 'Noto Serif', serif;
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  color: var(--text-primary);
 }
 
 .enem-enunciado-html p {
-  margin: 0 0 0.75em 0;
-  line-height: 1.7;
+  margin: 0 0 0.85em 0;
+  line-height: 1.8;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .enem-enunciado-html p:last-child {
   margin-bottom: 0;
 }
 
-/* Imagens */
+/* Imagens — centralizadas, responsivas, clicaveis para zoom */
 .enem-enunciado-html img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
-  margin: 8px auto;
+  border-radius: 6px;
+  margin: 12px auto;
   display: block;
   cursor: pointer;
   transition: opacity 0.2s;
+  background: var(--bg-elevated);
 }
 
 .enem-enunciado-html img:hover {
-  opacity: 0.9;
+  opacity: 0.85;
+}
+
+/* Imagens inline (que nao sao block) */
+.enem-enunciado-html .imagem-embutida {
+  text-align: center;
+  margin: 12px 0;
+}
+
+.enem-enunciado-html .imagem-embutida img {
+  max-height: 400px;
+  object-fit: contain;
 }
 
 /* Figuras com legenda */
@@ -2684,10 +2703,13 @@ img {
 }
 
 .enem-enunciado-html figure img {
-  margin: 0 auto 6px auto;
+  margin: 0 auto 8px auto;
+  max-height: 450px;
+  object-fit: contain;
 }
 
 .enem-enunciado-html figcaption {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 0.75rem;
   color: var(--text-muted);
   margin-top: 4px;
@@ -2695,10 +2717,10 @@ img {
   line-height: 1.4;
 }
 
-/* Textos em negrito e itálico */
+/* Textos em negrito e italico */
 .enem-enunciado-html strong,
 .enem-enunciado-html b {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
 }
 
@@ -2707,12 +2729,13 @@ img {
   font-style: italic;
 }
 
-/* Tabelas */
+/* Tabelas — estilo prova oficial */
 .enem-enunciado-html table {
   width: 100%;
   border-collapse: collapse;
-  margin: 12px 0;
-  font-size: 0.875rem;
+  margin: 14px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.8125rem;
   overflow-x: auto;
   display: block;
 }
@@ -2729,17 +2752,22 @@ img {
   background: var(--bg-elevated);
   font-weight: 600;
   font-size: 0.8rem;
+  text-align: center;
+}
+
+.enem-enunciado-html td {
+  text-align: center;
 }
 
 .enem-enunciado-html tbody tr:hover {
   background: var(--bg-elevated);
 }
 
-/* Citações */
+/* Citacoes — estilo prova oficial (textos motivadores) */
 .enem-enunciado-html blockquote {
   border-left: 3px solid var(--border-default);
-  padding-left: 12px;
-  margin: 10px 0;
+  padding-left: 14px;
+  margin: 12px 0;
   color: var(--text-secondary);
   font-style: italic;
 }
@@ -2748,18 +2776,18 @@ img {
 .enem-enunciado-html ul {
   list-style: disc;
   padding-left: 1.5em;
-  margin: 8px 0;
+  margin: 10px 0;
 }
 
 .enem-enunciado-html ol {
   list-style: decimal;
   padding-left: 1.5em;
-  margin: 8px 0;
+  margin: 10px 0;
 }
 
 .enem-enunciado-html li {
   margin-bottom: 4px;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 /* Super/subscript */
@@ -2775,59 +2803,82 @@ img {
   line-height: 0;
 }
 
-/* Small (fontes, referências) */
+/* Small — fontes e referencias bibliograficas */
 .enem-enunciado-html small {
-  font-size: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.7rem;
   color: var(--text-muted);
   display: block;
-  margin-top: 4px;
+  margin-top: 8px;
+  text-align: right;
+  font-style: normal;
 }
 
 /* Separadores */
 .enem-enunciado-html hr {
   border: none;
   border-top: 1px solid var(--border-default);
-  margin: 12px 0;
+  margin: 14px 0;
 }
 
-/* Poesia / texto pré-formatado */
+/* Poesia e texto pre-formatado */
 .enem-enunciado-html pre {
   white-space: pre-wrap;
   font-family: inherit;
-  margin: 8px 0;
-  padding: 12px;
+  margin: 10px 0;
+  padding: 14px;
   background: var(--bg-elevated);
   border-radius: 8px;
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
-/* Links (raros, mas podem existir) */
+/* Links */
 .enem-enunciado-html a {
   color: #3b82f6;
   text-decoration: underline;
+}
+
+/* H3/H4 dentro de questoes (titulos de textos motivadores) */
+.enem-enunciado-html h3,
+.enem-enunciado-html h4 {
+  font-size: 1em;
+  font-weight: 700;
+  margin: 14px 0 8px 0;
+  text-align: center;
 }
 
 /* ── Responsividade mobile ── */
 @media (max-width: 640px) {
   .enem-enunciado-html {
     font-size: 0.875rem;
+    line-height: 1.7;
+  }
+
+  .enem-enunciado-html p {
+    text-align: left;
   }
 
   .enem-enunciado-html img {
-    border-radius: 6px;
+    border-radius: 4px;
+    max-height: 300px;
+    object-fit: contain;
   }
 
   .enem-enunciado-html table {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 
   .enem-enunciado-html th,
   .enem-enunciado-html td {
-    padding: 6px 8px;
+    padding: 5px 6px;
   }
 
   .enem-enunciado-html figure {
     margin: 10px 0;
+  }
+
+  .enem-enunciado-html figure img {
+    max-height: 250px;
   }
 }

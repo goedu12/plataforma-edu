@@ -20,6 +20,7 @@ import {
   Calculator,
   Languages,
   Globe,
+  AlertTriangle,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
@@ -260,9 +261,9 @@ export default function SimuladoENEMPage() {
     return <Loading fullScreen componente={componente} text="Carregando questão..." />
   }
 
-  // Imagens válidas da questão
+  // Imagens válidas da questão (manter mesmo com erro para mostrar placeholder)
   const imagensValidas = questao?.todas_imagens?.filter(img =>
-    isValidImageUrl(img) && !imagensComErro.has(img)
+    isValidImageUrl(img)
   ) || []
 
   return (
@@ -391,21 +392,31 @@ export default function SimuladoENEMPage() {
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
                 {imagensValidas.map((img, i) => (
                   <div key={i} className="flex-shrink-0 text-center">
-                    <button
-                      onClick={() => setImagemZoom(img)}
-                      className="relative rounded-xl overflow-hidden group"
-                      style={{ background: 'var(--bg-elevated)' }}
-                    >
-                      <img
-                        src={img}
-                        alt={`Figura ${i + 1}`}
-                        className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
-                        onError={() => handleImageError(img)}
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                        <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                    {imagensComErro.has(img) ? (
+                      <div
+                        className="flex items-center gap-2 px-4 py-3 rounded-xl text-xs"
+                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px dashed var(--border-default)' }}
+                      >
+                        <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                        <span>Figura {i + 1} — indisponível</span>
                       </div>
-                    </button>
+                    ) : (
+                      <button
+                        onClick={() => setImagemZoom(img)}
+                        className="relative rounded-xl overflow-hidden group"
+                        style={{ background: 'var(--bg-elevated)' }}
+                      >
+                        <img
+                          src={img}
+                          alt={`Figura ${i + 1}`}
+                          className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
+                          onError={() => handleImageError(img)}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                          <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                        </div>
+                      </button>
+                    )}
                     <span className="text-xs mt-1 block" style={{ color: 'var(--text-muted)' }}>
                       Figura {i + 1}
                     </span>

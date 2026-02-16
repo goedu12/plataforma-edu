@@ -18,6 +18,7 @@ import {
   ZoomIn,
 } from 'lucide-react'
 import ImagemModal from '@/components/ui/ImagemModal'
+import { processarContexto, isValidImageUrl } from '@/lib/limpezaTexto'
 
 // ═══════════════════════════════════════════════════════════════════════════
 // PÁGINA DE QUESTÃO ENEM — /enem/questao/[id]
@@ -28,7 +29,7 @@ import ImagemModal from '@/components/ui/ImagemModal'
 // - ?modo=simulado               → navegação sequencial prev/next
 // ═══════════════════════════════════════════════════════════════════════════
 
-const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens/'
+const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
 
 interface Alternativa {
   letra: string
@@ -41,39 +42,40 @@ interface QuestaoData {
   id: string
   id_api: string
   ano_prova: number
-  dia: number
+  dia?: number
   numero_questao: number
-  caderno: string
+  caderno?: string
   area: string
   area_nome: string
-  componente: string
-  lingua_estrangeira: string | null
-  titulo: string | null
+  componente?: string
+  lingua_estrangeira?: string | null
+  titulo?: string | null
   contexto: string
-  comando: string
-  enunciado_html: string
-  imagem_principal: string | null
-  imagens_extras: string[]
+  comando?: string | null
+  enunciado_html?: string | null
+  imagem_principal?: string | null
+  imagens_extras?: string[]
+  todas_imagens?: string[]
   alternativa_a: string
   alternativa_b: string
   alternativa_c: string
   alternativa_d: string
   alternativa_e: string
-  imagem_a: string | null
-  imagem_b: string | null
-  imagem_c: string | null
-  imagem_d: string | null
-  imagem_e: string | null
-  alt_a_tipo: 'texto' | 'imagem'
-  alt_b_tipo: 'texto' | 'imagem'
-  alt_c_tipo: 'texto' | 'imagem'
-  alt_d_tipo: 'texto' | 'imagem'
-  alt_e_tipo: 'texto' | 'imagem'
-  fonte: string | null
-  anulada: boolean
-  tem_imagem: boolean
-  tem_formula: boolean
-  alternativas: Alternativa[]
+  imagem_a?: string | null
+  imagem_b?: string | null
+  imagem_c?: string | null
+  imagem_d?: string | null
+  imagem_e?: string | null
+  alt_a_tipo?: 'texto' | 'imagem'
+  alt_b_tipo?: 'texto' | 'imagem'
+  alt_c_tipo?: 'texto' | 'imagem'
+  alt_d_tipo?: 'texto' | 'imagem'
+  alt_e_tipo?: 'texto' | 'imagem'
+  fonte?: string | null
+  anulada?: boolean
+  tem_imagem?: boolean
+  tem_formula?: boolean
+  alternativas?: Alternativa[]
   textos_motivadores_json?: any[]
   imagens_json?: any[]
 }
@@ -85,6 +87,24 @@ function ensureAbsoluteUrl(url: string | null | undefined): string | null {
   if (!url) return null
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url
   return `${STORAGE_BASE_URL}${url}`
+}
+
+// Processar HTML: converter img src relativos para absolutos (safety net)
+function fixHtmlImageUrls(html: string): string {
+  return html.replace(
+    /(<img\s[^>]*?src\s*=\s*["'])(?!https?:\/\/|data:)([^"']+)(["'])/gi,
+    (_, pre, path, suf) => `${pre}${STORAGE_BASE_URL}${path}${suf}`
+  )
+}
+
+// Verificar se o comando deve ser exibido
+function comandoValido(cmd: string | null | undefined): boolean {
+  if (!cmd) return false
+  const t = cmd.trim().toLowerCase()
+  if (t.length < 10) return false
+  if (t.startsWith('descrição da imagem') || t.startsWith('descricao da imagem')) return false
+  if (/^\[["']/.test(t)) return false
+  return true
 }
 
 export default function QuestaoENEMPage() {
@@ -118,6 +138,11 @@ export default function QuestaoENEMPage() {
 
   // Imagem expandida
   const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
+  const [imagensComErro, setImagensComErro] = useState<Set<string>>(new Set())
+
+  const handleImageError = (url: string) => {
+    setImagensComErro(prev => new Set(prev).add(url))
+  }
 
   // Navegação simulado
   const [listaIds, setListaIds] = useState<string[]>([])
@@ -144,6 +169,7 @@ export default function QuestaoENEMPage() {
     setRespostaCorreta(null)
     setAcertou(null)
     setTempoDecorrido(0)
+    setImagensComErro(new Set())
     pararTimer()
 
     try {
@@ -338,7 +364,7 @@ export default function QuestaoENEMPage() {
   }
 
   // ═══ MONTAR ALTERNATIVAS ═══
-  const alternativas: Alternativa[] = questao.alternativas?.length > 0
+  const alternativas: Alternativa[] = (questao.alternativas && questao.alternativas.length > 0)
     ? questao.alternativas
     : [
         { letra: 'A', texto: questao.alternativa_a, imagem: ensureAbsoluteUrl(questao.imagem_a), tipo: questao.alt_a_tipo || 'texto' },
@@ -367,11 +393,19 @@ export default function QuestaoENEMPage() {
             >
               ENEM {questao.ano_prova}
             </span>
+            {questao.dia && (
+              <span
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
+              >
+                Dia {questao.dia}
+              </span>
+            )}
             <span
               className="text-xs px-2 py-0.5 rounded-full"
               style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}
             >
-              Dia {questao.dia} · Q{questao.numero_questao}
+              Q{questao.numero_questao}
             </span>
             {questao.anulada && (
               <span
@@ -426,97 +460,110 @@ export default function QuestaoENEMPage() {
         </div>
 
         {/* ─── ENUNCIADO ─── */}
-        <div
-          className="rounded-xl p-4 overflow-y-auto"
-          style={{
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-default)',
-            maxHeight: 'min(500px, 50vh)',
-          }}
-        >
-          {/* Preferir enunciado_html se disponível — já tem imagens com URLs absolutas */}
-          {questao.enunciado_html ? (
+        {(() => {
+          // Preparar dados
+          const temHtml = !!(questao.enunciado_html && questao.enunciado_html.trim().length > 20)
+          const htmlProcessado = temHtml ? fixHtmlImageUrls(questao.enunciado_html!) : null
+          const contextoHtml = !temHtml && questao.contexto
+            ? processarContexto(questao.contexto, { removerImagens: false })
+            : null
+          // Imagens separadas (da API ou consolidadas) — manter mesmo com erro para mostrar placeholder
+          const todasImagens = (questao.todas_imagens || [
+            questao.imagem_principal,
+            ...(questao.imagens_extras || []),
+          ]).filter((img): img is string => !!img && isValidImageUrl(img))
+
+          return (
             <div
-              className="enem-enunciado-html text-sm sm:text-base leading-relaxed"
-              style={{ color: 'var(--text-primary)' }}
-              dangerouslySetInnerHTML={{ __html: questao.enunciado_html }}
-              onClick={handleEnunciadoClick}
-            />
-          ) : (
-            <>
-              {/* Fallback: contexto + comando separados */}
-              {questao.contexto && (
-                <div
-                  className="questao-texto text-sm sm:text-base leading-relaxed"
-                  style={{ color: 'var(--text-primary)' }}
-                  dangerouslySetInnerHTML={{ __html: questao.contexto }}
-                  onClick={handleEnunciadoClick}
-                />
-              )}
-
-              {/* Imagem principal (se não embutida no HTML) */}
-              {questao.imagem_principal && !questao.enunciado_html && (
-                <div className="my-4 text-center">
-                  <img
-                    src={questao.imagem_principal}
-                    alt="Imagem da questão"
-                    className="max-w-full max-h-[300px] sm:max-h-[400px] h-auto object-contain rounded-xl mx-auto cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => setImagemExpandida(questao.imagem_principal!)}
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                  />
-                </div>
-              )}
-
-              {/* Imagens extras */}
-              {questao.imagens_extras && questao.imagens_extras.length > 0 && !questao.enunciado_html && (
-                <div className={`grid gap-3 my-4 ${questao.imagens_extras.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
-                  {questao.imagens_extras.map((img, idx) => (
-                    <div key={idx} className="text-center">
-                      <img
-                        src={img}
-                        alt={`Imagem ${idx + 2} da questão`}
-                        className="max-w-full max-h-[250px] h-auto object-contain rounded-xl mx-auto cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => setImagemExpandida(img)}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Comando (pergunta) */}
-              {questao.comando && (
-                <div
-                  className="mt-4 pt-3 text-sm sm:text-base leading-relaxed font-medium"
-                  style={{ color: 'var(--text-primary)', borderTop: '1px solid var(--border-default)' }}
-                  dangerouslySetInnerHTML={{ __html: questao.comando }}
-                />
-              )}
-            </>
-          )}
-
-          {/* Fonte/Referência bibliográfica */}
-          {questao.fonte && (
-            <div
-              className="mt-4 pt-2"
-              style={{ borderTop: '1px solid var(--border-default)' }}
+              className="rounded-xl overflow-hidden"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
             >
-              <p
-                className="text-[11px] sm:text-xs leading-relaxed"
-                style={{ color: 'var(--text-muted)' }}
-              >
-                {questao.fonte}
-              </p>
+              <div className="p-4 sm:p-5">
+                {/* MODO 1: enunciado_html (questões com HTML completo, ex: ENEM 2024/2025) */}
+                {htmlProcessado ? (
+                  <div
+                    className="enem-enunciado-html"
+                    dangerouslySetInnerHTML={{ __html: htmlProcessado }}
+                    onClick={handleEnunciadoClick}
+                  />
+                ) : (
+                  /* MODO 2: contexto + imagens separadas + comando (questões antigas) */
+                  <>
+                    {/* Título */}
+                    {questao.titulo && (
+                      <h3 className="font-bold text-base sm:text-lg mb-3" style={{ color: 'var(--text-primary)' }}>
+                        {questao.titulo}
+                      </h3>
+                    )}
+
+                    {/* Contexto processado (markdown → HTML com imagens inline) */}
+                    {contextoHtml && (
+                      <div
+                        className="enem-enunciado-html texto-questao"
+                        dangerouslySetInnerHTML={{ __html: contextoHtml }}
+                        onClick={handleEnunciadoClick}
+                      />
+                    )}
+
+                    {/* Galeria de imagens separadas */}
+                    {todasImagens.length > 0 && (
+                      <div className="my-4 flex flex-col items-center gap-3">
+                        {todasImagens.map((img, idx) => (
+                          imagensComErro.has(img) ? (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 px-4 py-3 rounded-lg text-xs"
+                              style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px dashed var(--border-default)' }}
+                            >
+                              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                              <span>Figura {idx + 1} — imagem indisponível</span>
+                            </div>
+                          ) : (
+                            <button
+                              key={idx}
+                              onClick={() => setImagemExpandida(img)}
+                              className="relative rounded-lg overflow-hidden group inline-block"
+                              style={{ background: 'var(--bg-elevated)' }}
+                            >
+                              <img
+                                src={img}
+                                alt={`Figura ${idx + 1}`}
+                                className="max-w-full max-h-[350px] sm:max-h-[450px] h-auto object-contain"
+                                onError={() => handleImageError(img)}
+                              />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                                <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all drop-shadow-md" />
+                              </div>
+                            </button>
+                          )
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Comando (pergunta) */}
+                    {comandoValido(questao.comando) && (
+                      <div className="mt-4 pt-3" style={{ borderTop: '1px solid var(--border-default)' }}>
+                        <p className="text-sm sm:text-base leading-relaxed font-medium" style={{ color: 'var(--text-primary)' }}>
+                          {questao.comando}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          )}
-        </div>
+          )
+        })()}
 
         {/* ─── ALTERNATIVAS (A-E) ─── */}
         <div className="space-y-2">
           {alternativas.map((alt) => {
             const style = getAlternativaStyle(alt.letra)
             const isImagemAlternativa = alt.tipo === 'imagem' || alt.texto === '[Imagem]'
-            const temImagem = alt.imagem && alt.imagem !== 'null'
+            const imgUrl = alt.imagem ? ensureAbsoluteUrl(alt.imagem) : null
+            const imgValida = imgUrl && imgUrl !== 'null' && isValidImageUrl(imgUrl)
+            const imgComErro = imgValida && imagensComErro.has(imgUrl!)
+            const temImagem = imgValida && !imgComErro
             const dimmed = confirmada && alt.letra !== respostaCorreta && alt.letra !== selecionada
 
             return (
@@ -558,40 +605,48 @@ export default function QuestaoENEMPage() {
                   {isImagemAlternativa && temImagem ? (
                     <div>
                       <img
-                        src={alt.imagem!}
+                        src={imgUrl!}
                         alt={`Alternativa ${alt.letra}`}
                         className="max-h-32 sm:max-h-40 w-auto object-contain rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation()
-                          setImagemExpandida(alt.imagem!)
+                          setImagemExpandida(imgUrl!)
                         }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        onError={() => handleImageError(imgUrl!)}
                       />
                     </div>
                   ) : temImagem ? (
                     /* Caso 2: alternativa tem texto E imagem */
                     <>
                       <img
-                        src={alt.imagem!}
+                        src={imgUrl!}
                         alt={`Alternativa ${alt.letra}`}
                         className="max-h-24 w-auto object-contain rounded-lg mb-2 cursor-pointer hover:opacity-80"
                         onClick={(e) => {
                           e.stopPropagation()
-                          setImagemExpandida(alt.imagem!)
+                          setImagemExpandida(imgUrl!)
                         }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                        onError={() => handleImageError(imgUrl!)}
                       />
-                      <span className="text-sm leading-relaxed block" style={{ color: 'var(--text-primary)' }}>
-                        {alt.texto}
-                      </span>
+                      {alt.texto && alt.texto !== '[Imagem]' && (
+                        <span className="text-sm leading-relaxed block" style={{ color: 'var(--text-primary)' }}>
+                          {alt.texto}
+                        </span>
+                      )}
                     </>
+                  ) : imgComErro ? (
+                    /* Caso 3: imagem da alternativa falhou */
+                    <div className="flex items-center gap-2 text-xs py-1" style={{ color: 'var(--text-muted)' }}>
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>Imagem indisponível</span>
+                    </div>
                   ) : (
-                    /* Caso 3: alternativa só texto */
+                    /* Caso 4: alternativa só texto */
                     <span
                       className="text-sm leading-relaxed block"
-                      style={{ color: alt.texto ? 'var(--text-primary)' : 'var(--text-muted)' }}
+                      style={{ color: (alt.texto && alt.texto !== '[Imagem]') ? 'var(--text-primary)' : 'var(--text-muted)' }}
                     >
-                      {alt.texto && alt.texto !== '[Imagem]' ? alt.texto : '(alternativa sem texto)'}
+                      {alt.texto && alt.texto !== '[Imagem]' ? alt.texto : '(sem texto)'}
                     </span>
                   )}
                 </div>
