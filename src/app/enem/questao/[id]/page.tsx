@@ -18,6 +18,8 @@ import {
   ZoomIn,
 } from 'lucide-react'
 import ImagemModal from '@/components/ui/ImagemModal'
+import ImagemENEM from '@/components/ui/ImagemENEM'
+import { useImagemProxyFallback } from '@/hooks/useImagemProxyFallback'
 import { processarContexto, isValidImageUrl } from '@/lib/limpezaTexto'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -139,6 +141,7 @@ export default function QuestaoENEMPage() {
   // Imagem expandida
   const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
   const [imagensComErro, setImagensComErro] = useState<Set<string>>(new Set())
+  const enunciadoRef = useImagemProxyFallback()
 
   const handleImageError = (url: string) => {
     setImagensComErro(prev => new Set(prev).add(url))
@@ -482,6 +485,7 @@ export default function QuestaoENEMPage() {
                 {/* MODO 1: enunciado_html (questões com HTML completo, ex: ENEM 2024/2025) */}
                 {htmlProcessado ? (
                   <div
+                    ref={enunciadoRef}
                     className="enem-enunciado-html"
                     dangerouslySetInnerHTML={{ __html: htmlProcessado }}
                     onClick={handleEnunciadoClick}
@@ -509,33 +513,15 @@ export default function QuestaoENEMPage() {
                     {todasImagens.length > 0 && (
                       <div className="my-4 flex flex-col items-center gap-3">
                         {todasImagens.map((img, idx) => (
-                          imagensComErro.has(img) ? (
-                            <div
-                              key={idx}
-                              className="flex items-center gap-2 px-4 py-3 rounded-lg text-xs"
-                              style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px dashed var(--border-default)' }}
-                            >
-                              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                              <span>Figura {idx + 1} — imagem indisponível</span>
-                            </div>
-                          ) : (
-                            <button
-                              key={idx}
-                              onClick={() => setImagemExpandida(img)}
-                              className="relative rounded-lg overflow-hidden group inline-block"
-                              style={{ background: 'var(--bg-elevated)' }}
-                            >
-                              <img
-                                src={img}
-                                alt={`Figura ${idx + 1}`}
-                                className="max-w-full max-h-[350px] sm:max-h-[450px] h-auto object-contain"
-                                onError={() => handleImageError(img)}
-                              />
-                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                                <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all drop-shadow-md" />
-                              </div>
-                            </button>
-                          )
+                          <ImagemENEM
+                            key={idx}
+                            src={img}
+                            alt={`Figura ${idx + 1}`}
+                            label={`Figura ${idx + 1}`}
+                            className="max-w-full max-h-[350px] sm:max-h-[450px] h-auto object-contain"
+                            onClick={() => setImagemExpandida(img)}
+                            onFinalError={() => handleImageError(img)}
+                          />
                         ))}
                       </div>
                     )}
@@ -602,46 +588,34 @@ export default function QuestaoENEMPage() {
                 {/* Conteúdo da alternativa */}
                 <div className="flex-1 min-w-0 pt-0.5">
                   {/* Caso 1: alternativa é imagem (alt_X_tipo === "imagem") */}
-                  {isImagemAlternativa && temImagem ? (
-                    <div>
-                      <img
+                  {isImagemAlternativa && imgValida ? (
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <ImagemENEM
                         src={imgUrl!}
                         alt={`Alternativa ${alt.letra}`}
-                        className="max-h-32 sm:max-h-40 w-auto object-contain rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setImagemExpandida(imgUrl!)
-                        }}
-                        onError={() => handleImageError(imgUrl!)}
+                        className="max-h-32 sm:max-h-40 w-auto object-contain rounded-lg"
+                        onClick={() => setImagemExpandida(imgUrl!)}
                       />
                     </div>
-                  ) : temImagem ? (
+                  ) : imgValida ? (
                     /* Caso 2: alternativa tem texto E imagem */
                     <>
-                      <img
-                        src={imgUrl!}
-                        alt={`Alternativa ${alt.letra}`}
-                        className="max-h-24 w-auto object-contain rounded-lg mb-2 cursor-pointer hover:opacity-80"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setImagemExpandida(imgUrl!)
-                        }}
-                        onError={() => handleImageError(imgUrl!)}
-                      />
+                      <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                        <ImagemENEM
+                          src={imgUrl!}
+                          alt={`Alternativa ${alt.letra}`}
+                          className="max-h-24 w-auto object-contain rounded-lg"
+                          onClick={() => setImagemExpandida(imgUrl!)}
+                        />
+                      </div>
                       {alt.texto && alt.texto !== '[Imagem]' && (
                         <span className="text-sm leading-relaxed block" style={{ color: 'var(--text-primary)' }}>
                           {alt.texto}
                         </span>
                       )}
                     </>
-                  ) : imgComErro ? (
-                    /* Caso 3: imagem da alternativa falhou */
-                    <div className="flex items-center gap-2 text-xs py-1" style={{ color: 'var(--text-muted)' }}>
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>Imagem indisponível</span>
-                    </div>
                   ) : (
-                    /* Caso 4: alternativa só texto */
+                    /* Caso 3: alternativa só texto */
                     <span
                       className="text-sm leading-relaxed block"
                       style={{ color: (alt.texto && alt.texto !== '[Imagem]') ? 'var(--text-primary)' : 'var(--text-muted)' }}

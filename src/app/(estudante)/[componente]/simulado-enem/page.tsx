@@ -26,6 +26,8 @@ import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import ImagemENEM from '@/components/ui/ImagemENEM'
+import { useImagemProxyFallback } from '@/hooks/useImagemProxyFallback'
 import { processarContexto, processarTexto, isValidImageUrl } from '@/lib/limpezaTexto'
 import { ENEM_CONFIG } from '@/types'
 import type { Componente, AreaENEM, SubareaENEM } from '@/types'
@@ -128,6 +130,7 @@ export default function SimuladoENEMPage() {
   // Zoom de imagem
   const [imagemZoom, setImagemZoom] = useState<string | null>(null)
   const [imagensComErro, setImagensComErro] = useState<Set<string>>(new Set())
+  const contextoRef = useImagemProxyFallback()
 
   // Cores
   const isFisica = componente === 'fisica'
@@ -375,6 +378,7 @@ export default function SimuladoENEMPage() {
 
             {/* 1. Contexto/Enunciado */}
             <div
+              ref={contextoRef}
               className="text-base rounded-xl p-4 texto-questao"
               style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', maxHeight: 'min(400px, 45vh)', overflowY: 'auto', border: '1px solid var(--border-default)' }}
               dangerouslySetInnerHTML={processarTextoQuestao(questao.contexto, imagensValidas.length > 0)}
@@ -392,31 +396,14 @@ export default function SimuladoENEMPage() {
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4">
                 {imagensValidas.map((img, i) => (
                   <div key={i} className="flex-shrink-0 text-center">
-                    {imagensComErro.has(img) ? (
-                      <div
-                        className="flex items-center gap-2 px-4 py-3 rounded-xl text-xs"
-                        style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', border: '1px dashed var(--border-default)' }}
-                      >
-                        <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                        <span>Figura {i + 1} — indisponível</span>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setImagemZoom(img)}
-                        className="relative rounded-xl overflow-hidden group"
-                        style={{ background: 'var(--bg-elevated)' }}
-                      >
-                        <img
-                          src={img}
-                          alt={`Figura ${i + 1}`}
-                          className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
-                          onError={() => handleImageError(img)}
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                          <ZoomIn className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-all" />
-                        </div>
-                      </button>
-                    )}
+                    <ImagemENEM
+                      src={img}
+                      alt={`Figura ${i + 1}`}
+                      label={`Figura ${i + 1}`}
+                      className="h-32 sm:h-40 w-auto object-contain max-w-[200px] sm:max-w-[280px]"
+                      onClick={() => setImagemZoom(img)}
+                      onFinalError={() => handleImageError(img)}
+                    />
                     <span className="text-xs mt-1 block" style={{ color: 'var(--text-muted)' }}>
                       Figura {i + 1}
                     </span>
@@ -471,17 +458,15 @@ export default function SimuladoENEMPage() {
                       {alt.letra}
                     </span>
                     <div className="flex-1 min-w-0 pt-0.5">
-                      {alt.imagem && isValidImageUrl(alt.imagem) && !imagensComErro.has(alt.imagem) && (
-                        <img
-                          src={alt.imagem}
-                          alt={`Alternativa ${alt.letra}`}
-                          className="max-h-24 w-auto object-contain rounded-lg mb-2 cursor-pointer"
-                          onError={() => handleImageError(alt.imagem!)}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setImagemZoom(alt.imagem!)
-                          }}
-                        />
+                      {alt.imagem && isValidImageUrl(alt.imagem) && (
+                        <div className="mb-2" onClick={(e) => e.stopPropagation()}>
+                          <ImagemENEM
+                            src={alt.imagem}
+                            alt={`Alternativa ${alt.letra}`}
+                            className="max-h-24 w-auto object-contain rounded-lg"
+                            onClick={() => setImagemZoom(alt.imagem!)}
+                          />
+                        </div>
                       )}
                       <span
                         className="text-sm leading-relaxed block"

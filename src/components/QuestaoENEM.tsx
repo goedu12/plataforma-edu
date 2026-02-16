@@ -15,7 +15,9 @@ import Button from './ui/Button'
 import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
+import ImagemENEM from './ui/ImagemENEM'
 import ConteudoQuestao from './enem/ConteudoQuestao'
+import { useImagemProxyFallback } from '@/hooks/useImagemProxyFallback'
 import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, separarMultiplosTextos, extrairImagensInline } from '@/lib/limpezaTexto'
 import { formatarFormula } from '@/lib/formatacao'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
@@ -77,6 +79,7 @@ export default function QuestaoENEM({
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
+  const enunciadoRef = useImagemProxyFallback()
 
   // Determinar cores com base no componente ou área
   const isFisica = componente === 'fisica'
@@ -258,6 +261,7 @@ export default function QuestaoENEM({
 
           {/* Renderizar enunciado_html — com processamento de URLs de imagem */}
           <div
+            ref={enunciadoRef}
             className="enem-enunciado-html text-sm sm:text-base leading-relaxed"
             style={{ color: 'var(--text-primary)' }}
             dangerouslySetInnerHTML={{ __html: processarHtmlImagens(questao.enunciado_html!) }}
@@ -347,15 +351,28 @@ export default function QuestaoENEM({
               )}
 
               {isValidImageUrl(questao.imagem_principal) && (
-                <div className="my-4">
-                  <ImagemQuestao src={questao.imagem_principal} alt="Imagem da questão" tipo="principal" onExpandir={setImagemExpandida} />
+                <div className="my-4 max-w-2xl mx-auto">
+                  <ImagemENEM
+                    src={questao.imagem_principal!}
+                    alt="Imagem da questão"
+                    label="Figura principal"
+                    className="w-full max-h-[400px] h-auto object-contain rounded-xl"
+                    onClick={() => setImagemExpandida(questao.imagem_principal!)}
+                  />
                 </div>
               )}
 
               {questao.imagens_extras && questao.imagens_extras.length > 0 && (
                 <div className={`grid gap-3 my-4 ${questao.imagens_extras.filter(isValidImageUrl).length === 1 ? 'grid-cols-1 max-w-lg mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
                   {questao.imagens_extras.filter(isValidImageUrl).map((img, idx) => (
-                    <ImagemQuestao key={idx} src={img} alt={`Imagem ${idx + 2} da questão`} tipo="extra" onExpandir={setImagemExpandida} />
+                    <ImagemENEM
+                      key={idx}
+                      src={img}
+                      alt={`Imagem ${idx + 2} da questão`}
+                      label={`Figura ${idx + 2}`}
+                      className="w-full max-h-[300px] h-auto object-contain rounded-xl"
+                      onClick={() => setImagemExpandida(img)}
+                    />
                   ))}
                 </div>
               )}
@@ -368,7 +385,14 @@ export default function QuestaoENEM({
                 return imagensNovas.length > 0 ? (
                   <div className={`grid gap-3 my-4 ${imagensNovas.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
                     {imagensNovas.map((img, idx) => (
-                      <ImagemQuestao key={`inline-${idx}`} src={img} alt={`Imagem ${idx + 1} do contexto`} tipo={imagensNovas.length === 1 ? 'principal' : 'extra'} onExpandir={setImagemExpandida} />
+                      <ImagemENEM
+                        key={`inline-${idx}`}
+                        src={img}
+                        alt={`Imagem ${idx + 1} do contexto`}
+                        label={`Figura ${idx + 1}`}
+                        className={`w-full h-auto object-contain rounded-xl ${imagensNovas.length === 1 ? 'max-h-[400px]' : 'max-h-[300px]'}`}
+                        onClick={() => setImagemExpandida(img)}
+                      />
                     ))}
                   </div>
                 ) : null
@@ -448,22 +472,22 @@ export default function QuestaoENEM({
                 {/* Caso 1: alternativa é somente imagem (alt_X_tipo === 'imagem') */}
                 {isImagemOnly && temImagem ? (
                   <div>
-                    <ImagemQuestao
-                      src={imagem}
+                    <ImagemENEM
+                      src={imagem!}
                       alt={`Alternativa ${letra}`}
-                      tipo="alternativa"
-                      onExpandir={setImagemExpandida}
+                      className="max-h-[80px] sm:max-h-[100px] w-auto object-contain"
+                      onClick={() => setImagemExpandida(imagem!)}
                     />
                   </div>
                 ) : temImagem ? (
                   /* Caso 2: alternativa tem texto E imagem */
                   <>
                     <div className="mb-2">
-                      <ImagemQuestao
-                        src={imagem}
+                      <ImagemENEM
+                        src={imagem!}
                         alt={`Alternativa ${letra}`}
-                        tipo="alternativa"
-                        onExpandir={setImagemExpandida}
+                        className="max-h-[80px] sm:max-h-[100px] w-auto object-contain"
+                        onClick={() => setImagemExpandida(imagem!)}
                       />
                     </div>
                     {texto && texto !== '[Imagem]' && (
