@@ -22,6 +22,7 @@ import {
   Bot,
   Info,
   X,
+  Clock,
 } from 'lucide-react'
 import Loading from '@/components/ui/Loading'
 import Badge from '@/components/ui/Badge'
@@ -49,6 +50,7 @@ interface NotaBimestre {
   nota_tempo: number
   bimestre: number
   dias_restantes: number
+  tempo_uso_horas: number
 }
 
 export default function MenuComponentePage() {
@@ -104,6 +106,7 @@ export default function MenuComponentePage() {
             nota_tempo: b.nota_tempo ?? 0,
             bimestre: b.bimestre ?? 1,
             dias_restantes: b.dias_restantes ?? 0,
+            tempo_uso_horas: b.tempo_uso_horas ?? 0,
           })
         }
       } catch {
@@ -145,6 +148,15 @@ export default function MenuComponentePage() {
     if (n >= 7) return 'var(--success)'
     if (n >= 5) return 'var(--warning)'
     return 'var(--error)'
+  }
+
+  // Formatar horas para exibição
+  const formatarTempo = (horas: number) => {
+    const h = Math.floor(horas)
+    const m = Math.round((horas - h) * 60)
+    if (h === 0) return `${m}min`
+    if (m === 0) return `${h}h`
+    return `${h}h${m.toString().padStart(2, '0')}`
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -268,14 +280,22 @@ export default function MenuComponentePage() {
               className="mt-3 p-3 rounded-xl flex items-center gap-3"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <TrendingUp className="w-4 h-4" style={{ color: getCorNota(nota.nota_final) }} />
-                <span
-                  className="text-2xl font-bold tabular-nums"
-                  style={{ color: getCorNota(nota.nota_final) }}
-                >
-                  {nota.nota_final.toFixed(1)}
-                </span>
+              <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4" style={{ color: getCorNota(nota.nota_final) }} />
+                  <span
+                    className="text-2xl font-bold tabular-nums"
+                    style={{ color: getCorNota(nota.nota_final) }}
+                  >
+                    {nota.nota_final.toFixed(1)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+                  <Clock className="w-3 h-3" />
+                  <span className="text-2xs font-medium tabular-nums">
+                    {formatarTempo(nota.tempo_uso_horas)}
+                  </span>
+                </div>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1">
