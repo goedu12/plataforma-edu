@@ -2642,3 +2642,192 @@ img {
     margin: 10px 0 6px 0;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ENEM 2024/2025 — Estilos para enunciado_html renderizado via dangerouslySetInnerHTML
+   Classe: .enem-enunciado-html
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.enem-enunciado-html {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.enem-enunciado-html p {
+  margin: 0 0 0.75em 0;
+  line-height: 1.7;
+}
+
+.enem-enunciado-html p:last-child {
+  margin-bottom: 0;
+}
+
+/* Imagens */
+.enem-enunciado-html img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 8px auto;
+  display: block;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.enem-enunciado-html img:hover {
+  opacity: 0.9;
+}
+
+/* Figuras com legenda */
+.enem-enunciado-html figure {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.enem-enunciado-html figure img {
+  margin: 0 auto 6px auto;
+}
+
+.enem-enunciado-html figcaption {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Textos em negrito e itálico */
+.enem-enunciado-html strong,
+.enem-enunciado-html b {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.enem-enunciado-html em,
+.enem-enunciado-html i {
+  font-style: italic;
+}
+
+/* Tabelas */
+.enem-enunciado-html table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.875rem;
+  overflow-x: auto;
+  display: block;
+}
+
+.enem-enunciado-html th,
+.enem-enunciado-html td {
+  border: 1px solid var(--border-default);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.enem-enunciado-html th {
+  background: var(--bg-elevated);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.enem-enunciado-html tbody tr:hover {
+  background: var(--bg-elevated);
+}
+
+/* Citações */
+.enem-enunciado-html blockquote {
+  border-left: 3px solid var(--border-default);
+  padding-left: 12px;
+  margin: 10px 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Listas */
+.enem-enunciado-html ul {
+  list-style: disc;
+  padding-left: 1.5em;
+  margin: 8px 0;
+}
+
+.enem-enunciado-html ol {
+  list-style: decimal;
+  padding-left: 1.5em;
+  margin: 8px 0;
+}
+
+.enem-enunciado-html li {
+  margin-bottom: 4px;
+  line-height: 1.6;
+}
+
+/* Super/subscript */
+.enem-enunciado-html sup {
+  font-size: 0.7em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+.enem-enunciado-html sub {
+  font-size: 0.7em;
+  vertical-align: sub;
+  line-height: 0;
+}
+
+/* Small (fontes, referências) */
+.enem-enunciado-html small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
+}
+
+/* Separadores */
+.enem-enunciado-html hr {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: 12px 0;
+}
+
+/* Poesia / texto pré-formatado */
+.enem-enunciado-html pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+  margin: 8px 0;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Links (raros, mas podem existir) */
+.enem-enunciado-html a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+/* ── Responsividade mobile ── */
+@media (max-width: 640px) {
+  .enem-enunciado-html {
+    font-size: 0.875rem;
+  }
+
+  .enem-enunciado-html img {
+    border-radius: 6px;
+  }
+
+  .enem-enunciado-html table {
+    font-size: 0.75rem;
+  }
+
+  .enem-enunciado-html th,
+  .enem-enunciado-html td {
+    padding: 6px 8px;
+  }
+
+  .enem-enunciado-html figure {
+    margin: 10px 0;
+  }
+}

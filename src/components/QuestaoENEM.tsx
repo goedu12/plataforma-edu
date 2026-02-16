@@ -73,13 +73,16 @@ export default function QuestaoENEM({
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   // Alternativas do ENEM (5) - preservar texto original para formatação correta
-  const alternativas: { letra: AlternativaENEM; texto: string; imagem?: string }[] = [
-    { letra: 'A', texto: questao.alternativa_a || '', imagem: questao.imagem_a },
-    { letra: 'B', texto: questao.alternativa_b || '', imagem: questao.imagem_b },
-    { letra: 'C', texto: questao.alternativa_c || '', imagem: questao.imagem_c },
-    { letra: 'D', texto: questao.alternativa_d || '', imagem: questao.imagem_d },
-    { letra: 'E', texto: questao.alternativa_e || '', imagem: questao.imagem_e },
+  const alternativas: { letra: AlternativaENEM; texto: string; imagem?: string; tipo: string }[] = [
+    { letra: 'A', texto: questao.alternativa_a || '', imagem: questao.imagem_a ?? undefined, tipo: questao.alt_a_tipo || 'texto' },
+    { letra: 'B', texto: questao.alternativa_b || '', imagem: questao.imagem_b ?? undefined, tipo: questao.alt_b_tipo || 'texto' },
+    { letra: 'C', texto: questao.alternativa_c || '', imagem: questao.imagem_c ?? undefined, tipo: questao.alt_c_tipo || 'texto' },
+    { letra: 'D', texto: questao.alternativa_d || '', imagem: questao.imagem_d ?? undefined, tipo: questao.alt_d_tipo || 'texto' },
+    { letra: 'E', texto: questao.alternativa_e || '', imagem: questao.imagem_e ?? undefined, tipo: questao.alt_e_tipo || 'texto' },
   ]
+
+  // Verifica se tem enunciado_html (questões ENEM 2024/2025)
+  const temEnunciadoHtml = !!(questao.enunciado_html && questao.enunciado_html.trim().length > 10)
 
   // Obter nome da área
   const areaNome = questao.area
@@ -224,221 +227,174 @@ export default function QuestaoENEM({
 
       {/* ═══════════════════════════════════════════════════════════════
           ENUNCIADO (CONTEXTO)
-          Ordem: Texto → Imagem → Fonte (como na prova ENEM original)
-          Suporte a LaTeX/KaTeX para fórmulas matemáticas
+          Modo 1: enunciado_html (ENEM 2024/2025) — render HTML direto
+          Modo 2: contexto processado (questões antigas) — render legado
           ═══════════════════════════════════════════════════════════════ */}
-      {(() => {
-        // Processa o contexto e extrai as fontes separadamente
-        // removerImagens: true pois imagens são exibidas via galeria abaixo
-        const contextoProcessado = processarContexto(questao.contexto, { removerImagens: true })
-        const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
+      {temEnunciadoHtml ? (
+        /* ── MODO 1: enunciado_html (ENEM 2024/2025) ── */
+        <div
+          className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[45vh] overflow-y-auto"
+          style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+        >
+          {/* Badge de questão anulada */}
+          {questao.anulada && (
+            <div
+              className="mb-3 px-3 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1"
+              style={{ background: 'var(--warning-bg-15)', color: 'var(--warning)' }}
+            >
+              <AlertCircle className="w-3.5 h-3.5" /> Questão Anulada
+            </div>
+          )}
 
-        // Separa em múltiplos textos (TEXTO I, TEXTO II, etc.)
-        const blocos = separarMultiplosTextos(textoSemSmall)
-        const temMultiplosTextos = blocos.length > 1
-
-        // Extrai título do texto-base (se for bloco único)
-        const { titulo: tituloDetectado, corpo: textoCorpo } = !temMultiplosTextos
-          ? extrairTituloDoTexto(textoSemSmall)
-          : { titulo: null, corpo: textoSemSmall }
-
-        // Detecta se há fórmulas LaTeX no contexto
-        const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int|\\times|\\div|\\vec/.test(questao.contexto || '')
-
-        // Também usar o título da questão (campo titulo) se existir
-        const tituloExibir = questao.titulo || tituloDetectado
-
-        // Extrair imagens inline do contexto
-        const { imagens: imagensInline } = extrairImagensInline(questao.contexto || '')
-
-        return (
+          {/* Renderizar enunciado_html — imagens já têm URLs absolutas */}
           <div
-            className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto questao-contexto"
-            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-          >
-            {/* 1. Título em negrito (se houver e bloco único) */}
-            {tituloExibir && !temMultiplosTextos && (
-              <h3
-                className="font-bold text-sm sm:text-base mb-3 pb-1"
-                style={{ color: 'var(--text-primary)' }}
+            className="enem-enunciado-html text-sm sm:text-base leading-relaxed"
+            style={{ color: 'var(--text-primary)' }}
+            dangerouslySetInnerHTML={{ __html: questao.enunciado_html! }}
+            onClick={(e) => {
+              const target = e.target as HTMLElement
+              if (target.tagName === 'IMG') {
+                const src = (target as HTMLImageElement).src
+                if (src) setImagemExpandida(src)
+              }
+            }}
+          />
+
+          {/* Fonte/referência */}
+          {questao.fonte && (
+            <div
+              className="mt-4 pt-2"
+              style={{ borderTop: '1px solid var(--border-default)' }}
+            >
+              <p
+                className="text-[0.7rem] sm:text-xs leading-relaxed"
+                style={{ color: 'var(--text-muted)' }}
               >
-                {tituloExibir}
-              </h3>
-            )}
+                {questao.fonte}
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* ── MODO 2: Renderização legada (questões antigas sem enunciado_html) ── */
+        (() => {
+          const contextoProcessado = processarContexto(questao.contexto, { removerImagens: true })
+          const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
+          const blocos = separarMultiplosTextos(textoSemSmall)
+          const temMultiplosTextos = blocos.length > 1
+          const { titulo: tituloDetectado, corpo: textoCorpo } = !temMultiplosTextos
+            ? extrairTituloDoTexto(textoSemSmall)
+            : { titulo: null, corpo: textoSemSmall }
+          const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int|\\times|\\div|\\vec/.test(questao.contexto || '')
+          const tituloExibir = questao.titulo || tituloDetectado
+          const { imagens: imagensInline } = extrairImagensInline(questao.contexto || '')
 
-            {/* 2. Renderizar blocos de texto */}
-            {temMultiplosTextos ? (
-              // Múltiplos textos (TEXTO I, TEXTO II, etc.)
-              <div className="space-y-4">
-                {blocos.map((bloco, idx) => {
-                  const { titulo: blocoTitulo, corpo: blocoCorpo } = bloco.titulo
-                    ? { titulo: null, corpo: bloco.conteudo }
-                    : extrairTituloDoTexto(bloco.conteudo)
+          return (
+            <div
+              className="flex-shrink-0 p-4 rounded-xl mb-3 max-h-[40vh] overflow-y-auto questao-contexto"
+              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+            >
+              {tituloExibir && !temMultiplosTextos && (
+                <h3 className="font-bold text-sm sm:text-base mb-3 pb-1" style={{ color: 'var(--text-primary)' }}>
+                  {tituloExibir}
+                </h3>
+              )}
 
-                  return (
-                    <div key={idx}>
-                      {/* Cabeçalho do bloco (TEXTO I, TEXTO II...) */}
-                      {bloco.titulo && (
-                        <h4
-                          className="font-bold text-xs sm:text-sm mb-2 uppercase tracking-wide"
-                          style={{ color: corPrimaria, opacity: 0.8 }}
-                        >
-                          {bloco.titulo}
-                        </h4>
-                      )}
-                      {/* Título interno do bloco */}
-                      {blocoTitulo && (
-                        <h3
-                          className="font-bold text-sm sm:text-base mb-2"
-                          style={{ color: 'var(--text-primary)' }}
-                        >
-                          {blocoTitulo}
-                        </h3>
-                      )}
-                      {/* Conteúdo do bloco */}
-                      {temLatex ? (
-                        <ConteudoQuestao
-                          conteudo={blocoTitulo ? blocoCorpo : bloco.conteudo}
-                          tipo="contexto"
-                        />
-                      ) : (
-                        <div
-                          className="questao-texto"
-                          style={{ color: 'var(--text-primary)' }}
-                          dangerouslySetInnerHTML={{ __html: blocoTitulo ? blocoCorpo : bloco.conteudo }}
-                        />
-                      )}
-                      {/* Separador entre blocos */}
-                      {idx < blocos.length - 1 && (
-                        <div className="mt-3 pt-1" style={{ borderBottom: '1px dashed var(--border-default)' }} />
-                      )}
-                    </div>
+              {temMultiplosTextos ? (
+                <div className="space-y-4">
+                  {blocos.map((bloco, idx) => {
+                    const { titulo: blocoTitulo, corpo: blocoCorpo } = bloco.titulo
+                      ? { titulo: null, corpo: bloco.conteudo }
+                      : extrairTituloDoTexto(bloco.conteudo)
+                    return (
+                      <div key={idx}>
+                        {bloco.titulo && (
+                          <h4 className="font-bold text-xs sm:text-sm mb-2 uppercase tracking-wide" style={{ color: corPrimaria, opacity: 0.8 }}>
+                            {bloco.titulo}
+                          </h4>
+                        )}
+                        {blocoTitulo && (
+                          <h3 className="font-bold text-sm sm:text-base mb-2" style={{ color: 'var(--text-primary)' }}>{blocoTitulo}</h3>
+                        )}
+                        {temLatex ? (
+                          <ConteudoQuestao conteudo={blocoTitulo ? blocoCorpo : bloco.conteudo} tipo="contexto" />
+                        ) : (
+                          <div className="questao-texto" style={{ color: 'var(--text-primary)' }} dangerouslySetInnerHTML={{ __html: blocoTitulo ? blocoCorpo : bloco.conteudo }} />
+                        )}
+                        {idx < blocos.length - 1 && <div className="mt-3 pt-1" style={{ borderBottom: '1px dashed var(--border-default)' }} />}
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                (tituloDetectado ? textoCorpo : textoSemSmall) && (
+                  temLatex ? (
+                    <ConteudoQuestao conteudo={tituloDetectado ? textoCorpo : textoSemSmall} tipo="contexto" />
+                  ) : (
+                    <div className="questao-texto" style={{ color: 'var(--text-primary)' }} dangerouslySetInnerHTML={{ __html: tituloDetectado ? textoCorpo : textoSemSmall }} />
                   )
-                })}
-              </div>
-            ) : (
-              // Bloco único
-              (tituloDetectado ? textoCorpo : textoSemSmall) && (
-                temLatex ? (
-                  <ConteudoQuestao
-                    conteudo={tituloDetectado ? textoCorpo : textoSemSmall}
-                    tipo="contexto"
-                  />
-                ) : (
-                  <div
-                    className="questao-texto"
-                    style={{ color: 'var(--text-primary)' }}
-                    dangerouslySetInnerHTML={{ __html: tituloDetectado ? textoCorpo : textoSemSmall }}
-                  />
                 )
-              )
-            )}
+              )}
 
-            {/* 3. Imagem principal do contexto - RESPONSIVA E AMPLIÁVEL */}
-            {isValidImageUrl(questao.imagem_principal) && (
-              <div className="my-4">
-                <ImagemQuestao
-                  src={questao.imagem_principal}
-                  alt="Imagem da questão"
-                  tipo="principal"
-                  onExpandir={setImagemExpandida}
-                />
-              </div>
-            )}
+              {isValidImageUrl(questao.imagem_principal) && (
+                <div className="my-4">
+                  <ImagemQuestao src={questao.imagem_principal} alt="Imagem da questão" tipo="principal" onExpandir={setImagemExpandida} />
+                </div>
+              )}
 
-            {/* 3b. Imagens extras (se houver) - GRID RESPONSIVO */}
-            {questao.imagens_extras && questao.imagens_extras.length > 0 && (
-              <div className={`
-                grid gap-3 my-4
-                ${questao.imagens_extras.filter(isValidImageUrl).length === 1
-                  ? 'grid-cols-1 max-w-lg mx-auto'
-                  : 'grid-cols-1 sm:grid-cols-2'}
-              `}>
-                {questao.imagens_extras.filter(isValidImageUrl).map((img, idx) => (
-                  <ImagemQuestao
-                    key={idx}
-                    src={img}
-                    alt={`Imagem ${idx + 2} da questão`}
-                    tipo="extra"
-                    onExpandir={setImagemExpandida}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* 3c. Imagens inline extraídas do texto (sem duplicar as já exibidas) */}
-            {(() => {
-              // Filtrar imagens inline que não são duplicatas da principal ou extras
-              const imagensJaExibidas = new Set<string>()
-              if (isValidImageUrl(questao.imagem_principal)) imagensJaExibidas.add(questao.imagem_principal!)
-              if (questao.imagens_extras) questao.imagens_extras.forEach(img => imagensJaExibidas.add(img))
-              const imagensNovas = imagensInline.filter(img => !imagensJaExibidas.has(img))
-
-              return imagensNovas.length > 0 ? (
-                <div className={`
-                  grid gap-3 my-4
-                  ${imagensNovas.length === 1
-                    ? 'grid-cols-1 max-w-lg mx-auto'
-                    : 'grid-cols-1 sm:grid-cols-2'}
-                `}>
-                  {imagensNovas.map((img, idx) => (
-                    <ImagemQuestao
-                      key={`inline-${idx}`}
-                      src={img}
-                      alt={`Imagem ${idx + 1} do contexto`}
-                      tipo={imagensNovas.length === 1 ? 'principal' : 'extra'}
-                      onExpandir={setImagemExpandida}
-                    />
+              {questao.imagens_extras && questao.imagens_extras.length > 0 && (
+                <div className={`grid gap-3 my-4 ${questao.imagens_extras.filter(isValidImageUrl).length === 1 ? 'grid-cols-1 max-w-lg mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                  {questao.imagens_extras.filter(isValidImageUrl).map((img, idx) => (
+                    <ImagemQuestao key={idx} src={img} alt={`Imagem ${idx + 2} da questão`} tipo="extra" onExpandir={setImagemExpandida} />
                   ))}
                 </div>
-              ) : null
-            })()}
+              )}
 
-            {/* 4. Fontes/Referências - Separadas com linha, fonte menor e em negrito */}
-            {fontes.length > 0 && (
-              <div
-                className="mt-4 pt-2"
-                style={{ borderTop: '1px solid var(--border-default)' }}
-              >
-                {fontes.map((fonte, index) => (
-                  <p
-                    key={index}
-                    className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
-                    style={{ color: 'var(--text-secondary)' }}
-                    dangerouslySetInnerHTML={{ __html: fonte }}
-                  />
-                ))}
-              </div>
-            )}
+              {(() => {
+                const imagensJaExibidas = new Set<string>()
+                if (isValidImageUrl(questao.imagem_principal)) imagensJaExibidas.add(questao.imagem_principal!)
+                if (questao.imagens_extras) questao.imagens_extras.forEach(img => imagensJaExibidas.add(img))
+                const imagensNovas = imagensInline.filter(img => !imagensJaExibidas.has(img))
+                return imagensNovas.length > 0 ? (
+                  <div className={`grid gap-3 my-4 ${imagensNovas.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                    {imagensNovas.map((img, idx) => (
+                      <ImagemQuestao key={`inline-${idx}`} src={img} alt={`Imagem ${idx + 1} do contexto`} tipo={imagensNovas.length === 1 ? 'principal' : 'extra'} onExpandir={setImagemExpandida} />
+                    ))}
+                  </div>
+                ) : null
+              })()}
 
-            {/* 5. Comando (texto antes das alternativas) */}
-            {questao.comando && (
-              <div className="mt-4 pt-3 border-t border-[var(--border-default)]">
-                {temLatex || /\$[^$]+\$/.test(questao.comando) ? (
-                  <ConteudoQuestao
-                    conteudo={questao.comando}
-                    tipo="comando"
-                  />
-                ) : (
-                  <p
-                    className="text-sm sm:text-base font-medium"
-                    style={{ color: 'var(--text-primary)' }}
-                  >
-                    {questao.comando}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )
-      })()}
+              {fontes.length > 0 && (
+                <div className="mt-4 pt-2" style={{ borderTop: '1px solid var(--border-default)' }}>
+                  {fontes.map((fonte, index) => (
+                    <p key={index} className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1" style={{ color: 'var(--text-secondary)' }} dangerouslySetInnerHTML={{ __html: fonte }} />
+                  ))}
+                </div>
+              )}
+
+              {questao.comando && (
+                <div className="mt-4 pt-3 border-t border-[var(--border-default)]">
+                  {temLatex || /\$[^$]+\$/.test(questao.comando) ? (
+                    <ConteudoQuestao conteudo={questao.comando} tipo="comando" />
+                  ) : (
+                    <p className="text-sm sm:text-base font-medium" style={{ color: 'var(--text-primary)' }}>{questao.comando}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })()
+      )}
 
       {/* ═══════════════════════════════════════════════════════════════
           ALTERNATIVAS (5)
           ═══════════════════════════════════════════════════════════════ */}
       <div className="space-y-2 sm:space-y-3 flex-shrink-0">
-        {alternativas.map(({ letra, texto, imagem }) => {
+        {alternativas.map(({ letra, texto, imagem, tipo: tipoAlt }) => {
           const style = getAlternativaStyle(letra)
+          const isImagemOnly = tipoAlt === 'imagem' || texto === '[Imagem]'
+          const temImagem = isValidImageUrl(imagem)
+
           return (
             <button
               key={letra}
@@ -479,9 +435,9 @@ export default function QuestaoENEM({
 
               {/* Conteúdo da alternativa */}
               <div className="flex-1 min-w-0">
-                {/* Imagem da alternativa (se houver e for válida) - AMPLIÁVEL */}
-                {isValidImageUrl(imagem) && (
-                  <div className="mb-2">
+                {/* Caso 1: alternativa é somente imagem (alt_X_tipo === 'imagem') */}
+                {isImagemOnly && temImagem ? (
+                  <div>
                     <ImagemQuestao
                       src={imagem}
                       alt={`Alternativa ${letra}`}
@@ -489,28 +445,38 @@ export default function QuestaoENEM({
                       onExpandir={setImagemExpandida}
                     />
                   </div>
-                )}
-                {/* Texto da alternativa (com suporte a LaTeX e fórmulas químicas) */}
-                {texto ? (
+                ) : temImagem ? (
+                  /* Caso 2: alternativa tem texto E imagem */
+                  <>
+                    <div className="mb-2">
+                      <ImagemQuestao
+                        src={imagem}
+                        alt={`Alternativa ${letra}`}
+                        tipo="alternativa"
+                        onExpandir={setImagemExpandida}
+                      />
+                    </div>
+                    {texto && texto !== '[Imagem]' && (
+                      /\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
+                        <ConteudoQuestao conteudo={texto} tipo="alternativa" className="flex-1" />
+                      ) : (
+                        <span className="text-sm sm:text-base leading-snug" style={{ color: 'var(--text-primary)' }}>
+                          {formatarFormula(texto)}
+                        </span>
+                      )
+                    )}
+                  </>
+                ) : texto && texto !== '[Imagem]' ? (
+                  /* Caso 3: alternativa somente texto */
                   /\$[^$]+\$|\\frac|\\sqrt|\\times/.test(texto) ? (
-                    <ConteudoQuestao
-                      conteudo={texto}
-                      tipo="alternativa"
-                      className="flex-1"
-                    />
+                    <ConteudoQuestao conteudo={texto} tipo="alternativa" className="flex-1" />
                   ) : (
-                    <span
-                      className="text-sm sm:text-base leading-snug"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
+                    <span className="text-sm sm:text-base leading-snug" style={{ color: 'var(--text-primary)' }}>
                       {formatarFormula(texto)}
                     </span>
                   )
                 ) : (
-                  <span
-                    className="text-sm italic"
-                    style={{ color: 'var(--text-muted)' }}
-                  >
+                  <span className="text-sm italic" style={{ color: 'var(--text-muted)' }}>
                     (alternativa sem texto)
                   </span>
                 )}
