@@ -11,7 +11,7 @@ import { ENEM_CONFIG } from '@/types'
 // API ENEM - Buscar questões para estudantes do Ensino Médio
 //
 // Modos de operação:
-// GET /api/enem?id_api=enem-2024-d1-azul-001-inglês  → questão específica (view questao_completa)
+// GET /api/enem?id_api=enem-2024-d1-azul-001-inglês  → questão específica
 // GET /api/enem?modo=listar&ano=2024&dia=1            → listar questões com filtros
 // GET /api/enem?ano=2024&area=matematica              → questão aleatória (modo legado)
 // GET /api/enem?modo=aleatorio                        → questão aleatória com filtros
@@ -19,12 +19,21 @@ import { ENEM_CONFIG } from '@/types'
 
 const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
 
+// URLs de placeholder/imagem quebrada conhecidos (ex: API enem.dev)
+const URLS_PLACEHOLDER = ['broken-image', 'placeholder', 'no-image', 'image-not-found', 'not-available']
+
+// Ano mínimo de questões servidas (questões anteriores são ignoradas)
+const ANO_MINIMO = 2024
+
 // Construir URL completa de imagem do storage
 function buildImageUrl(path: string | null | undefined): string | null {
   if (!path) return null
   const trimmed = path.trim()
   // Filtrar valores inválidos importados do CSV/API
   if (!trimmed || ['nan', 'none', 'null', 'undefined', 'NaN', 'None'].includes(trimmed)) return null
+  // Filtrar URLs de placeholder/imagem quebrada
+  const lower = trimmed.toLowerCase()
+  if (URLS_PLACEHOLDER.some(p => lower.includes(p))) return null
   // Se já é URL absoluta, retornar como está
   if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:')) return trimmed
   // Construir URL do storage
@@ -101,9 +110,9 @@ function formatarQuestaoPublica(q: any): any {
       buildImageUrl(q.imagem_principal),
       ...(q.imagens_extras || []).map(buildImageUrl).filter(Boolean),
     ].filter(Boolean),
-    // Da view questao_completa:
-    textos_motivadores_json: q.textos_motivadores_json,
-    imagens_json: q.imagens_json,
+    // Campos extras (opcionais, da view questao_completa se disponível)
+    textos_motivadores_json: q.textos_motivadores_json || null,
+    imagens_json: q.imagens_json || null,
     // Alternativas formatadas para compatibilidade com componente existente
     alternativas: [
       { letra: 'A', texto: q.alternativa_a, imagem: imgA, tipo: q.alt_a_tipo || 'texto' },
@@ -183,27 +192,14 @@ export async function GET(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // ─── MODO 1: Buscar questão específica por id_api (via view questao_completa) ───
+    // ─── MODO 1: Buscar questão específica por id_api ───
     if (idApiParam) {
-      // Tentar buscar da view questao_completa primeiro
-      let questao: any = null
-      const { data: questaoView } = await supabase
-        .from('questao_completa')
+      // Buscar direto da tabela questoes_enem (fonte primária)
+      const { data: questao } = await supabase
+        .from('questoes_enem')
         .select('*')
         .eq('id_api', idApiParam)
         .single()
-
-      if (questaoView) {
-        questao = questaoView
-      } else {
-        // Fallback: buscar da tabela questoes_enem
-        const { data: questaoTabela } = await supabase
-          .from('questoes_enem')
-          .select('*')
-          .eq('id_api', idApiParam)
-          .single()
-        questao = questaoTabela
-      }
 
       if (!questao) {
         return NextResponse.json({
@@ -227,6 +223,8 @@ export async function GET(request: NextRequest) {
 
       // Filtrar questões que não estão com status 'inativa' (permitir 'ativa' e sem status)
       query = query.or('status.eq.ativa,status.is.null')
+      // Apenas questões 2024+
+      query = query.gte('ano_prova', ANO_MINIMO)
 
       if (ano) query = query.eq('ano_prova', ano)
       if (dia) query = query.eq('dia', dia)
@@ -262,6 +260,7 @@ export async function GET(request: NextRequest) {
         .from('questoes_enem')
         .select('area, area_nome, dia')
         .or('status.eq.ativa,status.is.null')
+        .gte('ano_prova', ANO_MINIMO)
 
       if (ano) contagemQuery = contagemQuery.eq('ano_prova', ano)
 
@@ -293,36 +292,40 @@ export async function GET(request: NextRequest) {
 
     // ─── MODO 3: Questão aleatória (comportamento original) ───
 
-    // Buscar anos disponíveis
+    // Buscar anos disponíveis (apenas 2024+)
     const { data: anosData } = await supabase
       .from('questoes_enem')
       .select('ano_prova')
       .or('status.eq.ativa,status.is.null')
+      .gte('ano_prova', ANO_MINIMO)
 
     const anosDisponiveis = [...new Set(anosData?.map(a => a.ano_prova).filter(Boolean) || [])]
       .sort((a, b) => b - a)
 
-    // Buscar áreas disponíveis
+    // Buscar áreas disponíveis (apenas 2024+)
     const { data: areasData } = await supabase
       .from('questoes_enem')
       .select('area, area_nome')
       .or('status.eq.ativa,status.is.null')
+      .gte('ano_prova', ANO_MINIMO)
 
     const areasDisponiveis = [...new Set(areasData?.map(a => a.area_nome || a.area).filter(Boolean) || [])]
 
-    // Buscar dias disponíveis
+    // Buscar dias disponíveis (apenas 2024+)
     const { data: diasData } = await supabase
       .from('questoes_enem')
       .select('dia')
       .or('status.eq.ativa,status.is.null')
+      .gte('ano_prova', ANO_MINIMO)
 
     const diasDisponiveis = [...new Set(diasData?.map(a => a.dia).filter(Boolean) || [])].sort()
 
-    // Buscar subáreas disponíveis (filtradas por área se selecionada)
+    // Buscar subáreas disponíveis (apenas 2024+, filtradas por área se selecionada)
     let subareasQuery = supabase
       .from('questoes_enem')
       .select('subarea')
       .or('status.eq.ativa,status.is.null')
+      .gte('ano_prova', ANO_MINIMO)
 
     if (areaParam) {
       subareasQuery = subareasQuery.or(`area.eq.${areaParam},area.ilike.%${areaParam}%`)
@@ -342,11 +345,12 @@ export async function GET(request: NextRequest) {
       respostasUsuario?.map(r => r.questao_id).filter(Boolean) || []
     )
 
-    // Construir query principal
+    // Construir query principal (apenas 2024+)
     let query = supabase
       .from('questoes_enem')
       .select('*')
       .or('status.eq.ativa,status.is.null')
+      .gte('ano_prova', ANO_MINIMO)
 
     if (ano) query = query.eq('ano_prova', ano)
     if (dia) query = query.eq('dia', dia)
