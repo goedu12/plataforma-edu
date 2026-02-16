@@ -18,17 +18,6 @@ const nextConfig = {
         hostname: 'qjrjkjknesacrurvcthu.supabase.co',
         pathname: '/storage/v1/object/**',
       },
-      // API ENEM - imagens das questões (domínio principal)
-      {
-        protocol: 'https',
-        hostname: 'api.enem.dev',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'enem.dev',
-        pathname: '/**',
-      },
       // CDN comum para imagens
       {
         protocol: 'https',
