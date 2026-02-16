@@ -126,8 +126,10 @@ function formatarQuestaoPublica(q: any): any {
 
 // Verificar se uma questão passa no filtro de qualidade (para questões antigas)
 function verificarQualidade(q: any): boolean {
-  // Questões 2024/2025 importadas do banco local sempre passam no filtro
-  if (q.ano_prova >= 2024 && q.enunciado_html) return true
+  // Questões 2024+ importadas via CSV/lote sempre passam no filtro de qualidade.
+  // Diferente das questões enem.dev (2009-2023) que tinham imagens quebradas,
+  // estas foram importadas manualmente com dados confiáveis.
+  if (q.ano_prova >= 2024) return true
 
   const resultado = questaoTemQualidade({
     contexto: q.contexto,
