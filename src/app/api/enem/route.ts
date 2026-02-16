@@ -11,7 +11,7 @@ import { ENEM_CONFIG } from '@/types'
 // API ENEM - Buscar questões para estudantes do Ensino Médio
 //
 // Modos de operação:
-// GET /api/enem?id_api=enem-2024-d1-azul-001-inglês  → questão específica (view questao_completa)
+// GET /api/enem?id_api=enem-2024-d1-azul-001-inglês  → questão específica
 // GET /api/enem?modo=listar&ano=2024&dia=1            → listar questões com filtros
 // GET /api/enem?ano=2024&area=matematica              → questão aleatória (modo legado)
 // GET /api/enem?modo=aleatorio                        → questão aleatória com filtros
@@ -101,9 +101,9 @@ function formatarQuestaoPublica(q: any): any {
       buildImageUrl(q.imagem_principal),
       ...(q.imagens_extras || []).map(buildImageUrl).filter(Boolean),
     ].filter(Boolean),
-    // Da view questao_completa:
-    textos_motivadores_json: q.textos_motivadores_json,
-    imagens_json: q.imagens_json,
+    // Campos extras (opcionais, da view questao_completa se disponível)
+    textos_motivadores_json: q.textos_motivadores_json || null,
+    imagens_json: q.imagens_json || null,
     // Alternativas formatadas para compatibilidade com componente existente
     alternativas: [
       { letra: 'A', texto: q.alternativa_a, imagem: imgA, tipo: q.alt_a_tipo || 'texto' },
@@ -183,27 +183,14 @@ export async function GET(request: NextRequest) {
       }, { status: 403 })
     }
 
-    // ─── MODO 1: Buscar questão específica por id_api (via view questao_completa) ───
+    // ─── MODO 1: Buscar questão específica por id_api ───
     if (idApiParam) {
-      // Tentar buscar da view questao_completa primeiro
-      let questao: any = null
-      const { data: questaoView } = await supabase
-        .from('questao_completa')
+      // Buscar direto da tabela questoes_enem (fonte primária)
+      const { data: questao } = await supabase
+        .from('questoes_enem')
         .select('*')
         .eq('id_api', idApiParam)
         .single()
-
-      if (questaoView) {
-        questao = questaoView
-      } else {
-        // Fallback: buscar da tabela questoes_enem
-        const { data: questaoTabela } = await supabase
-          .from('questoes_enem')
-          .select('*')
-          .eq('id_api', idApiParam)
-          .single()
-        questao = questaoTabela
-      }
 
       if (!questao) {
         return NextResponse.json({
