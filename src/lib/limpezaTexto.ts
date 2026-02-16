@@ -9,6 +9,15 @@ const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/ob
 // Valores que devem ser tratados como vazio
 const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
 
+// URLs de imagem que são placeholders/quebrados conhecidos (ex: API enem.dev)
+const URLS_PLACEHOLDER = [
+  'broken-image',
+  'placeholder',
+  'no-image',
+  'image-not-found',
+  'not-available',
+]
+
 // Tags HTML permitidas (sanitização XSS)
 const TAGS_PERMITIDAS = new Set([
   'p', 'br', 'em', 'strong', 'span', 'div', 'img',
@@ -139,6 +148,9 @@ export function isValidImageUrl(url: string | null | undefined): boolean {
   const trimmed = url.trim()
   if (!trimmed) return false
   if (VALORES_INVALIDOS.includes(trimmed.toLowerCase())) return false
+  // Rejeitar URLs de placeholder/imagem quebrada conhecidas
+  const lower = trimmed.toLowerCase()
+  if (URLS_PLACEHOLDER.some(p => lower.includes(p))) return false
   // Aceitar URLs absolutas, data URIs e caminhos relativos (ex: enem/2024/img.jpeg)
   if (!trimmed.startsWith('http') && !trimmed.startsWith('data:image') && !trimmed.startsWith('//')) {
     // Caminho relativo: verificar se parece um caminho de arquivo válido (não um script/protocolo)
@@ -496,6 +508,13 @@ export function processarContexto(
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
+
+  // Remover referências a imagens quebradas/placeholder (ex: API enem.dev)
+  // Remove ![](broken-image.svg), ![alt](broken-image.svg) e variantes
+  processado = processado.replace(/!\[[^\]]*\]\([^)]*(?:broken-image|placeholder|no-image|not-available)[^)]*\)/gi, '')
+  processado = processado.replace(/!\([^)]*(?:broken-image|placeholder|no-image|not-available)[^)]*\)/gi, '')
+  // Remove <img> tags com src contendo broken-image
+  processado = processado.replace(/<img[^>]*src=["'][^"']*(?:broken-image|placeholder|no-image|not-available)[^"']*["'][^>]*\/?>/gi, '')
 
   // Remover informações redundantes do início (já aparecem nos badges)
   // Remove linhas tipo "ENEM 2014", "Questão 162", "Matemática" no início

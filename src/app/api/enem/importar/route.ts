@@ -20,7 +20,12 @@ import type { AreaENEM, SubareaENEM } from '@/types'
 const API_ENEM_BASE = 'https://api.enem.dev/v1'
 
 // Anos disponíveis na API (2009-2023)
+// NOTA: Apenas 2024+ devem ser importados. Questões antigas (2009-2023) da API enem.dev
+// possuem imagens quebradas (broken-image.svg) e qualidade inconsistente.
 const ANOS_DISPONIVEIS = [2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2014, 2013, 2012, 2011, 2010, 2009]
+
+// Ano mínimo permitido para importação (bloqueia importação de questões com imagens quebradas)
+const ANO_MINIMO_IMPORTACAO = 2024
 
 // Configurações de paginação e rate limit
 const CONFIG = {
@@ -211,10 +216,29 @@ export async function POST(request: NextRequest) {
     const body: RequestBody = await request.json()
     const {
       ano,
-      anos = ano ? [ano] : [2023, 2022, 2021, 2020, 2019],
+      anos: anosRaw = ano ? [ano] : [],
       areas = ['todas'],
       limite = 1000  // Limite total de questões a importar
     } = body
+
+    // Bloquear importação de questões anteriores a 2024
+    // Questões da API enem.dev (2009-2023) possuem imagens quebradas (broken-image.svg)
+    const anosBlockeados = (anosRaw || []).filter((a: number) => a < ANO_MINIMO_IMPORTACAO)
+    if (anosBlockeados.length > 0) {
+      return NextResponse.json({
+        sucesso: false,
+        erro: `Importação bloqueada para anos anteriores a ${ANO_MINIMO_IMPORTACAO}. Anos bloqueados: ${anosBlockeados.join(', ')}. Questões da API enem.dev (2009-2023) possuem imagens quebradas e qualidade inconsistente.`,
+      }, { status: 400 })
+    }
+
+    const anos = anosRaw.filter((a: number) => a >= ANO_MINIMO_IMPORTACAO)
+
+    if (anos.length === 0) {
+      return NextResponse.json({
+        sucesso: false,
+        erro: `Nenhum ano válido para importação. Apenas anos >= ${ANO_MINIMO_IMPORTACAO} são permitidos.`,
+      }, { status: 400 })
+    }
 
     let questoesImportadas = 0
     let questoesAtualizadas = 0

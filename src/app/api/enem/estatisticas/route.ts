@@ -9,7 +9,10 @@ import type { EstatisticasENEM } from '@/types'
 // API ENEM - Estatísticas do usuário
 // GET /api/enem/estatisticas
 // Usa tabelas: respostas_enem, questoes_enem
+// Apenas questões 2024+ (questões antigas foram removidas)
 // ═══════════════════════════════════════════════════════════════════════════
+
+const ANO_MINIMO = 2024
 
 export async function GET() {
   try {
@@ -54,11 +57,12 @@ export async function GET() {
       )
     }
 
-    // Buscar total de questões disponíveis
+    // Buscar total de questões disponíveis (apenas 2024+)
     const { data: totalQuestoesData } = await supabase
       .from('questoes_enem')
       .select('id, ano_prova, area')
       .or('anulada.is.null,anulada.eq.false')
+      .gte('ano_prova', ANO_MINIMO)
 
     const totalDisponivel = totalQuestoesData?.length || 0
 
