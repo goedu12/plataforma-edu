@@ -1,10 +1,7 @@
 /**
- * Utilitários para limpeza e formatação de texto das questões ENEM
- * Versão 3.1 - Limpeza completa de markdown, filtros de qualidade e sanitização XSS
+ * Utilitários para limpeza e formatação de texto de questões
+ * Limpeza de markdown, sanitização XSS e processamento de conteúdo
  */
-
-// URL base do Supabase Storage para imagens ENEM
-const STORAGE_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/exam-assets/'
 
 // Valores que devem ser tratados como vazio
 const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
@@ -22,7 +19,7 @@ const URLS_PLACEHOLDER = [
 const TAGS_PERMITIDAS = new Set([
   'p', 'br', 'em', 'strong', 'span', 'div', 'img',
   'b', 'i', 'u', 'sub', 'sup', 'ul', 'ol', 'li',
-  'small' // Para fontes/referências em tamanho menor (como na prova ENEM)
+  'small' // Para fontes/referências em tamanho menor
 ])
 
 // Atributos permitidos por tag
@@ -110,15 +107,11 @@ function sanitizarAtributos(tagCompleta: string, tagName: string): string {
         .replace(/vbscript\s*:/gi, '')
         .replace(/on\w+\s*=/gi, '')
 
-      // Para src de imagens, validar e converter URLs
+      // Para src de imagens, validar URLs
       if (attrNameLower === 'src') {
         // Bloquear protocolos perigosos
         if (/^(javascript|vbscript):/i.test(valorLimpo)) {
           continue
-        }
-        // Converter caminhos relativos para URLs absolutas do storage
-        if (!valorLimpo.startsWith('http') && !valorLimpo.startsWith('data:image') && !valorLimpo.startsWith('//')) {
-          valorLimpo = STORAGE_BASE_URL + valorLimpo
         }
       }
 
@@ -509,19 +502,10 @@ export function processarContexto(
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
 
-  // Remover referências a imagens quebradas/placeholder (ex: API enem.dev)
-  // Remove ![](broken-image.svg), ![alt](broken-image.svg) e variantes
+  // Remover referências a imagens quebradas/placeholder
   processado = processado.replace(/!\[[^\]]*\]\([^)]*(?:broken-image|placeholder|no-image|not-available)[^)]*\)/gi, '')
   processado = processado.replace(/!\([^)]*(?:broken-image|placeholder|no-image|not-available)[^)]*\)/gi, '')
-  // Remove <img> tags com src contendo broken-image
   processado = processado.replace(/<img[^>]*src=["'][^"']*(?:broken-image|placeholder|no-image|not-available)[^"']*["'][^>]*\/?>/gi, '')
-
-  // Remover informações redundantes do início (já aparecem nos badges)
-  // Remove linhas tipo "ENEM 2014", "Questão 162", "Matemática" no início
-  processado = processado
-    .replace(/^ENEM\s+\d{4}\s*/i, '')
-    .replace(/^Questão\s+\d+\s*/i, '')
-    .replace(/^(Matemática|Física|Química|Biologia|Português|Literatura|História|Geografia|Filosofia|Sociologia|Inglês|Espanhol)\s*/i, '')
 
   // Estilizar referências a figuras/tabelas como badges discretos
   // Para figuras: mostra abreviado pois a imagem aparece na galeria com legenda
@@ -587,142 +571,6 @@ export function processarContexto(
   processado = sanitizarHTML(processado)
 
   return processado.trim()
-}
-
-/**
- * Detecta padrões repetitivos no texto (ex: "ENEM2025ENEM2025ENEM2025...")
- * Retorna true se detectar padrão repetitivo suspeito
- */
-function temPadraoRepetitivo(texto: string): boolean {
-  if (!texto || texto.length < 20) return false
-
-  // Verifica se há um padrão de 4-20 caracteres repetido 3+ vezes consecutivas
-  const padraoRepetitivo = /(.{4,20})\1{2,}/i
-  if (padraoRepetitivo.test(texto)) {
-    return true
-  }
-
-  // Verifica padrões específicos conhecidos (ENEM + ano repetido)
-  if (/ENEM\d{4}ENEM\d{4}/i.test(texto)) {
-    return true
-  }
-
-  return false
-}
-
-/**
- * Verifica se uma questão tem qualidade suficiente para exibição
- * Retorna true se a questão pode ser exibida, false se deve ser ocultada
- * Critérios rigorosos para garantir boa experiência ao estudante
- */
-export function questaoTemQualidade(questao: {
-  contexto: string | null
-  alternativa_a: string | null
-  alternativa_b: string | null
-  alternativa_c: string | null
-  alternativa_d: string | null
-  alternativa_e: string | null
-  comando?: string | null
-  imagem_principal?: string | null
-  imagens_extras?: string[] | null
-}): { valida: boolean; motivo?: string } {
-  const contexto = questao.contexto || ''
-  const comando = questao.comando || ''
-
-  // 0. Verificar padrões repetitivos no comando ou contexto (dados mal formatados)
-  if (temPadraoRepetitivo(comando) || temPadraoRepetitivo(contexto)) {
-    return { valida: false, motivo: 'padrao_repetitivo' }
-  }
-
-  // 1. Contexto deve existir e ter conteúdo mínimo
-  const contextoLimpo = limparTexto(contexto)
-  if (!contextoLimpo || contextoLimpo.length < 30) {
-    return { valida: false, motivo: 'contexto_vazio' }
-  }
-
-  // 2. Verificar se tem referência a figura/imagem sem ter imagem válida
-  const temReferenciaFigura = /\b(Figura|Imagem|Quadro|Tabela|Gráfico)\s*\d+/i.test(contexto)
-  const temImagemValida = isValidImageUrl(questao.imagem_principal) ||
-    (questao.imagens_extras && questao.imagens_extras.some(img => isValidImageUrl(img))) ||
-    /!\([^)]+\)/.test(contexto) || // !(url) no texto
-    /!\[[^\]]*\]\([^)]+\)/.test(contexto) // ![alt](url) no texto
-
-  if (temReferenciaFigura && !temImagemValida) {
-    return { valida: false, motivo: 'referencia_figura_sem_imagem' }
-  }
-
-  // 3. Verificar problemas de formatação graves
-  // URLs soltas no texto (não formatadas como imagem)
-  const urlsSoltas = contexto.match(/https?:\/\/[^\s<>"]+/g) || []
-  const urlsNaoImagem = urlsSoltas.filter(url => !isValidImageUrl(url))
-  if (urlsNaoImagem.length > 2) {
-    return { valida: false, motivo: 'muitas_urls_soltas' }
-  }
-
-  // 4. Verificar se tem muito markdown não processável
-  const asteriscosExcessivos = (contexto.match(/\*{3,}/g) || []).length
-  if (asteriscosExcessivos > 3) {
-    return { valida: false, motivo: 'formatacao_quebrada' }
-  }
-
-  // 5. Verificar se contexto é JSON ou array malformado
-  if (/^\s*[\[\{]/.test(contexto) && /[\]\}]\s*$/.test(contexto)) {
-    return { valida: false, motivo: 'contexto_json' }
-  }
-
-  // 6. Verificar alternativas - pelo menos 4 devem ter texto válido
-  const alternativas = [
-    questao.alternativa_a,
-    questao.alternativa_b,
-    questao.alternativa_c,
-    questao.alternativa_d,
-    questao.alternativa_e,
-  ]
-
-  // 6a. Verificar padrões repetitivos nas alternativas
-  for (const alt of alternativas) {
-    if (alt && temPadraoRepetitivo(alt)) {
-      return { valida: false, motivo: 'alternativa_padrao_repetitivo' }
-    }
-  }
-
-  const alternativasValidas = alternativas.filter(alt => {
-    if (!alt) return false
-    const textoLimpo = limparTexto(alt)
-    // Alternativa válida se tem texto de pelo menos 1 caractere
-    // Aceita numerais romanos (I, II, III, IV, V) como válidos
-    return textoLimpo && textoLimpo.length >= 1
-  })
-
-  if (alternativasValidas.length < 4) {
-    return { valida: false, motivo: 'alternativas_insuficientes' }
-  }
-
-  // 7. Verificar se alternativas são apenas letras/números isolados sem sentido
-  const alternativasComConteudo = alternativas.filter(alt => {
-    if (!alt) return false
-    const limpo = limparTexto(alt)
-    // Deve ter mais que apenas um caractere ou ser numeral romano
-    return limpo && (limpo.length > 2 || /^[IVX]+$/i.test(limpo) || /^\d+$/.test(limpo))
-  })
-
-  if (alternativasComConteudo.length < 3) {
-    return { valida: false, motivo: 'alternativas_sem_conteudo' }
-  }
-
-  // 8. Verificar se tem TEXTO I e TEXTO II mas sem conteúdo entre eles
-  if (/TEXTO\s+I/i.test(contexto) && /TEXTO\s+II/i.test(contexto)) {
-    const partes = contexto.split(/TEXTO\s+I+/i)
-    if (partes.length > 1) {
-      const textoI = partes[1]?.split(/TEXTO\s+II/i)[0] || ''
-      const textoII = partes[1]?.split(/TEXTO\s+II/i)[1] || ''
-      if (limparTexto(textoI).length < 20 || limparTexto(textoII).length < 20) {
-        return { valida: false, motivo: 'textos_vazios' }
-      }
-    }
-  }
-
-  return { valida: true }
 }
 
 /**
@@ -821,7 +669,7 @@ export function extrairFontesDoContexto(html: string): {
 
 /**
  * Extrai título do texto-base de uma questão.
- * Detecta padrões comuns de títulos em textos ENEM:
+ * Detecta padrões comuns de títulos:
  * - Primeira linha curta (até 120 chars) sem ponto final
  * - Títulos entre aspas
  * - Títulos em negrito/itálico
@@ -1004,56 +852,3 @@ export function extrairImagensInline(texto: string): {
   return { imagens, textoLimpo }
 }
 
-/**
- * Extrai todas as imagens válidas de uma questão
- */
-export function extrairImagensQuestao(questao: {
-  contexto?: string | null
-  imagem_principal?: string | null
-  imagens_extras?: string[] | null
-  imagem_a?: string | null
-  imagem_b?: string | null
-  imagem_c?: string | null
-  imagem_d?: string | null
-  imagem_e?: string | null
-}): string[] {
-  const imagens: string[] = []
-
-  // Imagem principal
-  if (isValidImageUrl(questao.imagem_principal)) {
-    imagens.push(questao.imagem_principal!)
-  }
-
-  // Imagens extras
-  if (questao.imagens_extras) {
-    for (const img of questao.imagens_extras) {
-      if (isValidImageUrl(img)) {
-        imagens.push(img)
-      }
-    }
-  }
-
-  // Imagens do contexto (embutidas no texto)
-  if (questao.contexto) {
-    const { imagensExtraidas } = converterImagensEmbutidas(questao.contexto)
-    imagens.push(...imagensExtraidas)
-  }
-
-  // Imagens das alternativas
-  const imagensAlternativas = [
-    questao.imagem_a,
-    questao.imagem_b,
-    questao.imagem_c,
-    questao.imagem_d,
-    questao.imagem_e,
-  ]
-
-  for (const img of imagensAlternativas) {
-    if (isValidImageUrl(img)) {
-      imagens.push(img!)
-    }
-  }
-
-  // Remove duplicatas
-  return [...new Set(imagens)]
-}
