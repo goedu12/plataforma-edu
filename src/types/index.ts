@@ -85,6 +85,53 @@ export interface Questao {
 }
 
 // ═══════════════════════════════════════════════════════════
+// INTERFACE: QuestaoEnem
+// ═══════════════════════════════════════════════════════════
+export interface ElementoEnem {
+  tipo: 'texto' | 'imagem' | 'comando' | 'titulo' | 'fonte'
+  conteudo?: string
+  arquivo?: string
+}
+
+export interface QuestaoEnem {
+  id: string
+  ano: number
+  dia: number
+  caderno: string
+  numero: number
+  area: string
+  lingua_estrangeira: string | null
+  elementos: ElementoEnem[]
+  comando: string | null
+  alt_a_texto: string | null
+  alt_a_imagem: string | null
+  alt_b_texto: string | null
+  alt_b_imagem: string | null
+  alt_c_texto: string | null
+  alt_c_imagem: string | null
+  alt_d_texto: string | null
+  alt_d_imagem: string | null
+  alt_e_texto: string | null
+  alt_e_imagem: string | null
+  gabarito: string | null
+  anulada: boolean
+  tem_imagem: boolean
+  tem_imagem_alternativa: boolean
+  tem_formula: boolean
+  tipo_item: string | null
+  tipo_template: number | null
+  tipo_template_nome: string | null
+  observacoes: unknown[]
+}
+
+// Áreas do ENEM
+export type AreaEnem =
+  | 'Linguagens, Códigos e suas Tecnologias'
+  | 'Ciências Humanas e suas Tecnologias'
+  | 'Ciências da Natureza e suas Tecnologias'
+  | 'Matemática e suas Tecnologias'
+
+// ═══════════════════════════════════════════════════════════
 // INTERFACE: Resposta
 // ═══════════════════════════════════════════════════════════
 export interface Resposta {
