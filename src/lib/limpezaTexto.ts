@@ -747,6 +747,30 @@ export function extrairTituloDoTexto(texto: string): {
 }
 
 /**
+ * Destaca automaticamente o título no início do texto.
+ * Se detectar um título (linha curta sem ponto, título entre aspas, etc.),
+ * envolve em <h3> para formatação especial.
+ * Usado para dar destaque visual ao título como na prova original ENEM.
+ */
+export function destacarTituloContexto(texto: string): string {
+  if (!texto || typeof texto !== 'string') {
+    return ''
+  }
+
+  const { titulo, corpo } = extrairTituloDoTexto(texto)
+
+  if (!titulo) {
+    return texto
+  }
+
+  // Envolver título em h3 para destaque visual
+  // O handler de h3 no ReactMarkdown vai estilizar corretamente
+  const tituloFormatado = `<h3 class="questao-titulo">${titulo}</h3>`
+
+  return `${tituloFormatado}\n\n${corpo}`
+}
+
+/**
  * Separa texto que contém múltiplos trechos (TEXTO I, TEXTO II, etc.)
  * Retorna um array de blocos, cada um com título opcional e conteúdo.
  * Se o texto não tem múltiplos blocos, retorna um único bloco sem título.

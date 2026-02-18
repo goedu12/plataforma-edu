@@ -2430,6 +2430,30 @@ img {
   }
 }
 
+/* ── Título do texto/obra ── */
+.questao-titulo {
+  display: block;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  text-align: center;
+  line-height: 1.4;
+}
+
+@media (min-width: 640px) {
+  .questao-titulo {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Títulos entre aspas - estilo editorial */
+.questao-titulo:has(q),
+.questao-titulo:has(em) {
+  font-style: italic;
+}
+
 /* ── Imagens dentro do contexto ── */
 .questao-contexto .imagem-container,
 .questao-texto .imagem-container {
