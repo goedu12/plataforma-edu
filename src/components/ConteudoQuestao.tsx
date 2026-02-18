@@ -4,6 +4,7 @@ import React, { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import rehypeRaw from 'rehype-raw'
 import 'katex/dist/katex.min.css'
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -43,15 +44,15 @@ function htmlParaMarkdown(html: string): string {
   // Converter <small> para classe especial - fonte alinhada à direita
   texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
-  // Preservar spans com classes importantes (fontes, referências)
-  texto = texto.replace(/<span\s+class="questao-fonte">([\s\S]*?)<\/span>/gi, '\n\n*$1*')
-  texto = texto.replace(/<span\s+class="ref-figura">([\s\S]*?)<\/span>/gi, '$1')
-  texto = texto.replace(/<span\s+class="ref-tabela">([\s\S]*?)<\/span>/gi, '**$1**')
+  // Preservar spans com classes importantes (fontes, referências) - NÃO converter para markdown
+  // O rehype-raw vai processar esses spans como HTML inline
 
-  // Remover tags não suportadas mantendo conteúdo
+  // Remover tags estruturais mantendo conteúdo
   texto = texto.replace(/<\/?p>/gi, '\n')
   texto = texto.replace(/<\/?div>/gi, '\n')
-  texto = texto.replace(/<\/?span[^>]*>/gi, '')
+
+  // Remover apenas spans SEM classes importantes
+  texto = texto.replace(/<span(?![^>]*class=["'](?:questao-fonte|ref-figura|ref-tabela|questao-titulo)["'])[^>]*>([\s\S]*?)<\/span>/gi, '$1')
 
   // Limpar múltiplas quebras de linha
   texto = texto.replace(/\n{3,}/g, '\n\n')
@@ -266,7 +267,7 @@ export default function ConteudoQuestao({
     )
   }
 
-  // Renderizar com ReactMarkdown + KaTeX
+  // Renderizar com ReactMarkdown + KaTeX + rehype-raw (para HTML inline)
   return (
     <div
       className={`conteudo-questao ${estiloTipo} ${className}`}
@@ -274,7 +275,7 @@ export default function ConteudoQuestao({
     >
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           // Parágrafos
           p: ({ children }) => (
@@ -291,6 +292,49 @@ export default function ConteudoQuestao({
             <em className="italic" style={{ color: 'var(--text-secondary)' }}>
               {children}
             </em>
+          ),
+          // Spans com classes especiais (fontes, referências, títulos)
+          span: ({ className: spanClass, children }) => {
+            if (spanClass === 'questao-fonte') {
+              return (
+                <span className="questao-fonte block text-right mt-2 text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
+                  {children}
+                </span>
+              )
+            }
+            if (spanClass === 'questao-titulo') {
+              return (
+                <span className="questao-titulo block font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                  {children}
+                </span>
+              )
+            }
+            if (spanClass === 'ref-figura') {
+              return (
+                <span className="ref-figura text-xs italic" style={{ color: 'var(--text-muted)' }}>
+                  {children}
+                </span>
+              )
+            }
+            if (spanClass === 'ref-tabela') {
+              return (
+                <span className="ref-tabela text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>
+                  {children}
+                </span>
+              )
+            }
+            return <span className={spanClass}>{children}</span>
+          },
+          // Títulos h3 e h4 para títulos de textos
+          h3: ({ children }) => (
+            <h3 className="font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+              {children}
+            </h3>
+          ),
+          h4: ({ children }) => (
+            <h4 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--text-primary)' }}>
+              {children}
+            </h4>
           ),
           // Listas
           ul: ({ children }) => (
