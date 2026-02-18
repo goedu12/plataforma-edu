@@ -668,6 +668,177 @@ export function extrairFontesDoContexto(html: string): {
 }
 
 /**
+ * Detecta o gênero textual do conteúdo para aplicar formatação adequada
+ * Retorna: 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista'
+ */
+export type GeneroTextual = 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista'
+
+export function detectarGeneroTextual(texto: string): GeneroTextual {
+  if (!texto || typeof texto !== 'string') return 'prosa'
+
+  const textoLimpo = texto.replace(/<[^>]+>/g, '').trim()
+  const linhas = textoLimpo.split(/\n/).filter(l => l.trim())
+
+  // Poema: linhas curtas (< 60 chars) em sequência, sem pontuação final típica de prosa
+  const linhasCurtas = linhas.filter(l => l.trim().length > 0 && l.trim().length < 60)
+  const proporcaoLinhasCurtas = linhasCurtas.length / Math.max(linhas.length, 1)
+
+  // Versos tipicamente não terminam com ponto, e sim com vírgula, reticências ou nada
+  const linhasVerso = linhas.filter(l => {
+    const t = l.trim()
+    return t.length > 0 && t.length < 80 && !/[.!?:;]$/.test(t)
+  })
+  const proporcaoVersos = linhasVerso.length / Math.max(linhas.length, 1)
+
+  if (linhas.length >= 3 && proporcaoLinhasCurtas > 0.6 && proporcaoVersos > 0.5) {
+    return 'poema'
+  }
+
+  // Diálogo: linhas começando com travessão ou aspas de fala
+  const linhasDialogo = linhas.filter(l => /^[\u2014\u2013\-–—]["'"']?\s*[A-Z]/.test(l.trim()))
+  if (linhasDialogo.length >= 2 && linhasDialogo.length / linhas.length > 0.3) {
+    return 'dialogo'
+  }
+
+  // Citação: começa com aspas ou tem indicadores de citação
+  if (/^[""\[\(«]/.test(textoLimpo.trim()) || /apud|op\.\s*cit\.|ibidem|ibid\./i.test(textoLimpo)) {
+    return 'citacao'
+  }
+
+  // Lista: linhas começando com marcadores ou numeração
+  const linhasLista = linhas.filter(l => /^[\d]+[\.\)]\s|^[a-e][\.\)]\s|^[\-\*•]\s/i.test(l.trim()))
+  if (linhasLista.length >= 3 && linhasLista.length / linhas.length > 0.5) {
+    return 'lista'
+  }
+
+  // Científico: contém fórmulas, símbolos matemáticos ou notação científica
+  if (/\$.*\$|\\frac|\\sqrt|[°±≤≥→⇌∆Δ]|mol\/L|m\/s|km\/h|\d+\s*×\s*10|[A-Z][a-z]?[₂₃₄₅₆]/.test(textoLimpo)) {
+    return 'cientifico'
+  }
+
+  return 'prosa'
+}
+
+/**
+ * Formata texto de acordo com o gênero textual detectado
+ * Aplica recuos, quebras de linha e estilos apropriados
+ */
+export function formatarPorGenero(texto: string, genero?: GeneroTextual): string {
+  if (!texto || typeof texto !== 'string') return ''
+
+  const generoDetectado = genero || detectarGeneroTextual(texto)
+
+  switch (generoDetectado) {
+    case 'poema':
+      return formatarPoema(texto)
+    case 'dialogo':
+      return formatarDialogo(texto)
+    case 'citacao':
+      return formatarCitacao(texto)
+    default:
+      return texto
+  }
+}
+
+/**
+ * Formata texto como poema preservando estrutura de versos e estrofes
+ */
+function formatarPoema(texto: string): string {
+  // Preservar quebras de linha como versos
+  let formatado = texto
+    .replace(/\n\n+/g, '</div><div class="questao-estrofe">') // Estrofes separadas por linha em branco
+    .replace(/\n/g, '<br class="verso">') // Versos separados por quebra simples
+
+  // Envolver em container de poema
+  if (!formatado.includes('questao-poema')) {
+    formatado = `<div class="questao-poema"><div class="questao-estrofe">${formatado}</div></div>`
+  }
+
+  return formatado
+}
+
+/**
+ * Formata texto como diálogo com travessões
+ */
+function formatarDialogo(texto: string): string {
+  // Cada fala em linha separada
+  let formatado = texto
+    .replace(/\n/g, '<br>')
+    .replace(/([\u2014\u2013\-–—])\s*/g, '<span class="fala-marcador">$1</span> ')
+
+  if (!formatado.includes('questao-dialogo')) {
+    formatado = `<div class="questao-dialogo">${formatado}</div>`
+  }
+
+  return formatado
+}
+
+/**
+ * Formata texto como citação longa (recuo de 4cm)
+ */
+function formatarCitacao(texto: string): string {
+  if (!texto.includes('questao-citacao')) {
+    return `<blockquote class="questao-citacao">${texto}</blockquote>`
+  }
+  return texto
+}
+
+/**
+ * Separa corpo do texto e fonte/referência de forma robusta
+ * A fonte deve ficar UMA LINHA ABAIXO do texto principal
+ */
+export function separarTextoEFonte(texto: string): {
+  corpo: string
+  fonte: string | null
+} {
+  if (!texto || typeof texto !== 'string') {
+    return { corpo: '', fonte: null }
+  }
+
+  // Padrões de fonte/referência (ordem de prioridade)
+  const padroesFonte = [
+    // 1. Tags <small> explícitas
+    /<small[^>]*>([\s\S]+?)<\/small>\s*$/i,
+    // 2. Span com classe questao-fonte
+    /<span[^>]*class=["']questao-fonte["'][^>]*>([\s\S]+?)<\/span>\s*$/i,
+    // 3. ABNT: SOBRENOME, Nome. Título. Local: Editora, ano.
+    /\n([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ\s,]+\.\s+[^.]+\.[^.]+,\s*\d{4}[^)]*\.?\s*)$/,
+    // 4. Adaptado de...
+    /\n(\(?[Aa]daptado de?\)?[^)]*\.?\s*)$/,
+    // 5. Disponível em: URL
+    /\n(Dispon[ií]vel\s+em:[^\n]+)$/i,
+    // 6. Revista/Jornal, data
+    /\n((Revista|Jornal|Folha|O Globo|Estadão|Veja|Época)[^,\n]*,\s*\d+[^\n]*)$/i,
+    // 7. In: TÍTULO
+    /\n(In:\s+[^\n]+)$/i,
+    // 8. Fonte: descrição
+    /\n?\(?(Fonte:\s*[^)\n]+)\)?\s*$/i,
+    // 9. Texto entre parênteses no final com ano
+    /\n?\(([^)]+,\s*\d{4}[^)]*)\)\s*$/,
+  ]
+
+  let corpo = texto.trim()
+  let fonte: string | null = null
+
+  for (const padrao of padroesFonte) {
+    const match = corpo.match(padrao)
+    if (match && match[1]) {
+      fonte = match[1].trim()
+      corpo = corpo.replace(padrao, '').trim()
+      break
+    }
+  }
+
+  // Limpar corpo
+  corpo = corpo
+    .replace(/<br>\s*$/, '')
+    .replace(/\n\s*$/, '')
+    .trim()
+
+  return { corpo, fonte }
+}
+
+/**
  * Extrai título do texto-base de uma questão.
  * Detecta padrões comuns de títulos:
  * - Primeira linha curta (até 120 chars) sem ponto final

@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
 import 'katex/dist/katex.min.css'
+import { detectarGeneroTextual, separarTextoEFonte, type GeneroTextual } from '@/lib/limpezaTexto'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTE: ConteudoQuestao
@@ -14,13 +15,16 @@ import 'katex/dist/katex.min.css'
 // - LaTeX/KaTeX para fórmulas matemáticas ($...$, $$...$$)
 // - Markdown para formatação rica
 // - Descrições de imagens em itálico [...]
-// - Fontes e referências em tamanho menor
+// - Fontes e referências em tamanho menor (UMA LINHA ABAIXO)
+// - Detecção automática de gênero textual (prosa, poema, citação, etc.)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface ConteudoQuestaoProps {
   conteudo: string
   tipo?: 'contexto' | 'comando' | 'alternativa' | 'fonte'
   className?: string
+  /** Se true, renderiza fonte em linha separada abaixo do texto */
+  separarFonte?: boolean
 }
 
 // Converte HTML específico para Markdown compatível com KaTeX
@@ -221,13 +225,28 @@ function formatarSimbolos(texto: string): string {
 export default function ConteudoQuestao({
   conteudo,
   tipo = 'contexto',
-  className = ''
+  className = '',
+  separarFonte = true
 }: ConteudoQuestaoProps) {
 
-  const conteudoProcessado = useMemo(() => {
-    if (!conteudo) return ''
+  // Separar corpo e fonte/referência
+  const { corpo, fonte } = useMemo(() => {
+    if (!conteudo || tipo !== 'contexto' || !separarFonte) {
+      return { corpo: conteudo, fonte: null }
+    }
+    return separarTextoEFonte(conteudo)
+  }, [conteudo, tipo, separarFonte])
 
-    let texto = conteudo
+  // Detectar gênero textual para aplicar estilos apropriados
+  const generoTextual = useMemo(() => {
+    if (tipo !== 'contexto') return 'prosa' as GeneroTextual
+    return detectarGeneroTextual(corpo)
+  }, [corpo, tipo])
+
+  const conteudoProcessado = useMemo(() => {
+    if (!corpo) return ''
+
+    let texto = corpo
 
     // Formatar símbolos especiais
     texto = formatarSimbolos(texto)
@@ -236,7 +255,7 @@ export default function ConteudoQuestao({
     texto = htmlParaMarkdown(texto)
 
     return texto
-  }, [conteudo])
+  }, [corpo])
 
   const usarMarkdown = useMemo(() => {
     // Usar Markdown se contiver LaTeX ou formatação Markdown
@@ -254,170 +273,198 @@ export default function ConteudoQuestao({
     fonte: 'text-xs leading-relaxed opacity-70',
   }
 
+  // Classes adicionais baseadas no gênero textual
+  const classesGenero: Record<GeneroTextual, string> = {
+    prosa: '',
+    poema: 'questao-poema',
+    citacao: 'questao-citacao-container',
+    cientifico: 'questao-cientifico',
+    dialogo: 'questao-dialogo',
+    lista: 'questao-lista',
+  }
+
   const estiloTipo = estilosBase[tipo] || estilosBase.contexto
+  const classeGenero = classesGenero[generoTextual] || ''
+
+  // Componente de fonte/referência (renderizado abaixo do texto)
+  const FonteComponent = fonte ? (
+    <div className="questao-fonte-container">
+      <p className="questao-fonte-linha">{fonte}</p>
+    </div>
+  ) : null
 
   // Se não precisa de Markdown/LaTeX, usar renderização HTML direta
   if (!usarMarkdown) {
     return (
-      <div
-        className={`conteudo-questao ${estiloTipo} ${className}`}
-        style={{ color: 'var(--text-primary)' }}
-        dangerouslySetInnerHTML={{ __html: conteudo }}
-      />
+      <div className={`conteudo-questao-wrapper ${classeGenero}`}>
+        <div
+          className={`conteudo-questao ${estiloTipo} ${className}`}
+          style={{ color: 'var(--text-primary)' }}
+          dangerouslySetInnerHTML={{ __html: corpo }}
+        />
+        {FonteComponent}
+      </div>
     )
   }
 
   // Renderizar com ReactMarkdown + KaTeX + rehype-raw (para HTML inline)
   return (
-    <div
-      className={`conteudo-questao ${estiloTipo} ${className}`}
-      style={{ color: 'var(--text-primary)' }}
-    >
-      <ReactMarkdown
-        remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeRaw, rehypeKatex]}
-        components={{
-          // Parágrafos
-          p: ({ children }) => (
-            <p className="mb-2 last:mb-0">{children}</p>
-          ),
-          // Negrito
-          strong: ({ children }) => (
-            <strong className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {children}
-            </strong>
-          ),
-          // Itálico (usado para descrições de imagens)
-          em: ({ children }) => (
-            <em className="italic" style={{ color: 'var(--text-secondary)' }}>
-              {children}
-            </em>
-          ),
-          // Spans com classes especiais (fontes, referências, títulos)
-          span: ({ className: spanClass, children }) => {
-            if (spanClass === 'questao-fonte') {
-              return (
-                <span className="questao-fonte block text-right mt-2 text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
-                  {children}
-                </span>
-              )
-            }
-            if (spanClass === 'questao-titulo') {
-              return (
-                <span className="questao-titulo block font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
-                  {children}
-                </span>
-              )
-            }
-            if (spanClass === 'ref-figura') {
-              return (
-                <span className="ref-figura text-xs italic" style={{ color: 'var(--text-muted)' }}>
-                  {children}
-                </span>
-              )
-            }
-            if (spanClass === 'ref-tabela') {
-              return (
-                <span className="ref-tabela text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>
-                  {children}
-                </span>
-              )
-            }
-            return <span className={spanClass}>{children}</span>
-          },
-          // Títulos h3 e h4 para títulos de textos
-          h3: ({ children }) => (
-            <h3 className="font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
-              {children}
-            </h3>
-          ),
-          h4: ({ children }) => (
-            <h4 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--text-primary)' }}>
-              {children}
-            </h4>
-          ),
-          // Listas
-          ul: ({ children }) => (
-            <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>
-          ),
-          li: ({ children }) => (
-            <li className="text-sm">{children}</li>
-          ),
-          // Código (para fórmulas que não são LaTeX)
-          code: ({ children, className: codeClass }) => {
-            if (codeClass) {
+    <div className={`conteudo-questao-wrapper ${classeGenero}`}>
+      <div
+        className={`conteudo-questao ${estiloTipo} ${className}`}
+        style={{ color: 'var(--text-primary)' }}
+      >
+        <ReactMarkdown
+          remarkPlugins={[remarkMath]}
+          rehypePlugins={[rehypeRaw, rehypeKatex]}
+          components={{
+            // Parágrafos
+            p: ({ children }) => (
+              <p className="mb-2 last:mb-0">{children}</p>
+            ),
+            // Negrito
+            strong: ({ children }) => (
+              <strong className="font-semibold" style={{ color: 'var(--text-primary)' }}>
+                {children}
+              </strong>
+            ),
+            // Itálico (usado para descrições de imagens)
+            em: ({ children }) => (
+              <em className="italic" style={{ color: 'var(--text-secondary)' }}>
+                {children}
+              </em>
+            ),
+            // Spans com classes especiais (fontes, referências, títulos)
+            span: ({ className: spanClass, children }) => {
+              if (spanClass === 'questao-fonte') {
+                return (
+                  <span className="questao-fonte block text-right mt-2 text-xs font-bold" style={{ color: 'var(--text-secondary)' }}>
+                    {children}
+                  </span>
+                )
+              }
+              if (spanClass === 'questao-titulo') {
+                return (
+                  <span className="questao-titulo block font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                    {children}
+                  </span>
+                )
+              }
+              if (spanClass === 'ref-figura') {
+                return (
+                  <span className="ref-figura text-xs italic" style={{ color: 'var(--text-muted)' }}>
+                    {children}
+                  </span>
+                )
+              }
+              if (spanClass === 'ref-tabela') {
+                return (
+                  <span className="ref-tabela text-sm font-semibold" style={{ color: 'var(--color-accent)' }}>
+                    {children}
+                  </span>
+                )
+              }
+              return <span className={spanClass}>{children}</span>
+            },
+            // Títulos h3 e h4 para títulos de textos
+            h3: ({ children }) => (
+              <h3 className="font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                {children}
+              </h3>
+            ),
+            h4: ({ children }) => (
+              <h4 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--text-primary)' }}>
+                {children}
+              </h4>
+            ),
+            // Listas
+            ul: ({ children }) => (
+              <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>
+            ),
+            ol: ({ children }) => (
+              <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>
+            ),
+            li: ({ children }) => (
+              <li className="text-sm">{children}</li>
+            ),
+            // Código (para fórmulas que não são LaTeX)
+            code: ({ children, className: codeClass }) => {
+              if (codeClass) {
+                return (
+                  <code
+                    className="block p-2 rounded my-2 text-xs overflow-x-auto font-mono"
+                    style={{
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-default)',
+                    }}
+                  >
+                    {children}
+                  </code>
+                )
+              }
               return (
                 <code
-                  className="block p-2 rounded my-2 text-xs overflow-x-auto font-mono"
-                  style={{
-                    background: 'var(--bg-elevated)',
-                    border: '1px solid var(--border-default)',
-                  }}
+                  className="px-1 py-0.5 rounded text-xs font-mono"
+                  style={{ background: 'var(--bg-elevated)' }}
                 >
                   {children}
                 </code>
               )
-            }
-            return (
-              <code
-                className="px-1 py-0.5 rounded text-xs font-mono"
-                style={{ background: 'var(--bg-elevated)' }}
-              >
+            },
+            // Tabelas
+            table: ({ children }) => (
+              <div className="overflow-x-auto my-3">
+                <table
+                  className="w-full text-sm border-collapse"
+                  style={{ border: '1px solid var(--border-default)' }}
+                >
+                  {children}
+                </table>
+              </div>
+            ),
+            thead: ({ children }) => (
+              <thead style={{ background: 'var(--bg-elevated)' }}>
                 {children}
-              </code>
-            )
-          },
-          // Tabelas
-          table: ({ children }) => (
-            <div className="overflow-x-auto my-3">
-              <table
-                className="w-full text-sm border-collapse"
+              </thead>
+            ),
+            th: ({ children }) => (
+              <th
+                className="px-3 py-2 text-left font-semibold text-xs"
                 style={{ border: '1px solid var(--border-default)' }}
               >
                 {children}
-              </table>
-            </div>
-          ),
-          thead: ({ children }) => (
-            <thead style={{ background: 'var(--bg-elevated)' }}>
-              {children}
-            </thead>
-          ),
-          th: ({ children }) => (
-            <th
-              className="px-3 py-2 text-left font-semibold text-xs"
-              style={{ border: '1px solid var(--border-default)' }}
-            >
-              {children}
-            </th>
-          ),
-          td: ({ children }) => (
-            <td
-              className="px-3 py-2 text-sm"
-              style={{ border: '1px solid var(--border-default)' }}
-            >
-              {children}
-            </td>
-          ),
-          // Blockquote (usado para citações)
-          blockquote: ({ children }) => (
-            <blockquote
-              className="pl-4 my-2 italic"
-              style={{
-                borderLeft: '3px solid var(--border-default)',
-                color: 'var(--text-secondary)'
-              }}
-            >
-              {children}
-            </blockquote>
-          ),
-        }}
-      >
-        {conteudoProcessado}
-      </ReactMarkdown>
+              </th>
+            ),
+            td: ({ children }) => (
+              <td
+                className="px-3 py-2 text-sm"
+                style={{ border: '1px solid var(--border-default)' }}
+              >
+                {children}
+              </td>
+            ),
+            // Blockquote (usado para citações longas - recuo 4cm)
+            blockquote: ({ children }) => (
+              <blockquote
+                className="questao-citacao pl-4 my-3 text-sm"
+                style={{
+                  marginLeft: '2.5rem',
+                  paddingLeft: '1rem',
+                  borderLeft: '3px solid var(--color-accent)',
+                  color: 'var(--text-secondary)',
+                  fontStyle: 'normal',
+                  lineHeight: '1.5',
+                }}
+              >
+                {children}
+              </blockquote>
+            ),
+          }}
+        >
+          {conteudoProcessado}
+        </ReactMarkdown>
+      </div>
+      {FonteComponent}
     </div>
   )
 }
