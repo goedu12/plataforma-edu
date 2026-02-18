@@ -20,7 +20,7 @@ export default function EstudanteError({ error, reset }: ErrorProps) {
       <div className="card-standard max-w-md w-full text-center py-8 px-6">
         <div
           className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-          style={{ background: 'rgba(239, 68, 68, 0.1)' }}
+          style={{ background: 'var(--error-bg-10)' }}
         >
           <AlertTriangle className="w-8 h-8 text-red-500" />
         </div>

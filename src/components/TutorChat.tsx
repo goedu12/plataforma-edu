@@ -69,7 +69,7 @@ interface TutorChatProps {
 // CONSTANTES
 // ═══════════════════════════════════════════════════════════
 
-const MAX_CARACTERES = 500
+const MAX_CARACTERES = 2000
 const MAX_IMAGE_SIZE = 1024 * 1024 // 1MB apos compressao
 const IMAGE_QUALITY = 0.7
 
@@ -287,7 +287,7 @@ export default function TutorChat({
         body: JSON.stringify({
           componente,
           mensagem: texto || 'Analise esta imagem. Se for uma questão ou exercício, resolva completamente e me dê o gabarito com a resposta correta. Mostre o passo a passo.',
-          historico: mensagens,
+          historico: mensagens.filter(m => m.id !== '1'),
           nomeEstudante: primeiroNome,
           imagem: imagemParaEnviar, // Enviar base64 da imagem
         }),
@@ -393,7 +393,7 @@ export default function TutorChat({
           <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center"
             style={{
-              background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+              background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
             }}
           >
             <Bot className="w-6 h-6" style={{ color: corPrimaria }} />
@@ -456,7 +456,7 @@ export default function TutorChat({
                 style={{
                   background: msg.role === 'user'
                     ? 'var(--bg-elevated)'
-                    : isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                    : isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
                   border: msg.role === 'user'
                     ? '1px solid var(--border-default)'
                     : `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
@@ -473,7 +473,7 @@ export default function TutorChat({
                       <span
                         className="text-[10px] px-1.5 py-0.5 rounded"
                         style={{
-                          background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+                          background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)',
                           color: 'var(--text-muted)',
                         }}
                       >
@@ -546,8 +546,8 @@ export default function TutorChat({
                         disabled={loading || usoHoje >= limiteDiario}
                         className="text-xs px-3 py-1.5 rounded-full transition-all disabled:opacity-50"
                         style={{
-                          background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
-                          border: `1px solid ${isFisica ? 'rgba(34, 197, 94, 0.3)' : 'rgba(139, 92, 246, 0.3)'}`,
+                          background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
+                          border: `1px solid ${isFisica ? 'var(--color-fisica-bg-30)' : 'var(--color-matematica-bg-30)'}`,
                           color: corPrimaria,
                         }}
                       >
@@ -567,7 +567,7 @@ export default function TutorChat({
             <div
               className="p-4 rounded-2xl"
               style={{
-                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
                 border: `1px solid ${isFisica ? 'var(--border-fisica)' : 'var(--border-matematica)'}`,
                 borderRadius: '16px 16px 16px 4px',
               }}
@@ -586,8 +586,8 @@ export default function TutorChat({
           <div
             className="p-4 rounded-2xl"
             style={{
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'var(--error-bg-10)',
+              border: '1px solid var(--error-bg-30)',
             }}
           >
             <div className="flex items-center gap-3" style={{ color: 'var(--error)' }}>
@@ -603,8 +603,8 @@ export default function TutorChat({
         <div
           className="px-4 py-4 border-t"
           style={{
-            background: 'rgba(245, 158, 11, 0.1)',
-            borderColor: 'rgba(245, 158, 11, 0.3)',
+            background: 'var(--warning-bg-10)',
+            borderColor: 'var(--warning-bg-30)',
           }}
         >
           <div className="flex items-center gap-3 mb-3">
@@ -697,7 +697,7 @@ export default function TutorChat({
                 style={{
                   background: isListening ? corPrimaria : 'var(--bg-elevated)',
                   border: `1px solid ${isListening ? corPrimaria : 'var(--border-default)'}`,
-                  color: isListening ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+                  color: isListening ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)',
                 }}
                 title={isListening ? 'Parar de ouvir' : 'Falar pergunta'}
               >
@@ -723,7 +723,7 @@ export default function TutorChat({
                   color: 'var(--text-primary)',
                 }}
               />
-              {input.length > 400 && (
+              {input.length > 1800 && (
                 <span
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xs"
                   style={{ color: input.length >= MAX_CARACTERES ? 'var(--error)' : 'var(--text-muted)' }}
@@ -740,7 +740,7 @@ export default function TutorChat({
               className="px-5 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed touch-target"
               style={{
                 background: corPrimaria,
-                color: isFisica ? '#000' : '#fff',
+                color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
               }}
             >
               <Send className="w-5 h-5" />

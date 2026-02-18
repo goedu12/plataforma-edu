@@ -156,15 +156,15 @@ export default function RevisaoPage() {
   const getAlternativaStyle = (letra: Alternativa) => {
     if (feedback) {
       if (feedback.correta && letra === selecionada) {
-        return { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
+        return { background: 'var(--success-bg-20)', border: '2px solid var(--success)' }
       }
       if (!feedback.correta && letra === selecionada) {
-        return { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
+        return { background: 'var(--error-bg-20)', border: '2px solid var(--error)' }
       }
       return { background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', opacity: 0.5 }
     }
     if (selecionada === letra) {
-      return { background: 'rgba(245, 158, 11, 0.15)', border: '2px solid var(--warning)' }
+      return { background: 'var(--warning-bg-15)', border: '2px solid var(--warning)' }
     }
     return { background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }
   }
@@ -193,7 +193,7 @@ export default function RevisaoPage() {
   ] : []
 
   const dificuldadeLabel = { facil: 'Fácil', medio: 'Médio', dificil: 'Difícil' } as const
-  const dificuldadeColor = { facil: '#10b981', medio: '#f59e0b', dificil: '#ef4444' } as const
+  const dificuldadeColor = { facil: 'var(--difficulty-easy)', medio: 'var(--difficulty-medium)', dificil: 'var(--difficulty-hard)' } as const
 
   return (
     <div className="min-h-screen lg:h-screen pb-nav lg:pb-0 lg:pl-[72px] flex flex-col" style={{ background: 'var(--bg-base)' }}>
@@ -211,13 +211,13 @@ export default function RevisaoPage() {
 
                 {/* Tags inline - desktop */}
                 <div className="hidden lg:flex items-center gap-1.5">
-                  <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                  <span className="badge-chromebook" style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)', color: corPrimaria }}>
                     {questao.tema}
                   </span>
                   <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: dificuldadeColor[questao.dificuldade] }}>
                     {dificuldadeLabel[questao.dificuldade]}
                   </span>
-                  <span className="badge-chromebook" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}>
+                  <span className="badge-chromebook" style={{ background: 'var(--warning-bg-15)', color: 'var(--warning)' }}>
                     Revisão
                   </span>
                 </div>
@@ -275,7 +275,7 @@ export default function RevisaoPage() {
               <div className="space-chromebook">
                 {/* Info de quando errou - só mobile */}
                 {errouEm && (
-                  <div className="lg:hidden px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                  <div className="lg:hidden px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'var(--warning-bg-10)', border: '1px solid var(--warning-bg-30)' }}>
                     <AlertCircle className="w-3 h-3 flex-shrink-0" style={{ color: 'var(--warning)' }} />
                     <span className="text-[10px]" style={{ color: 'var(--text-secondary)' }}>
                       Você errou em {formatarDataErro(errouEm)}
@@ -285,13 +285,13 @@ export default function RevisaoPage() {
 
                 {/* Tags mobile */}
                 <div className="flex lg:hidden items-center gap-1.5">
-                  <span className="badge-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', color: corPrimaria }}>
+                  <span className="badge-chromebook" style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)', color: corPrimaria }}>
                     {questao.tema}
                   </span>
                   <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: dificuldadeColor[questao.dificuldade] }}>
                     {dificuldadeLabel[questao.dificuldade]}
                   </span>
-                  <span className="badge-chromebook" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning)' }}>
+                  <span className="badge-chromebook" style={{ background: 'var(--warning-bg-15)', color: 'var(--warning)' }}>
                     Revisão
                   </span>
                 </div>
@@ -326,7 +326,7 @@ export default function RevisaoPage() {
                                   ? 'var(--warning)'
                                   : 'var(--bg-elevated)',
                             color: (feedback && letra === selecionada) || selecionada === letra
-                              ? '#000'
+                              ? 'var(--text-on-fisica)'
                               : 'var(--text-muted)',
                           }}
                         >
@@ -350,7 +350,7 @@ export default function RevisaoPage() {
                 {!feedback && questao.dica && (
                   <div>
                     {mostrarDica ? (
-                      <div className="feedback-chromebook" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px dashed var(--border-default)' }}>
+                      <div className="feedback-chromebook" style={{ background: 'var(--warning-bg-10)', border: '1px dashed var(--border-default)' }}>
                         <div className="flex items-center gap-1 mb-0.5">
                           <Lightbulb className="icon-chromebook" style={{ color: 'var(--warning)' }} />
                           <span className="text-[10px] font-medium" style={{ color: 'var(--warning)' }}>Dica</span>
@@ -375,13 +375,13 @@ export default function RevisaoPage() {
                   <div
                     className="feedback-chromebook flex items-center gap-2"
                     style={{
-                      background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                      border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                      background: feedback.correta ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
+                      border: `1px solid ${feedback.correta ? 'var(--color-fisica-bg-40)' : 'var(--error-bg-40)'}`,
                     }}
                   >
                     <div
                       className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
-                      style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                      style={{ background: feedback.correta ? 'var(--success-bg-20)' : 'var(--error-bg-20)' }}
                     >
                       {feedback.correta ? <CheckCircle2 className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
                     </div>
@@ -391,7 +391,7 @@ export default function RevisaoPage() {
                           {feedback.correta ? 'Correto!' : 'Incorreto'}
                         </span>
                         {feedback.correta && feedback.pontosGanhos > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--success-bg-20)', color: 'var(--success)' }}>
                             +{feedback.pontosGanhos} pts
                           </span>
                         )}
@@ -408,7 +408,7 @@ export default function RevisaoPage() {
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <Trophy className="w-3.5 h-3.5" style={{ color: 'var(--warning)' }} />
                     {feedback.conquistasDesbloqueadas.map((c, i) => (
-                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}>
+                      <span key={i} className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--warning-bg-15)', color: 'var(--warning)' }}>
                         {c.icone} {c.nome}
                       </span>
                     ))}
@@ -417,7 +417,7 @@ export default function RevisaoPage() {
 
                 {/* Erro */}
                 {erro && (
-                  <div className="feedback-chromebook" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                  <div className="feedback-chromebook" style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}>
                     <p style={{ color: 'var(--text-secondary)' }}>{erro}</p>
                   </div>
                 )}
@@ -434,7 +434,7 @@ export default function RevisaoPage() {
                       <button
                         onClick={buscarQuestao}
                         className="flex-1 btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98]"
-                        style={{ background: 'var(--warning)', color: '#000' }}
+                        style={{ background: 'var(--warning)', color: 'var(--text-on-fisica)' }}
                       >
                         Próxima
                       </button>
@@ -446,7 +446,7 @@ export default function RevisaoPage() {
                       className="w-full btn-chromebook rounded-lg font-semibold transition-all active:scale-[0.98] disabled:opacity-50"
                       style={{
                         background: selecionada ? 'var(--warning)' : 'var(--bg-elevated)',
-                        color: selecionada ? '#000' : 'var(--text-muted)'
+                        color: selecionada ? 'var(--text-on-fisica)' : 'var(--text-muted)'
                       }}
                     >
                       {respondendo ? 'Enviando...' : selecionada ? 'Confirmar' : 'Selecione'}
@@ -465,7 +465,7 @@ export default function RevisaoPage() {
           <div className="card-chromebook p-6 text-center max-w-md w-full">
             <div
               className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-              style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)', border: `1px solid ${corPrimaria}` }}
+              style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)', border: `1px solid ${corPrimaria}` }}
             >
               <CheckCircle2 className="w-6 h-6" style={{ color: corPrimaria }} />
             </div>
@@ -493,7 +493,7 @@ export default function RevisaoPage() {
            ══════════════════════════════════════════════════════════════════ */
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="card-chromebook p-6 text-center max-w-md w-full">
-            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+            <div className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center" style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}>
               <WifiOff className="w-6 h-6" style={{ color: 'var(--error)' }} />
             </div>
 

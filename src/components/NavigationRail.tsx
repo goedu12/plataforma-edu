@@ -16,7 +16,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
 
   const isFisica = componente === 'fisica'
   const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const activeBg = isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+  const activeBg = isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
 
   const navItems = [
     { icon: Home, label: 'Início', href: `/${componente}/menu` },
@@ -69,7 +69,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
           className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
           style={{ background: accentColor }}
         >
-          <span className="font-bold text-lg" style={{ color: isFisica ? '#000' : '#fff' }}>
+          <span className="font-bold text-lg" style={{ color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)' }}>
             {isFisica ? 'F' : 'M'}
           </span>
         </div>
@@ -97,7 +97,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
               minHeight: '48px',
               padding: expanded ? '0 12px' : '0',
               justifyContent: expanded ? 'flex-start' : 'center',
-              borderRadius: '12px',
+              borderRadius: '0.75rem',
               background: active ? activeBg : 'transparent',
               color: active ? accentColor : 'var(--text-secondary)',
             }}
@@ -112,7 +112,7 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
             {expanded && (
               <span
                 style={{
-                  fontSize: '14px',
+                  fontSize: '0.875rem',
                   fontWeight: active ? 600 : 400,
                   whiteSpace: 'nowrap',
                 }}

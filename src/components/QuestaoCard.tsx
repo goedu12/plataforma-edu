@@ -4,8 +4,13 @@ import { useState } from 'react'
 import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy, TrendingUp, Target, ChevronDown, ChevronUp } from 'lucide-react'
 import Button from './ui/Button'
 import Badge from './ui/Badge'
+import SafeImage, { isValidImageUrl } from './ui/SafeImage'
+import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
+import ConteudoQuestao from './ConteudoQuestao'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
 import type { Questao, Componente, ModoResposta } from '@/types'
+import 'katex/dist/katex.min.css'
 
 interface LimiteInfo {
   questoes_semana: number
@@ -73,6 +78,7 @@ export default function QuestaoCard({
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
   const [mostrarDetalhesNota, setMostrarDetalhesNota] = useState(false)
+  const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
 
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
@@ -149,14 +155,14 @@ export default function QuestaoCard({
     if (feedback) {
       if (letra === feedback.respostaCorreta) {
         return {
-          background: 'rgba(34, 197, 94, 0.15)',
+          background: 'var(--success-bg-15)',
           border: '2px solid var(--success)',
           color: 'var(--success)',
         }
       }
       if (letra === selecionada && !feedback.correta) {
         return {
-          background: 'rgba(239, 68, 68, 0.15)',
+          background: 'var(--error-bg-15)',
           border: '2px solid var(--error)',
           color: 'var(--error)',
         }
@@ -170,7 +176,7 @@ export default function QuestaoCard({
 
     if (selecionada === letra) {
       return {
-        background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
+        background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)',
         border: `2px solid ${corPrimaria}`,
       }
     }
@@ -186,7 +192,7 @@ export default function QuestaoCard({
 
   const getNotaColor = (nota: number) => {
     if (nota >= 7) return 'var(--success)'
-    if (nota >= 6) return '#4ade80'
+    if (nota >= 6) return 'var(--color-fisica-light)'
     if (nota >= 5) return 'var(--warning)'
     return 'var(--error)'
   }
@@ -212,19 +218,87 @@ export default function QuestaoCard({
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════
-          ENUNCIADO - Área expansível
+          ENUNCIADO - Com suporte a título, LaTeX, imagens e fontes
           ═══════════════════════════════════════════════════════════════ */}
-      <div
-        className="flex-shrink-0 p-4 rounded-xl mb-3"
-        style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-      >
-        <p
-          className="text-sm sm:text-base leading-relaxed"
-          style={{ color: 'var(--text-primary)' }}
-        >
-          {formatarFormula(questao.enunciado)}
-        </p>
-      </div>
+      {(() => {
+        const enunciadoProcessado = processarContexto(questao.enunciado)
+        const { textoSemSmall, fontes } = extrairFontesDoContexto(enunciadoProcessado)
+        const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+        const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.enunciado || '')
+
+        // Extrair imagens inline do enunciado
+        const imagensEnunciado: string[] = []
+        const imgRegex = /https?:\/\/[^\s<>"]+\.(png|jpg|jpeg|gif|webp|svg)/gi
+        let imgMatch
+        while ((imgMatch = imgRegex.exec(questao.enunciado || '')) !== null) {
+          if (isValidImageUrl(imgMatch[0])) imagensEnunciado.push(imgMatch[0])
+        }
+
+        return (
+          <div
+            className="flex-shrink-0 p-4 rounded-xl mb-3"
+            style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+          >
+            {/* Título em negrito (se houver) */}
+            {titulo && (
+              <h3
+                className="font-bold text-sm sm:text-base mb-3 pb-1"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {titulo}
+              </h3>
+            )}
+
+            {/* Texto do enunciado - div para suportar parágrafos internos */}
+            {(titulo ? textoCorpo : textoSemSmall) && (
+              temLatex ? (
+                <ConteudoQuestao
+                  conteudo={titulo ? textoCorpo : textoSemSmall}
+                  tipo="contexto"
+                />
+              ) : (
+                <div
+                  className="questao-texto"
+                  style={{ color: 'var(--text-primary)' }}
+                  dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
+                />
+              )
+            )}
+
+            {/* Imagens do enunciado - com zoom */}
+            {imagensEnunciado.length > 0 && (
+              <div className="my-3">
+                {imagensEnunciado.map((img, idx) => (
+                  <ImagemQuestao
+                    key={idx}
+                    src={img}
+                    alt={`Imagem ${idx + 1} da questão`}
+                    tipo="principal"
+                    onExpandir={setImagemExpandida}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Fontes/Referências - Separadas com linha, fonte menor e em negrito */}
+            {fontes.length > 0 && (
+              <div
+                className="mt-4 pt-2"
+                style={{ borderTop: '1px solid var(--border-default)' }}
+              >
+                {fontes.map((fonte, index) => (
+                  <p
+                    key={index}
+                    className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
+                    style={{ color: 'var(--text-secondary)' }}
+                    dangerouslySetInnerHTML={{ __html: fonte }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* ═══════════════════════════════════════════════════════════════
           ALTERNATIVAS - Touch targets maiores no mobile
@@ -232,16 +306,18 @@ export default function QuestaoCard({
       <div className="space-y-2 sm:space-y-3 flex-shrink-0">
         {alternativas.map(({ letra, texto }) => {
           const style = getAlternativaStyle(letra)
+          const { imagens: imgAlt, textoLimpo: textoAlt } = extrairImagensInline(texto)
+          const textoExibir = imgAlt.length > 0 ? textoAlt : texto
           return (
             <button
               key={letra}
               onClick={() => !feedback && !loading && setSelecionada(letra)}
               disabled={!!feedback || loading}
-              className="w-full min-h-[52px] sm:min-h-[56px] px-3 sm:px-4 py-3 rounded-xl flex items-center gap-3 transition-all active:scale-[0.98] text-left"
+              className="w-full min-h-[52px] sm:min-h-[56px] px-3 sm:px-4 py-3 rounded-xl flex items-start gap-3 transition-all active:scale-[0.98] text-left"
               style={style}
             >
               <span
-                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-bold flex-shrink-0 text-sm sm:text-base mt-0.5"
                 style={{
                   background: feedback && letra === feedback.respostaCorreta
                     ? 'var(--success)'
@@ -251,7 +327,7 @@ export default function QuestaoCard({
                         ? corPrimaria
                         : 'var(--bg-elevated)',
                   color: (feedback && (letra === feedback.respostaCorreta || (letra === selecionada && !feedback.correta))) || selecionada === letra
-                    ? isFisica ? '#000' : '#fff'
+                    ? isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'
                     : 'var(--text-muted)',
                 }}
               >
@@ -263,9 +339,35 @@ export default function QuestaoCard({
                   letra
                 )}
               </span>
-              <span className="text-sm sm:text-base flex-1" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(texto)}
-              </span>
+              <div className="flex-1 min-w-0">
+                {/* Imagens inline da alternativa - com zoom */}
+                {imgAlt.length > 0 && (
+                  <div className="mb-2">
+                    {imgAlt.map((img, idx) => (
+                      <ImagemQuestao
+                        key={idx}
+                        src={img}
+                        alt={`Alternativa ${letra}`}
+                        tipo="alternativa"
+                        onExpandir={setImagemExpandida}
+                      />
+                    ))}
+                  </div>
+                )}
+                {/* Texto da alternativa */}
+                {textoExibir && (
+                  <span className="text-sm sm:text-base leading-snug" style={{ color: 'var(--text-primary)' }}>
+                    {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(textoExibir) ? (
+                      <ConteudoQuestao
+                        conteudo={textoExibir}
+                        tipo="alternativa"
+                      />
+                    ) : (
+                      formatarFormula(textoExibir)
+                    )}
+                  </span>
+                )}
+              </div>
             </button>
           )
         })}
@@ -277,7 +379,7 @@ export default function QuestaoCard({
       {erro && (
         <div
           className="rounded-xl p-3 mt-3"
-          style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+          style={{ background: 'var(--error-bg-15)', border: '1px solid var(--error-bg-30)' }}
         >
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--error)' }} />
@@ -304,7 +406,7 @@ export default function QuestaoCard({
             <div
               className="p-3 rounded-xl"
               style={{
-                background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+                background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
                 border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
               }}
             >
@@ -337,7 +439,7 @@ export default function QuestaoCard({
       {feedback && feedback.conquistasDesbloqueadas.length > 0 && (
         <div
           className="rounded-xl p-4 text-center mt-3 animate-fade-in"
-          style={{ background: 'rgba(245, 158, 11, 0.15)', border: '2px solid rgba(245, 158, 11, 0.4)' }}
+          style={{ background: 'var(--warning-bg-15)', border: '2px solid var(--warning-bg-40)' }}
         >
           <div className="flex items-center justify-center gap-2 mb-2">
             <Trophy className="w-5 h-5" style={{ color: 'var(--warning)' }} />
@@ -348,7 +450,7 @@ export default function QuestaoCard({
               <span
                 key={index}
                 className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-                style={{ background: 'rgba(245, 158, 11, 0.2)', color: 'var(--warning)' }}
+                style={{ background: 'var(--warning-bg-20)', color: 'var(--warning)' }}
               >
                 {conquista.icone} {conquista.nome}
               </span>
@@ -364,7 +466,7 @@ export default function QuestaoCard({
         <div
           className="rounded-xl p-3 mt-3 animate-fade-in"
           style={{
-            background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+            background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
             border: isFisica ? '1px solid var(--border-fisica)' : '1px solid var(--border-matematica)',
           }}
         >
@@ -442,14 +544,14 @@ export default function QuestaoCard({
         <div
           className="rounded-xl p-4 mt-3 animate-fade-in"
           style={{
-            background: feedback.correta ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-            border: `1px solid ${feedback.correta ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+            background: feedback.correta ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
+            border: `1px solid ${feedback.correta ? 'var(--success-bg-40)' : 'var(--error-bg-40)'}`,
           }}
         >
           <div className="flex items-start gap-3">
             <div
               className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: feedback.correta ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+              style={{ background: feedback.correta ? 'var(--success-bg-20)' : 'var(--error-bg-20)' }}
             >
               {feedback.correta ? (
                 <CheckCircle2 className="w-5 h-5" style={{ color: 'var(--success)' }} />
@@ -465,7 +567,7 @@ export default function QuestaoCard({
                 {feedback.correta && feedback.pontosGanhos > 0 && (
                   <span
                     className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(34, 197, 94, 0.2)', color: 'var(--success)' }}
+                    style={{ background: 'var(--success-bg-20)', color: 'var(--success)' }}
                   >
                     +{feedback.pontosGanhos} pts
                   </span>
@@ -492,7 +594,7 @@ export default function QuestaoCard({
       {feedback && feedback.notaTempoReal && !feedback.notaTempoReal.pode_continuar && (
         <div
           className="rounded-xl p-3 mt-3"
-          style={{ background: 'rgba(245, 158, 11, 0.15)', border: '1px solid rgba(245, 158, 11, 0.3)' }}
+          style={{ background: 'var(--warning-bg-15)', border: '1px solid var(--warning-bg-30)' }}
         >
           <div className="flex items-center gap-2">
             <Target className="w-4 h-4" style={{ color: 'var(--warning)' }} />
@@ -535,6 +637,15 @@ export default function QuestaoCard({
           </Button>
         )}
       </div>
+
+      {/* Modal de imagem expandida */}
+      {imagemExpandida && (
+        <ImagemModal
+          src={imagemExpandida}
+          alt="Imagem da questão ampliada"
+          onClose={() => setImagemExpandida(null)}
+        />
+      )}
     </div>
   )
 }

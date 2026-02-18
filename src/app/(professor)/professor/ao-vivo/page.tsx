@@ -65,6 +65,7 @@ interface AlunoAtivo {
   taxa_acerto: number
   nota_atual?: number
   posicao_ranking?: number
+  foto_url?: string | null
 }
 
 interface AlunoOcioso {
@@ -74,6 +75,7 @@ interface AlunoOcioso {
   componentes: Componente[]
   tempo_ocioso_segundos: number
   ultimo_acesso: string | null
+  foto_url?: string | null
 }
 
 interface AlunoInativo {
@@ -82,6 +84,7 @@ interface AlunoInativo {
   turma: string
   componentes: Componente[]
   ultimo_acesso: string | null
+  foto_url?: string | null
 }
 
 interface EstatisticasTempoReal {
@@ -132,15 +135,15 @@ interface DadosTempoReal {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const ATIVIDADE_CONFIG: Record<string, { cor: string; label: string }> = {
-  estudo: { cor: '#22c55e', label: 'Estudando' },
-  desafio: { cor: '#f59e0b', label: 'Desafio' },
-  tutor: { cor: '#3b82f6', label: 'Tutor IA' },
-  revisao: { cor: '#a855f7', label: 'Revisao' },
-  flashcard: { cor: '#a855f7', label: 'Flashcard' },
-  mapa: { cor: '#06b6d4', label: 'Mapa' },
+  estudo: { cor: 'var(--success)', label: 'Estudando' },
+  desafio: { cor: 'var(--warning)', label: 'Desafio' },
+  tutor: { cor: 'var(--info)', label: 'Tutor IA' },
+  revisao: { cor: 'var(--color-matematica-light)', label: 'Revisao' },
+  flashcard: { cor: 'var(--color-matematica-light)', label: 'Flashcard' },
+  mapa: { cor: 'var(--color-accent)', label: 'Mapa' },
 }
 
-const getAvatarBg = (comp: Componente) => comp === 'fisica' ? '#22c55e' : '#8b5cf6'
+const getAvatarBg = (comp: Componente) => comp === 'fisica' ? 'var(--color-fisica)' : 'var(--color-matematica)'
 const getIniciais = (nome: string) => nome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
 
 const formatarTempoOcioso = (seg: number) => {
@@ -276,17 +279,17 @@ export default function DashboardAoVivoPage() {
     return Object.entries(cont).map(([tipo, qtd]) => ({
       tipo,
       qtd,
-      cor: ATIVIDADE_CONFIG[tipo]?.cor || '#64748b',
+      cor: ATIVIDADE_CONFIG[tipo]?.cor || 'var(--text-tertiary)',
       label: ATIVIDADE_CONFIG[tipo]?.label || tipo,
     }))
   }, [alunosAtivos])
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f172a' }}>
+      <div className="ao-vivo-dark min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
-          <RefreshCw className="w-10 h-10 text-blue-400 animate-spin mx-auto mb-3" />
-          <p className="text-white text-lg">Carregando...</p>
+          <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-3" style={{ color: 'var(--info)' }} />
+          <p className="text-lg" style={{ color: 'var(--text-primary)' }}>Carregando...</p>
         </div>
       </div>
     )
@@ -294,11 +297,11 @@ export default function DashboardAoVivoPage() {
 
   if (erro) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f172a' }}>
+      <div className="ao-vivo-dark min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
-          <AlertTriangle className="w-10 h-10 text-red-400 mx-auto mb-3" />
-          <p className="text-white mb-3">{erro}</p>
-          <button onClick={buscarDados} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: 'var(--error)' }} />
+          <p className="mb-3" style={{ color: 'var(--text-primary)' }}>{erro}</p>
+          <button onClick={buscarDados} className="px-4 py-2 rounded-lg" style={{ background: 'var(--info)', color: 'var(--text-primary)' }}>
             Tentar novamente
           </button>
         </div>
@@ -307,87 +310,91 @@ export default function DashboardAoVivoPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: '#0f172a', fontFamily: 'system-ui, sans-serif' }}>
+    <div className="ao-vivo-dark h-screen flex flex-col overflow-hidden font-sans" style={{ background: 'var(--bg-base)' }}>
 
       {/* HEADER */}
-      <header className="px-3 py-1.5 flex items-center justify-between gap-3 flex-shrink-0" style={{ background: 'rgba(0,0,0,0.5)' }}>
+      <header className="px-3 py-1.5 flex items-center justify-between gap-3 flex-shrink-0" style={{ background: 'var(--bg-overlay)' }}>
         <div className="flex items-center gap-3">
           <div className="relative">
             <Radio className="w-5 h-5 text-green-400" />
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full animate-ping" />
           </div>
-          <h1 className="text-sm font-bold text-white">Ao Vivo</h1>
+          <h1 className="text-sm font-bold" style={{ color: 'var(--text-primary)' }}>Ao Vivo</h1>
           {colegioFiltro && <span className="px-2 py-0.5 bg-purple-600 text-white rounded text-xs">{colegioFiltro}</span>}
           {turmaFiltro && <span className="px-2 py-0.5 bg-green-600 text-white rounded text-xs">{turmaFiltro}</span>}
           {componenteFiltro && <span className="px-2 py-0.5 bg-blue-600 text-white rounded text-xs capitalize">{componenteFiltro}</span>}
-          <span className="text-white/50 text-xs">{horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+          <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{horaAtual.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
 
         <div className="flex items-center gap-2">
           {dados?.colegios_disponiveis && dados.colegios_disponiveis.length > 0 && (
             <select value={colegioFiltro} onChange={(e) => { setColegioFiltro(e.target.value); setTurmaFiltro('') }}
-              className="px-2 py-1 rounded text-xs bg-slate-700 text-white border border-slate-600">
+              className="px-2 py-1 rounded text-xs border"
+              style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', borderColor: 'var(--border-hover)', minHeight: '36px' }}>
               <option value="">Colegios</option>
               {dados.colegios_disponiveis.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           )}
           <select value={turmaFiltro} onChange={(e) => setTurmaFiltro(e.target.value)}
-            className="px-2 py-1 rounded text-xs bg-slate-700 text-white border border-slate-600">
+            className="px-2 py-1 rounded text-xs border"
+            style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', borderColor: 'var(--border-hover)', minHeight: '36px' }}>
             <option value="">Turmas</option>
             {(dados?.turmas_disponiveis || []).map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <select value={componenteFiltro} onChange={(e) => setComponenteFiltro(e.target.value as Componente | '')}
-            className="px-2 py-1 rounded text-xs bg-slate-700 text-white border border-slate-600">
+            className="px-2 py-1 rounded text-xs border"
+            style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', borderColor: 'var(--border-hover)', minHeight: '36px' }}>
             <option value="">Todos</option>
             <option value="fisica">Fis</option>
             <option value="matematica">Mat</option>
           </select>
 
           <button onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`p-1.5 rounded transition ${autoRefresh ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/60'}`}>
+            className={`p-2 rounded transition ${autoRefresh ? 'bg-green-500/20 text-green-400' : 'bg-white/10'}`}
+            style={{ minWidth: '36px', minHeight: '36px', ...(!autoRefresh ? { color: 'var(--text-tertiary)' } : {}) }}>
             {autoRefresh ? <PlayCircle className="w-5 h-5" /> : <PauseCircle className="w-5 h-5" />}
           </button>
 
           {autoRefresh && (
-            <div className="w-6 h-6 rounded-full border-2 border-green-400 flex items-center justify-center"
-              style={{ background: `conic-gradient(#22c55e ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)` }}>
-              <div className="w-4 h-4 rounded-full bg-slate-900 flex items-center justify-center">
-                <span className="text-[9px] text-green-400 font-bold">{intervalo - contadorRefresh}</span>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ borderColor: 'var(--success)', borderWidth: 2, borderStyle: 'solid', background: `conic-gradient(var(--success) ${((intervalo - contadorRefresh) / intervalo) * 360}deg, transparent 0deg)` }}>
+              <div className="w-4 h-4 rounded-full flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+                <span className="text-[10px] font-bold" style={{ color: 'var(--success)' }}>{intervalo - contadorRefresh}</span>
               </div>
             </div>
           )}
 
           <button onClick={() => router.push('/professor/dashboard')}
-            className="p-1.5 rounded bg-slate-700 text-white hover:bg-slate-600">
+            className="p-2 rounded hover:opacity-80 transition"
+            style={{ background: 'var(--bg-overlay)', color: 'var(--text-primary)', minWidth: '36px', minHeight: '36px' }}>
             <ArrowLeft className="w-5 h-5" />
           </button>
         </div>
       </header>
 
       {/* STATS BAR */}
-      <div className="px-2 py-1 grid grid-cols-6 gap-2 flex-shrink-0">
-        <MiniStat icon={<Wifi className="w-5 h-5" />} label="Online" value={totalOnline} color="#22c55e" />
-        <MiniStat icon={<Coffee className="w-5 h-5" />} label="Ociosos" value={alunosOciosos.length} color="#f59e0b" />
-        <MiniStat icon={<WifiOff className="w-5 h-5" />} label="Offline" value={alunosInativos.length} color="#64748b" />
-        <MiniStat icon={<BookOpen className="w-5 h-5" />} label="Questoes" value={stats?.questoes_periodo_total || 0} color="#3b82f6" />
+      <div className="px-2 py-1 grid grid-cols-3 lg:grid-cols-6 gap-2 flex-shrink-0">
+        <MiniStat icon={<Wifi className="w-5 h-5" />} label="Online" value={totalOnline} color="var(--success)" />
+        <MiniStat icon={<Coffee className="w-5 h-5" />} label="Ociosos" value={alunosOciosos.length} color="var(--warning)" />
+        <MiniStat icon={<WifiOff className="w-5 h-5" />} label="Offline" value={alunosInativos.length} color="var(--text-tertiary)" />
+        <MiniStat icon={<BookOpen className="w-5 h-5" />} label="Questoes" value={stats?.questoes_periodo_total || 0} color="var(--info)" />
         <MiniStat icon={<CheckCircle className="w-5 h-5" />} label="Acuracia" value={`${stats?.taxa_acerto_tempo_real || 0}%`}
-          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? '#22c55e' : '#f59e0b'} trend={stats?.tendencia_acerto} />
-        <MiniStat icon={<Star className="w-5 h-5" />} label="Nota Media" value={stats?.media_nota_ativos ? stats.media_nota_ativos.toFixed(1) : '-'} color="#f59e0b" />
+          color={stats?.taxa_acerto_tempo_real && stats.taxa_acerto_tempo_real >= 60 ? 'var(--success)' : 'var(--warning)'} trend={stats?.tendencia_acerto} />
+        <MiniStat icon={<Star className="w-5 h-5" />} label="Nota Media" value={stats?.media_nota_ativos ? stats.media_nota_ativos.toFixed(1) : '-'} color="var(--warning)" />
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 px-2 pb-1 grid grid-cols-12 gap-1.5 overflow-hidden min-h-0">
+      <div className="flex-1 px-2 pb-1 grid grid-cols-1 lg:grid-cols-12 gap-1.5 overflow-hidden min-h-0">
 
         {/* COLUNA ESQUERDA (8 cols) */}
-        <div className="col-span-8 flex flex-col gap-1 overflow-hidden min-h-0">
+        <div className="col-span-1 lg:col-span-8 flex flex-col gap-1 overflow-hidden min-h-0">
 
           {/* Grid de Alunos */}
-          <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700 min-h-0" style={{ flex: '1 1 55%' }}>
+          <div className="rounded-lg p-2 overflow-hidden flex flex-col min-h-0" style={{ flex: '1 1 55%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
             <div className="flex items-center justify-between mb-2 flex-shrink-0">
-              <h2 className="text-white font-semibold text-sm flex items-center gap-2">
+              <h2 className="font-semibold text-sm flex items-center gap-2" style={{ color: 'var(--text-primary)' }}>
                 <Users className="w-5 h-5 text-blue-400" />
                 Alunos
-                <span className="text-slate-400 font-normal text-xs">
+                <span className="font-normal text-xs" style={{ color: 'var(--text-muted)' }}>
                   {alunosAtivos.length} ativos | {alunosOciosos.length} ociosos | {alunosInativos.length} offline
                 </span>
               </h2>
@@ -400,7 +407,7 @@ export default function DashboardAoVivoPage() {
 
             <div className="flex-1 overflow-y-auto min-h-0">
               {alunosAtivos.length === 0 && alunosOciosos.length === 0 && alunosInativos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <div className="flex flex-col items-center justify-center h-full" style={{ color: 'var(--text-muted)' }}>
                   <UserX className="w-8 h-8 mb-1 opacity-70" />
                   <p className="text-xs">Nenhum aluno</p>
                 </div>
@@ -415,26 +422,30 @@ export default function DashboardAoVivoPage() {
                         className={`flex flex-col items-center hover:scale-105 transition-transform ${ajuda ? 'animate-pulse' : ''}`}
                         title={`${aluno.nome}\nTurma: ${aluno.turma}\n${cfg.label}\nQuestoes: ${aluno.questoes_sessao} | Acerto: ${aluno.taxa_acerto}%${aluno.nota_atual !== undefined ? `\nNota: ${aluno.nota_atual.toFixed(1)}` : ''}`}>
                         <div className="relative">
-                          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                            style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 3px #ef4444' : '0 0 0 3px #22c55e' }}>
-                            {getIniciais(aluno.nome)}
+                          <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm overflow-hidden"
+                            style={{ background: getAvatarBg(aluno.componente), boxShadow: ajuda ? '0 0 0 3px var(--error)' : '0 0 0 3px var(--success)' }}>
+                            {aluno.foto_url ? (
+                              <img src={aluno.foto_url} alt={aluno.nome} className="w-full h-full object-cover" />
+                            ) : (
+                              getIniciais(aluno.nome)
+                            )}
                           </div>
                           <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 flex items-center justify-center" style={{ background: cfg.cor }}>
                             <span className="text-white text-[9px] font-bold">{cfg.label[0]}</span>
                           </div>
                           {aluno.questoes_sessao > 0 && (
                             <div className="absolute -top-1 -left-1 px-1 rounded text-[10px] font-bold text-white"
-                              style={{ background: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                              style={{ background: aluno.taxa_acerto >= 70 ? 'var(--success)' : aluno.taxa_acerto >= 50 ? 'var(--warning)' : 'var(--error)' }}>
                               {aluno.taxa_acerto}%
                             </div>
                           )}
                           {aluno.nota_atual !== undefined && (
-                            <div className="absolute -top-1 right-[-8px] px-1 rounded text-[10px] font-bold text-yellow-300 bg-slate-900/80">
+                            <div className="absolute -top-1 right-[-8px] px-1 rounded text-[10px] font-bold text-yellow-300" style={{ background: 'var(--bg-base)' }}>
                               {aluno.nota_atual.toFixed(0)}
                             </div>
                           )}
                         </div>
-                        <span className="text-slate-200 text-[10px] mt-1 truncate max-w-[56px] text-center font-medium">{aluno.nome.split(' ')[0]}</span>
+                        <span className="text-[10px] mt-1 truncate max-w-[56px] text-center font-medium" style={{ color: 'var(--text-primary)' }}>{aluno.nome.split(' ')[0]}</span>
                       </div>
                     )
                   })}
@@ -444,9 +455,13 @@ export default function DashboardAoVivoPage() {
                     <div key={`o-${aluno.id}`} className="flex flex-col items-center"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOcioso ha ${formatarTempoOcioso(aluno.tempo_ocioso_segundos)}`}>
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-sm"
-                          style={{ background: '#78350f', boxShadow: '0 0 0 3px #f59e0b' }}>
-                          {getIniciais(aluno.nome)}
+                        <div className="w-12 h-12 rounded-full flex items-center justify-center text-yellow-200 font-bold text-sm overflow-hidden"
+                          style={{ background: 'var(--warning-bg-30)', boxShadow: '0 0 0 3px var(--warning)' }}>
+                          {aluno.foto_url ? (
+                            <img src={aluno.foto_url} alt={aluno.nome} className="w-full h-full object-cover opacity-70" />
+                          ) : (
+                            getIniciais(aluno.nome)
+                          )}
                         </div>
                         <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-slate-800 bg-yellow-500 flex items-center justify-center">
                           <Coffee className="w-2.5 h-2.5 text-yellow-900" />
@@ -463,18 +478,22 @@ export default function DashboardAoVivoPage() {
                   {alunosInativos.slice(0, 20).map((aluno) => (
                     <div key={`i-${aluno.id}`} className="flex flex-col items-center opacity-40"
                       title={`${aluno.nome}\nTurma: ${aluno.turma}\nOffline`}>
-                      <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-sm">
-                        {getIniciais(aluno.nome)}
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
+                        {aluno.foto_url ? (
+                          <img src={aluno.foto_url} alt={aluno.nome} className="w-full h-full object-cover grayscale" />
+                        ) : (
+                          getIniciais(aluno.nome)
+                        )}
                       </div>
-                      <span className="text-slate-500 text-[10px] mt-1 truncate max-w-[56px] font-medium">{aluno.nome.split(' ')[0]}</span>
+                      <span className="text-[10px] mt-1 truncate max-w-[56px] font-medium" style={{ color: 'var(--text-tertiary)' }}>{aluno.nome.split(' ')[0]}</span>
                     </div>
                   ))}
                   {alunosInativos.length > 20 && (
                     <div className="flex flex-col items-center opacity-40">
-                      <div className="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-sm">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm" style={{ background: 'var(--bg-overlay)', color: 'var(--text-muted)' }}>
                         +{alunosInativos.length - 20}
                       </div>
-                      <span className="text-slate-500 text-[10px] mt-1 font-medium">mais</span>
+                      <span className="text-[10px] mt-1 font-medium" style={{ color: 'var(--text-tertiary)' }}>mais</span>
                     </div>
                   )}
                 </div>
@@ -486,14 +505,14 @@ export default function DashboardAoVivoPage() {
           <div className="grid grid-cols-3 gap-1 overflow-hidden min-h-0" style={{ flex: '0 1 45%' }}>
 
             {/* GRÁFICO: Sparkline Acurácia + Donut Atividades */}
-            <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold text-sm flex items-center gap-1.5 mb-1.5">
+            <div className="rounded-lg p-2 overflow-hidden flex flex-col" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <h2 className="font-semibold text-sm flex items-center gap-1.5 mb-1.5" style={{ color: 'var(--text-primary)' }}>
                 <TrendingUp className="w-4 h-4 text-green-400" />
                 Acuracia
               </h2>
               <div className="flex-1 flex flex-col justify-center gap-2">
                 {/* Sparkline */}
-                <Sparkline data={historicoAcerto} color="#22c55e" max={100} label="%" />
+                <Sparkline data={historicoAcerto} color="var(--success)" max={100} label="%" />
                 {/* Mini donut de distribuição */}
                 <div className="flex items-center gap-2">
                   <DonutChart data={distribuicaoAtividades} size={44} />
@@ -501,8 +520,8 @@ export default function DashboardAoVivoPage() {
                     {distribuicaoAtividades.slice(0, 4).map(d => (
                       <div key={d.tipo} className="flex items-center gap-1.5 text-[10px]">
                         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: d.cor }} />
-                        <span className="text-slate-300">{d.label}</span>
-                        <span className="text-slate-500 font-medium">{d.qtd}</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{d.label}</span>
+                        <span className="font-medium" style={{ color: 'var(--text-tertiary)' }}>{d.qtd}</span>
                       </div>
                     ))}
                   </div>
@@ -511,18 +530,18 @@ export default function DashboardAoVivoPage() {
             </div>
 
             {/* Tabela de Desempenho com Nota */}
-            <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold text-sm flex items-center gap-1.5 mb-1.5">
+            <div className="rounded-lg p-2 overflow-hidden flex flex-col" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <h2 className="font-semibold text-sm flex items-center gap-1.5 mb-1.5" style={{ color: 'var(--text-primary)' }}>
                 <Award className="w-4 h-4 text-yellow-400" />
                 Top Alunos
               </h2>
               <div className="flex-1 overflow-y-auto">
                 {alunosAtivos.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-slate-500 text-xs">Sem dados</div>
+                  <div className="flex items-center justify-center h-full text-xs" style={{ color: 'var(--text-tertiary)' }}>Sem dados</div>
                 ) : (
                   <table className="w-full text-xs">
-                    <thead className="sticky top-0 bg-slate-800">
-                      <tr className="text-slate-500">
+                    <thead className="sticky top-0" style={{ background: 'var(--bg-elevated)' }}>
+                      <tr style={{ color: 'var(--text-tertiary)' }}>
                         <th className="text-left pb-1 pl-1">Aluno</th>
                         <th className="text-center pb-1">Q</th>
                         <th className="text-center pb-1">%</th>
@@ -533,10 +552,10 @@ export default function DashboardAoVivoPage() {
                       {alunosAtivos.slice(0, 8).map((aluno) => (
                         <tr key={aluno.id} className="border-t border-slate-700/30">
                           <td className="py-1 pl-1">
-                            <span className="text-slate-200 truncate max-w-[70px] inline-block font-medium">{aluno.nome.split(' ')[0]}</span>
+                            <span className="truncate max-w-[70px] inline-block font-medium" style={{ color: 'var(--text-primary)' }}>{aluno.nome.split(' ')[0]}</span>
                           </td>
-                          <td className="py-1 text-center text-slate-300">{aluno.questoes_sessao}</td>
-                          <td className="py-1 text-center font-bold" style={{ color: aluno.taxa_acerto >= 70 ? '#22c55e' : aluno.taxa_acerto >= 50 ? '#f59e0b' : '#ef4444' }}>
+                          <td className="py-1 text-center" style={{ color: 'var(--text-secondary)' }}>{aluno.questoes_sessao}</td>
+                          <td className="py-1 text-center font-bold" style={{ color: aluno.taxa_acerto >= 70 ? 'var(--success)' : aluno.taxa_acerto >= 50 ? 'var(--warning)' : 'var(--error)' }}>
                             {aluno.taxa_acerto}%
                           </td>
                           <td className="py-1 text-center">
@@ -555,8 +574,8 @@ export default function DashboardAoVivoPage() {
             </div>
 
             {/* Temas com Dificuldade */}
-            <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700">
-              <h2 className="text-white font-semibold text-sm flex items-center gap-1.5 mb-1.5">
+            <div className="rounded-lg p-2 overflow-hidden flex flex-col" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+              <h2 className="font-semibold text-sm flex items-center gap-1.5 mb-1.5" style={{ color: 'var(--text-primary)' }}>
                 <AlertTriangle className="w-4 h-4 text-red-400" />
                 Dificuldades
               </h2>
@@ -571,7 +590,7 @@ export default function DashboardAoVivoPage() {
                     {temasComDificuldade.map((tema) => (
                       <div key={tema.tema} className="bg-red-900/20 rounded p-1.5 border border-red-500/20">
                         <div className="flex items-center justify-between">
-                          <span className="text-white text-[11px] truncate flex-1 mr-1">{tema.tema}</span>
+                          <span className="text-[11px] truncate flex-1 mr-1" style={{ color: 'var(--text-primary)' }}>{tema.tema}</span>
                           <span className="text-red-300 text-xs font-bold">{tema.taxa_erro}%</span>
                         </div>
                         <div className="h-1 bg-red-900/50 rounded-full mt-1 overflow-hidden">
@@ -587,23 +606,23 @@ export default function DashboardAoVivoPage() {
         </div>
 
         {/* COLUNA DIREITA (4 cols): Gráfico Q/min + Alertas + Feed */}
-        <div className="col-span-4 flex flex-col gap-1 overflow-hidden min-h-0">
+        <div className="col-span-1 lg:col-span-4 flex flex-col gap-1 overflow-hidden min-h-0">
 
           {/* Gráfico: Questões nos últimos minutos */}
-          <div className="bg-slate-800/80 rounded-lg p-2 border border-slate-700 flex-shrink-0" style={{ height: '70px' }}>
+          <div className="rounded-lg p-2 flex-shrink-0" style={{ height: '70px', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-white font-semibold text-sm flex items-center gap-1.5">
+              <h2 className="font-semibold text-sm flex items-center gap-1.5" style={{ color: 'var(--text-primary)' }}>
                 <Activity className="w-4 h-4 text-blue-400" />
                 Ritmo
               </h2>
               <span className="text-blue-400 text-xs font-bold">{stats?.questoes_ultimos_5min || 0} q/5min</span>
             </div>
-            <Sparkline data={historicoQuestoes} color="#3b82f6" />
+            <Sparkline data={historicoQuestoes} color="var(--info)" />
           </div>
 
           {/* Alertas */}
-          <div className="bg-slate-800/80 rounded-lg p-2 overflow-hidden flex flex-col border border-slate-700 min-h-0" style={{ flex: '0 1 40%' }}>
-            <h2 className="text-white font-semibold text-sm flex items-center gap-1.5 mb-1.5 flex-shrink-0">
+          <div className="rounded-lg p-2 overflow-hidden flex flex-col min-h-0" style={{ flex: '0 1 40%', background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+            <h2 className="font-semibold text-sm flex items-center gap-1.5 mb-1.5 flex-shrink-0" style={{ color: 'var(--text-primary)' }}>
               <AlertTriangle className="w-4 h-4 text-yellow-400" />
               Alertas
               {(alunosOciosos.length + alunosPrecisandoAjuda.length) > 0 && (
@@ -617,7 +636,7 @@ export default function DashboardAoVivoPage() {
                 <div key={`ao-${aluno.id}`} className="flex items-center gap-2 p-1.5 bg-yellow-900/30 rounded border border-yellow-500/20">
                   <Coffee className="w-4 h-4 text-yellow-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium truncate">{aluno.nome.split(' ')[0]}</p>
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{aluno.nome.split(' ')[0]}</p>
                     <p className="text-yellow-400 text-[11px]">Parado ha {formatarTempoOcioso(aluno.tempo_ocioso_segundos)}</p>
                   </div>
                   <span className="text-yellow-500 text-[11px] font-bold">{aluno.turma}</span>
@@ -627,7 +646,7 @@ export default function DashboardAoVivoPage() {
                 <div key={`ah-${aluno.id}`} className="flex items-center gap-2 p-1.5 bg-red-900/30 rounded border border-red-500/20">
                   <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium truncate">{aluno.nome.split(' ')[0]}</p>
+                    <p className="text-xs font-medium truncate" style={{ color: 'var(--text-primary)' }}>{aluno.nome.split(' ')[0]}</p>
                     <p className="text-red-400 text-[11px]">{aluno.taxa_acerto}% em {aluno.questoes_sessao}q</p>
                   </div>
                 </div>
@@ -642,14 +661,14 @@ export default function DashboardAoVivoPage() {
           </div>
 
           {/* Feed de Atividades */}
-          <div className="bg-slate-800/80 rounded-lg p-2 flex-1 overflow-hidden flex flex-col border border-slate-700 min-h-0">
-            <h2 className="text-white font-semibold text-sm flex items-center gap-1.5 mb-1.5 flex-shrink-0">
+          <div className="rounded-lg p-2 flex-1 overflow-hidden flex flex-col min-h-0" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}>
+            <h2 className="font-semibold text-sm flex items-center gap-1.5 mb-1.5 flex-shrink-0" style={{ color: 'var(--text-primary)' }}>
               <Activity className="w-4 h-4 text-blue-400" />
               Feed
             </h2>
             <div className="flex-1 overflow-y-auto space-y-0.5 min-h-0">
               {atividades.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                <div className="flex flex-col items-center justify-center h-full" style={{ color: 'var(--text-muted)' }}>
                   <Clock className="w-6 h-6 mb-1.5 opacity-70" />
                   <p className="text-xs">Aguardando...</p>
                 </div>
@@ -669,8 +688,8 @@ export default function DashboardAoVivoPage() {
                     ) : (
                       <Activity className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
                     )}
-                    <span className="text-slate-200 text-[11px] font-medium">{ativ.usuario_nome.split(' ')[0]}</span>
-                    <span className="text-slate-400 text-[11px] truncate flex-1">
+                    <span className="text-[11px] font-medium" style={{ color: 'var(--text-primary)' }}>{ativ.usuario_nome.split(' ')[0]}</span>
+                    <span className="text-[11px] truncate flex-1" style={{ color: 'var(--text-muted)' }}>
                       {ativ.tipo === 'resposta' || ativ.tipo === 'revisao'
                         ? (ativ.detalhes.correta ? 'acertou' : 'errou')
                         : ativ.tipo === 'desafio_completo' ? 'desafio OK'
@@ -679,7 +698,7 @@ export default function DashboardAoVivoPage() {
                         : 'atividade'
                       }
                     </span>
-                    <span className="text-slate-500 text-[10px] flex-shrink-0">{formatarTempoRelativo(ativ.timestamp)}</span>
+                    <span className="text-[10px] flex-shrink-0" style={{ color: 'var(--text-tertiary)' }}>{formatarTempoRelativo(ativ.timestamp)}</span>
                   </div>
                 ))
               )}
@@ -687,6 +706,14 @@ export default function DashboardAoVivoPage() {
           </div>
         </div>
       </div>
+
+      {/* FOOTER - Créditos do Projeto */}
+      <footer className="px-3 py-1.5 flex items-center justify-center gap-2 flex-shrink-0" style={{ background: 'var(--bg-overlay)', borderTop: '1px solid var(--border-default)' }}>
+        <BookOpen className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'var(--info)' }} />
+        <span className="text-[10px] text-center" style={{ color: 'var(--text-muted)' }}>
+          Projeto desenvolvido pelo Professor Leonardo Dantas Vieira com estudantes do Colégio Cora Coralina e Colemar Natal e Silva
+        </span>
+      </footer>
     </div>
   )
 }
@@ -700,15 +727,15 @@ function MiniStat({ icon, label, value, color, trend }: {
   trend?: 'subindo' | 'estavel' | 'descendo'
 }) {
   return (
-    <div className="rounded-lg p-2 flex items-center gap-2 border border-slate-700" style={{ background: 'rgba(30,41,59,0.9)', borderLeft: `3px solid ${color}` }}>
+    <div className="rounded-lg p-2 flex items-center gap-2" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderLeft: `3px solid ${color}` }}>
       <div style={{ color }} className="flex-shrink-0">{icon}</div>
       <div className="min-w-0">
         <div className="flex items-center gap-1">
-          <span className="text-lg font-bold text-white leading-none">{value}</span>
+          <span className="text-lg font-bold leading-none" style={{ color: 'var(--text-primary)' }}>{value}</span>
           {trend === 'subindo' && <TrendingUp className="w-4 h-4 text-green-400" />}
           {trend === 'descendo' && <TrendingDown className="w-4 h-4 text-red-400" />}
         </div>
-        <span className="text-slate-400 text-[11px] leading-none">{label}</span>
+        <span className="text-[11px] leading-none" style={{ color: 'var(--text-muted)' }}>{label}</span>
       </div>
     </div>
   )
@@ -718,7 +745,7 @@ function Sparkline({ data, color, max, label }: {
   data: number[]; color: string; max?: number; label?: string
 }) {
   if (data.length < 2) {
-    return <div className="h-6 flex items-center justify-center text-slate-500 text-xs">Coletando dados...</div>
+    return <div className="h-6 flex items-center justify-center text-xs" style={{ color: 'var(--text-tertiary)' }}>Coletando dados...</div>
   }
 
   const maxVal = max || Math.max(...data, 1)
@@ -754,7 +781,7 @@ function DonutChart({ data, size }: {
   if (total === 0) {
     return (
       <svg width={size} height={size} viewBox="0 0 36 36">
-        <circle cx="18" cy="18" r="14" fill="none" stroke="#334155" strokeWidth="5" />
+        <circle cx="18" cy="18" r="14" fill="none" stroke="var(--text-muted)" strokeWidth="5" />
       </svg>
     )
   }

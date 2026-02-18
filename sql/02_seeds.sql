@@ -233,7 +233,7 @@ INSERT INTO questoes (componente, ano, tema, subtema, dificuldade, enunciado, al
 -- 6º Ano - Números
 ('matematica', 6, 'Números', 'Operações Básicas', 'facil',
 'Quanto é 456 + 789?',
-'1.135', '1.245', '1.345', '1.245', 'B',
+'1.135', '1.245', '1.345', '1.235', 'B',
 '456 + 789 = 1.245. Some unidade com unidade, dezena com dezena, centena com centena.',
 'Some coluna por coluna'),
 

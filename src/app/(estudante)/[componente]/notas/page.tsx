@@ -188,12 +188,12 @@ export default function NotasPage() {
   }, [componente, buscarNotas, router])
 
   const getStatusConfig = (status: string, nota: number) => {
-    if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' }
+    if (nota >= 6) return { label: 'Aprovado', color: 'var(--success)', bg: 'var(--success-bg-15)' }
     const config: Record<string, { label: string; color: string; bg: string }> = {
-      aprovado: { label: 'Aprovado', color: 'var(--success)', bg: 'rgba(34, 197, 94, 0.15)' },
-      reprovado: { label: 'Recuperação', color: 'var(--error)', bg: 'rgba(239, 68, 68, 0.15)' },
-      recuperacao: { label: 'Recuperação', color: 'var(--warning)', bg: 'rgba(245, 158, 11, 0.15)' },
-      em_andamento: { label: 'Em Andamento', color: 'var(--color-accent)', bg: 'rgba(59, 130, 246, 0.15)' },
+      aprovado: { label: 'Aprovado', color: 'var(--success)', bg: 'var(--success-bg-15)' },
+      reprovado: { label: 'Recuperação', color: 'var(--error)', bg: 'var(--error-bg-15)' },
+      recuperacao: { label: 'Recuperação', color: 'var(--warning)', bg: 'var(--warning-bg-15)' },
+      em_andamento: { label: 'Em Andamento', color: 'var(--color-accent)', bg: 'var(--info-bg-15)' },
     }
     return config[status] || config.em_andamento
   }
@@ -204,10 +204,10 @@ export default function NotasPage() {
   const statusConfig = notaAtual ? getStatusConfig(notaAtual.status, notaAtual.nota_final) : null
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen pb-nav lg:pb-0 lg:pl-[72px]" style={{ background: 'var(--bg-base)' }}>
       <NavigationRail componente={componente} />
 
-      <div className="h-full flex flex-col max-w-lg mx-auto px-4 py-4">
+      <div className="h-full flex flex-col max-w-2xl mx-auto px-4 py-4">
         {/* Header Padronizado */}
         <header className="flex items-center justify-between mb-3">
           <BackButton href={`/${componente}/menu`} mobileOnly />
@@ -418,7 +418,7 @@ export default function NotasPage() {
                 disabled={!notaAtual.pode_responder}
                 rightIcon={notaAtual.pode_responder ? <ChevronRight className="w-5 h-5" /> : undefined}
               >
-                {notaAtual.pode_responder ? 'Estudar' : `Limite: ${notaAtual.questoes_semana}/15`}
+                {notaAtual.pode_responder ? 'Estudar' : `Limite: ${notaAtual.questoes_semana}/${notaAtual.limite_semanal ?? 70}`}
               </Button>
               <Button
                 variant="secondary"

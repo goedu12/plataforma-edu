@@ -3,8 +3,10 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao, hashSenha } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import { gerarSenhaTemporaria } from '@/lib/utils'
 import { logger } from '@/lib/logger'
+
+// Senha padrão para todos os estudantes
+const SENHA_PADRAO_ESTUDANTE = '@estudante'
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,8 +43,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Gerar senha temporária única
-    const novaSenha = gerarSenhaTemporaria()
+    // Resetar para senha padrão @estudante
+    const novaSenha = SENHA_PADRAO_ESTUDANTE
     const novaSenhaHash = await hashSenha(novaSenha)
 
     // Atualizar senha e marcar como não alterada (forçar troca no próximo login)
@@ -50,7 +52,7 @@ export async function POST(request: NextRequest) {
       .from('usuarios')
       .update({
         senha_hash: novaSenhaHash,
-        senha_alterada: false,
+        senha_alterada: true, // Senha padrão @estudante, sem obrigar troca
       })
       .eq('id', usuario_id)
 
@@ -59,9 +61,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       sucesso: true,
-      mensagem: 'Senha temporária gerada com sucesso',
-      nova_senha: novaSenha, // Exibida apenas uma vez para o professor informar ao aluno
-      aviso: 'Informe esta senha ao estudante. Ele deverá alterá-la no primeiro acesso.',
+      mensagem: 'Senha resetada para a senha padrão',
+      nova_senha: novaSenha,
+      aviso: 'A senha foi resetada para @estudante. O estudante deverá alterá-la no primeiro acesso.',
     })
   } catch (error) {
     logger.error('Erro ao resetar senha:', error)

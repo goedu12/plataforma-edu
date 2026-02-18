@@ -86,20 +86,20 @@ export function TutorFeedbackInline({ componente, mensagemId, onFeedbackEnviado 
       <button
         onClick={() => enviarFeedbackRapido(true)}
         disabled={enviando}
-        className="p-1 rounded transition-colors hover:bg-black/10"
+        className="p-2 rounded-lg transition-colors hover:bg-black/10 flex items-center justify-center"
         title="Resposta util"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: 'var(--text-muted)', minWidth: '36px', minHeight: '36px' }}
       >
-        <ThumbsUp className="w-3.5 h-3.5" />
+        <ThumbsUp className="w-4 h-4" />
       </button>
       <button
         onClick={() => enviarFeedbackRapido(false)}
         disabled={enviando}
-        className="p-1 rounded transition-colors hover:bg-black/10"
+        className="p-2 rounded-lg transition-colors hover:bg-black/10 flex items-center justify-center"
         title="Resposta pode melhorar"
-        style={{ color: 'var(--text-muted)' }}
+        style={{ color: 'var(--text-muted)', minWidth: '36px', minHeight: '36px' }}
       >
-        <ThumbsDown className="w-3.5 h-3.5" />
+        <ThumbsDown className="w-4 h-4" />
       </button>
     </div>
   )
@@ -167,7 +167,7 @@ function TutorFeedbackDetalhado({
       <div
         className="p-3 rounded-xl text-sm"
         style={{
-          background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)',
+          background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)',
           border: `1px solid ${corPrimaria}`,
           color: corPrimaria,
         }}
@@ -204,7 +204,7 @@ function TutorFeedbackDetalhado({
           <button
             key={tipo.valor}
             onClick={() => setTipoProblema(tipoProblema === tipo.valor ? null : tipo.valor)}
-            className="px-2 py-1 rounded text-xs transition-all flex items-center gap-1"
+            className="px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-1"
             style={{
               background: tipoProblema === tipo.valor ? `${corPrimaria}20` : 'var(--bg-surface)',
               border: tipoProblema === tipo.valor ? `1px solid ${corPrimaria}` : '1px solid var(--border-default)',
@@ -225,7 +225,7 @@ function TutorFeedbackDetalhado({
               <button
                 key={n}
                 onClick={() => setClareza(clareza === n ? 0 : n)}
-                className="p-0.5"
+                className="p-1"
               >
                 <Star
                   className="w-3.5 h-3.5"
@@ -245,7 +245,7 @@ function TutorFeedbackDetalhado({
               <button
                 key={n}
                 onClick={() => setPrecisao(precisao === n ? 0 : n)}
-                className="p-0.5"
+                className="p-1"
               >
                 <Star
                   className="w-3.5 h-3.5"
@@ -281,7 +281,7 @@ function TutorFeedbackDetalhado({
           className="px-3 py-2 rounded-lg"
           style={{
             background: corPrimaria,
-            color: isFisica ? '#000' : '#fff',
+            color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
           }}
         >
           {enviando ? '...' : <Send className="w-4 h-4" />}
@@ -358,8 +358,8 @@ export function TutorAvaliacaoSessao({
   if (enviado) {
     return (
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+        className="fixed inset-0 flex items-center justify-center p-4"
+        style={{ background: 'var(--overlay-modal)', zIndex: 100 }}
       >
         <div
           className="p-6 rounded-2xl text-center"
@@ -375,8 +375,8 @@ export function TutorAvaliacaoSessao({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: 'var(--overlay-modal)', zIndex: 100 }}
     >
       <div
         className="w-full max-w-sm rounded-2xl p-6 space-y-4"
@@ -427,7 +427,7 @@ export function TutorAvaliacaoSessao({
             className="flex-1 py-2 rounded-xl text-sm font-medium"
             style={{
               background: satisfacao ? corPrimaria : 'var(--bg-overlay)',
-              color: satisfacao ? (isFisica ? '#000' : '#fff') : 'var(--text-muted)',
+              color: satisfacao ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)') : 'var(--text-muted)',
             }}
           >
             {enviando ? 'Enviando...' : 'Enviar'}

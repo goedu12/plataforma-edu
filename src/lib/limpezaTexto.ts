@@ -1,16 +1,25 @@
 /**
- * Utilitários para limpeza e formatação de texto das questões ENEM
- * Versão 3.1 - Limpeza completa de markdown, filtros de qualidade e sanitização XSS
+ * Utilitários para limpeza e formatação de texto de questões
+ * Limpeza de markdown, sanitização XSS e processamento de conteúdo
  */
 
 // Valores que devem ser tratados como vazio
 const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
 
+// URLs de imagem que são placeholders/quebrados conhecidos (ex: API enem.dev)
+const URLS_PLACEHOLDER = [
+  'broken-image',
+  'placeholder',
+  'no-image',
+  'image-not-found',
+  'not-available',
+]
+
 // Tags HTML permitidas (sanitização XSS)
 const TAGS_PERMITIDAS = new Set([
   'p', 'br', 'em', 'strong', 'span', 'div', 'img',
   'b', 'i', 'u', 'sub', 'sup', 'ul', 'ol', 'li',
-  'small' // Para fontes/referências em tamanho menor (como na prova ENEM)
+  'small' // Para fontes/referências em tamanho menor
 ])
 
 // Atributos permitidos por tag
@@ -98,10 +107,11 @@ function sanitizarAtributos(tagCompleta: string, tagName: string): string {
         .replace(/vbscript\s*:/gi, '')
         .replace(/on\w+\s*=/gi, '')
 
-      // Para src de imagens, validar URL
+      // Para src de imagens, validar URLs
       if (attrNameLower === 'src') {
-        if (!valorLimpo.startsWith('http') && !valorLimpo.startsWith('data:image')) {
-          continue // Pular src inválido
+        // Bloquear protocolos perigosos
+        if (/^(javascript|vbscript):/i.test(valorLimpo)) {
+          continue
         }
       }
 
@@ -124,14 +134,23 @@ function sanitizarAtributos(tagCompleta: string, tagName: string): string {
 
 /**
  * Valida se é uma URL de imagem válida
+ * Aceita URLs absolutas (http/https), data URIs e caminhos relativos do storage
  */
 export function isValidImageUrl(url: string | null | undefined): boolean {
   if (!url || typeof url !== 'string') return false
   const trimmed = url.trim()
   if (!trimmed) return false
   if (VALORES_INVALIDOS.includes(trimmed.toLowerCase())) return false
-  // Deve começar com http ou data:image
-  if (!trimmed.startsWith('http') && !trimmed.startsWith('data:image')) return false
+  // Rejeitar URLs de placeholder/imagem quebrada conhecidas
+  const lower = trimmed.toLowerCase()
+  if (URLS_PLACEHOLDER.some(p => lower.includes(p))) return false
+  // Aceitar URLs absolutas, data URIs e caminhos relativos (ex: enem/2024/img.jpeg)
+  if (!trimmed.startsWith('http') && !trimmed.startsWith('data:image') && !trimmed.startsWith('//')) {
+    // Caminho relativo: verificar se parece um caminho de arquivo válido (não um script/protocolo)
+    if (/^(javascript|vbscript):/i.test(trimmed)) return false
+    // Aceitar caminhos relativos que parecem ser arquivos de imagem ou paths do storage
+    if (!/\.(png|jpg|jpeg|gif|webp|svg|bmp)(\?.*)?$/i.test(trimmed) && !trimmed.includes('/')) return false
+  }
   // Rejeitar URLs muito curtas ou claramente inválidas
   if (trimmed.length < 10) return false
   return true
@@ -241,12 +260,59 @@ export function isTextoValido(texto: string | null | undefined): boolean {
 }
 
 /**
+ * Formata fórmulas químicas comuns para Unicode (H2O → H₂O, CO2 → CO₂)
+ * Aplicado no texto ANTES da conversão para HTML
+ */
+function formatarQuimica(texto: string): string {
+  if (!texto) return ''
+
+  const formulas: [RegExp, string][] = [
+    // Ácidos
+    [/\bH2SO4\b/g, 'H₂SO₄'], [/\bH3PO4\b/g, 'H₃PO₄'], [/\bHNO3\b/g, 'HNO₃'],
+    [/\bH2CO3\b/g, 'H₂CO₃'], [/\bH2S\b/g, 'H₂S'], [/\bH2O2\b/g, 'H₂O₂'],
+    // Bases
+    [/\bCa\(OH\)2\b/g, 'Ca(OH)₂'], [/\bMg\(OH\)2\b/g, 'Mg(OH)₂'],
+    [/\bAl\(OH\)3\b/g, 'Al(OH)₃'], [/\bNH4OH\b/g, 'NH₄OH'],
+    // Óxidos e moléculas comuns
+    [/\bCO2\b/g, 'CO₂'], [/\bH2O\b/g, 'H₂O'], [/\bSO2\b/g, 'SO₂'], [/\bSO3\b/g, 'SO₃'],
+    [/\bNO2\b/g, 'NO₂'], [/\bN2O\b/g, 'N₂O'], [/\bFe2O3\b/g, 'Fe₂O₃'],
+    [/\bAl2O3\b/g, 'Al₂O₃'], [/\bSiO2\b/g, 'SiO₂'],
+    // Gases
+    [/\bO2\b/g, 'O₂'], [/\bO3\b/g, 'O₃'], [/\bN2\b/g, 'N₂'], [/\bH2\b/g, 'H₂'],
+    [/\bCl2\b/g, 'Cl₂'], [/\bNH3\b/g, 'NH₃'],
+    // Orgânicos
+    [/\bCH4\b/g, 'CH₄'], [/\bC2H5OH\b/g, 'C₂H₅OH'], [/\bC6H12O6\b/g, 'C₆H₁₂O₆'],
+    [/\bCH3COOH\b/g, 'CH₃COOH'], [/\bC6H6\b/g, 'C₆H₆'],
+    // Sais
+    [/\bCaCO3\b/g, 'CaCO₃'], [/\bNa2CO3\b/g, 'Na₂CO₃'], [/\bKMnO4\b/g, 'KMnO₄'],
+    // Setas de reação
+    [/<=>/g, '⇌'], [/(?<!=)->/g, '→'],
+  ]
+
+  let resultado = texto
+  for (const [padrao, sub] of formulas) {
+    resultado = resultado.replace(padrao, sub)
+  }
+
+  // Notação científica: 5x10^12 → 5×10¹²
+  const superMap: Record<string, string> = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻' }
+  resultado = resultado.replace(/(\d)\s*[xX×]\s*10\^(-?\d+)/g, (_match, n, exp) => {
+    return n + '×10' + exp.split('').map((c: string) => superMap[c] || c).join('')
+  })
+
+  return resultado
+}
+
+/**
  * Formata LaTeX básico para exibição
  */
 export function formatarMatematica(texto: string): string {
   if (!texto) return ''
 
-  let formatado = texto
+  // Primeiro aplicar formatação química
+  let formatado = formatarQuimica(texto)
+
+  formatado = formatado
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1/$2)')
     .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
     .replace(/\\sqrt\[(\d+)\]\{([^}]+)\}/g, '$1√($2)')
@@ -436,12 +502,10 @@ export function processarContexto(
     .replace(/&#39;/g, "'")
     .replace(/&nbsp;/g, ' ')
 
-  // Remover informações redundantes do início (já aparecem nos badges)
-  // Remove linhas tipo "ENEM 2014", "Questão 162", "Matemática" no início
-  processado = processado
-    .replace(/^ENEM\s+\d{4}\s*/i, '')
-    .replace(/^Questão\s+\d+\s*/i, '')
-    .replace(/^(Matemática|Física|Química|Biologia|Português|Literatura|História|Geografia|Filosofia|Sociologia|Inglês|Espanhol)\s*/i, '')
+  // Remover referências a imagens quebradas/placeholder
+  processado = processado.replace(/!\[[^\]]*\]\([^)]*(?:broken-image|placeholder|no-image|not-available)[^)]*\)/gi, '')
+  processado = processado.replace(/!\([^)]*(?:broken-image|placeholder|no-image|not-available)[^)]*\)/gi, '')
+  processado = processado.replace(/<img[^>]*src=["'][^"']*(?:broken-image|placeholder|no-image|not-available)[^"']*["'][^>]*\/?>/gi, '')
 
   // Estilizar referências a figuras/tabelas como badges discretos
   // Para figuras: mostra abreviado pois a imagem aparece na galeria com legenda
@@ -510,148 +574,11 @@ export function processarContexto(
 }
 
 /**
- * Detecta padrões repetitivos no texto (ex: "ENEM2025ENEM2025ENEM2025...")
- * Retorna true se detectar padrão repetitivo suspeito
- */
-function temPadraoRepetitivo(texto: string): boolean {
-  if (!texto || texto.length < 20) return false
-
-  // Verifica se há um padrão de 4-20 caracteres repetido 3+ vezes consecutivas
-  const padraoRepetitivo = /(.{4,20})\1{2,}/i
-  if (padraoRepetitivo.test(texto)) {
-    return true
-  }
-
-  // Verifica padrões específicos conhecidos (ENEM + ano repetido)
-  if (/ENEM\d{4}ENEM\d{4}/i.test(texto)) {
-    return true
-  }
-
-  return false
-}
-
-/**
- * Verifica se uma questão tem qualidade suficiente para exibição
- * Retorna true se a questão pode ser exibida, false se deve ser ocultada
- * Critérios rigorosos para garantir boa experiência ao estudante
- */
-export function questaoTemQualidade(questao: {
-  contexto: string | null
-  alternativa_a: string | null
-  alternativa_b: string | null
-  alternativa_c: string | null
-  alternativa_d: string | null
-  alternativa_e: string | null
-  comando?: string | null
-  imagem_principal?: string | null
-  imagens_extras?: string[] | null
-}): { valida: boolean; motivo?: string } {
-  const contexto = questao.contexto || ''
-  const comando = questao.comando || ''
-
-  // 0. Verificar padrões repetitivos no comando ou contexto (dados mal formatados)
-  if (temPadraoRepetitivo(comando) || temPadraoRepetitivo(contexto)) {
-    return { valida: false, motivo: 'padrao_repetitivo' }
-  }
-
-  // 1. Contexto deve existir e ter conteúdo mínimo
-  const contextoLimpo = limparTexto(contexto)
-  if (!contextoLimpo || contextoLimpo.length < 30) {
-    return { valida: false, motivo: 'contexto_vazio' }
-  }
-
-  // 2. Verificar se tem referência a figura/imagem sem ter imagem válida
-  const temReferenciaFigura = /\b(Figura|Imagem|Quadro|Tabela|Gráfico)\s*\d+/i.test(contexto)
-  const temImagemValida = isValidImageUrl(questao.imagem_principal) ||
-    (questao.imagens_extras && questao.imagens_extras.some(img => isValidImageUrl(img))) ||
-    /!\([^)]+\)/.test(contexto) || // !(url) no texto
-    /!\[[^\]]*\]\([^)]+\)/.test(contexto) // ![alt](url) no texto
-
-  if (temReferenciaFigura && !temImagemValida) {
-    return { valida: false, motivo: 'referencia_figura_sem_imagem' }
-  }
-
-  // 3. Verificar problemas de formatação graves
-  // URLs soltas no texto (não formatadas como imagem)
-  const urlsSoltas = contexto.match(/https?:\/\/[^\s<>"]+/g) || []
-  const urlsNaoImagem = urlsSoltas.filter(url => !isValidImageUrl(url))
-  if (urlsNaoImagem.length > 2) {
-    return { valida: false, motivo: 'muitas_urls_soltas' }
-  }
-
-  // 4. Verificar se tem muito markdown não processável
-  const asteriscosExcessivos = (contexto.match(/\*{3,}/g) || []).length
-  if (asteriscosExcessivos > 3) {
-    return { valida: false, motivo: 'formatacao_quebrada' }
-  }
-
-  // 5. Verificar se contexto é JSON ou array malformado
-  if (/^\s*[\[\{]/.test(contexto) && /[\]\}]\s*$/.test(contexto)) {
-    return { valida: false, motivo: 'contexto_json' }
-  }
-
-  // 6. Verificar alternativas - pelo menos 4 devem ter texto válido
-  const alternativas = [
-    questao.alternativa_a,
-    questao.alternativa_b,
-    questao.alternativa_c,
-    questao.alternativa_d,
-    questao.alternativa_e,
-  ]
-
-  // 6a. Verificar padrões repetitivos nas alternativas
-  for (const alt of alternativas) {
-    if (alt && temPadraoRepetitivo(alt)) {
-      return { valida: false, motivo: 'alternativa_padrao_repetitivo' }
-    }
-  }
-
-  const alternativasValidas = alternativas.filter(alt => {
-    if (!alt) return false
-    const textoLimpo = limparTexto(alt)
-    // Alternativa válida se tem texto de pelo menos 1 caractere
-    // Aceita numerais romanos (I, II, III, IV, V) como válidos
-    return textoLimpo && textoLimpo.length >= 1
-  })
-
-  if (alternativasValidas.length < 4) {
-    return { valida: false, motivo: 'alternativas_insuficientes' }
-  }
-
-  // 7. Verificar se alternativas são apenas letras/números isolados sem sentido
-  const alternativasComConteudo = alternativas.filter(alt => {
-    if (!alt) return false
-    const limpo = limparTexto(alt)
-    // Deve ter mais que apenas um caractere ou ser numeral romano
-    return limpo && (limpo.length > 2 || /^[IVX]+$/i.test(limpo) || /^\d+$/.test(limpo))
-  })
-
-  if (alternativasComConteudo.length < 3) {
-    return { valida: false, motivo: 'alternativas_sem_conteudo' }
-  }
-
-  // 8. Verificar se tem TEXTO I e TEXTO II mas sem conteúdo entre eles
-  if (/TEXTO\s+I/i.test(contexto) && /TEXTO\s+II/i.test(contexto)) {
-    const partes = contexto.split(/TEXTO\s+I+/i)
-    if (partes.length > 1) {
-      const textoI = partes[1]?.split(/TEXTO\s+II/i)[0] || ''
-      const textoII = partes[1]?.split(/TEXTO\s+II/i)[1] || ''
-      if (limparTexto(textoI).length < 20 || limparTexto(textoII).length < 20) {
-        return { valida: false, motivo: 'textos_vazios' }
-      }
-    }
-  }
-
-  return { valida: true }
-}
-
-/**
- * Extrai tags <small> e <span class="questao-fonte"> do texto HTML,
- * retornando o texto separado em duas partes:
- * - textoSemSmall: o texto original sem as referências
- * - fontes: array com o conteúdo de cada referência encontrada
+ * Extrai tags <small> do texto HTML e retorna o texto separado em duas partes:
+ * - textoSemSmall: o texto original sem as tags <small>
+ * - fontes: array com o conteúdo de cada tag <small>
  *
- * Garante a ordem ENEM original: Texto → Imagem → Fonte → Comando
+ * Usado para renderizar as fontes/referências em posição diferente (ex: após imagens)
  */
 export function extrairFontesDoContexto(html: string): {
   textoSemSmall: string
@@ -663,60 +590,73 @@ export function extrairFontesDoContexto(html: string): {
 
   const fontes: string[] = []
 
-  // 1. Extrair <small>...</small>
+  // 1. Primeiro, tentar extrair de tags <small>...</small>
   const smallRegex = /<small[^>]*>([\s\S]*?)<\/small>/gi
   let match
   while ((match = smallRegex.exec(html)) !== null) {
     const conteudo = match[1].trim()
-    if (conteudo) fontes.push(conteudo)
+    if (conteudo) {
+      fontes.push(conteudo)
+    }
   }
+
+  // Remover todas as tags <small>...</small> do texto original
   let textoSemSmall = html.replace(/<small[^>]*>[\s\S]*?<\/small>/gi, '')
 
-  // 2. Extrair <span class="questao-fonte">...</span>
-  const spanFonteRegex = /<span\s+class="questao-fonte"[^>]*>([\s\S]*?)<\/span>/gi
-  while ((match = spanFonteRegex.exec(textoSemSmall)) !== null) {
-    const conteudo = match[1].trim()
-    if (conteudo) fontes.push(conteudo)
-  }
-  textoSemSmall = textoSemSmall.replace(/<span\s+class="questao-fonte"[^>]*>[\s\S]*?<\/span>/gi, '')
-
-  // 3. Se não encontrou fontes por tag, detectar automaticamente por padrão
+  // 2. Se não encontrou fontes em <small>, detectar automaticamente
   if (fontes.length === 0) {
-    const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.replace(/<[^>]+>/g, '').trim()).filter(l => l)
+    // Extrair parágrafos de tags <p> (processarContexto converte \n\n em </p><p>)
+    const paragrafos: { textoLimpo: string; htmlOriginal: string }[] = []
+    const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi
+    let pMatch
+    while ((pMatch = pRegex.exec(textoSemSmall)) !== null) {
+      const textoLimpo = pMatch[1].replace(/<[^>]+>/g, '').trim()
+      if (textoLimpo) {
+        paragrafos.push({ textoLimpo, htmlOriginal: pMatch[0] })
+      }
+    }
 
-    for (let i = linhas.length - 1; i >= Math.max(0, linhas.length - 4); i--) {
-      const linha = linhas[i]
+    // Fallback: se não tem <p> tags, separar por \n ou <br>
+    if (paragrafos.length === 0) {
+      const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+      for (const linha of linhas) {
+        const textoLimpo = linha.replace(/<[^>]+>/g, '').trim()
+        if (textoLimpo) {
+          paragrafos.push({ textoLimpo, htmlOriginal: linha })
+        }
+      }
+    }
+
+    // Verificar os últimos parágrafos (pode ter múltiplas fontes)
+    for (let i = paragrafos.length - 1; i >= Math.max(0, paragrafos.length - 3); i--) {
+      const { textoLimpo, htmlOriginal } = paragrafos[i]
+
+      // Padrões que indicam fonte/referência:
       const ehFonte =
-        // SOBRENOME, Nome. — autor em maiúsculas (padrão ABNT)
-        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]{2,}[A-Za-záàâãéêíóôõúç\s]*,\s*[A-Z]/.test(linha) ||
-        // Disponível em: URL
-        /Dispon[ií]vel\s+em:/i.test(linha) ||
-        // Acesso em: DATA
-        /Acesso\s+em:/i.test(linha) ||
-        // (adaptado) ou (Adaptado)
-        /\(adaptado\)/i.test(linha) ||
-        // Adaptado de / In: / Apud:
-        /^(Adaptado\s+de|In:|Apud:)/i.test(linha) ||
-        // Revista, Jornal, Editorial
-        /^(Revista|Jornal|Editorial)\s+/i.test(linha) ||
-        // Termina com ano: , 2024. ou (2024).
-        /[,.]\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(linha) ||
-        // URL no texto (www. ou http)
-        /\bwww\./i.test(linha) ||
-        /https?:\/\//i.test(linha) ||
-        // Editora: Cidade: Editora, Ano
-        /:\s+[A-Z][a-záàâãéê]+,\s*\d{4}/.test(linha)
+        // Padrão: SOBRENOME, Nome. Título... (autor em maiúsculas)
+        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ\s]+,\s*[A-Z]/.test(textoLimpo) ||
+        // Padrão: Disponível em: URL
+        /Dispon[ií]vel\s+em:/i.test(textoLimpo) ||
+        // Padrão: Acesso em: DATA
+        /Acesso\s+em:/i.test(textoLimpo) ||
+        // Padrão: (adaptado) ou (Adaptado)
+        /\(adaptado\)/i.test(textoLimpo) ||
+        // Padrão: Revista/Jornal Nome, n. XX
+        /^(Revista|Jornal)\s+/i.test(textoLimpo) ||
+        // Padrão: termina com ano entre parênteses ou ponto
+        /,\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(textoLimpo) ||
+        // Padrão: URL no final
+        /\.(com|org|gov|edu|br)\b/i.test(textoLimpo)
 
-      if (ehFonte && linha.length > 10 && linha.length < 600) {
-        fontes.unshift(linha)
-        // Remover do texto usando o HTML original
-        const escapado = linha.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-        textoSemSmall = textoSemSmall.replace(new RegExp(escapado, 'g'), '').trim()
+      if (ehFonte && textoLimpo.length > 15 && textoLimpo.length < 500) {
+        fontes.unshift(textoLimpo) // Adiciona no início para manter ordem
+        // Remover o parágrafo HTML completo do texto
+        textoSemSmall = textoSemSmall.replace(htmlOriginal, '').trim()
       }
     }
   }
 
-  // Limpar espaços extras
+  // Limpar espaços extras deixados pela remoção
   textoSemSmall = textoSemSmall
     .replace(/<br>\s*<br>\s*<br>/g, '<br>')
     .replace(/<p>\s*<\/p>/g, '')
@@ -728,102 +668,187 @@ export function extrairFontesDoContexto(html: string): {
 }
 
 /**
- * Detecta e destaca o título da obra/texto na primeira linha do contexto.
- * Se a primeira linha for curta (≤ 120 chars), isolada e não parecer parágrafo,
- * é marcada como <strong> para renderização em destaque.
- *
- * Padrões de título no ENEM:
- *   "De próprio punho"        → título em destaque
- *   "TEXTO I" / "TEXTO II"   → marcadores de seção
- *   "Art. 26-A."              → artigo de lei (já em strong)
+ * Extrai título do texto-base de uma questão.
+ * Detecta padrões comuns de títulos:
+ * - Primeira linha curta (até 120 chars) sem ponto final
+ * - Títulos entre aspas
+ * - Títulos em negrito/itálico
+ * Retorna o título separado do corpo do texto.
  */
-export function destacarTituloContexto(html: string): string {
-  if (!html || typeof html !== 'string') return html
-
-  // Não processar se já tem <strong> no início (já formatado)
-  const inicio = html.trimStart()
-  if (inicio.startsWith('<strong>') || inicio.startsWith('<em>') || inicio.startsWith('<p><strong>')) {
-    return html
+export function extrairTituloDoTexto(texto: string): {
+  titulo: string | null
+  corpo: string
+} {
+  if (!texto || typeof texto !== 'string') {
+    return { titulo: null, corpo: '' }
   }
 
-  // Extrair primeira linha relevante
-  const linhas = html.split(/\n|<br\s*\/?>/gi)
-  const primeiraLinha = linhas[0]?.replace(/<[^>]+>/g, '').trim()
+  const textoTrimmed = texto.trim()
 
-  if (!primeiraLinha) return html
-
-  // Critérios para ser considerado título:
-  const ehTitulo =
-    primeiraLinha.length > 0 &&
-    primeiraLinha.length <= 120 &&
-    // Não é início de parágrafo longo
-    !primeiraLinha.endsWith(',') &&
-    // Não começa com artigo/preposição minúsculo (parágrafo narrativo)
-    !/^(o |a |os |as |um |uma |de |da |do |em |na |no |que |e |é |com )/i.test(primeiraLinha) &&
-    // Não é apenas números ou símbolos
-    /[a-zA-ZÀ-ú]/.test(primeiraLinha) &&
-    // Tem pelo menos 3 caracteres
-    primeiraLinha.length >= 3
-
-  if (ehTitulo && linhas.length > 1) {
-    // Substituir primeira linha por versão em destaque
-    linhas[0] = linhas[0].replace(primeiraLinha, `<strong>${primeiraLinha}</strong>`)
-    return linhas.join('\n')
+  // Extrair parágrafos de tags <p> (processarContexto converte \n\n em </p><p>)
+  const paragrafos: { textoLimpo: string; htmlOriginal: string; htmlConteudo: string }[] = []
+  const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi
+  let pMatch
+  while ((pMatch = pRegex.exec(textoTrimmed)) !== null) {
+    const textoLimpo = pMatch[1].replace(/<[^>]+>/g, '').trim()
+    if (textoLimpo) {
+      paragrafos.push({ textoLimpo, htmlOriginal: pMatch[0], htmlConteudo: pMatch[1].trim() })
+    }
   }
 
-  return html
-}
-
-/**
- * Extrai todas as imagens válidas de uma questão
- */
-export function extrairImagensQuestao(questao: {
-  contexto?: string | null
-  imagem_principal?: string | null
-  imagens_extras?: string[] | null
-  imagem_a?: string | null
-  imagem_b?: string | null
-  imagem_c?: string | null
-  imagem_d?: string | null
-  imagem_e?: string | null
-}): string[] {
-  const imagens: string[] = []
-
-  // Imagem principal
-  if (isValidImageUrl(questao.imagem_principal)) {
-    imagens.push(questao.imagem_principal!)
-  }
-
-  // Imagens extras
-  if (questao.imagens_extras) {
-    for (const img of questao.imagens_extras) {
-      if (isValidImageUrl(img)) {
-        imagens.push(img)
+  // Fallback: se não tem <p> tags, separar por \n ou <br>
+  if (paragrafos.length === 0) {
+    const linhas = textoTrimmed.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+    for (const linha of linhas) {
+      const textoLimpo = linha.replace(/<[^>]+>/g, '').trim()
+      if (textoLimpo) {
+        paragrafos.push({ textoLimpo, htmlOriginal: linha, htmlConteudo: linha })
       }
     }
   }
 
-  // Imagens do contexto (embutidas no texto)
-  if (questao.contexto) {
-    const { imagensExtraidas } = converterImagensEmbutidas(questao.contexto)
-    imagens.push(...imagensExtraidas)
+  if (paragrafos.length < 2) {
+    return { titulo: null, corpo: textoTrimmed }
   }
 
-  // Imagens das alternativas
-  const imagensAlternativas = [
-    questao.imagem_a,
-    questao.imagem_b,
-    questao.imagem_c,
-    questao.imagem_d,
-    questao.imagem_e,
-  ]
+  const primeiraLinhaLimpa = paragrafos[0].textoLimpo
+  const primeiraLinhaHtml = paragrafos[0].htmlConteudo
 
-  for (const img of imagensAlternativas) {
-    if (isValidImageUrl(img)) {
-      imagens.push(img!)
+  // Padrões de título:
+  const ehTitulo =
+    // Linha curta (até 120 chars) que não termina com ponto ou dois-pontos
+    (primeiraLinhaLimpa.length <= 120 && primeiraLinhaLimpa.length >= 3 &&
+     !/[.;:]$/.test(primeiraLinhaLimpa) &&
+     // Não é uma frase comum (começa com maiúscula ou tem aspas)
+     (/^["'""«]/.test(primeiraLinhaLimpa) || /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/.test(primeiraLinhaLimpa))) ||
+    // Título entre aspas
+    /^["'""«][^"'""»]+["'""»]$/.test(primeiraLinhaLimpa) ||
+    // Título em negrito (já processado como <strong> ou **)
+    /^<strong>.*<\/strong>$/i.test(primeiraLinhaHtml) ||
+    /^\*\*[^*]+\*\*$/.test(primeiraLinhaLimpa) ||
+    // Padrão "TEXTO I", "TEXTO II" etc
+    /^TEXTO\s+[IVX\d]+$/i.test(primeiraLinhaLimpa)
+
+  if (!ehTitulo) {
+    return { titulo: null, corpo: textoTrimmed }
+  }
+
+  // A segunda linha deve ter conteúdo substancial (indica que a primeira é realmente um título)
+  const restoTexto = textoTrimmed.replace(paragrafos[0].htmlOriginal, '').trim()
+  const restoLimpo = restoTexto.replace(/<[^>]+>/g, '').trim()
+  if (restoLimpo.length < 30) {
+    return { titulo: null, corpo: textoTrimmed }
+  }
+
+  return {
+    titulo: primeiraLinhaLimpa,
+    corpo: restoTexto
+  }
+}
+
+/**
+ * Separa texto que contém múltiplos trechos (TEXTO I, TEXTO II, etc.)
+ * Retorna um array de blocos, cada um com título opcional e conteúdo.
+ * Se o texto não tem múltiplos blocos, retorna um único bloco sem título.
+ */
+export function separarMultiplosTextos(texto: string): {
+  titulo: string | null
+  conteudo: string
+}[] {
+  if (!texto || typeof texto !== 'string') {
+    return [{ titulo: null, conteudo: '' }]
+  }
+
+  // Padrões que indicam múltiplos textos/trechos
+  const padraoTexto = /(?:^|\n|<br\s*\/?>)\s*(TEXTO\s+[IVX\d]+|Texto\s+[IVX\d]+|TRECHO\s+[IVX\d]+|Trecho\s+[IVX\d]+|FRAGMENTO\s+[IVX\d]+|Fragmento\s+[IVX\d]+)\s*(?:\n|<br\s*\/?>)/gi
+
+  const matches: { index: number; titulo: string }[] = []
+  let match: RegExpExecArray | null
+
+  while ((match = padraoTexto.exec(texto)) !== null) {
+    matches.push({
+      index: match.index,
+      titulo: match[1].trim()
+    })
+  }
+
+  // Se não há múltiplos textos, retornar como um bloco único
+  if (matches.length < 2) {
+    return [{ titulo: null, conteudo: texto }]
+  }
+
+  // Separar os blocos
+  const blocos: { titulo: string | null; conteudo: string }[] = []
+
+  // Conteúdo antes do primeiro texto (se houver)
+  const antesDosPrimeiro = texto.substring(0, matches[0].index).trim()
+  if (antesDosPrimeiro) {
+    blocos.push({ titulo: null, conteudo: antesDosPrimeiro })
+  }
+
+  // Cada bloco de texto
+  for (let i = 0; i < matches.length; i++) {
+    const inicio = matches[i].index
+    const fim = i < matches.length - 1 ? matches[i + 1].index : texto.length
+
+    let conteudo = texto.substring(inicio, fim)
+    // Remover o marcador do título do conteúdo
+    conteudo = conteudo.replace(new RegExp(`^\\s*(\\n|<br\\s*\\/?>)?\\s*${matches[i].titulo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(\\n|<br\\s*\\/?>)?`, 'i'), '').trim()
+
+    blocos.push({
+      titulo: matches[i].titulo,
+      conteudo: conteudo
+    })
+  }
+
+  return blocos
+}
+
+/**
+ * Extrai URLs de imagens embutidas em texto (inline)
+ * Retorna as URLs encontradas e o texto limpo (sem as URLs)
+ */
+export function extrairImagensInline(texto: string): {
+  imagens: string[]
+  textoLimpo: string
+} {
+  if (!texto || typeof texto !== 'string') {
+    return { imagens: [], textoLimpo: '' }
+  }
+
+  const imagens: string[] = []
+  let textoLimpo = texto
+
+  // Padrão: URLs de imagem diretas no texto
+  const imgUrlRegex = /https?:\/\/[^\s<>"']+\.(png|jpg|jpeg|gif|webp|svg)(\?[^\s<>"']*)?/gi
+  let urlMatch: RegExpExecArray | null
+
+  while ((urlMatch = imgUrlRegex.exec(texto)) !== null) {
+    const url = urlMatch[0]
+    if (isValidImageUrl(url) && !imagens.includes(url)) {
+      imagens.push(url)
     }
   }
 
-  // Remove duplicatas
-  return [...new Set(imagens)]
+  // Padrão: Tags <img> no texto
+  const imgTagRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi
+  while ((urlMatch = imgTagRegex.exec(texto)) !== null) {
+    const url = urlMatch[1]
+    if (isValidImageUrl(url) && !imagens.includes(url)) {
+      imagens.push(url)
+    }
+    // Remover a tag <img> do texto
+    textoLimpo = textoLimpo.replace(urlMatch[0], '')
+  }
+
+  // Remover URLs de imagem soltas do texto
+  for (const img of imagens) {
+    textoLimpo = textoLimpo.replace(img, '')
+  }
+
+  // Limpar espaços extras
+  textoLimpo = textoLimpo.replace(/\n\s*\n\s*\n/g, '\n\n').trim()
+
+  return { imagens, textoLimpo }
 }
+

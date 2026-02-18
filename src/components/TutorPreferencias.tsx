@@ -58,16 +58,31 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
     }
   }, [isOpen])
 
+  const PREFERENCIAS_PADRAO: Preferencias = {
+    prefere_analogias: true,
+    prefere_formulas: true,
+    prefere_exemplos: true,
+    prefere_visual: true,
+    prefere_passo_a_passo: true,
+    nivel_detalhe: 'medio',
+    tom_conversa: 'amigavel',
+    velocidade: 'normal',
+    usar_exemplos_brasileiros: true,
+  }
+
   const carregarPreferencias = async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/tutor/preferencias')
       const data = await res.json()
-      if (data.sucesso) {
+      if (data.sucesso && data.preferencias) {
         setPreferencias(data.preferencias)
+      } else {
+        setPreferencias(PREFERENCIAS_PADRAO)
       }
     } catch (error) {
       console.error('Erro ao carregar preferências:', error)
+      setPreferencias(PREFERENCIAS_PADRAO)
     } finally {
       setLoading(false)
     }
@@ -115,8 +130,8 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.7)' }}
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{ background: 'var(--overlay-modal)', zIndex: 100 }}
       onClick={onClose}
     >
       <div
@@ -132,13 +147,13 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)' }}
+              style={{ background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)' }}
             >
               <Settings className="w-5 h-5" style={{ color: corPrimaria }} />
             </div>
             <div>
               <h3 className="font-semibold" style={{ color: 'var(--text-primary)' }}>
-                Preferencias de Estudo
+                Preferências de Estudo
               </h3>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
                 Personalize como o tutor explica
@@ -165,13 +180,13 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
               {/* Estilo de Explicação */}
               <div className="space-y-2">
                 <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Estilo de Explicacao
+                  Estilo de Explicação
                 </h4>
 
                 <PreferenciaToggle
                   icon={<Lightbulb className="w-4 h-4" />}
                   label="Usar analogias"
-                  sublabel="Comparacoes com o dia-a-dia"
+                  sublabel="Comparações com o dia a dia"
                   ativo={preferencias.prefere_analogias}
                   onToggle={() => togglePreferencia('prefere_analogias')}
                   cor={corPrimaria}
@@ -179,8 +194,8 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
 
                 <PreferenciaToggle
                   icon={<Calculator className="w-4 h-4" />}
-                  label="Mostrar formulas"
-                  sublabel="Formulas matematicas nas explicacoes"
+                  label="Mostrar fórmulas"
+                  sublabel="Fórmulas matemáticas nas explicações"
                   ativo={preferencias.prefere_formulas}
                   onToggle={() => togglePreferencia('prefere_formulas')}
                   cor={corPrimaria}
@@ -189,7 +204,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                 <PreferenciaToggle
                   icon={<BookOpen className="w-4 h-4" />}
                   label="Dar exemplos"
-                  sublabel="Exemplos praticos ao explicar"
+                  sublabel="Exemplos práticos ao explicar"
                   ativo={preferencias.prefere_exemplos}
                   onToggle={() => togglePreferencia('prefere_exemplos')}
                   cor={corPrimaria}
@@ -198,7 +213,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                 <PreferenciaToggle
                   icon={<ListOrdered className="w-4 h-4" />}
                   label="Passo a passo"
-                  sublabel="Resolucoes detalhadas"
+                  sublabel="Resoluções detalhadas"
                   ativo={preferencias.prefere_passo_a_passo}
                   onToggle={() => togglePreferencia('prefere_passo_a_passo')}
                   cor={corPrimaria}
@@ -208,7 +223,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
               {/* Nível de Detalhe */}
               <div className="space-y-2">
                 <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Nivel de Detalhe
+                  Nível de Detalhe
                 </h4>
                 <div className="grid grid-cols-3 gap-2">
                   {['minimo', 'medio', 'maximo'].map(nivel => (
@@ -218,7 +233,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                       className="p-3 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: preferencias.nivel_detalhe === nivel
-                          ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                          ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                           : 'var(--bg-elevated)',
                         border: preferencias.nivel_detalhe === nivel
                           ? `2px solid ${corPrimaria}`
@@ -247,7 +262,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                       className="p-3 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: preferencias.tom_conversa === tom
-                          ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                          ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                           : 'var(--bg-elevated)',
                         border: preferencias.tom_conversa === tom
                           ? `2px solid ${corPrimaria}`
@@ -257,7 +272,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                           : 'var(--text-secondary)',
                       }}
                     >
-                      {tom === 'formal' ? 'Formal' : tom === 'amigavel' ? 'Amigavel' : 'Descontraido'}
+                      {tom === 'formal' ? 'Formal' : tom === 'amigavel' ? 'Amigável' : 'Descontraído'}
                     </button>
                   ))}
                 </div>
@@ -266,7 +281,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
               {/* Velocidade */}
               <div className="space-y-2">
                 <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Ritmo das Explicacoes
+                  Ritmo das Explicações
                 </h4>
                 <div className="grid grid-cols-3 gap-2">
                   {['lento', 'normal', 'rapido'].map(vel => (
@@ -276,7 +291,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                       className="p-3 rounded-xl text-sm font-medium transition-all"
                       style={{
                         background: preferencias.velocidade === vel
-                          ? isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)'
+                          ? isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)'
                           : 'var(--bg-elevated)',
                         border: preferencias.velocidade === vel
                           ? `2px solid ${corPrimaria}`
@@ -286,7 +301,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
                           : 'var(--text-secondary)',
                       }}
                     >
-                      {vel === 'lento' ? 'Devagar' : vel === 'normal' ? 'Normal' : 'Rapido'}
+                      {vel === 'lento' ? 'Devagar' : vel === 'normal' ? 'Normal' : 'Rápido'}
                     </button>
                   ))}
                 </div>
@@ -294,7 +309,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
             </>
           ) : (
             <p className="text-center py-4" style={{ color: 'var(--text-muted)' }}>
-              Erro ao carregar preferencias
+              Erro ao carregar preferências
             </p>
           )}
         </div>
@@ -310,7 +325,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
             className="w-full py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
             style={{
               background: salvo ? 'var(--success)' : corPrimaria,
-              color: isFisica ? '#000' : '#fff',
+              color: isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)',
               opacity: (salvando || loading) ? 0.7 : 1,
             }}
           >
@@ -327,7 +342,7 @@ export default function TutorPreferencias({ componente, isOpen, onClose }: Tutor
             ) : (
               <>
                 <Save className="w-5 h-5" />
-                Salvar Preferencias
+                Salvar Preferências
               </>
             )}
           </button>

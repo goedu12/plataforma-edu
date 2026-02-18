@@ -18,17 +18,6 @@ const nextConfig = {
         hostname: 'qjrjkjknesacrurvcthu.supabase.co',
         pathname: '/storage/v1/object/**',
       },
-      // API ENEM - imagens das questões (domínio principal)
-      {
-        protocol: 'https',
-        hostname: 'api.enem.dev',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'enem.dev',
-        pathname: '/**',
-      },
       // CDN comum para imagens
       {
         protocol: 'https',
@@ -46,6 +35,33 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'i.imgur.com',
+      },
+      // Wikipedia/Wikimedia (imagens de questões)
+      {
+        protocol: 'https',
+        hostname: '*.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.wikipedia.org',
+      },
+      // INEP / MEC (provas oficiais)
+      {
+        protocol: 'https',
+        hostname: '*.inep.gov.br',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.mec.gov.br',
+      },
+      // Catch-all para imagens educacionais
+      {
+        protocol: 'https',
+        hostname: '*.wp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.staticflickr.com',
       },
     ],
     minimumCacheTTL: 60,

@@ -47,6 +47,7 @@ export interface AlunoAtivo {
   taxa_acerto: number
   nota_atual?: number
   posicao_ranking?: number
+  foto_url?: string | null
 }
 
 // NOVO: Aluno inativo (não participou no período)
@@ -56,6 +57,7 @@ export interface AlunoInativo {
   turma: string
   componentes: Componente[]
   ultimo_acesso: string | null
+  foto_url?: string | null
 }
 
 // Aluno com heartbeat mas sem atividade recente
@@ -66,6 +68,7 @@ export interface AlunoOcioso {
   componentes: Componente[]
   tempo_ocioso_segundos: number
   ultimo_acesso: string | null
+  foto_url?: string | null
 }
 
 export interface EstatisticasTempoReal {
@@ -208,7 +211,7 @@ export async function GET(request: NextRequest) {
           pontos_ganhos,
           criado_em,
           modo,
-          usuarios!fk_respostas_usuario (id, nome, turma, ativo, tipo),
+          usuarios!fk_respostas_usuario (id, nome, turma, ativo, tipo, foto_url),
           questoes!fk_respostas_questao (tema)
         `)
         .gte('criado_em', periodoAtras)
@@ -226,7 +229,7 @@ export async function GET(request: NextRequest) {
           questoes_total,
           status,
           criado_em,
-          usuarios (id, nome, turma, ativo, tipo)
+          usuarios (id, nome, turma, ativo, tipo, foto_url)
         `)
         .gte('criado_em', periodoAtras)
         .order('criado_em', { ascending: false }),
@@ -239,7 +242,7 @@ export async function GET(request: NextRequest) {
           usuario_id,
           componente,
           criado_em,
-          usuarios (id, nome, turma, ativo, tipo)
+          usuarios (id, nome, turma, ativo, tipo, foto_url)
         `)
         .gte('criado_em', periodoAtras)
         .eq('role', 'user')
@@ -253,7 +256,7 @@ export async function GET(request: NextRequest) {
       // Inclui pontos para calcular ranking e colegio para filtro
       supabase
         .from('usuarios')
-        .select('id, nome, turma, colegio, componentes, ultimo_acesso, fis_pontos, mat_pontos')
+        .select('id, nome, turma, colegio, componentes, ultimo_acesso, fis_pontos, mat_pontos, foto_url')
         .eq('tipo', 'estudante')
         .eq('ativo', true)
         .order('nome'),
@@ -266,7 +269,7 @@ export async function GET(request: NextRequest) {
           mapa_id,
           usuario_id,
           criado_em,
-          usuarios (id, nome, turma, ativo, tipo),
+          usuarios (id, nome, turma, ativo, tipo, foto_url),
           mapas_mentais (titulo, componente)
         `)
         .gte('criado_em', periodoAtras)
@@ -280,7 +283,7 @@ export async function GET(request: NextRequest) {
           mapa_id,
           usuario_id,
           criado_em,
-          usuarios (id, nome, turma, ativo, tipo),
+          usuarios (id, nome, turma, ativo, tipo, foto_url),
           mapas_mentais (titulo, componente)
         `)
         .gte('criado_em', periodoAtras)
@@ -353,7 +356,7 @@ export async function GET(request: NextRequest) {
       }, new Map<string, number>())
 
     // 5. Processar e normalizar dados do Supabase
-    interface UsuarioInfo { id: string; nome: string; turma: string; ativo: boolean; tipo: string }
+    interface UsuarioInfo { id: string; nome: string; turma: string; ativo: boolean; tipo: string; foto_url?: string | null }
     interface QuestaoInfo { tema: string }
     interface MapaInfo { titulo: string; componente: string }
 
@@ -586,6 +589,7 @@ export async function GET(request: NextRequest) {
           questoes_sessao: 1,
           acertos_sessao: resposta.correta ? 1 : 0,
           taxa_acerto: resposta.correta ? 100 : 0,
+          foto_url: resposta.usuarios.foto_url,
         })
       } else {
         existente.questoes_sessao++
@@ -620,6 +624,7 @@ export async function GET(request: NextRequest) {
           questoes_sessao: 0,
           acertos_sessao: 0,
           taxa_acerto: 0,
+          foto_url: desafio.usuarios.foto_url,
         })
       }
     }
@@ -644,6 +649,7 @@ export async function GET(request: NextRequest) {
           questoes_sessao: 0,
           acertos_sessao: 0,
           taxa_acerto: 0,
+          foto_url: chat.usuarios.foto_url,
         })
       }
     }
@@ -666,6 +672,7 @@ export async function GET(request: NextRequest) {
           questoes_sessao: 0,
           acertos_sessao: 0,
           taxa_acerto: 0,
+          foto_url: curtida.usuarios.foto_url,
         })
       }
     }
@@ -687,6 +694,7 @@ export async function GET(request: NextRequest) {
           questoes_sessao: 0,
           acertos_sessao: 0,
           taxa_acerto: 0,
+          foto_url: download.usuarios.foto_url,
         })
       }
     }
@@ -727,6 +735,7 @@ export async function GET(request: NextRequest) {
           componentes: (a.componentes || []) as Componente[],
           tempo_ocioso_segundos: hb.tempoOcioso,
           ultimo_acesso: a.ultimo_acesso,
+          foto_url: a.foto_url,
         })
       } else if (!hb) {
         // Sem heartbeat = offline/inativo
@@ -736,6 +745,7 @@ export async function GET(request: NextRequest) {
           turma: a.turma,
           componentes: (a.componentes || []) as Componente[],
           ultimo_acesso: a.ultimo_acesso,
+          foto_url: a.foto_url,
         })
       }
       // hb.status === 'ativo' sem atividades = navegando, não ocioso (ignorar)

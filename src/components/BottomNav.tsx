@@ -14,7 +14,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
 
   const isFisica = componente === 'fisica'
   const activeColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const activeBg = isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)'
+  const activeBg = isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)'
 
   const items = [
     { icon: Home, label: 'Início', href: `/${componente}/menu` },
@@ -33,7 +33,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
         borderTop: '1px solid var(--border-default)',
         paddingBottom: 'env(safe-area-inset-bottom, 0)',
         zIndex: 50,
-        boxShadow: '0 -4px 20px rgba(0, 0, 0, 0.1)',
+        boxShadow: 'var(--shadow-nav)',
       }}
     >
       {items.map((item) => {
@@ -45,13 +45,12 @@ export default function BottomNav({ componente }: BottomNavProps) {
             key={item.label}
             onClick={() => router.push(item.href)}
             aria-label={item.label}
-            className="flex flex-col items-center justify-center"
+            className="flex flex-col items-center justify-center rounded-xl"
             style={{
               gap: '2px',
               minWidth: '56px',
               minHeight: '48px',
               padding: '6px 8px',
-              borderRadius: '12px',
               background: isActive ? activeBg : 'transparent',
               color: isActive ? activeColor : 'var(--text-muted)',
               border: 'none',
@@ -60,7 +59,7 @@ export default function BottomNav({ componente }: BottomNavProps) {
             }}
           >
             <item.icon style={{ width: '20px', height: '20px' }} />
-            <span style={{ fontSize: '9px', fontWeight: 500 }}>{item.label}</span>
+            <span className="text-[10px] font-medium leading-tight">{item.label}</span>
           </button>
         )
       })}

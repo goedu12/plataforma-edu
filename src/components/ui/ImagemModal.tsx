@@ -167,13 +167,13 @@ export default function ImagemModal({ src, alt = 'Imagem ampliada', onClose }: I
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: 'rgba(0, 0, 0, 0.95)' }}
+      className="fixed inset-0 flex flex-col"
+      style={{ background: 'var(--overlay-image)', zIndex: 100 }}
     >
       {/* Header com controles */}
       <div
         className="flex items-center justify-between p-3 sm:p-4"
-        style={{ background: 'rgba(0, 0, 0, 0.5)' }}
+        style={{ background: 'var(--overlay-dropdown)' }}
       >
         {/* Controles de zoom */}
         <div className="flex items-center gap-1 sm:gap-2">
@@ -282,7 +282,7 @@ export default function ImagemModal({ src, alt = 'Imagem ampliada', onClose }: I
       {/* Dica de uso */}
       <div
         className="text-center py-2 sm:py-3 text-white/50 text-xs sm:text-sm"
-        style={{ background: 'rgba(0, 0, 0, 0.5)' }}
+        style={{ background: 'var(--overlay-dropdown)' }}
       >
         <span className="hidden sm:inline">
           Scroll para zoom • Arraste para mover • Duplo clique para zoom • ESC para fechar

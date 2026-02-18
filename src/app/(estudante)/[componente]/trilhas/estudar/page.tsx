@@ -17,8 +17,13 @@ import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { isValidImageUrl } from '@/components/ui/SafeImage'
+import ImagemModal, { ImagemQuestao } from '@/components/ui/ImagemModal'
+import ConteudoQuestao from '@/components/ConteudoQuestao'
 import type { Componente } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
+import 'katex/dist/katex.min.css'
 
 interface Alternativas {
   A: string
@@ -39,6 +44,8 @@ interface Questao {
   contexto: string
   tema: string
   subtema: string
+  imagens?: string[]
+  imagem_principal?: string
 }
 
 interface Progresso {
@@ -72,6 +79,7 @@ export default function TrilhasEstudarPage() {
   const [usouDica, setUsouDica] = useState(false)
   const [tempoInicio, setTempoInicio] = useState(Date.now())
   const [animandoProxima, setAnimandoProxima] = useState(false)
+  const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
 
   // Modal de conclusão
   const [mostrarConclusao, setMostrarConclusao] = useState(false)
@@ -283,8 +291,8 @@ export default function TrilhasEstudarPage() {
   }
 
   const isFisica = componente === 'fisica'
-  const accentColor = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
-  const textOnAccent = isFisica ? '#000' : '#fff'
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const textOnAccent = isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'
 
   // Tela de sem questões / gerando
   if (questoes.length === 0) {
@@ -297,11 +305,11 @@ export default function TrilhasEstudarPage() {
         <div className="text-center p-6 max-w-sm">
           <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
             {gerando ? (
-              <Loader2 className="w-10 h-10 animate-spin" style={{ color: accentColor }} />
+              <Loader2 className="w-10 h-10 animate-spin" style={{ color: corPrimaria }} />
             ) : completou ? (
-              <Trophy className="w-10 h-10" style={{ color: accentColor }} />
+              <Trophy className="w-10 h-10" style={{ color: corPrimaria }} />
             ) : (
-              <Zap className="w-10 h-10" style={{ color: accentColor }} />
+              <Zap className="w-10 h-10" style={{ color: corPrimaria }} />
             )}
           </div>
 
@@ -325,7 +333,7 @@ export default function TrilhasEstudarPage() {
                   <div
                     key={i}
                     className="w-2 h-2 rounded-full animate-bounce"
-                    style={{ background: accentColor, animationDelay: `${i * 0.15}s` }}
+                    style={{ background: corPrimaria, animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
               </div>
@@ -372,7 +380,7 @@ export default function TrilhasEstudarPage() {
             <BackButton href={`/${componente}/trilhas`} mobileOnly />
 
             <div className="flex items-center gap-1.5 flex-1 lg:flex-none">
-              <Target className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: accentColor }} />
+              <Target className="w-4 h-4 lg:w-3.5 lg:h-3.5" style={{ color: corPrimaria }} />
               <span className="font-semibold text-sm lg:text-xs" style={{ color: 'var(--text-primary)' }}>Trilha</span>
             </div>
 
@@ -384,7 +392,7 @@ export default function TrilhasEstudarPage() {
                     key={index}
                     className="w-1.5 h-3 rounded-sm"
                     style={{
-                      background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                      background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? corPrimaria : 'var(--bg-elevated)'
                     }}
                   />
                 ))}
@@ -408,7 +416,7 @@ export default function TrilhasEstudarPage() {
                   key={index}
                   className="flex-1 h-1 rounded-full"
                   style={{
-                    background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? accentColor : 'var(--bg-elevated)'
+                    background: index < questaoAtual + (mostrarResultado ? 1 : 0) ? corPrimaria : 'var(--bg-elevated)'
                   }}
                 />
               ))}
@@ -423,26 +431,99 @@ export default function TrilhasEstudarPage() {
           <div className="space-chromebook">
             {/* Tag tema - inline no mobile */}
             {questao.tema && (
-              <span className="badge-chromebook inline-block mb-1" style={{ background: `${accentColor}15`, color: accentColor }}>
+              <span className="badge-chromebook inline-block mb-1" style={{ background: `${corPrimaria}15`, color: corPrimaria }}>
                 {questao.tema}
               </span>
             )}
 
-            {/* Enunciado */}
-            <div className="card-chromebook">
-              <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-                {formatarFormula(questao.enunciado)}
-              </p>
-            </div>
+            {/* Enunciado - com suporte a título, LaTeX, imagens e fontes */}
+            {(() => {
+              const enunciadoProcessado = processarContexto(questao.enunciado)
+              const { textoSemSmall, fontes } = extrairFontesDoContexto(enunciadoProcessado)
+              const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+              const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.enunciado || '')
+
+              return (
+                <div className="card-chromebook">
+                  {/* Título em negrito */}
+                  {titulo && (
+                    <h3
+                      className="font-bold text-sm sm:text-base mb-2"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {titulo}
+                    </h3>
+                  )}
+
+                  {/* Texto do enunciado - justificado, ocupa todo o espaço */}
+                  {(titulo ? textoCorpo : textoSemSmall) && (
+                    temLatex ? (
+                      <ConteudoQuestao
+                        conteudo={titulo ? textoCorpo : textoSemSmall}
+                        tipo="contexto"
+                      />
+                    ) : (
+                      <div
+                        className="questao-texto"
+                        style={{ color: 'var(--text-primary)' }}
+                        dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
+                      />
+                    )
+                  )}
+
+                  {/* Imagens com zoom */}
+                  {questao.imagem_principal && isValidImageUrl(questao.imagem_principal) && (
+                    <div className="my-3">
+                      <ImagemQuestao
+                        src={questao.imagem_principal}
+                        alt="Imagem da questão"
+                        tipo="principal"
+                        onExpandir={setImagemExpandida}
+                      />
+                    </div>
+                  )}
+                  {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
+                    <div className="my-3 space-y-2">
+                      {questao.imagens.filter(isValidImageUrl).map((img, idx) => (
+                        <ImagemQuestao
+                          key={idx}
+                          src={img}
+                          alt={`Imagem ${idx + 1} da questão`}
+                          tipo="extra"
+                          onExpandir={setImagemExpandida}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Fontes/Referências - com linha em branco antes */}
+                  {fontes.length > 0 && (
+                    <div
+                      className="mt-4 pt-2"
+                      style={{ borderTop: '1px solid var(--border-default)' }}
+                    >
+                      {fontes.map((fonte, index) => (
+                        <p
+                          key={index}
+                          className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
+                          style={{ color: 'var(--text-secondary)' }}
+                          dangerouslySetInnerHTML={{ __html: fonte }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Dica */}
             {!mostrarResultado && questao.dica && (
               <div>
                 {mostrarDica ? (
-                  <div className="feedback-chromebook" style={{ background: isFisica ? 'rgba(34, 197, 94, 0.1)' : 'rgba(139, 92, 246, 0.1)', border: '1px dashed var(--border-default)' }}>
+                  <div className="feedback-chromebook" style={{ background: isFisica ? 'var(--color-fisica-bg-10)' : 'var(--color-matematica-bg-10)', border: '1px dashed var(--border-default)' }}>
                     <div className="flex items-center gap-1 mb-0.5">
-                      <Lightbulb className="icon-chromebook" style={{ color: accentColor }} />
-                      <span className="text-[10px] font-medium" style={{ color: accentColor }}>Dica</span>
+                      <Lightbulb className="icon-chromebook" style={{ color: corPrimaria }} />
+                      <span className="text-[10px] font-medium" style={{ color: corPrimaria }}>Dica</span>
                     </div>
                     <p style={{ color: 'var(--text-secondary)' }}>{formatarFormula(questao.dica)}</p>
                   </div>
@@ -473,16 +554,16 @@ export default function TrilhasEstudarPage() {
 
                   if (showResult) {
                     if (isCorrect) {
-                      style = { background: 'rgba(34, 197, 94, 0.2)', border: '2px solid var(--success)' }
+                      style = { background: 'var(--color-fisica-bg-20)', border: '2px solid var(--success)' }
                     } else if (isSubmitted) {
-                      style = { background: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--error)' }
+                      style = { background: 'var(--error-bg-20)', border: '2px solid var(--error)' }
                     } else {
                       style = { ...style, opacity: 0.5 }
                     }
                   } else if (isCurrentSelection) {
                     style = {
-                      background: isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)',
-                      border: `2px solid ${accentColor}`
+                      background: isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)',
+                      border: `2px solid ${corPrimaria}`
                     }
                   }
 
@@ -502,10 +583,10 @@ export default function TrilhasEstudarPage() {
                             : showResult && isSubmitted
                               ? 'var(--error)'
                               : isCurrentSelection
-                                ? accentColor
+                                ? corPrimaria
                                 : 'var(--bg-elevated)',
                           color: (showResult && (isCorrect || isSubmitted)) || isCurrentSelection
-                            ? isFisica ? '#000' : '#fff'
+                            ? isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)'
                             : 'var(--text-muted)',
                         }}
                       >
@@ -517,9 +598,42 @@ export default function TrilhasEstudarPage() {
                           letra
                         )}
                       </span>
-                      <span className="texto-alternativa-chromebook flex-1" style={{ color: 'var(--text-primary)' }}>
-                        {formatarFormula(texto as string)}
-                      </span>
+                      <div className="texto-alternativa-chromebook flex-1 min-w-0">
+                        {(() => {
+                          const textoStr = texto as string
+                          const { imagens: imgAlt, textoLimpo: textoAlt } = extrairImagensInline(textoStr)
+                          const textoExibir = imgAlt.length > 0 ? textoAlt : textoStr
+                          return (
+                            <>
+                              {imgAlt.length > 0 && (
+                                <div className="mb-1">
+                                  {imgAlt.map((img, idx) => (
+                                    <ImagemQuestao
+                                      key={idx}
+                                      src={img}
+                                      alt={`Alternativa ${letra}`}
+                                      tipo="alternativa"
+                                      onExpandir={setImagemExpandida}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              {textoExibir && (
+                                <span style={{ color: 'var(--text-primary)' }}>
+                                  {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(textoExibir) ? (
+                                    <ConteudoQuestao
+                                      conteudo={textoExibir}
+                                      tipo="alternativa"
+                                    />
+                                  ) : (
+                                    formatarFormula(textoExibir)
+                                  )}
+                                </span>
+                              )}
+                            </>
+                          )
+                        })()}
+                      </div>
                     </button>
                   )
                 })}
@@ -530,13 +644,13 @@ export default function TrilhasEstudarPage() {
               <div
                 className="feedback-chromebook flex items-center gap-2"
                 style={{
-                  background: acertou ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                  border: `1px solid ${acertou ? 'rgba(34, 197, 94, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`,
+                  background: acertou ? 'var(--success-bg-15)' : 'var(--error-bg-15)',
+                  border: `1px solid ${acertou ? 'var(--color-fisica-bg-40)' : 'var(--error-bg-40)'}`,
                 }}
               >
                 <div
                   className="w-5 h-5 lg:w-4 lg:h-4 rounded flex items-center justify-center flex-shrink-0"
-                  style={{ background: acertou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)' }}
+                  style={{ background: acertou ? 'var(--color-fisica-bg-20)' : 'var(--error-bg-20)' }}
                 >
                   {acertou ? <CheckCircle className="w-3 h-3" style={{ color: 'var(--success)' }} /> : <XCircle className="w-3 h-3" style={{ color: 'var(--error)' }} />}
                 </div>
@@ -587,13 +701,22 @@ export default function TrilhasEstudarPage() {
 
       <BottomNav componente={componente} />
 
+      {/* Modal de imagem expandida */}
+      {imagemExpandida && (
+        <ImagemModal
+          src={imagemExpandida}
+          alt="Imagem da questão ampliada"
+          onClose={() => setImagemExpandida(null)}
+        />
+      )}
+
       {/* Modal de Conclusão */}
       {mostrarConclusao && resultadoSemana && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'var(--overlay-60)' }}>
           <div className="w-full max-w-sm rounded-2xl p-6 text-center animate-in zoom-in-95 duration-200" style={{ background: 'var(--bg-surface)' }}>
             <div
               className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
-              style={{ background: resultadoSemana.avancou ? 'rgba(34, 197, 94, 0.2)' : 'rgba(245, 158, 11, 0.2)' }}
+              style={{ background: resultadoSemana.avancou ? 'var(--color-fisica-bg-20)' : 'var(--warning-bg-20)' }}
             >
               {resultadoSemana.avancou ? (
                 <Trophy className="w-8 h-8" style={{ color: 'var(--color-success)' }} />
@@ -611,7 +734,7 @@ export default function TrilhasEstudarPage() {
             </p>
 
             <div className="p-4 rounded-xl mb-4" style={{ background: 'var(--bg-elevated)' }}>
-              <p className="text-3xl font-bold" style={{ color: accentColor }}>{resultadoSemana.taxaAcerto}%</p>
+              <p className="text-3xl font-bold" style={{ color: corPrimaria }}>{resultadoSemana.taxaAcerto}%</p>
               <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Taxa de acerto</p>
             </div>
 

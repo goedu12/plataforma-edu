@@ -46,8 +46,8 @@ export default function TrilhaCuriosidadePage() {
   const [serie, setSerie] = useState<string>('1EM')
 
   const isFisica = componente === 'fisica'
-  const corPrimaria = '#00BCD4' // Cor da trilha curiosidade
-  const corAccent = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
+  const corTrilha = 'var(--color-curiosidade)' // Cor da trilha curiosidade
+  const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
   useEffect(() => {
     if (!['fisica', 'matematica'].includes(componente)) {
@@ -153,16 +153,16 @@ export default function TrilhaCuriosidadePage() {
         <div
           className="p-4 lg:p-3 rounded-xl mb-4 lg:mb-3"
           style={{
-            background: `linear-gradient(135deg, ${corPrimaria}20, ${corPrimaria}10)`,
-            border: `1px solid ${corPrimaria}40`,
+            background: `linear-gradient(135deg, ${corTrilha}20, ${corTrilha}10)`,
+            border: `1px solid ${corTrilha}40`,
           }}
         >
           <div className="flex items-center gap-3 mb-3">
             <div
               className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: `${corPrimaria}30` }}
+              style={{ background: `${corTrilha}30` }}
             >
-              <Sparkles className="w-5 h-5" style={{ color: corPrimaria }} />
+              <Sparkles className="w-5 h-5" style={{ color: corTrilha }} />
             </div>
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
@@ -176,7 +176,7 @@ export default function TrilhaCuriosidadePage() {
 
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center p-2 rounded-lg" style={{ background: 'var(--bg-surface)' }}>
-              <p className="text-lg font-bold" style={{ color: corPrimaria }}>
+              <p className="text-lg font-bold" style={{ color: corTrilha }}>
                 {estatisticas.totalTemas}
               </p>
               <p className="text-2xs" style={{ color: 'var(--text-muted)' }}>Temas</p>
@@ -222,7 +222,7 @@ export default function TrilhaCuriosidadePage() {
                   border: tema.concluido
                     ? '1px solid var(--success)'
                     : iniciado
-                    ? `1px solid ${corPrimaria}50`
+                    ? `1px solid ${corTrilha}50`
                     : '1px solid var(--border-default)',
                 }}
               >
@@ -232,7 +232,7 @@ export default function TrilhaCuriosidadePage() {
                     style={{
                       background: tema.concluido
                         ? 'var(--success)20'
-                        : `${corPrimaria}20`,
+                        : `${corTrilha}20`,
                     }}
                   >
                     {tema.concluido ? <Trophy className="w-6 h-6 text-green-500" /> : tema.icone}
@@ -254,7 +254,7 @@ export default function TrilhaCuriosidadePage() {
                       {iniciado && !tema.concluido && (
                         <span
                           className="badge-chromebook flex-shrink-0"
-                          style={{ background: `${corPrimaria}20`, color: corPrimaria }}
+                          style={{ background: `${corTrilha}20`, color: corTrilha }}
                         >
                           {tema.questoes_respondidas}/{tema.total_questoes}
                         </span>
@@ -275,7 +275,7 @@ export default function TrilhaCuriosidadePage() {
                             className="h-full rounded-full transition-all"
                             style={{
                               width: `${progresso}%`,
-                              background: tema.concluido ? 'var(--success)' : corPrimaria,
+                              background: tema.concluido ? 'var(--success)' : corTrilha,
                             }}
                           />
                         </div>
@@ -296,13 +296,13 @@ export default function TrilhaCuriosidadePage() {
                   </div>
 
                   {selecionandoEste ? (
-                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: corPrimaria }} />
+                    <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: corTrilha }} />
                   ) : tema.concluido ? (
                     <Star className="w-5 h-5 flex-shrink-0" style={{ color: 'var(--warning)', fill: 'var(--warning)' }} />
                   ) : iniciado ? (
-                    <Play className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
+                    <Play className="w-5 h-5 flex-shrink-0" style={{ color: corTrilha }} />
                   ) : (
-                    <ChevronRight className="w-5 h-5 flex-shrink-0" style={{ color: corAccent }} />
+                    <ChevronRight className="w-5 h-5 flex-shrink-0" style={{ color: corPrimaria }} />
                   )}
                 </div>
               </button>

@@ -125,7 +125,7 @@ export default function AlunosProfessorPage() {
 
   const handleResetSenha = async (usuarioId: string, nomeAluno: string) => {
     const confirmacao = window.confirm(
-      `Deseja gerar uma nova senha temporária para ${nomeAluno}?\n\nA senha atual será substituída.`
+      `Deseja resetar a senha de ${nomeAluno} para @estudante?\n\nA senha atual será substituída.`
     )
 
     if (!confirmacao) return
@@ -145,7 +145,7 @@ export default function AlunosProfessorPage() {
           nomeAluno,
           senha: data.nova_senha,
         })
-        showToast('Senha temporária gerada com sucesso!', 'success')
+        showToast('Senha resetada para @estudante!', 'success')
       } else {
         showToast(data.erro || 'Erro ao resetar senha', 'error')
       }
@@ -258,8 +258,8 @@ export default function AlunosProfessorPage() {
         {/* Filtros */}
         <Card className="mb-4 animate-slide-up">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5 text-slate-500" />
-            <span className="font-semibold text-slate-800">Filtros</span>
+            <Filter className="w-5 h-5" style={{ color: 'var(--text-tertiary)' }} />
+            <span className="font-semibold" style={{ color: 'var(--text-primary)' }}>Filtros</span>
           </div>
           <div className="flex flex-wrap gap-4">
             <div className="flex-1 min-w-[200px]">
@@ -273,7 +273,8 @@ export default function AlunosProfessorPage() {
             <select
               value={turmaFiltro}
               onChange={e => setTurmaFiltro(e.target.value)}
-              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-slate-800"
+              className="px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--border-default)' }}
             >
               <option value="">Todas as turmas</option>
               {turmas.map(t => (
@@ -285,7 +286,8 @@ export default function AlunosProfessorPage() {
             <select
               value={componenteFiltro}
               onChange={e => setComponenteFiltro(e.target.value)}
-              className="px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white text-slate-800"
+              className="px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)', borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--border-default)' }}
             >
               <option value="">Todos os componentes</option>
               <option value="fisica">Física</option>
@@ -308,8 +310,8 @@ export default function AlunosProfessorPage() {
                   className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0"
                   style={{
                     background: aluno.componentes.includes('fisica')
-                      ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                      : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                      ? 'linear-gradient(135deg, var(--color-fisica) 0%, var(--color-fisica-dark) 100%)'
+                      : 'linear-gradient(135deg, var(--color-matematica) 0%, var(--color-matematica-dark) 100%)',
                   }}
                 >
                   {aluno.nome.charAt(0).toUpperCase()}
@@ -318,12 +320,12 @@ export default function AlunosProfessorPage() {
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-800 truncate text-sm">{aluno.nome}</h3>
+                    <h3 className="font-semibold truncate text-sm" style={{ color: 'var(--text-primary)' }}>{aluno.nome}</h3>
                     <Badge variant="default" size="sm">
                       {aluno.turma}
                     </Badge>
                   </div>
-                  <p className="text-xs text-slate-500 truncate mb-2">{aluno.email}</p>
+                  <p className="text-xs truncate mb-2" style={{ color: 'var(--text-tertiary)' }}>{aluno.email}</p>
                   <div className="flex items-center gap-3">
                     {aluno.componentes.includes('fisica') && (
                       <div className="flex items-center gap-1 text-xs">
@@ -344,7 +346,8 @@ export default function AlunosProfessorPage() {
                 <button
                   onClick={() => handleResetSenha(aluno.id, aluno.nome)}
                   disabled={resetando === aluno.id}
-                  className="p-2 text-slate-400 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all disabled:opacity-50"
+                  className="p-2 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all disabled:opacity-50"
+                  style={{ color: 'var(--text-muted)' }}
                   title="Gerar nova senha"
                   aria-label={`Gerar nova senha para ${aluno.nome}`}
                 >
@@ -360,13 +363,13 @@ export default function AlunosProfessorPage() {
 
           {alunosFiltrados.length === 0 && (
             <Card className="text-center py-10 animate-slide-up col-span-full">
-              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center bg-slate-100">
-                <Users className="w-8 h-8 text-slate-500" />
+              <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ background: 'var(--bg-elevated)' }}>
+                <Users className="w-8 h-8" style={{ color: 'var(--text-tertiary)' }} />
               </div>
-              <h2 className="text-xl font-bold text-slate-800 mb-2">
+              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                 Nenhum aluno encontrado
               </h2>
-              <p className="text-slate-600 mb-4">
+              <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>
                 Ajuste os filtros ou adicione novos alunos.
               </p>
               <button
@@ -396,9 +399,10 @@ export default function AlunosProfessorPage() {
               </h2>
               <button
                 onClick={() => setNovoAlunoModal(prev => ({ ...prev, show: false }))}
-                className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'var(--text-tertiary)' }}
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -413,7 +417,8 @@ export default function AlunosProfessorPage() {
                   value={novoAlunoModal.nome}
                   onChange={e => setNovoAlunoModal(prev => ({ ...prev, nome: e.target.value }))}
                   placeholder="Ex: João Silva Santos"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
                 />
               </div>
 
@@ -427,7 +432,8 @@ export default function AlunosProfessorPage() {
                   value={novoAlunoModal.turma}
                   onChange={e => setNovoAlunoModal(prev => ({ ...prev, turma: e.target.value.toUpperCase() }))}
                   placeholder="Ex: 2A, 3B"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
                 />
               </div>
 
@@ -441,7 +447,8 @@ export default function AlunosProfessorPage() {
                   value={novoAlunoModal.colegio}
                   onChange={e => setNovoAlunoModal(prev => ({ ...prev, colegio: e.target.value }))}
                   placeholder="Nome do colégio"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--border-default)', background: 'var(--bg-surface)', color: 'var(--text-primary)' }}
                 />
               </div>
 
@@ -457,8 +464,9 @@ export default function AlunosProfessorPage() {
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                       novoAlunoModal.componentes.includes('fisica')
                         ? 'border-green-500 bg-green-50 text-green-700'
-                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                        : ''
                     }`}
+                    style={novoAlunoModal.componentes.includes('fisica') ? {} : { borderColor: 'var(--border-default)', color: 'var(--text-tertiary)' }}
                   >
                     <Atom className="w-5 h-5" />
                     Física
@@ -469,8 +477,9 @@ export default function AlunosProfessorPage() {
                     className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 transition-all ${
                       novoAlunoModal.componentes.includes('matematica')
                         ? 'border-purple-500 bg-purple-50 text-purple-700'
-                        : 'border-slate-200 text-slate-500 hover:border-slate-300'
+                        : ''
                     }`}
+                    style={novoAlunoModal.componentes.includes('matematica') ? {} : { borderColor: 'var(--border-default)', color: 'var(--text-tertiary)' }}
                   >
                     <Calculator className="w-5 h-5" />
                     Matemática
@@ -482,8 +491,8 @@ export default function AlunosProfessorPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setNovoAlunoModal(prev => ({ ...prev, show: false }))}
-                className="flex-1 py-3 px-4 rounded-xl font-semibold border border-slate-200 hover:bg-slate-50 transition-colors"
-                style={{ color: 'var(--text-secondary)' }}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold transition-colors"
+                style={{ borderWidth: '1px', borderStyle: 'solid', borderColor: 'var(--border-default)', color: 'var(--text-secondary)' }}
               >
                 Cancelar
               </button>
@@ -524,10 +533,10 @@ export default function AlunosProfessorPage() {
               className="text-lg font-bold mb-2"
               style={{ color: 'var(--text-primary)' }}
             >
-              Senha Gerada
+              Senha Padrão
             </h2>
             <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
-              Senha temporária para <strong>{novaSenhaModal.nomeAluno}</strong>:
+              Senha para <strong>{novaSenhaModal.nomeAluno}</strong>:
             </p>
 
             <div
@@ -554,7 +563,7 @@ export default function AlunosProfessorPage() {
             </div>
 
             <p className="text-xs mb-4 text-center" style={{ color: 'var(--text-muted)' }}>
-              O estudante deverá alterar esta senha no primeiro acesso.
+              Senha padrão para todos os estudantes.
             </p>
 
             <button

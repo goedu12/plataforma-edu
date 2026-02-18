@@ -100,9 +100,9 @@ export default function ImportarProfessorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-8">
+    <div className="min-h-screen pb-8" style={{ background: 'var(--bg-base)' }}>
       {/* Header */}
-      <header className="bg-white border-b border-border px-4 py-6">
+      <header className="border-b border-border px-4 py-6" style={{ background: 'var(--bg-surface)' }}>
         <div className="max-w-2xl mx-auto">
           <div className="mb-4">
             <BackButton href="/professor/dashboard" showLabel label="Voltar ao Dashboard" />
@@ -112,8 +112,8 @@ export default function ImportarProfessorPage() {
               <Upload className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-title text-slate-800">Importar Estudantes</h1>
-              <p className="text-caption text-slate-500">Adicione estudantes via planilha</p>
+              <h1 className="text-title" style={{ color: 'var(--text-primary)' }}>Importar Estudantes</h1>
+              <p className="text-caption" style={{ color: 'var(--text-tertiary)' }}>Adicione estudantes via planilha</p>
             </div>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function ImportarProfessorPage() {
         <Card className="mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Upload className="w-5 h-5 text-primary-500" />
-            <h3 className="text-heading text-slate-800">Enviar Arquivo</h3>
+            <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Enviar Arquivo</h3>
           </div>
           <div
             onDrop={handleDrop}
@@ -174,21 +174,21 @@ export default function ImportarProfessorPage() {
             {arquivo ? (
               <>
                 <FileSpreadsheet className="w-12 h-12 text-primary-500 mx-auto mb-3" />
-                <p className="font-medium text-slate-800">{arquivo.name}</p>
-                <p className="text-caption text-slate-500 mt-1">
+                <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{arquivo.name}</p>
+                <p className="text-caption mt-1" style={{ color: 'var(--text-tertiary)' }}>
                   Clique para trocar o arquivo
                 </p>
               </>
             ) : (
               <>
-                <Upload className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-                <p className="font-medium text-slate-600">
+                <Upload className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-tertiary)' }} />
+                <p className="font-medium" style={{ color: 'var(--text-secondary)' }}>
                   Arraste o arquivo aqui
                 </p>
-                <p className="text-caption text-slate-500 mt-1">
+                <p className="text-caption mt-1" style={{ color: 'var(--text-tertiary)' }}>
                   ou clique para selecionar
                 </p>
-                <p className="text-caption text-slate-500 mt-2">
+                <p className="text-caption mt-2" style={{ color: 'var(--text-tertiary)' }}>
                   Formatos: .xlsx, .csv
                 </p>
               </>
@@ -213,12 +213,12 @@ export default function ImportarProfessorPage() {
               {resultado.sucesso ? (
                 <>
                   <CheckCircle2 className="w-5 h-5 text-success" />
-                  <h3 className="text-heading text-slate-800">Importação Concluída</h3>
+                  <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Importação Concluída</h3>
                 </>
               ) : (
                 <>
                   <AlertCircle className="w-5 h-5 text-warning" />
-                  <h3 className="text-heading text-slate-800">Importação com Alertas</h3>
+                  <h3 className="text-heading" style={{ color: 'var(--text-primary)' }}>Importação com Alertas</h3>
                 </>
               )}
             </div>
@@ -260,7 +260,7 @@ export default function ImportarProfessorPage() {
                         }`}
                       />
                     )}
-                    <span className="flex-1 truncate text-slate-800">{item.nome}</span>
+                    <span className="flex-1 truncate" style={{ color: 'var(--text-primary)' }}>{item.nome}</span>
                     <Badge variant="default" size="sm">
                       {item.turma}
                     </Badge>

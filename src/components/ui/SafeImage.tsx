@@ -26,6 +26,11 @@ const PADROES_INVALIDOS = [
   /^file:\/\//i,
   /^\[object/i,
   /^<(img|div|span)/i,
+  /broken-image/i,
+  /placeholder/i,
+  /no-image/i,
+  /image-not-found/i,
+  /not-available/i,
 ]
 
 // Verificar se a URL é válida

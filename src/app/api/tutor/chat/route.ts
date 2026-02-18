@@ -145,7 +145,7 @@ async function buscarContextoEstudante(
       .select('correta, tema')
       .eq('usuario_id', usuarioId)
       .eq('componente', componente)
-      .order('created_at', { ascending: false })
+      .order('criado_em', { ascending: false })
       .limit(50)
 
     if (respostas && respostas.length > 0) {
@@ -351,6 +351,7 @@ export async function POST(request: NextRequest) {
         preferePasso: preferencias.prefere_passo_a_passo,
         nivelDetalhe: preferencias.nivel_detalhe,
         tomConversa: preferencias.tom_conversa,
+        velocidade: preferencias.velocidade,
       }
     }
 
@@ -453,7 +454,7 @@ export async function POST(request: NextRequest) {
           content: respostaFinal,
           modo: resultado.modo || null,
           topico: resultado.topico || null,
-          modelo_usado: 'gemini-2.0-flash-lite',
+          modelo_usado: resultado.modelo_usado || 'gemini-2.5-flash',
         })
 
         // Atualizar sessão com modo/tópico predominante

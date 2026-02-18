@@ -71,7 +71,7 @@ export default function ThemeToggle({ componente = 'fisica' }: ThemeToggleProps)
             style={{
               background: isActive ? accentColor : 'transparent',
               color: isActive
-                ? (isFisica ? '#000' : '#fff')
+                ? (isFisica ? 'var(--text-on-fisica)' : 'var(--text-on-matematica)')
                 : 'var(--text-secondary)',
             }}
           >

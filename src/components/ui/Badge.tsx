@@ -24,38 +24,38 @@ export default function Badge({
     switch (variant) {
       case 'fisica':
         return {
-          background: 'rgba(34, 197, 94, 0.15)',
+          background: 'var(--color-fisica-bg-15)',
           color: 'var(--color-fisica)',
         }
       case 'matematica':
         return {
-          background: 'rgba(139, 92, 246, 0.15)',
+          background: 'var(--color-matematica-bg-15)',
           color: 'var(--color-matematica)',
         }
       case 'streak':
         return {
-          background: 'rgba(249, 115, 22, 0.15)',
+          background: 'var(--orange-bg-15)',
           color: 'var(--color-streak)',
         }
       case 'success':
         return {
-          background: 'rgba(16, 185, 129, 0.15)',
+          background: 'var(--success-bg-15)',
           color: 'var(--success)',
         }
       case 'warning':
         return {
-          background: 'rgba(245, 158, 11, 0.15)',
+          background: 'var(--warning-bg-15)',
           color: 'var(--warning)',
         }
       case 'error':
         return {
-          background: 'rgba(239, 68, 68, 0.15)',
+          background: 'var(--error-bg-15)',
           color: 'var(--error)',
         }
       case 'info':
         return {
-          background: 'rgba(59, 130, 246, 0.15)',
-          color: '#3b82f6',
+          background: 'var(--info-bg-15)',
+          color: 'var(--info)',
         }
       case 'secondary':
         return {

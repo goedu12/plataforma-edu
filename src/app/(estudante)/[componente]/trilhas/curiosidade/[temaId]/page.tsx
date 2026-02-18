@@ -18,7 +18,13 @@ import Loading from '@/components/ui/Loading'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import { isValidImageUrl } from '@/components/ui/SafeImage'
+import ImagemModal, { ImagemQuestao } from '@/components/ui/ImagemModal'
+import ConteudoQuestao from '@/components/ConteudoQuestao'
+import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
 import type { Componente } from '@/types'
+import 'katex/dist/katex.min.css'
 
 interface Questao {
   id: number
@@ -30,6 +36,8 @@ interface Questao {
   dificuldade: string
   tipo: string
   contexto: string
+  imagens?: string[]
+  imagem_principal?: string
 }
 
 interface Tema {
@@ -74,9 +82,10 @@ export default function EstudarCuriosidadePage() {
   const [serie, setSerie] = useState('1EM')
 
   const [temaConcluido, setTemaConcluido] = useState(false)
+  const [imagemExpandida, setImagemExpandida] = useState<string | null>(null)
 
   const isFisica = componente === 'fisica'
-  const corPrimaria = '#00BCD4' // Cor da trilha curiosidade
+  const corPrimaria = 'var(--color-curiosidade)' // Cor da trilha curiosidade
 
   const carregarQuestao = useCallback(async () => {
     setLoading(true)
@@ -226,7 +235,7 @@ export default function EstudarCuriosidadePage() {
             <button
               onClick={() => router.push(`/${componente}/trilhas/curiosidade`)}
               className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-              style={{ background: corPrimaria, color: '#fff' }}
+              style={{ background: corPrimaria, color: 'var(--text-primary)' }}
             >
               <Sparkles className="w-5 h-5" />
               Explorar Outros Temas
@@ -310,15 +319,88 @@ export default function EstudarCuriosidadePage() {
               )}
             </div>
 
-            {/* Enunciado */}
-            <div
-              className="p-4 rounded-xl"
-              style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
-            >
-              <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'var(--text-primary)' }}>
-                {questao.enunciado}
-              </p>
-            </div>
+            {/* Enunciado - com suporte a título, LaTeX, imagens e fontes */}
+            {(() => {
+              const enunciadoProcessado = processarContexto(questao.enunciado)
+              const { textoSemSmall, fontes } = extrairFontesDoContexto(enunciadoProcessado)
+              const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
+              const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.enunciado || '')
+
+              return (
+                <div
+                  className="p-4 rounded-xl"
+                  style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-default)' }}
+                >
+                  {/* Título em negrito */}
+                  {titulo && (
+                    <h3
+                      className="font-bold text-sm sm:text-base mb-3"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {titulo}
+                    </h3>
+                  )}
+
+                  {/* Texto do enunciado - justificado, ocupa todo o espaço */}
+                  {(titulo ? textoCorpo : textoSemSmall) && (
+                    temLatex ? (
+                      <ConteudoQuestao
+                        conteudo={titulo ? textoCorpo : textoSemSmall}
+                        tipo="contexto"
+                      />
+                    ) : (
+                      <div
+                        className="questao-texto"
+                        style={{ color: 'var(--text-primary)' }}
+                        dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
+                      />
+                    )
+                  )}
+
+                  {/* Imagens com zoom */}
+                  {questao.imagem_principal && isValidImageUrl(questao.imagem_principal) && (
+                    <div className="my-3">
+                      <ImagemQuestao
+                        src={questao.imagem_principal}
+                        alt="Imagem da questão"
+                        tipo="principal"
+                        onExpandir={setImagemExpandida}
+                      />
+                    </div>
+                  )}
+                  {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
+                    <div className="my-3 space-y-2">
+                      {questao.imagens.filter(isValidImageUrl).map((img, idx) => (
+                        <ImagemQuestao
+                          key={idx}
+                          src={img}
+                          alt={`Imagem ${idx + 1}`}
+                          tipo="extra"
+                          onExpandir={setImagemExpandida}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Fontes/Referências - com linha em branco antes */}
+                  {fontes.length > 0 && (
+                    <div
+                      className="mt-4 pt-2"
+                      style={{ borderTop: '1px solid var(--border-default)' }}
+                    >
+                      {fontes.map((fonte, index) => (
+                        <p
+                          key={index}
+                          className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
+                          style={{ color: 'var(--text-secondary)' }}
+                          dangerouslySetInnerHTML={{ __html: fonte }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
 
             {/* Alternativas */}
             <div className="space-y-2">
@@ -348,14 +430,14 @@ export default function EstudarCuriosidadePage() {
                     key={letra}
                     onClick={() => !mostrarResultado && setRespostaSelecionada(letra)}
                     disabled={mostrarResultado}
-                    className="w-full p-3 rounded-lg text-left transition-all flex items-start gap-3"
+                    className="w-full p-3 sm:p-4 rounded-xl text-left transition-all flex items-start gap-3 active:scale-[0.98]"
                     style={{
                       background: bgColor,
                       border: `1.5px solid ${borderColor}`,
                     }}
                   >
                     <span
-                      className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-sm"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm"
                       style={{
                         background: mostrarResultado
                           ? eCorreta
@@ -367,7 +449,7 @@ export default function EstudarCuriosidadePage() {
                           ? corPrimaria
                           : 'var(--bg-elevated)',
                         color: (mostrarResultado && (eCorreta || eErrada)) || selecionada
-                          ? '#fff'
+                          ? 'var(--text-primary)'
                           : 'var(--text-secondary)',
                       }}
                     >
@@ -379,9 +461,41 @@ export default function EstudarCuriosidadePage() {
                         letra
                       )}
                     </span>
-                    <span className="text-sm flex-1" style={{ color: 'var(--text-primary)' }}>
-                      {texto}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      {(() => {
+                        const { imagens: imgAlt, textoLimpo: textoAlt } = extrairImagensInline(texto)
+                        const textoExibir = imgAlt.length > 0 ? textoAlt : texto
+                        return (
+                          <>
+                            {imgAlt.length > 0 && (
+                              <div className="mb-1.5">
+                                {imgAlt.map((img, idx) => (
+                                  <ImagemQuestao
+                                    key={idx}
+                                    src={img}
+                                    alt={`Alternativa ${letra}`}
+                                    tipo="alternativa"
+                                    onExpandir={setImagemExpandida}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            {textoExibir && (
+                              <span className="text-sm" style={{ color: 'var(--text-primary)' }}>
+                                {/\$[^$]+\$|\\frac|\\sqrt|\\times/.test(textoExibir) ? (
+                                  <ConteudoQuestao
+                                    conteudo={textoExibir}
+                                    tipo="alternativa"
+                                  />
+                                ) : (
+                                  formatarFormula(textoExibir)
+                                )}
+                              </span>
+                            )}
+                          </>
+                        )
+                      })()}
+                    </div>
                   </button>
                 )
               })}
@@ -474,7 +588,7 @@ export default function EstudarCuriosidadePage() {
                   className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
                   style={{
                     background: respostaSelecionada ? corPrimaria : 'var(--bg-elevated)',
-                    color: respostaSelecionada ? '#fff' : 'var(--text-muted)',
+                    color: respostaSelecionada ? 'var(--text-primary)' : 'var(--text-muted)',
                   }}
                 >
                   {respondendo ? (
@@ -493,7 +607,7 @@ export default function EstudarCuriosidadePage() {
                 <button
                   onClick={proximaQuestao}
                   className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
-                  style={{ background: corPrimaria, color: '#fff' }}
+                  style={{ background: corPrimaria, color: 'var(--text-primary)' }}
                 >
                   Proxima Questao
                   <ArrowRight className="w-5 h-5" />
@@ -509,6 +623,15 @@ export default function EstudarCuriosidadePage() {
       </main>
 
       <BottomNav componente={componente} />
+
+      {/* Modal de imagem expandida */}
+      {imagemExpandida && (
+        <ImagemModal
+          src={imagemExpandida}
+          alt="Imagem da questão ampliada"
+          onClose={() => setImagemExpandida(null)}
+        />
+      )}
     </div>
   )
 }

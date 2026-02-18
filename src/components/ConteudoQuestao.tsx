@@ -4,7 +4,6 @@ import React, { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import rehypeRaw from 'rehype-raw'
 import 'katex/dist/katex.min.css'
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -41,23 +40,18 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '^{$1}') // Converter para LaTeX superscript
   texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '_{$1}') // Converter para LaTeX subscript
 
-  // Converter <small> para span preservado — fonte/referência alinhada à direita
-  texto = texto.replace(/<small[^>]*>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
+  // Converter <small> para classe especial - fonte alinhada à direita
+  texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
-  // Remover tags não suportadas mantendo conteúdo (preservar span.questao-fonte)
+  // Preservar spans com classes importantes (fontes, referências)
+  texto = texto.replace(/<span\s+class="questao-fonte">([\s\S]*?)<\/span>/gi, '\n\n*$1*')
+  texto = texto.replace(/<span\s+class="ref-figura">([\s\S]*?)<\/span>/gi, '$1')
+  texto = texto.replace(/<span\s+class="ref-tabela">([\s\S]*?)<\/span>/gi, '**$1**')
+
+  // Remover tags não suportadas mantendo conteúdo
   texto = texto.replace(/<\/?p>/gi, '\n')
-  texto = texto.replace(/<\/?div[^>]*>/gi, '\n')
-  // Remover apenas spans SEM classe especial (preservar questao-fonte)
-  texto = texto.replace(/<span(?!\s+class="questao-fonte")[^>]*>/gi, '')
-  texto = texto.replace(/<\/span>/gi, (_, offset, str) => {
-    // Verificar se é fechamento de span.questao-fonte — manter
-    const antes = str.substring(0, offset)
-    const ultimoSpan = antes.lastIndexOf('<span')
-    if (ultimoSpan !== -1 && str.substring(ultimoSpan, ultimoSpan + 30).includes('questao-fonte')) {
-      return '</span>'
-    }
-    return ''
-  })
+  texto = texto.replace(/<\/?div>/gi, '\n')
+  texto = texto.replace(/<\/?span[^>]*>/gi, '')
 
   // Limpar múltiplas quebras de linha
   texto = texto.replace(/\n{3,}/g, '\n\n')
@@ -66,9 +60,8 @@ function htmlParaMarkdown(html: string): string {
   return texto
 }
 
-// Detecta se o texto contém fórmulas LaTeX
+// Detecta se o texto contém fórmulas LaTeX ou notação científica
 function contemLatex(texto: string): boolean {
-  // Padrões comuns de LaTeX
   const padroes = [
     /\$[^$]+\$/,           // $inline$
     /\$\$[^$]+\$\$/,       // $$block$$
@@ -81,6 +74,12 @@ function contemLatex(texto: string): boolean {
     /\^{[^}]+}/,           // ^{expoente}
     /_{[^}]+}/,            // _{subscrito}
     /\\[a-zA-Z]+\{/,       // qualquer comando LaTeX
+    /\\times/,             // multiplicação LaTeX
+    /\\div/,               // divisão LaTeX
+    /\\pm/,                // mais ou menos LaTeX
+    /\\vec\{/,             // vetor LaTeX
+    /\\overline\{/,        // barra sobre
+    /\\Delta/,             // delta LaTeX
   ]
 
   return padroes.some(p => p.test(texto))
@@ -100,19 +99,100 @@ function formatarSimbolos(texto: string): string {
     [/(\d+)\s*m³/g, '$1 m³'],
     [/(\d+)\s*cm²/g, '$1 cm²'],
     [/(\d+)\s*cm³/g, '$1 cm³'],
+    [/(\d+)\s*J\/mol/g, '$1 J/mol'],
+    [/(\d+)\s*kJ\/mol/g, '$1 kJ/mol'],
+    [/(\d+)\s*g\/mol/g, '$1 g/mol'],
+    [/(\d+)\s*mol\/L/g, '$1 mol/L'],
+    [/(\d+)\s*atm/g, '$1 atm'],
+    [/(\d+)\s*kPa/g, '$1 kPa'],
 
     // Notação científica (converte para LaTeX)
     [/(\d+)\s*[xX×]\s*10\^(\d+)/g, '$1 \\times 10^{$2}'],
     [/(\d+)\s*[xX×]\s*10\^(-?\d+)/g, '$1 \\times 10^{$2}'],
 
-    // Símbolos químicos com índices
-    [/CO2/g, 'CO₂'],
-    [/H2O/g, 'H₂O'],
-    [/O2/g, 'O₂'],
-    [/N2/g, 'N₂'],
-    [/CO₂/g, 'CO₂'], // Já formatado
+    // Fórmulas químicas comuns - Ácidos
+    [/\bH2SO4\b/g, 'H₂SO₄'],
+    [/\bH3PO4\b/g, 'H₃PO₄'],
+    [/\bHNO3\b/g, 'HNO₃'],
+    [/\bHCl\b/g, 'HCl'],
+    [/\bH2CO3\b/g, 'H₂CO₃'],
+    [/\bH2S\b/g, 'H₂S'],
+    [/\bH2O2\b/g, 'H₂O₂'],
+    // Bases
+    [/\bCa\(OH\)2\b/g, 'Ca(OH)₂'],
+    [/\bMg\(OH\)2\b/g, 'Mg(OH)₂'],
+    [/\bAl\(OH\)3\b/g, 'Al(OH)₃'],
+    [/\bFe\(OH\)2\b/g, 'Fe(OH)₂'],
+    [/\bFe\(OH\)3\b/g, 'Fe(OH)₃'],
+    [/\bNH4OH\b/g, 'NH₄OH'],
+    // Sais
+    [/\bCaCO3\b/g, 'CaCO₃'],
+    [/\bNa2CO3\b/g, 'Na₂CO₃'],
+    [/\bNaHCO3\b/g, 'NaHCO₃'],
+    [/\bCaSO4\b/g, 'CaSO₄'],
+    [/\bBaSO4\b/g, 'BaSO₄'],
+    [/\bAgNO3\b/g, 'AgNO₃'],
+    [/\bFeCl3\b/g, 'FeCl₃'],
+    [/\bFeCl2\b/g, 'FeCl₂'],
+    [/\bKMnO4\b/g, 'KMnO₄'],
+    [/\bK2Cr2O7\b/g, 'K₂Cr₂O₇'],
+    [/\bNa2SO4\b/g, 'Na₂SO₄'],
+    // Óxidos
+    [/\bCO2\b/g, 'CO₂'],
+    [/\bH2O\b/g, 'H₂O'],
+    [/\bSO2\b/g, 'SO₂'],
+    [/\bSO3\b/g, 'SO₃'],
+    [/\bNO2\b/g, 'NO₂'],
+    [/\bN2O\b/g, 'N₂O'],
+    [/\bN2O4\b/g, 'N₂O₄'],
+    [/\bN2O5\b/g, 'N₂O₅'],
+    [/\bFe2O3\b/g, 'Fe₂O₃'],
+    [/\bFe3O4\b/g, 'Fe₃O₄'],
+    [/\bAl2O3\b/g, 'Al₂O₃'],
+    [/\bSiO2\b/g, 'SiO₂'],
+    [/\bP2O5\b/g, 'P₂O₅'],
+    // Gases
+    [/\bO2\b/g, 'O₂'],
+    [/\bO3\b/g, 'O₃'],
+    [/\bN2\b/g, 'N₂'],
+    [/\bH2\b/g, 'H₂'],
+    [/\bCl2\b/g, 'Cl₂'],
+    [/\bF2\b/g, 'F₂'],
+    [/\bNH3\b/g, 'NH₃'],
+    // Compostos orgânicos
+    [/\bCH4\b/g, 'CH₄'],
+    [/\bC2H6\b/g, 'C₂H₆'],
+    [/\bC2H4\b/g, 'C₂H₄'],
+    [/\bC2H2\b/g, 'C₂H₂'],
+    [/\bC3H8\b/g, 'C₃H₈'],
+    [/\bC6H12O6\b/g, 'C₆H₁₂O₆'],
+    [/\bC2H5OH\b/g, 'C₂H₅OH'],
+    [/\bCH3OH\b/g, 'CH₃OH'],
+    [/\bCH3COOH\b/g, 'CH₃COOH'],
+    [/\bC6H6\b/g, 'C₆H₆'],
+    // Íons comuns
+    [/\bNH4\+/g, 'NH₄⁺'],
+    [/\bSO4\^?2-/g, 'SO₄²⁻'],
+    [/\bNO3-/g, 'NO₃⁻'],
+    [/\bCO3\^?2-/g, 'CO₃²⁻'],
+    [/\bHCO3-/g, 'HCO₃⁻'],
+    [/\bPO4\^?3-/g, 'PO₄³⁻'],
+    [/\bOH-/g, 'OH⁻'],
+    [/\bMnO4-/g, 'MnO₄⁻'],
+    [/\bFe\^?2\+/g, 'Fe²⁺'],
+    [/\bFe\^?3\+/g, 'Fe³⁺'],
+    [/\bCu\^?2\+/g, 'Cu²⁺'],
+    [/\bZn\^?2\+/g, 'Zn²⁺'],
+    [/\bAl\^?3\+/g, 'Al³⁺'],
+    [/\bCa\^?2\+/g, 'Ca²⁺'],
+    [/\bMg\^?2\+/g, 'Mg²⁺'],
+    [/\bNa\+/g, 'Na⁺'],
+    [/\bK\+/g, 'K⁺'],
+    [/\bH\+/g, 'H⁺'],
+    [/\bCl-/g, 'Cl⁻'],
 
-    // Setas
+    // Setas de reação
+    [/<=>/g, '⇌'],
     [/->/g, '→'],
     [/<->/g, '↔'],
     [/=>/g, '⇒'],
@@ -124,6 +204,9 @@ function formatarSimbolos(texto: string): string {
     [/<=/g, '≤'],
     [/!=/g, '≠'],
     [/~=/g, '≈'],
+
+    // Letras gregas comuns em contexto científico
+    [/\bdelta\b/gi, 'Δ'],
   ]
 
   let resultado = texto
@@ -164,9 +247,9 @@ export default function ConteudoQuestao({
 
   // Estilos baseados no tipo de conteúdo
   const estilosBase = {
-    contexto: 'text-sm sm:text-base leading-relaxed',
+    contexto: 'text-sm sm:text-base leading-relaxed questao-texto',
     comando: 'text-sm sm:text-base font-medium leading-relaxed',
-    alternativa: 'text-sm leading-relaxed',
+    alternativa: 'text-sm leading-snug',
     fonte: 'text-xs leading-relaxed opacity-70',
   }
 
@@ -191,7 +274,7 @@ export default function ConteudoQuestao({
     >
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeRaw, rehypeKatex]}
+        rehypePlugins={[rehypeKatex]}
         components={{
           // Parágrafos
           p: ({ children }) => (
@@ -218,31 +301,6 @@ export default function ConteudoQuestao({
           ),
           li: ({ children }) => (
             <li className="text-sm">{children}</li>
-          ),
-          // Span — preservar questao-fonte e outras classes especiais
-          span: ({ children, className: spanClass, ...props }) => {
-            if (spanClass === 'questao-fonte') {
-              return (
-                <span
-                  className="questao-fonte"
-                  style={{ color: 'var(--text-muted)' }}
-                >
-                  {children}
-                </span>
-              )
-            }
-            return <span className={spanClass} {...props}>{children}</span>
-          },
-          // Títulos de texto/obra
-          h3: ({ children }) => (
-            <h3 className="questao-titulo-obra font-bold text-base sm:text-lg mb-2 mt-1" style={{ color: 'var(--text-primary)' }}>
-              {children}
-            </h3>
-          ),
-          h4: ({ children }) => (
-            <h4 className="questao-titulo-obra font-semibold text-sm sm:text-base mb-1" style={{ color: 'var(--text-primary)' }}>
-              {children}
-            </h4>
           ),
           // Código (para fórmulas que não são LaTeX)
           code: ({ children, className: codeClass }) => {

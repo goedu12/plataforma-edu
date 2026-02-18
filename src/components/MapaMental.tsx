@@ -8,7 +8,7 @@ interface MapaMentalProps {
   corPrimaria?: string
 }
 
-export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMentalProps) {
+export default function MapaMental({ codigo, corPrimaria = 'var(--color-fisica)' }: MapaMentalProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [svg, setSvg] = useState<string>('')
   const [zoom, setZoom] = useState(1)
@@ -28,11 +28,11 @@ export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMent
           theme: 'base',
           themeVariables: {
             primaryColor: corPrimaria,
-            primaryTextColor: '#ffffff',
+            primaryTextColor: 'var(--text-primary)',
             primaryBorderColor: corPrimaria,
             lineColor: corPrimaria,
-            secondaryColor: '#f0f0f0',
-            tertiaryColor: '#ffffff',
+            secondaryColor: 'var(--bg-surface-hover)',
+            tertiaryColor: 'var(--text-primary)',
             background: 'transparent',
           },
           mindmap: {
@@ -80,7 +80,7 @@ export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMent
       <div
         className="p-4 rounded-xl text-sm"
         style={{
-          background: 'rgba(239, 68, 68, 0.1)',
+          background: 'var(--error-bg-10)',
           color: 'var(--error)'
         }}
       >
@@ -104,8 +104,9 @@ export default function MapaMental({ codigo, corPrimaria = '#22c55e' }: MapaMent
 
   return (
     <div
-      className={`relative rounded-xl overflow-hidden ${fullscreen ? 'fixed inset-4 z-50' : ''}`}
+      className={`relative rounded-xl overflow-hidden ${fullscreen ? 'fixed inset-4' : ''}`}
       style={{
+        ...(fullscreen ? { zIndex: 100 } : {}),
         background: 'var(--bg-elevated)',
         border: '1px solid var(--border-default)'
       }}

@@ -22,9 +22,9 @@ export default function RankingTable({
 
   const getPodiumColor = (posicao: number) => {
     switch (posicao) {
-      case 1: return '#FFD700'
-      case 2: return '#C0C0C0'
-      case 3: return '#CD7F32'
+      case 1: return 'var(--medal-gold)'
+      case 2: return 'var(--medal-silver)'
+      case 3: return 'var(--medal-bronze)'
       default: return 'var(--text-muted)'
     }
   }
@@ -66,7 +66,7 @@ export default function RankingTable({
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: getPodiumColor(2), color: '#000' }}
+                  style={{ background: getPodiumColor(2), color: 'var(--text-on-fisica)' }}
                 >
                   2
                 </div>
@@ -105,7 +105,7 @@ export default function RankingTable({
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full flex items-center justify-center"
                   style={{ background: getPodiumColor(1) }}
                 >
-                  <Trophy className="w-4 h-4" style={{ color: '#000' }} />
+                  <Trophy className="w-4 h-4" style={{ color: 'var(--text-on-fisica)' }} />
                 </div>
               </div>
               <p className="text-base font-bold text-center truncate max-w-full" style={{ color: 'var(--text-primary)' }}>
@@ -137,7 +137,7 @@ export default function RankingTable({
                 </div>
                 <div
                   className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: getPodiumColor(3), color: '#fff' }}
+                  style={{ background: getPodiumColor(3), color: 'var(--text-primary)' }}
                 >
                   3
                 </div>
@@ -179,7 +179,7 @@ export default function RankingTable({
                     className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
                     style={{
                       background: item.posicao <= 10
-                        ? (isFisica ? 'rgba(34, 197, 94, 0.15)' : 'rgba(139, 92, 246, 0.15)')
+                        ? (isFisica ? 'var(--color-fisica-bg-15)' : 'var(--color-matematica-bg-15)')
                         : 'var(--bg-elevated)',
                       color: item.posicao <= 10 ? corPrimaria : 'var(--text-muted)',
                     }}

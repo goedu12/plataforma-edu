@@ -304,11 +304,11 @@ INSERT INTO questoes (
 
 (
     'matematica', 2, 1, 'Trigonometria', 'Identidades', 'dificil',
-    'Simplifique: sen²x + cos²x + tg²x × cos²x',
-    '1', '2', 'sen²x + 1', 'tg²x + 1', NULL,
+    'Sabendo que sec²x = 1 + tg²x, simplifique: sec²x - tg²x',
+    '0', '1', 'sen²x', 'cos²x', NULL,
     'B',
-    'sen²x + cos²x = 1. tg²x × cos²x = (sen²x/cos²x) × cos²x = sen²x. Total: 1 + sen²x... Usando tg²x×cos²x = sen²x: 1 + sen²x. Mas a resposta é 2 quando simplificamos: sen²x + cos²x + sen²x = 1 + sen²x... Verificando: se consideramos que tg²x × cos²x = sen²x, temos 1 + sen²x. Para x = 45°: 1 + 0.5 = 1.5. Resposta B=2 parece incorreta. Vou ajustar...',
-    'Use as identidades fundamentais',
+    'Pela identidade fundamental: sec²x = 1 + tg²x. Logo: sec²x - tg²x = (1 + tg²x) - tg²x = 1.',
+    'Use a identidade sec²x = 1 + tg²x',
     'ativa'
 ),
 
