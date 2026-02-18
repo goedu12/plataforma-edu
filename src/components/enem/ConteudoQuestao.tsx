@@ -4,6 +4,7 @@ import React, { useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import rehypeRaw from 'rehype-raw'
 import 'katex/dist/katex.min.css'
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -40,13 +41,23 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '^{$1}') // Converter para LaTeX superscript
   texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '_{$1}') // Converter para LaTeX subscript
 
-  // Converter <small> para classe especial - fonte alinhada à direita
-  texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
+  // Converter <small> para span preservado — fonte/referência alinhada à direita
+  texto = texto.replace(/<small[^>]*>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
-  // Remover tags não suportadas mantendo conteúdo
+  // Remover tags não suportadas mantendo conteúdo (preservar span.questao-fonte)
   texto = texto.replace(/<\/?p>/gi, '\n')
-  texto = texto.replace(/<\/?div>/gi, '\n')
-  texto = texto.replace(/<\/?span[^>]*>/gi, '')
+  texto = texto.replace(/<\/?div[^>]*>/gi, '\n')
+  // Remover apenas spans SEM classe especial (preservar questao-fonte)
+  texto = texto.replace(/<span(?!\s+class="questao-fonte")[^>]*>/gi, '')
+  texto = texto.replace(/<\/span>/gi, (_, offset, str) => {
+    // Verificar se é fechamento de span.questao-fonte — manter
+    const antes = str.substring(0, offset)
+    const ultimoSpan = antes.lastIndexOf('<span')
+    if (ultimoSpan !== -1 && str.substring(ultimoSpan, ultimoSpan + 30).includes('questao-fonte')) {
+      return '</span>'
+    }
+    return ''
+  })
 
   // Limpar múltiplas quebras de linha
   texto = texto.replace(/\n{3,}/g, '\n\n')
@@ -180,7 +191,7 @@ export default function ConteudoQuestao({
     >
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           // Parágrafos
           p: ({ children }) => (
@@ -207,6 +218,31 @@ export default function ConteudoQuestao({
           ),
           li: ({ children }) => (
             <li className="text-sm">{children}</li>
+          ),
+          // Span — preservar questao-fonte e outras classes especiais
+          span: ({ children, className: spanClass, ...props }) => {
+            if (spanClass === 'questao-fonte') {
+              return (
+                <span
+                  className="questao-fonte"
+                  style={{ color: 'var(--text-muted)' }}
+                >
+                  {children}
+                </span>
+              )
+            }
+            return <span className={spanClass} {...props}>{children}</span>
+          },
+          // Títulos de texto/obra
+          h3: ({ children }) => (
+            <h3 className="questao-titulo-obra font-bold text-base sm:text-lg mb-2 mt-1" style={{ color: 'var(--text-primary)' }}>
+              {children}
+            </h3>
+          ),
+          h4: ({ children }) => (
+            <h4 className="questao-titulo-obra font-semibold text-sm sm:text-base mb-1" style={{ color: 'var(--text-primary)' }}>
+              {children}
+            </h4>
           ),
           // Código (para fórmulas que não são LaTeX)
           code: ({ children, className: codeClass }) => {

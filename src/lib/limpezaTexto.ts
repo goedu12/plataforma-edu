@@ -646,11 +646,12 @@ export function questaoTemQualidade(questao: {
 }
 
 /**
- * Extrai tags <small> do texto HTML e retorna o texto separado em duas partes:
- * - textoSemSmall: o texto original sem as tags <small>
- * - fontes: array com o conteúdo de cada tag <small>
+ * Extrai tags <small> e <span class="questao-fonte"> do texto HTML,
+ * retornando o texto separado em duas partes:
+ * - textoSemSmall: o texto original sem as referências
+ * - fontes: array com o conteúdo de cada referência encontrada
  *
- * Usado para renderizar as fontes/referências em posição diferente (ex: após imagens)
+ * Garante a ordem ENEM original: Texto → Imagem → Fonte → Comando
  */
 export function extrairFontesDoContexto(html: string): {
   textoSemSmall: string
@@ -662,54 +663,60 @@ export function extrairFontesDoContexto(html: string): {
 
   const fontes: string[] = []
 
-  // 1. Primeiro, tentar extrair de tags <small>...</small>
+  // 1. Extrair <small>...</small>
   const smallRegex = /<small[^>]*>([\s\S]*?)<\/small>/gi
   let match
   while ((match = smallRegex.exec(html)) !== null) {
     const conteudo = match[1].trim()
-    if (conteudo) {
-      fontes.push(conteudo)
-    }
+    if (conteudo) fontes.push(conteudo)
   }
-
-  // Remover todas as tags <small>...</small> do texto original
   let textoSemSmall = html.replace(/<small[^>]*>[\s\S]*?<\/small>/gi, '')
 
-  // 2. Se não encontrou fontes em <small>, detectar automaticamente
+  // 2. Extrair <span class="questao-fonte">...</span>
+  const spanFonteRegex = /<span\s+class="questao-fonte"[^>]*>([\s\S]*?)<\/span>/gi
+  while ((match = spanFonteRegex.exec(textoSemSmall)) !== null) {
+    const conteudo = match[1].trim()
+    if (conteudo) fontes.push(conteudo)
+  }
+  textoSemSmall = textoSemSmall.replace(/<span\s+class="questao-fonte"[^>]*>[\s\S]*?<\/span>/gi, '')
+
+  // 3. Se não encontrou fontes por tag, detectar automaticamente por padrão
   if (fontes.length === 0) {
-    // Padrões de fonte ENEM (última linha que parece referência)
-    const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.trim()).filter(l => l)
+    const linhas = textoSemSmall.split(/\n|<br\s*\/?>/gi).map(l => l.replace(/<[^>]+>/g, '').trim()).filter(l => l)
 
-    // Verificar as últimas linhas (pode ter múltiplas fontes)
-    for (let i = linhas.length - 1; i >= Math.max(0, linhas.length - 3); i--) {
+    for (let i = linhas.length - 1; i >= Math.max(0, linhas.length - 4); i--) {
       const linha = linhas[i]
-
-      // Padrões que indicam fonte/referência:
       const ehFonte =
-        // Padrão: SOBRENOME, Nome. Título... (autor em maiúsculas)
-        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ\s]+,\s*[A-Z]/.test(linha) ||
-        // Padrão: Disponível em: URL
+        // SOBRENOME, Nome. — autor em maiúsculas (padrão ABNT)
+        /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]{2,}[A-Za-záàâãéêíóôõúç\s]*,\s*[A-Z]/.test(linha) ||
+        // Disponível em: URL
         /Dispon[ií]vel\s+em:/i.test(linha) ||
-        // Padrão: Acesso em: DATA
+        // Acesso em: DATA
         /Acesso\s+em:/i.test(linha) ||
-        // Padrão: (adaptado) ou (Adaptado)
+        // (adaptado) ou (Adaptado)
         /\(adaptado\)/i.test(linha) ||
-        // Padrão: Revista/Jornal Nome, n. XX
-        /^(Revista|Jornal)\s+/i.test(linha) ||
-        // Padrão: termina com ano entre parênteses ou ponto
-        /,\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(linha) ||
-        // Padrão: URL no final
-        /\.(com|org|gov|edu|br)\b/i.test(linha)
+        // Adaptado de / In: / Apud:
+        /^(Adaptado\s+de|In:|Apud:)/i.test(linha) ||
+        // Revista, Jornal, Editorial
+        /^(Revista|Jornal|Editorial)\s+/i.test(linha) ||
+        // Termina com ano: , 2024. ou (2024).
+        /[,.]\s*\d{4}\.?\s*(\(adaptado\))?\.?\s*$/i.test(linha) ||
+        // URL no texto (www. ou http)
+        /\bwww\./i.test(linha) ||
+        /https?:\/\//i.test(linha) ||
+        // Editora: Cidade: Editora, Ano
+        /:\s+[A-Z][a-záàâãéê]+,\s*\d{4}/.test(linha)
 
-      if (ehFonte && linha.length > 15 && linha.length < 500) {
-        fontes.unshift(linha) // Adiciona no início para manter ordem
-        // Remover a linha do texto
-        textoSemSmall = textoSemSmall.replace(linha, '').trim()
+      if (ehFonte && linha.length > 10 && linha.length < 600) {
+        fontes.unshift(linha)
+        // Remover do texto usando o HTML original
+        const escapado = linha.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        textoSemSmall = textoSemSmall.replace(new RegExp(escapado, 'g'), '').trim()
       }
     }
   }
 
-  // Limpar espaços extras deixados pela remoção
+  // Limpar espaços extras
   textoSemSmall = textoSemSmall
     .replace(/<br>\s*<br>\s*<br>/g, '<br>')
     .replace(/<p>\s*<\/p>/g, '')
@@ -718,6 +725,53 @@ export function extrairFontesDoContexto(html: string): {
     .trim()
 
   return { textoSemSmall, fontes }
+}
+
+/**
+ * Detecta e destaca o título da obra/texto na primeira linha do contexto.
+ * Se a primeira linha for curta (≤ 120 chars), isolada e não parecer parágrafo,
+ * é marcada como <strong> para renderização em destaque.
+ *
+ * Padrões de título no ENEM:
+ *   "De próprio punho"        → título em destaque
+ *   "TEXTO I" / "TEXTO II"   → marcadores de seção
+ *   "Art. 26-A."              → artigo de lei (já em strong)
+ */
+export function destacarTituloContexto(html: string): string {
+  if (!html || typeof html !== 'string') return html
+
+  // Não processar se já tem <strong> no início (já formatado)
+  const inicio = html.trimStart()
+  if (inicio.startsWith('<strong>') || inicio.startsWith('<em>') || inicio.startsWith('<p><strong>')) {
+    return html
+  }
+
+  // Extrair primeira linha relevante
+  const linhas = html.split(/\n|<br\s*\/?>/gi)
+  const primeiraLinha = linhas[0]?.replace(/<[^>]+>/g, '').trim()
+
+  if (!primeiraLinha) return html
+
+  // Critérios para ser considerado título:
+  const ehTitulo =
+    primeiraLinha.length > 0 &&
+    primeiraLinha.length <= 120 &&
+    // Não é início de parágrafo longo
+    !primeiraLinha.endsWith(',') &&
+    // Não começa com artigo/preposição minúsculo (parágrafo narrativo)
+    !/^(o |a |os |as |um |uma |de |da |do |em |na |no |que |e |é |com )/i.test(primeiraLinha) &&
+    // Não é apenas números ou símbolos
+    /[a-zA-ZÀ-ú]/.test(primeiraLinha) &&
+    // Tem pelo menos 3 caracteres
+    primeiraLinha.length >= 3
+
+  if (ehTitulo && linhas.length > 1) {
+    // Substituir primeira linha por versão em destaque
+    linhas[0] = linhas[0].replace(primeiraLinha, `<strong>${primeiraLinha}</strong>`)
+    return linhas.join('\n')
+  }
+
+  return html
 }
 
 /**

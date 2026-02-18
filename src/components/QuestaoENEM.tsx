@@ -18,7 +18,7 @@ import Badge from './ui/Badge'
 import SafeImage, { isValidImageUrl } from './ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from './ui/ImagemModal'
 import ConteudoQuestao from './enem/ConteudoQuestao'
-import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto } from '@/lib/limpezaTexto'
+import { processarTexto, processarContexto, isTextoValido, extrairFontesDoContexto, destacarTituloContexto } from '@/lib/limpezaTexto'
 import type { QuestaoENEM, AlternativaENEM, AreaENEM, Componente } from '@/types'
 import { ENEM_CONFIG } from '@/types'
 import 'katex/dist/katex.min.css'
@@ -231,7 +231,9 @@ export default function QuestaoENEM({
       {(() => {
         // Processa o contexto e extrai as fontes separadamente
         const contextoProcessado = processarContexto(questao.contexto)
-        const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoProcessado)
+        // Destaca título automaticamente se não houver <strong> explícito
+        const contextoComTitulo = destacarTituloContexto(contextoProcessado)
+        const { textoSemSmall, fontes } = extrairFontesDoContexto(contextoComTitulo)
 
         // Detecta se há fórmulas LaTeX no contexto
         const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.contexto || '')
