@@ -255,7 +255,7 @@ function validarQuestao(questao: QuestaoEnem): ProblemaFormatacao[] {
   }
 
   // 2. Verificar imagens inválidas
-  const camposImagem = [
+  const camposImagem: (string | null | undefined)[] = [
     questao.alt_a_imagem, questao.alt_b_imagem, questao.alt_c_imagem,
     questao.alt_d_imagem, questao.alt_e_imagem
   ]
@@ -266,7 +266,7 @@ function validarQuestao(questao: QuestaoEnem): ProblemaFormatacao[] {
   const todasImagens = [...camposImagem, ...imagensElementos]
 
   for (const img of todasImagens) {
-    if (!validarImagem(img)) {
+    if (!validarImagem(img ?? null)) {
       problemas.push({
         questaoId: questao.id,
         ano: questao.ano,
