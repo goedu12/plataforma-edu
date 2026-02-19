@@ -2430,6 +2430,151 @@ img {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   NOVA FORMATAÇÃO: Fonte UMA LINHA ABAIXO do texto
+   Padrão ENEM/INEP - Fonte separada visualmente do corpo do texto
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Container wrapper para texto + fonte */
+.conteudo-questao-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Container da fonte - sempre abaixo do texto */
+.questao-fonte-container {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Linha da fonte - alinhada à direita, itálico */
+.questao-fonte-linha {
+  display: block;
+  text-align: right;
+  font-style: italic;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+@media (min-width: 640px) {
+  .questao-fonte-linha {
+    font-size: 0.75rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FORMATAÇÃO POR GÊNERO TEXTUAL
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Poema / Verso ── */
+.questao-poema {
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.questao-poema .conteudo-questao {
+  text-indent: 0 !important;
+  text-align: left;
+}
+
+.questao-poema p {
+  text-indent: 0 !important;
+  margin-bottom: 0.25rem;
+  line-height: 1.5;
+}
+
+/* Estrofe - grupo de versos */
+.questao-estrofe {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.questao-estrofe:last-child {
+  margin-bottom: 0;
+}
+
+/* Verso individual */
+.verso {
+  display: block;
+  line-height: 1.5;
+}
+
+/* ── Diálogo ── */
+.questao-dialogo {
+  padding-left: 0.5rem;
+}
+
+.questao-dialogo p {
+  text-indent: 0 !important;
+  margin-bottom: 0.5rem;
+}
+
+/* Marcador de fala (travessão) */
+.fala-marcador {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ── Citação Longa (recuo 4cm / 2.5rem) ── */
+.questao-citacao-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-citacao {
+  margin: 1rem 0 1rem 2.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  border-left: 3px solid var(--color-accent);
+  background: var(--bg-elevated);
+  border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.questao-citacao p {
+  text-indent: 0 !important;
+  margin-bottom: 0.5rem;
+}
+
+.questao-citacao p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Texto Científico ── */
+.questao-cientifico {
+  /* Fórmulas e equações precisam de espaço */
+}
+
+.questao-cientifico .katex-display {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+/* ── Lista ── */
+.questao-lista p {
+  text-indent: 0 !important;
+}
+
+.questao-lista ul,
+.questao-lista ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SEÇÕES DE TEXTO (TEXTO I, TEXTO II, etc.)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.secao-texto-header {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin: 1rem 0 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--bg-elevated);
+  border-radius: 0.25rem;
+  color: var(--text-primary);
+}
+
 /* ── Título do texto/obra ── */
 .questao-titulo {
   display: block;
