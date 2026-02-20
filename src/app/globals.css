@@ -2362,14 +2362,13 @@ img {
   -webkit-hyphens: auto;
 }
 
-/* Primeiro parágrafo e parágrafo após título: sem recuo (estilo editorial) */
-.questao-texto > p:first-child,
-.questao-contexto > p:first-child,
+/* PADRÃO ENEM: TODOS os parágrafos têm recuo, incluindo o primeiro */
+/* Parágrafo após título centralizado: também com recuo normal */
 .questao-contexto h3 + p,
 .questao-contexto h4 + p,
 .questao-texto h3 + p,
 .questao-texto h4 + p {
-  text-indent: 0;
+  text-indent: 1.5em;
 }
 
 /* Último parágrafo sem margem inferior */
@@ -2403,14 +2402,59 @@ img {
   text-indent: 1.5em;
   margin-bottom: 0.75rem;
   text-align: justify;
+  line-height: 1.75;
 }
 
+/* PADRÃO ENEM: TODOS os parágrafos com recuo, inclusive o primeiro */
 .conteudo-questao > p:first-child {
-  text-indent: 0;
+  text-indent: 1.5em;
 }
 
 .conteudo-questao > p:last-child {
   margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TRAVESSÕES DE DIÁLOGO - Padrão ENEM
+   Falas com travessão (—) devem ter formatação especial
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Parágrafos que começam com travessão = fala de diálogo */
+.conteudo-questao p,
+.questao-texto p {
+  /* Detectar travessão no início via CSS não é possível,
+     mas garantimos que o espaçamento seja adequado */
+}
+
+/* Espaçamento entre parágrafos para leitura fluida */
+.conteudo-questao p + p,
+.questao-texto p + p {
+  margin-top: 0.5rem;
+}
+
+/* Travessão em destaque (quando usado no início de fala) */
+.conteudo-questao p:first-letter,
+.questao-texto p:first-letter {
+  /* Não aplicar estilo especial na primeira letra por padrão */
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ESPAÇAMENTO ENTRE PARÁGRAFOS - Padrão ENEM
+   Garantir separação visual clara entre parágrafos
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Espaçamento consistente */
+.questao-texto,
+.conteudo-questao {
+  /* Espaçamento entre linhas */
+  line-height: 1.75;
+}
+
+@media (min-width: 640px) {
+  .questao-texto,
+  .conteudo-questao {
+    line-height: 1.8;
+  }
 }
 
 /* ── Fonte/Referência bibliográfica ── */
@@ -2447,11 +2491,11 @@ img {
   padding-top: 0.5rem;
 }
 
-/* Linha da fonte - alinhada à direita, itálico */
+/* Linha da fonte - PADRÃO ENEM: alinhada à ESQUERDA, não itálico */
 .questao-fonte-linha {
   display: block;
-  text-align: right;
-  font-style: italic;
+  text-align: left;
+  font-style: normal;
   font-size: 0.6875rem;
   line-height: 1.4;
   color: var(--text-muted);
@@ -2461,6 +2505,41 @@ img {
   .questao-fonte-linha {
     font-size: 0.75rem;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TÍTULO DE TEXTO - PADRÃO ENEM
+   Centralizado e negrito, como nas provas originais
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Título de texto dentro de questão - centralizado e negrito */
+.questao-titulo-texto,
+.conteudo-questao .titulo-texto,
+.questao-texto .titulo-texto {
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+@media (min-width: 640px) {
+  .questao-titulo-texto,
+  .conteudo-questao .titulo-texto,
+  .questao-texto .titulo-texto {
+    font-size: 1rem;
+  }
+}
+
+/* Título de texto via tag strong no início (fallback) */
+.conteudo-questao > p:first-child strong:only-child,
+.questao-texto > p:first-child strong:only-child {
+  display: block;
+  text-align: center;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -2500,19 +2579,30 @@ img {
 }
 
 /* ── Diálogo ── */
-.questao-dialogo {
+.questao-dialogo,
+.questao-dialogo-wrapper {
   padding-left: 0.5rem;
 }
 
-.questao-dialogo p {
+.questao-dialogo p,
+.questao-dialogo-wrapper p {
   text-indent: 0 !important;
   margin-bottom: 0.5rem;
 }
 
+.questao-dialogo .fala,
+.questao-dialogo-wrapper .fala {
+  text-indent: 0 !important;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+  line-height: 1.6;
+}
+
 /* Marcador de fala (travessão) */
 .fala-marcador {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-right: 0.25rem;
 }
 
 /* ── Citação Longa (recuo 4cm / 2.5rem) ── */
@@ -2558,6 +2648,150 @@ img {
 .questao-lista ol {
   margin-left: 1.5rem;
   margin-bottom: 0.75rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   GÊNEROS TEXTUAIS ADICIONAIS (Carta, Notícia, Anúncio)
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── CARTA ── */
+.questao-carta-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-carta {
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-default);
+}
+
+.carta-data {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.carta-vocativo {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.carta-corpo {
+  margin-bottom: 1rem;
+}
+
+.carta-paragrafo {
+  text-indent: 2em;
+  margin-bottom: 0.5rem;
+  text-align: justify;
+}
+
+.carta-despedida {
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.carta-despedida p {
+  margin-bottom: 0.25rem;
+}
+
+/* ── NOTÍCIA ── */
+.questao-noticia-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-noticia {
+  padding: 0.75rem 0;
+}
+
+.noticia-manchete {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .noticia-manchete {
+    font-size: 1.25rem;
+  }
+}
+
+.noticia-lide {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--color-accent);
+}
+
+.noticia-corpo {
+  margin-top: 0.5rem;
+}
+
+.noticia-paragrafo {
+  text-indent: 1.5em;
+  margin-bottom: 0.5rem;
+  text-align: justify;
+}
+
+/* ── ANÚNCIO/PROPAGANDA ── */
+.questao-anuncio-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-anuncio {
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+  border-radius: 0.75rem;
+  border: 2px solid var(--color-accent);
+  text-align: center;
+}
+
+.anuncio-slogan {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+@media (min-width: 640px) {
+  .anuncio-slogan {
+    font-size: 1.5rem;
+  }
+}
+
+.anuncio-cta {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-accent);
+  color: white;
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+.anuncio-preco {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--success);
+  margin-bottom: 0.5rem;
+}
+
+.anuncio-texto {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -2619,6 +2853,444 @@ img {
   .questao-fonte,
   .fonte-pequena {
     font-size: 0.6875rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   NOVOS GÊNEROS TEXTUAIS (v2.0)
+   Documento histórico, Tirinha, Artigo de Lei, Entrevista, Letra de Música, Infográfico
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── DOCUMENTO HISTÓRICO ── */
+.questao-documento-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-documento {
+  padding: 1.25rem;
+  background: linear-gradient(to bottom, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--border-default);
+  border-radius: 0.5rem;
+  position: relative;
+}
+
+.questao-documento::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-accent) 0%, transparent 100%);
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.documento-titulo {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+}
+
+.documento-data {
+  font-style: italic;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-bottom: 0.75rem;
+}
+
+.documento-paragrafo {
+  text-indent: 2em;
+  text-align: justify;
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.documento-assinatura {
+  font-style: italic;
+  text-align: right;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-default);
+  color: var(--text-secondary);
+}
+
+/* ── ARTIGO DE LEI ── */
+.questao-artigo-lei-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-artigo-lei {
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.lei-artigo {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.lei-paragrafo {
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.lei-paragrafo-unico {
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.lei-inciso {
+  padding-left: 2rem;
+  margin-bottom: 0.375rem;
+  color: var(--text-primary);
+}
+
+.lei-inciso::first-letter {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.lei-alinea {
+  padding-left: 3rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+.lei-texto {
+  margin-bottom: 0.5rem;
+  text-align: justify;
+}
+
+/* ── TIRINHA/QUADRINHO ── */
+.questao-tirinha-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-tirinha {
+  padding: 1rem;
+  background: var(--bg-surface);
+  border: 2px solid var(--border-default);
+  border-radius: 1rem;
+}
+
+.tirinha-fala {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-elevated);
+  border-radius: 1rem;
+  position: relative;
+}
+
+.tirinha-fala::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  bottom: -8px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--bg-elevated);
+}
+
+.tirinha-personagem {
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.tirinha-balao {
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.tirinha-onomatopeia {
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-align: center;
+  color: var(--color-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.5rem;
+}
+
+.tirinha-descricao {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 0.25rem;
+}
+
+.tirinha-texto {
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+/* ── ENTREVISTA ── */
+.questao-entrevista-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-entrevista {
+  padding: 0.75rem 0;
+}
+
+.entrevista-pergunta {
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: var(--bg-elevated);
+  border-left: 3px solid var(--color-accent);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.entrevista-resposta {
+  padding: 0.75rem;
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+  border-left: 3px solid var(--border-default);
+}
+
+.entrevista-texto {
+  margin-bottom: 0.5rem;
+  text-align: justify;
+}
+
+/* ── LETRA DE MÚSICA ── */
+.questao-letra-musica-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-letra-musica {
+  font-family: Georgia, 'Times New Roman', serif;
+  padding: 1rem;
+}
+
+.musica-estrofe {
+  margin-bottom: 1.25rem;
+  padding-left: 1rem;
+}
+
+.musica-refrao {
+  margin-bottom: 1.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-elevated);
+  border-radius: 0.5rem;
+  border-left: 3px solid var(--color-accent);
+}
+
+.musica-verso {
+  line-height: 1.6;
+  margin-bottom: 0.25rem;
+}
+
+.musica-refrao .musica-verso {
+  font-style: italic;
+}
+
+/* ── INFOGRÁFICO ── */
+.questao-infografico-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-infografico {
+  padding: 1rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+}
+
+.infografico-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.infografico-percentual {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  background: var(--bg-elevated);
+  border-radius: 0.375rem;
+}
+
+.infografico-numero {
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 0.375rem;
+  padding-left: 0.5rem;
+}
+
+.infografico-fonte {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-default);
+}
+
+.infografico-texto {
+  margin-bottom: 0.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   FORMATAÇÃO POR ÁREA DO CONHECIMENTO
+   Biologia, Filosofia, Química, Geografia
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── BIOLOGIA - Nomenclatura Científica ── */
+.nome-cientifico {
+  font-style: italic;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* ── BIOLOGIA - Sequências de DNA/RNA ── */
+.sequencia-dna,
+.sequencia-rna {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.9em;
+  letter-spacing: 0.15em;
+  padding: 0.125rem 0.25rem;
+  background: var(--bg-elevated);
+  border-radius: 0.25rem;
+}
+
+.sequencia-dna {
+  color: #2563eb; /* azul para DNA */
+}
+
+.sequencia-rna {
+  color: #dc2626; /* vermelho para RNA */
+}
+
+/* ── FILOSOFIA/SOCIOLOGIA - Termos Técnicos ── */
+.termo-filosofico {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TABELAS RESPONSIVAS (Matemática, Geografia)
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Container responsivo para tabelas */
+.tabela-responsiva {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+}
+
+.tabela-responsiva table {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+/* Cabeçalho fixo em scroll horizontal */
+@media (max-width: 640px) {
+  .tabela-responsiva th:first-child,
+  .tabela-responsiva td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--bg-surface);
+    z-index: 1;
+  }
+
+  .tabela-responsiva th:first-child {
+    background: var(--bg-elevated);
+  }
+}
+
+/* Tabelas de dados estatísticos */
+.tabela-dados {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.tabela-dados th {
+  background: var(--color-accent);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.tabela-dados td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.tabela-dados tr:nth-child(even) {
+  background: var(--bg-elevated);
+}
+
+.tabela-dados tr:hover {
+  background: var(--bg-surface-hover);
+}
+
+/* Células numéricas alinhadas à direita */
+.tabela-dados td.numero,
+.tabela-dados td:has([data-tipo="numero"]) {
+  text-align: right;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ACESSIBILIDADE E DARK MODE
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Foco visível para navegação por teclado */
+.questao-documento:focus-within,
+.questao-artigo-lei:focus-within,
+.questao-tirinha:focus-within,
+.questao-entrevista:focus-within,
+.questao-letra-musica:focus-within,
+.questao-infografico:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Contraste aprimorado para texto em dark mode */
+@media (prefers-color-scheme: dark) {
+  .documento-titulo,
+  .lei-artigo,
+  .tirinha-personagem,
+  .entrevista-pergunta,
+  .infografico-titulo {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Redução de movimento para usuários sensíveis */
+@media (prefers-reduced-motion: reduce) {
+  .tirinha-fala,
+  .questao-documento,
+  .questao-artigo-lei {
+    transition: none;
   }
 }
 

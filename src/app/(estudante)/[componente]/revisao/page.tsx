@@ -10,6 +10,7 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto } from '@/lib/limpezaTexto'
 
 type StatusRevisao = 'OK' | 'SEM_REVISAO' | 'ERRO'
 type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -298,9 +299,11 @@ export default function RevisaoPage() {
 
                 {/* Enunciado */}
                 <div className="card-chromebook">
-                  <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-                    {formatarFormula(questao.enunciado)}
-                  </p>
+                  <div
+                    className="enunciado-chromebook questao-texto"
+                    style={{ color: 'var(--text-primary)' }}
+                    dangerouslySetInnerHTML={{ __html: processarContexto(questao.enunciado) }}
+                  />
                 </div>
 
                 {/* Alternativas - Ultra compactas */}

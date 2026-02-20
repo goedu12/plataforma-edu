@@ -12,6 +12,7 @@ import SafeImage, { isValidImageUrl } from '@/components/ui/SafeImage'
 import ImagemModal from '@/components/ui/ImagemModal'
 import ConteudoQuestao from '@/components/ConteudoQuestao'
 import { formatarFormula } from '@/lib/formatacao'
+import { extrairTituloDoTexto } from '@/lib/limpezaTexto'
 import type { Componente, QuestaoEnem, ElementoEnem } from '@/types'
 
 type StatusSimulado = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'FILTRO'
@@ -223,9 +224,40 @@ export default function SimuladoEnemPage() {
         )
       }
       if (elem.tipo === 'texto' && elem.conteudo) {
+        // Extrair título e fonte do próprio elemento (campos do JSONB)
+        const fonteDoElemento = elem.fonte
+
+        // Título: usar campo do JSONB ou extrair automaticamente do texto
+        let tituloExtraido: string | null = elem.titulo || null
+        let corpoTexto = elem.conteudo
+
+        // Se não tem título no campo, tentar extrair do início do texto
+        if (!tituloExtraido) {
+          const { titulo, corpo } = extrairTituloDoTexto(elem.conteudo)
+          if (titulo) {
+            tituloExtraido = titulo
+            corpoTexto = corpo
+          }
+        }
+
         return (
-          <div key={idx} className="mb-2">
-            <ConteudoQuestao conteudo={elem.conteudo} tipo="contexto" />
+          <div key={idx} className="mb-3">
+            {/* Título do texto (do campo JSONB ou extraído automaticamente) */}
+            {tituloExtraido && (
+              <h4 className="font-bold text-sm sm:text-base mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
+                {tituloExtraido}
+              </h4>
+            )}
+
+            {/* Conteúdo do texto (sem o título se foi extraído) */}
+            <ConteudoQuestao conteudo={corpoTexto} tipo="contexto" separarFonte={!fonteDoElemento} />
+
+            {/* Fonte/referência (se existir no campo fonte do elemento) */}
+            {fonteDoElemento && (
+              <p className="text-xs italic mt-2 text-right" style={{ color: 'var(--text-muted)' }}>
+                {fonteDoElemento}
+              </p>
+            )}
           </div>
         )
       }
@@ -238,23 +270,29 @@ export default function SimuladoEnemPage() {
       }
       if (elem.tipo === 'imagem' && elem.arquivo) {
         return (
-          <div key={idx} className="my-3 flex justify-center">
+          <div key={idx} className="my-3 flex flex-col items-center">
             <button onClick={() => setImagemExpandida(elem.arquivo!)}>
               <SafeImage
                 src={elem.arquivo}
-                alt={elem.conteudo || 'Imagem da questão'}
+                alt={elem.conteudo || elem.legenda || 'Imagem da questão'}
                 width={500}
                 height={300}
                 className="rounded-lg max-w-full h-auto cursor-zoom-in"
                 style={{ maxHeight: '300px', objectFit: 'contain' }}
               />
             </button>
+            {/* Legenda da imagem (se existir) */}
+            {elem.legenda && (
+              <p className="text-xs italic mt-1 text-center" style={{ color: 'var(--text-muted)' }}>
+                {elem.legenda}
+              </p>
+            )}
           </div>
         )
       }
       if (elem.tipo === 'fonte' && elem.conteudo) {
         return (
-          <p key={idx} className="text-xs italic mt-2" style={{ color: 'var(--text-muted)' }}>
+          <p key={idx} className="text-xs italic mt-2 text-right" style={{ color: 'var(--text-muted)' }}>
             {elem.conteudo}
           </p>
         )
@@ -274,7 +312,7 @@ export default function SimuladoEnemPage() {
         <NavigationRail componente={componente} />
 
         <header className="header-chromebook flex-shrink-0">
-          <div className="max-w-3xl mx-auto flex items-center gap-2">
+          <div className="max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto flex items-center gap-2">
             <BackButton href={`/${componente}/menu`} mobileOnly />
             <GraduationCap className="w-5 h-5" style={{ color: corPrimaria }} />
             <span className="font-semibold text-sm lg:text-base" style={{ color: 'var(--text-primary)' }}>
@@ -387,7 +425,7 @@ export default function SimuladoEnemPage() {
         <>
           {/* HEADER */}
           <header className="header-chromebook flex-shrink-0">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto">
               <div className="flex items-center gap-2 lg:gap-3">
                 <BackButton href={`/${componente}/menu`} mobileOnly />
 
@@ -441,8 +479,8 @@ export default function SimuladoEnemPage() {
           </header>
 
           {/* CONTEÚDO */}
-          <main className="flex-1 max-w-3xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-6 lg:py-4">
+          <main className="flex-1 max-w-3xl lg:max-w-5xl xl:max-w-6xl mx-auto w-full flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 overflow-y-auto px-3 py-2 lg:px-8 lg:py-4 xl:px-10">
               <div className="space-chromebook">
 
                 {/* Elementos do enunciado */}
