@@ -91,6 +91,13 @@ export interface ElementoEnem {
   tipo: 'texto' | 'imagem' | 'comando' | 'titulo' | 'fonte'
   conteudo?: string
   arquivo?: string
+  // Campos adicionais do banco de dados
+  fonte?: string | null      // Referência bibliográfica (dentro do elemento texto)
+  titulo?: string | null     // Título da obra/texto
+  ordem?: number             // Ordem de exibição
+  rotulo?: string | null     // Rótulo (ex: "TEXTO I")
+  legenda?: string | null    // Legenda de imagem
+  descricao?: string | null  // Descrição adicional
 }
 
 export interface QuestaoEnem {
