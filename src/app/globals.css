@@ -2362,14 +2362,13 @@ img {
   -webkit-hyphens: auto;
 }
 
-/* Primeiro parágrafo e parágrafo após título: sem recuo (estilo editorial) */
-.questao-texto > p:first-child,
-.questao-contexto > p:first-child,
+/* PADRÃO ENEM: TODOS os parágrafos têm recuo, incluindo o primeiro */
+/* Parágrafo após título centralizado: também com recuo normal */
 .questao-contexto h3 + p,
 .questao-contexto h4 + p,
 .questao-texto h3 + p,
 .questao-texto h4 + p {
-  text-indent: 0;
+  text-indent: 1.5em;
 }
 
 /* Último parágrafo sem margem inferior */
@@ -2405,8 +2404,9 @@ img {
   text-align: justify;
 }
 
+/* PADRÃO ENEM: TODOS os parágrafos com recuo, inclusive o primeiro */
 .conteudo-questao > p:first-child {
-  text-indent: 0;
+  text-indent: 1.5em;
 }
 
 .conteudo-questao > p:last-child {
@@ -2447,11 +2447,11 @@ img {
   padding-top: 0.5rem;
 }
 
-/* Linha da fonte - alinhada à direita, itálico */
+/* Linha da fonte - PADRÃO ENEM: alinhada à ESQUERDA, não itálico */
 .questao-fonte-linha {
   display: block;
-  text-align: right;
-  font-style: italic;
+  text-align: left;
+  font-style: normal;
   font-size: 0.6875rem;
   line-height: 1.4;
   color: var(--text-muted);
@@ -2461,6 +2461,41 @@ img {
   .questao-fonte-linha {
     font-size: 0.75rem;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TÍTULO DE TEXTO - PADRÃO ENEM
+   Centralizado e negrito, como nas provas originais
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Título de texto dentro de questão - centralizado e negrito */
+.questao-titulo-texto,
+.conteudo-questao .titulo-texto,
+.questao-texto .titulo-texto {
+  display: block;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+@media (min-width: 640px) {
+  .questao-titulo-texto,
+  .conteudo-questao .titulo-texto,
+  .questao-texto .titulo-texto {
+    font-size: 1rem;
+  }
+}
+
+/* Título de texto via tag strong no início (fallback) */
+.conteudo-questao > p:first-child strong:only-child,
+.questao-texto > p:first-child strong:only-child {
+  display: block;
+  text-align: center;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════

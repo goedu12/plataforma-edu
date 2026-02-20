@@ -42,8 +42,10 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<em>([\s\S]*?)<\/em>/gi, '*$1*')
   texto = texto.replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*')
   texto = texto.replace(/<u>([\s\S]*?)<\/u>/gi, '<u>$1</u>') // Manter underline como HTML
-  texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '^{$1}') // Converter para LaTeX superscript
-  texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '_{$1}') // Converter para LaTeX subscript
+  // Manter <sup> e <sub> como HTML - o rehype-raw vai processar corretamente
+  // NÃO converter para LaTeX ^{} e _{} pois só funciona dentro de delimitadores $...$
+  texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '<sup>$1</sup>')
+  texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '<sub>$1</sub>')
 
   // Converter <small> para classe especial - fonte alinhada à direita
   texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
@@ -66,9 +68,13 @@ function htmlParaMarkdown(html: string): string {
 }
 
 // Detecta se o texto contém fórmulas LaTeX ou notação científica
+// IMPORTANTE: Ignora valores monetários (R$) que não são LaTeX
 function contemLatex(texto: string): boolean {
+  // Primeiro, remover valores monetários para não confundir com LaTeX
+  const textoSemMonetario = texto.replace(/R\$\s*[\d.,]+/g, '')
+
   const padroes = [
-    /\$[^$]+\$/,           // $inline$
+    /\$[^$]+\$/,           // $inline$ (mas não R$)
     /\$\$[^$]+\$\$/,       // $$block$$
     /\\frac\{/,            // \frac{}{}
     /\\sqrt\{/,            // \sqrt{}
@@ -87,11 +93,25 @@ function contemLatex(texto: string): boolean {
     /\\Delta/,             // delta LaTeX
   ]
 
-  return padroes.some(p => p.test(texto))
+  return padroes.some(p => p.test(textoSemMonetario))
+}
+
+// Protege valores monetários (R$) de serem interpretados como LaTeX
+function protegerValoresMonetarios(texto: string): string {
+  // Substitui R$ por um placeholder que não será interpretado como LaTeX
+  return texto.replace(/R\$\s*([\d.,]+)/g, 'R§CIFRAO§$1')
+}
+
+// Restaura valores monetários após o processamento
+function restaurarValoresMonetarios(texto: string): string {
+  return texto.replace(/R§CIFRAO§/g, 'R$ ')
 }
 
 // Formata símbolos especiais comuns em questões ENEM
 function formatarSimbolos(texto: string): string {
+  // Primeiro, proteger valores monetários
+  let resultado = protegerValoresMonetarios(texto)
+
   // Símbolos químicos, físicos e matemáticos
   const substituicoes: [RegExp, string][] = [
     // ═══════════════════════════════════════════════════════════════════════════
@@ -269,19 +289,18 @@ function formatarSimbolos(texto: string): string {
     [/<=/g, '≤'],
     [/!=/g, '≠'],
     [/~=/g, '≈'],
-    [/\bpi\b/g, 'π'],
-    [/\balpha\b/gi, 'α'],
-    [/\bbeta\b/gi, 'β'],
-    [/\bgamma\b/gi, 'γ'],
-    [/\bdelta\b/gi, 'Δ'],
-    [/\btheta\b/gi, 'θ'],
-    [/\blambda\b/gi, 'λ'],
-    [/\bsigma\b/gi, 'σ'],
-    [/\bomega\b/gi, 'ω'],
-    [/\bmu\b/gi, 'μ'],
-    [/\brho\b/gi, 'ρ'],
-    [/\bphi\b/gi, 'φ'],
-    [/\bepsilon\b/gi, 'ε'],
+    // Letras gregas - apenas em contexto matemático/científico isolado
+    // Evita substituir em palavras como "município", "alfabeto", etc.
+    [/(?<=[\s=+\-*/():])\bpi\b(?=[\s=+\-*/():,.]|$)/g, 'π'],
+    [/(?<=[\s=:])\balpha\b(?=[\s=,.]|$)/g, 'α'],
+    [/(?<=[\s=:])\bbeta\b(?=[\s=,.]|$)/g, 'β'],
+    [/(?<=[\s=:])\bgamma\b(?=[\s=,.]|$)/g, 'γ'],
+    [/(?<=[\s=:])\bdelta\b(?=[\s=,.]|$)/g, 'Δ'],
+    [/(?<=[\s=:])\btheta\b(?=[\s=,.]|$)/g, 'θ'],
+    [/(?<=[\s=:])\blambda\b(?=[\s=,.]|$)/g, 'λ'],
+    [/(?<=[\s=:])\bsigma\b(?=[\s=,.]|$)/g, 'σ'],
+    [/(?<=[\s=:])\bomega\b(?=[\s=,.]|$)/g, 'ω'],
+    // NOTA: "mu", "rho", "phi", "epsilon" removidos por causar falsos positivos
 
     // ═══════════════════════════════════════════════════════════════════════════
     // FÍSICA - VETORES E CONSTANTES
@@ -311,12 +330,11 @@ function formatarSimbolos(texto: string): string {
     [/\b(Anopheles\s+\w+)\b/g, '<em class="nome-cientifico">$1</em>'],
     [/\b(Leishmania\s+\w+)\b/g, '<em class="nome-cientifico">$1</em>'],
     [/\b(Schistosoma\s+mansoni)\b/g, '<em class="nome-cientifico">$1</em>'],
-    // Padrão genérico para nomenclatura binomial (Maiúscula + minúscula)
-    [/\b([A-Z][a-z]+\s+[a-z]{3,})\b(?!\s*[A-Z])/g, '<em class="nome-cientifico">$1</em>'],
+    // NOTA: Removido padrão genérico de nomenclatura binomial (causava falsos positivos)
 
-    // Sequências de DNA/RNA
-    [/\b([ATCG]{4,})\b/g, '<span class="sequencia-dna">$1</span>'],
-    [/\b([AUCG]{4,})\b/g, '<span class="sequencia-rna">$1</span>'],
+    // Sequências de DNA/RNA (apenas sequências longas e isoladas)
+    [/\b([ATCG]{6,})\b/g, '<span class="sequencia-dna">$1</span>'],
+    [/\b([AUCG]{6,})\b/g, '<span class="sequencia-rna">$1</span>'],
 
     // ═══════════════════════════════════════════════════════════════════════════
     // GEOGRAFIA - COORDENADAS
@@ -344,10 +362,12 @@ function formatarSimbolos(texto: string): string {
     [/\b(ipsis litteris)\b/gi, '<em class="termo-filosofico">$1</em>'],
   ]
 
-  let resultado = texto
   for (const [padrao, substituicao] of substituicoes) {
     resultado = resultado.replace(padrao, substituicao)
   }
+
+  // Restaurar valores monetários
+  resultado = restaurarValoresMonetarios(resultado)
 
   return resultado
 }
@@ -487,9 +507,9 @@ export default function ConteudoQuestao({
                   </span>
                 )
               }
-              if (spanClass === 'questao-titulo') {
+              if (spanClass === 'questao-titulo' || spanClass === 'titulo-texto') {
                 return (
-                  <span className="questao-titulo block font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                  <span className="questao-titulo-texto" style={{ color: 'var(--text-primary)' }}>
                     {children}
                   </span>
                 )
@@ -510,14 +530,14 @@ export default function ConteudoQuestao({
               }
               return <span className={spanClass}>{children}</span>
             },
-            // Títulos h3 e h4 para títulos de textos
+            // Títulos h3 e h4 para títulos de textos - PADRÃO ENEM: centralizado e negrito
             h3: ({ children }) => (
-              <h3 className="font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="questao-titulo-texto" style={{ color: 'var(--text-primary)' }}>
                 {children}
               </h3>
             ),
             h4: ({ children }) => (
-              <h4 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--text-primary)' }}>
+              <h4 className="questao-titulo-texto" style={{ color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                 {children}
               </h4>
             ),
