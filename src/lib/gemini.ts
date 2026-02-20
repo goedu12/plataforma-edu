@@ -176,14 +176,24 @@ async function testarModelo(
 ): Promise<{ sucesso: boolean; resposta?: string; erro?: string }> {
   try {
     const genAI = getGenAI()
+
+    // Gemma não suporta systemInstruction - apenas Gemini
+    // Para Gemma, incorporamos as instruções no início do prompt
+    const isGemma = nomeModelo.startsWith('gemma')
+
     const modelConfig: { model: string; systemInstruction?: string } = { model: nomeModelo }
 
-    // Usar systemInstruction nativa da API para melhor separação de contexto
-    if (systemInstruction) {
+    // Usar systemInstruction nativa apenas para modelos Gemini
+    if (systemInstruction && !isGemma) {
       modelConfig.systemInstruction = systemInstruction
     }
 
     const model = genAI.getGenerativeModel(modelConfig)
+
+    // Para Gemma, prefixar o prompt com as instruções de sistema
+    const promptFinal = (systemInstruction && isGemma)
+      ? `INSTRUÇÕES DO SISTEMA:\n${systemInstruction}\n\n---\n\n${prompt}`
+      : prompt
 
     // Construir conteúdo multimodal se tiver imagem
     let conteudo: string | Part[]
@@ -191,7 +201,7 @@ async function testarModelo(
     if (imagemBase64) {
       // Multimodal: texto + imagem
       conteudo = [
-        { text: prompt },
+        { text: promptFinal },
         {
           inlineData: {
             mimeType: 'image/jpeg',
@@ -201,7 +211,7 @@ async function testarModelo(
       ]
     } else {
       // Apenas texto
-      conteudo = prompt
+      conteudo = promptFinal
     }
 
     const result = await comTimeout(
