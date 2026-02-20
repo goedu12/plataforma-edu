@@ -223,9 +223,28 @@ export default function SimuladoEnemPage() {
         )
       }
       if (elem.tipo === 'texto' && elem.conteudo) {
+        // Extrair título e fonte do próprio elemento (campos do JSONB)
+        const tituloDoElemento = elem.titulo
+        const fonteDoElemento = elem.fonte
+
         return (
-          <div key={idx} className="mb-2">
-            <ConteudoQuestao conteudo={elem.conteudo} tipo="contexto" />
+          <div key={idx} className="mb-3">
+            {/* Título do texto (se existir no campo titulo do elemento) */}
+            {tituloDoElemento && (
+              <h4 className="font-semibold text-sm sm:text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                {tituloDoElemento}
+              </h4>
+            )}
+
+            {/* Conteúdo do texto */}
+            <ConteudoQuestao conteudo={elem.conteudo} tipo="contexto" separarFonte={!fonteDoElemento} />
+
+            {/* Fonte/referência (se existir no campo fonte do elemento) */}
+            {fonteDoElemento && (
+              <p className="text-xs italic mt-2 text-right" style={{ color: 'var(--text-muted)' }}>
+                {fonteDoElemento}
+              </p>
+            )}
           </div>
         )
       }
@@ -238,23 +257,29 @@ export default function SimuladoEnemPage() {
       }
       if (elem.tipo === 'imagem' && elem.arquivo) {
         return (
-          <div key={idx} className="my-3 flex justify-center">
+          <div key={idx} className="my-3 flex flex-col items-center">
             <button onClick={() => setImagemExpandida(elem.arquivo!)}>
               <SafeImage
                 src={elem.arquivo}
-                alt={elem.conteudo || 'Imagem da questão'}
+                alt={elem.conteudo || elem.legenda || 'Imagem da questão'}
                 width={500}
                 height={300}
                 className="rounded-lg max-w-full h-auto cursor-zoom-in"
                 style={{ maxHeight: '300px', objectFit: 'contain' }}
               />
             </button>
+            {/* Legenda da imagem (se existir) */}
+            {elem.legenda && (
+              <p className="text-xs italic mt-1 text-center" style={{ color: 'var(--text-muted)' }}>
+                {elem.legenda}
+              </p>
+            )}
           </div>
         )
       }
       if (elem.tipo === 'fonte' && elem.conteudo) {
         return (
-          <p key={idx} className="text-xs italic mt-2" style={{ color: 'var(--text-muted)' }}>
+          <p key={idx} className="text-xs italic mt-2 text-right" style={{ color: 'var(--text-muted)' }}>
             {elem.conteudo}
           </p>
         )
