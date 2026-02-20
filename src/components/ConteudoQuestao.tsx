@@ -92,28 +92,80 @@ function contemLatex(texto: string): boolean {
 
 // Formata símbolos especiais comuns em questões ENEM
 function formatarSimbolos(texto: string): string {
-  // Símbolos químicos e físicos comuns
+  // Símbolos químicos, físicos e matemáticos
   const substituicoes: [RegExp, string][] = [
-    // Unidades
+    // ═══════════════════════════════════════════════════════════════════════════
+    // UNIDADES DE MEDIDA (todas as áreas)
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Temperatura
     [/(\d+)\s*°C/g, '$1 °C'],
     [/(\d+)\s*°F/g, '$1 °F'],
     [/(\d+)\s*K(?![a-zA-Z])/g, '$1 K'],
+    // Velocidade e aceleração
+    [/(\d+)\s*m\/s²/g, '$1 m/s²'],
     [/(\d+)\s*m\/s/g, '$1 m/s'],
     [/(\d+)\s*km\/h/g, '$1 km/h'],
+    [/(\d+)\s*cm\/s/g, '$1 cm/s'],
+    // Área e volume
     [/(\d+)\s*m²/g, '$1 m²'],
     [/(\d+)\s*m³/g, '$1 m³'],
     [/(\d+)\s*cm²/g, '$1 cm²'],
     [/(\d+)\s*cm³/g, '$1 cm³'],
+    [/(\d+)\s*km²/g, '$1 km²'],
+    [/(\d+)\s*km³/g, '$1 km³'],
+    [/(\d+)\s*mm²/g, '$1 mm²'],
+    [/(\d+)\s*mm³/g, '$1 mm³'],
+    // Química
     [/(\d+)\s*J\/mol/g, '$1 J/mol'],
     [/(\d+)\s*kJ\/mol/g, '$1 kJ/mol'],
     [/(\d+)\s*g\/mol/g, '$1 g/mol'],
     [/(\d+)\s*mol\/L/g, '$1 mol/L'],
     [/(\d+)\s*atm/g, '$1 atm'],
     [/(\d+)\s*kPa/g, '$1 kPa'],
+    [/(\d+)\s*mmHg/g, '$1 mmHg'],
+    // Física - Força e energia
+    [/(\d+)\s*N\.m/g, '$1 N·m'],
+    [/(\d+)\s*N·m/g, '$1 N·m'],
+    [/(\d+)\s*W\/m²/g, '$1 W/m²'],
+    [/(\d+)\s*J\/kg/g, '$1 J/kg'],
+    [/(\d+)\s*cal\/g/g, '$1 cal/g'],
+    [/(\d+)\s*kcal/g, '$1 kcal'],
+    // Eletricidade
+    [/(\d+)\s*V\/m/g, '$1 V/m'],
+    [/(\d+)\s*A\/m/g, '$1 A/m'],
+    [/(\d+)\s*Ω/g, '$1 Ω'],
+    [/(\d+)\s*ohms?/gi, '$1 Ω'],
+    [/(\d+)\s*mA/g, '$1 mA'],
+    [/(\d+)\s*μA/g, '$1 μA'],
+    [/(\d+)\s*kV/g, '$1 kV'],
+    [/(\d+)\s*mV/g, '$1 mV'],
+    [/(\d+)\s*μF/g, '$1 μF'],
+    [/(\d+)\s*pF/g, '$1 pF'],
+    // Frequência e ondas
+    [/(\d+)\s*Hz/g, '$1 Hz'],
+    [/(\d+)\s*kHz/g, '$1 kHz'],
+    [/(\d+)\s*MHz/g, '$1 MHz'],
+    [/(\d+)\s*GHz/g, '$1 GHz'],
+    // Massa e densidade
+    [/(\d+)\s*g\/cm³/g, '$1 g/cm³'],
+    [/(\d+)\s*kg\/m³/g, '$1 kg/m³'],
+    [/(\d+)\s*g\/mL/g, '$1 g/mL'],
+    // Tempo
+    [/(\d+)\s*ms/g, '$1 ms'],
+    [/(\d+)\s*μs/g, '$1 μs'],
+    [/(\d+)\s*ns/g, '$1 ns'],
+    // Luz e radiação
+    [/(\d+)\s*nm/g, '$1 nm'],
+    [/(\d+)\s*μm/g, '$1 μm'],
+    [/(\d+)\s*cd/g, '$1 cd'],
+    [/(\d+)\s*lux/g, '$1 lux'],
 
-    // Notação científica (converte para LaTeX)
+    // ═══════════════════════════════════════════════════════════════════════════
+    // NOTAÇÃO CIENTÍFICA
+    // ═══════════════════════════════════════════════════════════════════════════
     [/(\d+)\s*[xX×]\s*10\^(\d+)/g, '$1 \\times 10^{$2}'],
     [/(\d+)\s*[xX×]\s*10\^(-?\d+)/g, '$1 \\times 10^{$2}'],
+    [/(\d+[,\.]\d+)\s*[xX×]\s*10\^(-?\d+)/g, '$1 \\times 10^{$2}'],
 
     // Fórmulas químicas comuns - Ácidos
     [/\bH2SO4\b/g, 'H₂SO₄'],
@@ -196,22 +248,100 @@ function formatarSimbolos(texto: string): string {
     [/\bH\+/g, 'H⁺'],
     [/\bCl-/g, 'Cl⁻'],
 
-    // Setas de reação
+    // ═══════════════════════════════════════════════════════════════════════════
+    // REAÇÕES QUÍMICAS
+    // ═══════════════════════════════════════════════════════════════════════════
     [/<=>/g, '⇌'],
     [/->/g, '→'],
     [/<->/g, '↔'],
     [/=>/g, '⇒'],
+    [/\(aq\)/g, '₍ₐ₎'],
+    [/\(s\)/g, '₍ₛ₎'],
+    [/\(l\)/g, '₍ₗ₎'],
+    [/\(g\)/g, '₍₉₎'],
 
-    // Símbolos matemáticos
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SÍMBOLOS MATEMÁTICOS
+    // ═══════════════════════════════════════════════════════════════════════════
     [/(\d+)%/g, '$1%'],
     [/\+-/g, '±'],
     [/>=/g, '≥'],
     [/<=/g, '≤'],
     [/!=/g, '≠'],
     [/~=/g, '≈'],
-
-    // Letras gregas comuns em contexto científico
+    [/\bpi\b/g, 'π'],
+    [/\balpha\b/gi, 'α'],
+    [/\bbeta\b/gi, 'β'],
+    [/\bgamma\b/gi, 'γ'],
     [/\bdelta\b/gi, 'Δ'],
+    [/\btheta\b/gi, 'θ'],
+    [/\blambda\b/gi, 'λ'],
+    [/\bsigma\b/gi, 'σ'],
+    [/\bomega\b/gi, 'ω'],
+    [/\bmu\b/gi, 'μ'],
+    [/\brho\b/gi, 'ρ'],
+    [/\bphi\b/gi, 'φ'],
+    [/\bepsilon\b/gi, 'ε'],
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FÍSICA - VETORES E CONSTANTES
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Constantes físicas
+    [/\bc\s*=\s*3\s*[xX×]\s*10\^8/g, 'c = 3×10⁸ m/s'],
+    [/\bg\s*=\s*10\s*m\/s/g, 'g = 10 m/s²'],
+    [/\bg\s*=\s*9[,.]8/g, 'g = 9,8 m/s²'],
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BIOLOGIA - NOMENCLATURA CIENTÍFICA
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Formato: Genus species (primeira maiúscula, resto minúscula)
+    // Espécies comuns em questões ENEM
+    [/\b(Homo\s+sapiens)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Escherichia\s+coli)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Trypanosoma\s+cruzi)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Plasmodium\s+\w+)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Aedes\s+aegypti)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Apis\s+mellifera)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Zea\s+mays)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Saccharomyces\s+cerevisiae)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Oryza\s+sativa)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Glycine\s+max)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Coffea\s+arabica)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Manihot\s+esculenta)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Anopheles\s+\w+)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Leishmania\s+\w+)\b/g, '<em class="nome-cientifico">$1</em>'],
+    [/\b(Schistosoma\s+mansoni)\b/g, '<em class="nome-cientifico">$1</em>'],
+    // Padrão genérico para nomenclatura binomial (Maiúscula + minúscula)
+    [/\b([A-Z][a-z]+\s+[a-z]{3,})\b(?!\s*[A-Z])/g, '<em class="nome-cientifico">$1</em>'],
+
+    // Sequências de DNA/RNA
+    [/\b([ATCG]{4,})\b/g, '<span class="sequencia-dna">$1</span>'],
+    [/\b([AUCG]{4,})\b/g, '<span class="sequencia-rna">$1</span>'],
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // GEOGRAFIA - COORDENADAS
+    // ═══════════════════════════════════════════════════════════════════════════
+    [/(\d+)°(\d+)'([NS])/g, '$1°$2\'$3'],
+    [/(\d+)°(\d+)'([EWO])/g, '$1°$2\'$3'],
+    [/(\d+)°(\d+)'(\d+)"([NS])/g, '$1°$2\'$3"$4'],
+    [/(\d+)°(\d+)'(\d+)"([EWO])/g, '$1°$2\'$3"$4'],
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // FILOSOFIA/SOCIOLOGIA - TERMOS TÉCNICOS
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Termos gregos/latinos em itálico
+    [/\b(a priori)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(a posteriori)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(logos)\b/g, '<em class="termo-filosofico">$1</em>'],
+    [/\b(ethos)\b/g, '<em class="termo-filosofico">$1</em>'],
+    [/\b(pathos)\b/g, '<em class="termo-filosofico">$1</em>'],
+    [/\b(habitus)\b/g, '<em class="termo-filosofico">$1</em>'],
+    [/\b(status quo)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(modus operandi)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(lato sensu)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(stricto sensu)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(in loco)\b/gi, '<em class="termo-filosofico">$1</em>'],
+    [/\b(ipsis litteris)\b/gi, '<em class="termo-filosofico">$1</em>'],
   ]
 
   let resultado = texto
@@ -289,6 +419,12 @@ export default function ConteudoQuestao({
     noticia: 'questao-noticia-container',
     carta: 'questao-carta-container',
     anuncio: 'questao-anuncio-container',
+    documento: 'questao-documento-container',
+    tirinha: 'questao-tirinha-container',
+    artigo_lei: 'questao-artigo-lei-container',
+    entrevista: 'questao-entrevista-container',
+    letra_musica: 'questao-letra-musica-container',
+    infografico: 'questao-infografico-container',
   }
 
   const estiloTipo = estilosBase[tipo] || estilosBase.contexto

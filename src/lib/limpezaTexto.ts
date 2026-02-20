@@ -679,8 +679,14 @@ export function extrairFontesDoContexto(html: string): {
  * - noticia: manchete + lide + corpo
  * - carta: vocativo + corpo + despedida
  * - anuncio: texto publicitário
+ * - documento: documentos históricos, proclamações, decretos
+ * - tirinha: quadrinhos com balões de fala
+ * - artigo_lei: artigos jurídicos com incisos e parágrafos
+ * - entrevista: formato pergunta/resposta
+ * - letra_musica: letras de música com refrão
+ * - infografico: dados estatísticos formatados
  */
-export type GeneroTextual = 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista' | 'noticia' | 'carta' | 'anuncio'
+export type GeneroTextual = 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista' | 'noticia' | 'carta' | 'anuncio' | 'documento' | 'tirinha' | 'artigo_lei' | 'entrevista' | 'letra_musica' | 'infografico'
 
 export function detectarGeneroTextual(texto: string): GeneroTextual {
   if (!texto || typeof texto !== 'string') return 'prosa'
@@ -792,6 +798,73 @@ export function detectarGeneroTextual(texto: string): GeneroTextual {
     return 'cientifico'
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // DOCUMENTO HISTÓRICO: proclamações, decretos, manifestos
+  // ═══════════════════════════════════════════════════════════════════════
+  const palavrasDocumento = /\b(Decreto|Lei\s+n[°º]|Artigo|Proclama|Declara|Constituição|Manifesto|Carta\s+de|Tratado|Edital|Alvará|Regimento)\b/i.test(textoNormalizado)
+  const dataHistorica = /\b(século\s+[IVXLCDM]+|ano\s+de\s+\d{4}|\d{1,2}\s+de\s+\w+\s+de\s+\d{4})\b/i.test(textoNormalizado)
+  const linguagemArcaica = /\b(vossa|majestade|senhorias|súditos|mercê|outrossim|destarte|doravante)\b/i.test(textoNormalizado)
+
+  if ((palavrasDocumento && dataHistorica) || (palavrasDocumento && linguagemArcaica)) {
+    return 'documento'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ARTIGO DE LEI: incisos (I, II, III), parágrafos (§), alíneas (a, b, c)
+  // ═══════════════════════════════════════════════════════════════════════
+  const temIncisos = /^[IVXLCDM]+\s*[-–—]\s*/m.test(textoNormalizado) || /\b[IVXLCDM]+\s*[-–—]\s*\w/m.test(textoNormalizado)
+  const temParagrafos = /§\s*\d+[°º]?/i.test(textoNormalizado)
+  const temAlineas = /\b[a-z]\)\s+\w/m.test(textoNormalizado)
+  const temArtigo = /\bArt\.\s*\d+|Artigo\s+\d+/i.test(textoNormalizado)
+
+  if ((temArtigo && (temIncisos || temParagrafos)) || (temIncisos && temParagrafos) || (temArtigo && temAlineas)) {
+    return 'artigo_lei'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // TIRINHA/QUADRINHO: balões de fala, onomatopeias
+  // ═══════════════════════════════════════════════════════════════════════
+  const temBalaoFala = /[\[\(]["']|["\'][\)\]]|quadrinho|tirinha|balão/i.test(textoNormalizado)
+  const temOnomatopeia = /\b(POW|BAM|CRASH|SPLASH|BOOM|ZAP|WHAM|KABOOM|ARGH|UGH|HMM|HAHA|SNIFF|SOB)\b/i.test(textoNormalizado)
+  const temPersonagemFala = /^\w+:\s*["']/m.test(textoNormalizado)
+
+  if ((temBalaoFala && linhas.length <= 10) || (temOnomatopeia && linhas.length <= 10) || temPersonagemFala) {
+    return 'tirinha'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ENTREVISTA: formato pergunta/resposta
+  // ═══════════════════════════════════════════════════════════════════════
+  const temPergunta = linhas.filter(l => /\?$/.test(l.trim())).length
+  const temResposta = linhas.filter(l => /^R[:.]|^Resposta:/i.test(l.trim())).length
+  const temEntrevistador = /\b(Entrevistador|Repórter|Jornalista|P[:.])\s*[-–—:]/i.test(textoNormalizado)
+  const temEntrevistado = /\b(Entrevistado|E[:.])\s*[-–—:]/i.test(textoNormalizado)
+
+  if ((temPergunta >= 2 && temResposta >= 1) || (temEntrevistador && temEntrevistado)) {
+    return 'entrevista'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // LETRA DE MÚSICA: refrão repetido, estrutura de estrofes com repetição
+  // ═══════════════════════════════════════════════════════════════════════
+  const temRefrao = /\[?refrão\]?|bis\]?|\(2x\)|\(3x\)/i.test(textoNormalizado)
+  const linhasRepetidas = linhas.filter((l, i) => linhas.slice(i + 1).includes(l)).length
+
+  if (temRefrao || (linhasRepetidas >= 2 && proporcaoLinhasCurtas > 0.6)) {
+    return 'letra_musica'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // INFOGRÁFICO: dados estatísticos, percentuais múltiplos, listas de dados
+  // ═══════════════════════════════════════════════════════════════════════
+  const temPercentuais = (textoNormalizado.match(/\d+[,.]?\d*\s*%/g) || []).length
+  const temValoresNumericos = (textoNormalizado.match(/\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?/g) || []).length
+  const temUnidadesDados = /\b(mil|milhão|milhões|bilhão|bilhões|habitantes|pessoas|toneladas|hectares)\b/i.test(textoNormalizado)
+
+  if ((temPercentuais >= 3) || (temValoresNumericos >= 5 && temUnidadesDados)) {
+    return 'infografico'
+  }
+
   return 'prosa'
 }
 
@@ -817,6 +890,18 @@ export function formatarPorGenero(texto: string, genero?: GeneroTextual): string
       return formatarNoticia(texto)
     case 'anuncio':
       return formatarAnuncio(texto)
+    case 'documento':
+      return formatarDocumento(texto)
+    case 'artigo_lei':
+      return formatarArtigoLei(texto)
+    case 'tirinha':
+      return formatarTirinha(texto)
+    case 'entrevista':
+      return formatarEntrevista(texto)
+    case 'letra_musica':
+      return formatarLetraMusica(texto)
+    case 'infografico':
+      return formatarInfografico(texto)
     default:
       return texto
   }
@@ -1005,6 +1090,229 @@ function formatarAnuncio(texto: string): string {
   })
 
   return `<div class="questao-anuncio">${partes.join('')}</div>`
+}
+
+/**
+ * Formata texto como documento histórico (proclamações, decretos, manifestos)
+ */
+function formatarDocumento(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 1) return texto
+
+  const partes: string[] = []
+
+  linhas.forEach((linha, index) => {
+    // Título do documento (primeira linha curta ou em maiúsculas)
+    if (index === 0 && (linha.length < 80 || linha === linha.toUpperCase())) {
+      partes.push(`<h3 class="documento-titulo">${linha}</h3>`)
+    }
+    // Data histórica
+    else if (/^\d{1,2}\s+de\s+\w+\s+de\s+\d{4}|^Anno\s+de\s+\d{4}|^Em\s+\d{1,2}/i.test(linha)) {
+      partes.push(`<p class="documento-data">${linha}</p>`)
+    }
+    // Assinatura
+    else if (/^(Assinado|Dado|Feito|Publicado|Promulgado)/i.test(linha) || index === linhas.length - 1 && linha.length < 50) {
+      partes.push(`<p class="documento-assinatura">${linha}</p>`)
+    }
+    // Corpo do documento
+    else {
+      partes.push(`<p class="documento-paragrafo">${linha}</p>`)
+    }
+  })
+
+  return `<article class="questao-documento">${partes.join('')}</article>`
+}
+
+/**
+ * Formata texto como artigo de lei (com incisos, parágrafos, alíneas)
+ */
+function formatarArtigoLei(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 1) return texto
+
+  const partes: string[] = []
+
+  linhas.forEach(linha => {
+    // Artigo principal
+    if (/^Art\.\s*\d+|^Artigo\s+\d+/i.test(linha)) {
+      partes.push(`<p class="lei-artigo">${linha}</p>`)
+    }
+    // Parágrafo (§)
+    else if (/^§\s*\d+[°º]?/i.test(linha)) {
+      partes.push(`<p class="lei-paragrafo">${linha}</p>`)
+    }
+    // Inciso (I, II, III)
+    else if (/^[IVXLCDM]+\s*[-–—]/i.test(linha)) {
+      partes.push(`<p class="lei-inciso">${linha}</p>`)
+    }
+    // Alínea (a, b, c)
+    else if (/^[a-z]\)\s+/i.test(linha)) {
+      partes.push(`<p class="lei-alinea">${linha}</p>`)
+    }
+    // Parágrafo único
+    else if (/^Parágrafo\s+único/i.test(linha)) {
+      partes.push(`<p class="lei-paragrafo-unico">${linha}</p>`)
+    }
+    // Caput ou texto normal
+    else {
+      partes.push(`<p class="lei-texto">${linha}</p>`)
+    }
+  })
+
+  return `<div class="questao-artigo-lei">${partes.join('')}</div>`
+}
+
+/**
+ * Formata texto como tirinha/quadrinho
+ */
+function formatarTirinha(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 1) return texto
+
+  const partes: string[] = []
+
+  linhas.forEach(linha => {
+    // Fala de personagem (Personagem: "fala")
+    if (/^\w+:\s*["']/.test(linha)) {
+      const match = linha.match(/^(\w+):\s*["'](.+)["']?$/)
+      if (match) {
+        partes.push(`<div class="tirinha-fala"><span class="tirinha-personagem">${match[1]}:</span> <span class="tirinha-balao">"${match[2]}"</span></div>`)
+      } else {
+        partes.push(`<div class="tirinha-fala">${linha}</div>`)
+      }
+    }
+    // Onomatopeia (em maiúsculas)
+    else if (/^[A-Z]{2,}!*$/.test(linha.trim())) {
+      partes.push(`<p class="tirinha-onomatopeia">${linha}</p>`)
+    }
+    // Descrição de cena
+    else if (/^\[.+\]$/.test(linha) || /^\(.+\)$/.test(linha)) {
+      partes.push(`<p class="tirinha-descricao">${linha}</p>`)
+    }
+    // Texto normal
+    else {
+      partes.push(`<p class="tirinha-texto">${linha}</p>`)
+    }
+  })
+
+  return `<div class="questao-tirinha">${partes.join('')}</div>`
+}
+
+/**
+ * Formata texto como entrevista (pergunta/resposta)
+ */
+function formatarEntrevista(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 1) return texto
+
+  const partes: string[] = []
+
+  linhas.forEach(linha => {
+    // Pergunta
+    if (/\?$/.test(linha.trim()) || /^(P[:.]|Pergunta:|Entrevistador:|Repórter:)/i.test(linha)) {
+      partes.push(`<p class="entrevista-pergunta">${linha}</p>`)
+    }
+    // Resposta
+    else if (/^(R[:.]|Resposta:|Entrevistado:|E[:.])/i.test(linha)) {
+      partes.push(`<p class="entrevista-resposta">${linha}</p>`)
+    }
+    // Texto normal
+    else {
+      partes.push(`<p class="entrevista-texto">${linha}</p>`)
+    }
+  })
+
+  return `<div class="questao-entrevista">${partes.join('')}</div>`
+}
+
+/**
+ * Formata texto como letra de música (com estrofes e refrão)
+ */
+function formatarLetraMusica(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  // Separar estrofes (linhas em branco)
+  const estrofes = formatado.split(/\n\s*\n+/).filter(e => e.trim())
+
+  const estrofesFormatadas = estrofes.map(estrofe => {
+    const versos = estrofe.split(/\n/).filter(v => v.trim())
+
+    // Detectar se é refrão
+    const ehRefrao = /\[?refrão\]?|bis\]?|\(2x\)|\(3x\)/i.test(estrofe)
+    const classe = ehRefrao ? 'musica-refrao' : 'musica-estrofe'
+
+    return `<div class="${classe}">${versos.map(v => `<p class="musica-verso">${v}</p>`).join('')}</div>`
+  })
+
+  return `<div class="questao-letra-musica">${estrofesFormatadas.join('')}</div>`
+}
+
+/**
+ * Formata texto como infográfico (dados estatísticos)
+ */
+function formatarInfografico(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 1) return texto
+
+  const partes: string[] = []
+
+  linhas.forEach(linha => {
+    // Título/Categoria
+    if (linha.length < 50 && !/\d/.test(linha)) {
+      partes.push(`<h4 class="infografico-titulo">${linha}</h4>`)
+    }
+    // Dado com percentual
+    else if (/\d+[,.]?\d*\s*%/.test(linha)) {
+      partes.push(`<p class="infografico-percentual">${linha}</p>`)
+    }
+    // Dado numérico
+    else if (/\d{1,3}(?:[.,]\d{3})*/.test(linha)) {
+      partes.push(`<p class="infografico-numero">${linha}</p>`)
+    }
+    // Legenda/Fonte
+    else if (/^(Fonte:|Dados:|Pesquisa:)/i.test(linha)) {
+      partes.push(`<p class="infografico-fonte">${linha}</p>`)
+    }
+    // Texto normal
+    else {
+      partes.push(`<p class="infografico-texto">${linha}</p>`)
+    }
+  })
+
+  return `<div class="questao-infografico">${partes.join('')}</div>`
 }
 
 /**
