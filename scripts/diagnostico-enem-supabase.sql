@@ -759,3 +759,91 @@ SELECT
 FROM questoes_enem
 WHERE ano = 2024
 ORDER BY dia, numero;
+
+
+-- =============================================================================
+-- SCRIPT 11: QUESTÕES COM TABELAS E MARCADORES
+-- Verifica questões que possuem tabelas HTML ou listas com marcadores
+-- =============================================================================
+
+-- 11A: Questões com TABELAS HTML
+SELECT
+  '=== QUESTÕES COM TABELAS ===' AS secao,
+  id, ano, dia, numero, area,
+  SUBSTRING(e->>'conteudo', 1, 200) AS trecho_com_tabela
+FROM questoes_enem,
+     jsonb_array_elements(elementos) AS e
+WHERE e->>'conteudo' ILIKE '%<table%'
+   OR e->>'conteudo' ILIKE '%<tr%'
+   OR e->>'conteudo' ILIKE '%<td%'
+ORDER BY ano DESC, numero;
+
+-- 11B: Questões com LISTAS HTML (ul, ol, li)
+SELECT
+  '=== QUESTÕES COM LISTAS HTML ===' AS secao,
+  id, ano, dia, numero, area,
+  SUBSTRING(e->>'conteudo', 1, 200) AS trecho_com_lista
+FROM questoes_enem,
+     jsonb_array_elements(elementos) AS e
+WHERE e->>'conteudo' ILIKE '%<ul%'
+   OR e->>'conteudo' ILIKE '%<ol%'
+   OR e->>'conteudo' ILIKE '%<li%'
+ORDER BY ano DESC, numero;
+
+-- 11C: Questões com MARCADORES de texto (•, -, *, números)
+SELECT
+  '=== QUESTÕES COM MARCADORES TEXTO ===' AS secao,
+  id, ano, dia, numero, area,
+  SUBSTRING(e->>'conteudo', 1, 200) AS trecho_com_marcador
+FROM questoes_enem,
+     jsonb_array_elements(elementos) AS e
+WHERE e->>'conteudo' ~ E'(^|\\n)\\s*[•\\-\\*●○◦]\\s+'
+   OR e->>'conteudo' ~ E'(^|\\n)\\s*[1-9][0-9]?[\\.\\)]\\s+'
+   OR e->>'conteudo' ~ E'(^|\\n)\\s*[a-e][\\.\\)]\\s+'
+ORDER BY ano DESC, numero;
+
+-- 11D: Contagem resumida
+SELECT
+  'Resumo de elementos especiais' AS categoria,
+  COUNT(DISTINCT CASE WHEN e->>'conteudo' ILIKE '%<table%' THEN q.id END) AS com_tabelas,
+  COUNT(DISTINCT CASE WHEN e->>'conteudo' ILIKE '%<ul%' OR e->>'conteudo' ILIKE '%<ol%' THEN q.id END) AS com_listas_html,
+  COUNT(DISTINCT CASE WHEN e->>'conteudo' ~ E'(^|\\n)\\s*[•\\-\\*●○◦]\\s+' THEN q.id END) AS com_marcadores_texto
+FROM questoes_enem q,
+     jsonb_array_elements(q.elementos) AS e;
+
+
+-- =============================================================================
+-- SCRIPT 12: QUESTÕES COM GRÁFICOS E INFOGRÁFICOS
+-- Verifica questões que podem ter gráficos (geralmente como imagem)
+-- =============================================================================
+
+-- 12A: Questões com menção a gráfico/tabela/quadro no texto
+SELECT
+  '=== MENÇÕES A GRÁFICOS/TABELAS ===' AS secao,
+  id, ano, dia, numero, area,
+  tem_imagem,
+  CASE
+    WHEN comando ILIKE '%gráfico%' THEN 'gráfico'
+    WHEN comando ILIKE '%tabela%' THEN 'tabela'
+    WHEN comando ILIKE '%quadro%' THEN 'quadro'
+    WHEN comando ILIKE '%figura%' THEN 'figura'
+    WHEN comando ILIKE '%infográfico%' THEN 'infográfico'
+    ELSE 'outro'
+  END AS tipo_referencia
+FROM questoes_enem
+WHERE comando ILIKE '%gráfico%'
+   OR comando ILIKE '%tabela%'
+   OR comando ILIKE '%quadro%'
+   OR comando ILIKE '%figura%'
+   OR comando ILIKE '%infográfico%'
+ORDER BY ano DESC, numero;
+
+-- 12B: Contagem por tipo de referência visual
+SELECT
+  'Referências visuais no comando' AS categoria,
+  COUNT(*) FILTER (WHERE comando ILIKE '%gráfico%') AS menciona_grafico,
+  COUNT(*) FILTER (WHERE comando ILIKE '%tabela%') AS menciona_tabela,
+  COUNT(*) FILTER (WHERE comando ILIKE '%quadro%') AS menciona_quadro,
+  COUNT(*) FILTER (WHERE comando ILIKE '%figura%') AS menciona_figura,
+  COUNT(*) FILTER (WHERE comando ILIKE '%infográfico%') AS menciona_infografico
+FROM questoes_enem;
