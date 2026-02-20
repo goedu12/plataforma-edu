@@ -30,8 +30,8 @@ function comTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<
 // CONFIGURAÇÃO DO CLIENTE GEMINI
 // ═══════════════════════════════════════════════════════════
 
-// Gemini 2.5 Flash - modelo mais capaz com suporte avançado a imagens
-const MODELO_GEMINI = 'gemini-2.5-flash'
+// Gemma 3 27B - modelo gratuito via Google AI Studio com suporte multimodal
+const MODELO_GEMINI = 'gemma-3-27b-it'
 
 // Mantido para compatibilidade
 const MODELOS_DISPONIVEIS = [MODELO_GEMINI] as const
@@ -1150,10 +1150,9 @@ Retorne APENAS JSON válido:
   ]
 }`
 
-  // Tentar diferentes modelos - Pro primeiro para gabaritos corretos
+  // Tentar diferentes modelos - Gemma 3 27B principal (free tier)
   const modelosQuestoes = [
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
+    'gemma-3-27b-it',
     'gemini-2.0-flash-lite',
   ]
 
@@ -1319,11 +1318,10 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
   ]
 }`
 
-  // Tentar diferentes modelos
+  // Tentar diferentes modelos - Gemma 3 27B principal (free tier)
   const modelosQuestoes = [
+    'gemma-3-27b-it',
     'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
   ]
 
   for (const modelo of modelosQuestoes) {
@@ -1699,7 +1697,7 @@ EXEMPLO:
 Retorne JSON: {"questoes":[...]}`
 
   // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
-  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+  const modelos = ['gemma-3-27b-it', 'gemini-2.0-flash-lite']
 
   const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
     console.log(`[Gemini] Física EM iniciando ${modelo}...`)
@@ -1805,7 +1803,7 @@ EXEMPLO:
 Retorne JSON: {"questoes":[...]}`
 
   // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
-  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+  const modelos = ['gemma-3-27b-it', 'gemini-2.0-flash-lite']
 
   const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
     console.log(`[Gemini] Matemática EM iniciando ${modelo}...`)
@@ -1919,7 +1917,7 @@ EXEMPLO:
 Retorne JSON: {"questoes":[...]}`
 
   // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
-  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+  const modelos = ['gemma-3-27b-it', 'gemini-2.0-flash-lite']
 
   const tentarComModelo = async (modelo: string): Promise<QuestaoGeradaEF[]> => {
     console.log(`[Gemini] Matemática EF iniciando ${modelo}...`)

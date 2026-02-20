@@ -454,7 +454,7 @@ export async function POST(request: NextRequest) {
           content: respostaFinal,
           modo: resultado.modo || null,
           topico: resultado.topico || null,
-          modelo_usado: resultado.modelo_usado || 'gemini-2.5-flash',
+          modelo_usado: resultado.modelo_usado || 'gemma-3-27b-it',
         })
 
         // Atualizar sessão com modo/tópico predominante
