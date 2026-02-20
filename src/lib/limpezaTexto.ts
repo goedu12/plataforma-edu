@@ -669,50 +669,126 @@ export function extrairFontesDoContexto(html: string): {
 
 /**
  * Detecta o gênero textual do conteúdo para aplicar formatação adequada
- * Retorna: 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista'
+ * Gêneros suportados:
+ * - prosa: texto narrativo padrão com parágrafos
+ * - poema: versos e estrofes
+ * - citacao: texto com recuo (citação longa)
+ * - cientifico: texto com fórmulas
+ * - dialogo: falas com travessão
+ * - lista: itens enumerados
+ * - noticia: manchete + lide + corpo
+ * - carta: vocativo + corpo + despedida
+ * - anuncio: texto publicitário
  */
-export type GeneroTextual = 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista'
+export type GeneroTextual = 'prosa' | 'poema' | 'citacao' | 'cientifico' | 'dialogo' | 'lista' | 'noticia' | 'carta' | 'anuncio'
 
 export function detectarGeneroTextual(texto: string): GeneroTextual {
   if (!texto || typeof texto !== 'string') return 'prosa'
 
-  const textoLimpo = texto.replace(/<[^>]+>/g, '').trim()
-  const linhas = textoLimpo.split(/\n/).filter(l => l.trim())
+  // Normalizar texto: converter HTML breaks para newlines e remover tags
+  let textoNormalizado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .trim()
 
-  // Poema: linhas curtas (< 60 chars) em sequência, sem pontuação final típica de prosa
-  const linhasCurtas = linhas.filter(l => l.trim().length > 0 && l.trim().length < 60)
-  const proporcaoLinhasCurtas = linhasCurtas.length / Math.max(linhas.length, 1)
+  const linhas = textoNormalizado.split(/\n/).map(l => l.trim()).filter(l => l.length > 0)
 
-  // Versos tipicamente não terminam com ponto, e sim com vírgula, reticências ou nada
+  // Sem linhas suficientes = prosa
+  if (linhas.length < 2) return 'prosa'
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // CARTA: vocativo (Prezado, Caro, Senhor, A quem), despedida (Atenciosamente, Abraços)
+  // ═══════════════════════════════════════════════════════════════════════
+  const primeiraLinha = linhas[0]
+  const ultimasLinhas = linhas.slice(-3).join(' ')
+  const vocativoCarta = /^(Prezad[oa]s?|Car[oa]s?|Senhor[a]?|Excelentíssim[oa]|Ilustríssim[oa]|A quem possa interessar)/i.test(primeiraLinha)
+  const despedidaCarta = /(Atenciosamente|Cordialmente|Respeitosamente|Abraços?|Saudações|Grato|Obrigad[oa]|Att\.|Atenc\.|Sem mais)/i.test(ultimasLinhas)
+  const temDataCarta = /^\d{1,2}\s*(de\s*)?\w+\s*(de\s*)?\d{2,4}|^\w+,?\s*\d{1,2}\s*(de\s*)?\w+/i.test(primeiraLinha)
+
+  if ((vocativoCarta && despedidaCarta) || (vocativoCarta && temDataCarta)) {
+    return 'carta'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // NOTÍCIA: manchete curta + lide informativo (quem, o quê, quando, onde)
+  // ═══════════════════════════════════════════════════════════════════════
+  const mancheteCurta = linhas[0].length < 100 && linhas[0].length > 10
+  const temLide = linhas.length > 1 && linhas[1].length > 50
+  const palavrasNoticia = /\b(ontem|hoje|amanhã|segundo|conforme|informou|declarou|anunciou|ocorreu|aconteceu|foi\s+(realizado|divulgado|anunciado))\b/i.test(textoNormalizado)
+  const fontesJornalisticas = /\b(Folha|Estadão|Globo|Reuters|AFP|EFE|Agência|Jornal|Gazeta|G1|UOL)\b/i.test(textoNormalizado)
+
+  if (mancheteCurta && temLide && (palavrasNoticia || fontesJornalisticas)) {
+    return 'noticia'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ANÚNCIO/PROPAGANDA: frases curtas imperativas, slogan, call-to-action
+  // ═══════════════════════════════════════════════════════════════════════
+  const frasesImperativas = linhas.filter(l => /^(Compre|Adquira|Venha|Aproveite|Garanta|Ligue|Acesse|Clique|Descubra|Experimente|Confira|Não\s+perca|Promoção|Oferta|Grátis|Desconto)/i.test(l))
+  const temSlogan = linhas.some(l => l.length < 50 && /[!]$/.test(l))
+  const temPreco = /R\$\s*\d|%\s*(off|desconto)|parcelas?|à vista/i.test(textoNormalizado)
+
+  if ((frasesImperativas.length >= 1 && temSlogan) || (frasesImperativas.length >= 2) || (temPreco && temSlogan)) {
+    return 'anuncio'
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // POEMA: linhas curtas, sem pontuação final de prosa, estrutura de versos
+  // ═══════════════════════════════════════════════════════════════════════
+  const linhasCurtas = linhas.filter(l => l.length > 0 && l.length < 70)
+  const proporcaoLinhasCurtas = linhasCurtas.length / linhas.length
+
+  // Versos: não terminam com ponto, podem terminar com vírgula, reticências ou nada
   const linhasVerso = linhas.filter(l => {
     const t = l.trim()
-    return t.length > 0 && t.length < 80 && !/[.!?:;]$/.test(t)
+    // Verso típico: curto e não termina com ponto (mas pode ter ! ou ?)
+    return t.length > 0 && t.length < 80 && !/\.$/.test(t)
   })
-  const proporcaoVersos = linhasVerso.length / Math.max(linhas.length, 1)
+  const proporcaoVersos = linhasVerso.length / linhas.length
 
-  if (linhas.length >= 3 && proporcaoLinhasCurtas > 0.6 && proporcaoVersos > 0.5) {
+  // Indicadores de poema: rimas, repetições, estrutura estrófica
+  const temRepeticao = linhas.some((l, i) => i > 0 && linhas.slice(0, i).some(prev => prev === l))
+  const mediaComprimento = linhas.reduce((sum, l) => sum + l.length, 0) / linhas.length
+
+  // É poema se: maioria linhas curtas, terminam sem ponto, comprimento médio < 60
+  if (linhas.length >= 3 && proporcaoLinhasCurtas > 0.55 && proporcaoVersos > 0.4 && mediaComprimento < 65) {
+    return 'poema'
+  }
+  // Poema com repetição (refrão)
+  if (linhas.length >= 4 && temRepeticao && proporcaoLinhasCurtas > 0.5) {
     return 'poema'
   }
 
-  // Diálogo: linhas começando com travessão ou aspas de fala
-  const linhasDialogo = linhas.filter(l => /^[\u2014\u2013\-–—]["'"']?\s*[A-Z]/.test(l.trim()))
-  if (linhasDialogo.length >= 2 && linhasDialogo.length / linhas.length > 0.3) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // DIÁLOGO: linhas começando com travessão
+  // ═══════════════════════════════════════════════════════════════════════
+  const travessao = /^[\u2014\u2013\-–—]\s*/
+  const linhasDialogo = linhas.filter(l => travessao.test(l))
+  if (linhasDialogo.length >= 2 && linhasDialogo.length / linhas.length > 0.25) {
     return 'dialogo'
   }
 
-  // Citação: começa com aspas ou tem indicadores de citação
-  if (/^[""\[\(«]/.test(textoLimpo.trim()) || /apud|op\.\s*cit\.|ibidem|ibid\./i.test(textoLimpo)) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // CITAÇÃO: começa com aspas ou tem indicadores acadêmicos
+  // ═══════════════════════════════════════════════════════════════════════
+  const textoInicio = textoNormalizado.substring(0, 200)
+  if (/^[""\[\(«]/.test(textoInicio.trim()) || /apud|op\.\s*cit\.|ibidem|ibid\./i.test(textoNormalizado)) {
     return 'citacao'
   }
 
-  // Lista: linhas começando com marcadores ou numeração
+  // ═══════════════════════════════════════════════════════════════════════
+  // LISTA: linhas começando com marcadores ou numeração
+  // ═══════════════════════════════════════════════════════════════════════
   const linhasLista = linhas.filter(l => /^[\d]+[\.\)]\s|^[a-e][\.\)]\s|^[\-\*•]\s/i.test(l.trim()))
   if (linhasLista.length >= 3 && linhasLista.length / linhas.length > 0.5) {
     return 'lista'
   }
 
-  // Científico: contém fórmulas, símbolos matemáticos ou notação científica
-  if (/\$.*\$|\\frac|\\sqrt|[°±≤≥→⇌∆Δ]|mol\/L|m\/s|km\/h|\d+\s*×\s*10|[A-Z][a-z]?[₂₃₄₅₆]/.test(textoLimpo)) {
+  // ═══════════════════════════════════════════════════════════════════════
+  // CIENTÍFICO: fórmulas, símbolos matemáticos, notação científica
+  // ═══════════════════════════════════════════════════════════════════════
+  if (/\$.*\$|\\frac|\\sqrt|[°±≤≥→⇌∆Δ]|mol\/L|m\/s|km\/h|\d+\s*×\s*10|[A-Z][a-z]?[₂₃₄₅₆]/.test(textoNormalizado)) {
     return 'cientifico'
   }
 
@@ -735,6 +811,12 @@ export function formatarPorGenero(texto: string, genero?: GeneroTextual): string
       return formatarDialogo(texto)
     case 'citacao':
       return formatarCitacao(texto)
+    case 'carta':
+      return formatarCarta(texto)
+    case 'noticia':
+      return formatarNoticia(texto)
+    case 'anuncio':
+      return formatarAnuncio(texto)
     default:
       return texto
   }
@@ -742,45 +824,187 @@ export function formatarPorGenero(texto: string, genero?: GeneroTextual): string
 
 /**
  * Formata texto como poema preservando estrutura de versos e estrofes
+ * Lida com texto que pode ter HTML ou texto puro
  */
 function formatarPoema(texto: string): string {
-  // Preservar quebras de linha como versos
+  // Normalizar quebras de linha (converter <br> para \n)
   let formatado = texto
-    .replace(/\n\n+/g, '</div><div class="questao-estrofe">') // Estrofes separadas por linha em branco
-    .replace(/\n/g, '<br class="verso">') // Versos separados por quebra simples
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
 
-  // Envolver em container de poema
-  if (!formatado.includes('questao-poema')) {
-    formatado = `<div class="questao-poema"><div class="questao-estrofe">${formatado}</div></div>`
-  }
+  // Separar estrofes (linhas em branco)
+  const estrofes = formatado.split(/\n\s*\n+/).filter(e => e.trim())
 
-  return formatado
+  // Formatar cada estrofe
+  const estrofesFormatadas = estrofes.map(estrofe => {
+    // Cada linha dentro da estrofe é um verso
+    const versos = estrofe.split(/\n/).filter(v => v.trim())
+    return `<div class="questao-estrofe">${versos.join('<br class="verso">')}</div>`
+  })
+
+  return estrofesFormatadas.join('')
 }
 
 /**
- * Formata texto como diálogo com travessões
+ * Formata texto como diálogo com travessões destacados
+ * Lida com texto que pode ter HTML ou texto puro
  */
 function formatarDialogo(texto: string): string {
-  // Cada fala em linha separada
+  // Normalizar quebras de linha
   let formatado = texto
-    .replace(/\n/g, '<br>')
-    .replace(/([\u2014\u2013\-–—])\s*/g, '<span class="fala-marcador">$1</span> ')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n')
 
-  if (!formatado.includes('questao-dialogo')) {
-    formatado = `<div class="questao-dialogo">${formatado}</div>`
-  }
+  // Separar falas
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
 
-  return formatado
+  // Formatar cada fala com destaque no travessão
+  const falasFormatadas = linhas.map(linha => {
+    // Destacar travessão no início da fala
+    const falaFormatada = linha.replace(/^([\u2014\u2013\-–—])\s*/, '<span class="fala-marcador">$1</span> ')
+    return `<p class="fala">${falaFormatada}</p>`
+  })
+
+  return `<div class="questao-dialogo-wrapper">${falasFormatadas.join('')}</div>`
 }
 
 /**
- * Formata texto como citação longa (recuo de 4cm)
+ * Formata texto como citação longa (recuo de 4cm conforme ABNT)
  */
 function formatarCitacao(texto: string): string {
-  if (!texto.includes('questao-citacao')) {
-    return `<blockquote class="questao-citacao">${texto}</blockquote>`
+  // Não duplicar wrapper se já existe
+  if (texto.includes('questao-citacao')) {
+    return texto
   }
-  return texto
+  return `<blockquote class="questao-citacao">${texto}</blockquote>`
+}
+
+/**
+ * Formata texto como carta (vocativo, corpo, despedida)
+ */
+function formatarCarta(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 2) return texto
+
+  // Identificar partes da carta
+  const partes: string[] = []
+
+  // Data/Local (se houver)
+  const primeiraLinha = linhas[0]
+  let inicio = 0
+  if (/^\d{1,2}\s*(de\s*)?\w+\s*(de\s*)?\d{2,4}|^\w+,?\s*\d{1,2}\s*(de\s*)?\w+/i.test(primeiraLinha)) {
+    partes.push(`<div class="carta-data">${primeiraLinha}</div>`)
+    inicio = 1
+  }
+
+  // Vocativo
+  if (linhas[inicio] && /^(Prezad|Car[oa]|Senhor|Excelentíssim|Ilustríssim|A quem)/i.test(linhas[inicio])) {
+    partes.push(`<div class="carta-vocativo">${linhas[inicio]}</div>`)
+    inicio++
+  }
+
+  // Corpo
+  const corpoLinhas: string[] = []
+  let fim = linhas.length
+
+  // Identificar despedida (últimas linhas)
+  for (let i = linhas.length - 1; i >= inicio && i >= linhas.length - 3; i--) {
+    if (/(Atenciosamente|Cordialmente|Respeitosamente|Abraços?|Saudações|Grato|Obrigad[oa]|Att\.|Atenc\.|Sem mais)/i.test(linhas[i])) {
+      fim = i
+      break
+    }
+  }
+
+  // Corpo do texto
+  for (let i = inicio; i < fim; i++) {
+    corpoLinhas.push(`<p class="carta-paragrafo">${linhas[i]}</p>`)
+  }
+  if (corpoLinhas.length > 0) {
+    partes.push(`<div class="carta-corpo">${corpoLinhas.join('')}</div>`)
+  }
+
+  // Despedida e assinatura
+  if (fim < linhas.length) {
+    const despedidaLinhas = linhas.slice(fim).map(l => `<p>${l}</p>`).join('')
+    partes.push(`<div class="carta-despedida">${despedidaLinhas}</div>`)
+  }
+
+  return `<div class="questao-carta">${partes.join('')}</div>`
+}
+
+/**
+ * Formata texto como notícia (manchete + lide + corpo)
+ */
+function formatarNoticia(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 2) return texto
+
+  const partes: string[] = []
+
+  // Manchete (primeira linha, geralmente curta e impactante)
+  partes.push(`<h3 class="noticia-manchete">${linhas[0]}</h3>`)
+
+  // Lide (segundo parágrafo - resumo da notícia)
+  if (linhas.length > 1) {
+    partes.push(`<p class="noticia-lide">${linhas[1]}</p>`)
+  }
+
+  // Corpo (demais parágrafos)
+  if (linhas.length > 2) {
+    const corpoLinhas = linhas.slice(2).map(l => `<p class="noticia-paragrafo">${l}</p>`).join('')
+    partes.push(`<div class="noticia-corpo">${corpoLinhas}</div>`)
+  }
+
+  return `<article class="questao-noticia">${partes.join('')}</article>`
+}
+
+/**
+ * Formata texto como anúncio/propaganda
+ */
+function formatarAnuncio(texto: string): string {
+  // Normalizar quebras de linha
+  let formatado = texto
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  const linhas = formatado.split(/\n/).filter(l => l.trim())
+
+  if (linhas.length < 1) return texto
+
+  const partes: string[] = []
+
+  linhas.forEach(linha => {
+    // Slogan (linha curta com exclamação)
+    if (linha.length < 50 && /[!]$/.test(linha)) {
+      partes.push(`<p class="anuncio-slogan">${linha}</p>`)
+    }
+    // Call-to-action (imperativo)
+    else if (/^(Compre|Adquira|Venha|Aproveite|Garanta|Ligue|Acesse|Clique|Descubra|Experimente|Confira|Não\s+perca)/i.test(linha)) {
+      partes.push(`<p class="anuncio-cta">${linha}</p>`)
+    }
+    // Preço/Oferta
+    else if (/R\$\s*\d|%\s*(off|desconto)|parcelas?|à vista|Promoção|Oferta|Grátis|Desconto/i.test(linha)) {
+      partes.push(`<p class="anuncio-preco">${linha}</p>`)
+    }
+    // Texto comum
+    else {
+      partes.push(`<p class="anuncio-texto">${linha}</p>`)
+    }
+  })
+
+  return `<div class="questao-anuncio">${partes.join('')}</div>`
 }
 
 /**

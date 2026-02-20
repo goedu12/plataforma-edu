@@ -2500,19 +2500,30 @@ img {
 }
 
 /* ── Diálogo ── */
-.questao-dialogo {
+.questao-dialogo,
+.questao-dialogo-wrapper {
   padding-left: 0.5rem;
 }
 
-.questao-dialogo p {
+.questao-dialogo p,
+.questao-dialogo-wrapper p {
   text-indent: 0 !important;
   margin-bottom: 0.5rem;
 }
 
+.questao-dialogo .fala,
+.questao-dialogo-wrapper .fala {
+  text-indent: 0 !important;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+  line-height: 1.6;
+}
+
 /* Marcador de fala (travessão) */
 .fala-marcador {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-right: 0.25rem;
 }
 
 /* ── Citação Longa (recuo 4cm / 2.5rem) ── */
@@ -2558,6 +2569,150 @@ img {
 .questao-lista ol {
   margin-left: 1.5rem;
   margin-bottom: 0.75rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   GÊNEROS TEXTUAIS ADICIONAIS (Carta, Notícia, Anúncio)
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── CARTA ── */
+.questao-carta-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-carta {
+  padding: 1rem;
+  background: var(--bg-elevated);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-default);
+}
+
+.carta-data {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+.carta-vocativo {
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+}
+
+.carta-corpo {
+  margin-bottom: 1rem;
+}
+
+.carta-paragrafo {
+  text-indent: 2em;
+  margin-bottom: 0.5rem;
+  text-align: justify;
+}
+
+.carta-despedida {
+  margin-top: 1rem;
+  font-style: italic;
+}
+
+.carta-despedida p {
+  margin-bottom: 0.25rem;
+}
+
+/* ── NOTÍCIA ── */
+.questao-noticia-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-noticia {
+  padding: 0.75rem 0;
+}
+
+.noticia-manchete {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .noticia-manchete {
+    font-size: 1.25rem;
+  }
+}
+
+.noticia-lide {
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--color-accent);
+}
+
+.noticia-corpo {
+  margin-top: 0.5rem;
+}
+
+.noticia-paragrafo {
+  text-indent: 1.5em;
+  margin-bottom: 0.5rem;
+  text-align: justify;
+}
+
+/* ── ANÚNCIO/PROPAGANDA ── */
+.questao-anuncio-container .conteudo-questao {
+  text-indent: 0 !important;
+}
+
+.questao-anuncio {
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+  border-radius: 0.75rem;
+  border: 2px solid var(--color-accent);
+  text-align: center;
+}
+
+.anuncio-slogan {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+@media (min-width: 640px) {
+  .anuncio-slogan {
+    font-size: 1.5rem;
+  }
+}
+
+.anuncio-cta {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-accent);
+  color: white;
+  border-radius: 0.5rem;
+  display: inline-block;
+}
+
+.anuncio-preco {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--success);
+  margin-bottom: 0.5rem;
+}
+
+.anuncio-texto {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
 }
 
 /* ══════════════════════════════════════════════════════════════════════
