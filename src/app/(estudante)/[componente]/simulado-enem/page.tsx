@@ -12,6 +12,7 @@ import SafeImage, { isValidImageUrl } from '@/components/ui/SafeImage'
 import ImagemModal from '@/components/ui/ImagemModal'
 import ConteudoQuestao from '@/components/ConteudoQuestao'
 import { formatarFormula } from '@/lib/formatacao'
+import { extrairTituloDoTexto } from '@/lib/limpezaTexto'
 import type { Componente, QuestaoEnem, ElementoEnem } from '@/types'
 
 type StatusSimulado = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'FILTRO'
@@ -224,20 +225,32 @@ export default function SimuladoEnemPage() {
       }
       if (elem.tipo === 'texto' && elem.conteudo) {
         // Extrair título e fonte do próprio elemento (campos do JSONB)
-        const tituloDoElemento = elem.titulo
         const fonteDoElemento = elem.fonte
+
+        // Título: usar campo do JSONB ou extrair automaticamente do texto
+        let tituloExtraido: string | null = elem.titulo || null
+        let corpoTexto = elem.conteudo
+
+        // Se não tem título no campo, tentar extrair do início do texto
+        if (!tituloExtraido) {
+          const { titulo, corpo } = extrairTituloDoTexto(elem.conteudo)
+          if (titulo) {
+            tituloExtraido = titulo
+            corpoTexto = corpo
+          }
+        }
 
         return (
           <div key={idx} className="mb-3">
-            {/* Título do texto (se existir no campo titulo do elemento) */}
-            {tituloDoElemento && (
-              <h4 className="font-semibold text-sm sm:text-base mb-2" style={{ color: 'var(--text-primary)' }}>
-                {tituloDoElemento}
+            {/* Título do texto (do campo JSONB ou extraído automaticamente) */}
+            {tituloExtraido && (
+              <h4 className="font-bold text-sm sm:text-base mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
+                {tituloExtraido}
               </h4>
             )}
 
-            {/* Conteúdo do texto */}
-            <ConteudoQuestao conteudo={elem.conteudo} tipo="contexto" separarFonte={!fonteDoElemento} />
+            {/* Conteúdo do texto (sem o título se foi extraído) */}
+            <ConteudoQuestao conteudo={corpoTexto} tipo="contexto" separarFonte={!fonteDoElemento} />
 
             {/* Fonte/referência (se existir no campo fonte do elemento) */}
             {fonteDoElemento && (

@@ -6,7 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
 import 'katex/dist/katex.min.css'
-import { detectarGeneroTextual, separarTextoEFonte, type GeneroTextual } from '@/lib/limpezaTexto'
+import { detectarGeneroTextual, separarTextoEFonte, formatarPorGenero, type GeneroTextual } from '@/lib/limpezaTexto'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTE: ConteudoQuestao
@@ -248,6 +248,11 @@ export default function ConteudoQuestao({
 
     let texto = corpo
 
+    // Aplicar formatação específica por gênero textual (poema, diálogo, citação)
+    if (tipo === 'contexto' && generoTextual !== 'prosa') {
+      texto = formatarPorGenero(texto, generoTextual)
+    }
+
     // Formatar símbolos especiais
     texto = formatarSimbolos(texto)
 
@@ -255,7 +260,7 @@ export default function ConteudoQuestao({
     texto = htmlParaMarkdown(texto)
 
     return texto
-  }, [corpo])
+  }, [corpo, tipo, generoTextual])
 
   const usarMarkdown = useMemo(() => {
     // Usar Markdown se contiver LaTeX ou formatação Markdown

@@ -2500,19 +2500,30 @@ img {
 }
 
 /* ── Diálogo ── */
-.questao-dialogo {
+.questao-dialogo,
+.questao-dialogo-wrapper {
   padding-left: 0.5rem;
 }
 
-.questao-dialogo p {
+.questao-dialogo p,
+.questao-dialogo-wrapper p {
   text-indent: 0 !important;
   margin-bottom: 0.5rem;
 }
 
+.questao-dialogo .fala,
+.questao-dialogo-wrapper .fala {
+  text-indent: 0 !important;
+  margin-bottom: 0.5rem;
+  padding-left: 0.25rem;
+  line-height: 1.6;
+}
+
 /* Marcador de fala (travessão) */
 .fala-marcador {
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-right: 0.25rem;
 }
 
 /* ── Citação Longa (recuo 4cm / 2.5rem) ── */
