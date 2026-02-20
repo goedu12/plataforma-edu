@@ -286,6 +286,9 @@ export default function ConteudoQuestao({
     cientifico: 'questao-cientifico',
     dialogo: 'questao-dialogo',
     lista: 'questao-lista',
+    noticia: 'questao-noticia-container',
+    carta: 'questao-carta-container',
+    anuncio: 'questao-anuncio-container',
   }
 
   const estiloTipo = estilosBase[tipo] || estilosBase.contexto
