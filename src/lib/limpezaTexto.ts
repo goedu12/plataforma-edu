@@ -544,6 +544,44 @@ export function processarContexto(
   // Formatar matemática
   processado = formatarMatematica(processado)
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FORMATAÇÃO DE PARÁGRAFOS E TRAVESSÕES - Padrão ENEM
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // 1. Normalizar travessões para em dash (—)
+  processado = processado.replace(/—|–|--/g, '—')
+
+  // 2. Normalizar aspas
+  processado = processado.replace(/[""]/g, '"')
+  processado = processado.replace(/['']/g, "'")
+
+  // 3. Travessões de diálogo - cada fala em novo parágrafo
+  // Travessão após pontuação final (.!?) = novo parágrafo
+  processado = processado.replace(/([.!?])\s*—\s*/g, '$1\n\n— ')
+  // Travessão após aspas = novo parágrafo
+  processado = processado.replace(/([""'])\s*—\s*/g, '$1\n\n— ')
+  // Travessão no meio do texto (após palavra) = novo parágrafo
+  processado = processado.replace(/([a-záàâãéêíóôõúç])\s+—\s+([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/gi, '$1\n\n— $2')
+
+  // 4. Detecção inteligente de parágrafos
+  // Lista de abreviações comuns que NÃO devem quebrar parágrafo
+  const abreviacoes = /(?:Dr|Dra|Sr|Sra|Prof|Profa|Fig|Tab|Art|Inc|Ltda|S\.A|etc|vol|p|pp|ed|org|coord|n|nº|ex)\./gi
+  const protecoes: string[] = []
+  processado = processado.replace(abreviacoes, (match) => {
+    protecoes.push(match)
+    return `§§ABREV${protecoes.length - 1}§§`
+  })
+
+  // Ponto/exclamação/interrogação + 2+ espaços + maiúscula = novo parágrafo
+  processado = processado.replace(/([.!?])\s{2,}([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/g, '$1\n\n$2')
+
+  // Restaurar abreviações
+  processado = processado.replace(/§§ABREV(\d+)§§/g, (_, index) => protecoes[parseInt(index)] || '')
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONVERSÃO DE QUEBRAS EM TAGS HTML
+  // ═══════════════════════════════════════════════════════════════════════════
+
   // Converter quebras de linha em parágrafos para melhor espaçamento
   // Primeiro normaliza múltiplas quebras
   processado = processado.replace(/\n{3,}/g, '\n\n')

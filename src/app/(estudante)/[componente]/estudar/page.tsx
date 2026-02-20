@@ -10,6 +10,7 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto } from '@/lib/limpezaTexto'
 
 type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'LIMITE_SEMANAL' | 'FORA_PERIODO'
 type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -336,9 +337,11 @@ export default function EstudarPage() {
 
                 {/* Enunciado */}
                 <div className="card-chromebook">
-                  <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-                    {formatarFormula(questao.enunciado)}
-                  </p>
+                  <div
+                    className="enunciado-chromebook questao-texto"
+                    style={{ color: 'var(--text-primary)' }}
+                    dangerouslySetInnerHTML={{ __html: processarContexto(questao.enunciado) }}
+                  />
                 </div>
 
                 {/* Alternativas - Ultra compactas */}

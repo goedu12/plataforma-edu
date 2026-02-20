@@ -11,6 +11,7 @@ import NavigationRail from '@/components/NavigationRail'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
+import { processarContexto } from '@/lib/limpezaTexto'
 
 type StatusDesafio = 'NOVO' | 'EM_ANDAMENTO' | 'SEM_QUESTOES' | 'ERRO' | 'RESULTADO'
 
@@ -466,9 +467,11 @@ export default function DesafioPage() {
 
               {/* Enunciado */}
               <div className="card-chromebook">
-                <p className="enunciado-chromebook" style={{ color: 'var(--text-primary)' }}>
-                  {formatarFormula(questaoAtualData.enunciado)}
-                </p>
+                <div
+                  className="enunciado-chromebook questao-texto"
+                  style={{ color: 'var(--text-primary)' }}
+                  dangerouslySetInnerHTML={{ __html: processarContexto(questaoAtualData.enunciado) }}
+                />
               </div>
 
               {/* Alternativas - Ultra compactas */}
