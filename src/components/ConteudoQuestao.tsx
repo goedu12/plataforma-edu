@@ -28,40 +28,76 @@ interface ConteudoQuestaoProps {
 }
 
 // Converte HTML específico para Markdown compatível com KaTeX
+// IMPORTANTE: Garante que parágrafos sejam separados corretamente para aplicar recuo
 function htmlParaMarkdown(html: string): string {
   if (!html) return ''
 
   let texto = html
 
-  // Preservar quebras de linha
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 1: Normalizar estrutura de parágrafos
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Converter </p><p> em dupla quebra (novo parágrafo)
+  texto = texto.replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+
+  // Converter <p> e </p> isolados em quebras
+  texto = texto.replace(/<p[^>]*>/gi, '')
+  texto = texto.replace(/<\/p>/gi, '\n\n')
+
+  // Converter </div><div> em dupla quebra (novo parágrafo)
+  texto = texto.replace(/<\/div>\s*<div[^>]*>/gi, '\n\n')
+  texto = texto.replace(/<div[^>]*>/gi, '')
+  texto = texto.replace(/<\/div>/gi, '\n\n')
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 2: Tratar quebras de linha <br>
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Múltiplos <br> seguidos = novo parágrafo
+  texto = texto.replace(/(<br\s*\/?>\s*){2,}/gi, '\n\n')
+
+  // <br> único = quebra de linha simples (dentro do mesmo parágrafo)
   texto = texto.replace(/<br\s*\/?>/gi, '\n')
 
-  // Converter tags HTML para Markdown
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 3: Tratar travessões de diálogo (cada fala em novo parágrafo)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Travessão no início de linha após texto = novo parágrafo
+  texto = texto.replace(/([^\n])\s*([\u2014\u2013—–-]\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/g, '$1\n\n$2')
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 4: Converter tags HTML para Markdown
+  // ═══════════════════════════════════════════════════════════════════════════
+
   texto = texto.replace(/<strong>([\s\S]*?)<\/strong>/gi, '**$1**')
   texto = texto.replace(/<b>([\s\S]*?)<\/b>/gi, '**$1**')
   texto = texto.replace(/<em>([\s\S]*?)<\/em>/gi, '*$1*')
   texto = texto.replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*')
   texto = texto.replace(/<u>([\s\S]*?)<\/u>/gi, '<u>$1</u>') // Manter underline como HTML
+
   // Manter <sup> e <sub> como HTML - o rehype-raw vai processar corretamente
   // NÃO converter para LaTeX ^{} e _{} pois só funciona dentro de delimitadores $...$
   texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '<sup>$1</sup>')
   texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '<sub>$1</sub>')
 
-  // Converter <small> para classe especial - fonte alinhada à direita
+  // Converter <small> para classe especial - fonte alinhada à esquerda
   texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
-  // Preservar spans com classes importantes (fontes, referências) - NÃO converter para markdown
-  // O rehype-raw vai processar esses spans como HTML inline
-
-  // Remover tags estruturais mantendo conteúdo
-  texto = texto.replace(/<\/?p>/gi, '\n')
-  texto = texto.replace(/<\/?div>/gi, '\n')
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 5: Limpar spans e normalizar espaços
+  // ═══════════════════════════════════════════════════════════════════════════
 
   // Remover apenas spans SEM classes importantes
-  texto = texto.replace(/<span(?![^>]*class=["'](?:questao-fonte|ref-figura|ref-tabela|questao-titulo)["'])[^>]*>([\s\S]*?)<\/span>/gi, '$1')
+  texto = texto.replace(/<span(?![^>]*class=["'](?:questao-fonte|ref-figura|ref-tabela|questao-titulo|titulo-texto)["'])[^>]*>([\s\S]*?)<\/span>/gi, '$1')
 
-  // Limpar múltiplas quebras de linha
+  // Normalizar quebras de linha: máximo 2 consecutivas (1 parágrafo)
   texto = texto.replace(/\n{3,}/g, '\n\n')
+
+  // Limpar espaços extras no início/fim de linhas
+  texto = texto.split('\n').map(linha => linha.trim()).join('\n')
+
   texto = texto.trim()
 
   return texto
