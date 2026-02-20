@@ -42,8 +42,10 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<em>([\s\S]*?)<\/em>/gi, '*$1*')
   texto = texto.replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*')
   texto = texto.replace(/<u>([\s\S]*?)<\/u>/gi, '<u>$1</u>') // Manter underline como HTML
-  texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '^{$1}') // Converter para LaTeX superscript
-  texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '_{$1}') // Converter para LaTeX subscript
+  // Manter <sup> e <sub> como HTML - o rehype-raw vai processar corretamente
+  // NÃO converter para LaTeX ^{} e _{} pois só funciona dentro de delimitadores $...$
+  texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '<sup>$1</sup>')
+  texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '<sub>$1</sub>')
 
   // Converter <small> para classe especial - fonte alinhada à direita
   texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
@@ -505,9 +507,9 @@ export default function ConteudoQuestao({
                   </span>
                 )
               }
-              if (spanClass === 'questao-titulo') {
+              if (spanClass === 'questao-titulo' || spanClass === 'titulo-texto') {
                 return (
-                  <span className="questao-titulo block font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+                  <span className="questao-titulo-texto" style={{ color: 'var(--text-primary)' }}>
                     {children}
                   </span>
                 )
@@ -528,14 +530,14 @@ export default function ConteudoQuestao({
               }
               return <span className={spanClass}>{children}</span>
             },
-            // Títulos h3 e h4 para títulos de textos
+            // Títulos h3 e h4 para títulos de textos - PADRÃO ENEM: centralizado e negrito
             h3: ({ children }) => (
-              <h3 className="font-bold text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+              <h3 className="questao-titulo-texto" style={{ color: 'var(--text-primary)' }}>
                 {children}
               </h3>
             ),
             h4: ({ children }) => (
-              <h4 className="font-semibold text-sm mb-1.5" style={{ color: 'var(--text-primary)' }}>
+              <h4 className="questao-titulo-texto" style={{ color: 'var(--text-primary)', fontSize: '0.875rem' }}>
                 {children}
               </h4>
             ),
