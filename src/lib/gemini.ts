@@ -30,8 +30,8 @@ function comTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<
 // CONFIGURAÇÃO DO CLIENTE GEMINI
 // ═══════════════════════════════════════════════════════════
 
-// Gemini 2.5 Flash - modelo mais capaz com suporte avançado a imagens
-const MODELO_GEMINI = 'gemini-2.5-flash'
+// Gemma 3 27B - modelo gratuito via Google AI Studio com suporte multimodal
+const MODELO_GEMINI = 'gemma-3-27b-it'
 
 // Mantido para compatibilidade
 const MODELOS_DISPONIVEIS = [MODELO_GEMINI] as const
@@ -176,14 +176,24 @@ async function testarModelo(
 ): Promise<{ sucesso: boolean; resposta?: string; erro?: string }> {
   try {
     const genAI = getGenAI()
+
+    // Gemma não suporta systemInstruction - apenas Gemini
+    // Para Gemma, incorporamos as instruções no início do prompt
+    const isGemma = nomeModelo.startsWith('gemma')
+
     const modelConfig: { model: string; systemInstruction?: string } = { model: nomeModelo }
 
-    // Usar systemInstruction nativa da API para melhor separação de contexto
-    if (systemInstruction) {
+    // Usar systemInstruction nativa apenas para modelos Gemini
+    if (systemInstruction && !isGemma) {
       modelConfig.systemInstruction = systemInstruction
     }
 
     const model = genAI.getGenerativeModel(modelConfig)
+
+    // Para Gemma, prefixar o prompt com as instruções de sistema
+    const promptFinal = (systemInstruction && isGemma)
+      ? `INSTRUÇÕES DO SISTEMA:\n${systemInstruction}\n\n---\n\n${prompt}`
+      : prompt
 
     // Construir conteúdo multimodal se tiver imagem
     let conteudo: string | Part[]
@@ -191,7 +201,7 @@ async function testarModelo(
     if (imagemBase64) {
       // Multimodal: texto + imagem
       conteudo = [
-        { text: prompt },
+        { text: promptFinal },
         {
           inlineData: {
             mimeType: 'image/jpeg',
@@ -201,7 +211,7 @@ async function testarModelo(
       ]
     } else {
       // Apenas texto
-      conteudo = prompt
+      conteudo = promptFinal
     }
 
     const result = await comTimeout(
@@ -1150,10 +1160,9 @@ Retorne APENAS JSON válido:
   ]
 }`
 
-  // Tentar diferentes modelos - Pro primeiro para gabaritos corretos
+  // Tentar diferentes modelos - Gemma 3 27B principal (free tier)
   const modelosQuestoes = [
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
+    'gemma-3-27b-it',
     'gemini-2.0-flash-lite',
   ]
 
@@ -1319,11 +1328,10 @@ Retorne APENAS um JSON válido no formato (sem markdown, sem texto adicional):
   ]
 }`
 
-  // Tentar diferentes modelos
+  // Tentar diferentes modelos - Gemma 3 27B principal (free tier)
   const modelosQuestoes = [
+    'gemma-3-27b-it',
     'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
   ]
 
   for (const modelo of modelosQuestoes) {
@@ -1699,7 +1707,7 @@ EXEMPLO:
 Retorne JSON: {"questoes":[...]}`
 
   // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
-  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+  const modelos = ['gemma-3-27b-it', 'gemini-2.0-flash-lite']
 
   const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
     console.log(`[Gemini] Física EM iniciando ${modelo}...`)
@@ -1805,7 +1813,7 @@ EXEMPLO:
 Retorne JSON: {"questoes":[...]}`
 
   // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
-  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+  const modelos = ['gemma-3-27b-it', 'gemini-2.0-flash-lite']
 
   const tentarComModelo = async (modelo: string): Promise<QuestaoGerada[]> => {
     console.log(`[Gemini] Matemática EM iniciando ${modelo}...`)
@@ -1919,7 +1927,7 @@ EXEMPLO:
 Retorne JSON: {"questoes":[...]}`
 
   // OTIMIZADO: Execução PARALELA dos modelos - primeiro que responder ganha
-  const modelos = ['gemini-2.0-flash-lite', 'gemini-1.5-flash']
+  const modelos = ['gemma-3-27b-it', 'gemini-2.0-flash-lite']
 
   const tentarComModelo = async (modelo: string): Promise<QuestaoGeradaEF[]> => {
     console.log(`[Gemini] Matemática EF iniciando ${modelo}...`)
