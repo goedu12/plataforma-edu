@@ -31,13 +31,25 @@ interface ConteudoQuestaoProps {
 
 // Converte HTML específico para Markdown compatível com KaTeX
 // IMPORTANTE: Garante que parágrafos sejam separados corretamente para aplicar recuo
+// PADRÃO ENEM: Cada parágrafo deve ter recuo na primeira linha
 function htmlParaMarkdown(html: string): string {
   if (!html) return ''
 
   let texto = html
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ETAPA 1: Normalizar estrutura de parágrafos
+  // ETAPA 1: PRÉ-PROCESSAMENTO - Normalizar caracteres especiais
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Normalizar diferentes tipos de travessão para o padrão Unicode (em dash)
+  texto = texto.replace(/—|–|--/g, '—') // Padronizar para em dash (U+2014)
+
+  // Normalizar aspas
+  texto = texto.replace(/[""]/g, '"')
+  texto = texto.replace(/['']/g, "'")
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 2: ESTRUTURA DE PARÁGRAFOS - Tags HTML
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Converter </p><p> em dupla quebra (novo parágrafo)
@@ -53,7 +65,7 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<\/div>/gi, '\n\n')
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ETAPA 2: Tratar quebras de linha <br>
+  // ETAPA 3: QUEBRAS DE LINHA <br>
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Múltiplos <br> seguidos = novo parágrafo
@@ -63,14 +75,47 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<br\s*\/?>/gi, '\n')
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ETAPA 3: Tratar travessões de diálogo (cada fala em novo parágrafo)
+  // ETAPA 4: TRAVESSÕES DE DIÁLOGO - Padrão ENEM
+  // Cada fala com travessão deve iniciar um novo parágrafo
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Travessão no início de linha após texto = novo parágrafo
-  texto = texto.replace(/([^\n])\s*([\u2014\u2013—–-]\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/g, '$1\n\n$2')
+  // Travessão após pontuação final (.!?) = novo parágrafo
+  texto = texto.replace(/([.!?])\s*—\s*/g, '$1\n\n— ')
+
+  // Travessão após aspas fechando = novo parágrafo
+  texto = texto.replace(/([""'])\s*—\s*/g, '$1\n\n— ')
+
+  // Travessão no meio do texto (após palavra) = novo parágrafo
+  texto = texto.replace(/([a-záàâãéêíóôõúç])\s+—\s+([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/gi, '$1\n\n— $2')
+
+  // Travessão no início absoluto ou após quebra = garantir formato
+  texto = texto.replace(/^\s*—\s*/gm, '— ')
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ETAPA 4: Converter tags HTML para Markdown
+  // ETAPA 5: DETECÇÃO INTELIGENTE DE PARÁGRAFOS
+  // Ponto final + espaços + letra maiúscula = possível novo parágrafo
+  // CUIDADO: Não quebrar abreviações, siglas ou nomes próprios
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Lista de abreviações comuns que NÃO devem quebrar parágrafo
+  const abreviacoes = /(?:Dr|Dra|Sr|Sra|Prof|Profa|Fig|Tab|Art|Inc|Ltda|S\.A|etc|vol|p|pp|ed|org|coord|n|nº|ex)\./gi
+
+  // Proteger abreviações temporariamente
+  const protecoes: string[] = []
+  texto = texto.replace(abreviacoes, (match) => {
+    protecoes.push(match)
+    return `§§ABREV${protecoes.length - 1}§§`
+  })
+
+  // Detectar fim de frase + início de novo parágrafo
+  // Padrão: ponto/exclamação/interrogação + 2+ espaços + maiúscula = novo parágrafo
+  texto = texto.replace(/([.!?])\s{2,}([A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/g, '$1\n\n$2')
+
+  // Restaurar abreviações
+  texto = texto.replace(/§§ABREV(\d+)§§/g, (_, index) => protecoes[parseInt(index)])
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ETAPA 6: CONVERTER TAGS HTML PARA MARKDOWN
   // ═══════════════════════════════════════════════════════════════════════════
 
   texto = texto.replace(/<strong>([\s\S]*?)<\/strong>/gi, '**$1**')
@@ -80,7 +125,6 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<u>([\s\S]*?)<\/u>/gi, '<u>$1</u>') // Manter underline como HTML
 
   // Manter <sup> e <sub> como HTML - o rehype-raw vai processar corretamente
-  // NÃO converter para LaTeX ^{} e _{} pois só funciona dentro de delimitadores $...$
   texto = texto.replace(/<sup>([\s\S]*?)<\/sup>/gi, '<sup>$1</sup>')
   texto = texto.replace(/<sub>([\s\S]*?)<\/sub>/gi, '<sub>$1</sub>')
 
@@ -88,17 +132,20 @@ function htmlParaMarkdown(html: string): string {
   texto = texto.replace(/<small>([\s\S]*?)<\/small>/gi, '<span class="questao-fonte">$1</span>')
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // ETAPA 5: Limpar spans e normalizar espaços
+  // ETAPA 7: LIMPAR E NORMALIZAR
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Remover apenas spans SEM classes importantes
+  // Remover spans SEM classes importantes
   texto = texto.replace(/<span(?![^>]*class=["'](?:questao-fonte|ref-figura|ref-tabela|questao-titulo|titulo-texto)["'])[^>]*>([\s\S]*?)<\/span>/gi, '$1')
 
-  // Normalizar quebras de linha: máximo 2 consecutivas (1 parágrafo)
+  // Normalizar quebras de linha: máximo 2 consecutivas
   texto = texto.replace(/\n{3,}/g, '\n\n')
 
-  // Limpar espaços extras no início/fim de linhas
+  // Limpar espaços extras no início/fim de linhas (preservar indentação intencional)
   texto = texto.split('\n').map(linha => linha.trim()).join('\n')
+
+  // Limpar espaços múltiplos dentro do texto
+  texto = texto.replace(/[ \t]{2,}/g, ' ')
 
   texto = texto.trim()
 

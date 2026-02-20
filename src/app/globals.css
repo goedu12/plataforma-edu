@@ -2402,6 +2402,7 @@ img {
   text-indent: 1.5em;
   margin-bottom: 0.75rem;
   text-align: justify;
+  line-height: 1.75;
 }
 
 /* PADRÃO ENEM: TODOS os parágrafos com recuo, inclusive o primeiro */
@@ -2411,6 +2412,49 @@ img {
 
 .conteudo-questao > p:last-child {
   margin-bottom: 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TRAVESSÕES DE DIÁLOGO - Padrão ENEM
+   Falas com travessão (—) devem ter formatação especial
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Parágrafos que começam com travessão = fala de diálogo */
+.conteudo-questao p,
+.questao-texto p {
+  /* Detectar travessão no início via CSS não é possível,
+     mas garantimos que o espaçamento seja adequado */
+}
+
+/* Espaçamento entre parágrafos para leitura fluida */
+.conteudo-questao p + p,
+.questao-texto p + p {
+  margin-top: 0.5rem;
+}
+
+/* Travessão em destaque (quando usado no início de fala) */
+.conteudo-questao p:first-letter,
+.questao-texto p:first-letter {
+  /* Não aplicar estilo especial na primeira letra por padrão */
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ESPAÇAMENTO ENTRE PARÁGRAFOS - Padrão ENEM
+   Garantir separação visual clara entre parágrafos
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Espaçamento consistente */
+.questao-texto,
+.conteudo-questao {
+  /* Espaçamento entre linhas */
+  line-height: 1.75;
+}
+
+@media (min-width: 640px) {
+  .questao-texto,
+  .conteudo-questao {
+    line-height: 1.8;
+  }
 }
 
 /* ── Fonte/Referência bibliográfica ── */
