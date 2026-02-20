@@ -15,8 +15,10 @@ import { detectarGeneroTextual, separarTextoEFonte, formatarPorGenero, type Gene
 // - LaTeX/KaTeX para fórmulas matemáticas ($...$, $$...$$)
 // - Markdown para formatação rica
 // - Descrições de imagens em itálico [...]
-// - Fontes e referências em tamanho menor (UMA LINHA ABAIXO)
-// - Detecção automática de gênero textual (prosa, poema, citação, etc.)
+// - Fontes e referências em tamanho menor (UMA LINHA ABAIXO, alinhada à esquerda)
+// - Detecção automática de gênero textual (prosa, poema, citação, diálogo, etc.)
+// - Parágrafos com recuo na primeira linha (padrão ENEM)
+// - Travessões de diálogo em parágrafos separados
 // ═══════════════════════════════════════════════════════════════════════════════
 
 interface ConteudoQuestaoProps {
