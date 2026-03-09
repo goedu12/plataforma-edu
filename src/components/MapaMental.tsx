@@ -75,6 +75,43 @@ export default function MapaMental({ codigo, corPrimaria = 'var(--color-fisica)'
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.25, 0.5))
   const toggleFullscreen = () => setFullscreen(prev => !prev)
 
+  // Focus trap e atalhos de teclado para fullscreen (acessibilidade)
+  useEffect(() => {
+    if (!fullscreen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFullscreen(false)
+
+      // Focus trap - manter foco dentro do modal
+      if (e.key === 'Tab' && containerRef.current) {
+        const parent = containerRef.current.closest('[class*="fixed"]')
+        const focusableElements = parent?.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusableElements && focusableElements.length > 0) {
+          const firstElement = focusableElements[0] as HTMLElement
+          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+          if (e.shiftKey && document.activeElement === firstElement) {
+            lastElement.focus()
+            e.preventDefault()
+          } else if (!e.shiftKey && document.activeElement === lastElement) {
+            firstElement.focus()
+            e.preventDefault()
+          }
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [fullscreen])
+
   if (erro) {
     return (
       <div
