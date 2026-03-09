@@ -418,9 +418,11 @@ export function gerarRelatorioRevisao(resultado: ResultadoRevisao): string {
   return linhas.join('\n')
 }
 
-export default {
+const revisaoProfissional = {
   revisarConteudoProfissional,
   aplicarMelhorias,
   revisarAteNota10,
   gerarRelatorioRevisao,
 }
+
+export default revisaoProfissional
