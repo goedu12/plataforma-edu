@@ -6,7 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw'
 import 'katex/dist/katex.min.css'
-import { detectarGeneroTextual, separarTextoEFonte, formatarPorGenero, type GeneroTextual } from '@/lib/limpezaTexto'
+import { detectarGeneroTextual, separarTextoEFonte, formatarPorGenero, sanitizarHTML, type GeneroTextual } from '@/lib/limpezaTexto'
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMPONENTE: ConteudoQuestao
@@ -549,7 +549,7 @@ export default function ConteudoQuestao({
         <div
           className={`conteudo-questao ${estiloTipo} ${className}`}
           style={{ color: 'var(--text-primary)' }}
-          dangerouslySetInnerHTML={{ __html: corpo }}
+          dangerouslySetInnerHTML={{ __html: sanitizarHTML(corpo || '') }}
         />
         {FonteComponent}
       </div>
