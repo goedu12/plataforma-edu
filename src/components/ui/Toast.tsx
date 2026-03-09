@@ -68,7 +68,7 @@ export default function Toast({ message, type = 'info', duration = 5000, onClose
           setTimeout(onClose, 300)
         }}
         className="p-2 rounded-lg transition-colors flex items-center justify-center"
-        style={{ color: 'var(--text-secondary)', minWidth: '36px', minHeight: '36px' }}
+        style={{ color: 'var(--text-secondary)', minWidth: '44px', minHeight: '44px' }}
         aria-label="Fechar"
       >
         <X className="w-4 h-4" />

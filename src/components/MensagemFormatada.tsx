@@ -11,6 +11,17 @@ interface MensagemFormatadaProps {
 }
 
 /**
+ * Sanitiza SVG removendo scripts e event handlers para prevenir XSS
+ */
+function sanitizeSVG(svg: string): string {
+  return svg
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '')
+    .replace(/on\w+='[^']*'/gi, '')
+    .replace(/javascript:/gi, '')
+}
+
+/**
  * Componente Mermaid - renderiza diagramas do modo MAPA_MENTAL
  */
 function MermaidDiagram({ chart }: { chart: string }) {
@@ -35,7 +46,7 @@ function MermaidDiagram({ chart }: { chart: string }) {
         const { svg } = await mermaid.render(`mermaid-${uniqueId}`, chart.trim())
 
         if (!cancelled && containerRef.current) {
-          containerRef.current.innerHTML = svg
+          containerRef.current.innerHTML = sanitizeSVG(svg)
         }
       } catch (err) {
         console.error('[Mermaid] Erro ao renderizar:', err)

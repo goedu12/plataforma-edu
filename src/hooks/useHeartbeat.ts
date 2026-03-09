@@ -17,10 +17,10 @@ export function useHeartbeat() {
   const ultimaInteracaoRef = useRef(Date.now())
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Registrar interação do usuário
-  const registrarInteracao = useCallback(() => {
+  // Usar ref para manter referencia estavel do handler (evita memory leak)
+  const registrarInteracaoRef = useRef(() => {
     ultimaInteracaoRef.current = Date.now()
-  }, [])
+  })
 
   // Enviar heartbeat
   const enviarHeartbeat = useCallback(async () => {
@@ -48,18 +48,19 @@ export function useHeartbeat() {
     // Configurar intervalo
     intervalRef.current = setInterval(enviarHeartbeat, HEARTBEAT_INTERVAL)
 
-    // Registrar eventos de interação
+    // Registrar eventos de interacao usando ref estavel
+    const handler = registrarInteracaoRef.current
     for (const event of INTERACTION_EVENTS) {
-      window.addEventListener(event, registrarInteracao, { passive: true })
+      window.addEventListener(event, handler, { passive: true })
     }
 
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
       for (const event of INTERACTION_EVENTS) {
-        window.removeEventListener(event, registrarInteracao)
+        window.removeEventListener(event, handler)
       }
     }
-  }, [enviarHeartbeat, registrarInteracao])
+  }, [enviarHeartbeat])
 
   return { monitorando }
 }

@@ -34,23 +34,23 @@ export default function AnimatedBackground({
     switch (variant) {
       case 'fisica':
         return {
-          primary: 'rgba(0, 229, 255, 0.6)',
-          secondary: 'rgba(0, 212, 237, 0.4)',
-          tertiary: 'rgba(0, 168, 194, 0.3)',
-          glow: 'rgba(0, 229, 255, 0.15)',
+          primary: 'rgba(34, 197, 94, 0.6)',    // Verde (--color-fisica)
+          secondary: 'rgba(34, 197, 94, 0.4)',
+          tertiary: 'rgba(34, 197, 94, 0.2)',
+          glow: 'rgba(34, 197, 94, 0.15)',
         }
       case 'matematica':
         return {
-          primary: 'rgba(224, 64, 251, 0.6)',
-          secondary: 'rgba(213, 0, 249, 0.4)',
-          tertiary: 'rgba(170, 0, 255, 0.3)',
-          glow: 'rgba(224, 64, 251, 0.15)',
+          primary: 'rgba(139, 92, 246, 0.6)',   // Roxo (--color-matematica)
+          secondary: 'rgba(139, 92, 246, 0.4)',
+          tertiary: 'rgba(139, 92, 246, 0.2)',
+          glow: 'rgba(139, 92, 246, 0.15)',
         }
       default:
         return {
           primary: 'rgba(255, 107, 44, 0.5)',
-          secondary: 'rgba(0, 229, 255, 0.4)',
-          tertiary: 'rgba(224, 64, 251, 0.3)',
+          secondary: 'rgba(34, 197, 94, 0.4)',
+          tertiary: 'rgba(139, 92, 246, 0.3)',
           glow: 'rgba(255, 107, 44, 0.1)',
         }
     }

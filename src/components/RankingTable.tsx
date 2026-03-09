@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Trophy, Star, Crown, TrendingUp } from 'lucide-react'
 import type { RankingItem, Componente } from '@/types'
 
@@ -17,8 +18,10 @@ export default function RankingTable({
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  const top3 = ranking.slice(0, 3)
-  const restante = ranking.slice(3)
+  const { top3, restante } = useMemo(() => ({
+    top3: ranking.slice(0, 3),
+    restante: ranking.slice(3)
+  }), [ranking])
 
   const getPodiumColor = (posicao: number) => {
     switch (posicao) {

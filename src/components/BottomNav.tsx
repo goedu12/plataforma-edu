@@ -26,6 +26,8 @@ export default function BottomNav({ componente }: BottomNavProps) {
 
   return (
     <nav
+      role="navigation"
+      aria-label="Menu principal"
       className="flex lg:hidden fixed bottom-0 left-0 right-0 items-center justify-around"
       style={{
         height: '64px',
