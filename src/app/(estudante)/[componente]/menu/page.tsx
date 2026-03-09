@@ -51,6 +51,9 @@ interface NotaBimestre {
   bimestre: number
   dias_restantes: number
   tempo_uso_horas: number
+  acertos_estudo: number
+  acertos_revisao: number
+  acertos_desafio: number
 }
 
 export default function MenuComponentePage() {
@@ -107,6 +110,9 @@ export default function MenuComponentePage() {
             bimestre: b.bimestre ?? 1,
             dias_restantes: b.dias_restantes ?? 0,
             tempo_uso_horas: b.tempo_uso_horas ?? 0,
+            acertos_estudo: b.acertos_estudo ?? 0,
+            acertos_revisao: b.acertos_revisao ?? 0,
+            acertos_desafio: b.acertos_desafio ?? 0,
           })
         }
       } catch {
@@ -184,6 +190,7 @@ export default function MenuComponentePage() {
   // Grupo 3: Progresso
   const grupoProgresso: MenuItem[] = [
     { icon: Bot, label: 'Tutor IA', href: `/${componente}/tutor`, description: `${isFisica ? 'Newton' : 'Pitágoras'}` },
+    { icon: TrendingUp, label: 'Notas', href: `/${componente}/notas`, description: 'Bimestre' },
     { icon: Trophy, label: 'Ranking', href: `/${componente}/ranking`, description: 'Posição' },
     { icon: Medal, label: 'Conquistas', href: `/${componente}/conquistas`, description: '10 níveis' },
   ]
@@ -276,55 +283,63 @@ export default function MenuComponentePage() {
 
           {/* Nota do Bimestre — sempre visível */}
           {nota && (
-            <div
-              className="mt-3 p-3 rounded-xl flex items-center gap-3"
+            <button
+              onClick={() => router.push(`/${componente}/notas`)}
+              className="mt-3 p-3 rounded-xl w-full text-left transition-all hover:translate-y-[-1px]"
               style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)' }}
             >
-              <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4" style={{ color: getCorNota(nota.nota_final) }} />
-                  <span
-                    className="text-2xl font-bold tabular-nums"
-                    style={{ color: getCorNota(nota.nota_final) }}
-                  >
-                    {nota.nota_final.toFixed(1)}
-                  </span>
+              <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" style={{ color: getCorNota(nota.nota_final) }} />
+                    <span
+                      className="text-2xl font-bold tabular-nums"
+                      style={{ color: getCorNota(nota.nota_final) }}
+                    >
+                      {nota.nota_final.toFixed(1)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5" style={{ color: 'var(--text-secondary)' }}>
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm font-bold tabular-nums">
-                    {formatarTempo(nota.tempo_uso_horas)}
-                  </span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                      Nota {nota.bimestre}º bimestre
+                    </span>
+                    <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
+                      {nota.dias_restantes}d restantes
+                    </span>
+                  </div>
+                  {/* Barra dupla: Acertos + Tempo */}
+                  <div className="w-full h-2.5 rounded-full overflow-hidden flex" style={{ background: 'var(--bg-base)' }}>
+                    <div
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${(nota.nota_acertos / 10) * 100}%`,
+                        background: corPrimaria,
+                      }}
+                    />
+                    <div
+                      className="h-full transition-all duration-500"
+                      style={{
+                        width: `${(nota.nota_tempo / 10) * 100}%`,
+                        background: 'var(--color-accent)',
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-1.5 gap-2">
+                    <span className="text-2xs tabular-nums flex items-center gap-1" style={{ color: corPrimaria }}>
+                      <Target className="w-3 h-3" />
+                      <span className="font-semibold">{nota.nota_acertos.toFixed(1)}</span>/6
+                    </span>
+                    <span className="text-2xs tabular-nums flex items-center gap-1" style={{ color: 'var(--color-accent)' }}>
+                      <Clock className="w-3 h-3" />
+                      <span className="font-semibold">{nota.nota_tempo.toFixed(1)}</span>/4
+                      <span style={{ color: 'var(--text-muted)' }}>({formatarTempo(nota.tempo_uso_horas)})</span>
+                    </span>
+                  </div>
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
-                    Nota {nota.bimestre}º bimestre
-                  </span>
-                  <span className="text-2xs" style={{ color: 'var(--text-muted)' }}>
-                    {nota.dias_restantes}d restantes
-                  </span>
-                </div>
-                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'var(--bg-base)' }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${Math.min((nota.nota_final / 10) * 100, 100)}%`,
-                      background: getCorNota(nota.nota_final),
-                    }}
-                  />
-                </div>
-                <div className="flex justify-between mt-1">
-                  <span className="text-2xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                    Acertos: {nota.nota_acertos.toFixed(1)}
-                  </span>
-                  <span className="text-2xs tabular-nums" style={{ color: 'var(--text-muted)' }}>
-                    Tempo: {nota.nota_tempo.toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
+            </button>
           )}
 
           {/* Progresso do nível — visível e motivador */}
