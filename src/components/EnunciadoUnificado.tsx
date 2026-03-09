@@ -86,13 +86,10 @@ export default function EnunciadoUnificado({
 
     // 2. Extrair fonte automaticamente (se não fornecida)
     if (extrairFonte && !fonteFinal) {
-      const fontes = extrairFontesDoContexto(textoCorpo)
+      const { fontes, textoSemSmall } = extrairFontesDoContexto(textoCorpo)
       if (fontes.length > 0) {
         fonteFinal = fontes.join(' ')
-        // Remover fontes do corpo do texto
-        for (const f of fontes) {
-          textoCorpo = textoCorpo.replace(f, '').trim()
-        }
+        textoCorpo = textoSemSmall
       }
     }
 
