@@ -192,11 +192,25 @@ export async function POST(request: NextRequest) {
         .eq('serie', serieAtual)
     }
 
-    // Retornar resultado
-    return NextResponse.json({
+    // SEGURANCA: Só revelar resposta correta se o aluno acertou
+    // Evita que alunos descubram respostas errando propositalmente
+    const resultado: {
+      sucesso: boolean
+      correta: boolean
+      resposta_certa?: string
+      resposta_dada: string
+      pontos: number
+      feedback: string
+      progresso: {
+        questoes_respondidas: number
+        questoes_corretas: number
+        total: number
+        percentual: number
+        semana_completa: boolean
+      }
+    } = {
       sucesso: true,
       correta,
-      resposta_certa: resposta_correta.toUpperCase(),
       resposta_dada: resposta.toUpperCase(),
       pontos,
       feedback: feedback || (correta ? 'Parabéns! Resposta correta!' : 'Resposta incorreta. Tente revisar o conteúdo.'),
@@ -207,7 +221,14 @@ export async function POST(request: NextRequest) {
         percentual: Math.round((novasQuestoesCorretas / 5) * 100),
         semana_completa: novasQuestoesRespondidas >= 5
       }
-    })
+    }
+
+    // Só inclui resposta correta se acertou
+    if (correta) {
+      resultado.resposta_certa = resposta_correta.toUpperCase()
+    }
+
+    return NextResponse.json(resultado)
 
   } catch (error) {
     console.error('Erro na API de responder:', error)

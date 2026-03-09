@@ -29,6 +29,14 @@ export async function GET(request: NextRequest) {
     const turma = searchParams.get('turma')
     const componente = searchParams.get('componente')
 
+    // SEGURANCA: Turma é obrigatória para evitar listagem de todos os alunos
+    if (!turma) {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Parâmetro turma é obrigatório' },
+        { status: 400 }
+      )
+    }
+
     const supabase = getSupabaseAdmin()
 
     let query = supabase
@@ -36,11 +44,8 @@ export async function GET(request: NextRequest) {
       .select('*')
       .eq('tipo', 'estudante')
       .eq('ativo', true)
+      .eq('turma', turma)  // SEGURANCA: Sempre filtrar por turma
       .order('nome', { ascending: true })
-
-    if (turma) {
-      query = query.eq('turma', turma)
-    }
 
     if (componente) {
       query = query.contains('componentes', [componente])

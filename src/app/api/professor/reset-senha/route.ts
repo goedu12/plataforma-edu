@@ -59,11 +59,11 @@ export async function POST(request: NextRequest) {
     // Log de auditoria (sem expor a senha)
     logger.info(`Senha resetada pelo professor ${sessao.userId} para estudante ${usuario_id}`)
 
+    // SEGURANCA: Nunca retornar senhas em respostas HTTP
     return NextResponse.json({
       sucesso: true,
-      mensagem: 'Senha resetada para a senha padrão',
-      nova_senha: novaSenha,
-      aviso: 'A senha foi resetada para @estudante. O estudante deverá alterá-la no primeiro acesso.',
+      mensagem: 'Senha resetada com sucesso',
+      aviso: 'O estudante deverá usar a senha padrão informada em sala de aula.',
     })
   } catch (error) {
     logger.error('Erro ao resetar senha:', error)
