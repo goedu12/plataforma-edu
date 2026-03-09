@@ -43,17 +43,36 @@ export default function ImagemModal({ src, alt = 'Imagem ampliada', onClose }: I
     setHasError(false)
   }, [src])
 
-  // Fechar com ESC
+  // Fechar com ESC e focus trap para acessibilidade
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
       if (e.key === '+' || e.key === '=') handleZoomIn()
       if (e.key === '-') handleZoomOut()
       if (e.key === '0') handleReset()
+
+      // Focus trap - manter foco dentro do modal
+      if (e.key === 'Tab' && containerRef.current) {
+        const focusableElements = containerRef.current.parentElement?.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusableElements && focusableElements.length > 0) {
+          const firstElement = focusableElements[0] as HTMLElement
+          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement
+
+          if (e.shiftKey && document.activeElement === firstElement) {
+            lastElement.focus()
+            e.preventDefault()
+          } else if (!e.shiftKey && document.activeElement === lastElement) {
+            firstElement.focus()
+            e.preventDefault()
+          }
+        }
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [onClose])
+  }, [onClose, handleZoomIn, handleZoomOut, handleReset])
 
   // Prevenir scroll do body
   useEffect(() => {

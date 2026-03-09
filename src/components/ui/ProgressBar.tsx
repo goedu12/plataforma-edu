@@ -25,10 +25,11 @@ export default function ProgressBar({
     lg: 'h-4',
   }
 
-  const barColor =
-    componente === 'fisica'
-      ? 'bg-gradient-to-r from-fisica-400 to-fisica-600'
-      : 'bg-gradient-to-r from-matematica-400 to-matematica-600'
+  const barStyle = {
+    background: componente === 'fisica'
+      ? 'linear-gradient(to right, var(--color-fisica), var(--color-fisica-dark, #16a34a))'
+      : 'linear-gradient(to right, var(--color-matematica), var(--color-matematica-dark, #7c3aed))'
+  }
 
   return (
     <div className={`w-full ${className}`}>
@@ -37,8 +38,8 @@ export default function ProgressBar({
         style={{ background: 'var(--bg-surface-hover)' }}
       >
         <div
-          className={`${sizeStyles[size]} ${barColor} rounded-full transition-all duration-500 ease-out`}
-          style={{ width: `${percentage}%` }}
+          className={`${sizeStyles[size]} rounded-full transition-all duration-500 ease-out`}
+          style={{ width: `${percentage}%`, ...barStyle }}
           role="progressbar"
           aria-valuenow={value}
           aria-valuemin={0}

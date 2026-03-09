@@ -32,16 +32,22 @@ const MAX_POR_BATCH = 5
 
 export async function POST(request: NextRequest) {
   try {
-    // Verificar autorização (via header ou query param)
+    // SEGURANCA: Verificar autorização via CRON_SECRET
     const authHeader = request.headers.get('authorization')
     const cronSecret = process.env.CRON_SECRET
 
-    // Se CRON_SECRET está configurado, verificar
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      // Permitir chamadas do Vercel Cron (não tem auth header)
-      const isVercelCron = request.headers.get('x-vercel-cron') === '1'
-      if (!isVercelCron) {
-        return NextResponse.json({ erro: 'Não autorizado' }, { status: 401 })
+    // Se CRON_SECRET está configurado, SEMPRE verificar
+    // Nota: Header x-vercel-cron pode ser falsificado, então não confiamos nele sozinho
+    if (cronSecret) {
+      if (authHeader !== `Bearer ${cronSecret}`) {
+        console.warn('[Cron] Tentativa de acesso não autorizado ao cron job')
+        return NextResponse.json({ erro: 'Não autorizado' }, { status: 403 })
+      }
+    } else {
+      // Em produção, CRON_SECRET deve estar configurado
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Cron] CRON_SECRET não configurado em produção!')
+        return NextResponse.json({ erro: 'Configuração inválida' }, { status: 500 })
       }
     }
 

@@ -8,9 +8,9 @@ import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import EnunciadoUnificado, { FeedbackExplicacao } from '@/components/EnunciadoUnificado'
 import type { Componente, Questao } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto } from '@/lib/limpezaTexto'
 
 type StatusRevisao = 'OK' | 'SEM_REVISAO' | 'ERRO'
 type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -297,12 +297,14 @@ export default function RevisaoPage() {
                   </span>
                 </div>
 
-                {/* Enunciado */}
+                {/* Enunciado - Renderização Unificada */}
                 <div className="card-chromebook">
-                  <div
-                    className="enunciado-chromebook questao-texto"
-                    style={{ color: 'var(--text-primary)' }}
-                    dangerouslySetInnerHTML={{ __html: processarContexto(questao.enunciado) }}
+                  <EnunciadoUnificado
+                    enunciado={questao.enunciado}
+                    modo="padrao"
+                    extrairTitulo={true}
+                    extrairFonte={true}
+                    className="enunciado-chromebook"
                   />
                 </div>
 
@@ -391,7 +393,7 @@ export default function RevisaoPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold" style={{ color: feedback.correta ? 'var(--success)' : 'var(--error)' }}>
-                          {feedback.correta ? 'Correto!' : 'Incorreto'}
+                          {feedback.correta ? 'Parabéns! Você dominou este tópico.' : 'Incorreto'}
                         </span>
                         {feedback.correta && feedback.pontosGanhos > 0 && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: 'var(--success-bg-20)', color: 'var(--success)' }}>
@@ -404,6 +406,17 @@ export default function RevisaoPage() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Explicação Pedagógica - Exibe explicação após resposta */}
+                {feedback && feedback.explicacao && (
+                  <FeedbackExplicacao
+                    explicacao={feedback.explicacao}
+                    correta={feedback.correta}
+                    gabarito={!feedback.correta ? feedback.respostaCorreta : null}
+                    tema={questao?.tema}
+                    linkTeoria={!feedback.correta ? `/${componente}/teoria` : undefined}
+                  />
                 )}
 
                 {/* Conquistas - inline */}

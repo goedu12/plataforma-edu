@@ -14,6 +14,8 @@ interface BackButtonProps {
   mobileOnly?: boolean
   /** Usa versão compacta no desktop */
   compactOnDesktop?: boolean
+  /** Define a cor do botao baseado no componente */
+  componente?: 'fisica' | 'matematica'
 }
 
 /**
@@ -32,6 +34,7 @@ export default function BackButton({
   className = '',
   mobileOnly = false,
   compactOnDesktop = false,
+  componente = 'fisica',
 }: BackButtonProps) {
   const router = useRouter()
 
@@ -54,11 +57,15 @@ export default function BackButton({
     className,
   ].filter(Boolean).join(' ')
 
+  // Define a cor de fundo baseado no componente
+  const corFundo = componente === 'matematica' ? 'var(--color-matematica)' : 'var(--color-fisica)'
+
   return (
     <button
       onClick={handleClick}
       className={classes}
       aria-label={label}
+      style={{ '--back-button-color': corFundo } as React.CSSProperties}
     >
       <ArrowLeft className="w-5 h-5" />
       {showLabel && <span className="sm:inline">{label}</span>}

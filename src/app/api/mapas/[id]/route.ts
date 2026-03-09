@@ -192,7 +192,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE - Remover mapa (apenas professor)
+// DELETE - Remover mapa (apenas professor que criou)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const sessao = await obterSessao()
@@ -216,6 +216,28 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!usuario || usuario.tipo !== 'professor') {
       return NextResponse.json(
         { sucesso: false, erro: 'Apenas professores podem remover mapas' },
+        { status: 403 }
+      )
+    }
+
+    // SEGURANCA: Verificar se o mapa pertence ao professor
+    const { data: mapa } = await supabase
+      .from('mapas_mentais')
+      .select('criado_por')
+      .eq('id', id)
+      .single()
+
+    if (!mapa) {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Mapa não encontrado' },
+        { status: 404 }
+      )
+    }
+
+    // Apenas o criador pode deletar (ou implementar role admin futuramente)
+    if (mapa.criado_por !== sessao.userId) {
+      return NextResponse.json(
+        { sucesso: false, erro: 'Você não tem permissão para remover este mapa' },
         { status: 403 }
       )
     }

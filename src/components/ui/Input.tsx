@@ -60,6 +60,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
             className={`input ${leftIcon ? 'pl-12' : ''} ${rightIcon ? 'pr-12' : ''} ${error ? 'input-error' : ''} ${className}`}
             style={{
               ['--focus-color' as string]: focusColor,
@@ -89,7 +91,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         </div>
 
         {error && (
-          <p className="text-xs mt-2" style={{ color: 'var(--error)' }}>
+          <p id={`${inputId}-error`} role="alert" className="text-xs mt-2" style={{ color: 'var(--error)' }}>
             {error}
           </p>
         )}
@@ -152,6 +154,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${inputId}-error` : undefined}
           className={`input resize-none ${error ? 'input-error' : ''} ${className}`}
           onFocus={(e) => {
             if (!error) {
@@ -167,7 +171,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         />
 
         {error && (
-          <p className="text-xs mt-2" style={{ color: 'var(--error)' }}>
+          <p id={`${inputId}-error`} role="alert" className="text-xs mt-2" style={{ color: 'var(--error)' }}>
             {error}
           </p>
         )}
@@ -231,6 +235,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={inputId}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
             className={`select ${error ? 'input-error' : ''} ${className}`}
             onFocus={(e) => {
               if (!error) {
@@ -249,7 +255,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </div>
 
         {error && (
-          <p className="text-xs mt-2" style={{ color: 'var(--error)' }}>
+          <p id={`${inputId}-error`} role="alert" className="text-xs mt-2" style={{ color: 'var(--error)' }}>
             {error}
           </p>
         )}

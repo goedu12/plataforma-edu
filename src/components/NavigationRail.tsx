@@ -33,6 +33,8 @@ export default function NavigationRail({ componente }: NavigationRailProps) {
 
   return (
     <nav
+      role="navigation"
+      aria-label="Menu principal"
       className="hidden lg:flex"
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}

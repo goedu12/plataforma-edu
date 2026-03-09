@@ -219,11 +219,14 @@ export const ALERTAS_CONFIG = {
   DIAS_INATIVIDADE_ALERTA: 7,
 } as const
 
-// Constantes de rate limiting
+// Constantes de rate limiting e anti-automação
 export const RATE_LIMIT_CONFIG = {
   WINDOW_MS: 60 * 1000, // 1 minuto
   MAX_REQUESTS_API: 100, // máximo 100 requisições por minuto
   MAX_REQUESTS_RESPOSTA: 30, // máximo 30 respostas por minuto
+  TEMPO_MINIMO_RESPOSTA_SEGUNDOS: 3, // tempo mínimo para responder uma questão
+  TEMPO_SUSPEITO_SEGUNDOS: 5, // abaixo disso, marca como suspeito
+  ACERTOS_CONSECUTIVOS_SUSPEITO: 10, // muitos acertos seguidos em tempo curto
 } as const
 
 // ═══════════════════════════════════════════════════════════

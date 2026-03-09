@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { CheckCircle2, XCircle, Lightbulb, Clock, AlertCircle, Trophy, TrendingUp, Target, ChevronDown, ChevronUp } from 'lucide-react'
 import Button from './ui/Button'
 import Badge from './ui/Badge'
@@ -83,13 +83,13 @@ export default function QuestaoCard({
   const isFisica = componente === 'fisica'
   const corPrimaria = isFisica ? 'var(--color-fisica)' : 'var(--color-matematica)'
 
-  const alternativas: { letra: Alternativa; texto: string }[] = [
+  const alternativas = useMemo<{ letra: Alternativa; texto: string }[]>(() => [
     { letra: 'A', texto: questao.alternativa_a },
     { letra: 'B', texto: questao.alternativa_b },
     { letra: 'C', texto: questao.alternativa_c },
     { letra: 'D', texto: questao.alternativa_d },
     ...(questao.alternativa_e ? [{ letra: 'E' as Alternativa, texto: questao.alternativa_e }] : []),
-  ]
+  ], [questao.alternativa_a, questao.alternativa_b, questao.alternativa_c, questao.alternativa_d, questao.alternativa_e])
 
   const handlePedirDica = () => {
     setMostrarDica(true)
