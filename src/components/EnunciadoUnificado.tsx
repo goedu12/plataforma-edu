@@ -96,7 +96,7 @@ export default function EnunciadoUnificado({
     // 3. Extrair imagens inline do texto
     if (extrairImagens) {
       const { imagens, textoLimpo } = extrairImagensInline(textoCorpo)
-      imagensInline = imagens
+      imagensInline = imagens.map(url => ({ url }))
       textoCorpo = textoLimpo
     }
 
