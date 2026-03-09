@@ -3,6 +3,12 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
+import {
+  checkRespostaRateLimit,
+  getRateLimitHeaders,
+  verificarTempoMinimo,
+  analisarPadrao,
+} from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +17,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { sucesso: false, erro: 'Não autenticado' },
         { status: 401 }
+      )
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RATE LIMITING - Proteção contra automação
+    // ═══════════════════════════════════════════════════════════════════════
+    const rateLimit = checkRespostaRateLimit(sessao.userId)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          sucesso: false,
+          erro: `Muitas requisições. Aguarde ${rateLimit.resetIn} segundos.`,
+          codigo: 'RATE_LIMIT',
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimit),
+        }
       )
     }
 
@@ -28,6 +52,22 @@ export async function POST(request: NextRequest) {
     if (!['A', 'B', 'C', 'D', 'E'].includes(resposta)) {
       return NextResponse.json(
         { sucesso: false, erro: 'Alternativa inválida' },
+        { status: 400 }
+      )
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TEMPO MÍNIMO - Proteção contra respostas instantâneas
+    // ═══════════════════════════════════════════════════════════════════════
+    const tempoValidado = Math.max(0, Math.min(3600, Number(tempo_segundos) || 0))
+    const tempoCheck = verificarTempoMinimo(tempoValidado)
+    if (!tempoCheck.valido) {
+      return NextResponse.json(
+        {
+          sucesso: false,
+          erro: `Tempo de resposta muito curto. Mínimo: ${tempoCheck.tempoMinimo} segundos.`,
+          codigo: 'TEMPO_MINIMO',
+        },
         { status: 400 }
       )
     }
@@ -66,6 +106,26 @@ export async function POST(request: NextRequest) {
     // Questão anulada = sempre correta
     const correta = questao.anulada ? true : (resposta === questao.gabarito)
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // DETECÇÃO DE PADRÕES SUSPEITOS
+    // ═══════════════════════════════════════════════════════════════════════
+    const padrao = analisarPadrao(sessao.userId, tempoValidado, correta)
+    if (padrao.nivel === 'bloqueado') {
+      console.warn(`[Anti-Bot ENEM] Usuário ${sessao.userId} bloqueado: ${padrao.motivo}`)
+      return NextResponse.json(
+        {
+          sucesso: false,
+          erro: 'Atividade suspeita detectada. Tente novamente mais tarde.',
+          codigo: 'PADRAO_SUSPEITO',
+        },
+        { status: 403 }
+      )
+    }
+
+    if (padrao.nivel === 'suspeito' || padrao.nivel === 'atencao') {
+      console.warn(`[Anti-Bot ENEM] Padrão ${padrao.nivel} para usuário ${sessao.userId}: ${padrao.motivo}`)
+    }
+
     // Registrar resposta
     const { error: errInsert } = await supabase
       .from('respostas_enem')
@@ -74,7 +134,7 @@ export async function POST(request: NextRequest) {
         questao_enem_id: questao_id,
         resposta_dada: resposta,
         correta,
-        tempo_segundos: tempo_segundos || 0,
+        tempo_segundos: tempoValidado,
       })
 
     if (errInsert) {
@@ -97,10 +157,13 @@ export async function POST(request: NextRequest) {
       ? Math.round((totalCorretas / totalRespondidas) * 100)
       : 0
 
+    // SEGURANCA: Só revelar gabarito se acertou ou questão anulada
+    // Evita que alunos descubram respostas errando propositalmente
     return NextResponse.json({
       sucesso: true,
       correta,
-      gabarito: questao.gabarito,
+      // Só mostra gabarito se acertou ou se questão foi anulada
+      gabarito: (correta || questao.anulada) ? questao.gabarito : undefined,
       anulada: questao.anulada,
       estatisticas: {
         total_respondidas: totalRespondidas,

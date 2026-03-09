@@ -14,6 +14,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase'
 import { obterSessao } from '@/lib/auth'
 import { isSerieEF } from '@/lib/gemini'
+import {
+  checkRespostaRateLimit,
+  getRateLimitHeaders,
+  verificarTempoMinimo,
+  analisarPadrao,
+} from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +29,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { erro: 'Não autorizado' },
         { status: 401 }
+      )
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // RATE LIMITING - Proteção contra automação
+    // ═══════════════════════════════════════════════════════════════════════
+    const rateLimit = checkRespostaRateLimit(sessao.userId)
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          erro: `Muitas requisições. Aguarde ${rateLimit.resetIn} segundos.`,
+          codigo: 'RATE_LIMIT',
+        },
+        {
+          status: 429,
+          headers: getRateLimitHeaders(rateLimit),
+        }
       )
     }
 
@@ -72,6 +95,20 @@ export async function POST(request: NextRequest) {
 
     // Validar tempo (máximo 1 hora = 3600 segundos por questão)
     const tempoValidado = Math.max(0, Math.min(3600, Number(tempo_segundos) || 0))
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // TEMPO MÍNIMO - Proteção contra respostas instantâneas
+    // ═══════════════════════════════════════════════════════════════════════
+    const tempoCheck = verificarTempoMinimo(tempoValidado)
+    if (!tempoCheck.valido) {
+      return NextResponse.json(
+        {
+          erro: `Tempo de resposta muito curto. Mínimo: ${tempoCheck.tempoMinimo} segundos.`,
+          codigo: 'TEMPO_MINIMO',
+        },
+        { status: 400 }
+      )
+    }
 
     const supabase = getSupabaseAdmin()
 
@@ -190,6 +227,26 @@ export async function POST(request: NextRequest) {
         .eq('usuario_id', sessao.userId)
         .eq('trilha_id', trilhaId)
         .eq('serie', serieAtual)
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // DETECÇÃO DE PADRÕES SUSPEITOS
+    // ═══════════════════════════════════════════════════════════════════════
+    const padrao = analisarPadrao(sessao.userId, tempoValidado, correta)
+    if (padrao.nivel === 'bloqueado') {
+      console.warn(`[Anti-Bot] Usuário ${sessao.userId} bloqueado: ${padrao.motivo}`)
+      return NextResponse.json(
+        {
+          erro: 'Atividade suspeita detectada. Tente novamente mais tarde.',
+          codigo: 'PADRAO_SUSPEITO',
+        },
+        { status: 403 }
+      )
+    }
+
+    // Log de atenção (não bloqueia, mas registra)
+    if (padrao.nivel === 'suspeito' || padrao.nivel === 'atencao') {
+      console.warn(`[Anti-Bot] Padrão ${padrao.nivel} para usuário ${sessao.userId}: ${padrao.motivo}`)
     }
 
     // SEGURANCA: Só revelar resposta correta se o aluno acertou

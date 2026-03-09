@@ -117,3 +117,132 @@ export function resetRateLimit(identifier: string): void {
   const key = `rate:${identifier}`
   rateLimitStore.delete(key)
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DETECÇÃO DE PADRÕES SUSPEITOS (Anti-automação)
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface PatternEntry {
+  respostas: Array<{ tempo: number; correta: boolean; timestamp: number }>
+  alertas: number
+}
+
+const patternStore = new Map<string, PatternEntry>()
+
+// Limpar padrões antigos a cada 5 minutos
+setInterval(() => {
+  const agora = Date.now()
+  const EXPIRACAO = 10 * 60 * 1000 // 10 minutos
+  for (const [key, entry] of patternStore.entries()) {
+    // Remover respostas antigas
+    entry.respostas = entry.respostas.filter(r => agora - r.timestamp < EXPIRACAO)
+    if (entry.respostas.length === 0 && entry.alertas === 0) {
+      patternStore.delete(key)
+    }
+  }
+}, 5 * 60 * 1000)
+
+export interface SuspiciousResult {
+  suspeito: boolean
+  motivo?: string
+  nivel: 'ok' | 'atencao' | 'suspeito' | 'bloqueado'
+  alertas: number
+}
+
+/**
+ * Registra e analisa padrões de resposta para detectar automação
+ */
+export function analisarPadrao(
+  userId: string,
+  tempoSegundos: number,
+  correta: boolean
+): SuspiciousResult {
+  const key = `pattern:${userId}`
+  const agora = Date.now()
+
+  let entry = patternStore.get(key)
+  if (!entry) {
+    entry = { respostas: [], alertas: 0 }
+    patternStore.set(key, entry)
+  }
+
+  // Registrar resposta
+  entry.respostas.push({ tempo: tempoSegundos, correta, timestamp: agora })
+
+  // Manter apenas últimas 20 respostas
+  if (entry.respostas.length > 20) {
+    entry.respostas = entry.respostas.slice(-20)
+  }
+
+  const respostasRecentes = entry.respostas.filter(
+    r => agora - r.timestamp < 5 * 60 * 1000 // últimos 5 minutos
+  )
+
+  // Análise de padrões suspeitos
+  let motivo: string | undefined
+  let nivel: SuspiciousResult['nivel'] = 'ok'
+
+  // 1. Muitas respostas muito rápidas
+  const respostasRapidas = respostasRecentes.filter(
+    r => r.tempo < RATE_LIMIT_CONFIG.TEMPO_SUSPEITO_SEGUNDOS
+  )
+  if (respostasRapidas.length >= 5) {
+    motivo = 'Muitas respostas em tempo muito curto'
+    nivel = 'suspeito'
+    entry.alertas++
+  }
+
+  // 2. Taxa de acerto perfeita com tempo baixo (muito suspeito)
+  if (respostasRecentes.length >= 8) {
+    const todasCorretas = respostasRecentes.every(r => r.correta)
+    const tempoMedio = respostasRecentes.reduce((s, r) => s + r.tempo, 0) / respostasRecentes.length
+    if (todasCorretas && tempoMedio < 10) {
+      motivo = '100% de acerto com tempo médio muito baixo'
+      nivel = 'suspeito'
+      entry.alertas += 2
+    }
+  }
+
+  // 3. Tempo exatamente igual em múltiplas respostas (automação)
+  const temposIguais = respostasRecentes.filter(r => r.tempo === tempoSegundos)
+  if (temposIguais.length >= 4 && tempoSegundos < 10) {
+    motivo = 'Tempo de resposta idêntico repetidamente'
+    nivel = 'suspeito'
+    entry.alertas++
+  }
+
+  // 4. Resposta instantânea (tempo 0 ou 1)
+  if (tempoSegundos <= 1) {
+    motivo = 'Resposta instantânea (possível automação)'
+    nivel = nivel === 'suspeito' ? 'bloqueado' : 'atencao'
+    entry.alertas++
+  }
+
+  // Nível de bloqueio por acúmulo de alertas
+  if (entry.alertas >= 10) {
+    nivel = 'bloqueado'
+    motivo = 'Muitos padrões suspeitos detectados'
+  } else if (entry.alertas >= 5) {
+    nivel = nivel === 'ok' ? 'atencao' : nivel
+  }
+
+  return {
+    suspeito: nivel === 'suspeito' || nivel === 'bloqueado',
+    motivo,
+    nivel,
+    alertas: entry.alertas,
+  }
+}
+
+/**
+ * Verifica tempo mínimo de resposta
+ */
+export function verificarTempoMinimo(tempoSegundos: number): {
+  valido: boolean
+  tempoMinimo: number
+} {
+  return {
+    valido: tempoSegundos >= RATE_LIMIT_CONFIG.TEMPO_MINIMO_RESPOSTA_SEGUNDOS,
+    tempoMinimo: RATE_LIMIT_CONFIG.TEMPO_MINIMO_RESPOSTA_SEGUNDOS,
+  }
+}
