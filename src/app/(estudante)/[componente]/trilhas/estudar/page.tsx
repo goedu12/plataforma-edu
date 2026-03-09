@@ -23,6 +23,7 @@ import EnunciadoUnificado, { FeedbackExplicacao } from '@/components/EnunciadoUn
 import ConteudoQuestao from '@/components/ConteudoQuestao'
 import type { Componente } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
+import { extrairImagensInline } from '@/lib/limpezaTexto'
 import 'katex/dist/katex.min.css'
 
 interface Alternativas {
