@@ -3,32 +3,13 @@
  * Limpeza de markdown, sanitização XSS e processamento de conteúdo
  */
 
-// Valores que devem ser tratados como vazio
-const VALORES_INVALIDOS = ['nan', 'none', 'null', 'undefined', 'NaN', 'None', 'NULL', '']
-
-// URLs de imagem que são placeholders/quebrados conhecidos (ex: API enem.dev)
-const URLS_PLACEHOLDER = [
-  'broken-image',
-  'placeholder',
-  'no-image',
-  'image-not-found',
-  'not-available',
-]
-
-// Tags HTML permitidas (sanitização XSS)
-const TAGS_PERMITIDAS = new Set([
-  'p', 'br', 'em', 'strong', 'span', 'div', 'img',
-  'b', 'i', 'u', 'sub', 'sup', 'ul', 'ol', 'li',
-  'small' // Para fontes/referências em tamanho menor
-])
-
-// Atributos permitidos por tag
-const ATRIBUTOS_PERMITIDOS: Record<string, Set<string>> = {
-  'img': new Set(['src', 'alt', 'class', 'loading', 'width', 'height']),
-  'span': new Set(['class', 'style']),
-  'div': new Set(['class', 'style']),
-  'p': new Set(['class', 'style']),
-}
+// Importar constantes do módulo centralizado
+import {
+  VALORES_INVALIDOS,
+  URLS_PLACEHOLDER,
+  TAGS_PERMITIDAS,
+  ATRIBUTOS_PERMITIDOS
+} from './texto/types'
 
 /**
  * Sanitiza HTML removendo tags e atributos perigosos (proteção XSS)
