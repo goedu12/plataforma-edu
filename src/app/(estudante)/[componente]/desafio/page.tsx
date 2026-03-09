@@ -8,10 +8,10 @@ import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import EnunciadoUnificado from '@/components/EnunciadoUnificado'
 import type { Componente, Questao } from '@/types'
 import { DESAFIO } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto } from '@/lib/limpezaTexto'
 
 type StatusDesafio = 'NOVO' | 'EM_ANDAMENTO' | 'SEM_QUESTOES' | 'ERRO' | 'RESULTADO'
 
@@ -465,12 +465,14 @@ export default function DesafioPage() {
                 </span>
               </div>
 
-              {/* Enunciado */}
+              {/* Enunciado - Modo Compacto para Desafio */}
               <div className="card-chromebook">
-                <div
-                  className="enunciado-chromebook questao-texto"
-                  style={{ color: 'var(--text-primary)' }}
-                  dangerouslySetInnerHTML={{ __html: processarContexto(questaoAtualData.enunciado) }}
+                <EnunciadoUnificado
+                  enunciado={questaoAtualData.enunciado}
+                  modo="compacto"
+                  extrairTitulo={false}
+                  extrairFonte={false}
+                  className="enunciado-chromebook"
                 />
               </div>
 

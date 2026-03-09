@@ -19,10 +19,9 @@ import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
 import { isValidImageUrl } from '@/components/ui/SafeImage'
 import ImagemModal, { ImagemQuestao } from '@/components/ui/ImagemModal'
-import ConteudoQuestao from '@/components/ConteudoQuestao'
+import EnunciadoUnificado, { FeedbackExplicacao } from '@/components/EnunciadoUnificado'
 import type { Componente } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto, extrairFontesDoContexto, extrairTituloDoTexto, extrairImagensInline } from '@/lib/limpezaTexto'
 import 'katex/dist/katex.min.css'
 
 interface Alternativas {
@@ -436,85 +435,33 @@ export default function TrilhasEstudarPage() {
               </span>
             )}
 
-            {/* Enunciado - com suporte a título, LaTeX, imagens e fontes */}
-            {(() => {
-              const enunciadoProcessado = processarContexto(questao.enunciado)
-              const { textoSemSmall, fontes } = extrairFontesDoContexto(enunciadoProcessado)
-              const { titulo, corpo: textoCorpo } = extrairTituloDoTexto(textoSemSmall)
-              const temLatex = /\$[^$]+\$|\\\(|\\\[|\\frac|\\sqrt|\\sum|\\int/.test(questao.enunciado || '')
+            {/* Enunciado - Renderização Unificada */}
+            <div className="card-chromebook">
+              <EnunciadoUnificado
+                enunciado={questao.enunciado}
+                imagem={questao.imagem_principal}
+                modo="padrao"
+                extrairTitulo={true}
+                extrairFonte={true}
+                onImagemClick={setImagemExpandida}
+                className="questao-texto"
+              />
 
-              return (
-                <div className="card-chromebook">
-                  {/* Título em negrito */}
-                  {titulo && (
-                    <h3
-                      className="font-bold text-sm sm:text-base mb-2"
-                      style={{ color: 'var(--text-primary)' }}
-                    >
-                      {titulo}
-                    </h3>
-                  )}
-
-                  {/* Texto do enunciado - justificado, ocupa todo o espaço */}
-                  {(titulo ? textoCorpo : textoSemSmall) && (
-                    temLatex ? (
-                      <ConteudoQuestao
-                        conteudo={titulo ? textoCorpo : textoSemSmall}
-                        tipo="contexto"
-                      />
-                    ) : (
-                      <div
-                        className="questao-texto"
-                        style={{ color: 'var(--text-primary)' }}
-                        dangerouslySetInnerHTML={{ __html: titulo ? textoCorpo : textoSemSmall }}
-                      />
-                    )
-                  )}
-
-                  {/* Imagens com zoom */}
-                  {questao.imagem_principal && isValidImageUrl(questao.imagem_principal) && (
-                    <div className="my-3">
-                      <ImagemQuestao
-                        src={questao.imagem_principal}
-                        alt="Imagem da questão"
-                        tipo="principal"
-                        onExpandir={setImagemExpandida}
-                      />
-                    </div>
-                  )}
-                  {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
-                    <div className="my-3 space-y-2">
-                      {questao.imagens.filter(isValidImageUrl).map((img, idx) => (
-                        <ImagemQuestao
-                          key={idx}
-                          src={img}
-                          alt={`Imagem ${idx + 1} da questão`}
-                          tipo="extra"
-                          onExpandir={setImagemExpandida}
-                        />
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Fontes/Referências - com linha em branco antes */}
-                  {fontes.length > 0 && (
-                    <div
-                      className="mt-4 pt-2"
-                      style={{ borderTop: '1px solid var(--border-default)' }}
-                    >
-                      {fontes.map((fonte, index) => (
-                        <p
-                          key={index}
-                          className="text-[0.7rem] sm:text-xs leading-relaxed font-bold mt-1"
-                          style={{ color: 'var(--text-secondary)' }}
-                          dangerouslySetInnerHTML={{ __html: fonte }}
-                        />
-                      ))}
-                    </div>
-                  )}
+              {/* Imagens extras com zoom */}
+              {questao.imagens && questao.imagens.filter(isValidImageUrl).length > 0 && (
+                <div className="my-3 space-y-2">
+                  {questao.imagens.filter(isValidImageUrl).map((img, idx) => (
+                    <ImagemQuestao
+                      key={idx}
+                      src={img}
+                      alt={`Imagem ${idx + 1} da questão`}
+                      tipo="extra"
+                      onExpandir={setImagemExpandida}
+                    />
+                  ))}
                 </div>
-              )
-            })()}
+              )}
+            </div>
 
             {/* Dica */}
             {!mostrarResultado && questao.dica && (

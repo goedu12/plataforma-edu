@@ -8,9 +8,9 @@ import Button from '@/components/ui/Button'
 import BackButton from '@/components/ui/BackButton'
 import BottomNav from '@/components/BottomNav'
 import NavigationRail from '@/components/NavigationRail'
+import EnunciadoUnificado, { FeedbackExplicacao } from '@/components/EnunciadoUnificado'
 import type { Componente, Questao } from '@/types'
 import { formatarFormula } from '@/lib/formatacao'
-import { processarContexto } from '@/lib/limpezaTexto'
 
 type StatusQuestao = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'LIMITE_SEMANAL' | 'FORA_PERIODO'
 type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
@@ -335,12 +335,14 @@ export default function EstudarPage() {
                   </span>
                 </div>
 
-                {/* Enunciado */}
+                {/* Enunciado - Renderização Unificada */}
                 <div className="card-chromebook">
-                  <div
-                    className="enunciado-chromebook questao-texto"
-                    style={{ color: 'var(--text-primary)' }}
-                    dangerouslySetInnerHTML={{ __html: processarContexto(questao.enunciado) }}
+                  <EnunciadoUnificado
+                    enunciado={questao.enunciado}
+                    modo="padrao"
+                    extrairTitulo={true}
+                    extrairFonte={true}
+                    className="enunciado-chromebook"
                   />
                 </div>
 
@@ -446,6 +448,17 @@ export default function EstudarPage() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* Explicação Pedagógica - NOVO: Exibe explicação após resposta */}
+                {feedback && feedback.explicacao && (
+                  <FeedbackExplicacao
+                    explicacao={feedback.explicacao}
+                    correta={feedback.correta}
+                    gabarito={!feedback.correta ? feedback.respostaCorreta : null}
+                    tema={questao?.tema}
+                    linkTeoria={!feedback.correta ? `/${componente}/teoria` : undefined}
+                  />
                 )}
 
                 {/* Conquistas - inline e compacto */}
