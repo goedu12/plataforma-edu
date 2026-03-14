@@ -334,7 +334,7 @@ export default function SimuladoEnemPage() {
                 <GraduationCap className="w-7 h-7" style={{ color: corPrimaria }} />
               </div>
               <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--text-primary)' }}>
-                ENEM 2024/2025
+                Simulado ENEM
               </h2>
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
                 Pratique com questões reais do ENEM
@@ -354,6 +354,7 @@ export default function SimuladoEnemPage() {
                   <option value="">Todos os anos</option>
                   <option value="2025">ENEM 2025</option>
                   <option value="2024">ENEM 2024</option>
+                  <option value="2023">ENEM 2023</option>
                 </select>
               </div>
 
