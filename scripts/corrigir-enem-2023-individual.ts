@@ -148,15 +148,16 @@ function converterFormulasQuimicas(texto: string): string {
     [/\bOH-/g, 'OH⁻'],
     [/\bNa\+/g, 'Na⁺'],
     [/\bCl-/g, 'Cl⁻'],
-    // Notacao cientifica
-    [/(\d+)\s*[xX]\s*10\^(-?\d+)/g, '$1 × 10$2'],
-    [/10\^(-?\d+)/g, (_, exp) => `10${converterParaSuperscrito(exp)}`],
   ]
 
   let resultado = texto
   for (const [padrao, substituicao] of substituicoes) {
-    resultado = resultado.replace(padrao, substituicao as string)
+    resultado = resultado.replace(padrao, substituicao)
   }
+
+  // Notacao cientifica - tratar separadamente com funcao
+  resultado = resultado.replace(/10\^(-?\d+)/g, (_, exp) => `10${converterParaSuperscrito(exp)}`)
+  resultado = resultado.replace(/(\d+)\s*[xX]\s*10(\d+)/g, '$1 × 10$2')
 
   return resultado
 }
