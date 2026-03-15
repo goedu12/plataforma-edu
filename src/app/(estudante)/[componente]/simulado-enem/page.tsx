@@ -313,21 +313,36 @@ export default function SimuladoEnemPage() {
       if (elem.tipo === 'imagem' && elem.arquivo && !ARQUIVO_INVALIDO.test(elem.arquivo.trim())) {
         const imagemUrl = getEnemImageUrl(elem.arquivo)
         if (!imagemUrl) return null
+
+        const descricaoTexto = elem.legenda || elem.descricao || ''
+        const imagemFallback = (
+          <div className="flex flex-col items-center justify-center p-6 rounded-lg border border-dashed"
+               style={{ borderColor: 'var(--text-muted)', background: 'var(--bg-elevated)', minHeight: '120px', maxWidth: '600px', width: '100%' }}>
+            <ImageIcon className="w-8 h-8 mb-2" style={{ color: 'var(--text-muted)' }} />
+            <span className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Imagem indisponível</span>
+            {descricaoTexto && (
+              <p className="text-xs italic mt-2 text-center px-4" style={{ color: 'var(--text-muted)' }}>
+                {descricaoTexto}
+              </p>
+            )}
+          </div>
+        )
+
         return (
           <div key={idx} className="questao-imagem-container">
             <button onClick={() => setImagemExpandida(imagemUrl)}>
               <SafeImage
                 src={imagemUrl}
-                alt={elem.conteudo || elem.legenda || elem.descricao || 'Imagem da questão'}
+                alt={elem.conteudo || descricaoTexto || 'Imagem da questão'}
                 width={500}
                 height={400}
                 className="questao-imagem-principal"
+                fallback={imagemFallback}
               />
             </button>
-            {/* Legenda ou descrição da imagem */}
-            {(elem.legenda || elem.descricao) && (
+            {descricaoTexto && (
               <p className="text-xs italic mt-1 text-center" style={{ color: 'var(--text-muted)' }}>
-                {elem.legenda || elem.descricao}
+                {descricaoTexto}
               </p>
             )}
           </div>

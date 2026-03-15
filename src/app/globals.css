@@ -2134,7 +2134,7 @@ img {
 /* Imagem principal - tamanhos responsivos */
 .questao-imagem-principal {
   width: 100%;
-  max-width: 100%;
+  max-width: 600px;
   height: auto;
   border-radius: 0.75rem;
   cursor: pointer;
