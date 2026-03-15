@@ -214,7 +214,8 @@ export default function SimuladoEnemPage() {
   }).filter(a => a.texto || a.imagem) : []
 
   // Renderizar elementos do enunciado ENEM
-  const renderElementos = (elementos: ElementoEnem[]) => {
+  const renderElementos = (elementos: ElementoEnem[] | null | undefined) => {
+    if (!elementos || !Array.isArray(elementos)) return null
     return elementos.map((elem, idx) => {
       if (elem.tipo === 'titulo' && elem.conteudo) {
         return (
@@ -488,6 +489,12 @@ export default function SimuladoEnemPage() {
                 {/* Elementos do enunciado */}
                 <div className="card-chromebook">
                   {renderElementos(questao.elementos)}
+                  {/* Fallback: mostrar comando se não houver elementos */}
+                  {(!questao.elementos || questao.elementos.length === 0) && questao.comando && (
+                    <div className="font-medium">
+                      <ConteudoQuestao conteudo={questao.comando} tipo="comando" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Alternativas */}
