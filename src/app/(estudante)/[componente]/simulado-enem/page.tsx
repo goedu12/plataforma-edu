@@ -56,6 +56,24 @@ const AREAS_ENEM: Record<string, string> = {
   'Matemática e suas Tecnologias': 'Matemática',
 }
 
+// Normalizar string removendo acentos (para match accent-insensitive de áreas)
+function normalizeStr(s: string): string {
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+}
+
+// Buscar label curto da área com fallback accent-insensitive
+function getAreaLabel(area: string): string {
+  if (AREAS_ENEM[area]) return AREAS_ENEM[area]
+  const n = normalizeStr(area)
+  for (const [key, value] of Object.entries(AREAS_ENEM)) {
+    if (normalizeStr(key) === n) return value
+  }
+  return area
+}
+
+// Padrão para detectar URLs de arquivo inválidas nos elementos
+const ARQUIVO_INVALIDO = /^(nan|none|null|undefined|\s*)$/i
+
 export default function SimuladoEnemPage() {
   const router = useRouter()
   const params = useParams()
@@ -229,9 +247,10 @@ export default function SimuladoEnemPage() {
   // Renderizar elementos do enunciado ENEM
   const renderElementos = (elementos: ElementoEnem[] | null | undefined) => {
     if (!elementos || !Array.isArray(elementos)) return null
-    return elementos.map((elem, idx) => {
-      // Pular elementos null dentro do array
-      if (!elem) return null
+    // Filtrar elementos null/undefined do array
+    const elementosValidos = elementos.filter((e): e is ElementoEnem => e != null)
+    if (elementosValidos.length === 0) return null
+    return elementosValidos.map((elem, idx) => {
       if (elem.tipo === 'titulo' && elem.conteudo) {
         return (
           <h3 key={idx} className="font-bold text-sm sm:text-base mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -258,6 +277,13 @@ export default function SimuladoEnemPage() {
 
         return (
           <div key={idx} className="mb-3">
+            {/* Rótulo do texto (ex: "TEXTO I", "TEXTO II") */}
+            {elem.rotulo && (
+              <p className="font-bold text-xs sm:text-sm mb-1 text-center uppercase tracking-wide"
+                 style={{ color: 'var(--text-secondary)' }}>
+                {elem.rotulo}
+              </p>
+            )}
             {/* Título do texto (do campo JSONB ou extraído automaticamente) */}
             {tituloExtraido && (
               <h4 className="font-bold text-sm sm:text-base mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
@@ -284,7 +310,7 @@ export default function SimuladoEnemPage() {
           </div>
         )
       }
-      if (elem.tipo === 'imagem' && elem.arquivo) {
+      if (elem.tipo === 'imagem' && elem.arquivo && !ARQUIVO_INVALIDO.test(elem.arquivo.trim())) {
         const imagemUrl = getEnemImageUrl(elem.arquivo)
         if (!imagemUrl) return null
         return (
@@ -457,7 +483,7 @@ export default function SimuladoEnemPage() {
                     D{questao.dia} Q{questao.numero}
                   </span>
                   <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                    {AREAS_ENEM[questao.area] || questao.area}
+                    {getAreaLabel(questao.area)}
                   </span>
                 </div>
 
@@ -492,7 +518,7 @@ export default function SimuladoEnemPage() {
                   Q{questao.numero}
                 </span>
                 <span className="badge-chromebook" style={{ background: 'var(--bg-elevated)', color: 'var(--text-secondary)' }}>
-                  {AREAS_ENEM[questao.area] || questao.area}
+                  {getAreaLabel(questao.area)}
                 </span>
               </div>
             </div>
@@ -506,8 +532,8 @@ export default function SimuladoEnemPage() {
                 {/* Elementos do enunciado */}
                 <div className="card-chromebook">
                   {renderElementos(questao.elementos)}
-                  {/* Fallback: mostrar comando se não houver elementos */}
-                  {(!questao.elementos || questao.elementos.length === 0) && questao.comando && (
+                  {/* Fallback: mostrar comando se não houver elementos válidos */}
+                  {(!questao.elementos || questao.elementos.filter(e => e != null).length === 0) && questao.comando && (
                     <div className="font-medium">
                       <ConteudoQuestao conteudo={questao.comando} tipo="comando" />
                     </div>

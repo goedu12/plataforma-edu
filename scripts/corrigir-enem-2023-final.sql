@@ -299,25 +299,25 @@ SELECT '=== FASE 7: PADRONIZAR METADADOS ===' as etapa;
 -- Areas
 UPDATE questoes_enem
 SET area = CASE
-    WHEN LOWER(area) LIKE '%linguag%' THEN 'Linguagens, Codigos e suas Tecnologias'
-    WHEN LOWER(area) LIKE '%human%' THEN 'Ciencias Humanas e suas Tecnologias'
-    WHEN LOWER(area) LIKE '%natureza%' THEN 'Ciencias da Natureza e suas Tecnologias'
-    WHEN LOWER(area) LIKE '%matemat%' THEN 'Matematica e suas Tecnologias'
+    WHEN LOWER(area) LIKE '%linguag%' THEN 'Linguagens, Códigos e suas Tecnologias'
+    WHEN LOWER(area) LIKE '%human%' THEN 'Ciências Humanas e suas Tecnologias'
+    WHEN LOWER(area) LIKE '%natureza%' THEN 'Ciências da Natureza e suas Tecnologias'
+    WHEN LOWER(area) LIKE '%matemat%' THEN 'Matemática e suas Tecnologias'
     ELSE area
 END
 WHERE ano = 2023
   AND area NOT IN (
-    'Linguagens, Codigos e suas Tecnologias',
-    'Ciencias Humanas e suas Tecnologias',
-    'Ciencias da Natureza e suas Tecnologias',
-    'Matematica e suas Tecnologias'
+    'Linguagens, Códigos e suas Tecnologias',
+    'Ciências Humanas e suas Tecnologias',
+    'Ciências da Natureza e suas Tecnologias',
+    'Matemática e suas Tecnologias'
   );
 
 -- Dia
 UPDATE questoes_enem
 SET dia = CASE
-    WHEN area IN ('Linguagens, Codigos e suas Tecnologias', 'Ciencias Humanas e suas Tecnologias') THEN 1
-    WHEN area IN ('Ciencias da Natureza e suas Tecnologias', 'Matematica e suas Tecnologias') THEN 2
+    WHEN area IN ('Linguagens, Códigos e suas Tecnologias', 'Ciências Humanas e suas Tecnologias') THEN 1
+    WHEN area IN ('Ciências da Natureza e suas Tecnologias', 'Matemática e suas Tecnologias') THEN 2
     ELSE dia
 END
 WHERE ano = 2023
@@ -460,8 +460,8 @@ FROM (
     SELECT 'Com dia definido', COUNT(*) FROM questoes_enem WHERE ano = 2023 AND dia IS NOT NULL
     UNION ALL
     SELECT 'Com area padronizada', COUNT(*) FROM questoes_enem WHERE ano = 2023 AND area IN (
-        'Linguagens, Codigos e suas Tecnologias', 'Ciencias Humanas e suas Tecnologias',
-        'Ciencias da Natureza e suas Tecnologias', 'Matematica e suas Tecnologias'
+        'Linguagens, Códigos e suas Tecnologias', 'Ciências Humanas e suas Tecnologias',
+        'Ciências da Natureza e suas Tecnologias', 'Matemática e suas Tecnologias'
     )
 ) stats;
 

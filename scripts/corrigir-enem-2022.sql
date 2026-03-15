@@ -468,29 +468,29 @@ SELECT '=== FASE 7: PADRONIZACAO DE METADADOS ===' as etapa;
 UPDATE questoes_enem
 SET area = CASE
     WHEN LOWER(area) LIKE '%linguag%' OR LOWER(area) LIKE '%codigo%' OR area ILIKE '%LC%'
-        THEN 'Linguagens, Codigos e suas Tecnologias'
+        THEN 'Linguagens, Códigos e suas Tecnologias'
     WHEN LOWER(area) LIKE '%human%' OR area ILIKE '%CH%'
-        THEN 'Ciencias Humanas e suas Tecnologias'
+        THEN 'Ciências Humanas e suas Tecnologias'
     WHEN LOWER(area) LIKE '%natureza%' OR area ILIKE '%CN%'
-        THEN 'Ciencias da Natureza e suas Tecnologias'
+        THEN 'Ciências da Natureza e suas Tecnologias'
     WHEN LOWER(area) LIKE '%matemat%' OR area ILIKE '%MT%'
-        THEN 'Matematica e suas Tecnologias'
+        THEN 'Matemática e suas Tecnologias'
     ELSE area
 END
 WHERE ano = 2022
   AND area NOT IN (
-    'Linguagens, Codigos e suas Tecnologias',
-    'Ciencias Humanas e suas Tecnologias',
-    'Ciencias da Natureza e suas Tecnologias',
-    'Matematica e suas Tecnologias'
+    'Linguagens, Códigos e suas Tecnologias',
+    'Ciências Humanas e suas Tecnologias',
+    'Ciências da Natureza e suas Tecnologias',
+    'Matemática e suas Tecnologias'
   );
 
 -- 7.2 Definir DIA correto baseado na area
 UPDATE questoes_enem
 SET dia = CASE
-    WHEN area IN ('Linguagens, Codigos e suas Tecnologias', 'Ciencias Humanas e suas Tecnologias')
+    WHEN area IN ('Linguagens, Códigos e suas Tecnologias', 'Ciências Humanas e suas Tecnologias')
         THEN 1
-    WHEN area IN ('Ciencias da Natureza e suas Tecnologias', 'Matematica e suas Tecnologias')
+    WHEN area IN ('Ciências da Natureza e suas Tecnologias', 'Matemática e suas Tecnologias')
         THEN 2
     ELSE dia
 END
@@ -674,8 +674,8 @@ FROM (
     SELECT 'Com dia definido' as metrica, COUNT(*) FROM questoes_enem WHERE ano = 2022 AND dia IS NOT NULL
     UNION ALL
     SELECT 'Com area padronizada' as metrica, COUNT(*) FROM questoes_enem WHERE ano = 2022 AND area IN (
-        'Linguagens, Codigos e suas Tecnologias', 'Ciencias Humanas e suas Tecnologias',
-        'Ciencias da Natureza e suas Tecnologias', 'Matematica e suas Tecnologias'
+        'Linguagens, Códigos e suas Tecnologias', 'Ciências Humanas e suas Tecnologias',
+        'Ciências da Natureza e suas Tecnologias', 'Matemática e suas Tecnologias'
     )
     UNION ALL
     SELECT 'Com flag tem_imagem' as metrica, COUNT(*) FROM questoes_enem WHERE ano = 2022 AND tem_imagem = true
