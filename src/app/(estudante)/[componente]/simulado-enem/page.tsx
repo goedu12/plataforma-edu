@@ -217,6 +217,8 @@ export default function SimuladoEnemPage() {
   const renderElementos = (elementos: ElementoEnem[] | null | undefined) => {
     if (!elementos || !Array.isArray(elementos)) return null
     return elementos.map((elem, idx) => {
+      // Pular elementos null dentro do array
+      if (!elem) return null
       if (elem.tipo === 'titulo' && elem.conteudo) {
         return (
           <h3 key={idx} className="font-bold text-sm sm:text-base mb-2" style={{ color: 'var(--text-primary)' }}>
