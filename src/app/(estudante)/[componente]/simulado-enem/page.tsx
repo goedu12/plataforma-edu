@@ -15,6 +15,18 @@ import { formatarFormula } from '@/lib/formatacao'
 import { extrairTituloDoTexto } from '@/lib/limpezaTexto'
 import type { Componente, QuestaoEnem, ElementoEnem } from '@/types'
 
+// URL base para imagens do ENEM no Supabase Storage
+const ENEM_IMAGES_BASE_URL = 'https://qjrjkjknesacrurvcthu.supabase.co/storage/v1/object/public/enem-imagens'
+
+// Construir URL completa para imagem ENEM
+function getEnemImageUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  // Se já é URL completa, retornar como está
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  // Montar URL completa
+  return `${ENEM_IMAGES_BASE_URL}/${path}`
+}
+
 type StatusSimulado = 'OK' | 'SEM_QUESTOES' | 'COMPLETOU' | 'ERRO' | 'FILTRO'
 type Alternativa = 'A' | 'B' | 'C' | 'D' | 'E'
 
@@ -209,7 +221,8 @@ export default function SimuladoEnemPage() {
   const alternativas = questao ? (['A', 'B', 'C', 'D', 'E'] as Alternativa[]).map(letra => {
     const letraLower = letra.toLowerCase()
     const texto = questao[`alt_${letraLower}_texto` as keyof QuestaoEnem] as string | null
-    const imagem = questao[`alt_${letraLower}_imagem` as keyof QuestaoEnem] as string | null
+    const imagemRaw = questao[`alt_${letraLower}_imagem` as keyof QuestaoEnem] as string | null
+    const imagem = getEnemImageUrl(imagemRaw)
     return { letra, texto, imagem }
   }).filter(a => a.texto || a.imagem) : []
 
@@ -272,22 +285,24 @@ export default function SimuladoEnemPage() {
         )
       }
       if (elem.tipo === 'imagem' && elem.arquivo) {
+        const imagemUrl = getEnemImageUrl(elem.arquivo)
+        if (!imagemUrl) return null
         return (
           <div key={idx} className="my-3 flex flex-col items-center">
-            <button onClick={() => setImagemExpandida(elem.arquivo!)}>
+            <button onClick={() => setImagemExpandida(imagemUrl)}>
               <SafeImage
-                src={elem.arquivo}
-                alt={elem.conteudo || elem.legenda || 'Imagem da questão'}
+                src={imagemUrl}
+                alt={elem.conteudo || elem.legenda || elem.descricao || 'Imagem da questão'}
                 width={500}
                 height={300}
                 className="rounded-lg max-w-full h-auto cursor-zoom-in"
                 style={{ maxHeight: '300px', objectFit: 'contain' }}
               />
             </button>
-            {/* Legenda da imagem (se existir) */}
-            {elem.legenda && (
+            {/* Legenda ou descrição da imagem */}
+            {(elem.legenda || elem.descricao) && (
               <p className="text-xs italic mt-1 text-center" style={{ color: 'var(--text-muted)' }}>
-                {elem.legenda}
+                {elem.legenda || elem.descricao}
               </p>
             )}
           </div>
@@ -535,7 +550,7 @@ export default function SimuladoEnemPage() {
                           )}
                         </span>
                         <div className="flex-1 min-w-0">
-                          {imagem && isValidImageUrl(imagem) && (
+                          {imagem && (
                             <div className="mb-1">
                               <button onClick={(e) => { e.stopPropagation(); setImagemExpandida(imagem) }}>
                                 <SafeImage
