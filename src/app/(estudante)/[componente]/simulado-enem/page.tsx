@@ -253,7 +253,7 @@ export default function SimuladoEnemPage() {
     return elementosValidos.map((elem, idx) => {
       if (elem.tipo === 'titulo' && elem.conteudo) {
         return (
-          <h3 key={idx} className="font-bold text-sm sm:text-base mb-2" style={{ color: 'var(--text-primary)' }}>
+          <h3 key={idx} className="questao-titulo-texto" style={{ color: 'var(--text-primary)' }}>
             {elem.conteudo}
           </h3>
         )
@@ -280,13 +280,13 @@ export default function SimuladoEnemPage() {
             {/* Rótulo do texto (ex: "TEXTO I", "TEXTO II") */}
             {elem.rotulo && (
               <p className="font-bold text-xs sm:text-sm mb-1 text-center uppercase tracking-wide"
-                 style={{ color: 'var(--text-secondary)' }}>
+                 style={{ color: 'var(--text-secondary)', textIndent: 0 }}>
                 {elem.rotulo}
               </p>
             )}
             {/* Título do texto (do campo JSONB ou extraído automaticamente) */}
             {tituloExtraido && (
-              <h4 className="font-bold text-sm sm:text-base mb-2 text-center" style={{ color: 'var(--text-primary)' }}>
+              <h4 className="questao-titulo-texto" style={{ color: 'var(--text-primary)' }}>
                 {tituloExtraido}
               </h4>
             )}
@@ -296,9 +296,9 @@ export default function SimuladoEnemPage() {
 
             {/* Fonte/referência (se existir no campo fonte do elemento) */}
             {fonteDoElemento && (
-              <p className="text-xs italic mt-2 text-right" style={{ color: 'var(--text-muted)' }}>
-                {fonteDoElemento}
-              </p>
+              <div className="questao-fonte-container">
+                <span className="questao-fonte-linha">{fonteDoElemento}</span>
+              </div>
             )}
           </div>
         )
@@ -314,15 +314,14 @@ export default function SimuladoEnemPage() {
         const imagemUrl = getEnemImageUrl(elem.arquivo)
         if (!imagemUrl) return null
         return (
-          <div key={idx} className="my-3 flex flex-col items-center">
+          <div key={idx} className="questao-imagem-container">
             <button onClick={() => setImagemExpandida(imagemUrl)}>
               <SafeImage
                 src={imagemUrl}
                 alt={elem.conteudo || elem.legenda || elem.descricao || 'Imagem da questão'}
                 width={500}
-                height={300}
-                className="rounded-lg max-w-full h-auto cursor-zoom-in"
-                style={{ maxHeight: '300px', objectFit: 'contain' }}
+                height={400}
+                className="questao-imagem-principal"
               />
             </button>
             {/* Legenda ou descrição da imagem */}
@@ -336,9 +335,9 @@ export default function SimuladoEnemPage() {
       }
       if (elem.tipo === 'fonte' && elem.conteudo) {
         return (
-          <p key={idx} className="text-xs italic mt-2 text-right" style={{ color: 'var(--text-muted)' }}>
-            {elem.conteudo}
-          </p>
+          <div key={idx} className="questao-fonte-container">
+            <span className="questao-fonte-linha">{elem.conteudo}</span>
+          </div>
         )
       }
       return null
