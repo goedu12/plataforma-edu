@@ -35,6 +35,20 @@ export default function ImagemModal({ src, alt = 'Imagem ampliada', onClose }: I
   const MAX_SCALE = 4
   const ZOOM_STEP = 0.5
 
+  // Funções de zoom (declaradas antes dos useEffects que as usam)
+  const handleZoomIn = useCallback(() => {
+    setScale(prev => Math.min(prev + ZOOM_STEP, MAX_SCALE))
+  }, [])
+
+  const handleZoomOut = useCallback(() => {
+    setScale(prev => Math.max(prev - ZOOM_STEP, MIN_SCALE))
+  }, [])
+
+  const handleReset = useCallback(() => {
+    setScale(1)
+    setPosition({ x: 0, y: 0 })
+  }, [])
+
   // Reset ao abrir
   useEffect(() => {
     setScale(1)
@@ -80,19 +94,6 @@ export default function ImagemModal({ src, alt = 'Imagem ampliada', onClose }: I
     return () => {
       document.body.style.overflow = ''
     }
-  }, [])
-
-  const handleZoomIn = useCallback(() => {
-    setScale(prev => Math.min(prev + ZOOM_STEP, MAX_SCALE))
-  }, [])
-
-  const handleZoomOut = useCallback(() => {
-    setScale(prev => Math.max(prev - ZOOM_STEP, MIN_SCALE))
-  }, [])
-
-  const handleReset = useCallback(() => {
-    setScale(1)
-    setPosition({ x: 0, y: 0 })
   }, [])
 
   // Mouse drag
