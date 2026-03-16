@@ -3,12 +3,6 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { obterSessao } from '@/lib/auth'
 import { getSupabaseAdmin } from '@/lib/supabase'
-import {
-  checkRespostaRateLimit,
-  getRateLimitHeaders,
-  verificarTempoMinimo,
-  analisarPadrao,
-} from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,24 +11,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { sucesso: false, erro: 'Não autenticado' },
         { status: 401 }
-      )
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // RATE LIMITING - Proteção contra automação
-    // ═══════════════════════════════════════════════════════════════════════
-    const rateLimit = checkRespostaRateLimit(sessao.userId)
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        {
-          sucesso: false,
-          erro: `Muitas requisições. Aguarde ${rateLimit.resetIn} segundos.`,
-          codigo: 'RATE_LIMIT',
-        },
-        {
-          status: 429,
-          headers: getRateLimitHeaders(rateLimit),
-        }
       )
     }
 
@@ -56,21 +32,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // TEMPO MÍNIMO - Proteção contra respostas instantâneas
-    // ═══════════════════════════════════════════════════════════════════════
     const tempoValidado = Math.max(0, Math.min(3600, Number(tempo_segundos) || 0))
-    const tempoCheck = verificarTempoMinimo(tempoValidado)
-    if (!tempoCheck.valido) {
-      return NextResponse.json(
-        {
-          sucesso: false,
-          erro: `Tempo de resposta muito curto. Mínimo: ${tempoCheck.tempoMinimo} segundos.`,
-          codigo: 'TEMPO_MINIMO',
-        },
-        { status: 400 }
-      )
-    }
 
     const supabase = getSupabaseAdmin()
 
@@ -105,26 +67,6 @@ export async function POST(request: NextRequest) {
 
     // Questão anulada = sempre correta
     const correta = questao.anulada ? true : (resposta === questao.gabarito)
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // DETECÇÃO DE PADRÕES SUSPEITOS
-    // ═══════════════════════════════════════════════════════════════════════
-    const padrao = analisarPadrao(sessao.userId, tempoValidado, correta)
-    if (padrao.nivel === 'bloqueado') {
-      console.warn(`[Anti-Bot ENEM] Usuário ${sessao.userId} bloqueado: ${padrao.motivo}`)
-      return NextResponse.json(
-        {
-          sucesso: false,
-          erro: 'Atividade suspeita detectada. Tente novamente mais tarde.',
-          codigo: 'PADRAO_SUSPEITO',
-        },
-        { status: 403 }
-      )
-    }
-
-    if (padrao.nivel === 'suspeito' || padrao.nivel === 'atencao') {
-      console.warn(`[Anti-Bot ENEM] Padrão ${padrao.nivel} para usuário ${sessao.userId}: ${padrao.motivo}`)
-    }
 
     // Registrar resposta
     const { error: errInsert } = await supabase
