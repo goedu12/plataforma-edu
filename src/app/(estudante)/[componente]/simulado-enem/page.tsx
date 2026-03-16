@@ -372,8 +372,6 @@ export default function SimuladoEnemPage() {
                   <option value="">Todos os anos</option>
                   <option value="2025">ENEM 2025</option>
                   <option value="2024">ENEM 2024</option>
-                  <option value="2023">ENEM 2023</option>
-                  <option value="2022">ENEM 2022</option>
                 </select>
               </div>
 
