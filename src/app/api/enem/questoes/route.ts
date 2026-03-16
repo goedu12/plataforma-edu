@@ -38,7 +38,28 @@ export async function GET(request: NextRequest) {
 
     if (ano) query = query.eq('ano', parseInt(ano))
     if (dia) query = query.eq('dia', parseInt(dia))
-    if (area) query = query.eq('area', area)
+    if (area) {
+      // Match accent-insensitive: dados de 2022/2023 podem ter nomes sem acento
+      const semAcento = area.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      if (semAcento !== area) {
+        // Área com acentos: buscar também versão sem acento
+        query = query.or(`area.eq.${area},area.eq.${semAcento}`)
+      } else {
+        // Área sem acentos: mapear para versão com acento e buscar ambas
+        const AREA_COM_ACENTO: Record<string, string> = {
+          'Linguagens, Codigos e suas Tecnologias': 'Linguagens, Códigos e suas Tecnologias',
+          'Ciencias Humanas e suas Tecnologias': 'Ciências Humanas e suas Tecnologias',
+          'Ciencias da Natureza e suas Tecnologias': 'Ciências da Natureza e suas Tecnologias',
+          'Matematica e suas Tecnologias': 'Matemática e suas Tecnologias',
+        }
+        const comAcento = AREA_COM_ACENTO[area]
+        if (comAcento) {
+          query = query.or(`area.eq.${area},area.eq.${comAcento}`)
+        } else {
+          query = query.eq('area', area)
+        }
+      }
+    }
 
     query = query.order('numero', { ascending: true })
 

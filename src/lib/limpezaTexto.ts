@@ -1436,20 +1436,29 @@ export function extrairTituloDoTexto(texto: string): {
   const primeiraLinhaLimpa = paragrafos[0].textoLimpo
   const primeiraLinhaHtml = paragrafos[0].htmlConteudo
 
-  // Padrões de título:
+  // Padrões de título (restritivos para evitar falsos positivos com enunciados):
   const ehTitulo =
-    // Linha curta (até 120 chars) que não termina com ponto ou dois-pontos
-    (primeiraLinhaLimpa.length <= 120 && primeiraLinhaLimpa.length >= 3 &&
-     !/[.;:]$/.test(primeiraLinhaLimpa) &&
-     // Não é uma frase comum (começa com maiúscula ou tem aspas)
-     (/^["'""«]/.test(primeiraLinhaLimpa) || /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/.test(primeiraLinhaLimpa))) ||
-    // Título entre aspas
-    /^["'""«][^"'""»]+["'""»]$/.test(primeiraLinhaLimpa) ||
+    // Título entre aspas (linha inteira entre aspas)
+    /^["'\u201C\u201D\u00AB][^"'\u201C\u201D\u00BB]+["'\u201C\u201D\u00BB]$/.test(primeiraLinhaLimpa) ||
     // Título em negrito (já processado como <strong> ou **)
     /^<strong>.*<\/strong>$/i.test(primeiraLinhaHtml) ||
     /^\*\*[^*]+\*\*$/.test(primeiraLinhaLimpa) ||
     // Padrão "TEXTO I", "TEXTO II" etc
-    /^TEXTO\s+[IVX\d]+$/i.test(primeiraLinhaLimpa)
+    /^TEXTO\s+[IVX\d]+$/i.test(primeiraLinhaLimpa) ||
+    // Linha curta (≤60 chars) que NÃO parece frase normal do enunciado
+    (primeiraLinhaLimpa.length <= 60 && primeiraLinhaLimpa.length >= 3 &&
+     !/[.;:,]$/.test(primeiraLinhaLimpa) &&
+     // Rejeitar se contém verbos/palavras comuns de frases em português
+     !/ (que |tem |são |foi |pode |é |está |era |será |deve |cada |todo |toda |como |mais |muito |por |para |com |sobre |entre |sem |quando |onde |qual |quais )/i.test(' ' + primeiraLinhaLimpa + ' ') &&
+     // Rejeitar frases que começam com artigos/pronomes comuns em enunciados
+     !/^(Cada|Todo|Toda|Um |Uma |Os |As |No |Na |Nos |Nas |Em |Para |Com |Por |Segundo |De acordo|Conforme|Considere|Observe|Sabendo|Sobre )/i.test(primeiraLinhaLimpa) &&
+     (
+       /^["'\u201C\u201D\u00AB]/.test(primeiraLinhaLimpa) ||
+       // ALL CAPS (ex: "O CORTIÇO", "MEMORIAL DE AIRES")
+       /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/.test(primeiraLinhaLimpa) ||
+       // Title Case: palavras capitalizadas (ex: "Memórias Póstumas de Brás Cubas")
+       /^[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+(\s+(de|do|da|dos|das|e|ou|em|com|a|o|à|ao)\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]?[a-záàâãéêíóôõúç]*|\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ][a-záàâãéêíóôõúç]+)*$/.test(primeiraLinhaLimpa)
+     ))
 
   if (!ehTitulo) {
     return { titulo: null, corpo: textoTrimmed }
