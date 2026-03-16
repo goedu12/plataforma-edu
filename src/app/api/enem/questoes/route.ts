@@ -29,12 +29,13 @@ export async function GET(request: NextRequest) {
 
     const respondidas = new Set(respostasUsuario?.map(r => r.questao_enem_id) || [])
 
-    // Buscar questões ENEM (excluir anuladas e variantes de língua estrangeira)
+    // Buscar questões ENEM (excluir anuladas, variantes de língua estrangeira e anos 2022/2023)
     let query = supabase
       .from('questoes_enem')
       .select('*')
       .eq('anulada', false)
       .or('lingua_estrangeira.is.null,lingua_estrangeira.eq.inglês')
+      .not('ano', 'in', '(2022,2023)')
 
     if (ano) query = query.eq('ano', parseInt(ano))
     if (dia) query = query.eq('dia', parseInt(dia))
