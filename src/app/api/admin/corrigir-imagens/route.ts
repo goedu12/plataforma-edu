@@ -398,17 +398,10 @@ async function atualizarDB(
 // AUTH HELPER
 // ═══════════════════════════════════════════════════════════════════
 
-async function verificarAdmin(supabase: SupabaseClient): Promise<{ ok: boolean; erro?: string; status?: number }> {
+async function verificarAdmin(): Promise<{ ok: boolean; erro?: string; status?: number }> {
   const sessao = await obterSessao()
   if (!sessao) return { ok: false, erro: 'Não autenticado', status: 401 }
-
-  const { data: usuario } = await supabase
-    .from('usuarios')
-    .select('tipo')
-    .eq('id', sessao.userId)
-    .single()
-
-  if (!usuario || usuario.tipo !== 'professor') return { ok: false, erro: 'Acesso negado', status: 403 }
+  if (sessao.tipo !== 'professor') return { ok: false, erro: 'Acesso negado', status: 403 }
   return { ok: true }
 }
 
@@ -418,10 +411,10 @@ async function verificarAdmin(supabase: SupabaseClient): Promise<{ ok: boolean; 
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = getSupabaseAdmin()
-    const auth = await verificarAdmin(supabase)
+    const auth = await verificarAdmin()
     if (!auth.ok) return NextResponse.json({ erro: auth.erro }, { status: auth.status })
 
+    const supabase = getSupabaseAdmin()
     const searchParams = request.nextUrl.searchParams
     const anoParam = searchParams.get('ano')
     const limiteParam = searchParams.get('limite')
@@ -464,10 +457,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = getSupabaseAdmin()
-    const auth = await verificarAdmin(supabase)
+    const auth = await verificarAdmin()
     if (!auth.ok) return NextResponse.json({ erro: auth.erro }, { status: auth.status })
 
+    const supabase = getSupabaseAdmin()
     const body = await request.json().catch(() => ({}))
     const { ano: anoParam, limite: limiteParam, dryRun } = body as {
       ano?: number
